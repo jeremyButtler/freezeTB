@@ -3,7 +3,9 @@
 ampDepth gets the rough location of an amplicon, the genes
   in an amplicon, and the mean, maximum, and minimum depth
   for amplicons. The graphAmpDepth.r script can be used to
-  visualize the depths for each gene (not positions).
+  visualize the depths for each gene(not positions). It
+  also puts out a graph showing the coverage for each
+  gene.
 
 # Install:
 
@@ -13,9 +15,17 @@ If Rscript is not in `/usr/bin/`, then set the top line
   using `find / -name Rscript 2>/dev/null | grep -v "lib"`
 
 ```
-make;
-make install;
+sudo make install; # Run make if you have issues
+
+# or for mac (should work)
+make mac;
+sudo make install;
 ```
+
+The binary for ampDepth is compliled on void linux with
+   musl. So, it should be smaller in size then other linux
+   distributions. It is compiled statically, so linux
+   distrubution should not be a concern.
 
 # Running:
 
@@ -62,14 +72,21 @@ You can grab the row of a gene from the tsv made by
 
 # Dummy figure
 
-![Figure make by graphAmpDepth.r](out.svg)
+![Read depth figure made by graphAmpDepth.r](
+  test-readDepth.svg)
 
+![Ampilcon gene coverage figure made by graphAmpDepth.r](
+  test-ampMap.svg)
 
-| flag |  start |  end  | avgAmpDepth | minAmpDepth | maxAmpDepth | entireFirstGene | entireLastGene | firstBaseDepth0 | lastBaseDepth0 | avgDepth0 | minDepth0 | maxDepth0 | geneId0 | firstBaseDepth1 | lastBaseDepth1 | avgDepth1 | minDepth1 | maxDepth1 | geneId1 |
-|:----:|:-------|:-----:|:-----------:|:-----------:|:-----------:|:---------------:|:--------------:|:----------------|:---------------|:----------|:----------|:----------|:-------:|:----------------|:---------------|:----------|:----------|:----------|:-------:|
-| own  | 6505   |7729   |69           |     21      |    86       |     Part        |      Part      |      25         |      75        |    67     |    25     |    86     |  gyrB   |     75          |      21        |   73      |    21     |    85     |  gyrA   |
-| own  | 490818 |491038 |22           |     20      |    24       |     Part        |      NA        |      20         |      21        |    22     |    20     |    24     |  fgd1   |     NA          |      NA        |   NA      |    NA     |    NA     |  NA     |
-| own  | 491047 |491080 |200          |     20      |    20       |     Part        |      NA        |      20         |      20        |    20     |    20     |    20     |  fgd1   |     NA          |      NA        |   NA      |    NA     |    NA     |  NA     |
+| flag | ampNumber | refStart | refEnd | ampStart | ampEnd | avgAmpDepth | minAmpDepth | maxAmpDepth | geneId       | refGeneStart | refGeneEnd | firstBaseDepth | lastBaseDepth | avgDepth | minDepth | maxDepth |
+|:----:|:----------|:---------|:-------|:---------|:-------|:------------|:------------|:------------|:------------:|:-------------|:-----------|:---------------|:--------------|:---------|:---------|:---------|
+| ONT  |    0      |   5241   |  9809  |  6503    | 7744   | 316         | 21          | 386         | gyrB         | 5241         | 7261       | 85             | 323           | 307      | 85       | 369      |
+| ONT  |    0      |   5241   |  9809  |  6503    | 7744   | 316         | 21          | 386         | gyrA         | 7306         | 9809       | 359            | 21            | 331      | 21       | 386      |
+| ONT  |    1      |   490782 |  493857|  490782  | 491864 | 164         | 26          | 212         | fgd1         | 490782       | 491791     | 70             | 156           | 166      | 70       | 212      |
+| ONT  |    1      |   490782 |  493857|  490782  | 491864 | 164         | 26          | 212         | pta          | 491790       | 493857     | 156            | 26            | 125      | 26       | 156      |
+| ONT  |    2      |   528609 |  530223|  528748  | 529674 | 241         | 25          | 288         | groEL2       | 528609       | 530223     | 78             | 25            | 241      | 25       | 288      |
+| ONT  |    25     |   NA     |  NA    |  NA      | NA     | 0           | 0           | 0           | x-off-target | NA           | NA         | 0              | 0             | 0        | 0        | 0        |
+| ONT  |    26     |   NA     |  NA    |  NA      | NA     | 6075        | 6075        | 6075        | z-unmapped   | NA           | NA         | 6075           | 6075          | 6075     | 6075     | 6075     |
 
 Table: Example of three rows from the tsv output from
   ampDepth

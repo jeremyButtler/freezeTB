@@ -2,6 +2,8 @@
 
 library("ggplot2")
 library("viridisLite")
+library("data.table")
+# sudo xbps-install R-cran-data.table
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SOF: Start Of File
@@ -52,69 +54,61 @@ if(inputStr[6] == "-h" ||
    q("no");
 }
 
-if(length(inputStr) > 7) nameStr = inputStr[7];
+if(length(inputStr) > 6)
+{ # If: there is a second argument
+ nameStr = inputStr[7];
 
-if(inputStr[7] == "-h" ||
-   inputStr[7] == "--h" ||
-   inputStr[7] == "-help" ||
-   inputStr[7] == "--help" ||
-   inputStr[7] == "help"){
-   print("RScript graphAmpDepth.r file.tsv prefix");
-   print("  - Makes a graph of mapped amplicons from");
-   print("    a tsv from ampDepth. The output graph is");
-   print("    saved to prefix.svg (defualt is out)");
-   q("no");
-}
- 
-dataDF = read.csv(inputStr[6], sep = "\t", header = TRUE);
+ if(inputStr[7] == "-h" ||
+    inputStr[7] == "--h" ||
+    inputStr[7] == "-help" ||
+    inputStr[7] == "--help" ||
+    inputStr[7] == "help"){
+    print("RScript graphAmpDepth.r file.tsv prefix");
+    print("  - Makes a graph of mapped amplicons from");
+    print("    a tsv from ampDepth. The output graph is");
+    print("    saved to prefix.svg (defualt is out)");
+    q("no");
+ }
+} # If: there is a second argument
 
-if(length(inputStr) > 7) nameStr = inputStr[7];
+dataDF=setDT(read.csv(inputStr[6],sep="\t",header=TRUE));
+
+# For deugging
+#dataDF =
+#   setDT(read.csv("new-test.tsv",sep="\t",header=TRUE));
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-03:
 #  - Set up the gene Names column
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# Find the maximum number of genes in an amplicon
-targIndexI = seq(from=14, to=length(dataDF[1,]), by=6);
-maxGenesI = length(targIndexI);
+dataDF[
+   ,
+   genes:=paste(geneId, collapse="-"),
+   by = ampNumber
+]; # Merge the gene names
+   # I need collapse to merge the names not sep.
+   # Collapses deals with vectors, sep deals with separete
+   # srings?
 
-# Paste the gene names in an amplcon together
-# This trick for merging columns is from
-#   https://stackoverflow.com/questions/18115550/combine-two-or-more-columns-in-a-dataframe-into-a-new-column-with-a-new-name            
-
-paste_noNA =
-   function(x, sep="-"){
-      gsub(
-         ", ",
-         sep,
-         toString(x[!is.na(x) & x != "" & x != "NA"])
-      )
-} # paste_noNA fuction
-
-dataDF$genes =
-  apply(
-      dataDF[,seq(from=14, to=maxGenesI * 6 + 6, by=6)],
-      1,
-      paste_noNA,
-      sep="-"
-   );
+# Removing the _gene name (just need the number)
+dataDF$genes = gsub("gene_*", "", dataDF$genes);
 
 # Add the flat to the gene names. This allows me to graph
 # the amplicons for each gene separately
-dataDF$genes = paste(dataDF$genes, dataDF$flag, sep=" ");
-
-# Removing the _gene name (just need the number)
-dataDF$genes = gsub("gene_", "", dataDF$genes);
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec-04:
-#  - Final preperations and graphing
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+dataDF$genesTag = paste(dataDF$genes,dataDF$flag,sep=" ");
 
 # Make an mean column for each flag. This is so I can
 # overlay the means
 dataDF$avgCol = paste(dataDF$flag, "mean"); # For legend
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec-04:
+#  - graphing (read depth)
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+dataDF$depth20X = "20x read depth";
+dataDF$depth100X = "100x read depth";
 
 # Graph the main data
 graphObj = ggplot(dataDF);
@@ -122,16 +116,41 @@ graphObj = ggplot(dataDF);
 # graph the maximum read depth data
 graphObj =
    graphObj +
-   geom_col(aes(x=genes, y=maxAmpDepth, fill=flag));
+   geom_col(aes(x=genesTag, y=maxAmpDepth, fill=flag));
 
 # Graph the mean read depth data over the maximum
 graphObj =
    graphObj +
-   geom_col(aes(x=genes, y=avgAmpDepth, fill=avgCol));
+   geom_col(aes(x=genesTag, y=avgAmpDepth, fill=avgCol));
+
+# Add in read depth markers
+graphObj =
+   graphObj +
+   geom_segment(
+      aes(
+         x = 1 + ampNumber - 0.45,
+         xend = 1 + ampNumber + 0.45,
+         y = 20,
+         yend = 20,
+         col = depth20X
+      ),
+   );
+
+graphObj =
+   graphObj +
+   geom_segment(
+      aes(
+         x = 1 + ampNumber - 0.45,
+         xend = 1 + ampNumber + 0.45,
+         y = 100,
+         yend = 100,
+         col = depth100X
+      ),
+   );
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-05:
-#  - Format and save the graph
+#  - Format and save the graph (read depth)
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # ADd color to the graph
@@ -145,4 +164,112 @@ graphObj =
    graphObj +
    theme(axis.text.x = element_text(angle = 90));
 
-ggsave(paste(nameStr, ".svg", sep = ""), device = svg);
+ggsave(
+   paste(nameStr, "-readDepth.svg", sep = ""),
+   device = svg
+); # Save the graph
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec-06:
+#  - graphing (Mapping to genes)
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+dataDF =
+   dataDF[
+      dataDF$geneId != "z-unmapped" &
+      dataDF$geneId != "x-off-target"
+      , 
+   ]; # Remove the umapped and off-target columns
+
+# The Z is to force it to be last in the color scheme
+dataDF$ref = "z ref";
+
+# The 0 is to force it to be first in the color scheme
+dataDF$geneEndFlag = "0 gene end";
+dataDF$geneStartFlag = "0 gene start";
+
+# Merege amplicons covering the same gene
+dataDF[
+   ,
+   geneGroup:=paste(genes, sep = "-", collapse = "-"),
+   by = geneId
+]; # merege gene names of amplicons togeether
+
+dataDF[
+   ,
+   geneGroup:=paste(geneGroup, collapse = "-"),
+   by = ampNumber
+]; # Make sure all genes in an ampiocn have the same
+   # gene group name
+
+dataDF$geneGroup = 
+   sapply(
+      strsplit(dataDF$geneGroup, "-"),
+      function(x) paste(unique(x), collapse= "-")
+   ); # Remove duplicate names from the gene groups
+
+dataDF[, minRefStart:=min(refStart), by = geneGroup];
+dataDF[, maxRefEnd:=max(refEnd), by = geneGroup];
+
+# Graph the main data
+graphObj = ggplot(dataDF);
+
+# graph the maximum read depth data
+graphObj =
+   graphObj +
+   geom_segment(
+      aes(
+         x = ampStart - minRefStart,
+         xend = ampEnd - minRefStart,
+         y = flag,
+         yend = flag,
+         col = flag
+      ) # aes
+   );
+
+# graph the maximum read depth data
+graphObj =
+   graphObj +
+   geom_segment(
+      aes(
+         x = 0,
+         xend = maxRefEnd - minRefStart,
+         y = ref,
+         yend = ref,
+         col = ref
+      ) # aes
+   );
+# Graph the mean read depth data over the maximum
+
+graphObj =
+   graphObj +
+   geom_vline(
+      aes(
+         xintercept = refGeneStart - minRefStart,
+         col = geneStartFlag
+      ) # aes
+   );
+graphObj =
+   graphObj +
+   facet_wrap(vars(geneGroup), scales = "free_x");
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec-07:
+#  - Format and save the graph (mapping to genes)
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+# ADd color to the graph
+graphObj = graphObj + scale_color_viridis_d(direction=-1);
+
+graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
+graphObj = graphObj + ylab("Method");
+graphObj = graphObj + theme_classic();
+graphObj = graphObj + theme(legend.position = "top");
+graphObj =
+   graphObj +
+   theme(axis.text.x = element_text(angle = 90));
+
+ggsave(
+   paste(nameStr, "-ampMap.svg", sep = ""),
+   device = svg
+); # Save the graph

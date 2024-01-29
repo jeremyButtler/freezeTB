@@ -23,6 +23,6 @@ debug:
 
 install:
 	cp ampDepth $(PREFIX);
-	cp graphAmpDepth $(PREFIX);
+	cp graphAmpDepth.r $(PREFIX);
 	chmod a+x $(PREFIX)/ampDepth;
-	chmod a+x $(PREFIX)/graphAmpDepth;
+	chmod a+x $(PREFIX)/graphAmpDepth.r;
