@@ -42,12 +42,10 @@ mac: macAmpDepth macTrimSam macSubsample macFqGetIds
 	mv tmp.awk ampMapScripts/trimCon.gawk;
 	sed\
       '1s/\/usr//'\
-       ampMapScripts/ivarConScript.sh\
+      ivarConScript.sh\
      > tmp.sh;
-	mv\
-      ampMapScripts/ivarConScript.sh\
-      ampMapScripts/ivarConScriptLinux.sh;
-	mv tmp.sh ampMapScripts/ivarConScript.sh;
+	mv ivarConScript.sh ivarConScriptLinux.sh;
+	mv tmp.sh ivarConScript.sh;
 	sed\
       '1s/\/usr//; s/awk/gawk/g;'\
        buildAmpCons.sh\
@@ -78,6 +76,7 @@ install:
 	cp -r ampMapScripts $(PREFIX);
 	cp buildAmpCons.sh $(PREFIX);
 	cp trimSam subsampleIds fqGetIds ampDepth $(PREFIX);
+	cp ivarConScript.sh $(PREFIX);
 	chmod -R a+x $(PREFIX)/ampMapScripts;
 	chmod a+x $(PREFIX)/ampMapScripts/*;
 	chmod a+x $(PREFIX)/buildAmpCons.sh;
@@ -85,6 +84,12 @@ install:
 	chmod a+x $(PREFIX)/subsampleIds;
 	chmod a+x $(PREFIX)/fqGetIds;
 	chmod a+x $(PREFIX)/ampDepth;
+	chmod a+x $(PREFIX)/ivarConScript.sh;
+
+# Currently nothing to clean up
+clean:
+	# Handle mac install case
+	mv\
 
 # Currently nothing to clean up
 clean:

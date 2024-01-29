@@ -148,6 +148,7 @@ fi # If: the fastq file is not valid
 
 logStr="$prefixStr-$logStr";
 
+# Check if i need to make a gene coordinates file
 if [[ ! -f "$pafStr" ]]; then
    printf " -paf %s is not a paf file\n" "$pafStr"
 
@@ -157,6 +158,8 @@ if [[ ! -f "$pafStr" ]]; then
       >> "$logStr";
 
    pafStr="$(sed 's/\.fas*t*a*$/.paf/' <<< "$genesStr")";
+   pafStr="$prefixStr-$(basename "$pafStr")";
+
    printf "making new paf file named %s\n" "$pafStr";
 
    printf\
@@ -361,7 +364,7 @@ for strFq in ./"$prefixStr-"*.fastq; do
        "$subFqStr"\
      >> "$prefixStr-log-ivar.txt";
 
-   bash "$scriptDirStr/ivarConScript.sh"\
+   bash "$programDirStr/ivarConScript.sh"\
        -ref "tmp-ref.fa"\
        -fastq "$subFqStr"\
        -prefix "$(\
@@ -387,5 +390,19 @@ fi
 mv "$prefixStr-"*con.fa "$prefixStr-consensuses";
 
 cat "$prefixStr-consensuses/"* > "$prefixStr-cons.fa";
+
+minimap2\
+     -a\
+     --secondary-seq\
+     "$genesStr"\
+     "$prefixStr-cons.fa"\
+     2>/dev/null |
+  "$programDirStr/trimSam" -stdin |
+  awk '{
+      if($10 == "*") next;
+      if(length($10) < 200) next;
+      sub(/-.*/, "", $1);
+      printf ">%s-%s\n%s\n", $1, $3, $10;
+   }' > "$prefixStr-genes-cons.fa";
 
 exit;
