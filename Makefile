@@ -1,33 +1,96 @@
 CC = cc
+PREFIX = /usr/local/bin
+
 CFLAGS += -std=c99 -O3 -static -Wall -Wno-unused-function
+MACFLAGS += -std=c99 -O3 -static -Wall
 
-all: ampCountsCode trimSamCode subsampleCode fqGetIdsCode
+all: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds
 
-ampCountsCode:
-	make -C ./ampMapSource CC="$(CC)" CFLAGS="$(CFLAGS)";
-	mv ./ampMapSource/ampMapCounts ./ampMapScripts/ampMap;
+buildAmpDepth:
+	make -C ./ampDepthSource CC="$(CC)" CFLAGS="$(CFLAGS)";
+	mv ./ampDepthSource/ampDepth ./;
 
-trimSamCode:
+buildTrimSam:
 	make -C ./trimSamSource CC="$(CC)" CFLAGS="$(CFLAGS)";
-	mv ./trimSamSource/trimSam ./ampMapScripts/;
+	mv ./trimSamSource/trimSam ./;
 
-subsampleCode:
+
+buildSubsample:
 	make -C ./subsampleSource CC="$(CC)" CFLAGS="$(CFLAGS)";
-	mv ./subsampleSource/subsampleIds ./ampMapScripts/;
+	mv ./subsampleSource/subsampleIds ./;
 
-fqGetIdsCode:
+buildFqGetIds:
 	make -C ./fqGetIdsSource CC="$(CC)" CFLAGS="$(CFLAGS)";
-	mv ./fqGetIdsSource/fqGetIds ./ampMapScripts/;
+	mv ./fqGetIdsSource/fqGetIds ./;
+
+
+mac: macAmpDepth macTrimSam macSubsample macFqGetIds
+	sed\
+      '1s/awk/gawk/'\
+       ampMapScripts/extractPrimRead.awk\
+     > tmp.gawk;
+	mv tmp.awk ampMapScripts/extractPrimRead.gawk;
+	sed\
+      '1s/awk/gawk/'\
+       ampMapScripts/getMapCoord.awk\
+     > tmp.gawk;
+	mv tmp.awk ampMapScripts/getMapCoord.gawk;
+	sed\
+      '1s/awk/gawk/'\
+       ampMapScripts/trimCon.awk\
+     > tmp.gawk;
+	mv tmp.awk ampMapScripts/trimCon.gawk;
+	sed\
+      '1s/\/usr//'\
+       ampMapScripts/ivarConScript.sh\
+     > tmp.sh;
+	mv\
+      ampMapScripts/ivarConScript.sh\
+      ampMapScripts/ivarConScriptLinux.sh;
+	mv tmp.sh ampMapScripts/ivarConScript.sh;
+	sed\
+      '1s/\/usr//; s/awk/gawk/g;'\
+       buildAmpCons.sh\
+     > tmp.sh;
+	mv buildAmpCons.sh buildAmpConsLinux.sh;
+	mv tmp.sh buildAmpCons.sh;
+
+macAmpDepth:
+	make mac -C ./ampDepthSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
+	mv ./ampDepthSource/ampDepth ./;
+
+macTrimSam:
+	make mac -C ./trimSamSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
+	mv ./trimSamSource/trimSam ./;
+
+macSubsample:
+	make mac -C ./subsampleSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
+	mv ./subsampleSource/subsampleIds ./;
+
+macFqGetIds:
+	make mac -C ./fqGetIdsSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
+	mv ./fqGetIdsSource/fqGetIds ./;
 
 R:
 	Rscript rDepends.r
 
 install:
-	cp -r ampMapScripts /usr/local/bin;
-	cp buildAmpCons.sh /usr/local/bin;
-	chmod -R a+x /usr/local/bin/ampMapScripts;
-	chmod a+x /usr/local/bin/ampMapScripts/*;
-	chmod a+x /usr/local/bin/buildAmpCons.sh;
+	cp -r ampMapScripts $(PREFIX);
+	cp buildAmpCons.sh $(PREFIX);
+	cp trimSam subsampleIds fqGetIds ampDepth $(PREFIX);
+	chmod -R a+x $(PREFIX)/ampMapScripts;
+	chmod a+x $(PREFIX)/ampMapScripts/*;
+	chmod a+x $(PREFIX)/buildAmpCons.sh;
+	chmod a+x $(PREFIX)/trimSam;
+	chmod a+x $(PREFIX)/subsampleIds;
+	chmod a+x $(PREFIX)/fqGetIds;
+	chmod a+x $(PREFIX)/ampDepth;
 
 # Currently nothing to clean up
 clean:
+	# Handle mac install case
+	mv\
+       ampMapScripts/ivarConScriptLinux.sh\
+       ampMapScripts/ivarConScript.sh || exit;
+	mv buildAmpConsLinux.sh buildAmpCons.sh;
+	rm ampMApScripts/*.gawk;

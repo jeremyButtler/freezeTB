@@ -14,18 +14,34 @@ Consensuses are built for genes that have enough mapped
 
 # Requirements
 
-1. minimap2 [https://github.com/lh3/minimap2](https://github.com/lh3/minimap2)
-2. ivar [https://github.com/andersen-lab/ivar](https://github.com/andersen-lab/ivar)
-3. samtools [https://github.com/samtools/samtools](https://github.com/samtools/samtools)
+For mac, you can install some of the dependencies by
+  homebrew. Instructions for installing homebrew can be
+  found at [https://brew.sh/](https://brew.sh/).
+
+1. minimap2 [https://github.com/lh3/minimap2](
+   https://github.com/lh3/minimap2)
+2. samtools [https://github.com/samtools/samtools](
+   https://github.com/samtools/samtools)
    - For Debian/Unbuntu "sudo apt-get install samtools"
-4. R with ggplot2, viridisLite, and svgLite
-   - use "sudo make R" to run an install script for the libraries
-4. Basic unix tools, like awk
+   - For mac you can install samtools with homebrew
+     `brew install samtools`
+3. ivar [https://github.com/andersen-lab/ivar](
+   https://github.com/andersen-lab/ivar)
+   - For mac, you can install ivar with homebrew. I can
+     not remmeber the full name. Do `brew search ivar` and
+     then `brew install` on the found package.
+4. R with ggplot2, viridisLite, svgLite, and data.table
+   - use "sudo make R" to run an install script for the
+     libraries
+5. Basic unix tools, like gawk (awk on linux)
+   - For MAC this will require you to install gawk through
+     homebrew `brew install gawk`
 
 # Install
 
 Install ivar, minimap2, samtools, and the R packages you
-  need. Then do "make" and "sudo make install".
+  need. Then do `sudo make install` for linux or 
+  `make mac` and the `sudo make install` for mac.
 
 # Run
 

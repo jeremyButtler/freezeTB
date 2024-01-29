@@ -44,13 +44,17 @@
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 refStr="";
+pafStr=""; # Gene coordiantges
 genesStr="";
 fastqStr="";
 prefixStr="out";
 minReadsI=20;
 threadsI=3;
+flagStr="ONT";
 
 scriptDirStr="$(dirname "$0")/ampMapScripts";
+programDirStr="$(dirname "$0")";
+logStr="-log.txt";
 
 helpStr="
    $(basename "$0") -ref ref.fa -genes ref-genes.fa -fastq file.fq
@@ -65,11 +69,18 @@ helpStr="
          extracting reads from the fastq file
      -fastq: [Required]
        o Fastq file to extract reads from
-     -prefix: [out]
+     -paf: [Optional]
+       o Paf file with the coordinates of each reference
+         gene. This will be made if not provided.
+       o minimap2 reference.fasta genes.fasta > file.paf
+     -flag: [$flagStr]
+       o Flag in graph that is added to the end of the
+         gene names
+     -prefix: [$prefixStr]
        o prefix to name the output consensus
-     -min-reads: [20]
+     -min-reads: [$minReadsI]
        o Min number of reads to bulid a consensus for
-     -threads/-t: [3]
+     -threads/-t: [$threadsI]
        o Number of threads to use
    Output:
      - consensus to prefix-con.fasta
@@ -86,6 +97,7 @@ helpStr="
 # This script was build for a Tubercilousis project
 refStr="$scriptDirStr/TB-NC000962.fa";
 genesStr="$scriptDirStr/TB-NC000962-genes.fa";
+pafStr="$scriptDirStr/TB-gene-coordinates.paf";
 
 while [[ $# -gt 0 ]]; do
 # Loop: get all user input
@@ -93,6 +105,8 @@ while [[ $# -gt 0 ]]; do
       -ref) refStr="$2"; shift;;
       -genes) genesStr="$2"; shift;;
       -fastq) fastqStr="$2"; shift;;
+      -paf) pafStr="$2"; shift;;
+      -flag) flagStr=$2; shift;;
       -prefix) prefixStr="$2"; shift;;
       -min-reads) minReadsI="$2"; shift;;
       -threads) threadsI="$2"; shift;;
@@ -132,28 +146,62 @@ fi # If: the fastq file is not valid
 #   - Get stats and extract reads
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+logStr="$prefixStr-$logStr";
+
+if [[ ! -f "$pafStr" ]]; then
+   printf " -paf %s is not a paf file\n" "$pafStr"
+
+   printf\
+       " -paf %s is not a paf file\n"\
+       "$pafStr"\
+      >> "$logStr";
+
+   pafStr="$(sed 's/\.fas*t*a*$/.paf/' <<< "$genesStr")";
+   printf "making new paf file named %s\n" "$pafStr";
+
+   printf\
+       "making new paf file named %s\n"\
+       "$pafStr"\
+     >> "$logStr";
+
+   minimap2 "$refStr" "$genesStr" >"$pafStr" 2>>"$logStr";
+   printf "\n\n" >> "$logStr";
+fi
+
 # Get mappings
 printf "Mapping reads to genes\n";
-printf "Map reads to genes\n" >>"$prefixStr-log-ivar.txt";
+printf "Map reads to genes\n" >> "$logStr";
 
 minimap2\
    --eqx\
    -a\
    -x map-ont\
    -t "$threadsI"\
-   "$genesStr"\
+   "$refStr"\
    "$fastqStr"\
- > tmp.sam\
- 2>>"$prefixStr-log-ivar.txt" || exit;
+ > "$prefixStr-map.sam"\
+ 2>>"$logStr" || exit;
+
+printf "\n\n" >> "$logStr";
+
+# For the tuberculosis finder
+samtools view\
+    -F 4\
+    "$prefixStr-map.sam"\
+     -b\
+   > "$prefixStr-map.bam" || exit;
+
+printf "Geting amplicon stats" >> "$logStr";
 
 # Find the counts in the file
-"$scriptDirStr/ampMap"\
-   -sam "tmp.sam"\
-   -map-out "$prefixStr-mapTbl.tsv"\
-   -sup-out "$prefixStr-supTbl.tsv"\
-   -tsv || exit;
+"$programDirStr/ampDepth"\
+    -paf "$pafStr"\
+    -sam "$prefixStr-map.sam"\
+    -min-depth "$minReadsI"\
+    -flag "$flagStr"\
+    -out "$prefixStr-mapTbl.tsv" || exit;
 
-Rscript "$scriptDirStr/ampFig.r"\
+Rscript "$scriptDirStr/graphAmpDepth.r"\
   "$prefixStr-mapTbl.tsv"\
   "$prefixStr-mapGraph"\
   2> /dev/null\
@@ -161,14 +209,18 @@ Rscript "$scriptDirStr/ampFig.r"\
 
 # Extract the reads to build consensus for
 printf "Extracting reads that mapped to genes\n";
-awk\
-   -f "$scriptDirStr/extractPrimRead.awk"\
-   -v tblStr="$prefixStr-mapTbl.tsv"\
-   -v minReadsI="$minReadsI"\
-   -v prefStr="$prefixStr"\
-   < tmp.sam || exit;
+printf\
+    "Extracting reads that mapped to genes\n"\
+   >> "$logStr";
 
-rm tmp.sam;
+awk\
+    -f "$scriptDirStr/extractPrimRead.awk"\
+    -v tblStr="$prefixStr-mapTbl.tsv"\
+    -v minReadsI="$minReadsI"\
+    -v prefStr="$prefixStr"\
+    < "$prefixStr-map.sam" || exit;
+
+rm "$prefixStr-map.sam";
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-04:
@@ -192,7 +244,9 @@ rm tmp.sam;
 
 printf "\n\n";
 
-mkdir "$prefixStr-fastq";
+if [[ ! -d "$prefixStr-fastq" ]]; then 
+   mkdir "$prefixStr-fastq";
+fi
 mkdir "$prefixStr-subsample";
 
 for strFq in ./"$prefixStr-"*.fastq; do
@@ -214,10 +268,10 @@ for strFq in ./"$prefixStr-"*.fastq; do
        2>/dev/null\
      > tmp.sam;
 
-   "$scriptDirStr/subsampleIds"\
+   "$programDirStr/subsampleIds"\
         -num-reads 300\
         -sam tmp.sam |
-     "$scriptDirStr/fqGetIds"\
+     "$programDirStr/fqGetIds"\
          -stdin-filt\
          -fastq "$strFq"\
          -out "$subFqStr";
@@ -250,7 +304,7 @@ for strFq in ./"$prefixStr-"*.fastq; do
       } >> "$prefixStr-log.txt"; # Add error to log
 
       rm tmp.sam;
-      mv "$subFqStr" "$prefixStr-subsample";k
+      mv "$subFqStr" "$prefixStr-subsample";
       continue;
    fi # If: I could not extract enough reads
 
@@ -326,7 +380,10 @@ done # Loop: Build a consensus for each fastq file
 #   - Put consensuses into single file and exit
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-mkdir "$prefixStr-consensuses";
+if [[ ! -d "$prefixStr-consensuses" ]]; then
+   mkdir "$prefixStr-consensuses";
+fi
+
 mv "$prefixStr-"*con.fa "$prefixStr-consensuses";
 
 cat "$prefixStr-consensuses/"* > "$prefixStr-cons.fa";

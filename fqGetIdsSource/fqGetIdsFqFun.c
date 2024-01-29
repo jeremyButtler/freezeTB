@@ -1008,8 +1008,6 @@ uint8_t moveToNextFastqEntry(
     *  - Adjust positoin for the next read
     \*****************************************************/
 
-    cleanUp:
-
     if(outFILE != 0)
     { // If printin out the fastq entry
       *(buffCStr + *posUL - 1) = '\0';

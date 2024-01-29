@@ -1,3 +1,5 @@
+#!/usr/bin/awk
+
 BEGIN{
    startI = 1000000000; # So gets overwitten early
 } # BEGIN

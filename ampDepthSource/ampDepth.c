@@ -196,9 +196,6 @@ int main(
    uint ampGeneStartUI = 0;
    uint ampGeneEndUI = 0;
    
-
-   uint uiBase = 0;
-
    int tmpI = 0;
 
    struct geneCoords *genesST = 0; 
@@ -729,7 +726,7 @@ int main(
 
    fprintf(
       outFILE,
-      "\tx-off-target\tNA\tNA\t%u\t%u\t%lu\t%u\t%u\n",
+      "\tx-off-target\tNA\tNA\t%u\t%u\t%u\t%u\t%u\n",
       offTargUI,
       offTargUI,
       offTargUI,
@@ -751,7 +748,7 @@ int main(
 
    fprintf(
       outFILE,
-      "\tz-unmapped\tNA\tNA\t%u\t%u\t%lu\t%u\t%u\n",
+      "\tz-unmapped\tNA\tNA\t%u\t%u\t%u\t%u\t%u\n",
       umappedUI,
       umappedUI,
       umappedUI,
@@ -912,7 +909,7 @@ void pAmpDepthHelp(
 
    fprintf(
       outFILE,
-      "  Input:"
+      "Input:\n"
    );
 
    /*-paf*/
@@ -1021,7 +1018,7 @@ void pAmpDepthHelp(
 
    fprintf(
       outFILE,
-      "  Output:"
+      "Output:"
    );
 
    fprintf(
@@ -1036,12 +1033,23 @@ void pAmpDepthHelp(
 
    fprintf(
       outFILE,
-      "    o Column 2 is the ampicon starting base\n"
+      "    o Column 2 is the  first base in the first\n"
    );
 
    fprintf(
       outFILE,
-      "    o Column 3 is the ampicon ending base\n"
+      "      gene in the amplicont\n"
+   );
+
+   fprintf(
+      outFILE,
+      "    o Column 3 is last base of the last gene in\n"
+   );
+
+
+   fprintf(
+      outFILE,
+      "      the amplicont\n"
    );
 
    fprintf(
