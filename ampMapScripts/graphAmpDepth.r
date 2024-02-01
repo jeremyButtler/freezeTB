@@ -31,8 +31,7 @@ dataDF = NULL;
 graphObj = NULL; # for holding the graph
 
 # Are for pasting the gene names together
-targIndexI = 0;
-maxGenesI = 0;
+numBarsI = 0;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-02:
@@ -75,17 +74,33 @@ dataDF=setDT(read.csv(inputStr[6],sep="\t",header=TRUE));
 
 # For deugging
 #dataDF =
-#   setDT(read.csv("new-test.tsv",sep="\t",header=TRUE));
+#   setDT(
+#      read.csv(
+#         "04-ONT-Illumina/04-merged-stats.tsv",
+#         sep="\t",
+#         header=TRUE
+#));
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-03:
 #  - Set up the gene Names column
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+dataDF =
+   dataDF[
+      dataDF$geneId != "x-off-target" &
+      dataDF$geneId != "z-unmapped"
+      ,
+   ]; # Remove items I do not want to graph
+
+# This is so the amplicon names will print out in the 
+# proper order (ampMap graphs)
+dataDF = dataDF[order(dataDF$refGeneStart)];
+
 dataDF[
    ,
    genes:=paste(geneId, collapse="-"),
-   by = ampNumber
+   by = c("ampNumber", "flag")
 ]; # Merge the gene names
    # I need collapse to merge the names not sep.
    # Collapses deals with vectors, sep deals with separete
@@ -113,15 +128,30 @@ dataDF$depth100X = "100x read depth";
 # Graph the main data
 graphObj = ggplot(dataDF);
 
+# The legend has an issue were it can not handle separate
+# fill  and color values. So, every item needs to have
+# an fill and color. Otherwise the color scheme is reused
+
 # graph the maximum read depth data
 graphObj =
    graphObj +
-   geom_col(aes(x=genesTag, y=maxAmpDepth, fill=flag));
+   geom_col(
+       aes(x=genesTag,
+       y=maxAmpDepth,
+       fill=flag,
+       col=flag # For legend
+   ));
 
 # Graph the mean read depth data over the maximum
 graphObj =
    graphObj +
-   geom_col(aes(x=genesTag, y=avgAmpDepth, fill=avgCol));
+   geom_col(
+      aes(
+         x=genesTag,
+         y=avgAmpDepth,
+         fill=avgCol,
+         col = avgCol # For legend
+   ));
 
 # Add in read depth markers
 graphObj =
@@ -132,7 +162,8 @@ graphObj =
          xend = 1 + ampNumber + 0.45,
          y = 20,
          yend = 20,
-         col = depth20X
+         col = depth20X,
+         fill = depth20X # Errors out, but for legend
       ),
    );
 
@@ -144,7 +175,8 @@ graphObj =
          xend = 1 + ampNumber + 0.45,
          y = 100,
          yend = 100,
-         col = depth100X
+         col = depth100X,
+         fill = depth100X # errors out, but for legend
       ),
    );
 
@@ -154,7 +186,13 @@ graphObj =
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # ADd color to the graph
-graphObj = graphObj + scale_fill_viridis_d(direction = 1);
+graphObj =
+   graphObj +
+   scale_fill_viridis_d(name = "Legend", direction = 1);
+
+graphObj =
+   graphObj +
+   scale_color_viridis_d(name = "Legend", direction = 1);
 
 graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
 graphObj = graphObj + ylab("Max read depth");
@@ -188,19 +226,19 @@ dataDF$ref = "z ref";
 dataDF$geneEndFlag = "0 gene end";
 dataDF$geneStartFlag = "0 gene start";
 
+# I need this to handle when diffeernt genes are targeted
+dataDF[
+   ,
+   newStart:= min(refStart),
+   by = geneId
+];
+
 # Merege amplicons covering the same gene
 dataDF[
    ,
-   geneGroup:=paste(genes, sep = "-", collapse = "-"),
-   by = geneId
+   geneGroup:=paste(geneId, sep = "-", collapse = "-"),
+   by = newStart
 ]; # merege gene names of amplicons togeether
-
-dataDF[
-   ,
-   geneGroup:=paste(geneGroup, collapse = "-"),
-   by = ampNumber
-]; # Make sure all genes in an ampiocn have the same
-   # gene group name
 
 dataDF$geneGroup = 
    sapply(
@@ -210,6 +248,7 @@ dataDF$geneGroup =
 
 dataDF[, minRefStart:=min(refStart), by = geneGroup];
 dataDF[, maxRefEnd:=max(refEnd), by = geneGroup];
+
 
 # Graph the main data
 graphObj = ggplot(dataDF);
@@ -259,7 +298,9 @@ graphObj =
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # ADd color to the graph
-graphObj = graphObj + scale_color_viridis_d(direction=-1);
+graphObj =
+   graphObj +
+   scale_color_viridis_d(name = "Legend", direction=-1);
 
 graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
 graphObj = graphObj + ylab("Method");
