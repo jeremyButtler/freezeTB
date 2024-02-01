@@ -32,6 +32,7 @@ graphObj = NULL; # for holding the graph
 
 # Are for pasting the gene names together
 numBarsI = 0;
+outputStr = "tiff";
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-02:
@@ -42,7 +43,7 @@ if(length(inputStr) < 6)
   stop("No tsv file from ampDepth input");
 
 if(inputStr[6] == "-h" ||
-   inputStr[6] == "--h" ||
+   inputStr[7] == "--h" ||
    inputStr[6] == "-help" ||
    inputStr[6] == "--help" ||
    inputStr[6] == "help"){
@@ -203,8 +204,8 @@ graphObj =
    theme(axis.text.x = element_text(angle = 90));
 
 ggsave(
-   paste(nameStr, "-readDepth.svg", sep = ""),
-   device = svg
+   paste(nameStr, "-readDepth.", outputStr, sep = ""),
+   device = outputStr
 ); # Save the graph
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -311,6 +312,6 @@ graphObj =
    theme(axis.text.x = element_text(angle = 90));
 
 ggsave(
-   paste(nameStr, "-ampMap.svg", sep = ""),
-   device = svg
+   paste(nameStr, "-ampMap.", outputStr, sep = ""),
+   device = outputStr
 ); # Save the graph
