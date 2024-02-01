@@ -47,10 +47,12 @@ if(inputStr[6] == "-h" ||
    inputStr[6] == "-help" ||
    inputStr[6] == "--help" ||
    inputStr[6] == "help"){
-   print("RScript graphAmpDepth.r file.tsv prefix");
+   print("RScript graphAmpDepth.r file.tsv prefix type");
    print("  - Makes a graph of mapped amplicons from");
    print("    a tsv from ampDepth. The output graph is");
    print("    saved to prefix.svg (defualt is out)");
+   print("  - type is the file type (svg, tiff, pdf,");
+   print("    ect...)");
    q("no");
 }
 
@@ -63,10 +65,32 @@ if(length(inputStr) > 6)
     inputStr[7] == "-help" ||
     inputStr[7] == "--help" ||
     inputStr[7] == "help"){
-    print("RScript graphAmpDepth.r file.tsv prefix");
+    print("RScript graphAmpDepth.r file.tsv prefix type");
     print("  - Makes a graph of mapped amplicons from");
     print("    a tsv from ampDepth. The output graph is");
     print("    saved to prefix.svg (defualt is out)");
+    print("  - type is the file type (svg, tiff, pdf,");
+    print("    ect...)");
+    q("no");
+ }
+} # If: there is a second argument
+
+
+if(length(inputStr) > 7)
+{ # If: there is a second argument
+ outputStr = inputStr[8];
+
+ if(inputStr[7] == "-h" ||
+    inputStr[7] == "--h" ||
+    inputStr[7] == "-help" ||
+    inputStr[7] == "--help" ||
+    inputStr[7] == "help"){
+    print("RScript graphAmpDepth.r file.tsv prefix type");
+    print("  - Makes a graph of mapped amplicons from");
+    print("    a tsv from ampDepth. The output graph is");
+    print("    saved to prefix.svg (defualt is out)");
+    print("  - type is the file type (svg, tiff, pdf,");
+    print("    ect...)");
     q("no");
  }
 } # If: there is a second argument
@@ -94,6 +118,10 @@ dataDF =
       ,
    ]; # Remove items I do not want to graph
 
+
+# Removing the _gene name (just need the number)
+dataDF$geneId = gsub("gene_*", "", dataDF$geneId);
+
 # This is so the amplicon names will print out in the 
 # proper order (ampMap graphs)
 dataDF = dataDF[order(dataDF$refGeneStart)];
@@ -106,9 +134,6 @@ dataDF[
    # I need collapse to merge the names not sep.
    # Collapses deals with vectors, sep deals with separete
    # srings?
-
-# Removing the _gene name (just need the number)
-dataDF$genes = gsub("gene_*", "", dataDF$genes);
 
 # Add the flat to the gene names. This allows me to graph
 # the amplicons for each gene separately
