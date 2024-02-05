@@ -31,12 +31,17 @@
 '   o fun-06: swapGeneCoord
 '     - Swaps two array items in a geneCoords structure
 '       around
+'   o fun-09: pafGetGeneCoords
+'     - Gets the gene coordinates from a paf file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
 | Header:
 |   - Included libraries and defintions
 \-------------------------------------------------------*/
+
+#ifndef GENE_COORD_STRUCT_H
+#define GENE_COORD_STRUCT_H
 
 #include "base10StrToNum.h"
 #include "genMath.h"
@@ -458,3 +463,67 @@ static int findStartCoordInGeneCoord(
 
    return midI;
 } /*findStartCoordInGeneCoords*/
+
+
+/*-------------------------------------------------------\
+| Fun-09: pafGetGeneCoords
+|  - Gets the gene coordinates from a paf file
+| Input:
+|  - pafFILE:
+|    o Pointer to paf FILE to get gene coordinates from
+|  - numGenesUI:
+|    o Number of genes extracted
+| Output:
+|  - Returns:
+|    o Pointer to an sorted geneCoords structure with the 
+|      gene coordinates
+|    o 0 for memory error
+|  - Modifies:
+|    o numGenesI to have the number of genes (index 0)
+|      extracted
+\-------------------------------------------------------*/
+#define pafGetGeneCoords(\
+   pafFILE, /*Paf file to extract gene coordinates from*/\
+   numGenesI /*Number of genes extracted*/\
+)({\
+   ushort macLenBuffUS = 1024;\
+   char macBuffStr[macLenBuffUS];\
+   \
+   char macAlnTypeC = 0;     /*To check alignment type*/\
+   ulong macNumLinesUL = 0;\
+   ulong macIdIndexUL = 0;\
+   \
+   struct geneCoords *macGenesST = 0;\
+   \
+   /*Find the number of entries in the paf file*/\
+   while(fgets(macBuffStr, macLenBuffUS, (pafFILE)))\
+      ++macNumLinesUL;\
+   \
+   /*Extract each entry*/\
+   fseek((pafFILE), 0, SEEK_SET);\
+   macGenesST = makeGeneCoords(macNumLinesUL);\
+   \
+   if(macGenesST)\
+   { /*If: I did not have a memory error*/\
+      while(fgets(macBuffStr, macLenBuffUS, (pafFILE)))\
+      { /*Loop: Get entries from the paf file*/\
+         /*Get the gene locations from the paf line*/\
+         getPafGene(\
+            macGenesST,\
+            (numGenesI),\
+            macAlnTypeC,\
+            macBuffStr\
+         );\
+         \
+         (numGenesI) += (macAlnTypeC == 'P');\
+      } /*Loop: Get entries from the paf file*/\
+      \
+      --(numGenesI); /*Convert to index 0*/\
+      sortGeneCoords(macGenesST, 0, (numGenesI));\
+      fseek((pafFILE), 0, SEEK_SET);\
+      \
+   } /*If: I did not have a memory error*/\
+   macGenesST;\
+})
+
+#endif

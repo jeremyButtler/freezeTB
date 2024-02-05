@@ -15,6 +15,9 @@ all:
 	$(CC) $(CFLAGS) -o ampDepth ampDepth.c
 
 mac:
+	sed '1s/#!usr\/bin\/Rscript/#!usr\/local\/bin\/Rscript/;' < graphAmpDepth.r > tmp.r;
+	mv graphAmpDepth.r linuxGraphAmpDepth.r;
+	mv tmp.r graphAmpDepth.r;
 	$(CC) $(MACFLAGS) -o ampDepth ampDepth.c
 
 debug:
@@ -26,3 +29,4 @@ install:
 	cp graphAmpDepth.r $(PREFIX);
 	chmod a+x $(PREFIX)/ampDepth;
 	chmod a+x $(PREFIX)/graphAmpDepth.r;
+	mv linuxGraphAmpDepth.r graphAmpDepth.r || printf "";

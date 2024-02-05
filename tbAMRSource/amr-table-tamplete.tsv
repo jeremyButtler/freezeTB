@@ -1,0 +1,4 @@
+geneId	firstBase	codonStart	mutPattern	mutAA	antibotic1	antibotic2	antibotic3	antibotic4	antibotic5	antibotic6	antibotic7
+NA	700.00	NA	t	NA	NA	NA	NA	NA	NA	NA	NA
+demo	1000.00	999.00	g	G	MXR	AMI	NA	NA	NA	NA	NA
+demo	1200.00	NA	a	NA	LEV	NA	NA	NA	NA	NA	NA

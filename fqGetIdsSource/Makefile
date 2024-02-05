@@ -1,5 +1,5 @@
-CC=cc
 PREFIX=/usr/local/bin
+CC=cc
 NAME=fqGetIds
 CFLAGS=\
   -static \

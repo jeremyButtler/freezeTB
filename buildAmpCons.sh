@@ -50,7 +50,8 @@ fastqStr="";
 prefixStr="out";
 minReadsI=20;
 threadsI=3;
-flagStr="ONT";
+flagStr="amplicon";
+graphExtStr="tiff";
 
 scriptDirStr="$(dirname "$0")/ampMapScripts";
 programDirStr="$(dirname "$0")";
@@ -82,6 +83,8 @@ helpStr="
        o Min number of reads to bulid a consensus for
      -threads/-t: [$threadsI]
        o Number of threads to use
+     -extension: [$graphExtStr]
+       o Extension to save graphs as
    Output:
      - consensus to prefix-con.fasta
      - prefix-tblStr.tsv with mapping counts
@@ -111,6 +114,7 @@ while [[ $# -gt 0 ]]; do
       -min-reads) minReadsI="$2"; shift;;
       -threads) threadsI="$2"; shift;;
       -t) threadsI="$2"; shift;;
+      -extension) graphExtStr="$2"; shift;;
       -h) printf "%s\n" "$helpStr"; exit;;
       --h) printf "%s\n" "$helpStr"; exit;;
       -help) printf "%s\n" "$helpStr"; exit;;
@@ -207,6 +211,7 @@ printf "Geting amplicon stats" >> "$logStr";
 Rscript "$scriptDirStr/graphAmpDepth.r"\
   "$prefixStr-mapTbl.tsv"\
   "$prefixStr-mapGraph"\
+  "$graphExtStr"\
   2> /dev/null\
   1> /dev/null;
 

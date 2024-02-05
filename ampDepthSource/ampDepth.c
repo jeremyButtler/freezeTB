@@ -1,7 +1,5 @@
-
 /*########################################################
 # Name: ampDepth
-# Use:
 #  - Makes a tsv file with the read depths for detected
 #    amplicons in a sam file. It includes the genes names
 #    in each amplicon and the read depths for each gene in
@@ -13,7 +11,7 @@
 #   o "../generalLib/dataTypeShortHand.h"
 #   - "../generalLib/geneCoordStruct.h"
 #   o "../generalLib/genMath.h"
-# C Sta../generalLib/ndard Libraries:
+# C Standard Libraries:
 #   o <stdlib.h>
 #   o <stdint.h>
 #   o <stdio.h>
@@ -383,13 +381,7 @@ int main(
    ^  - Extract the genes from the paf file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*Find the number of entries in the paf file*/
-   while(fgets(buffStr, lenBuffUS, pafFILE)) ++numLinesUI; 
-
-   /*Extract each entry*/
-   fseek(pafFILE, 0, SEEK_SET);
-
-   genesST = makeGeneCoords(numLinesUI);
+   genesST = pafGetGeneCoords(pafFILE, numGenesI);
 
    if(genesST == 0)
    { /*If: I had a memory error*/
@@ -399,21 +391,6 @@ int main(
       fprintf(stderr, "Memory error\n");
       exit(-1);
    } /*If: I had a memory error*/
-
-   while(fgets(buffStr, lenBuffUS, pafFILE))
-   { /*Loop: Get entries from the paf file*/
-      /*Get the gene locations from the paf line*/
-      getPafGene(genesST, numGenesI, alnTypeC, buffStr);
-
-      if(alnTypeC == 'P')
-      { /*If: This was a primary alignment*/
-         idIndexUI += 64;
-         ++numGenesI;
-      } /*If: This was a primary alignment*/
-   } /*Loop: Get entries from the paf file*/
-
-   --numGenesI; /*Convert to index 0*/
-   sortGeneCoords(genesST, 0, numGenesI);
 
    fclose(pafFILE);
    pafFILE = 0;
