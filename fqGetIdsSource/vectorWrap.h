@@ -199,78 +199,78 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// This is to avoid makefile errors when compiling with
-// vectorWrap.c, but not using vectors. This would be a
-// case were the user is donig a scalar fallback
+/* This is to avoid makefile errors when compiling with
+  vectorWrap.c, but not using vectors. This would be a
+   case were the user is donig a scalar fallback
+*/
 
 #if defined AVX512 || AVX2 || SSE || NEON || NEON64
 
-// <immintrin_dbg.h> // For debugging
-#ifdef AVX512               // 512 bit registers
+#ifdef AVX512               /* 512 bit registers*/
   #include <immintrin.h>
 
   #define vectorBits 512
   #define vectorBytes 64
 
-  typedef __m512i vectI8; // vector of bytes (8bits)
-  typedef __m512i vectI16; // vector of shorts (16 bits)
-  typedef __m512i vectI32; // vector of ints (32 bits)
+  typedef __m512i vectI8;  /* vector of bytes (8bits)*/
+  typedef __m512i vectI16; /* vector of shorts (16 bits)*/
+  typedef __m512i vectI32; /* vector of ints (32 bits)*/
 
   typedef __mmask16 mmaskI32;
   typedef __mmask32 mmaskI16;
   typedef __mmask64 mmaskI8;
 
-#elif AVX2                  // 256 bit registers
+#elif AVX2                  /* 256 bit registers*/
   #include <immintrin.h>
 
   #define vectorBits 256
   #define vectorBytes 32
 
-  typedef __m256i vectI8; // vector of bytes (8bits)
-  typedef __m256i vectI16; // vector of shorts (16 bits)
-  typedef __m256i vectI32; // vector of ints (32 bits)
+  typedef __m256i vectI8; /* vector of bytes (8bits)*/
+  typedef __m256i vectI16; /* vector of shorts (16 bits)*/
+  typedef __m256i vectI32; /* vector of ints (32 bits)*/
 
   typedef __m256i mmaskI32;
   typedef __m256i mmaskI16;
   typedef __m256i mmaskI8;
 
-#elif SSE                   // 128 bit registers
+#elif SSE                   /* 128 bit registers*/
   #include <immintrin.h>
 
   #define vectorBits 128
   #define vectorBytes 16
 
-  typedef __m128i vectI8; // vector of bytes (8bits)
-  typedef __m128i vectI16; // vector of shorts (16 bits)
-  typedef __m128i vectI32; // vector of ints (32 bits)
+  typedef __m128i vectI8; /* vector of bytes (8bits)*/
+  typedef __m128i vectI16; /* vector of shorts (16 bits)*/
+  typedef __m128i vectI32; /* vector of ints (32 bits)*/
 
   typedef __m128i mmaskI32;
   typedef __m128i mmaskI16;
   typedef __m128i mmaskI8;
 
 #elif NEON
-  #include <arm_neon.h>  // Arm neom support
+  #include <arm_neon.h>  /* Arm neom support*/
 
   #define vectorBits 128
   #define vectorBytes 16
 
-  typedef int8x16_t vectI8;  // vector of bytes (8bits)
-  typedef int16x8_t vectI16; // vector of bytes (8bits)
-  typedef int32x4_t vectI32; // vector of bytes (8bits)
+  typedef int8x16_t vectI8;  /* vector of bytes (8bits)*/
+  typedef int16x8_t vectI16; /* vector of bytes (8bits)*/
+  typedef int32x4_t vectI32; /* vector of bytes (8bits)*/
 
   typedef int8x16_t mmaskI8;
   typedef int16x8_t mmaskI16;
   typedef int32x4_t mmaskI32;
 
 #elif NEON64
-  #include <arm_neon.h>  // Arm neom support
+  #include <arm_neon.h>  /* Arm neom support*/
 
   #define vectorBits 64
   #define vectorBytes 8
 
-  typedef int8x8_t vectI8;   // vector of bytes (8bits)
-  typedef int16x4_t vectI16; // vector of bytes (8bits)
-  typedef int32x2_t vectI32; // vector of bytes (8bits)
+  typedef int8x8_t vectI8;   /* vector of bytes (8bits)*/
+  typedef int16x4_t vectI16; /* vector of bytes (8bits)*/
+  typedef int32x2_t vectI32; /* vector of bytes (8bits)*/
 
   typedef int8x8_t mmaskI8;
   typedef int16x4_t mmaskI16;
@@ -284,8 +284,8 @@
 ^  - variable defintions 
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-// Probably in stdint, but must makking sure I have the
-// maximum value for each uintx_t value
+/* Probably in stdint, but must makking sure I have the*/
+/* maximum value for each uintx_t value*/
 #define defMaxUI64 0xFFFFFFFFFFFFFFFF
 #define defMaxUI32 0xFFFFFFFF
 #define defMaxUI16 0xFFFF
@@ -296,7 +296,7 @@
 ^  - Structures
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-// No longer used. Left here in case is needed later
+/* No longer used. Left here in case is needed later*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Sec-04:
@@ -340,7 +340,7 @@
 \--------------------------------------------------------*/
 void * makeVectBufferMalloc(
   unsigned long numBytesUL
-   // Number of bytes to assign to buffer
+   /* Number of bytes to assign to buffer*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: makeVectBufferMalloc
    '  - Make an aligned buffer for a vector
@@ -354,7 +354,7 @@ void * makeVectBufferMalloc(
 \--------------------------------------------------------*/
 void * makeVectBufferCalloc(
   unsigned long numBytesUL
-   // Number of bytes to assign to buffer
+   /* Number of bytes to assign to buffer*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-02 TOC: makeVectBufferMalloc
    '  - Make an aligned buffer with zeros for a vector
@@ -367,9 +367,9 @@ void * makeVectBufferCalloc(
 |    o 0 if realloc had a memeory error
 \--------------------------------------------------------*/
 void * makeVectBufferRealloc(
-  void *buffToResize, // Buffer to resize to new size
+  void *buffToResize, /* Buffer to resize to new size*/
   unsigned long numBytesUL
-   // Number of elements to assign to buffer
+   /* Number of elements to assign to buffer*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-03 TOC: makeVectBufferMalloc
    '  - Resize a buffer making sure it is aligned to an
@@ -383,7 +383,7 @@ void * makeVectBufferRealloc(
 \--------------------------------------------------------*/
 unsigned long bytesToAllocate(
   unsigned long numBytesUL
-   // Planned array size
+   /* Planned array size*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-04 TOC: bytesToAllocate
    '  - Find the number of bytes to allocate
@@ -396,7 +396,7 @@ unsigned long bytesToAllocate(
 |    o 1: If there was a zero (false) in the vector mask
 \--------------------------------------------------------*/
 char checkVectMaskFalseI8(
-  mmaskI8 vectMask // Mask to check for zeros
+  mmaskI8 vectMask /* Mask to check for zeros*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-05 TOC: checkVectMaskFalse
    '  - Check to see if a mask from a vector comparison at
@@ -410,15 +410,15 @@ char checkVectMaskFalseI8(
 |    o 1: If there is at least one positive value
 \--------------------------------------------------------*/
 char checkVectMaskTrueI8(
-  mmaskI8 vectMask // Mask to check for zeros
+  mmaskI8 vectMask /* Mask to check for zeros*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-06 TOC: checkVectMaskTrue
    '  - Check to see if a vector mask has at least one true
    '    value (1).
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-// Need to add in logic to handle OS were 64 bits varibles
-// are not present
+/* Need to add in logic to handle OS were 64 bits varibles*/
+/* are not present*/
 /*--------------------------------------------------------\
 | Output:
 |  - Returns:
@@ -434,7 +434,7 @@ char checkVectMaskTrueI8(
 |   - I have not tested this code yet
 \--------------------------------------------------------*/
 unsigned char findFirstFalseI8(
-  mmaskI8 vectorMask      // vector mask to find zero in
+  mmaskI8 vectorMask      /* vector mask to find zero in*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-07 TOC: findFirstZero
    '  - Finds the first zero char value in a vector mask
@@ -459,7 +459,7 @@ unsigned char findFirstFalseI8(
 |      a binary search for the first zero in the long.
 \--------------------------------------------------------*/
 unsigned char findLastTrueI8(
-  mmaskI8 vectorMask     // vector mask to find zero in
+  mmaskI8 vectorMask     /* vector mask to find zero in*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-08 TOC: findLasttTrue
    '  - Finds the last true value (1) in a comparison mask
@@ -470,8 +470,8 @@ unsigned char findLastTrueI8(
    '    - Find the position of the first zero in the long
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-// Need to add in logic to handle OS were 64 bits varibles
-// are not present
+/* Need to add in logic to handle OS were 64 bits varibles*/
+/* are not present*/
 /*--------------------------------------------------------\
 | Output:
 |  - Returns:
@@ -485,7 +485,7 @@ unsigned char findLastTrueI8(
 |      a binary search for the first zero in the long.
 \--------------------------------------------------------*/
 unsigned char findFirstTrueI8(
-  mmaskI8 vectorMask      // vector mask to find zero in
+  mmaskI8 vectorMask      /* vector mask to find zero in*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-09 TOC: findFirstTrue
    '  - Finds the first true value (1) in a comparison mask
@@ -503,13 +503,13 @@ unsigned char findFirstTrueI8(
 |      mask
 \--------------------------------------------------------*/
 unsigned char findNumTruesI8(
-  mmaskI8 vectorMask     // vector mask to find zero in
+  mmaskI8 vectorMask     /* vector mask to find zero in*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-10 TOC: findNumTrues
    '  - Find the number of set bits (1's or true's) in a
    '    vector.
    '  - This coes is From
-   '    https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetNaive
+   '    https:\\graphics.stanford.edu/~seander/bithacks.html#CountBitsSetNaive
    '  - I would like to say I understand this code, however,
    '    I do not. I just know that it works
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -524,8 +524,8 @@ unsigned char findNumTruesI8(
 |    the shift left function requires a constant.
 \--------------------------------------------------------*/
 vectI8 zeroAfterFirstTrueI8(
-  vectI8 vectToZero,// Vector to make zeros after 1st true
-  mmaskI8 maskVect    // Has the one to zero after
+  vectI8 vectToZero,/* Vector to make zeros after 1st true*/
+  mmaskI8 maskVect    /* Has the one to zero after*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-11 TOC: zeroAfterFirstTrue
    '  - Zeros all elements in the vector after the first
@@ -567,7 +567,7 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Input/output functions (load, set, store)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // Aligned loading
+  /* Aligned loading*/
   #define mmLoadI8(inVectI8, array) { \
     (inVectI8) = _mm512_load_si512((__m512i *) (array)); \
   }
@@ -580,7 +580,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm512_load_si512((__m512i *) (array)); \
   }
 
-  // Unaligned loading
+  /* Unaligned loading*/
   #define mmLoadUI8(inVectI8, array) { \
     (inVectI8) = _mm512_loadu_si512((__m512i *) (array)); \
   }
@@ -593,7 +593,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm512_loadu_si512((__m512i *) (array));\
   }
 
-  // Making a zero vector
+  /* Making a zero vector*/
   #define mmSetZeroI8(inVectI8) {\
     (inVectI8) = _mm512_setzero_si512(); \
   }
@@ -606,7 +606,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm512_setzero_si512(); \
   }
 
-  // Set a single element for all vector positions
+  /* Set a single element for all vector positions*/
   #define mmSet1I8(inVectI8, valC) { \
     (inVectI8) = _mm512_set1_epi8((valC)); \
   }
@@ -619,7 +619,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm512_set1_epi32((valC)); \
   }
 
-  // Store vector output into an array
+  /* Store vector output into an array*/
   #define mmStoreI8(array, inVectI8) { \
     _mm512_store_si512((__m512i *) (array), (inVectI8)); \
   }
@@ -637,33 +637,33 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Comparison functions (if)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // This first part deals with storing a maks from a
-  // comaparison
-  // retUL is an unsigned long
+  /* This first part deals with storing a maks from a*/
+  /* comaparison*/
+  /* retUL is an unsigned long*/
   #define storeI8CmpMask(retUL, maskI8) { \
     _store_mask64((__mmask64 *) (retUL), (maskI8)); \
-  } // Mask is from comparing 8 bit integers
+  } /* Mask is from comparing 8 bit integers*/
 
-  // retUL is an unsinged long
+  /* retUL is an unsinged long*/
   #define storeI16CmpMask(retUL, maskI16) { \
     _store_mask64((__mmask32 *) (retUL), (maskI16)); \
-  } // Mask is from comparing 16 bit integers
+  } /* Mask is from comparing 16 bit integers*/
 
-  // retUL is an unsinged long
+  /* retUL is an unsinged long*/
   #define storeI32CmpMask(retUL, maskI32) { \
     _store_mask16((__mmask16 *) (retUL), (maskI32)); \
-  } // Mask is from comparing 32 bit integers
+  } /* Mask is from comparing 32 bit integers*/
 
-  // This is here to support SSE2, AVX2, and NEON. 
-  // The returned mask in AVX512 has only one bit per
-  // data type in comparison
+  /* This is here to support SSE2, AVX2, and NEON. */
+  /* The returned mask in AVX512 has only one bit per*/
+  /* data type in comparison*/
   #define fixI8CmpMaskCnt(retUL,inUL) ((retUL) = (inUL))
   #define fixI16CmpMaskCnt(retUL,inUL) ((retUL) = (inUL))
   #define fixI32CmpMaskCnt(retUL,inUL) ((retUL) = (inUL))
 
-  // This next part deals with the comparison functions
+  /* This next part deals with the comparison functions*/
 
-  // Comparison functions
+  /* Comparison functions*/
   #define mmCmpGtI8(outMaskI8, vectOneI8, vectTwoI8) { \
     (outMaskI8) = \
       _mm512_cmpgt_epi8_mask((vectOneI8), (vectTwoI8)); \
@@ -714,8 +714,8 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Logical functions (and, or, xor)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // and not function. The extra functions here are to
-  // support the NEON functions
+  /* and not function. The extra functions here are to*/
+  /* support the NEON functions*/
   #define mmAndNotI8(outVectI8, notVectI8, inVectI8) { \
     (outVectI8) = \
       _mm512_andnot_si512((notVectI8), (inVectI8)); \
@@ -731,7 +731,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm512_andnot_si512((notVectI32), (inVectI32)); \
   }
 
-  // And functions (extra functions for NEON support)
+  /* And functions (extra functions for NEON support)*/
   #define mmAndI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = \
       _mm512_and_si512((vectOneI8), (vectTwoI8)); \
@@ -747,7 +747,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm512_and_si512((vectOneI32), (vectTwoI32)); \
   }
 
-  // Or functions
+  /* Or functions*/
   #define mmOrI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = \
       _mm512_or_si512((vectOneI8), (vectTwoI8)); \
@@ -763,7 +763,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm512_or_si512((vectOneI32), (vectTwoI32)); \
   }
 
-  // Or functions
+  /* Or functions*/
   #define mmXOrI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = \
       _mm512_xor_si512((vectOneI8), (vectTwoI8)); \
@@ -789,33 +789,33 @@ vectI8 zeroAfterFirstTrueI8(
       _mm512_srli_si512((inVectI8), (numBytesI)); \
   }
 
-  // the << 1 is to account for two bytes per short
-  // This is to ensure that this 
+  /* the << 1 is to account for two bytes per short*/
+  /* This is to ensure that this */
   #define mmShiftRightI16(outVectI16,inVectI16,numShorts){\
     (outVectI16) =\
       _mm512_srli_si512((inVectI16), (numShorts) <<1);\
   }
 
-  // The << 2 is to account for four bytes per int
+  /* The << 2 is to account for four bytes per int*/
   #define mmShiftRightI32(outVectI32, inVectI32, numInts){\
     (outVectI) = \
       _mm512_srli_si512((inVectI32), (numInts) << 2);\
   }
 
-  // Shift left
+  /* Shift left*/
   #define mmShiftLeftI8(outVectI8, inVectI8, numBytesI){\
     (outVectI8) = \
       _mm512_slli_si512((inVectI8), (numBytesI)); \
   }
 
-  // the << 1 is to account for two bytes per short
-  // This is to ensure that this 
+  /* the << 1 is to account for two bytes per short*/
+  /* This is to ensure that this */
   #define mmShiftLeftI16(outVectI16,inVectI16,numShorts){\
     (outVectI16) =\
       _mm512_slli_si512((inVectI16), (numShorts) <<1);\
   }
 
-  // The << 2 is to account for four bytes per int
+  /* The << 2 is to account for four bytes per int*/
   #define mmShiftLeftI32(outVectI32, inVectI32, numInts){\
     (outVectI) = \
       _mm512_slli_si512((inVectI32), (numInts) << 2);\
@@ -841,7 +841,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm512_add_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Saturation addition
+   /* Saturation addition*/
    #define mmAddSatI8(outVectI8, vectOneI8, vectTwoI8) {\
      (outVectI8) = \
        _mm512_adds_epi8((vectOneI8), (vectTwoI8)); \
@@ -857,7 +857,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm512_adds_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Subtraction
+   /* Subtraction*/
 
    #define mmSubI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = \
@@ -874,7 +874,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm512_sub_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Satuturation Subtraction
+   /* Satuturation Subtraction*/
    #define mmSubSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = \
        _mm512_subs_epi8((vectOneI8), (vectTwoI8)); \
@@ -895,7 +895,7 @@ vectI8 zeroAfterFirstTrueI8(
    +  - Conversion (casting)
    \+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   // These are here to support NEON
+   /* These are here to support NEON*/
    #define cnvtI8ToI16(outVectI16, inVectI8) { \
      (outVectI16) = (inVectI8); \
    }
@@ -949,7 +949,7 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Input/output functions (load, set, store)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // Aligned loading
+  /* Aligned loading*/
   #define mmLoadI8(inVectI8, array) { \
     (inVectI8) = _mm256_load_si256((__m256i *) (array)); \
   }
@@ -962,7 +962,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm256_load_si256((__m256i *) (array)); \
   }
 
-  // Unaligned loading
+  /* Unaligned loading*/
   #define mmLoadUI8(inVectI8, array) { \
     (inVectI8) = _mm256_loadu_si256((__m256i *) (array)); \
   }
@@ -975,7 +975,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm256_loadu_si256((__m256i *) (array));\
   }
 
-  // Making a zero vector
+  /* Making a zero vector*/
   #define mmSetZeroI8(inVectI8) {\
     (inVectI8) = _mm256_setzero_si256(); \
   }
@@ -988,7 +988,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm256_setzero_si256(); \
   }
 
-  // Set a single element for all vector positions
+  /* Set a single element for all vector positions*/
   #define mmSet1I8(inVectI8, valC) { \
     (inVectI8) = _mm256_set1_epi8((valC)); \
   }
@@ -1001,7 +1001,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm256_set1_epi32((valC)); \
   }
 
-  // Store vector output into an array
+  /* Store vector output into an array*/
   #define mmStoreI8(array, inVectI8) { \
     _mm256_store_si256((__m256i *) (array), (inVectI8)); \
   }
@@ -1019,30 +1019,30 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Comparison functions (if)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // Functions for converting mask to longs
-  // retUL is an unsigned long
+  /* Functions for converting mask to longs*/
+  /* retUL is an unsigned long*/
   #define storeI8CmpMask(retUL, maskI8) { \
     (retUL) = _mm256_movemask_epi8((maskI8)); \
-  } // Mask is from comparing 8 bit integers
+  } /* Mask is from comparing 8 bit integers*/
 
-  // retUL is an unsinged long
+  /* retUL is an unsinged long*/
   #define storeI16CmpMask(retUL, maskI16) { \
     (retUL) = _mm256_movemask_epi8((maskI16)); \
-  } // Mask is from comparing 16 bit integers
+  } /* Mask is from comparing 16 bit integers*/
 
-  // retUL is an unsinged long
+  /* retUL is an unsinged long*/
   #define storeI32CmpMask(retUL, maskI32) { \
     (retUL) = _mm256_movemask_epi8((maskI32)); \
-  } // Mask is from comparing 32 bit integers
+  } /* Mask is from comparing 32 bit integers*/
 
-  // Correct the bitcounts in the comparison masks
-  // Intel AVX2 returns a 256 bit vector that is converted
-  // to characters
+  /* Correct the bitcounts in the comparison masks*/
+  /* Intel AVX2 returns a 256 bit vector that is converted*/
+  /* to characters*/
   #define fixI8CmpMaskCnt(retUL,inUL) ((retUL) = (inUL))
   #define fixI16CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>1)
   #define fixI32CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>2)
 
-  // Comparison functions
+  /* Comparison functions*/
   #define mmCmpGtI8(outMaskI8, vectOneI8, vectTwoI8) { \
     (outMaskI8) = \
       _mm256_cmpgt_epi8((vectOneI8), (vectTwoI8)); \
@@ -1093,8 +1093,8 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Logical functions (and, or, xor)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // and not function. The extra functions here are to
-  // support the NEON functions
+  /* and not function. The extra functions here are to*/
+  /* support the NEON functions*/
   #define mmAndNotI8(outVectI8, notVectI8, inVectI8) { \
     (outVectI8) = \
       _mm256_andnot_si256((notVectI8), (inVectI8)); \
@@ -1110,7 +1110,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm256_andnot_si256((notVectI32), (inVectI32)); \
   }
 
-  // And functions (extra functions for NEON support)
+  /* And functions (extra functions for NEON support)*/
   #define mmAndI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = \
       _mm256_and_si256((vectOneI8), (vectTwoI8)); \
@@ -1126,7 +1126,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm256_and_si256((vectOneI32), (vectTwoI32)); \
   }
 
-  // Or functions
+  /* Or functions*/
   #define mmOrI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = \
       _mm256_or_si256((vectOneI8),(vectTwoI8)); \
@@ -1142,7 +1142,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm256_or_si256((vectOneI32), (vectTwoI32)); \
   }
 
-  // Or functions
+  /* Or functions*/
   #define mmXOrI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = \
       _mm256_xor_si256((vectOneI8), (vectTwoI8)); \
@@ -1168,33 +1168,33 @@ vectI8 zeroAfterFirstTrueI8(
        _mm256_srli_si256((inVectI8), (numBytesI)); \
   }
 
-  // the << 1 is to account for two bytes per short
-  // This is to ensure that this 
+  /* the << 1 is to account for two bytes per short*/
+  /* This is to ensure that this */
   #define mmShiftRightI16(outVectI16,inVectI16,numShorts){\
     (outVectI16) = \
       _mm256_srli_si256((inVectI16), (numShorts) <<1);\
   }
 
-  // The << 2 is to account for four bytes per int
+  /* The << 2 is to account for four bytes per int*/
   #define mmShiftRightI32(outVectI32, inVectI32, numInts){\
     (outVectI) = \
       _mm256_srli_si256((inVectI32), (numInts) << 2);\
   }
 
-  // Shift left
+  /* Shift left*/
   #define mmShiftLeftI8(outVectI8, inVectI8, numBytesI){\
     (outVectI8) = \
       _mm256_slli_si256((inVectI8), (numBytesI)); \
   }
 
-  // the << 1 is to account for two bytes per short
-  // This is to ensure that this 
+  /* the << 1 is to account for two bytes per short*/
+  /* This is to ensure that this */
   #define mmShiftLeftI16(outVectI16,inVectI16,numShorts){\
     (outVectI16) =\
       _mm256_slli_si256((inVectI16), (numShorts) <<1);\
   }
 
-  // The << 2 is to account for four bytes per int
+  /* The << 2 is to account for four bytes per int*/
   #define mmShiftLeftI32(outVectI32, inVectI32, numInts){\
     (outVectI) = \
       _mm256_slli_si256((inVectI32), (numInts) << 2);\
@@ -1219,7 +1219,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm256_add_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Saturation addition
+   /* Saturation addition*/
    #define mmAddSatI8(outVectI8, vectOneI8, vectTwoI8) {\
      (outVectI8) = \
        _mm256_adds_epi8((vectOneI8), (vectTwoI8)); \
@@ -1235,7 +1235,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm256_adds_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Subtraction
+   /* Subtraction*/
 
    #define mmSubI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = \
@@ -1252,7 +1252,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm256_sub_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Satuturation Subtraction
+   /* Satuturation Subtraction*/
    #define mmSubSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = \
        _mm256_subs_epi8((vectOneI8), (vectTwoI8)); \
@@ -1273,7 +1273,7 @@ vectI8 zeroAfterFirstTrueI8(
    +  - Conversion (casting)
    \+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-    // These are here to support NEON
+    /* These are here to support NEON*/
 
    #define cnvtI8ToI16(outVectI16, inVectI8) { \
      (outVectI16) = (inVectI8); \
@@ -1327,7 +1327,7 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Input/output functions (load, set, store)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // Aligned loading
+  /* Aligned loading*/
   #define mmLoadI8(inVectI8, array) { \
     (inVectI8) = _mm_load_si128((__m128i *) (array)); \
   }
@@ -1340,7 +1340,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm_load_si128((__m128i *) (array)); \
   }
 
-  // Unaligned loading
+  /* Unaligned loading*/
   #define mmLoadUI8(inVectI8, array) { \
     (inVectI8) = _mm_loadu_si128((__m128i *) (array)); \
   }
@@ -1353,7 +1353,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm_loadu_si128((__m128i *) (array)); \
   }
 
-  // Making a zero vector
+  /* Making a zero vector*/
   #define mmSetZeroI8(inVectI8) {\
     (inVectI8) = _mm_setzero_si128(); \
   }
@@ -1366,7 +1366,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm_setzero_si128(); \
   }
 
-  // Set a single element for all vector positions
+  /* Set a single element for all vector positions*/
   #define mmSet1I8(inVectI8, valC) { \
     (inVectI8) = _mm_set1_epi8((valC)); \
   }
@@ -1379,7 +1379,7 @@ vectI8 zeroAfterFirstTrueI8(
     (inVectI32) = _mm_set1_epi32((valC)); \
   }
 
-  // Store vector output into an array
+  /* Store vector output into an array*/
   #define mmStoreI8(array, inVectI8) { \
     _mm_store_si128((__m128i *) (array), (inVectI8)); \
   }
@@ -1397,30 +1397,30 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Comparison functions (if)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // Functions for converting mask to longs
-  // retUL is an unsigned long
+  /* Functions for converting mask to longs*/
+  /* retUL is an unsigned long*/
   #define storeI8CmpMask(retUL, maskI8) { \
     (retUL) = _mm_movemask_epi8((maskI8)); \
-  } // Mask is from comparing 8 bit integers
+  } /* Mask is from comparing 8 bit integers*/
 
-  // retUL is an unsinged long
+  /* retUL is an unsinged long*/
   #define storeI16CmpMask(retUL, maskI16) { \
     (retUL) = _mm_movemask_epi8((maskI16)); \
-  } // Mask is from comparing 16 bit integers
+  } /* Mask is from comparing 16 bit integers*/
 
-  // retUL is an unsinged long
+  /* retUL is an unsinged long*/
   #define storeI32CmpMask(retUL, maskI32) { \
     (retUL) = _mm_movemask_epi8((maskI32)); \
-  } // Mask is from comparing 32 bit integers
+  } /* Mask is from comparing 32 bit integers*/
 
-  // Correct the bitcounts in the comparison masks
-  // Intel SSE returns a 128 bit vector that is converted
-  // to characters
+  /* Correct the bitcounts in the comparison masks*/
+  /* Intel SSE returns a 128 bit vector that is converted*/
+  /* to characters*/
   #define fixI8CmpMaskCnt(retUL,inUL) ((retUL) = (inUL))
   #define fixI16CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>1)
   #define fixI32CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>2)
 
-  // Comparison functions
+  /* Comparison functions*/
   #define mmCmpGtI8(outMaskI8, vectOneI8, vectTwoI8) { \
     (outMaskI8) = _mm_cmpgt_epi8((vectOneI8),(vectTwoI8));\
   }
@@ -1468,8 +1468,8 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Logical functions (and, or, xor)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-  // and not function. The extra functions here are to
-  // support the NEON functions
+  /* and not function. The extra functions here are to*/
+  /* support the NEON functions*/
   #define mmAndNotI8(outVectI8, notVectI8, inVectI8) { \
     (outVectI8) =_mm_andnot_si128((notVectI8),(inVectI8));\
   }
@@ -1484,7 +1484,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm_andnot_si128((notVectI32), (inVectI32));\
   }
 
-  // And functions (extra functions for NEON support)
+  /* And functions (extra functions for NEON support)*/
   #define mmAndI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = _mm_and_si128((vectOneI8), (vectTwoI8));\
   }
@@ -1499,7 +1499,7 @@ vectI8 zeroAfterFirstTrueI8(
       _mm_and_si128((vectOneI32), (vectTwoI32)); \
   }
 
-  // Or functions
+  /* Or functions*/
   #define mmOrI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8) = _mm_or_si128((vectOneI8), (vectTwoI8)); \
   }
@@ -1512,7 +1512,7 @@ vectI8 zeroAfterFirstTrueI8(
     (outVectI32)= _mm_or_si128((vectOneI32),(vectTwoI32));\
   }
 
-  // Or functions
+  /* Or functions*/
   #define mmXOrI8(outVectI8, vectOneI8, vectTwoI8) { \
     (outVectI8)= _mm_xor_si128((vectOneI8), (vectTwoI8));\
   }
@@ -1534,32 +1534,32 @@ vectI8 zeroAfterFirstTrueI8(
     (outVectI8)=_mm_srli_si128((inVectI8), (numBytesI));\
   }
 
-  // the << 1 is to account for two bytes per short
-  // This is to ensure that this 
+  /* the << 1 is to account for two bytes per short*/
+  /* This is to ensure that this */
   #define mmShiftRightI16(outVectI16,inVectI16,numShorts){\
     (outVectI16) =\
       _mm_srli_si128((inVectI16), (numShorts) <<1);\
   }
 
-  // The << 2 is to account for four bytes per int
+  /* The << 2 is to account for four bytes per int*/
   #define mmShiftRightI32(outVectI32, inVectI32, numInts){\
     (outVectI32) = \
       _mm_srli_si128((inVectI32), (numInts) << 2);\
   }
 
-  // Shift left
+  /* Shift left*/
   #define mmShiftLeftI8(outVectI8, inVectI8, numBytesI){\
     (outVectI8) = _mm_slli_si128((inVectI8), (numBytesI));\
   }
 
-  // the << 1 is to account for two bytes per short
-  // This is to ensure that this 
+  /* the << 1 is to account for two bytes per short*/
+  /* This is to ensure that this */
   #define mmShiftLeftI16(outVectI16,inVectI16,numShorts){\
     (outVectI16) =\
       _mm_slli_si128((inVectI16), (numShorts) <<1);\
   }
 
-  // The << 2 is to account for four bytes per int
+  /* The << 2 is to account for four bytes per int*/
   #define mmShiftLeftI32(outVectI32, inVectI32, numInts){\
     (outVectI) = \
       _mm_slli_si128((inVectI32), (numInts) << 2);\
@@ -1584,7 +1584,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm_add_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Saturation addition
+   /* Saturation addition*/
    #define mmAddSatI8(outVectI8, vectOneI8, vectTwoI8) {\
      (outVectI8) = _mm_adds_epi8((vectOneI8),(vectTwoI8));\
    }
@@ -1599,7 +1599,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm_adds_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Subtraction
+   /* Subtraction*/
 
    #define mmSubI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = _mm_sub_epi8((vectOneI8), (vectTwoI8));\
@@ -1615,7 +1615,7 @@ vectI8 zeroAfterFirstTrueI8(
        _mm_sub_epi32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Satuturation Subtraction
+   /* Satuturation Subtraction*/
    #define mmSubSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = _mm_subs_epi8((vectOneI8),(vectTwoI8));\
    }
@@ -1635,7 +1635,7 @@ vectI8 zeroAfterFirstTrueI8(
    +  - Conversion (casting)
    \+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-    // These are here to support NEON
+    /* These are here to support NEON*/
 
    #define cnvtI8ToI16(outVectI16, inVectI8) { \
      (outVectI16) = (inVectI8); \
@@ -1700,9 +1700,9 @@ vectI8 zeroAfterFirstTrueI8(
     (outVectI8) = vld1q_s32((int32_t *) (arrayI32));\
    }
 
-   // Unaliged load options.
-   // This is here to support intel, which does have this
-   // function
+   /* Unaliged load options.*/
+   /* This is here to support intel, which does have this*/
+   /* function*/
    #define mmLoadUI8(outVectI8, arrayI8) { \
     (outVectI8) = vld1q_s8((int8_t *) (arrayI8));\
    }
@@ -1715,7 +1715,7 @@ vectI8 zeroAfterFirstTrueI8(
     (outVectI32) = vld1q_s32((int32_t *) (arrayI32));\
    }
 
-   // single value loads
+   /* single value loads*/
    #define mmSet1I8(inVectI8, valC) { \
      (inVectI8) = vdupq_n_s8((valC)); \
    }
@@ -1728,7 +1728,7 @@ vectI8 zeroAfterFirstTrueI8(
      (inVectI32) = vdupq_n_s32((valC)); \
    }
 
-   // Set zero values (here to support intel)
+   /* Set zero values (here to support intel)*/
    #define mmSeqZeroI8(inVectI8) { \
      (inVectI8) = vdupq_n_s8(0); \
    }
@@ -1741,7 +1741,7 @@ vectI8 zeroAfterFirstTrueI8(
      (inVectI32) = vdupq_n_s32(0); \
    }
 
-  // Output functions; storing vectors in arrays
+  /* Output functions; storing vectors in arrays*/
   #define mmStoreI8(array, inVectI8) { \
     vstlq_s8((int8_t *) (array), (inVectI8)); \
   }
@@ -1759,9 +1759,9 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Comparison functions (if)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-// Store the mask functions (unsigned long returns)
-   // The logic for these store functions came from
-   // https://community.arm.com/arm-community-blogs/b/infrastructure-solutions-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon
+/* Store the mask functions (unsigned long returns)*/
+   /* The logic for these store functions came from*/
+   /* https://community.arm.com/arm-community-blogs/b/infrastructure-solutions-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon*/
    #define storeI8CmpMask(retUL, maskI8) { \
      uint16x8_t res16x8 = vreinterpretq_u16_s8((maskI8)); \
      uint8x8_t res8x8 = vshrn_n_u16(res16x8, 4); \
@@ -1783,12 +1783,12 @@ vectI8 zeroAfterFirstTrueI8(
      (retUL) = vget_lane_u64(res64x1, 0); \
    }
 
-   // Correct the bitcounts in the comparison masks
+   /* Correct the bitcounts in the comparison masks*/
    #define fixI8CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>2)
    #define fixI16CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>3)
    #define fixI32CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>4)
 
-   // greater then comparisions
+   /* greater then comparisions*/
    #define mmCmpGtI8(outMaskI8, vectOneI8, vectTwoI8) { \
      (outMaskI8) = vcgtq_s8((vectOneI8), (vectTwoI8)); \
    };
@@ -1801,7 +1801,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outMaskI32) = vcgtq_s32((vectOneI32), (vectTwoI32));\
    };
 
-   // Less then comparisions
+   /* Less then comparisions*/
    #define mmCmpLtI8(outMaskI8, vectOneI8, vectTwoI8) { \
      (outMaskI8) = vcltq_s8((vectOneI8), (vectTwoI8)); \
    };
@@ -1814,7 +1814,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outMaskI32) = vcltq_s32((vectOneI32), (vectTwoI32));\
    };
 
-   // Less then comparisions
+   /* Less then comparisions*/
    #define mmCmpEqI8(outMaskI8, vectOneI8, vectTwoI8) { \
      (outMaskI8) = vceqq_s8((vectOneI8), (vectTwoI8)); \
    };
@@ -1917,7 +1917,7 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Math functions (add and sub)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   // Addition (non-saturating)
+   /* Addition (non-saturating)*/
    #define mmAddI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vaddq_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -1930,7 +1930,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outVectI32) = vaddq_s32((vectOneI32),(vectTwoI32)); \
    }
 
-   // Addition (saturating)
+   /* Addition (saturating)*/
    #define mmAddSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vqaddq_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -1943,7 +1943,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outVectI32) = vqaddq_s32((vectOneI32),(vectTwoI32));\
    }
 
-   // subtraction (non-saturating)
+   /* subtraction (non-saturating)*/
    #define mmsubI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vsubq_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -1956,7 +1956,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outVectI32) = vsubq_s32((vectOneI32),(vectTwoI32)); \
    }
 
-   // subtraction (saturating)
+   /* subtraction (saturating)*/
    #define mmSubSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vqsubq_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -2023,7 +2023,7 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Input/output functions (load, set, store)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   // Regular loads
+   /* Regular loads*/
    #define mmLoadI8(outVectI8, arrayI8) { \
     (outVectI8) = vld1_s8((int8_t *) (arrayI8));\
    }
@@ -2036,7 +2036,7 @@ vectI8 zeroAfterFirstTrueI8(
     (outVectI8) = vld1_s32((int32_t *) (arrayI32));\
    }
 
-   // Unligned load options (here to support intel)
+   /* Unligned load options (here to support intel)*/
    #define mmLoadUI8(outVectI8, arrayI8) { \
     (outVectI8) = vld1_s8((int8_t *) (arrayI8));\
    }
@@ -2049,7 +2049,7 @@ vectI8 zeroAfterFirstTrueI8(
     (outVectI32) = vld1_s32((int32_t *) (arrayI32));\
    }
 
-   // single value loads
+   /* single value loads*/
    #define mmSet1I8(inVectI8, valC) { \
      (inVectI8) = vdup_n_s8((valC)); \
    }
@@ -2062,7 +2062,7 @@ vectI8 zeroAfterFirstTrueI8(
      (inVectI32) = vdup_n_s32((valC)); \
    }
 
-   // Set zero values (here to support intel)
+   /* Set zero values (here to support intel)*/
    #define mmSeqZeroI8(inVectI8) { \
      (inVectI8) = vdup_n_s8(0); \
    }
@@ -2075,7 +2075,7 @@ vectI8 zeroAfterFirstTrueI8(
      (inVectI32) = vdup_n_s32(0); \
    }
 
-  // Output functions; storing vectors in arrays
+  /* Output functions; storing vectors in arrays*/
   #define mmStoreI8(array, inVectI8) { \
     vstl_s8((int8_t *) (array), (inVectI8)); \
   }
@@ -2093,9 +2093,9 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Comparison functions (if)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   // Store the mask functions (unsigned long returns)
-   // The logic for these store functions came from
-   // https://community.arm.com/arm-community-blogs/b/infrastructure-solutions-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon
+   /* Store the mask functions (unsigned long returns)*/
+   /* The logic for these store functions came from*/
+   /* https://community.arm.com/arm-community-blogs/b/infrastructure-solutions-blog/posts/porting-x86-vector-bitmask-optimizations-to-arm-neon*/
    #define storeI8CmpMask(retUL, maskI8) { \
      (retUL) = \
        vget_lane_u64(vreinterpret_u64_s8((maskI8)), 0);\
@@ -2111,12 +2111,12 @@ vectI8 zeroAfterFirstTrueI8(
        vget_lane_u64(vreinterpret_u64_s32((maskI32)), 0);\
    }
 
-   // Correct the bitcounts in the comparison masks
+   /* Correct the bitcounts in the comparison masks*/
    #define fixI8CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>3)
    #define fixI16CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>4)
    #define fixI32CmpMaskCnt(retUL,inUL) ((retUL)=(inUL)>>5)
 
-   // greater then comparisions
+   /* greater then comparisions*/
    #define mmCmpGtI8(outMaskI8, vectOneI8, vectTwoI8) { \
      (outMaskI8) = vcgt_s8((vectOneI8), (vectTwoI8)); \
    };
@@ -2129,7 +2129,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outMaskI32) = vcgt_s32((vectOneI32), (vectTwoI32)); \
    };
 
-   // Less then comparisions
+   /* Less then comparisions*/
    #define mmCmpLtI8(outMaskI8, vectOneI8, vectTwoI8) { \
      (outMaskI8) = vclt_s8((vectOneI8), (vectTwoI8)); \
    };
@@ -2142,7 +2142,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outMaskI32) = vclt_s32((vectOneI32), (vectTwoI32)); \
    };
 
-   // Less then comparisions
+   /* Less then comparisions*/
    #define mmCmpEqI8(outMaskI8, vectOneI8, vectTwoI8) { \
      (outMaskI8) = vceq_s8((vectOneI8), (vectTwoI8)); \
    };
@@ -2245,7 +2245,7 @@ vectI8 zeroAfterFirstTrueI8(
   +  - Math functions (add and sub)
   \*+++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   // Addition (non-saturating)
+   /* Addition (non-saturating)*/
    #define mmAddI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vadd_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -2258,7 +2258,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outVectI32) = vadd_s32((vectOneI32), (vectTwoI32)); \
    }
 
-   // Addition (saturating)
+   /* Addition (saturating)*/
    #define mmAddSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vqadd_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -2271,7 +2271,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outVectI32) = vqadd_s32((vectOneI32), (vectTwoI32));\
    }
 
-   // subtraction (non-saturating)
+   /* subtraction (non-saturating)*/
    #define mmsubI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vsub_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -2284,7 +2284,7 @@ vectI8 zeroAfterFirstTrueI8(
      (outVectI32) = vsub_s32((vectOneI32), (vectTwoI32)); \
    }
 
-   // subtraction (saturating)
+   /* subtraction (saturating)*/
    #define mmSubSatI8(outVectI8, vectOneI8, vectTwoI8) { \
      (outVectI8) = vqsub_s8((vectOneI8), (vectTwoI8)); \
    }
@@ -2330,16 +2330,16 @@ vectI8 zeroAfterFirstTrueI8(
    #define cnvtI32ToI16(outVectI16, inVectI32) { \
      (outVectI16) = vreinterpret_s16_s32((inVectI32)); \
    }
-#endif // Commands for AVS512, AVX2, SSE3, and NEON
+#endif /* Commands for AVS512, AVX2, SSE3, and NEON*/
 
 #else
-  // This only happens for scaler code. This is here so
-  // the user can use these values to modify their code,
-  // but also have then got to one byte for scaler
+  /* This only happens for scaler code. This is here so*/
+  /* the user can use these values to modify their code,*/
+  /* but also have then got to one byte for scaler*/
   #define vectorBits 8
   #define vectorBytes 1
 
-#endif // User is using scalar side of their pogram, this
-       // is to disable compiler errrors when vectorWarp.c
-       // is included in build for vector versions of code
-#endif // if this header has not already been defined
+#endif /* User is using scalar side of their pogram, this*/
+       /* is to disable compiler errrors when vectorWarp.c*/
+       /* is included in build for vector versions of code*/
+#endif /* if this header has not already been defined*/

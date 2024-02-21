@@ -161,8 +161,9 @@
 
 #include "vectorWrap.h"
 
-// Disable functions if not using vectors
-// This is to avoide makfile errors when not using vectors
+/*Disable functions if not using vectors
+' This is to avoide makfile errors when not using vectors 
+*/
 #if defined AVX512 || AVX2 || SSE || NEON || NEON64
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -206,7 +207,7 @@
 \--------------------------------------------------------*/
 void * makeVectBufferMalloc(
   unsigned long numBytesUL
-   // Number of elements to assign to buffer
+   /* Number of elements to assign to buffer*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: makeVectBufferMalloc
    '  - Make an aligned buffer for a vector
@@ -214,7 +215,7 @@ void * makeVectBufferMalloc(
 
   numBytesUL += vectorBytes - (numBytesUL % vectorBytes);
   return malloc(sizeof(char) * numBytesUL);
-} // makeVectBufferMalloc
+} /* makeVectBufferMalloc*/
 
 /*--------------------------------------------------------\
 | Output:
@@ -224,7 +225,7 @@ void * makeVectBufferMalloc(
 \--------------------------------------------------------*/
 void * makeVectBufferCalloc(
   unsigned long numBytesUL
-   // Number of elements to assign to buffer
+   /* Number of elements to assign to buffer*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-02 TOC: makeVectBufferMalloc
    '  - Make an aligned buffer with zeros for a vector
@@ -232,7 +233,7 @@ void * makeVectBufferCalloc(
 
   numBytesUL += vectorBytes - (numBytesUL % vectorBytes);
   return calloc(numBytesUL, sizeof(char));
-} // makeVectBufferMalloc
+} /* makeVectBufferMalloc*/
 
 /*--------------------------------------------------------\
 | Output:
@@ -241,9 +242,9 @@ void * makeVectBufferCalloc(
 |    o 0 if realloc had a memeory error
 \--------------------------------------------------------*/
 void * makeVectBufferRealloc(
-  void *buffToResize, // Buffer to resize to new size
+  void *buffToResize, /* Buffer to resize to new size*/
   unsigned long numBytesUL
-   // Number of elements to assign to buffer
+   /* Number of elements to assign to buffer*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-03 TOC: makeVectBufferMalloc
    '  - Resize a buffer making sure it is aligned to an
@@ -252,7 +253,7 @@ void * makeVectBufferRealloc(
 
   numBytesUL += vectorBytes - (numBytesUL % vectorBytes);
   return realloc(buffToResize, numBytesUL * sizeof(char));
-} // makeVectBufferMalloc
+} /* makeVectBufferMalloc*/
 
 /*--------------------------------------------------------\
 | Output:
@@ -261,7 +262,7 @@ void * makeVectBufferRealloc(
 \--------------------------------------------------------*/
 unsigned long bytesToAllocate(
   unsigned long numBytesUL
-   // Planned array size
+   /* Planned array size*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-04 TOC: bytesToAllocate
    '  - Find the number of bytes to allocate
@@ -269,7 +270,7 @@ unsigned long bytesToAllocate(
 
   return
     numBytesUL + vectorBytes - (numBytesUL % vectorBytes);
-} // bytesToAllocate
+} /* bytesToAllocate*/
 
 /*--------------------------------------------------------\
 | Output:
@@ -278,7 +279,7 @@ unsigned long bytesToAllocate(
 |    o 1: If there was a zero (false) in the vector mask
 \--------------------------------------------------------*/
 char checkVectMaskFalseI8(
-  mmaskI8 vectMask // Mask to check for zeros
+  mmaskI8 vectMask /* Mask to check for zeros*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-05 TOC: checkVectMaskFalse
    '  - Check to see if a mask from a vector comparison at
@@ -297,7 +298,7 @@ char checkVectMaskFalseI8(
     uint64_t maskUX;
   #endif
 
-  // Latency of 3 for 256 and 128; 6 to 8 for 512 bit
+  /* Latency of 3 for 256 and 128; 6 to 8 for 512 bit*/
   storeI8CmpMask(maskUX, vectMask);
 
   #ifdef AVX512
@@ -305,14 +306,14 @@ char checkVectMaskFalseI8(
   #elif AVX2
     if(maskUX < defMaxUI32) return 1;
   #elif SSE
-    //maskUX = maskUX >> 16; // Remove 16 zeros
-      // Turns out that the code fills up the lowest
-      // postions first, so I did not need this
+    /*maskUX = maskUX >> 16; // Remove 16 zeros*/
+      /* Turns out that the code fills up the lowest*/
+      /* postions first, so I did not need this*/
     if(maskUX < defMaxUI16) return 1;
   #endif
 
-  return 0; // No zeros in the vector
-} // checkVectMaskFalse
+  return 0; /* No zeros in the vector*/
+} /* checkVectMaskFalse*/
 
 /*--------------------------------------------------------\
 | Output:
@@ -321,7 +322,7 @@ char checkVectMaskFalseI8(
 |    o 1: If there is a true value
 \--------------------------------------------------------*/
 char checkVectMaskTrueI8(
-  mmaskI8 vectMask // Mask to check for zeros
+  mmaskI8 vectMask /* Mask to check for zeros*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-06 TOC: checkVectMaskTrue
    '  - Check to see if a vector mask has at least one true
@@ -340,15 +341,15 @@ char checkVectMaskTrueI8(
     uint64_t maskUX;
   #endif
 
-  // Latency of 3 for 256 and 128; 6 to 8 for 512 bit
+  /* Latency of 3 for 256 and 128; 6 to 8 for 512 bit*/
   storeI8CmpMask(maskUX, vectMask);
 
   if(maskUX != 0) return 1;
-  return 0; // No zeros in the vector
-} // checkVectMaskTrue
+  return 0; /* No zeros in the vector*/
+} /* checkVectMaskTrue*/
 
-// Need to add in logic to handle OS were 64 bits varibles
-// are not present
+/* Need to add in logic to handle OS were 64 bits varibles*/
+/* are not present*/
 /*--------------------------------------------------------\
 | Output:
 |  - Returns:
@@ -364,7 +365,7 @@ char checkVectMaskTrueI8(
 |   - I have not tested this code yet
 \--------------------------------------------------------*/
 unsigned char findFirstFalseI8(
-  mmaskI8 vectorMask      // vector mask to find zero in
+  mmaskI8 vectorMask      /* vector mask to find zero in*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-07 TOC: findFirstFalse
    '  - Finds the first zero char value in a vector mask
@@ -400,75 +401,71 @@ unsigned char findFirstFalseI8(
   ^  - Find the position of the first zero in the long
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-  // Not sure if I have this right, but doing backwards
-  // because intel loads its vectors backwards. So the
-  // start of the string is the smallest bit
-  // Latency of 3 for 256 and 128; 6 to 8 for 512 bit
+  /* Not sure if I have this right, but doing backwards*/
+  /* because intel loads its vectors backwards. So the*/
+  /* start of the string is the smallest bit*/
+  /* Latency of 3 for 256 and 128; 6 to 8 for 512 bit*/
   storeI8CmpMask(maskUX, vectorMask);
 
-  // If dealing with a 64 bit mask
+  /* If dealing with a 64 bit mask*/
   #if defined AVX512 || NEON || NEON64
-    // ADD IFNDEF 64 BIT OS
+    /* ADD IFNDEF 64 BIT OS*/
     if(maskUX >> 32 != defMaxUI32)
-    { // If all last digits set (vectors are backwards)
+    { /* If all last digits set (vectors are backwards)*/
       maskUX = maskUX >> 32;
       posUC += 32;
-    } // If all last digits set (vectors are backwards)
+    } /* If all last digits set (vectors are backwards)*/
 
     else maskUX &= 0x00000000FFFFFFFF;
   #endif
 
-  // Not needed for 128 bit vectors
+  /* Not needed for 128 bit vectors*/
   #if defined AVX2 || AVX512 ||  NEON || NEON64
     if(maskUX >> 16 != defMaxUI16)
-    { // If all last digits set (vectors are backwards)
+    { /* If all last digits set (vectors are backwards)*/
       maskUX = maskUX >> 16;
       posUC += 16;
-    } // If all last digits set (vectors are backwards)
+    } /* If all last digits set (vectors are backwards)*/
 
     else maskUX &= 0x0000FFFF;
-
-  //#elif SSE
-    // Fills form lowest position up, so do not need
-    //maskUX = maskUX >> 16; // Lower 16 is just 0's
   #endif
 
   if(maskUX >> 8 != defMaxUI8)
-  { // Else zero in last 1/4 of vector (first 1/4 of buff)
+  { /* Else zero in last 1/4 of vector (first 1/4 of buff)*/
     maskUX = maskUX >> 8;
     posUC += 8;
-  } // Else zero in last 1/4 of vector (first 1/4 of buff)
+  } /* Else zero in last 1/4 of vector (first 1/4 of buff)*/
 
   else maskUX &= 0x00FF;
 
   if(maskUX >> 4 != 0xF)
-  { // If the next 4 digits are all ones
+  { /* If the next 4 digits are all ones*/
     maskUX = maskUX >> 4;
     posUC += 4;
-  } // If the next 4 digits are all ones
+  } /* If the next 4 digits are all ones*/
 
   else maskUX &= 0x0F;
 
-  // Check To see which two bits it is
+  /* Check To see which two bits it is*/
   if(maskUX >> 2 != 3)
-  { // If the next 2 digits are all ones
+  { /* If the next 2 digits are all ones*/
     maskUX = maskUX >> 2;
     posUC += 2;
-  } // If the next 2 digits are all ones
+  } /* If the next 2 digits are all ones*/
 
-  else maskUX &= 3; // Keep only the 2nd ahd thrid bit
+  else maskUX &= 3; /* Keep only the 2nd ahd thrid bit*/
 
-  // Check the final value
+  /* Check the final value*/
   if(maskUX >> 1 == 0) ++posUC;
 
-  // Adust for off counts
+  /* Adust for off counts*/
   fixI8CmpMaskCnt(posUC, posUC);
 
   return posUC;
-} // findFristFalse
+} /* findFristFalse*/
 
-// Need to add in logic to handle OS were 64 bits varibles
-// are not present
+/* Need to add in logic to handle OS were 64 bits varibles*/
+/* are not present*/
 /*--------------------------------------------------------\
 | Output:
 |  - Returns:
@@ -482,7 +479,7 @@ unsigned char findFirstFalseI8(
 |      a binary search for the first zero in the long.
 \--------------------------------------------------------*/
 unsigned char findLastTrueI8(
-  mmaskI8 vectorMask     // vector mask to find zero in
+  mmaskI8 vectorMask     /* vector mask to find zero in*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-08 TOC: findLasttTrue
    '  - Finds the last true value (1) in a comparison mask
@@ -517,64 +514,64 @@ unsigned char findLastTrueI8(
   ^  - Find the position of the first zero in the long
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-  // Latency of 3 for 256 and 128; 6 to 8 for 512 bit
+  /* Latency of 3 for 256 and 128; 6 to 8 for 512 bit*/
   storeI8CmpMask(maskUX, vectorMask);
 
-  // Doing checks backwards because the vectors are loaded
-  // backwards. The start of the string is the smallest
-  // bit
-  // If dealing with a 64 bit mask
+  /* Doing checks backwards because the vectors are loaded*/
+  /* backwards. The start of the string is the smallest*/
+  /* bit*/
+  /* If dealing with a 64 bit mask*/
   #if defined AVX512 ||  NEON || NEON64
-    // ADD IFNDEF 64 BIT OS
+    /* ADD IFNDEF 64 BIT OS*/
     if(maskUX >> 32 != 0)
-    { // If the position is in the higher bit
+    { /* If the position is in the higher bit*/
       maskUX = maskUX >> 32;
       posUC += 32;
-    } // If the position is in the higher bit
+    } /* If the position is in the higher bit*/
   #endif
 
-  // Not needed for 128 bit vectors
+  /* Not needed for 128 bit vectors*/
   #if defined AVX2 || AVX512 ||  NEON || NEON64
     if(maskUX >> 16 != 0)
-    { // If the position is in the higher bit
+    { /* If the position is in the higher bit*/
       maskUX = maskUX >> 16;
       posUC += 16;
-    } // If the position is in the higher bit
+    } /* If the position is in the higher bit*/
 
-  //#elif SSE
-    // Fills form lowest position up, so do not need
-    //maskUX = maskUX >> 16; // Lower 16 is just 0's
+  /*#elif SSE*/
+    /* Fills form lowest position up, so do not need*/
+    /*maskUX = maskUX >> 16; // Lower 16 is just 0's*/
   #endif
 
   if(maskUX >> 8 != 0)
-  { // If I have a higher bit value
+  { /* If I have a higher bit value*/
      maskUX = maskUX >> 8;
      posUC += 8;
-  } // If I have a higher bit value
+  } /* If I have a higher bit value*/
 
   if(maskUX >> 4 != 0)
-  { // If the value is in the higher bit
+  { /* If the value is in the higher bit*/
     maskUX = maskUX >> 4;
     posUC += 4;
-  } // If the value is in the higher bit
+  } /* If the value is in the higher bit*/
 
-  // Check To see which two bits it is
+  /* Check To see which two bits it is*/
   if(maskUX >> 2 != 0)
-  { // If is in the higher bit
+  { /* If is in the higher bit*/
     maskUX = maskUX >> 2;
     posUC += 2;
-  } // If is in the higher bit
+  } /* If is in the higher bit*/
 
   if(maskUX >> 1 != 0) ++posUC;
 
-  // Adust for off counts
+  /* Adust for off counts*/
   fixI8CmpMaskCnt(posUC, posUC);
 
   return posUC;
-} // findLastTrue
+} /* findLastTrue*/
 
-// Need to add in logic to handle OS were 64 bits varibles
-// are not present
+/* Need to add in logic to handle OS were 64 bits varibles*/
+/* are not present*/
 /*--------------------------------------------------------\
 | Output:
 |  - Returns:
@@ -588,7 +585,7 @@ unsigned char findLastTrueI8(
 |      a binary search for the first zero in the long.
 \--------------------------------------------------------*/
 unsigned char findFirstTrueI8(
-  mmaskI8 vectorMask     // vector mask to find zero in
+  mmaskI8 vectorMask     /* vector mask to find zero in*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-09 TOC: findFirstTrue
    '  - Finds the first true value (1) in a comparison mask
@@ -623,72 +620,72 @@ unsigned char findFirstTrueI8(
   ^  - Find the position of the first zero in the long
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-  // Latency of 3 for 256 and 128; 6 to 8 for 512 bit
+  /* Latency of 3 for 256 and 128; 6 to 8 for 512 bit*/
   storeI8CmpMask(maskUX, vectorMask);
 
-  // Doing checks backwards because the vectors are loaded
-  // backwards. The start of the string is the smallest
-  // bit
-  // If dealing with a 64 bit mask
+  /* Doing checks backwards because the vectors are loaded*/
+  /* backwards. The start of the string is the smallest*/
+  /* bit*/
+  /* If dealing with a 64 bit mask*/
   #if defined AVX512 ||  NEON || NEON64
-    // ADD IFNDEF 64 BIT OS
+    /* ADD IFNDEF 64 BIT OS*/
     if(maskUX & 0x00000000FFFFFFFF)
       maskUX &= 0x00000000FFFFFFFF;
 
     else
-    { // Else the first bit is in the uppler position
+    { /* Else the first bit is in the uppler position*/
       posUC += 32;
       maskUX = maskUX >> 32;
-    } // Else the first bit is in the uppler position
+    } /* Else the first bit is in the uppler position*/
 
   #endif
 
-  // Not needed for 128 bit vectors
+  /* Not needed for 128 bit vectors*/
   #if defined AVX2 || AVX512 ||  NEON || NEON64
     if(maskUX & 0x0000FFFF) maskUX &= 0x0000FFFF;
 
     else
-    { // Else the first bit is in the uppler position
+    { /* Else the first bit is in the uppler position*/
       posUC += 16;
       maskUX = maskUX >> 16;
-    } // Else the first bit is in the uppler position
+    } /* Else the first bit is in the uppler position*/
 
-  //#elif SSE
-    // Fills form lowest position up, so do not need
-    //maskUX = maskUX << 16; // Lower 16 is just 0's
+  /*#elif SSE*/
+    /* Fills form lowest position up, so do not need*/
+    /*maskUX = maskUX << 16; // Lower 16 is just 0's*/
   #endif
 
   if(maskUX & 0x00FF) maskUX &= 0x00FF;
 
   else
-  { // Else the first bit is in the uppler position
+  { /* Else the first bit is in the uppler position*/
     posUC += 8;
     maskUX = maskUX >> 8;
-  } // Else the first bit is in the uppler position
+  } /* Else the first bit is in the uppler position*/
 
   if(maskUX & 0x0F) maskUX &= 0x0F;
 
   else
-  { // Else the first bit is in the uppler position
+  { /* Else the first bit is in the uppler position*/
     posUC += 4;
     maskUX = maskUX >> 4;
-  } // Else the first bit is in the uppler position
+  } /* Else the first bit is in the uppler position*/
 
   if(maskUX & 3) maskUX &= 3;
 
   else
-  { // Else the first bit is in the uppler position
+  { /* Else the first bit is in the uppler position*/
     posUC += 2;
     maskUX = maskUX >> 2;
-  } // Else the first bit is in the uppler position
+  } /* Else the first bit is in the uppler position*/
 
   if(!(maskUX & 1)) ++posUC;
 
-  // Adust for off counts
+  /* Adust for off counts*/
   fixI8CmpMaskCnt(posUC, posUC);
 
   return posUC;
-} // findFristTrue
+} /* findFristTrue*/
 
 
 /*--------------------------------------------------------\
@@ -698,13 +695,13 @@ unsigned char findFirstTrueI8(
 |      mask
 \--------------------------------------------------------*/
 unsigned char findNumTruesI8(
-  mmaskI8 vectorMask     // vector mask to find zero in
+  mmaskI8 vectorMask     /* vector mask to find zero in*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-10 TOC: findNumTrues
    '  - Find the number of set bits (1's or true's) in a
    '    vector.
    '  - This coes is From
-   '    https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetNaive
+   '    https:\\graphics.stanford.edu/~seander/bithacks.html#CountBitsSetNaive
    '  - I would like to say I understand this code, however,
    '    I do not. I just know that it works
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -732,7 +729,7 @@ unsigned char findNumTruesI8(
 
     maskUX =
        (((maskUX + (maskUX >> 4)) & 0xF0F0F0F) * 0x1010101)
-      >> 24; // << ((sizeof(unsigned int) - 1) * 8)
+      >> 24; /* << ((sizeof(unsigned int) - 1) * 8)*/
   #endif
 
   #if defined AVX512 || NEON || NEON64
@@ -751,7 +748,7 @@ unsigned char findNumTruesI8(
 
   fixI8CmpMaskCnt(maskUX, maskUX);
   return maskUX;
-} // findNumTrues
+} /* findNumTrues*/
 
 /*--------------------------------------------------------\
 | Output;
@@ -763,8 +760,8 @@ unsigned char findNumTruesI8(
 |    the shift left function requires a constant.
 \--------------------------------------------------------*/
 vectI8 zeroAfterFirstTrueI8(
-  vectI8 vectToZero, // Vector to make zeros after 1st true
-  mmaskI8 maskVect  // Has the one to zero after
+  vectI8 vectToZero, /* Vector to make zeros after 1st true*/
+  mmaskI8 maskVect  /* Has the one to zero after*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-11 TOC: zeroAfterFirstTrue
    '  - Zeros all elements in the vector after the first
@@ -782,9 +779,9 @@ vectI8 zeroAfterFirstTrueI8(
   vectI8 retVect;
   char shiftUC =
     vectorBytes - (findFirstTrueI8(maskVect)) - 1;
-    // Find how many btyes till I read the first true
-    // this will be the number of bytes to keep
-    // -1 is to account for vectorBytes being index 1
+    /* Find how many btyes till I read the first true*/
+    /* this will be the number of bytes to keep*/
+    /* -1 is to account for vectorBytes being index 1*/
 
   #ifdef AVX512
     uint64_t maskAryUL[8];
@@ -809,7 +806,7 @@ vectI8 zeroAfterFirstTrueI8(
     if(shiftUC > 7)
       maskAryUL[7] = 0;
     else
-    { // Else I need to shift the enxt long
+    { /* Else I need to shift the enxt long*/
       maskAryUL[7] = ULONG_MAX >> (shiftUC * 8);
 
       maskAryUL[6] = ULONG_MAX;
@@ -821,14 +818,14 @@ vectI8 zeroAfterFirstTrueI8(
       maskAryUL[0] = ULONG_MAX;
 
       goto loadMask;
-    } // Else I need to shift the enxt long
+    } /* Else I need to shift the enxt long*/
 
     shiftUC -= 8;
 
     if(shiftUC > 7)
       maskAryUL[6] = 0;
     else
-    { // Else I need to shift the enxt long
+    { /* Else I need to shift the enxt long*/
       maskAryUL[6] = ULONG_MAX >> (shiftUC * 8);
 
       maskAryUL[5] = ULONG_MAX;
@@ -839,14 +836,14 @@ vectI8 zeroAfterFirstTrueI8(
       maskAryUL[0] = ULONG_MAX;
       
       goto loadMask;
-    } // Else I need to shift the enxt long
+    } /* Else I need to shift the enxt long*/
 
     shiftUC -= 8;
 
     if(shiftUC > 7)
       maskAryUL[5] = 0;
     else
-    { // Else I need to shift the enxt long
+    { /* Else I need to shift the enxt long*/
       maskAryUL[5] = ULONG_MAX >> (shiftUC * 8);
       maskAryUL[4] = ULONG_MAX;
       maskAryUL[3] = ULONG_MAX;
@@ -855,21 +852,21 @@ vectI8 zeroAfterFirstTrueI8(
       maskAryUL[0] = ULONG_MAX;
       
       goto loadMask;
-    } // Else I need to shift the enxt long
+    } /* Else I need to shift the enxt long*/
 
     shiftUC -= 8;
 
     if(shiftUC > 7)
       maskAryUL[4] = 0;
     else
-    { // Else I need to shift the enxt long
+    { /* Else I need to shift the enxt long*/
       maskAryUL[3] = ULONG_MAX >> (shiftUC * 8);
       maskAryUL[2] = ULONG_MAX;
       maskAryUL[1] = ULONG_MAX;
       maskAryUL[0] = ULONG_MAX;
 
       goto loadMask;
-    } // Else I need to shift the enxt long
+    } /* Else I need to shift the enxt long*/
 
     shiftUC -= 8;
   #endif
@@ -885,27 +882,27 @@ vectI8 zeroAfterFirstTrueI8(
     if(shiftUC > 7)
       maskAryUL[3] = 0;
     else
-    { // Else I need to shift the enxt long
+    { /* Else I need to shift the enxt long*/
       maskAryUL[3] = ULONG_MAX >> (shiftUC * 8);
       maskAryUL[2] = ULONG_MAX;
       maskAryUL[1] = ULONG_MAX;
       maskAryUL[0] = ULONG_MAX;
 
       goto loadMask;
-    } // Else I need to shift the enxt long
+    } /* Else I need to shift the enxt long*/
 
     shiftUC -= 8;
 
     if(shiftUC > 7)
       maskAryUL[2] = 0;
     else
-    { // Else I need to shift the enxt long
+    { /* Else I need to shift the enxt long*/
       maskAryUL[2] = ULONG_MAX >> (shiftUC * 8);
       maskAryUL[1] = ULONG_MAX;
       maskAryUL[0] = ULONG_MAX;
       
       goto loadMask;
-    } // Else I need to shift the enxt long
+    } /* Else I need to shift the enxt long*/
 
     shiftUC -= 8;
   #endif
@@ -922,12 +919,12 @@ vectI8 zeroAfterFirstTrueI8(
       maskAryUL[1] = 0;
 
     else
-    { // Else only need to shift elemetns in the first limb
+    { /* Else only need to shift elemetns in the first limb*/
       maskAryUL[1] = ULONG_MAX >> (shiftUC * 8);
       maskAryUL[0] = ULONG_MAX;
 
       goto loadMask;
-    } // Else only need to shift elemetns in the first limb
+    } /* Else only need to shift elemetns in the first limb*/
 
     shiftUC -= 8;
   #endif
@@ -946,11 +943,11 @@ vectI8 zeroAfterFirstTrueI8(
   loadMask:
 
   mmLoadUI8(retVect, maskAryUL);
-    // I will get some rare setfaults on AVX2 when I use
-    // mmload. Some odd alignment issues here
+    /* I will get some rare setfaults on AVX2 when I use*/
+    /* mmload. Some odd alignment issues here*/
   mmAndI8(retVect, vectToZero, retVect);
 
   return retVect;
-} // zeroAfterFristTrue
+} /* zeroAfterFristTrue*/
 
 #endif

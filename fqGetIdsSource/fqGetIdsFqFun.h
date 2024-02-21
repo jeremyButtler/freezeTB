@@ -18,7 +18,7 @@
 #ifndef FQGREPFQFUN_H
 #define FQGREPFQFUN_H
 
-#include "vectorWrap.h"  // Using vectors
+#include "vectorWrap.h"  /* Using vectors*/
 #include "fqGetIdsStructs.h" /*<stdlib.h>, <stdio.h>, <stdint.h>*/
      /*Has structure functions & hex look up tables*/
 
@@ -52,15 +52,12 @@ Usesing'   - Moves the the next fastq entry and prints to the
 |    o 4 If ran out of file
 \--------------------------------------------------------*/
 uint8_t parseFastqHeader(
-    char *buffCStr,          // Buffer with reads
-    unsigned long *posUL,    // Point working at in buffer
-    //unsigned long *startUL,
-       // Points to start of read entry. This is changed
-       // when new input is grabed from fastqFile
-    unsigned long *lenInUL,  //Number of char in buffer
-    unsigned int buffSizeUI, // Size of the buffer
-    struct bigNum *idBigNum, // Will hold big number
-    FILE *fqFile             // Fastq file to get data from
+    char *buffCStr,          /* Buffer with reads*/
+    unsigned long *posUL,    /* Point working at in buffer*/
+    unsigned long *lenInUL,  /*Number of char in buffer*/
+    unsigned int buffSizeUI, /* Size of the buffer*/
+    struct bigNum *idBigNum, /* Will hold big number*/
+    FILE *fqFile             /* Fastq file to get data from*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: parseFastqHeader
    '  - Reads in and converts read id in buffer to a
@@ -86,14 +83,14 @@ uint8_t parseFastqHeader(
 |   o 4 If ran out of file
 \--------------------------------------------------------*/
 uint8_t moveToNextFastqEntry(
-    char *buffCStr,       // buffer with input to scan
-    unsigned long *posUL, // Position at in buffer
-    unsigned int lenBuffI,// Size of buffer to work on
-    unsigned long *numReadCharUL,//Number chars in buffCStr
-    FILE *fqFILE,         // Fastq file to get input from
-    FILE *outFILE         // FILE to output reads to
-      // This function will skip printing output if
-      // outFILE == 0
+    char *buffCStr,       /* buffer with input to scan*/
+    unsigned long *posUL, /* Position at in buffer*/
+    unsigned int lenBuffI,/* Size of buffer to work on*/
+    unsigned long *numReadCharUL,/*Number chars in buffCStr*/
+    FILE *fqFILE,         /* Fastq file to get input from*/
+    FILE *outFILE         /* FILE to output reads to*/
+      /* This function will skip printing output if*/
+      /* outFILE == 0*/
 ); /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-02 TOC: or Fun-04 TOC: moveToNextFastqEntry
    '  - Moves the the next fastq entry and prints to the

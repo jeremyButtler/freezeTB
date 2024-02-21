@@ -464,6 +464,7 @@ unsigned long findMajicNumber()
 
    unsigned long majicNumUL = 0;
    unsigned char numDigUC =((sizeof(unsigned long) << 3)/powTwoPerTen);
+   unsigned char uCGoldDig;
 
       /*
         The idea here is 2^(x * 3.333...) ~ 10^x, which gives me the
@@ -475,7 +476,7 @@ unsigned long findMajicNumber()
       */
 
    /*Grab the first 64 bits of numbers in golden number into a long*/
-   for(unsigned char uCGoldDig = 0; uCGoldDig < numDigUC; ++uCGoldDig)
+   for(uCGoldDig = 0; uCGoldDig < numDigUC; ++uCGoldDig)
        majicNumUL = 10*majicNumUL + (GOLDEN_RATIO[uCGoldDig] & ~48);
 
    return majicNumUL;

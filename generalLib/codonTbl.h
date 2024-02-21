@@ -14,7 +14,10 @@
 '  o tbl-01 baseToCodeLkTbl:
 '    - Table to convert bases to codes used in the codon
 '      table.
-'  o tbl-02 codonLkTbl:
+'  o tbl-02 compBaseToCodeLkTbl:
+'    - Table to convert bases to its complement base and
+'      then the code used in the codon table.
+'  o tbl-03 codonLkTbl:
 '    - Table to convert three bases to codons
 '  o fun-01: aaThreeLetterToChar
 '    - Converts a three letter amino acid idenity to its
@@ -29,7 +32,6 @@
 |  - Table to convert bases to codes used in the codon
 |    table.
 \--------------------------------------------------------*/
-
 static char baseToCodeLkTbl[] =
    {  /*baseToCodeLkTbl*/
       /*White space/invisible charactes block*/
@@ -92,8 +94,76 @@ static char baseToCodeLkTbl[] =
       8, 8, 8, 8, 8, 8,
    }; /*baseToCodeLkTbl*/
 
+
 /*--------------------------------------------------------\
-| Tbl-02 codonLkTbl:
+| Tbl-02 compBaseToCodeLkTbl:
+|  - Table to convert bases to its complement base and
+|    then the code used in the codon table.
+\--------------------------------------------------------*/
+static char compBaseToCodeLkTbl[] =
+   {  /*baseToCodeLkTbl*/
+      /*White space/invisible charactes block*/
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+
+      /*symbol/number block*/
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+
+      2, /*A (65)*/
+      4, /*B, (C/G/T) treat as N*/
+      1, /*C*/
+      4, /*D (AGT), treat as N*/
+      8, 8,
+      1, /*G*/
+      4, /*H (ACT) treat as N*/
+      8, 8,
+      4, /*K (GT), treat as N*/
+      8,
+      4, /*M (AC), treat as N*/
+      4, /*N (AGCT)*/
+      8, 8, 8,
+      4, /*R (AG), treat as N*/
+      4, /*S (CG), treat as N*/
+      2, /*T*/
+      2, /*U*/
+      4, /*V (ACG), treat as N*/
+      8,
+      4, /*X, I treat as an N, but is for amino acids*/
+      8, 8,
+
+      /*Special characters after upercase letters*/
+      8, 8, 8, 8, 8, 8,
+
+      /*lower case letters*/
+      2, /*a (65)*/
+      4, /*b, (c/g/t) treat as n*/
+      1, /*c*/
+      4, /*d (agt), treat as n*/
+      8, 8,
+      1, /*g*/
+      4, /*h (act) treat as n*/
+      8, 8,
+      4, /*k (gt), treat as n*/
+      8,
+      4, /*m (ac), treat as n*/
+      4, /*n (agct)*/
+      8, 8, 8,
+      4, /*r (ag), treat as n*/
+      4, /*s (cg), treat as n*/
+      2, /*t*/
+      2, /*u*/
+      4, /*v (acg), treat as n*/
+      8,
+      4, /*x, i treat as an n, but is for amino acids*/
+      8, 8,
+
+      /*Special characters after lowercase letters*/
+      8, 8, 8, 8, 8, 8,
+   }; /*baseToCodeLkTbl*/
+
+/*--------------------------------------------------------\
+| Tbl-03 codonLkTbl:
 |  - Table to convert three bases to codons
 \--------------------------------------------------------*/
 static char codonLkTbl[5][5][5] =
@@ -155,29 +225,33 @@ static char codonLkTbl[5][5][5] =
 #define aaThreeLetterToChar(codonStr)({\
    char retC = 0;\
    \
-   switch(codonStr[0] & ~32)\
+   switch((codonStr)[0] & ~32)\
    { /*Switch: Check the first letter*/\
       case 'A':\
       /*Case: The first letter is an A*/\
-         switch(codonStr[2] & ~32)\
+         switch((codonStr)[2] & ~32)\
          { /*Switch: Check the A's third letter*/\
             case 'A': retC = 'a'; break; /*Ala*/\
             case 'G': retC = 'r'; break; /*Arg*/\
             case 'N': retC = 'n'; break; /*Asn*/\
             case 'P': retC = 'd'; break; /*Asp*/\
          } /*Switch: Check the A's third letter*/\
+         \
+         break;\
       /*Case: The first letter is an A*/\
       \
       case 'C': retC = 'c'; break; /*Cys*/\
       \
       case 'G':\
       /*Case: The first letter is a G*/\
-         switch(codonStr[2] & ~32)\
+         switch((codonStr)[2] & ~32)\
          { /*Switch: Check the third letter of G*/\
             case 'N': retC = 'q'; break; /*Gln*/\
             case 'U': retC = 'e'; break; /*Glu*/\
             case 'Y': retC = 'g'; break; /*Gly*/\
          } /*Switch: Check the third letter of G*/\
+         \
+         break;\
       /*Case: The first letter is a G*/\
       \
       case 'H': retC = 'h'; break; /*His*/\
@@ -185,34 +259,40 @@ static char codonLkTbl[5][5][5] =
       \
       case 'L':\
       /*Case: The first letter is a L*/\
-         switch(codonStr[2] & ~32)\
+         switch((codonStr)[2] & ~32)\
          { /*Switch: Check the third letter of L*/\
             case 'S': retC = 'k'; break; /*Lys*/\
             case 'U': retC = 'l'; break; /*Leu*/\
          } /*Switch: Check the third letter of L*/\
+         \
+         break;\
       /*Case: The first letter is a L*/\
       \
       case 'M': retC = 'm'; break; /*Met*/\
       \
       case 'P':\
       /*Case: The first letter is a P*/\
-         switch(codonStr[2] & ~32)\
+         switch((codonStr)[2] & ~32)\
          { /*Switch: Check the third letter of P*/\
             case 'E': retC = 'f'; break; /*Phe*/\
             case 'O': retC = 'p'; break; /*Pro*/\
          } /*Switch: Check the third letter of P*/\
+         \
+         break;\
       /*Case: The first letter is a P*/\
       \
       case 'S': retC = 's'; break; /*Ser*/\
       \
       case 'T':\
       /*Case: The first letter is a T*/\
-         switch(codonStr[2] & ~32)\
+         switch((codonStr)[2] & ~32)\
          { /*Switch: Check the third letter of T*/\
             case 'R': retC = 't'; break; /*Thr*/\
             case 'P': retC = 'w'; break; /*Trp*/\
             case 'Y': retC = 'y'; break; /*Try*/\
          } /*Switch: Check the third letter of T*/\
+         \
+         break;\
       /*Case: The first letter is a T*/\
       \
       case 'V': retC = 'v'; break; /*Val*/\

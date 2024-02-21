@@ -1,0 +1,3 @@
+b ../generalLib/numToStr.h:23
+
+r -sam rm.sam

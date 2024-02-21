@@ -46,19 +46,19 @@ char hexTblCharAry[] =
 
      /*Special characters : ; < = > ? @ (58 to 64)*/
      0, 32, 32, 32, 32, 32, 32,
-     //32, 32, 32, 32, 32, 32, 32,
-     // Treating : as 0 so that it is kept in the 
-     // 4 bit setup
+     /*32, 32, 32, 32, 32, 32, 32,*/
+     /* Treating : as 0 so that it is kept in the */
+     /* 4 bit setup*/
 
      /*Hext A-F (65-70)*/
      10, 11, 12, 13, 14, 15,
 
      /*5 bit G-U (71 to 85)*/
-     //32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,
+     /*32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,*/
      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
 
      /*W,X,Y,Z (86 to 90) [this would need to be 6 bit*/
-     //32,32,32,32,32,
+     /*32,32,32,32,32,*/
      0,0,0,0,0,
 
      /*specialcharacters [ \ ] ^ _ ` (91 to 96)*/
@@ -68,11 +68,11 @@ char hexTblCharAry[] =
      10, 11, 12, 13, 14, 15,
 
      /*5 bit g-u (103 to 117)*/
-     //32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,
+     /*32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,*/
      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
 
      /*w,x,y,z 98-122 (this would need to be 6 bit)*/
-     //32,32,32,32,32,
+     /*32,32,32,32,32,*/
      0,0,0,0,0,
 
      /*special characters { | } ~ (123 to 126)*/
@@ -385,6 +385,8 @@ long cmpBigNums(
     ^ Fun-8 Sec-1 Sub-1 TOC: cmpBigNums
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+    short sElm;
+
     if(bigNumQ->totalL != bigNumS->totalL)
       return bigNumQ->totalL - bigNumS->totalL;
 
@@ -392,7 +394,7 @@ long cmpBigNums(
     if(bigNumQ->lenUsedElmChar != bigNumS->lenUsedElmChar)
         return bigNumQ->lenUsedElmChar - bigNumS->lenUsedElmChar;
 
-    for(short sElm = bigNumQ->lenUsedElmChar - 1; sElm > -1; --sElm)
+    for(sElm = bigNumQ->lenUsedElmChar - 1; sElm > -1; --sElm)
     { /*For all unsinged longs in the big number*/
         if(*(bigNumQ->bigNumAryIOrL +sElm)
            != *(bigNumS->bigNumAryIOrL +sElm)

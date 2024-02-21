@@ -1,4 +1,4 @@
-/*######################################################################
+/*########################################################
 # Name: trimSamFile.c
 # Use:
 #    - Trims & prints alignments with sequences in a sam file.
@@ -15,16 +15,18 @@
 # Output:
 #    stdout: sam file
 # Includes:
-#    - "trimSam.h"
-#    o "samEntryStruct.h"
-#    o "cStrToNumberFun.h"
-#    o "printError.h"
-# C standard libraries:
-#   o <stdlib.h>
-#   o <string.h>
-#   o <stdint.h>
-#   k <stdio.h>
-######################################################################*/
+#   - "../generalLib/trimSam.h"
+#   o "../generalLib/samEntryStruct.h"     (No .c file)
+#   o "../generalLib/base10StrToNum.h"     (No .c file)
+#   o "../generalLib/dataTypeShortHand.h"  (No .c file)
+#   o "../generalLib/ulCpStr.h"            (No .c file)
+#   o "../generalLib/numToStr.h"           (No .c file)
+# C Standard Libraries:
+#  o <string.h>
+#  o <stdlib.h>
+#  o <stdio.h>
+#  o <limits.h>
+########################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' SOP:
@@ -34,7 +36,7 @@
 
 #include <string.h> /*strcmp function*/
 #include "../generalLib/trimSam.h"
-#define defTrimSamVersion 20240104
+#define defTrimSamVersion 20240215
 
 /*---------------------------------------------------------------------\
 | Output: Modifies: Each input variable to hold user input
@@ -99,14 +101,14 @@ int main(int lenArgsInt, char *argsPtrCStr[])
             \n Output:\
             \n    - stdout: Prints trimmed alignments & headers\
             \n Input:\
-            \n    -stdin:                                    [No]\
+            \n    -stdin: [No]\
             \n        - Take input from command line\
-            \n    -file:                                     [Required]\
+            \n    -file or -sam: [Required]\
             \n        - Take input from file\
             \n        - Can be replaced with -stdin\
-            \n    -out:                                      [stdout]\
+            \n    -out: [stdout]\
             \n        - File to print trimmed aligments to\
-            \n    -keep-unmapped-reads                       [No]\
+            \n    -keep-unmapped-reads: [No]\
             \n        - Keep unmapped reads\
             \n        - These reads will/can not be trimmed\
             \n";
@@ -181,7 +183,10 @@ int main(int lenArgsInt, char *argsPtrCStr[])
     ^ Main Sec-3: Open sam file for reading
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    if(stdinChar != 1)
+    if(!samPathCStr || samPathCStr[0] == '-')
+       samFILE = stdin;
+
+    else if(stdinChar != 1)
     { /*If using a file for input*/
         samFILE = fopen(samPathCStr, "r");
     
@@ -197,8 +202,7 @@ int main(int lenArgsInt, char *argsPtrCStr[])
         } /*If was unable to open the sam file*/
     } /*If using a file for input*/
 
-    else
-        samFILE = stdin;
+    else samFILE = stdin;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Main Sec-4: Open output file
@@ -256,48 +260,57 @@ char checkInput(
 ) /*Checks & extracts user input*/
 { /*checkInput*/
 
-    /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+    /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
     ' Fun-1 TOC: checkInput
-    '    fun-1 sec-1: Variable declerations
-    '    fun-1 sec-2: Look through user input
-    '    fun-1 sec-3: Check if user provided sam file if -file used
-    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+    '  o fun-1 sec-1:
+    '    - Variable declerations
+    '  o fun-1 sec-2:
+    '    - Look through user input
+    '  o fun-1 sec-3:
+    '    - Check if user provided sam file if -file used
+    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-1 Sec-1: Variable declerations
-    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    char *tmpCStr = 0, *singleArgCStr = 0;
+    char *tmpCStr = 0;
+    char *singleArgCStr = 0;
+    int intArg = 0;
 
-    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # Fun-1 Sec-2: Look through user input
-    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+    ^ Fun-1 Sec-2: Look through user input
+    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    if(*lenArgsInt < 2)
-        return 0; /*no arguments input*/
+    /*0 is program name; so I need to start at 1*/
+    for(intArg = 1; intArg < *lenArgsInt; intArg++)
+    { /*loop through all user input arguments*/
+        singleArgCStr = *(argsCStr +intArg + 1);
+        tmpCStr = *(argsCStr + intArg);
 
-    for(int intArg = 1; intArg < *lenArgsInt; intArg++)
-    { /*loop through all user input arguments*/    /*0 is program name*/
-        singleArgCStr = *(argsCStr +intArg + 1);   /*supplied argument*/
-        tmpCStr = *(argsCStr + intArg);            /*Paramter*/
-
-        if(strcmp(tmpCStr, "-file") == 0)
+        if(!strcmp(tmpCStr, "-file"))
+        { /*If: This is the input file*/
             *samPathCStr = singleArgCStr;
+            intArg++;
+        } /*If: This is the input file*/
 
-        else if(strcmp(tmpCStr, "-stdin") == 0)
-        { /*If if taking input from stdin*/
+        else if(!strcmp(tmpCStr, "-sam"))
+        { /*If: This is the input file*/
+            *samPathCStr = singleArgCStr;
+            intArg++;
+        } /*If: This is the input file*/
+
+        else if(!strcmp(tmpCStr, "-stdin"))
             *stdinChar = 1;
-            intArg--; /*Account for incurment at end of loop*/
-        } /*If taking input from stdin*/
 
-        else if(strcmp(tmpCStr, "-out") == 0)
+        else if(!strcmp(tmpCStr, "-out"))
+        { /*Else if: This is the output file*/
             *outPathCStr = singleArgCStr;
+            intArg++;
+        } /*Else if: This is the output file*/
 
-        else if(strcmp(tmpCStr, "-keep-unmapped-reads") == 0)
-        { /*If printing all unmapped reads*/
+        else if(!strcmp(tmpCStr, "-keep-unmapped-reads"))
             *keepUnmapBl = 1;
-            intArg--; /*Account for incurment at end of loop*/
-        } /*If printing all unmapped reads*/
 
         else
         { /*Else is invalid input*/
@@ -305,34 +318,7 @@ char checkInput(
             return 2;
         } /*Else is invalid input*/
 
-        intArg++; /*Move to the parameter, so next input is a flag*/
     } /*loop through all user input arguments*/
-
-    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-1 Sec-3: Check if user provided sam file if -file used
-    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-    tmpCStr = *samPathCStr;
-
-    if(*stdinChar != 1)
-    { /*If taking input from a file*/
-        while(*tmpCStr != '\0') /*find end of c-string*/
-            tmpCStr++;
-
-        if(
-            *(tmpCStr - 3)!='s' ||
-            *(tmpCStr - 2)!='a' ||
-            *(tmpCStr - 1)!='m')
-        { /*If file is not a sam file*/
-            fprintf(
-                stderr,
-                "%s is not a sam file\n",
-                *samPathCStr
-            ); /*Tell user input was not a sam file*/
-
-            return 4; /*If file does not end in sam*/
-        } /*If file is not a sam file*/
-    } /*If taking input from a file*/
 
     return 1; /*input is valid*/
 } /*checkInput*/

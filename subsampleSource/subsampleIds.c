@@ -5,18 +5,21 @@
 # Libraries:
 #   - "readIdSubsample.h"
 #   o "minAlnStatsStruct.h"
-#   o "../samEntryStruct.h"
-#   o "../base10StrToNum.h"
-#   o "../dataTypeShortHand.h"
-#   o "../trimSam.h"
+#   o "../generalLib/trimSam.h"
+#   o "../generalLib/samEntryStruct.h"
+#   o "../generalLib/base10StrToNum.h"
+#   o "../generalLib/dataTypeShortHand.h"
+#   o "../generalLib/ulCpStr"
+#   o "../generalLib/numToStr.h"
 # C Standard Libraries:
-#   o <stdint.h>
+#   - <string.h>
 #   o <stdlib.h>
-#   o <string.h>
 #   o <stdio.h>
+#   o <limits.h>
 ########################################################*/
 
 #include "readIdSubsample.h"
+#include <string.h>
 #define defVersion 20240108
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -98,19 +101,19 @@ int main(int lenArgsInt, char *argsCStr[])
         \n   -max-length: [3000]\
         \n     o Remove reads over this length\
         \n     o 0 means keep all reads\
-        \n   -max-snps: [0.07=7%]\
+        \n   -min-snps: [0.07=7%]\
         \n     o Maximum percent difference in SNPs\
         \n       between read and reference to keep read.\
-        \n   -max-diff: [1=100%]\
+        \n   -min-diff: [1=100%]\
         \n     o Maximum percent difference between read\
         \n       reference to keep read.\
-        \n   -max-inss: [1=100%]\
+        \n   -min-inss: [1=100%]\
         \n     o Maximum percent difference in insertions\
         \n       between read and reference to keep read.\
-        \n   -max-dels: [1=100%]\
+        \n   -min-dels: [1=100%]\
         \n     o Maximum percent difference in deletions\
         \n       between read and reference to keep read.\
-        \n   -max-indels: [0.85=85%]\
+        \n   -min-indels: [1=100%]\
         \n     o Maximum percent difference in indels\
         \n       between read and reference to keep read.\
         \n   -v:\
@@ -242,7 +245,7 @@ int main(int lenArgsInt, char *argsCStr[])
           samFILE
        ); /*Subsample reads*/
 
-    freeStackSamEntry(&samST);
+    freeSamEntryStack(&samST);
     fclose(samFILE);
     samFILE = 0;
 
@@ -280,14 +283,15 @@ char * checkInput(
 
     char *parmStr = 0;
     char *singleArgStr = 0;
+    int iArg = 0;
 
     if(*lenArgsInt < 2)
         return parmStr; /*no arguments input*/
 
-    for(int intArg = 1; intArg < *lenArgsInt; intArg++)
+    for(iArg = 1; iArg < *lenArgsInt; iArg++)
     { /*loop through all user input arguments*/  /*0 is program name*/
-        singleArgStr = *(argsStr +intArg + 1); /*supplied argument*/
-        parmStr = *(argsStr + intArg);          /*Paramter*/
+        singleArgStr = *(argsStr +iArg + 1); /*supplied argument*/
+        parmStr = *(argsStr + iArg);          /*Paramter*/
 
         if(strcmp(parmStr, "-sam") == 0)
             *samFileStr = singleArgStr;
@@ -333,7 +337,7 @@ char * checkInput(
        else
            return parmStr;
 
-        intArg++; /*Move to the parameter, so next input is a flag*/
+        iArg++; /*Move to the parameter, so next input is a flag*/
     } /*loop through all user input arguments*/
 
     return 0; /*input is valid*/

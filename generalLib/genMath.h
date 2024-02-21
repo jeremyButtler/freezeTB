@@ -36,7 +36,7 @@
 \-------------------------------------------------------*/
 
 #ifndef GENERAL_MATH_FUNCTIONS_H
-#define GENERAL_MATH_FUNCITONS_H
+#define GENERAL_MATH_FUNCTIONS_H
 
 /*-------------------------------------------------------\
 | Fun-01: noBranchHiBit2

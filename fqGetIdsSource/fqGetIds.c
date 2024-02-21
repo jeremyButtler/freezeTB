@@ -141,7 +141,7 @@ int main(int lenArgsInt, char *argsCStr[])
     ); /*Get the user input*/
 
     if(inputChar)
-    { // If had an error (inputChar has a value )
+    { /* If had an error (inputChar has a value )*/
       if(
          strcmp(inputChar, "-h") == 0 ||
          strcmp(inputChar, "--h") == 0 ||
@@ -150,7 +150,7 @@ int main(int lenArgsInt, char *argsCStr[])
          strcmp(inputChar, "help") == 0
       ) { /*If user wanted the help message*/
           fprintf(
-              stdout, // So user can pipe message to less
+              stdout, /* So user can pipe message to less*/
               "%s\n",
               helpMesgCStr
           ); /*Print out help message*/
@@ -170,8 +170,8 @@ int main(int lenArgsInt, char *argsCStr[])
 
       if(inputChar != 0)
       { /*If user had invalid input*/
-          // Printing error to stderr, so that the user
-          // knows something went wrong
+          /* Printing error to stderr, so that the user*/
+          /* knows something went wrong*/
           fprintf(
             stderr,
             "%s\n%s is invalid\n",
@@ -181,7 +181,7 @@ int main(int lenArgsInt, char *argsCStr[])
 
           exit(-1);
       } /*If user had invalid input*/
-    } // If had an error (inputChar has a value )
+    } /* If had an error (inputChar has a value )*/
 
     if(stdinFastqChar == 1 && stdinFiltChar == 1)
     { /*If user takeing all input from stdin*/
@@ -343,11 +343,12 @@ char * checkInput(int *lenArgsInt,        /*Number of arugments user input*/
 ) /*Checks user input & puts input into variables for later use*/
 { /*checkInput*/
     char *tmpCStr = 0, *singleArgCStr = 0;
+    int intArg;
 
     if(*lenArgsInt < 2)
         return tmpCStr; /*no arguments input*/
 
-    for(int intArg = 1; intArg < *lenArgsInt; intArg++)
+    for(intArg = 1; intArg < *lenArgsInt; intArg++)
     { /*loop through all user input arguments*/           /*0 is program name*/
         singleArgCStr = *(argsCStr +intArg + 1);          /*supplied argument*/
         tmpCStr = *(argsCStr + intArg);                   /*Paramter*/
@@ -417,7 +418,7 @@ char * checkInput(int *lenArgsInt,        /*Number of arugments user input*/
         *(tmpCStr - 1) == 'q' &&
         *(tmpCStr - 2) == 'f' &&
         *(tmpCStr - 3) == '.'
-    ) return 0; // Is an abreivated fastq file extentoins
+    ) return 0; /* Is an abreivated fastq file extentoins*/
 
         fprintf(
             stderr,

@@ -4,7 +4,7 @@ PREFIX=/usr/local/bin
 CFLAGS += -static -O3 -Wno-unused-function
 
 # For MACS (do not lie -Wno-unused-function
-MACFLAGS += -static -O3
+MAC_CFLAGS += -O3
 
 # Debuggin
 BUGFLAGS += -ggdb -Wall -O0 -static -o debugAmpDepth
@@ -18,11 +18,11 @@ mac:
 	sed '1s/#!usr\/bin\/Rscript/#!usr\/local\/bin\/Rscript/;' < graphAmpDepth.r > tmp.r;
 	mv graphAmpDepth.r linuxGraphAmpDepth.r;
 	mv tmp.r graphAmpDepth.r;
-	$(CC) $(MACFLAGS) -o ampDepth ampDepth.c
+	$(CC) $(MAC_CFLAGS) -o ampDepth ampDepth.c
 
 debug:
 	$(CC) $(BUGFLAGS) -o debugAmpDepth ampDepth.c
-	#gdb -ex "b ampDepth.c:68" -ex "r -paf ../old.paf -sam ../test.sam" debugAmpDepth
+	gdb -x bug-cmds.txt debugAmpDepth
 
 install:
 	cp ampDepth $(PREFIX);

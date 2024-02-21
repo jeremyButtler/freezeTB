@@ -3,8 +3,10 @@ CC=cc
 NAME=fqGetIds
 CFLAGS=\
   -static \
-  --std=c99 \
+  --std=c89 \
   -O3
+
+MAC_CFLAGS=-O3
 
 FILES=\
   vectorWrap.c \
@@ -20,7 +22,7 @@ all:
 	$(CC) $(CFLAGS) $(FILES) -o $(NAME)
 
 mac:
-	$(CC) $(CFLAGS) $(FILES) -o $(NAME)
+	$(CC) $(MAC_CFLAGS) $(FILES) -o $(NAME)
 
 sse:
 	$(CC) $(CFLAGS) -DSSE $(FILES) -o $(NAME);

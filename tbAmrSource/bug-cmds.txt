@@ -1,0 +1,4 @@
+b tbAMR.c:161
+b checkAmr.h:209
+
+r -who-amr-tbl WHO-TB-catalog-genomeIndicies.csv -sam 2024-02-02-BC33.sam

@@ -45,15 +45,12 @@
 |    o 4 If ran out of file
 \--------------------------------------------------------*/
 uint8_t parseFastqHeader(
-    char *buffCStr,          // Buffer with reads
-    unsigned long *posUL,    // Point working at in buffer
-    //unsigned long *startUL,
-       // Points to start of read entry. This is changed
-       // when new input is grabed from fastqFile
-    unsigned long *lenInUL,  //Number of char in buffer
-    unsigned int buffSizeUI, // Size of the buffer
-    struct bigNum *idBigNum, // Will hold big number
-    FILE *fqFILE             // Fastq file to get data from
+    char *buffCStr,          /* Buffer with reads*/
+    unsigned long *posUL,    /* Point working at in buffer*/
+    unsigned long *lenInUL,  /*Number of char in buffer*/
+    unsigned int buffSizeUI, /* Size of the buffer*/
+    struct bigNum *idBigNum, /* Will hold big number*/
+    FILE *fqFILE             /* Fastq file to get data from*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: parseFastqHeader
    '  - Reads in and converts read id in buffer to a
@@ -85,7 +82,7 @@ uint8_t parseFastqHeader(
     idBigNum->totalL = 0;
 
     if(*posUL >= *lenInUL - 129) 
-    { // If I need to get new input
+    { /* If I need to get new input*/
         /*move though fastq function will catch EOF*/
 	if(*lenInUL < buffSizeUI) return 4;
 
@@ -95,7 +92,7 @@ uint8_t parseFastqHeader(
 
         *(buffCStr + *lenInUL) = '\0';
         *posUL = 0;
-    } // If I need to get new input
+    } /* If I need to get new input*/
     
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-01 Sec-03:
@@ -116,12 +113,12 @@ uint8_t parseFastqHeader(
         charBit = 0;
 
         while(charBit < defMaxDigPerLimb)
-        { // while have room in the current long
+        { /* while have room in the current long*/
             if(
               hexTblCharAry[
                 (unsigned char) *(buffCStr + *posUL)
               ] & 64
-            ) break; // finshed converting the hex string
+            ) break; /* finshed converting the hex string*/
 
             if(
               !(hexTblCharAry[
@@ -133,13 +130,13 @@ uint8_t parseFastqHeader(
                 *elmILPtr +=
                   hexTblCharAry[
                     (unsigned char) *(buffCStr + *posUL)
-                ]; // Convert the character to a number
+                ]; /* Convert the character to a number*/
 
                 ++charBit;
             } /*If is a hex character*/
 
             ++(*posUL);
-        } // while have room in the current long
+        } /* while have room in the current long*/
 
         /*Only used in speed setting*/
         #if defOSBit == 64
@@ -158,7 +155,7 @@ uint8_t parseFastqHeader(
       !(hexTblCharAry[
          (unsigned char) *(buffCStr + *posUL)
       ] & 64)
-    ); // While still on the read name part of header
+    ); /* While still on the read name part of header*/
 
      return 0; /*Copied name sucessfully*/
 } /*parseFastqHeader*/
@@ -178,14 +175,14 @@ uint8_t parseFastqHeader(
 |   o 4 If ran out of file
 \--------------------------------------------------------*/
 uint8_t moveToNextFastqEntry(
-    char *buffCStr,       // buffer with input to scan
-    unsigned long *posUL, // Position at in buffer
-    unsigned int lenBuffI,// Size of buffer to work on
-    unsigned long *numReadCharUL,//Number chars in buffCStr
-    FILE *fqFILE,         // Fastq file to get input from
-    FILE *outFILE         // FILE to output reads to
-      // This function will skip printing output if
-      // outFILE == 0
+    char *buffCStr,       /* buffer with input to scan*/
+    unsigned long *posUL, /* Position at in buffer*/
+    unsigned int lenBuffI,/* Size of buffer to work on*/
+    unsigned long *numReadCharUL,/*Number chars in buffCStr*/
+    FILE *fqFILE,         /* Fastq file to get input from*/
+    FILE *outFILE         /* FILE to output reads to*/
+      /* This function will skip printing output if*/
+      /* outFILE == 0*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-02 TOC: moveToNextFastqEntry
    '  - Moves the the next fastq entry and prints to the
@@ -212,8 +209,8 @@ uint8_t moveToNextFastqEntry(
     long numSeqLinesL = 0;
 
     vectI8 lineVect;
-    vectI8 newLineVect; // For new line comparisons
-    vectI8 plusVect;    // marker between seq and q-score
+    vectI8 newLineVect; /* For new line comparisons*/
+    vectI8 plusVect;    /* marker between seq and q-score*/
 
     mmaskI8 resMaskI8;
     mmaskI8 tmpMaskI8;
@@ -233,11 +230,11 @@ uint8_t moveToNextFastqEntry(
     \*****************************************************/
 
     if(*numReadCharUL - *posUL < vectorBytes)
-    { // IF I need to have an offset
-      // Check if have more file to read in
+    { /* IF I need to have an offset*/
+      /* Check if have more file to read in*/
       if(*numReadCharUL < lenBuffI) return 1;
 
-      // Get back to char after '\n'
+      /* Get back to char after '\n'*/
       fseek(
         fqFILE,
         -1 * (*numReadCharUL - *posUL),
@@ -249,7 +246,7 @@ uint8_t moveToNextFastqEntry(
 
       *numReadCharUL =
         fread(buffCStr, sizeof(char), lenBuffI, fqFILE);
-    } // IF I need to have an offset
+    } /* IF I need to have an offset*/
 
     mmLoadUI8(lineVect, (buffCStr + *posUL));
     mmSet1I8(newLineVect, '\n');
@@ -268,21 +265,21 @@ uint8_t moveToNextFastqEntry(
         if(*posUL + (vectorBytes << 1) >= *numReadCharUL)
         { /*If ran out of buffer */
             if(*numReadCharUL < lenBuffI)
-                return 4;      // incomplete fastq entry
+                return 4;      /* incomplete fastq entry*/
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               *(buffCStr + *posUL + vectorBytes) = '\0';
               fprintf(outFILE,"%s",buffCStr+startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *numReadCharUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *numReadCharUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
             
             if(*posUL + vectorBytes < *numReadCharUL)
               /*Move to charaters that were not loaded*/
@@ -296,7 +293,7 @@ uint8_t moveToNextFastqEntry(
             *numReadCharUL =
               fread(buffCStr,sizeof(char),lenBuffI,fqFILE);
 
-            // Keep as a c-string
+            /* Keep as a c-string*/
             *(buffCStr + *numReadCharUL) = '\0';
             *posUL = 0;
 
@@ -320,25 +317,25 @@ uint8_t moveToNextFastqEntry(
     ++(*posUL);
 
     if(*numReadCharUL - *posUL < vectorBytes)
-    { // IF I need to have an offset
-      // Check if have more file to read in
+    { /* IF I need to have an offset*/
+      /* Check if have more file to read in*/
       if(*numReadCharUL < lenBuffI) return 4;
 
       if(outFILE != 0)
-      { // IF I am printing out the entry
+      { /* IF I am printing out the entry*/
         *(buffCStr + *posUL - 1) = '\0';
         fprintf(outFILE, "%s\n", buffCStr + startPosUL);
-        //fwrite(
-        //  buffCStr + startPosUL,
-        //  sizeof(char),
-        //  *numReadCharUL - startPosUL,
-        //  outFILE
-        //);
+        /*fwrite(*/
+        /*  buffCStr + startPosUL,*/
+        /*  sizeof(char),*/
+        /*  *numReadCharUL - startPosUL,*/
+        /*  outFILE*/
+        /*);*/
 
         startPosUL = 0;
-      } // IF I am printing out the entry
+      } /* IF I am printing out the entry*/
 
-      // Get back to char after '\n'
+      /* Get back to char after '\n'*/
       fseek(
         fqFILE,
         -1 * (*numReadCharUL - *posUL),
@@ -349,7 +346,7 @@ uint8_t moveToNextFastqEntry(
 
       *numReadCharUL =
         fread(buffCStr, sizeof(char), lenBuffI, fqFILE);
-    } // IF I need to have an offset
+    } /* IF I need to have an offset*/
 
     mmLoadUI8(lineVect, (buffCStr + *posUL));
 
@@ -372,31 +369,31 @@ uint8_t moveToNextFastqEntry(
     mmCmpEqI8(resMaskI8, lineVect, plusVect);
 
     while(checkVectMaskTrueI8(resMaskI8) == 0)
-    { // While I am on the sequence entry
+    { /* While I am on the sequence entry*/
         if(*posUL + (vectorBytes << 1) >= *numReadCharUL)
-        { // If I need to read in more input
+        { /* If I need to read in more input*/
             if(*numReadCharUL < lenBuffI)
-                return 4; // Fastq missing q-score entry
+                return 4; /* Fastq missing q-score entry*/
 
-            // Check if going to miss any new lines
+            /* Check if going to miss any new lines*/
             mmCmpEqI8(resMaskI8, lineVect, newLineVect);
 
             if(checkVectMaskTrueI8(resMaskI8))
               numSeqLinesL += findNumTruesI8(resMaskI8);
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               *(buffCStr + *posUL + vectorBytes) = '\0';
               fprintf(outFILE,"%s",buffCStr+startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *numReadCharUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *numReadCharUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             if(*posUL + vectorBytes < *numReadCharUL)
               /*Move to charaters that were not loaded*/
@@ -414,12 +411,12 @@ uint8_t moveToNextFastqEntry(
             *posUL = 0;
 
             goto seqEntryLoad;
-        } // If I need to read in more input
+        } /* If I need to read in more input*/
 
         mmCmpEqI8(resMaskI8, lineVect, newLineVect);
 
-        // Count the number of new lines in the sequence
-        // entry
+        /* Count the number of new lines in the sequence*/
+        /* entry*/
         if(checkVectMaskTrueI8(resMaskI8))
            numSeqLinesL += findNumTruesI8(resMaskI8);
 
@@ -429,7 +426,7 @@ uint8_t moveToNextFastqEntry(
 
         mmLoadUI8(lineVect, (buffCStr + *posUL));
         mmCmpEqI8(resMaskI8, lineVect, plusVect);
-    } // While I am on the sequence entry
+    } /* While I am on the sequence entry*/
 
     /*****************************************************\
     * Fun-02 Sec-03 Sub-02:
@@ -438,14 +435,14 @@ uint8_t moveToNextFastqEntry(
 
     mmCmpEqI8(resMaskI8, lineVect, plusVect);
 
-    // Check to see if any new lines
+    /* Check to see if any new lines*/
     lineVect = zeroAfterFirstTrueI8(lineVect, resMaskI8);
-     // Savgin resMaskI8, so I can avoid an extra
-     // comparison later
+     /* Savgin resMaskI8, so I can avoid an extra*/
+     /* comparison later*/
     mmCmpEqI8(tmpMaskI8, lineVect, newLineVect);
-       // Count the number of sequence new lines
-       // I am using zeroAFterFirstVect to remove any
-       // new lines after the plus
+       /* Count the number of sequence new lines*/
+       /* I am using zeroAFterFirstVect to remove any*/
+       /* new lines after the plus*/
 
     if(checkVectMaskTrueI8(tmpMaskI8))
       numSeqLinesL += findNumTruesI8(tmpMaskI8);
@@ -459,24 +456,24 @@ uint8_t moveToNextFastqEntry(
     ++(*posUL);
 
     if(*numReadCharUL - *posUL < vectorBytes)
-    { // IF I need to have an offset
-      // Check if have more file to read in
+    { /* IF I need to have an offset*/
+      /* Check if have more file to read in*/
       if(*numReadCharUL < lenBuffI) return 4;
 
       if(outFILE != 0)
-      { // IF I am printing out the entry
-        *(buffCStr + *posUL - 1) = '\0'; // is a '+'
+      { /* IF I am printing out the entry*/
+        *(buffCStr + *posUL - 1) = '\0'; /* is a '+'*/
         fprintf(outFILE, "%s+", buffCStr + startPosUL);
 
-        //fwrite(
-        //  buffCStr + startPosUL,
-        //  sizeof(char),
-        //  *numReadCharUL - startPosUL,
-        //  outFILE
-        //);
+        /*fwrite(*/
+        /*  buffCStr + startPosUL,*/
+        /*  sizeof(char),*/
+        /*  *numReadCharUL - startPosUL,*/
+        /*  outFILE*/
+        /*);*/
 
         startPosUL = 0;
-      } // IF I am printing out the entry
+      } /* IF I am printing out the entry*/
 
       /*Move to charaters that were not loaded*/
       fseek(
@@ -489,7 +486,7 @@ uint8_t moveToNextFastqEntry(
 
       *numReadCharUL =
         fread(buffCStr, sizeof(char), lenBuffI, fqFILE);
-    } // IF I need to have an offset
+    } /* IF I need to have an offset*/
 
     mmLoadUI8(lineVect, (buffCStr + *posUL));
 
@@ -516,21 +513,21 @@ uint8_t moveToNextFastqEntry(
         { /*If ran out of buffer*/
 
             if(*numReadCharUL < lenBuffI)
-                return 4;         // invalid fastq entry
+                return 4;         /* invalid fastq entry*/
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               *(buffCStr + *posUL + vectorBytes) = '\0';
               fprintf(outFILE,"%s",buffCStr+startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *numReadCharUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *numReadCharUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             if(*posUL + vectorBytes < *numReadCharUL)
               /*Move to charaters that were not loaded*/
@@ -547,7 +544,7 @@ uint8_t moveToNextFastqEntry(
                 fqFILE
             ); /*Read in more of the file*/
 
-            // Make sure buffer is a c-string
+            /* Make sure buffer is a c-string*/
             *(buffCStr + *numReadCharUL) = '\0';
             *posUL = 0;
 
@@ -571,26 +568,26 @@ uint8_t moveToNextFastqEntry(
     ++(*posUL);
 
     if(*numReadCharUL - *posUL < vectorBytes)
-    { // IF I need to have an offset
-      // Check if have more file to read in
+    { /* IF I need to have an offset*/
+      /* Check if have more file to read in*/
       if(*numReadCharUL < lenBuffI) return 4;
 
       if(outFILE != 0)
-      { // IF I am printing out the entry
+      { /* IF I am printing out the entry*/
         *(buffCStr + *posUL - 1) = '\0';
         fprintf(outFILE, "%s\n", buffCStr + startPosUL);
 
-        //fwrite(
-        //  buffCStr + startPosUL,
-        //  sizeof(char),
-        //  *numReadCharUL - startPosUL,
-        //  outFILE
-        //);
+        /*fwrite(*/
+        /*  buffCStr + startPosUL,*/
+        /*  sizeof(char),*/
+        /*  *numReadCharUL - startPosUL,*/
+        /*  outFILE*/
+        /*);*/
 
         startPosUL = 0;
-      } // IF I am printing out the entry
+      } /* IF I am printing out the entry*/
 
-      // Get back to char after '\n'
+      /* Get back to char after '\n'*/
       fseek(
         fqFILE,
         -1 * (*numReadCharUL - *posUL),
@@ -601,7 +598,7 @@ uint8_t moveToNextFastqEntry(
 
       *numReadCharUL =
         fread(buffCStr, sizeof(char), lenBuffI, fqFILE);
-    } // IF I need to have an offset
+    } /* IF I need to have an offset*/
 
     mmLoadUI8(lineVect, (buffCStr + *posUL));
 
@@ -627,28 +624,28 @@ uint8_t moveToNextFastqEntry(
         if(*posUL + (vectorBytes << 1) >= *numReadCharUL)
         { /*If ran out of buffer*/
 
-          // Check if we hit a new line
+          /* Check if we hit a new line*/
           mmCmpEqI8(resMaskI8, lineVect, newLineVect);
 
            if(checkVectMaskTrueI8(resMaskI8))
-           { // If I had new lines
+           { /* If I had new lines*/
              numSeqLinesL -= findNumTruesI8(resMaskI8);
              if(numSeqLinesL <= 0) goto cleanUp;
-           } // If I had new lines
+           } /* If I had new lines*/
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               *(buffCStr + *posUL + vectorBytes) = '\0';
               fprintf(outFILE,"%s",buffCStr+startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *numReadCharUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *numReadCharUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             if(*numReadCharUL < lenBuffI)
             { /*If at end of the file*/
@@ -671,18 +668,18 @@ uint8_t moveToNextFastqEntry(
             *posUL = 0;
 
             goto qEntryLoad;
-        } // If I need to read in more input
+        } /* If I need to read in more input*/
 
         mmCmpEqI8(resMaskI8, lineVect, newLineVect);
 
-        // Count the number of new lines remaing in the
-        // q-score entry
+        /* Count the number of new lines remaing in the*/
+        /* q-score entry*/
 
         if(checkVectMaskTrueI8(resMaskI8))
-        { // If I have a new line
+        { /* If I have a new line*/
           numSeqLinesL -= findNumTruesI8(resMaskI8);
           if(numSeqLinesL <= 0) goto cleanUp;
-        } // If I have a new line
+        } /* If I have a new line*/
 
         *posUL += vectorBytes;
 
@@ -703,24 +700,24 @@ uint8_t moveToNextFastqEntry(
     ++(*posUL);
 
     if(outFILE != 0)
-    { // If printin out the fastq entry
+    { /* If printin out the fastq entry*/
       *(buffCStr + *posUL - 1) = '\0';
       fprintf(outFILE, "%s\n", buffCStr + startPosUL);
 
-      //fwrite(
-      //    buffCStr + startPosUL,
-      //    sizeof(char),
-      //    *posUL - startPosUL,
-      //    outFILE
-      //);
-    } // If printin out the fastq entry
+      /*fwrite(*/
+      /*    buffCStr + startPosUL,*/
+      /*    sizeof(char),*/
+      /*    *posUL - startPosUL,*/
+      /*    outFILE*/
+      /*);*/
+    } /* If printin out the fastq entry*/
 
     if(*numReadCharUL - *posUL < vectorBytes)
-    { // IF I need to have an offset
-      // Check if have more file to read in
+    { /* IF I need to have an offset*/
+      /* Check if have more file to read in*/
       if(*numReadCharUL < lenBuffI) return 1;
 
-      // Get back to char after '\n'
+      /* Get back to char after '\n'*/
       fseek(
         fqFILE,
         -1 * (*numReadCharUL - *posUL),
@@ -731,12 +728,12 @@ uint8_t moveToNextFastqEntry(
 
       *numReadCharUL =
         fread(buffCStr, sizeof(char), lenBuffI, fqFILE);
-    } // IF I need to have an offset
+    } /* IF I need to have an offset*/
 
     return 0;
 } /*moveToNextFastqEntry*/
 
-// Non-vector functions
+/* Non-vector functions*/
 #else
 
 /*--------------------------------------------------------\
@@ -752,14 +749,14 @@ uint8_t moveToNextFastqEntry(
 |   o 4 If ran out of file
 \--------------------------------------------------------*/
 uint8_t moveToNextFastqEntry(
-    char *buffCStr,       // buffer with input to scan
-    unsigned long *posUL, // Position at in buffer
-    unsigned int lenBuffI,// Size of buffer to work on
-    unsigned long *numReadCharUL,//Number chars in buffCStr
-    FILE *fqFILE,         // Fastq file to get input from
-    FILE *outFILE         // FILE to output reads to
-      // This function will skip printing output if
-      // outFILE == 0
+    char *buffCStr,       /* buffer with input to scan*/
+    unsigned long *posUL, /* Position at in buffer*/
+    unsigned int lenBuffI,/* Size of buffer to work on*/
+    unsigned long *numReadCharUL,/*Number chars in buffCStr*/
+    FILE *fqFILE,         /* Fastq file to get input from*/
+    FILE *outFILE         /* FILE to output reads to*/
+      /* This function will skip printing output if*/
+      /* outFILE == 0*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-04 TOC: moveToNextFastqEntry
    '  - Moves the the next fastq entry and prints to the
@@ -801,15 +798,15 @@ uint8_t moveToNextFastqEntry(
     \*****************************************************/
 
     if(*posUL >= *numReadCharUL)
-    { // IF I need to get more input
-      if(*numReadCharUL < lenBuffI) return 1; // EOF
+    { /* IF I need to get more input*/
+      if(*numReadCharUL < lenBuffI) return 1; /* EOF*/
 
       /*Read in more of the file*/
       *numReadCharUL =
         fread(buffCStr,sizeof(char),lenBuffI,fqFILE);
 
       *posUL = 0;
-    } // IF I need to get more input
+    } /* IF I need to get more input*/
 
     if(*posUL == 0) startPosUL = 0;
 
@@ -824,26 +821,26 @@ uint8_t moveToNextFastqEntry(
         if(*posUL >= *numReadCharUL)
         { /*If ran out of buffer */
             if(*numReadCharUL < lenBuffI)
-                return 4;      // incomplete fastq entry
+                return 4;      /* incomplete fastq entry*/
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               fprintf(outFILE,"%s",buffCStr + startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *posUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *posUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             /*Read in more of the file*/
             *numReadCharUL =
               fread(buffCStr,sizeof(char),lenBuffI,fqFILE);
 
-            // Keep as a c-string
+            /* Keep as a c-string*/
             *(buffCStr + *numReadCharUL) = '\0';
             *posUL = 0;
 
@@ -853,7 +850,7 @@ uint8_t moveToNextFastqEntry(
         ++(*posUL);
     } /*While on header, move to sequence line*/
 
-    ++(*posUL); // Get off the new line
+    ++(*posUL); /* Get off the new line*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-04 Sec-03:
@@ -861,24 +858,24 @@ uint8_t moveToNextFastqEntry(
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
     while(*(buffCStr + *posUL) != '+')
-    { // While I am on the sequence entry
+    { /* While I am on the sequence entry*/
         if(*posUL >= *numReadCharUL)
-        { // If I need to read in more input
+        { /* If I need to read in more input*/
             if(*numReadCharUL < lenBuffI)
-                return 4; // Fastq missing q-score entry
+                return 4; /* Fastq missing q-score entry*/
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               fprintf(outFILE,"%s",buffCStr + startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *posUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *posUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             /*Read in more of the file*/
             *numReadCharUL =
@@ -888,16 +885,16 @@ uint8_t moveToNextFastqEntry(
             *posUL = 0;
 
             continue;
-        } // If I need to read in more input
+        } /* If I need to read in more input*/
 
-        // Count the number of new lines in the sequence
-        // entry
+        /* Count the number of new lines in the sequence*/
+        /* entry*/
         if(*(buffCStr + *posUL) == '\n') ++numSeqLinesL;
 
         ++(*posUL);
-    } // While I am on the sequence entry
+    } /* While I am on the sequence entry*/
 
-    ++(*posUL); // Get off the '+'
+    ++(*posUL); /* Get off the '+'*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-04 Sec-04:
@@ -911,20 +908,20 @@ uint8_t moveToNextFastqEntry(
         { /*If ran out of buffer*/
 
             if(*numReadCharUL < lenBuffI)
-                return 4;         // invalid fastq entry
+                return 4;         /* invalid fastq entry*/
 
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               fprintf(outFILE,"%s",buffCStr + startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *posUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *posUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             *numReadCharUL =
               fread(buffCStr,
@@ -933,7 +930,7 @@ uint8_t moveToNextFastqEntry(
                 fqFILE
             ); /*Read in more of the file*/
 
-            // Make sure buffer is a c-string
+            /* Make sure buffer is a c-string*/
             *(buffCStr + *numReadCharUL) = '\0';
             *posUL = 0;
 
@@ -943,7 +940,7 @@ uint8_t moveToNextFastqEntry(
         ++(*posUL);
     } /*While on the spacer entry*/
 
-    ++(*posUL); // Get off the new line
+    ++(*posUL); /* Get off the new line*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-04 Sec-05:
@@ -967,22 +964,22 @@ uint8_t moveToNextFastqEntry(
         if(*posUL >= *numReadCharUL)
         { /*If ran out of buffer*/
             if(outFILE != 0)
-            { // If I am writing output to a file
+            { /* If I am writing output to a file*/
               fprintf(outFILE,"%s",buffCStr + startPosUL);
-              //fwrite(
-              //  buffCStr + startPosUL,
-              //  sizeof(char),
-              //  *posUL - startPosUL,
-              //  outFILE
-              //);
+              /*fwrite(*/
+              /*  buffCStr + startPosUL,*/
+              /*  sizeof(char),*/
+              /*  *posUL - startPosUL,*/
+              /*  outFILE*/
+              /*);*/
 
               startPosUL = 0;
-            } // If I am writing output to a file
+            } /* If I am writing output to a file*/
 
             if(*numReadCharUL < lenBuffI)
             { /*If at end of the file*/
                 if(numSeqLinesL > 1) return 4; 
-                else return 1;  // finshed the fastq file
+                else return 1;  /* finshed the fastq file*/
             } /*If at end of the file*/
 
             /*Read in more of the file*/
@@ -992,10 +989,10 @@ uint8_t moveToNextFastqEntry(
             *posUL = 0;
 
             continue;
-        } // If I need to read in more input
+        } /* If I need to read in more input*/
 
-        // Count the number of new lines remaing in the
-        // q-score entry
+        /* Count the number of new lines remaing in the*/
+        /* q-score entry*/
 
         if(*(buffCStr + *posUL) == '\n')
           --numSeqLinesL;
@@ -1009,28 +1006,28 @@ uint8_t moveToNextFastqEntry(
     \*****************************************************/
 
     if(outFILE != 0)
-    { // If printin out the fastq entry
+    { /* If printin out the fastq entry*/
       *(buffCStr + *posUL - 1) = '\0';
       fprintf(outFILE,"%s\n",buffCStr + startPosUL);
 
-      //fwrite(
-      //  buffCStr + startPosUL,
-      //  sizeof(char),
-      //  *posUL - startPosUL,
-      //  outFILE
-      //);
-    } // If printin out the fastq entry
+      /*fwrite(*/
+      /*  buffCStr + startPosUL,*/
+      /*  sizeof(char),*/
+      /*  *posUL - startPosUL,*/
+      /*  outFILE*/
+      /*);*/
+    } /* If printin out the fastq entry*/
 
     if(*posUL >= *numReadCharUL)
-    { // IF I need to get more input
-      if(*numReadCharUL < lenBuffI) return 1; // EOF
+    { /* IF I need to get more input*/
+      if(*numReadCharUL < lenBuffI) return 1; /* EOF*/
 
       /*Read in more of the file*/
       *numReadCharUL =
         fread(buffCStr,sizeof(char),lenBuffI,fqFILE);
 
       *posUL = 0;
-    } // IF I need to get more input
+    } /* IF I need to get more input*/
 
     return 0;
 } /*moveToNextFastqEntry*/

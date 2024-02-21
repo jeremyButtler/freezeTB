@@ -312,25 +312,25 @@ uint8_t extractReads(
     # Fun-3 Sec-1: Variable declerations
     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    uint8_t eofC = 0; // Tells if error or EOF
+    uint8_t eofC = 0; /* Tells if error or EOF*/
 
-    // I need a blank number to initalize the big number
-    // structuer
+    /* I need a blank number to initalize the big number*/
+    /* structuer*/
     char dummyConvertUChar = '0';
 
-    // Maximum number of limbs to have in big number struct
+    /* Maximum number of limbs to have in big number struct*/
     unsigned int maxLimbsUI = 1024;
-      // This is 16 limbs for 64 bit integers
+      /* This is 16 limbs for 64 bit integers*/
 
-    unsigned long lenInUL = 0; // Number of chars in buffer
+    unsigned long lenInUL = 0; /* Number of chars in buffer*/
 
-    unsigned long posUL = 0;   // Position at in buffer
-    unsigned long startUL = 0; // Start of fastq entry
+    unsigned long posUL = 0;   /* Position at in buffer*/
+    unsigned long startUL = 0; /* Start of fastq entry*/
 
-    // For hash table
+    /* For hash table*/
     struct bigNum *idBigNum = 0;
 
-    // For searching read id tree (part of hash table)
+    /* For searching read id tree (part of hash table)*/
     struct readInfo *lastRead = 0;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -341,14 +341,14 @@ uint8_t extractReads(
     #    fun-3 sec-3 sub-4: Keeping read, print out read
     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    // Read in the first bit of input
+    /* Read in the first bit of input*/
     lenInUL =
       fread(buffCStr, sizeof(char), lenBuffUI, fqFILE);
 
     buffCStr[lenBuffUI] = '\0';          /*Make c-string for fread*/
     posUL = 0;
 
-    // Set up the big number sruct
+    /* Set up the big number sruct*/
     idBigNum =
       makeBigNumStruct(&dummyConvertUChar, &maxLimbsUI);
 
@@ -363,9 +363,9 @@ uint8_t extractReads(
 
         eofC =
             parseFastqHeader(
-                buffCStr, // Buffer to hold file input
-                &posUL,   // Positon working on in buffer
-                //&startUL, // Reset if read in new buffer
+                buffCStr, /* Buffer to hold file input*/
+                &posUL,   /* Positon working on in buffer*/
+                /*&startUL, // Reset if read in new buffer*/
                 &lenInUL,
                 lenBuffUI,
                 idBigNum,
@@ -375,19 +375,19 @@ uint8_t extractReads(
         if(startUL > posUL) startUL = 0;
 
          if(eofC)
-         { // If at end of file
+         { /* If at end of file*/
              if(eofC & 1) eofC = 0;
 
              freeBigNumStruct(&idBigNum);
-             return eofC; // Will be 4 for invalid fastq
-                          // and 1 for complete fastq
-         } // If at end of file
+             return eofC; /* Will be 4 for invalid fastq*/
+                          /* and 1 for complete fastq*/
+         } /* If at end of file*/
 
         /***********************************************************************
         # Fun-3 Sec-3 Sub-2: Determine if read is in tree
         ***********************************************************************/
 
-        // Check if using hash table/AVL tree or just AVL
+        /* Check if using hash table/AVL tree or just AVL*/
         if(hashTbl == 0)
             lastRead = searchTree(idBigNum, readTree);
         else 
@@ -416,22 +416,22 @@ uint8_t extractReads(
              eofC =
                  moveToNextFastqEntry(
                      buffCStr,
-                     &posUL,   // Points to End of read id
+                     &posUL,   /* Points to End of read id*/
                      lenBuffUI,
                      &lenInUL,   /*Holds how many characters fread got*/
                      fqFILE,
-                     0         // Do not print anything
+                     0         /* Do not print anything*/
              ); /*Move to next fastq entry*/
 
 
              if(eofC)
-             { // If at end of file
+             { /* If at end of file*/
                  if(eofC & 1) eofC = 0;
 
                  freeBigNumStruct(&idBigNum);
-                 return eofC; // 4 for invalid fastq
-                              // and 1 for complete fastq
-             } // If at end of file
+                 return eofC; /* 4 for invalid fastq*/
+                              /* and 1 for complete fastq*/
+             } /* If at end of file*/
 
             startUL = posUL;
             continue;
@@ -444,7 +444,7 @@ uint8_t extractReads(
          eofC =
              moveToNextFastqEntry(
                  buffCStr,
-                 &startUL,       // Start of read id
+                 &startUL,       /* Start of read id*/
                  lenBuffUI,
                  &lenInUL,
                  fqFILE,
@@ -454,13 +454,13 @@ uint8_t extractReads(
          posUL = startUL;
 
          if(eofC)
-         { // If at end of file
+         { /* If at end of file*/
            if(eofC & 1) eofC = 0;
 
            freeBigNumStruct(&idBigNum);
-           return eofC; // 4 for invalid fastq
-                        // and 1 for complete fastq
-         } // If at end of file
+           return eofC; /* 4 for invalid fastq*/
+                        /* and 1 for complete fastq*/
+         } /* If at end of file*/
     } /*While there are lines in the file*/
 
     freeBigNumStruct(&idBigNum);

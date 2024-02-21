@@ -28,7 +28,7 @@
 #define SUBSAMPLE_SETTINGS_H
 
 #define defMinPercSNPs 0.07 /*Min % of SNPs to keep read*/
-#define defMinPercDiff 0.85 /*Min % difference to keep read*/
+#define defMinPercDiff 1 /*Min % difference to keep read*/
 #define defMinPercDels 1 /*Min % deletions to keep read*/
 #define defMinPercInss 1 /*Min % insertions to keep read*/
 #define defMinPercIndels 1 /*Min % indels to keep read*/

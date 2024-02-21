@@ -9,13 +9,15 @@
 #   o "../generalLib/samEntryStruct.h"
 #   o "../generalLib/base10StrToNum.h"
 #   o "../generalLib/dataTypeShortHand.h"
+#   o "../generalLib/ulCpStr.h"
+#   o "../generalLib/numToStr.h"
 #   - "../generalLib/geneCoordStruct.h"
 #   o "../generalLib/genMath.h"
 # C Standard Libraries:
+#   - <string.h>
 #   o <stdlib.h>
 #   o <stdint.h>
 #   o <stdio.h>
-#   o <string.h>
 ########################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -37,6 +39,7 @@
 
 #include "../generalLib/geneCoordStruct.h"
 #include "../generalLib/trimSam.h"
+#include <string.h>
 
 #define defVersion 20240125
 #define defMinDepth 20
@@ -157,23 +160,16 @@ int main(
    char *extraColStr = globalExtraCol;
 
    char *errStr = 0;
-
-   ushort lenBuffUS = 2048;
-   char buffStr[lenBuffUS];
-   char alnTypeC;
    uchar errUC = 0; /*Error report*/
    
-   uint numLinesUI = 0;
    int numGenesI = 0;
    int geneIndexI = 0;
-   uint idIndexUI = 0;
 
    uint *readMapAryUI = 0; /*Mapped region of reads*/
    uint offTargUI = 0;
    uint umappedUI = 0;
 
    uint mapStartUI = 0;
-   uint mapEndUI = 0;
    uint tmpStartUI = 0;
 
    /*For printing out read counts*/
@@ -198,11 +194,12 @@ int main(
 
    struct geneCoords *genesST = 0; 
    struct samEntry readST;
+   char *samBuffStr = 0;
+   ulong lenSamBuffUL = 0;
 
    FILE *pafFILE = 0;
    FILE *samFILE = 0;
    FILE *outFILE = stdout;
-
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-02:
@@ -436,29 +433,36 @@ int main(
    \*****************************************************/
 
    initSamEntry(&readST);
-   errUC = readSamLine(&readST, samFILE);
+
+   errUC =
+      readSamLine(
+          &readST,
+          &samBuffStr,
+          &lenSamBuffUL,
+          samFILE
+      );
+
    offTargUI = 0;
 
-   while(errUC == 1)
+   while(!errUC)
    { /*Loop: read in the samfile*/
       /*check if this is a header line*/
-      if(readST.samEntryCStr[0] == '@') goto nextLine;
+      if(readST.extraStr[0] == '@') goto nextLine;
 
-      if(readST.flagUSht & 4)
+      if(readST.flagUS & 4)
       { /*If: the read was unmapped*/
          ++umappedUI;
          goto nextLine;
       } /*If: the read was unmapped*/
 
       trimSamEntry(&readST); /*Trim off softmasked bases*/
-      mapEndUI = readST.readLenUInt + readST.posOnRefUInt;
 
       /**************************************************\
       * Main Sec-06 Sub-02:
       *   - Handle secondary and supplemental mapped reads
       \**************************************************/
 
-      if(readST.flagUSht & (4 | 2048)) goto nextLine;
+      if(readST.flagUS & (256 | 2048)) goto nextLine;
 
       /**************************************************\
       * Main Sec-06 Sub-03:
@@ -466,8 +470,8 @@ int main(
       \**************************************************/
 
       for(
-         mapStartUI = readST.posOnRefUInt;
-         mapStartUI < mapEndUI;
+         mapStartUI = readST.refStartUI;
+         mapStartUI < readST.refEndUI;
          ++mapStartUI
       ){ /*Loop: Fill in bases*/
          if(mapStartUI > genesST->endAryUI[numGenesI])
@@ -479,14 +483,37 @@ int main(
          ++readMapAryUI[mapStartUI];
       } /*Loop: Fill in bases*/
 
-      nextLine:
+      nextLine:;
 
-      blankSamEntry(&readST);
-      errUC = readSamLine(&readST, samFILE);
+      errUC =
+         readSamLine(
+             &readST,
+             &samBuffStr,
+             &lenSamBuffUL,
+             samFILE
+         );
    } /*Loop: read in the samfile*/
 
-
+   free(samBuffStr);
    fclose(samFILE);
+
+   samFILE = 0;
+   samBuffStr = 0;
+   lenSamBuffUL = 0;
+
+   if(errUC & 64)
+   { /*If: I had a memory error*/
+      freeGeneCoords(genesST);
+      free(readMapAryUI);
+      
+      fprintf(
+         stderr,
+         "Memory error while reading sam file\n"
+      );
+
+      exit(-1);
+   } /*If: I had a memory error*/
+
    samFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

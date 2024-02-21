@@ -8,17 +8,32 @@
 #   - "samEntryStruct.h"
 #   o "base10StrToNum.h"
 #   o "dataTypeShortHand.h"
+#   o "ulCpStr"
+#   o "numToStr.h"
 # C Standard Libraries:
 #   o <stdlib.h>
-#   o <stdint.h>
 #   o <stdio.h>
-#   o <string.h>
+#   o <limits.h>
 ########################################################*/
 
 #ifndef TRIMSAM_H
 #define TRIMSAM_H
 
 #include "samEntryStruct.h"
+
+#if UINT_MAX >= 0xffffffffffffffff
+   #define defShiftIntToGetChar 3 /*Not realisistic*/
+
+#elif UINT_MAX >= 0xffffffff
+   #define defShiftIntToGetChar 2
+
+#elif ULONG_MAX >= 0xffff
+   #define defShiftIntToGetChar 1
+
+#else
+   #error This is an 8 bit system
+#endif
+
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 | trimSam SOF: Start Of Functions
@@ -45,7 +60,7 @@
 |  - Modifies:
 |    o Trims cigar, sequence, & q-score entries in samST.
 \-------------------------------------------------------*/
-static uint8_t trimSamEntry(
+static uchar trimSamEntry(
     struct samEntry *samST   /*has sam line to trim*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: trimSamEntry
@@ -54,13 +69,11 @@ static uint8_t trimSamEntry(
    '  o fun-01 sec-01:
    '    - Variable declerations
    '  o fun-01 sec-02:
-   '    - Find how much to trim & trim cigar entry
+   '    - Check if I have something to trim
    '  o fun-01 sec-03:
-   '    - Trim the sequence entry
+   '    - Finding trimming postions and trim the cigar
    '  o fun-01 sec-04:
-   '    - Trim the q-score entry
-   '  o fun-01 sec-05:
-   '    - Shift characters for other parts of the cigar
+   '    - Trim the sequence and Q-score entry
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -68,193 +81,171 @@ static uint8_t trimSamEntry(
     ^  - Variable declerations
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    char *incSamUCStr = samST->cigarCStr;
-    char *delUCStr = samST->cigarCStr; /*Bases to remove*/
-
-    unsigned char uCharTabCnt =0;/*Counts number of tabs*/
-
     /*Number of bases soft masked at start or end*/
-    uint32_t lenStartTrimUInt = 0;
-    uint32_t lenEndTrimUInt = 0;
+    uchar qUC = 0;
+
+    int startPosI = 0;
+    int endTrimI = 0;
+    uint iCig = 0;
+    uint iSeq = 0;
+
+    char *seqCpStr = 0;
+    char *seqDupStr = 0;
+    ulong *seqCpUL = 0;
+    ulong *seqDupUL = 0;
+
+    char *qCpStr = 0;
+    char *qDupStr = 0;
+    ulong *qCpUL = 0;
+    ulong *qDupUL = 0;
         
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-01 Sec-02:
-    ^  - Find how much to trim & trim cigar entry
-    ^  o fun-01 sec-02 sub-01:
-    ^    - Check start of cigar & trim if needed
-    ^  o fun-01 sec-02 sub-02:
-    ^    - Check end of cigar & trim if needed
+    ^   - Check if I have something to trim
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    /****************************************************\
-    * Fun-01 Sec-02 Sub-01:
-    *  - Check start of cigar & trim if needed
-    \****************************************************/
-
     /*Check if is an header is an header entry*/
-    if(*(samST->samEntryCStr) == '@') return 2;
+    if(samST->extraStr[0] == '@') return 2;
 
     /*Check if is an unmapped read*/
-    if(samST->flagUSht & 4) return 4;
+    if(samST->flagUS & 4) return 4;
+
+    /*Check if is an unmapped read*/
+    if(samST->cigTypeStr[0] == '*') return 4;
 
     /*Check if has a sequence to trim*/
-    if(*(samST->seqCStr) == '*') return 8;
-
-    incSamUCStr =
-       base10StrToUI(incSamUCStr, lenStartTrimUInt);
-
-    if(*incSamUCStr != 'S')
-    { /*If: no softmasking at start*/
-        lenStartTrimUInt = 0;
-
-        /*Move to end of cigar entry*/
-        while(*incSamUCStr > 32) ++incSamUCStr;
-        delUCStr = incSamUCStr;
-    } /*If: no softmasking at start*/
-
-    else
-    { /*Else: this is a soft mask and need to remove*/
-        ++incSamUCStr; /*Move off soft mask marker*/
-
-        while(*incSamUCStr > 32)
-        { /*Loop: Get to end of the cigar*/
-            *delUCStr = *incSamUCStr;
-            ++incSamUCStr;/*Move to end of cigar entry*/
-            ++delUCStr;   /*Move to next base to replace*/
-        } /*Loop: Get to end of the cigar*/
-    } /*Else: this is a soft mask and need to remove*/
-
-    /****************************************************\
-    * Fun-01 Sec-02 Sub-02:
-    *  - Check end of cigar & trim if needed
-    \****************************************************/
-
-    --delUCStr;        /*Move back to last cigar entry*/
-
-    if(*delUCStr != 'S')
-    { /*If: their is not softmasking at the end*/
-        lenEndTrimUInt = 0;/*If no soft masking at start*/
-
-        /*Check if there is anyting to trim*/
-        if(lenStartTrimUInt == 0) return 0;
-        ++delUCStr;           /*Account for minus one*/
-    } /*If: their is not softmasking at the end*/
-
-    else
-    { /*Else: I am trimming bases off the end*/
-        /*Get number of bases to trim*/
-        --delUCStr; /*Move soft masking 'S' marker*/
-
-        delUCStr =
-           base10BackwardsStrToUI(
-              delUCStr,
-              lenEndTrimUInt
-           );
-
-        ++delUCStr; /*Move off entry before soft mask*/
-    } /*Else: I am trimming bases off the end*/
+    if(samST->seqStr[0] == '*') return 8;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-01 Sec-03:
-    ^  - Trim the sequence entry
+    ^   - Finding trimming postions and trim the cigar
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    if(uCharTabCnt < 4)
-    { /*If: I need to find the sequence entry*/
-        /*Find the sequence entry*/
-        for(
-           uint8_t uCharCnt = uCharTabCnt;
-           uCharCnt < 4;
-           ++uCharCnt
-        ){ /*Loop: get past RNEXT, PNEXT, & TLEN*/
-            while(*incSamUCStr > 32) /*Move next entry*/
-            { /*Loop: get to end of entry*/
-                *delUCStr = *incSamUCStr;
-                ++delUCStr;
-                ++incSamUCStr;
-            } /*Loop: get to end of entry*/
+    /*Position my self at the start of the sequence*/
+    startPosI = -((int) samST->cigTypeStr[0] == 'S');
+    iCig -= startPosI; /*Marks if skipping the start*/
 
-            /*Move leader of the tab*/
-            *delUCStr = *incSamUCStr;
-            ++delUCStr;
-            ++incSamUCStr;
-        } /*Loop: get past RNEXT, PNEXT, & TLEN*/
-    } /*If: I need to find the sequence entry*/
+    endTrimI =
+       -((int) samST->cigTypeStr[samST->lenCigUI-1]=='S');
 
-    else incSamUCStr = samST->seqCStr;
+    endTrimI &= samST->cigValAryI[samST->lenCigUI - 1];
 
-    /*Record new sequence start*/
-    samST->seqCStr = delUCStr;
+    samST->lenCigUI += startPosI; /*+0 or + -1*/
+    samST->lenCigUI -= (endTrimI > 0);
 
-    /*skip the trim region at start*/
-    incSamUCStr += lenStartTrimUInt;
+    startPosI &= samST->cigValAryI[0];
+    samST->readLenUI -= (startPosI + endTrimI);
 
-    /*Find how long the sequence will be after triming*/
-    samST->readLenUInt =
-         samST->unTrimReadLenUInt
-       - lenStartTrimUInt
-       - lenEndTrimUInt;
+    ulCpStr(
+       samST->cigTypeStr,
+       (samST->cigTypeStr + iCig),
+       samST->lenCigUI
+    ); /*Trim the cigar types array*/
 
-    for(
-       uint32_t uIntSeq=0;
-       uIntSeq < samST->readLenUInt;
-       ++uIntSeq
-    ){ /*Loop: shift bases back in sequence*/
-        *delUCStr = *incSamUCStr;
-        ++delUCStr;
-        ++incSamUCStr;
-    } /*Loop: shift bases back in sequence*/
+    ulCpStr(
+       (char *) samST->cigValAryI,
+       (char *) (samST->cigValAryI + iCig),
+       (samST->lenCigUI << defShiftIntToGetChar)
+    ); /*Trim the cigar value (bases per type) array*/
 
-    /*Move off trimed bases & tab*/
-    incSamUCStr += lenEndTrimUInt + 1;
-
-    *delUCStr = *(incSamUCStr - 1);    /*Save the tab*/
-    ++delUCStr;                        /*Move past tab*/
+    samST->numMaskUI = 0;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun-01 Sec-04:
-    ^  - Trim the q-score entry
+    ^   - Trim the sequence and Q-score entry
+    ^   o fun-01 sec-04 sub-01:
+    ^     - Set up the pionters for trimming (copying)
+    ^   o fun-01 sec-04 sub-02:
+    ^     - Adjust Q-scores for removing bases from start
+    ^   o fun-01 sec-04 sub-03:
+    ^     - Copy kept parts of Q-score & sequence entries
+    ^   o fun-01 sec-04 sub-04:
+    ^     - Adjust for the Q-scores removed at the end
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    if(*(samST->qCStr) != '*' || *(samST->qCStr+1) !='\t')
-    { /*If their is a Q-score entry to trim*/
-        samST->qCStr = delUCStr;  /*new start of q-score*/
+    /****************************************************\
+    * Fun-01 Sec-04 Sub-01:
+    *   - Set up the pionters for trimming (copying)
+    \****************************************************/
 
-        /*skip starting trim region*/
-        incSamUCStr += lenStartTrimUInt;
+    /*The longs are for 8 byte copying, while the c-string
+    ' pionters are for the end (when sequence was not a
+    ' multiple of 8
+    */
 
-        for(
-            uint32_t uIntSeq=0;
-            uIntSeq < samST->readLenUInt;
-            ++uIntSeq
-        ) { /*Loop: shift bases back in q-score entry*/
-            *delUCStr = *incSamUCStr;
-            ++delUCStr;
-            ++incSamUCStr;
-        } /*Loop: shift bases back in q-score entry*/
+    seqCpUL = (ulong *) (samST->seqStr + startPosI);
+    seqDupUL = (ulong *) samST->seqStr;
+    seqCpStr = samST->seqStr + startPosI;
+    seqDupStr = samST->seqStr;
 
-        /*Move off end trim to tab*/
-        incSamUCStr += lenEndTrimUInt;
-    } /*If their is a Q-score entry to trim*/
+    qCpUL = (ulong *) (samST->qStr + startPosI);
+    qDupUL = (ulong *) samST->qStr;
+    qCpStr = samST->qStr + startPosI;
+    qDupStr = samST->qStr;
 
-    else samST->qCStr = delUCStr; /*new start of q-score*/
+    /****************************************************\
+    * Fun-01 Sec-04 Sub-02:
+    *   - Adjust Q-scores for removing bases from start
+    \****************************************************/
 
-    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-01 Sec-05:
-    ^  - Shift characters for other parts of the cigar
-    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+    for(iSeq = 0; iSeq < startPosI; ++iSeq)
+    { /*Loop: adjust for the timmed starting Q-scores*/
+       qUC = (uchar) samST->qStr[iSeq] - defQAdjust;
+       --(samST->qHistUI[qUC]);
+       samST->sumQUL -= qUC;
+    } /*Loop: adjust for the timmed starting Q-scores*/
 
-    while(*incSamUCStr != '\0' && *incSamUCStr != '\n')
-    { /*Loop: Till at end of sam entry*/
-        *delUCStr = *incSamUCStr;
-        ++delUCStr;
-        ++incSamUCStr;
-    } /*Loop: Till at end of sam entry*/
+    /****************************************************\
+    * Fun-01 Sec-04 Sub-03:
+    *   - Copy kept parts of Q-score & sequence entries
+    \****************************************************/
 
-    *delUCStr = *incSamUCStr;
+    /*I am not using my copy functions here to leverage dual
+    ` dual accumulators, which the cpu should hanlde.
+    ` easier.
+    */
 
-    /*Make sure null terminated*/
-    if(*delUCStr == '\n') *(delUCStr + 1) = '\0';
+    /*Copy With longs*/
+    for(
+       iSeq = 0;
+       iSeq < (samST->readLenUI >> defShiftByUL);
+       ++iSeq
+    ) { /*Loop: Copy sequences and q-score entries*/
+       seqDupUL[iSeq] = seqCpUL[iSeq];
+       qDupUL[iSeq] = qCpUL[iSeq];
+    } /*Loop: Copy sequences and q-score entries*/
+
+    /*Finish coping the kept region using characters*/
+    for(
+       iSeq =
+           samST->readLenUI
+         - (samST->readLenUI & defModByUL);
+       iSeq < samST->readLenUI;
+       ++iSeq
+    ) { /*Loop: Copy sequences and q-score entries*/
+       seqDupStr[iSeq] = seqCpStr[iSeq];
+       qDupStr[iSeq] = qCpStr[iSeq];
+    } /*Loop: Copy sequences and q-score entries*/
+   
+    /****************************************************\
+    * Fun-01 Sec-04 Sub-04:
+    *   - Adjust for the Q-scores removed at the end
+    \****************************************************/
+
+    /*Adjust for having removed q-scores at the end*/
+    for(iSeq = iSeq; qCpStr[iSeq] != '\0'; ++iSeq)
+    { /*Loop: adjust for the timmed ending Q-scores*/
+       qUC = (uchar) samST->qStr[iSeq] - defQAdjust;
+       --(samST->qHistUI[qUC]);
+       samST->sumQUL -= qUC;
+    } /*Loop: adjust for the timmed ending Q-scores*/
+
+    /*Make sure they are c-strings*/
+    seqDupStr[samST->readLenUI] = '\0';
+    qDupStr[samST->readLenUI] = '\0';
+
+    samST->meanQF=(float) samST->sumQUL /samST->readLenUI;
+    samEntryQHistToMed(samST);
 
     return 0;
 } /*trimSamEntry*/
@@ -272,6 +263,9 @@ static uint8_t trimSamEntry(
 |  - keepUnmappedReadsBl:
 |    o Also print out entries with unmapped reads
 | Output:
+|  - Returns:
+|    o 0 if suceeded
+|    o 64 for memory error
 |  - Prints:
 |    o Trimmed sam entries with sequences to outFILE, but
 |      ignores sam entries without sequences
@@ -280,26 +274,37 @@ static uint8_t trimSamEntry(
     samFILE,               /*Sam file to trim*/\
     outFILE,               /*File to store output*/\
     keepUnmappedReadsBl    /*1: keep unmapped reads*/\
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+)({/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-02 TOC: trimSamReads
    '  - Goes though sam file and calls trimSamEntry for
    '    each entry
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/\
     \
-    unsigned char errUC = 0;  /*Tells if memory error*/\
+    char *buffStr = 0;\
+    ulong lenBuffUL = 0;\
+    uchar errUC = 0;  /*Tells if memory error*/\
     struct samEntry samST;\
     \
     initSamEntry(&samST);\
-    errUC = readSamLine(&samST, samFILE);\
     \
-    while(errUC & 1)\
+    errUC =\
+       readSamLine(&samST,&buffStr,&lenBuffUL,samFILE);\
+    \
+    while(!errUC)\
     { /*While there are lines in sam file to convert*/\
         \
-        if(*(samST.samEntryCStr) == '@')\
+        if(*(samST.extraStr) == '@')\
         { /*If was a header*/\
-            printSamEntry(&samST, outFILE);\
-            blankSamEntry(&samST);\
-            errUC = readSamLine(&samST, samFILE);\
+            pSamEntry(&samST,buffStr,lenBuffUL,outFILE);\
+            \
+            errUC =\
+               readSamLine(\
+                  &samST,\
+                  &buffStr,\
+                  &lenBuffUL,\
+                  samFILE\
+               );\
+            \
             continue; /*header line, move to next line*/\
         } /*If was a header*/\
         \
@@ -308,17 +313,23 @@ static uint8_t trimSamEntry(
         \
         /*Print out the converted entry*/\
         if(!(errUC >> 2))\
-            printSamEntry(&samST, outFILE);\
-            /*header or sequence*/\
-        else if(errUC & 4 && keepUnmappedReadsBl & 1)\
-            printSamEntry(&samST, outFILE);\
+           {pSamEntry(&samST,buffStr,lenBuffUL,outFILE);}\
+        \
+        else if(errUC & 4 && keepUnmappedReadsBl)\
+           {pSamEntry(&samST,buffStr,lenBuffUL,outFILE);}\
             /*Else if printing umapped reads*/\
         \
-        blankSamEntry(&samST);\
-        errUC = readSamLine(&samST, samFILE);\
+        errUC =\
+           readSamLine(\
+              &samST,\
+              &buffStr,\
+              &lenBuffUL,\
+              samFILE\
+           );\
     } /*While there are lines in sam file to convert*/\
     \
-    freeStackSamEntry(&samST);\
-} /*trimSamReads*/
+    freeSamEntryStack(&samST);\
+    errUC & ~1;\
+}) /*trimSamReads*/
 
 #endif
