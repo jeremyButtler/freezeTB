@@ -1,16 +1,14 @@
 # Use
 
-ampMapCounts is designed to map Nanopore sequenced
-   amplicons to a set of target genes. The number of
-   mapped reads per gene is recored and the mapped reads
-   are then split up into individual files by the gene
-   they primarly mapped to. A graph (prefix-mapGraph.svg)
-   is made to show how many reads mapped.
+freezeTB is designed to detect amr resistant tb strains
+   using Nanopore reads.
 
 Consensuses are built for genes that have enough mapped
   reads (at least 20) using ivar. Subsampling by mapping
   quality and median q-score is done when a gene has more
   than 300 mapped reads.
+
+Currently this uses the WHO 2021 catalog.
 
 # Requirements
 
@@ -43,10 +41,32 @@ Install ivar, minimap2, samtools, and the R packages you
   need. Then do `sudo make install` for linux or 
   `make mac` and the `sudo make install` for mac.
 
-# Run
+## Linux
 
 ```
-buildAmpCons.sh -ref ref.fasta -genes genes.fasta -fastq reads.fastq
+git clone https://github.com/jeremybuttler/freezeTB
+cd freezeTB
+sudo make install
+```
+
+## Mac
+
+This  should work, but I am not sure. You will need to
+  install the dependencies by homebrew.
+
+```
+git clone https://github.com/jeremybuttler/freezeTB
+cd freezeTB
+make mac
+sudo make install
+```
+
+# Run
+
+Simplest way (needed file are at install locations):
+
+```
+freezeTB.sh -fastq reads.fastq
 ```
 
 # How it works
@@ -75,4 +95,5 @@ buildAmpCons.sh -ref ref.fasta -genes genes.fasta -fastq reads.fastq
    region.
 8. Build a consensus for the subsampled reads using the
    extracted largest region from the TB referenced.
-     
+9. Use the consensuses to find the amr resistant genes
+   using tbAmr
