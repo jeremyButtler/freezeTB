@@ -4,6 +4,7 @@
 #     unsigned longs (poor mans vectors)
 # Libraries:
 #   - "dataTypeShortHand.h"
+#   - "genMath.h"
 # C Standard Libraries:
 #   - <limits.h>
 ########################################################*/
@@ -29,6 +30,8 @@
 |    - ulCpStr, but can be compiled with vectors
 |  o fun-06: ulVectCpStrDelim TODO:
 |    - ulCpStrDelim, but can be compiled with vectors
+|  o fun-0?: cStrEql
+|    - Checks to see if two strings are equal
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -697,4 +700,35 @@
    \
    uiIterMac;\
 })
+
+/*-------------------------------------------------------\
+| Fun-0?: cStrEql
+|   - Checks to see if two strings are equal
+| Input:
+|   - qryStr:
+|     o The query c-string to compare against the
+|       reference
+|   - refStr:
+|     o The reference c-string to compare against the
+|       query
+| Output:
+|   - Returns:
+|     o < 0 for qry less than reference
+|     o 0 for qry is same as the reference
+|     o >0 for qry is greater than the reference
+\-------------------------------------------------------*/
+#define cStrEql(qryStr, refStr, delimC)({\
+   int iCntMac = 0;\
+   int retI = 0;\
+   \
+   while((qryStr)[iCntMac] == (refStr)[iCntMac])\
+   { /*Loop: Check if strings are equal*/\
+      if((qryStr)[iCntMac] == (delimC)) break;\
+      ++iCntMac;\
+   } /*Loop: Check if strings are equal*/\
+   \
+     (-(qryStr)[iCntMac] == (delimC))\
+   & ((qryStr)[iCntMac] - (refStr)[iCntMac]);\
+})
+
 #endif
