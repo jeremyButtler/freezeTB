@@ -1,14 +1,14 @@
 CC=cc
 PREFIX=/usr/local/bin
 CFLAGS= -static -O3 -Wno-unused-function -std=c89
-MAC_CFLAGS= -O3
+MACCFLAGS= -O3
 DEBUGFLAGS= -static -O0 -ggdb -Wall -Wno-unused-function
 
 all:
 	$(CC) $(CFLAGS) -o tbAmr tbAmr.c;
 
 mac:
-	$(CC) $(MAC_CFLAGS) -o tbAmr tbAmr.c;
+	$(CC) $(MACCFLAGS) -o tbAmr tbAmr.c;
 
 debug:
 	$(CC) $(DEBUGFLAGS) -o debugTbAmr tbAmr.c;

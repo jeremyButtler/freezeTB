@@ -6,7 +6,7 @@ CFLAGS=\
   --std=c89 \
   -O3
 
-MAC_CFLAGS=-O3
+MACCFLAGS=-O3
 
 FILES=\
   vectorWrap.c \
@@ -22,7 +22,7 @@ all:
 	$(CC) $(CFLAGS) $(FILES) -o $(NAME)
 
 mac:
-	$(CC) $(MAC_CFLAGS) $(FILES) -o $(NAME)
+	$(CC) $(MACCFLAGS) $(FILES) -o $(NAME)
 
 sse:
 	$(CC) $(CFLAGS) -DSSE $(FILES) -o $(NAME);

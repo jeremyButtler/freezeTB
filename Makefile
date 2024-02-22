@@ -2,7 +2,7 @@ CC = cc
 PREFIX = /usr/local/bin
 
 CFLAGS += -std=c89 -O3 -static
-MAC_CFLAGS += -O3
+MACCFLAGS += -O3
 
 all: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds buildTbAmr
 
@@ -46,10 +46,10 @@ openbsd: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds buildTbAmr
 	mv tmp.sh ivarConScript.sh;
 	sed\
       '1s/#!\/usr\/bin\/bash/#!\/local\/bin\/bash/; s/awk/gawk/g;'\
-       buildAmpCons.sh\
+       freezeTb.sh\
      > tmp.sh;
-	mv buildAmpCons.sh buildAmpConsLinux.sh;
-	mv tmp.sh buildAmpCons.sh;
+	mv freezeTb.sh buildAmpConsLinux.sh;
+	mv tmp.sh freezeTb.sh;
 
 
 mac: macAmpDepth macTrimSam macSubsample macFqGetIds macTbAmr
@@ -76,25 +76,25 @@ mac: macAmpDepth macTrimSam macSubsample macFqGetIds macTbAmr
 	mv tmp.sh ivarConScript.sh;
 	sed\
       '1s/#!\/usr\/bin\/bash/#!\/bin\/bash/; s/awk/gawk/g;'\
-       buildAmpCons.sh\
+       freezeTb.sh\
      > tmp.sh;
-	mv buildAmpCons.sh buildAmpConsLinux.sh;
-	mv tmp.sh buildAmpCons.sh;
+	mv freezeTb.sh buildAmpConsLinux.sh;
+	mv tmp.sh freezeTb.sh;
 
 macAmpDepth:
-	make mac -C ./ampDepthSource CC="$(CC)" MAC_CFLAGS="$(MAC_CFLAGS)";
+	make mac -C ./ampDepthSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
 
 macTrimSam:
-	make mac -C ./trimSamSource CC="$(CC)" MAC_CFLAGS="$(MAC_CFLAGS)";
+	make mac -C ./trimSamSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
 
 macSubsample:
-	make mac -C ./subsampleSource CC="$(CC)" MAC_CFLAGS="$(MAC_CFLAGS)";
+	make mac -C ./subsampleSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
 
 macFqGetIds:
-	make mac -C ./fqGetIdsSource CC="$(CC)" MAC_CFLAGS="$(MAC_CFLAGS)";
+	make mac -C ./fqGetIdsSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
 
 macTbAmr:
-	make -C ./tbAmrSource CC="$(CC)" MAC_CFLAGS="$(MAC_CFLAGS)";
+	make -C ./tbAmrSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
 
 R:
 	Rscript rDepends.r
@@ -111,15 +111,15 @@ install:
 	cp ivarConScript.sh $(PREFIX);
 	chmod -R a+x $(PREFIX)/freezeTBScripts;
 	chmod a+x $(PREFIX)/freezeTBScripts/*;
-	chmod a+x $(PREFIX)/buildAmpCons.sh;
+	chmod a+x $(PREFIX)/freezeTb.sh;
 	chmod a+x $(PREFIX)/ivarConScript.sh;
 	mv ampDepthSource/linuxGraphAmpDepth.r ampDepthSource/graphAmpDepth.r || exit;
 	mv ivarConScriptLinux.sh ivarConScript.sh || exit;
-	mv buildAmpConsLinux.sh buildAmpCons.sh;
+	mv buildAmpConsLinux.sh freezeTb.sh;
 	rm freezeTBScripts/*.gawk;
 
 # Currently nothing to clean up
 clean:
 	mv ivarConScriptLinux.sh ivarConScript.sh || exit;
-	mv buildAmpConsLinux.sh buildAmpCons.sh;
+	mv buildAmpConsLinux.sh freezeTb.sh;
 	rm freezeTBScripts/*.gawk;

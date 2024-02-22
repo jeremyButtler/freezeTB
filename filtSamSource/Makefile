@@ -1,7 +1,7 @@
 CC=cc
 PREFIX=/usr/local/bin
 CFLAGS= -static -O3
-MACCFLAGS= -static -O3
+MACCFLAGS= -O3
 DEBUGFLAGS= -static -O0 -ggdb -Wall -Wno-unused-function
 
 all:
