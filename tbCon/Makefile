@@ -1,7 +1,7 @@
 CC=cc
 PREFIX=/usr/local/bin
 CFLAGS=-static -std=c89 -O3 -Wno-unused-function
-MAC_CFLAGS=-O3
+MACCFLAGS=-O3
 
 DEBUG_FLAGS=-static -std=89 -O0 -ggdb -Wall
 GDB_NAME=gdb
@@ -12,7 +12,7 @@ all:
 	$(CC) $(CFLAGS) -o $(outNameStr) tbCon.c
 
 mac:
-	$(CC) $(MAC_CFLAGS) -o $(outNameStr) tbCon.c
+	$(CC) $(MACCFLAGS) -o $(outNameStr) tbCon.c
 
 debug:
 	$(CC) $(DEBUG_FLAGS) -o bugTbCon tbCon.h
