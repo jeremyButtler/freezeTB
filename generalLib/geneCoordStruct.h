@@ -31,6 +31,12 @@
 '   o fun-06: swapGeneCoord
 '     - Swaps two array items in a geneCoords structure
 '       around
+'   o fun-07: geneCoordsSort
+'     - Sorts the arrays in a genesCoord structure by
+'       starting positiion with shell short.
+'   o fun-08: findStartCoordInGeneCoord
+'     - Does a binary search by starting coordinate for a
+'       potentail gene in a geneCoords structure
 '   o fun-09: pafGetGeneCoords
 '     - Gets the gene coordinates from a paf file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -463,7 +469,6 @@ static int findStartCoordInGeneCoord(
 
    return midI;
 } /*findStartCoordInGeneCoords*/
-
 
 /*-------------------------------------------------------\
 | Fun-09: pafGetGeneCoords
