@@ -43,7 +43,11 @@
 '     - Gets the amr data from the Who 2021 TB antibiotice
 '       resistance catalog (genome indicie tab saved as
 '       a csv).
-'    o fun-15: read_2023_WhoAmrTsv
+'   o fun-15: checkCrossRes
+'     - Check if there is cross resitance (2023 catalog)
+'   o fun-16: pCrossRes
+'     - Print out cross resitance (report not database)
+'    o fun-17: read_2023_WhoAmrTsv
 '      - Reads in the two tabs (as separate tsv's) and
 '        converts them to an amrStructs array
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -66,6 +70,12 @@
 #define def_amrST_unkownDir 2
 #define def_amrST_memError 64
 #define def_amrST_missingIndice 2
+
+#define def_FQ_CrossResFlag 1
+#define def_BDQ_CrossResFlag 2
+#define def_CFZ_CrossResFlag 4
+#define def_INH_CrossResFlag 8
+#define def_ETO_CrossResFlag 16
 
 /*-------------------------------------------------------\
 | ST-01: amrStruct
@@ -98,7 +108,6 @@ typedef struct amrStruct{
    char *commentStr; /*WHO comment (has epistatic)*/
    uint lenCommentUI; /*Length of comment*/
 
-
    char gradeC;    /*Grade of resitance*/
    char mutTypeStr[4]; /*Mutation type*/
    char dirFlag;   /*-1: gene reverse complement, else 0*/
@@ -106,6 +115,7 @@ typedef struct amrStruct{
       ' at the end
       */
    ulong amrFlagsUL;   /*flags for antibiotic classes*/
+   ulong crossResFlagsUL;/*flags for cross resistance*/
    uint numSupReadsUI; /*Number of reads supporting*/
    uint numMapReadsUI; /*Number of reads mapping*/
 }amrStruct;
@@ -165,6 +175,8 @@ typedef struct amrStruct{
    (amrStructPtr)->amrFlagsUL = 0;\
    (amrStructPtr)->numSupReadsUI = 0;\
    (amrStructPtr)->numMapReadsUI = 0;\
+   \
+   (amrStructPtr)->crossResFlagsUL = 0;\
 } /*blankAmrStruct*/
 
 /*-------------------------------------------------------\
@@ -1264,12 +1276,105 @@ static struct amrStruct * read_2021_WhoAmrCsv(
    return amrST;
 } /*read_2021_WhoAmrCsv*/
 
-#define getAASnpFromVarId(amrSTPtr){\
-\
-}
+/*-------------------------------------------------------\
+| Fun-15: checkCrossRes
+|   - Check if there is cross resitance (2023 catalog)
+| Input:
+|   - crossStr:
+|     o C-string with cross resitance to check
+|   - amrSTPtr:
+|     o Pionter to amrStruct structure to add corss
+|       resitance to
+| Output:
+|   - Modifies:
+|     o crosRefFlagsUL in amrSTPtr to hold the cross
+|       resitance results
+\-------------------------------------------------------*/
+#define checkCrossRes(crossStr, amrSTPtr){\
+   if(*(crossStr) < 32) ;\
+   \
+   else if(!cStrEql("FQ X-R\t", (crossStr), '\t'))\
+      (amrSTPtr)->crossResFlagsUL |= def_FQ_CrossResFlag;\
+   \
+   else if(!cStrEql("BDQ-CFZ X-R\t", (crossStr), '\t'))\
+   { /*Else If: there was bedaquiline/clorfazimine*/\
+      (amrSTPtr)->crossResFlagsUL |=def_BDQ_CrossResFlag;\
+      (amrSTPtr)->crossResFlagsUL |=def_CFZ_CrossResFlag;\
+   } /*Else If: there was bedaquiline/clorfazimine*/\
+   \
+   else if(!cStrEql("INH-ETO X-R\t", (crossStr), '\t'))\
+   { /*Else If: there was isoniazid-ethionamide*/\
+      (amrSTPtr)->crossResFlagsUL |=def_INH_CrossResFlag;\
+      (amrSTPtr)->crossResFlagsUL |=def_ETO_CrossResFlag;\
+   } /*Else If: there was isoniazid-ethionamide*/\
+} /*checkCrossRes*/
 
 /*-------------------------------------------------------\
-| Fun-15: read_2023_WhoAmrTsv
+| Fun-16: pCrossRes
+|   - Print out cross resitance (for report, not database)
+| Input:
+|   - amrSTPtr:
+|     o Pionter to amrStruct structure to print out cross
+|       resistance for
+|   - oufFILE:
+|     o FIle to print the cross restance to
+| Output:
+|   - Prints:
+|     o NA if no cross resitance
+|     o drug1-drug2-...-drugn if there is any cross
+|       resistance
+\-------------------------------------------------------*/
+#define pCrossRes(amrSTPtr, outFILE){\
+   char firstPrintBl = 1;\
+   \
+   if((amrSTPtr)->crossResFlagsUL & def_FQ_CrossResFlag)\
+   { /*If: there was cross resistance*/\
+      fprintf((outFILE), "fluoroquine");\
+      firstPrintBl = 0;\
+   } /*If: there was cross resistance*/\
+   \
+   if((amrSTPtr)->crossResFlagsUL & def_BDQ_CrossResFlag)\
+   { /*If: there was cross resistance*/\
+      if(firstPrintBl)\
+         fprintf((outFILE), "bedaquiline");\
+      else\
+         fprintf((outFILE), "-bedaquiline");\
+      firstPrintBl = 0;\
+   } /*If: there was cross resistance*/\
+   \
+   if((amrSTPtr)->crossResFlagsUL & def_CFZ_CrossResFlag)\
+   { /*If: there was cross resistance*/\
+      if(firstPrintBl)\
+         fprintf((outFILE), "clofazimine");\
+      else\
+         fprintf((outFILE), "-clofazimine");\
+      firstPrintBl = 0;\
+   } /*If: there was cross resistance*/\
+   \
+   if((amrSTPtr)->crossResFlagsUL & def_INH_CrossResFlag)\
+   { /*If: there was cross resistance*/\
+      if(firstPrintBl)\
+         fprintf((outFILE), "isoniazid");\
+      else\
+         fprintf((outFILE), "-isoniazid");\
+      firstPrintBl = 0;\
+   } /*If: there was cross resistance*/\
+   \
+   if((amrSTPtr)->crossResFlagsUL & def_ETO_CrossResFlag)\
+   { /*If: there was cross resistance*/\
+      if(firstPrintBl)\
+         fprintf((outFILE), "ethionamide");\
+      else\
+         fprintf((outFILE), "-ethionmaide");\
+      firstPrintBl = 0;\
+   } /*If: there was cross resistance*/\
+   \
+   /*If there was no cross resistance*/\
+   if(firstPrintBl) fprintf((outFILE), "NA");\
+} /*pCrossRes*/
+
+/*-------------------------------------------------------\
+| Fun-17: read_2023_WhoAmrTsv
 |   - Reads in the two tabs (as separate tsv's) and
 |     converts them to an amrStructs array
 | Input:
@@ -1300,23 +1405,23 @@ static amrStruct * read_2023_WhoAmrTsv(
    char **drugAryStr,    /*Holds antibiotics*/
    uchar *errUC         /*Reports errors*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-15 TOC: read_2023_WhoAmrTsv
-    '   o fun-15 sec-01:
+   ' Fun-17 TOC: read_2023_WhoAmrTsv
+    '   o fun-17 sec-01:
     '     - Variable declerations
-    '   o fun-15 sec-02:
+    '   o fun-17 sec-02:
     '     - Get the genome coordinates
-    '   o fun-15 sec-03:
+    '   o fun-17 sec-03:
     '     - Get the master file length
-    '   o fun-15 sec-04:
+    '   o fun-17 sec-04:
     '     - Set up the buffers
-    '   o fun-15 sec-05:
+    '   o fun-17 sec-05:
     '     - Read in the file
-    '   o fun-15 sec-06:
+    '   o fun-17 sec-06:
     '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-15 Sec-01:
+    ^ Fun-17 Sec-01:
     ^   - Variable declerations
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1343,7 +1448,7 @@ static amrStruct * read_2023_WhoAmrTsv(
     struct amrStruct *amrST = 0;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-15 Sec-02:
+    ^ Fun-17 Sec-02:
     ^   - Get the genome coordinates
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1360,7 +1465,7 @@ static amrStruct * read_2023_WhoAmrTsv(
     } /*If: I had a memory error*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-15 Sec-03:
+    ^ Fun-17 Sec-03:
     ^   - Get the master file length
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1377,7 +1482,7 @@ static amrStruct * read_2023_WhoAmrTsv(
     fseek(whoMasterFILE, 0, SEEK_SET); /*Start of file*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-15 Sec-04:
+    ^ Fun-17 Sec-04:
     ^   - Set up the buffers
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1401,37 +1506,40 @@ static amrStruct * read_2023_WhoAmrTsv(
     *numAmrUL = 0;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-15 Sec-05:
+    ^ Fun-17 Sec-05:
     ^   - Read in the file
-    ^   o fun-15 sec-05 sub-01:
+    ^   o fun-17 sec-05 sub-01:
     ^     - get past header, start loop, get antibiotic
-    ^   o fun-15 sec-05 sub-02:
+    ^   o fun-17 sec-05 sub-02:
     ^     - get the gene name
-    ^   o fun-15 sec-05 sub-03:
+    ^   o fun-17 sec-05 sub-03:
     ^     - Move past the mutation column
-    ^   o fun-15 sec-05 sub-04:
+    ^   o fun-17 sec-05 sub-04:
     ^     - Move past the mutation column
-    ^   o fun-15 sec-05 sub-05:
+    ^   o fun-17 sec-05 sub-05:
     ^     - Move past the mutation column
-    ^   o fun-15 sec-05 sub-06:
+    ^   o fun-17 sec-05 sub-06:
     ^     - Get the effect column
-    ^   o fun-15 sec-05 sub-07:
+    ^   o fun-17 sec-05 sub-07:
     ^     - Move past the genome coordinate. I will get
     ^       this form the genIndice array I made at the
     ^       end
-    ^   o fun-15 sec-05 sub-08:
+    ^   o fun-17 sec-05 sub-08:
     ^     - Move to the next set of targets to extract
-    ^   o fun-15 sec-05 sub-09:
+    ^   o fun-17 sec-05 sub-09:
     ^     - Check if this provides resitance
+    ^   o fun-17 sec-05 sub-10:
     ^     - Get the comment entry
-    ^   o fun-15 sec-05 sub-10:
+    ^   o fun-17 sec-05 sub-11:
+    ^     - Check for cross resistance (additional grade)
+    ^   o fun-17 sec-05 sub-12:
     ^     - Deal with genomic coordiantes
-    ^   o fun-15 sec-05 sub-11:
+    ^   o fun-17 sec-05 sub-13:
     ^     - Move to the next amr entry
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
     /****************************************************\
-    * Fun-15 Sec-05 Sub-01:
+    * Fun-17 Sec-05 Sub-01:
     *   - get past header, start loop, get antibiotic
     \****************************************************/
 
@@ -1469,14 +1577,14 @@ static amrStruct * read_2023_WhoAmrTsv(
        } /*If: I am on a new antibiotic*/ 
 
        amrST[*numAmrUL].amrFlagsUL =
-          ((ulong) 1 << (uiDrug - 1));
+          ((ulong) 1 << (uiDrug));
 
        while(buffStr[uiPos] > 31) ++uiPos;
 
        ++uiPos; /*Get off the tab*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-02:
+       * Fun-17 Sec-05 Sub-02:
        *   - get the gene name
        \*************************************************/
 
@@ -1504,7 +1612,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        uiPos += amrST[*numAmrUL].lenGeneIdUI + 1;
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-03:
+       * Fun-17 Sec-05 Sub-03:
        *   - Move past the mutation column
        \*************************************************/
 
@@ -1512,7 +1620,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        ++uiPos; /*get off the tab*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-04:
+       * Fun-17 Sec-05 Sub-04:
        *   - Read in the variant column
        \*************************************************/
 
@@ -1540,7 +1648,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        uiPos += amrST[*numAmrUL].lenVarIdUI + 1;
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-05:
+       * Fun-17 Sec-05 Sub-05:
        *   - Read past the teir column
        \*************************************************/
 
@@ -1548,7 +1656,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        ++uiPos; /*get off the tab*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-06:
+       * Fun-17 Sec-05 Sub-06:
        *   - Get the effect column
        \*************************************************/
 
@@ -1591,7 +1699,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        skipEffect:;
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-07:
+       * Fun-17 Sec-05 Sub-07:
        *   - Move past the genome coordinate. I will get
        *     this form the genIndice array I made at the
        *     end
@@ -1601,7 +1709,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        ++uiPos; /*get off the tab*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-08:
+       * Fun-17 Sec-05 Sub-08:
        *   - Move to the next set of targets to extract
        \*************************************************/
 
@@ -1612,7 +1720,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        } /*Loop: Get past columns I am ignoring*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-09:
+       * Fun-17 Sec-05 Sub-09:
        *   - Check if this provides resitance
        \*************************************************/
 
@@ -1630,7 +1738,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        ++uiPos; /*get off the tab*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-10:
+       * Fun-17 Sec-05 Sub-10:
        *   - Get the comment entry
        \*************************************************/
 
@@ -1673,34 +1781,47 @@ static amrStruct * read_2023_WhoAmrTsv(
        skipComent:;
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-11:
+       * Fun-17 Sec-05 Sun-11:
+       *   - Check for cross resistance (additional grade)
+       \*************************************************/
+
+       for(iTab = 0; iTab < 4; ++iTab)
+       { /*Loop: Get past columns I am ignoring*/
+          while(buffStr[uiPos] != '\t') ++uiPos;
+          ++uiPos; /*Get off the tab*/
+       } /*Loop: Get past columns I am ignoring*/
+
+       checkCrossRes(&buffStr[uiPos], &amrST[*numAmrUL]);
+
+       /*************************************************\
+       * Fun-17 Sec-05 Sun-12:
        *   - Deal with genomic coordiantes
-       *   o fun-15 sec-05 sub-11 cat-01:
+       *   o fun-17 sec-05 sun-12 cat-01:
        *     - Find the matching gene indice(s)
-       *   o fun-15 sec-05 sub-11 cat-02:
+       *   o fun-17 sec-05 sun-12 cat-02:
        *     - Check if I have another amr/start loop
-       *   o fun-15 sec-05 sub-11 cat-03:
+       *   o fun-17 sec-05 sun-12 cat-03:
        *     - In next amr, copy the gene id
-       *   o fun-15 sec-05 sub-11 cat-04:
+       *   o fun-17 sec-05 sun-12 cat-04:
        *     - In next amr, copy variant id
-       *   o fun-15 sec-05 sub-11 cat-05:
+       *   o fun-17 sec-05 sun-12 cat-05:
        *     - In next amr, copy effect entry
-       *   o fun-15 sec-05 sub-11 cat-06:
+       *   o fun-17 sec-05 sun-12 cat-06:
        *     - In next amr, copy the comment entry
-       *   o fun-15 sec-05 sub-11 cat-07:
+       *   o fun-17 sec-05 sun-12 cat-07:
        *     - Get reference postion
-       *   o fun-15 sec-05 sub-11 cat-08:
+       *   o fun-17 sec-05 sun-12 cat-08:
        *     - Copy the reference sequence
-       *   o fun-15 sec-05 sub-11 cat-09:
+       *   o fun-17 sec-05 sun-12 cat-09:
        *     - Copy the amr sequence
-       *   o fun-15 sec-05 sub-11 cat-10:
+       *   o fun-17 sec-05 sun-12 cat-10:
        *     - Check the amr mutation type
-       *   o fun-15 sec-05 sub-11 cat-11:
+       *   o fun-17 sec-05 sun-12 cat-11:
        *     - Move to the next gene indice/dup amr
        \*************************************************/
 
        /*++++++++++++++++++++++++++++++++++++++++++++++++\
-       + Fun-15 Sec-05 Sub-11 Cat-01:
+       + Fun-17 Sec-05 Sun-12 Cat-01:
        +   - Find the matching gene indice(s)
        \++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1724,7 +1845,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        } /*If: I could not find the indice*/
 
        /*++++++++++++++++++++++++++++++++++++++++++++++++\
-       + Fun-15 Sec-05 Sub-11 Cat-02:
+       + Fun-17 Sec-05 Sun-12 Cat-02:
        +   - Check if I have another amr/start loop
        \++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1743,11 +1864,14 @@ static amrStruct * read_2023_WhoAmrTsv(
           { /*If: I have multiple amrs for this entry*/
              initAmrStruct(&amrST[*numAmrUL + 1]);
 
+             amrST[*numAmrUL + 1].crossResFlagsUL = 
+                amrST[*numAmrUL].crossResFlagsUL;
+
              amrST[*numAmrUL + 1].amrFlagsUL = 
                 amrST[*numAmrUL].amrFlagsUL;
 
              /*++++++++++++++++++++++++++++++++++++++++++\
-             + Fun-15 Sec-05 Sub-11 Cat-03:
+             + Fun-17 Sec-05 Sun-12 Cat-03:
              +   - In next amr, copy the gene id
              \++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1770,7 +1894,7 @@ static amrStruct * read_2023_WhoAmrTsv(
              ); /*Copy the reference sequence*/
 
              /*++++++++++++++++++++++++++++++++++++++++++\
-             + Fun-15 Sec-05 Sub-11 Cat-04:
+             + Fun-17 Sec-05 Sun-12 Cat-04:
              +   - In next amr, copy variant id
              \++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1793,7 +1917,7 @@ static amrStruct * read_2023_WhoAmrTsv(
              ); /*Copy the reference sequence*/
 
              /*++++++++++++++++++++++++++++++++++++++++++\
-             + Fun-15 Sec-05 Sub-11 Cat-05:
+             + Fun-17 Sec-05 Sun-12 Cat-05:
              +   - In next amr, copy effect entry
              \++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1816,7 +1940,7 @@ static amrStruct * read_2023_WhoAmrTsv(
              ); /*Copy the reference sequence*/
 
              /*++++++++++++++++++++++++++++++++++++++++++\
-             + Fun-15 Sec-05 Sub-11 Cat-06:
+             + Fun-17 Sec-05 Sun-12 Cat-06:
              +   - In next amr, copy the comment entry
              \++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1840,7 +1964,7 @@ static amrStruct * read_2023_WhoAmrTsv(
           } /*If: I have multiple amrs for this entry*/
 
           /*+++++++++++++++++++++++++++++++++++++++++++++\
-          + Fun-15 Sec-05 Sub-11 Cat-07:
+          + Fun-17 Sec-05 Sun-12 Cat-07:
           +   - Copy the reference position
           \+++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1848,7 +1972,7 @@ static amrStruct * read_2023_WhoAmrTsv(
              indiceAryST[indexI].posUI;
 
           /*+++++++++++++++++++++++++++++++++++++++++++++\
-          + Fun-15 Sec-05 Sub-11 Cat-08:
+          + Fun-17 Sec-05 Sun-12 Cat-08:
           +   - Copy the reference sequence
           \+++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1871,7 +1995,7 @@ static amrStruct * read_2023_WhoAmrTsv(
           ); /*Copy the reference sequence*/
 
           /*+++++++++++++++++++++++++++++++++++++++++++++\
-          + Fun-15 Sec-05 Sub-11 Cat-09:
+          + Fun-17 Sec-05 Sun-12 Cat-09:
           +   - Copy the amr sequence
           \+++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1894,7 +2018,7 @@ static amrStruct * read_2023_WhoAmrTsv(
           ); /*Copy the amrerence sequence*/
 
           /*+++++++++++++++++++++++++++++++++++++++++++++\
-          + Fun-15 Sec-05 Sub-11 Cat-10:
+          + Fun-17 Sec-05 Sun-12 Cat-10:
           +   - Check the amr mutation type
           \+++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1942,7 +2066,7 @@ static amrStruct * read_2023_WhoAmrTsv(
           amrST[*numAmrUL].mutTypeStr[3] = '\0';
 
           /*+++++++++++++++++++++++++++++++++++++++++++++\
-          + Fun-15 Sec-05 Sub-11 Cat-11:
+          + Fun-17 Sec-05 Sun-12 Cat-11:
           +   - Move to the next gene indice/dup amr
           \+++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1951,7 +2075,7 @@ static amrStruct * read_2023_WhoAmrTsv(
        } /*Loop: Copy needed coordiantes*/
 
        /*************************************************\
-       * Fun-15 Sec-05 Sub-11:
+       * Fun-17 Sec-05 Sun-13:
        *   - Move to the next amr entry
        \*************************************************/
 
@@ -1959,7 +2083,7 @@ static amrStruct * read_2023_WhoAmrTsv(
     } /*Loop: Read in the file*/
     
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-15 Sec-06:
+    ^ Fun-17 Sec-06:
     ^   - Clean up
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 

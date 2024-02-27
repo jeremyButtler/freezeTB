@@ -1,10 +1,7 @@
 #b tbAmr.c:183
-#b tbAmr.c:240
-#b amrStruct.h:1905
-b amrStruct.h:1971
+b amrStruct.h:1790
 #b genIndiceStruct.h:644
-b checkAmr.h:771
-#b checkAmr.h:941
+#b checkAmr.h:771
 #b ../generalLib/samEntryStruct.h:636
 
 # 2021 catalog command (just reads, no id printing)
@@ -18,3 +15,16 @@ r -who-2023-tab1-tsv WHO-2023-TB-tab1-master.tsv -who-2023-tab2-tsv WHO-2023-TB-
 
 # run commands for print ids
 #r -who-2021-csv WHO-TB-catalog-genomeIndicies.csv -sam ~/BC33-test.sam -id-file-pref ~/delete-tbAmrTest/delete
+
+define pcross
+   set $icnt = 0
+   set $tmpAmrST = $0
+   set $lenAmr = $1
+
+   while($icnt < lenAmr)
+      if(tmpAmrST[icnt].crossResFlagsUL)
+         p icnt
+      end
+      set $icnt = $icnt + 1
+   end
+end

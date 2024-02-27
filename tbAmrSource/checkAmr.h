@@ -479,7 +479,8 @@ static struct amrHit * checkAmrSam(
    if((pHeadBl))\
    { /*If: I am printing the header*/\
       (pHeadBl) = 0;\
-      fprintf((outFILE), "Id\tGene\tDrug\tVariantId");\
+      fprintf((outFILE), "Id\tGene\tDrug");\
+      fprintf((outFILE), "\tCrossResitance\tVariantId");\
       fprintf((outFILE), "\tType\t\trefPos\tseqPos");\
       fprintf((outFILE), "\trefSeq\tamrSeq\teffect");\
       fprintf((outFILE), "\twhoComment\n");\
@@ -506,13 +507,20 @@ static struct amrHit * checkAmrSam(
          /*There is resistance, print it out*/\
          fprintf(\
            (outFILE),\
-           "%s\t%s\t%s\t%s\t%s",\
+           "%s\t%s\t%s\t",\
            (seqIdStr),              /*Name of the seq*/\
            tmpST->amrST->geneIdStr, /*Gene name*/\
-           drugStr,                 /*Amr drug*/\
+           drugStr                 /*Amr drug*/\
+         ); /*Pirnt out gene id and drug*/\
+         \
+         pCrossRes(tmpST->amrST, (outFILE));\
+         \
+         fprintf(\
+           (outFILE),\
+           "\t%s\t%s",\
            tmpST->amrST->varIdStr,  /*Variant id*/\
            tmpST->amrST->mutTypeStr /*snp/del/ins/LoF*/\
-         ); /*Print out the gene id and drug name*/\
+         ); /*Print out the variant id and type*/\
          \
          fprintf(\
            (outFILE),\
@@ -600,11 +608,11 @@ static struct amrHit * checkAmrSam(
    if((pHeadBl))\
    { /*If: I am printing the header*/\
       (pHeadBl) = 0;\
-      fprintf((outFILE), "\tGene\tDrug\tVariantId\tType");\
-      fprintf((outFILE), "\trefPos\trefSeq\tamrSeq");\
-      fprintf((outFILE), "\tmappedReads");\
-      fprintf((outFILE), "\tsupportingReads");\
-      fprintf((outFILE), "\teffect\twhoComment\n");\
+      fprintf((outFILE),"\tGene\tDrug\tcrossResistance");\
+      fprintf((outFILE),"\tVariantId\tType\trefPos");\
+      fprintf((outFILE),"\trefSeq\tamrSeq\tmappedReads");\
+      fprintf((outFILE),"\tsupportingReads");\
+      fprintf((outFILE),"\teffect\twhoComment\n");\
    } /*If: I am printing the header*/\
    \
    for(indexUI = 0; indexUI < (numAmrsUI); ++indexUI)\
@@ -645,9 +653,16 @@ static struct amrHit * checkAmrSam(
          /*There is resistance, print it out*/\
          fprintf(\
            (outFILE),\
-           "%s\t%s\t%s\t%s",\
+           "%s\t%s\t",\
            (amrSTAry)[indexUI].geneIdStr,/*gene id*/\
-           drugStr,\
+           drugStr\
+         ); /*Pirnt out gene id and drug*/\
+         \
+         pCrossRes(&(amrSTAry)[indexUI], (outFILE));\
+         \
+         fprintf(\
+           (outFILE),\
+           "\t%s\t%s",\
            (amrSTAry)[indexUI].varIdStr, /*variant id*/\
            (amrSTAry)[indexUI].mutTypeStr/*mutationType*/\
          ); /*Print out the gene id and drug name*/\
