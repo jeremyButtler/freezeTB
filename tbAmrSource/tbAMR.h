@@ -29,6 +29,9 @@
 #define defWhoTblSep ','  /*Deleminator for who table*/
 #define defAmrTblSep '\t' /*Deliminator for my amr table*/
 #define defMaxHomoLen 1   /*Maximum homopolymer length*/
+#define defNoWho 0
+#define defWho2021 1
+#define defWho2023 2
 
 
 /*-------------------------------------------------------\
@@ -61,10 +64,15 @@ char * tbAMRGetInput(
    int numArgsI,
    char *argsAryStr[],
    char **amrTblStr,  /*Table with AMR mutations*/
-   char **seqStr,     /*Sequence to check for resitance*/
+   char **amrTblTab2STr, /*For 2023 catalog*/
+   char **samStr,     /*Sequence to check for resitance*/
    char **outStr,     /*File to output to*/
-   int *maxHomoI,     /*Maximum homopolymer size*/
-   char *whoTblBl     /*amrTblStr is from the who (csv)*/
+   char **idPrefStr,   /*Prefix for read id files*/
+   char *whoTblFlag,    /*amrTblStr is from the who (csv)*/
+   char *readsBl,     /*1: user input reads*/
+   uint *minDepthI,   /*Min read depth to keep an amr*/
+   float *minPercMapF,/*Min % support to keep amr (read)*/
+   float *minPercTotalF  /*Min % mapped reads to keep*/
 ); /*tbAMRGetInput*/
 
 /*-------------------------------------------------------\

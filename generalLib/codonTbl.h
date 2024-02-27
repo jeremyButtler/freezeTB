@@ -296,6 +296,11 @@ static char codonLkTbl[5][5][5] =
       /*Case: The first letter is a T*/\
       \
       case 'V': retC = 'v'; break; /*Val*/\
+      \
+      /*This case is for stop and it will look like a
+      ` new line. So there is some risk
+      */\
+      case ('*' & ~32): retC = '*'; break; /*stop*/\
    } /*Switch: Check the first letter*/\
    \
    retC;\

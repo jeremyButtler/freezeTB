@@ -21,26 +21,29 @@ int main(
    char *amrTblStr = 0;/*Table with AMR mutations*/
    char *samStr = 0;   /*Sequence to check for resitance*/
    char *outStr = 0;   /*Holds path to File to output to*/
-   int maxHomoI = defMaxHomoLen;/*Max homopolymer size*/
-   char whoTblBl = 0; /*amrTblStr is from the who (csv)*/
+   char *amrTblTab2Str = 0; /*For 2023 catalog*/
+   char *idPrefStr = 0; /*Prefix for read id files*/
+   char whoTblFlag = 0; /*amrTblStr is from the who (csv)*/
 
+   char readsBl;     /*1: user input reads*/
 
-   char *drugAryStr[] =
-      {"RIF", "INH", "EMB", "PZA", "LEV", "MXF", "BDQ",
-       "LZD", "CFZ", "DLM", "AMI", "STM", "ETH", "KAN",
-       "CAP"  
-      }; /*This is hardcoded for know, but I need to set
-         ` this up so it is grabbed ffrom the file
-         */
+   /*Stats for read processing*/
+   uint minDepthUI = defMinDepth;
+   float minPercMapF = defMinPerReadsMap;
+   float minPercTotalF = defMinPerReadsTotal;
+
+   char *drugAryStr = 0;
 
    char *buffStr = 0;   /*For reading sam files*/
    ulong lenBuffUL = 0; /*Size of buffStr*/
 
    char *errStr = 0;
+   uchar errUC = 0;
 
    ulong numAmrUL = 0;
 
    FILE *amrFILE = 0;
+   FILE *amrTwoFILE = 0;
    FILE *samFILE = 0;
    FILE *outFILE = 0;
 
@@ -65,10 +68,15 @@ int main(
         numArgsI,
         argsAryStr,
         &amrTblStr,  /*Table with AMR mutations*/
+        &amrTblTab2Str, /*For 2023 catalog*/
         &samStr,     /*Sequence to check for resitance*/
         &outStr,     /*File to outuput to*/
-        &maxHomoI,   /*Maximum homopolymer size*/
-        &whoTblBl    /*amrTblStr is from the who (csv)*/
+        &idPrefStr,   /*Prefix for read id files*/
+        &whoTblFlag,   /*amrTblStr is from the who (csv)*/
+        &readsBl,     /*1: user input reads*/
+        &minDepthUI,   /*Min read depth to keep an amr*/
+        &minPercMapF,/*Min % support to keep amr (read)*/
+        &minPercTotalF  /*Min % mapped reads to keep*/
      ); /*Get the user input*/
 
    /****************************************************\
@@ -176,7 +184,19 @@ int main(
 
    if(amrFILE == 0)
    { /*If: I could not open the WHO catalog*/
-      fprintf(stderr, "Unable to open %s\n", amrTblStr);
+      if(whoTblFlag == defWho2021)
+         fprintf(
+            stderr,
+            "Could not open -who-2021-csv %s\n",
+            amrTblStr
+         );
+
+      if(whoTblFlag == defWho2023)
+         fprintf(
+            stderr,
+            "Could not open -who-2023-tab1-tsv %s\n",
+            amrTblStr
+         );
 
       fclose(samFILE);
       fclose(outFILE);
@@ -184,8 +204,54 @@ int main(
       exit(-1);
    } /*If: I could not open the WHO catalog*/
 
-   amrST = read_2021_WhoAmrCsv(amrFILE, &numAmrUL);
+   if(amrTblTab2Str)
+   { /*If: I have a two part amr table*/
+      amrTwoFILE = fopen(amrTblTab2Str, "r");
+
+      if(!amrTwoFILE)
+      { /*If: I could not open the amr file*/
+         fprintf(
+            stderr,
+            "Unable to open -who-2023-tab2-tsv %s\n",
+            amrTblTab2Str
+          );
+
+         fclose(samFILE);
+         fclose(amrFILE);
+         fclose(outFILE);
+
+         exit(-1);
+      } /*If: I could not open the amr file*/
+   } /*If: I have a two part amr table*/
+
+   switch(whoTblFlag)
+   { /*Switch: checking amr input method*/
+      case defWho2021:
+         amrST =
+            read_2021_WhoAmrCsv(
+               amrFILE,
+               &numAmrUL,
+               &drugAryStr
+            ); /*get the amr data (2021 catalog*/
+         break;
+
+      case defWho2023:
+         amrST =
+             read_2023_WhoAmrTsv(
+                amrFILE,
+                amrTwoFILE,
+                &numAmrUL,
+                &drugAryStr,
+                &errUC
+             ); /*Get the amr data (2023 catalog)*/
+
+         fclose(amrTwoFILE);
+         amrTwoFILE = 0;
+         break;
+   } /*Switch: checking amr input method*/
+
    fclose(amrFILE);
+   amrFILE = 0;
 
    if(amrST == 0)
    { /*If: There was a memory error*/
@@ -217,14 +283,20 @@ int main(
       drugAryStr,
       &buffStr,
       &lenBuffUL,
+      readsBl,    /*Working with reads or consesnsuses*/
+      minDepthUI,  /*Minimum read depth*/
+      minPercMapF,/*Min % support to keep amr (read)*/
+      minPercTotalF, /*Min % mapped reads to keep*/
       samFILE,
-      outFILE
-   );
+      outFILE,
+      idPrefStr /*Prefix for variant read id files*/
+   ); /*check for amrs*/
       
    fclose(samFILE);
    fclose(outFILE);
    free(buffStr);
    freeAmrStructArray(amrST, numAmrUL);
+   free(drugAryStr);
 
    exit(0);
 } /*main*/
@@ -248,9 +320,9 @@ int main(
 |   - maxHomlI:
 |     o Will hold the maximum homopolymer length to keep
 |       an indel
-|   - whoTlbBl:
-|     o Holds if amrTblStr pionts to a csv from the
-|       WHO or my own tsv file format
+|   - whoTlbFlag:
+|     o Tells if using the 2021 (1) or 2023 (2) catalog or
+|       if using my own format once implements
 | Output:
 |   - Modifies:
 |     o All input variables
@@ -259,10 +331,15 @@ char * tbAMRGetInput(
    int numArgsI,
    char *argsAryStr[],
    char **amrTblStr,  /*Table with AMR mutations*/
+   char **amrTblTab2Str, /*For 2023 catalog*/
    char **samStr,     /*Sequence to check for resitance*/
    char **outStr,     /*File to output to*/
-   int *maxHomoI,     /*Maximum homopolymer size*/
-   char *whoTblBl     /*amrTblStr is from the who (csv)*/
+   char **idPrefStr,   /*Prefix for read id files*/
+   char *whoTblFlag,    /*amrTblStr is from the who (csv)*/
+   char *readsBl,     /*1: user input reads*/
+   uint *minDepthUI,   /*Min read depth to keep an amr*/
+   float *minPercMapF,/*Min % support to keep amr (read)*/
+   float *minPercTotalF  /*Min % mapped reads to keep*/
 ){ /*tbAMRGetInput*/
 
    char *parmStr = 0;
@@ -273,40 +350,83 @@ char * tbAMRGetInput(
    { /*Loop: Get user input*/
       parmStr = argsAryStr[iArg];
 
-      if(strcmp(parmStr, "-who-amr-tbl") == 0)
+      if(cStrEql(parmStr, "-who-2021-csv", '\0') == 0)
       { /*Else if: this is the amr table (from who)*/
-         *amrTblStr = argsAryStr[iArg + 1];
-         *whoTblBl = 1;
          ++iArg;
+         *amrTblStr = argsAryStr[iArg];
+         *whoTblFlag = defWho2021;
       } /*Else if: this is the amr table (from who)*/
 
-      else if(strcmp(parmStr, "-amr-tbl") == 0)
-      { /*Else if: this is the amr table*/
-         *amrTblStr = argsAryStr[iArg + 1];
-         *whoTblBl = 0;
+
+      else if(!cStrEql(parmStr,"-who-2023-tab1-tsv",'\0'))
+      { /*Else if: this is the amr table (from who)*/
          ++iArg;
+         *amrTblStr = argsAryStr[iArg];
+         *whoTblFlag = defWho2023;
+      } /*Else if: this is the amr table (from who)*/
+
+      else if(!cStrEql(parmStr,"-who-2023-tab2-tsv",'\0'))
+      { /*Else if: this is the amr table (from who)*/
+         ++iArg;
+         *amrTblTab2Str = argsAryStr[iArg];
+         *whoTblFlag = defWho2023;
+      } /*Else if: this is the amr table (from who)*/
+
+      else if(cStrEql(parmStr, "-amr-tbl", '\0') == 0)
+      { /*Else if: this is the amr table*/
+         ++iArg;
+         *amrTblStr = argsAryStr[iArg];
+         *whoTblFlag = defNoWho;
       } /*Else if: this is the amr table*/
 
-      else if(strcmp(parmStr, "-sam") == 0)
+      else if(cStrEql(parmStr, "-sam", '\0') == 0)
       { /*Else if: User input consensus mappings*/
-         *samStr = argsAryStr[iArg + 1];
          ++iArg;
+         *samStr = argsAryStr[iArg];
+         *readsBl = 1;
       } /*Else if: User input consensus mappings*/
 
-      else if(strcmp(parmStr, "-out") == 0)
+      else if(cStrEql(parmStr, "-sam-con", '\0') == 0)
       { /*Else if: User input consensus mappings*/
-         *outStr = argsAryStr[iArg + 1];
          ++iArg;
+         *samStr = argsAryStr[iArg];
+         *readsBl = 0;
       } /*Else if: User input consensus mappings*/
 
-      else if(strcmp(parmStr, "-max-homo-len") == 0)
+      else if(cStrEql(parmStr, "-out", '\0') == 0)
+      { /*Else if: User input consensus mappings*/
+         ++iArg;
+         *outStr = argsAryStr[iArg];
+      } /*Else if: User input consensus mappings*/
+
+      else if(cStrEql(parmStr, "-id-file-pref", '\0') ==0)
+      { /*Else if: User input consensus mappings*/
+         ++iArg;
+         *idPrefStr = argsAryStr[iArg];
+      } /*Else if: User input consensus mappings*/
+
+      else if(cStrEql(parmStr, "-min-depth", '\0') == 0)
       { /*Else if: tb sequence to check*/
+         ++iArg;
+
          errStr =
-            base10StrToSI(argsAryStr[iArg + 1],*maxHomoI);
+           base10StrToSI(argsAryStr[iArg], *minDepthUI);
 
          if(*errStr > 32) return parmStr;
-         ++iArg;
       } /*Else if: tb sequence to check*/
+
+      else if(!cStrEql(parmStr,"-min-amr-map-perc",'\0'))
+      { /*Else if: Minimum map percent input*/
+         ++iArg;
+         *minPercMapF= atof(argsAryStr[iArg]);
+      } /*Else if: Minimum map percent input*/
+
+      else if(
+         !cStrEql(parmStr,"-min-total-map-perc",'\0')
+      ){ /*Else if: Total map percent input*/
+         ++iArg;
+         *minPercTotalF= atof(argsAryStr[iArg]);
+      } /*Else if: Total map percent input*/
 
       else return parmStr;
    } /*Loop: Get user input*/

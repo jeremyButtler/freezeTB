@@ -1,11 +1,21 @@
 /*#######################################################\
 # Name: geneIndiceStruct
-#   - Has the geneIndice structures and supporting
-#     functions to make an geneIndice tree
+#   - Has functions for reading the genome indice (tab 2)
+#     of the WHO's 2023 TB catalog.
+#   - Based on what happened between 2021 (edition 1) and
+#     2023 (edition 2), I suspect that I will have to
+#     change this for whenever catalog edition 3 comes
+#     out. How the WHO handled their 2023 catalog is a bug
+#     of its own.
 # Libraries:
-#   - "../generalLib/dataTypeShortHand.h"
+#   - "../generalLib/base10StrToNum.h"
+#   o "../generalLib/dataTypeShortHand.h"
+#   - "../generalLib/ulCpStr.h"
+#   o "../generalLib/genMath.h"
 # C Standard Libraries:
 #   - <stdlib.h>
+#   - <stdio.h>
+#   o <limits.h>
 \#######################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -13,8 +23,8 @@
 '   o header: 
 '     - Has included libraries and defines
 '   o st-01: genIndice
-'     - Structure to hold number of read mappings for a
-'       single reference
+'     - Structure to hold a single genome indice from
+'       the who 2023 catalog
 '   o fun-01: blankGeneIndice
 '     - Blanks all non-pointer values in a genIndice
 '   o fun-02: initGeneIndice
@@ -27,6 +37,27 @@
 '     - Frees a single geneIndiceST structure. This
 '       function does 'not free the child pointers in
 '       geneIndiceST
+'   o fun-06: freeGeneIndiceAry
+'     - Frees an array of geneIndiceST structures.
+'   o fun-07: cmpGenIndices
+'     - Compares to see if one genIndice structure is
+'       less than another
+'   o fun-08: cmpGenIndiceToStr
+'     - Compares to see if a genIndice structure is
+'       less than a string
+'   o fun-09: swapGenIndices
+'     - Swaps two array items in a genIndice structure
+'       around
+'   o fun-10: genIndiceSort
+'     - Sorts an array of genIndice structures by variant
+'       ids with shell short.
+'   o fun-11: findGenIndiceVariant
+'     - Does a binary search for the nearest amr at or
+'       after to the input query coordiante
+'   o fun-12: read_who2023_indiceTab
+'     - Reads in the genome coordinates and variants from
+'       the 2023 WHO TB catalog genome indice tab (saved
+'       as a tsv)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /*-------------------------------------------------------\
 | Header: 
@@ -37,40 +68,27 @@
 #define GENOME_INDICIE_STRUCT_H
 
 #include <stdlib.h>
-#include "../generalLib/dataTypeShortHand.h"
+#include <stdio.h>
+#include "../generalLib/ulCpStr.h"
+#include "../generalLib/base10StrToNum.h"
 
 /*-------------------------------------------------------\
 | ST-01: genIndice
-|   - Structure to hold number of read mappings for a
-|     single reference
-|   - For my forest I expect to have one structure per
-|     gene + 2n structures for connections. This would
-|     make a total of 3n.
-|     - Each structure is around 95 bytes, which is close
-|       to 100. So, I expect 20000 genes to need 60000
-|       structures. So, 60000 * 100 bytes = 6Mb.
-|     - The actual worst case is n + n^2, but in real life
-|       this would never happend. n + 2n is much more
-|       realistic
+|   - Structure to hold a single genome indice from
+|     the who 2023 catalog
 \-------------------------------------------------------*/
 typedef struct genIndice
 { /*genIndice*/
-   char *varIdStr;
-   uint lenVarIdUI;
    uint posUI;
 
-   char **refAryStr;
-   uint lenRefAryUI;
-   uint *lenRefStrUI;
+   char *varIdStr;
+   uint lenVarIdUI;
 
-   char **amrAryStr;
-   uint lenArmAryUI;
-   uint *lenAmrStrUI;
+   char *refSeqStr;
+   uint lenRefSeqUI;
 
-   /*Avl tree variables*/
-   char balC;
-   struct genIndice *leftST;
-   struct genIndice *rightST;
+   char *amrSeqStr;
+   uint lenAmrSeqUI;
 }genIndice;
 
 /*-------------------------------------------------------\
@@ -85,22 +103,18 @@ typedef struct genIndice
 |       pointers
 \-------------------------------------------------------*/
 #define initGenIndice(genIndiceSTPtr){\
-   (genIndicieSTPtr)->posUI = 0;\
-   (genIndicieSTPtr)->varIdStr = 0;\
+   (genIndiceSTPtr)->posUI = 0;\
    \
-   (genIndicieSTPtr)->refAryStr = 0;\
-   (genIndicieSTPtr)->lenRefAryUI = 0;\
-   (genIndicieSTPtr)->lenRefStrUI = 0;\
+   (genIndiceSTPtr)->varIdStr = 0;\
+   (genIndiceSTPtr)->lenVarIdUI = 0;\
+   \
+   (genIndiceSTPtr)->refSeqStr = 0;\
+   (genIndiceSTPtr)->lenRefSeqUI = 0;\
     \
-   (genIndicieSTPtr)->amrAryStr = 0;\
-   (genIndicieSTPtr)->lenAmrAryUI = 0;\
-   (genIndicieSTPtr)->lenAmrStrUI = 0;\
+   (genIndiceSTPtr)->amrSeqStr = 0;\
+   (genIndiceSTPtr)->lenAmrSeqUI = 0;\
    \
-   (genIndicieSTPtr)->balC = 0;\
-   (genIndicieSTPtr)->link = 0;\
-   (genIndicieSTPtr)->leftST = 0;\
-   (genIndicieSTPtr)->rightST = 0;\
-}
+} /*initGenIndice*/
 
 /*-------------------------------------------------------\
 | Fun-03: makeGenIndice
@@ -117,7 +131,7 @@ typedef struct genIndice
    \
    initGenIndice(retST);\
    retST;\
-})
+}) /*makeGenIndice*/
 
 /*-------------------------------------------------------\
 | Fun-04: freeGenIndiceStack
@@ -134,51 +148,580 @@ typedef struct genIndice
 |     o Everything to 0
 \-------------------------------------------------------*/
 #define freeGeneIndiceStack(geneIndiceST){\
-   uint iFree ` 0;\
-   \
    if((geneIndiceST)->varIdStr)\
-       free((geneIndiceST)->varIdStr);\
+      free((geneIndiceST)->varIdStr);\
    \
-   if((geneIndiceST)->refAryStr)\
-   { /*If: I have refence sequences to free*/\
-       for(\
-          iFree = 0;\
-          iFree < (geneIndiceST)->lenRefAryUI;\
-          ++iFree\
-       ) free((geneIndiceST)->refAryStr[iFree]);\
-       \
-       free((geneIndiceST)->lenRefStrUI);\
-   } /*If: I have refence sequences to free*/\
+   if((geneIndiceST)->refSeqStr)\
+      free((geneIndiceST)->refSeqStr);\
    \
-   if((geneIndiceST)->amrAryStr)\
-   { /*If: I have amr sequences to free*/\
-       for(\
-          iFree = 0;\
-          iFree < (geneIndiceST)->lenAmrAryUI;\
-          ++iFree\
-       ) free((geneIndiceST)->amrAryStr[iFree]);\
-       \
-       free((geneIndiceST)->lenAmrStrUI);\
-   } /*If: I have amr sequences to free*/\
+   if((geneIndiceST)->amrSeqStr)\
+      free((geneIndiceST)->amrSeqStr);\
    \
    initGenIndice(geneIndiceST);\
-}
+} /*freeGeneIndiceStack*/
 
 /*-------------------------------------------------------\
 | Fun-05: freeGeneIndice
-|   - Frees a single geneIndiceST structure. This function
-|     does not free the or child pointers in geneIndiceST
+|   - Frees a single geneIndiceST structure.
 | Input:
 |   - geneIndiceST:
 |     o Pointer to geneIndiceST structure to free
 | Output:
 |   - Frees:
-|     o geneIndiceST, but not leftST, rightST, or link
+|     o geneIndiceST
 \-------------------------------------------------------*/
 #define freeGeneIndice(geneIndiceST){\
    freeGeneIndiceStack((geneIndiceST));\
    free(geneIndiceST);\
    geneIndiceST = 0;\
-}
+} /*freeGenIndice*/
+
+
+/*-------------------------------------------------------\
+| Fun-06: freeGeneIndiceAry
+|   - Frees an array of geneIndiceST structures.
+| Input:
+|   - genIndiceST:
+|     o Pointer to genIndiceST structure arrray to free
+|  - numElmUI:
+|     o unsigned int with the number of elements in
+|       genIndiceST
+| Output:
+|   - Frees:
+|     o genIndiceST
+|   - Sets:
+|     o genIndiceST to 0
+\-------------------------------------------------------*/
+#define freeGeneIndiceAry(genIndiceST, numElm){\
+   uint uiElm = 0;\
+   for(uiElm = 0; uiElm < numElm; ++uiElm)\
+      freeGeneIndiceStack((genIndiceST));\
+   \
+   free(genIndiceST);\
+   genIndiceST = 0;\
+} /*freeGenIndiceAry*/
+
+/*-------------------------------------------------------\
+| Fun-07: cmpGenIndices
+|   - Compares to see if one genIndice structure is
+|     less than another
+| Input:
+|   - qryGenIndicePtr:
+|     o Pointer to a query genIndice to compare
+|   - refGenIndicePtr:
+|     o Pointer to a reference genIndice to compare
+| Output:
+|   - Returns:
+|     o < 0 if the query is less than the reference
+|     o 0 if the query is the same as the reference
+|     o > 0 if the query is greater than the reference
+\-------------------------------------------------------*/
+#define cmpGenIndices(qryGenIndicePtr, refGenIndicePtr)(\
+   cStrEql(\
+      (qryGenIndicePtr)->varIdStr,\
+      (refGenIndicePtr)->varIdStr,\
+      '\0'\
+   )\
+) /*cmpGenIndicies*/
+
+
+/*-------------------------------------------------------\
+| Fun-08: cmpGenIndiceToStr
+|   - Compares to see if a genIndice structure is
+|     less than a string
+| Input:
+|   - qryGenIndicePtr:
+|     o Pointer to a query genIndice to compare
+|   - refStr:
+|     o C-string to compare
+| Output:
+|   - Returns:
+|     o < 0 if the query is less than the reference
+|     o 0 if the query is the same as the reference
+|     o > 0 if the query is greater than the reference
+\-------------------------------------------------------*/
+#define cmpGenIndiceToStr(qryStr, refGenIndicePtr)(\
+   cStrEql(qryStr, (refGenIndicePtr)->varIdStr, '\0')\
+) /*cmpGenIndicies*/
+
+/*-------------------------------------------------------\
+| Fun-09: swapGenIndices
+|  - Swaps two array items in a genIndice structure
+|    around
+| Input:
+|  - genIndiceAry:
+|    o Pointer to the geneIndice structure array to to
+|      swap elements in
+|  - posOne:
+|    o The position (index) of the first gene to swap
+|  - posTwo:
+|    o The position (index) of the second gene to swap
+| Output:
+|  - Modifies:
+|    o Swaps the pionters and values in the two structers
+|      around
+\-------------------------------------------------------*/
+#define swapGenIndices(genIndiceAry, posOne, posTwo){ \
+  uint macSwapUI = (genIndiceAry)[posOne].posUI;\
+  char *macSwapStr = 0;\
+  \
+  /*Swap the reference position*/\
+  (genIndiceAry)[posOne].posUI =\
+     (genIndiceAry)[posTwo].posUI;\
+  \
+  (genIndiceAry)[posTwo].posUI = macSwapUI;\
+  \
+  \
+  /*Swap the variant id*/\
+  macSwapUI = (genIndiceAry)[posOne].lenVarIdUI;\
+  macSwapStr = (genIndiceAry)[posOne].varIdStr;\
+  \
+  (genIndiceAry)[posOne].varIdStr =\
+     (genIndiceAry)[posTwo].varIdStr;\
+  \
+  (genIndiceAry)[posOne].lenVarIdUI =\
+     (genIndiceAry)[posTwo].lenVarIdUI;\
+  \
+  (genIndiceAry)[posTwo].varIdStr = macSwapStr;\
+  (genIndiceAry)[posTwo].lenVarIdUI = macSwapUI;\
+  \
+  \
+  /*Swap the reference sequence*/\
+  macSwapUI = (genIndiceAry)[posOne].lenRefSeqUI;\
+  macSwapStr = (genIndiceAry)[posOne].refSeqStr;\
+  \
+  (genIndiceAry)[posOne].lenRefSeqUI =\
+     (genIndiceAry)[posTwo].lenRefSeqUI;\
+  \
+  (genIndiceAry)[posOne].refSeqStr =\
+     (genIndiceAry)[posTwo].refSeqStr;\
+  \
+  (genIndiceAry)[posTwo].lenRefSeqUI = macSwapUI;\
+  (genIndiceAry)[posTwo].refSeqStr = macSwapStr;\
+  \
+  \
+  /*Swap the amr sequence*/\
+  macSwapUI = (genIndiceAry)[posOne].lenAmrSeqUI;\
+  macSwapStr = (genIndiceAry)[posOne].amrSeqStr;\
+  \
+  (genIndiceAry)[posOne].lenAmrSeqUI =\
+     (genIndiceAry)[posTwo].lenAmrSeqUI;\
+  \
+  (genIndiceAry)[posOne].amrSeqStr =\
+     (genIndiceAry)[posTwo].amrSeqStr;\
+  \
+  (genIndiceAry)[posTwo].lenAmrSeqUI = macSwapUI;\
+  (genIndiceAry)[posTwo].amrSeqStr = macSwapStr;\
+} /*swapScoreSTs*/
+
+/*-------------------------------------------------------\
+| Fun-10: genIndiceSort
+|  - Sorts an array of genIndice structures by variant ids
+|    with shell short.
+| Input:
+|  - genIndiceST:
+|    o Pointer to genIndice structure array with variants
+|      to sort
+|  - startUI:
+|    o First element to start sorting at
+|  - endUI:
+|    o Last element to sort (index 0)
+| Output:
+|  - Modifies:
+|    o Arrays in genIndiceST to be sorted by the gene
+|      starting coordinate (lowest first)
+\-------------------------------------------------------*/
+static void sortGenIndice(
+   struct genIndice *genIndiceST,
+   uint startUI,
+   uint endUI
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ' Fun-10 TOC: sortGenIndice
+   '  - Sorts the arrays in a genIndice struct by variant
+   '    id with shell short.
+   '  - Shell sort taken from:
+   '    - Adam Drozdek. 2013. Data Structures and
+   '      Algorithims in c++. Cengage Leraning. fourth
+   '      edition. pages 505-508
+   '    - I made some minor changes, but is mostly the
+   '      same
+   '  o fun-10 sec-01:
+   '    - Variable declerations
+   '  o fun-10 sec-02:
+   '    - Find the number of rounds to sort for
+   '  o fun-10 sec-03:
+   '    - Sort the arrays in genIndiceST
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-10 Sec-01:
+  ^  - Variable declerations
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Number of elements to sort*/
+  ulong numElmUL = (endUI) - (startUI);
+  
+  /*Number of sorting rounds*/
+  ulong subUL = 0;
+  ulong nextElmUL = 0;
+  ulong lastElmUL = 0;
+  ulong elmOnUL = 0;
+  
+  /*Get arrays to sort from the matrix (for sanity)*/
+  
+  /*Variables to incurment loops*/
+  ulong ulIndex = 0;
+  ulong ulElm = 0;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-10 Sec-02:
+  ^  - Find the max search value (number rounds to sort)
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
+  subUL = 1; /*Initialzie first array*/
+  while(subUL < numElmUL - 1) subUL = (3 * subUL) + 1;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ^ Fun-10 Sec-03:
+  ^  - Sort the arrays in genIndiceST
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  while(subUL > 0)
+  { /*loop trhough all sub arrays sort the subarrays*/
+    for(ulIndex = 0; ulIndex <= subUL; ++ulIndex)
+    { /*For each element in the subarray*/
+      for(ulElm = ulIndex;
+          ulElm + subUL <= endUI;
+          ulElm += subUL
+      ){ /*Loop; swap each nth element of the subarray*/
+        nextElmUL = ulElm + subUL;
+        
+        if(cmpGenIndices(
+              &(genIndiceST)[ulElm],
+              &(genIndiceST)[nextElmUL]
+           ) > 0
+        ){ /*If I need to swap an element*/
+          swapGenIndices((genIndiceST),ulElm,nextElmUL);
+          
+          lastElmUL = ulElm;
+          elmOnUL = ulElm;
+          
+          while(lastElmUL >= subUL)
+          { /*loop; move swapped element back*/
+            lastElmUL -= subUL;
+            
+            if(cmpGenIndices(
+                  &(genIndiceST)[elmOnUL],
+                  &(genIndiceST)[lastElmUL]
+               ) > 0
+            ) break; /*Positioned the element*/
+            
+            swapGenIndices(
+               (genIndiceST),
+               elmOnUL,
+               lastElmUL
+            ); /*swap the two indices*/
+            
+            elmOnUL = lastElmUL;
+          } /*loop; move swapped element back*/
+        } /*If I need to swap elements*/
+      } /*Loop; swap each nth element of the subarray*/
+    } /*For each element in the subarray*/
+    
+    subUL = (subUL - 1) / 3; /*Move to the next round*/
+  } /*loop through all sub arrays to sort the subarrays*/
+} /*sortGenIndice*/
+
+/*-------------------------------------------------------\
+| Fun-11: findGenIndiceVariant
+|  - Does a binary search for the nearest amr at or after
+|    to the input query coordiante
+| Input:
+|  - genIndiceAry:
+|    o Pointer to an genIndice structured array  to find
+|      the variant in
+|  - qryStr:
+|    o C-string with variant to search for
+|  - lenAryI:
+|    o Lenth of the genIndice structure array (index 1)
+| Output:
+|  - Returns:
+|    o The index of the variant in the array
+|    o -1 if the variant is not in the array
+\-------------------------------------------------------*/
+static int findGenIndiceVariant(
+   struct genIndice *genIndiceAry,
+   char *qryStr,
+   int lenAryI
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ' Fun-11 TOC: findGenIndiceVariant
+   '   - Finds the nearest amr at or after the input query
+   '     coordiante
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   int strDiffI = 0;
+   int midI = 0; /*divide by 2*/
+   int rightHalfI = lenAryI - 1;
+   int leftHalfI = 0;
+
+   while(leftHalfI <= rightHalfI)
+   { /*Loop: Search for the starting coordinate*/
+      midI = (leftHalfI + rightHalfI) >> 1;
+
+      strDiffI =
+         cmpGenIndiceToStr(qryStr, &genIndiceAry[midI]);
+
+      if(strDiffI > 0) leftHalfI = midI + 1;
+      else if(strDiffI < 0) rightHalfI = midI - 1;
+
+     else
+     { /*Else: I found the query*/
+        foundResult:;
+
+        while(midI > 0)
+        { /*Loop: Make sure I am on the first amr*/
+
+           strDiffI =
+             cmpGenIndiceToStr(
+                qryStr,
+                &genIndiceAry[midI - 1]
+             );
+
+           if(strDiffI) break; /*At start of variant*/
+
+           --midI;
+        } /*Loop: Make sure I am on the first amr*/
+
+        return midI;
+     } /*Else: I found the query*/
+
+     /*branchless whith an if return was slower here*/
+   } /*Loop: Search for the starting coordinate*/
+
+   if(!cmpGenIndiceToStr(qryStr, &genIndiceAry[midI]))
+      goto foundResult;
+
+   return -1; /*The variant is not in the array*/
+} /*findGenIndiceVariant*/
+
+/*-------------------------------------------------------\
+| Fun-12: read_who2023_indiceTab
+|   - Reads in the genome coordinates and variants from
+|     the 2023 WHO TB catalog genome indice tab (saved
+|     as a tsv)
+| Input:
+|   - indiceFILE:
+|     o The genome indice tab (tab 2) of the who 2023
+|       catalog as a tsv.
+|   - numIndicesUI:
+|     o Poiunter to unsigned int to put the number of
+|       extracted entries in
+| Output:
+|   - Modifies:
+|     o numIndicesUI to have the number of extracted
+|       genome indices
+|   - Returns:
+|     o 0 for memory error
+|     o Pointer to an array of genIndice structures
+\-------------------------------------------------------*/
+static struct genIndice * read_who2023_indiceTabTsv(
+   FILE *indiceFILE,
+   uint *numIndicesUI
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-12 TOC: read_who2023_indiceTab
+   '   - Reads in the genome coordinates and variants from
+   '     the 2023 WHO TB catalog genome indice tab (saved
+   '     as a tsv)
+   '   o fun-12 Sec-01:
+   '     - Variable declerations
+   '   o fun-12 Sec-02:
+   '     - Get the number of entries in the file
+   '   o fun-12 Sec-03:
+   '     - Read in each entry in the file
+   '   o fun-12 Sec-04:
+   '     - Clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-12 Sec-01:
+   ^   - Variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   ushort lenBuffUS = 4096;
+   char buffStr[lenBuffUS];
+   char *tmpStr = 0;
+
+   uint uiElm = 0;  /*indice entry on (excluding header)*/
+   uint uiPos = 0; /*Positon in buffStr at*/
+   struct genIndice *indiceSTAry =  0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-12 Sec-02:
+   ^   - Get the number of entries in the file
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   *numIndicesUI = 0;
+
+   while(fgets(buffStr, lenBuffUS, indiceFILE))
+      ++(*numIndicesUI);
+
+   fseek(indiceFILE, 0, SEEK_SET); /*go to start of file*/
+
+   /*Ignore the header*/
+   tmpStr = fgets(buffStr, lenBuffUS, indiceFILE);
+
+   indiceSTAry =
+      malloc(*numIndicesUI * sizeof(struct genIndice));
+
+   if(!indiceSTAry) return 0; /*memory error*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-12 Sec-03:
+   ^   - Read in each entry in the file
+   ^   o fun-12 sec-03 sub-01:
+   ^     - Read in the variant id (also start loop)
+   ^   o fun-12 sec-03 sub-02:
+   ^     - Move past the reference/chromosome id
+   ^   o fun-12 sec-03 sub-03:
+   ^     - Get the refernce position
+   ^   o fun-12 sec-03 sub-04:
+   ^     - Get the refernce sequence
+   ^   o fun-12 sec-03 sub-05:
+   ^     - Get the amr sequence
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun-12 Sec-03 Sub-01:
+   *   - Read in the variant id (also start loop)
+   \*****************************************************/
+
+   while(fgets(buffStr, lenBuffUS, indiceFILE))
+   { /*Loop: Get each entry from the file*/
+      initGenIndice(&indiceSTAry[uiElm]);
+      uiPos = 0;
+
+      indiceSTAry[uiElm].lenVarIdUI =
+         cLenStr(&buffStr[uiPos],'\t');
+
+      indiceSTAry[uiElm].varIdStr =
+         malloc(
+             (indiceSTAry[uiElm].lenVarIdUI + 1)
+           * sizeof(char)
+         ); /*Make the buffer for the reference sequence*/
+
+      /*Check for memory errors*/
+      if(!indiceSTAry[uiElm].varIdStr) goto memoryError;
+
+      cCpStr(
+         indiceSTAry[uiElm].varIdStr,
+         &buffStr[uiPos],
+         indiceSTAry[uiElm].lenVarIdUI
+      ); /*Copy the variant id*/
+
+      uiPos = indiceSTAry[uiElm].lenVarIdUI + 1;
+        /*+1 to get of tab*/
+
+      /**************************************************\
+      * Fun-12 Sec-03 Sub-02:
+      *   - Move past the reference/chromosome id
+      \**************************************************/
+
+      /*Move past the chromosome entry*/
+      while(buffStr[uiPos] > 31) ++uiPos;
+
+      ++uiPos; /*Get of tab*/
+
+      /**************************************************\
+      * Fun-12 Sec-03 Sub-03:
+      *   - Get the refernce position
+      \**************************************************/
+
+      tmpStr = 
+         base10StrToUI(
+            &buffStr[uiPos],
+           indiceSTAry[uiElm].posUI
+         ); /*Get the genome coordiant*/
+
+       uiPos = tmpStr + 1 - buffStr;
+
+      /**************************************************\
+      * Fun-12 Sec-03 Sub-04:
+      *   - Get the refernce sequence
+      \**************************************************/
+
+      indiceSTAry[uiElm].lenRefSeqUI =
+         cLenStr(&buffStr[uiPos],'\t');
+
+      indiceSTAry[uiElm].refSeqStr =
+         malloc(
+             (indiceSTAry[uiElm].lenRefSeqUI + 1)
+           * sizeof(char)
+         ); /*Make the buffer for the reference sequence*/
+
+      /*Check for memory errors*/
+      if(!indiceSTAry[uiElm].refSeqStr) goto memoryError;
+
+      cCpStr(
+         indiceSTAry[uiElm].refSeqStr,
+         &buffStr[uiPos],
+         indiceSTAry[uiElm].lenRefSeqUI
+      ); /*Copy the reference sequence*/
+
+      uiPos += indiceSTAry[uiElm].lenRefSeqUI + 1;
+         /*+1 to get off the tab*/
+
+      /**************************************************\
+      * Fun-12 Sec-03 Sub-05:
+      *   - Get the amr sequence
+      \**************************************************/
+
+      indiceSTAry[uiElm].lenAmrSeqUI = uiPos;
+
+      while(buffStr[indiceSTAry[uiElm].lenAmrSeqUI] > 31)
+         ++indiceSTAry[uiElm].lenAmrSeqUI;
+
+      indiceSTAry[uiElm].lenAmrSeqUI -= uiPos;
+
+      indiceSTAry[uiElm].amrSeqStr =
+         malloc(
+             (indiceSTAry[uiElm].lenAmrSeqUI + 1)
+           * sizeof(char)
+         ); /*Make the buffer for the amr sequence*/
+
+      /*Check for memory errors*/
+      if(!indiceSTAry[uiElm].amrSeqStr) goto memoryError;
+
+      cCpStr(
+         indiceSTAry[uiElm].amrSeqStr,
+         &buffStr[uiPos],
+         indiceSTAry[uiElm].lenAmrSeqUI
+      ); /*Copy the amr sequence*/
+
+       ++uiElm;
+   } /*Loop: Get each entry from the file*/
+
+   goto cleanUp; /*No errors*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-12 Sec-04:
+   ^   - Clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   memoryError:;
+
+   freeGeneIndiceAry(indiceSTAry, uiElm);
+   return 0;
+
+   cleanUp:;
+
+   /*Sort the array by the variant; this is for easier
+   ` lookups later
+   */
+   sortGenIndice(indiceSTAry, 0, uiElm - 1);
+   *numIndicesUI = uiElm;
+
+   return indiceSTAry;
+} /*read_who2023_indiceTabTsv*/
 
 #endif

@@ -596,8 +596,8 @@ static char readSamLine(
 
    ushort extraBuffUS = 4096;
 
-   VI8 tabVI8 = VI8CpMakeDelim('\t');
-   VI8 newLineVI8 = VI8CpMakeDelim('\n');
+   ulong tabUL = ulCpMakeDelim('\t');
+   ulong newLineUL = ulCpMakeDelim('\n');
 
    ulong oldLenUL = 0;
    char *tmpStr = 0;
@@ -700,7 +700,8 @@ static char readSamLine(
       ulCpStrDelim(
          samSTPtr->refIdStr,
          iterStr,
-         defTabDelim
+         defTabDelim,
+         '\t'
       ); /*Copy the reference id/name*/
    
    iterStr += samSTPtr->lenRefIdUC + 1; /*+1 get off tab*/
@@ -900,7 +901,8 @@ static char readSamLine(
       ulCpStrDelim(
          samSTPtr->rNextStr,
          iterStr,
-         defTabDelim
+         defTabDelim,
+         '\t'
       ); /*Copy the query id/name*/
 
    iterStr += samSTPtr->lenRNextUC + 1; /*+1 get off tab*/
@@ -937,7 +939,7 @@ static char readSamLine(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(samSTPtr->readLenUI == 0 && iterStr[0] != '*')
-      samSTPtr->readLenUI= VI8LenStr(iterStr,tabVI8,'\t');
+      samSTPtr->readLenUI= ulLenStr(iterStr, tabUL, '\t');
 
    else if(iterStr[0] == '*')
    { /*Else If: There  is no sequence entry*/
@@ -970,7 +972,7 @@ static char readSamLine(
       samSTPtr->lenQBuffUI = samSTPtr->readLenUI;
    } /*If: I need to resize sequence & Q-score buffers*/
 
-   VI8CpStr(samSTPtr->seqStr,iterStr,samSTPtr->readLenUI);
+   ulCpStr(samSTPtr->seqStr,iterStr,samSTPtr->readLenUI);
    iterStr += samSTPtr->readLenUI + 1; /*+1 gets off tab*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1010,8 +1012,7 @@ static char readSamLine(
    extraEntry:
 
    /*not sure if char or ul copy better here*/
-   samSTPtr->lenExtraUI =
-      VI8LenStr(iterStr, newLineVI8, '\n');
+   samSTPtr->lenExtraUI= ulLenStr(iterStr,newLineUL,'\n');
 
    if(samSTPtr->lenExtraUI > samSTPtr->lenExtraBuffUI)
    { /*If: I need to resize the buffer*/
@@ -1024,7 +1025,7 @@ static char readSamLine(
       if(samSTPtr->extraStr == 0) return 64;
    } /*If: I need to resize the buffer*/
 
-   VI8CpStr(
+   ulCpStr(
       samSTPtr->extraStr,
       iterStr,
       samSTPtr->lenExtraUI

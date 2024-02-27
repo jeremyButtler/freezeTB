@@ -10,6 +10,7 @@
 #   - "amrStruct.h"
 #   o "../generalLib/codonTbl.h"
 #   o "../generalLib/genMath.h"
+#   o "genIndiceSruct.h"
 # C Stanadrd Libraries
 #   o <stdio.h>
 #   o <stdlib.h>
@@ -22,9 +23,14 @@
 #include "../generalLib/samEntryStruct.h"
 #include "amrStruct.h"
 
-/*TODO: Get these working*/
-/*#include "../generalLib/trimSam.h"*/
-/*#include "../generalLib/rmHomo.h"*/
+#define defMinDepth 20
+
+#define defMinPerReadsMap 0.45f
+    /*At least 45% of reads with region support the amr*/
+#define defMinPerReadsTotal 0.00f
+    /*0% (turn off) of all kept reads mapped to this amr
+    `   region
+    */
 
 typedef struct amrHit{
    struct amrStruct *amrST;
@@ -313,6 +319,7 @@ static struct amrHit * checkAmrSam(
       *   - Check if the amr has a strict match
       \**************************************************/
 
+      ++amrAryST[iAmr].numMapReadsUI;
       seqUStr = (uchar *) &samST->seqStr[seqPosUI];
 
       /*check if the amr is from an amino acid change*/
@@ -388,6 +395,7 @@ static struct amrHit * checkAmrSam(
 
       if(resBl)
       { /*If: I found a resitance mutation*/
+         ++(amrAryST[iAmr].numSupReadsUI);
          ++(*numHitsI);
 
          if(amrSTList)
@@ -403,6 +411,7 @@ static struct amrHit * checkAmrSam(
 
             amrST->nextAmr->amrST = &amrAryST[iAmr];
             amrST->nextAmr->seqPosUI = seqPosUI;
+            amrST = amrST->nextAmr;
          } /*If: This is not the first amr*/
 
          else
@@ -432,11 +441,11 @@ static struct amrHit * checkAmrSam(
 } /*checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun-06: pAmrs
+| Fun-06: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
-|   - samST:
-|     o Sam file entry
+|   - seqIdStr:
+|     o C-string with name of sequence that had the amr
 |   - amrHitSTListPtr:
 |     o Pointer to a List of amrHit structures with amr's
 |       to print out
@@ -455,18 +464,24 @@ static struct amrHit * checkAmrSam(
 |   - Sets:
 |     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
-#define pAmrs(amrHitSTListPtr,drugAryStr,pHeadBl,outFILE)\
-{\
+#define pAmrHitList(\
+   seqIdStr,\
+   amrHitSTListPtr,\
+   drugAryStr,\
+   pHeadBl,\
+   outFILE\
+){\
    struct amrHit *tmpST = (amrHitSTListPtr);\
    ulong amrFlagUL = 0;\
    int flagOnI = 0;\
+   char *drugStr = 0;\
    \
    if((pHeadBl))\
    { /*If: I am printing the header*/\
       (pHeadBl) = 0;\
-      fprintf((outFILE), "Gene\tDrug\tVariantId\tType");\
-      fprintf((outFILE), "\trefPos\tseqPos\trefSeq");\
-      fprintf((outFILE), "\tamrSeq\tamrAminoAcid");\
+      fprintf((outFILE), "Id\tGene\tDrug\tVariantId");\
+      fprintf((outFILE), "\tType\t\trefPos\tseqPos");\
+      fprintf((outFILE), "\trefSeq\tamrSeq\teffect");\
       fprintf((outFILE), "\twhoComment\n");\
    } /*If: I am printing the header*/\
    \
@@ -485,12 +500,16 @@ static struct amrHit * checkAmrSam(
             continue; /*No resitance*/\
          } /*If: There is no amr to this drug*/\
          \
+         drugStr =\
+            getDrugFromDrugAry((drugAryStr), flagOnI);\
+         \
          /*There is resistance, print it out*/\
          fprintf(\
            (outFILE),\
-           "%s\t%s\t%s\t%s",\
+           "%s\t%s\t%s\t%s\t%s",\
+           (seqIdStr),              /*Name of the seq*/\
            tmpST->amrST->geneIdStr, /*Gene name*/\
-           (drugAryStr)[flagOnI],   /*Amr drug*/\
+           drugStr,                 /*Amr drug*/\
            tmpST->amrST->varIdStr,  /*Variant id*/\
            tmpST->amrST->mutTypeStr /*snp/del/ins/LoF*/\
          ); /*Print out the gene id and drug name*/\
@@ -504,13 +523,21 @@ static struct amrHit * checkAmrSam(
            tmpST->amrST->amrSeqStr  /*amr pattern*/\
          );\
          \
-         if(tmpST->amrST->amrAaC)\
+         if(tmpST->amrST->effectStr)\
             fprintf(\
                (outFILE),\
-               "\t%c\tNA\n",\
-               tmpST->amrST->amrAaC\
+               "\t%s",\
+               tmpST->amrST->effectStr\
             );\
-         else fprintf((outFILE), "\t-\tNA\n");\
+         else fprintf((outFILE), "\tNA");\
+         \
+         if(tmpST->amrST->commentStr)\
+            fprintf(\
+               (outFILE),\
+               "\t%s\n",\
+               tmpST->amrST->commentStr\
+            );\
+         else fprintf((outFILE), "\tNA\n");\
          \
          ++flagOnI;\
          amrFlagUL >>= 1;\
@@ -518,10 +545,156 @@ static struct amrHit * checkAmrSam(
       \
       tmpST = tmpST->nextAmr;\
    } /*Loop: Print out all amr's*/\
+} /*pAmrHitList*/
+
+/*-------------------------------------------------------\
+| Fun-07: pAmrs
+|   - Prints out all amr's that meant the min depth
+| Input:
+|   - minDepthUI:
+|     o uinsigned in with  he minumum depth to keep an amr
+|   - minPercMapF:
+|     o Float with the min percent of supporting reads
+|       to keep an amr (only compared locally)
+|   - minPercTotalF:
+|     o Float with the min percent of mapped reads needed
+|       to keep an amr (all reads kept)
+|   - totalReadsUI:
+|     o total number of reads input
+|   - amrSTAry:
+|     o Pointer to an array of amrStruct structures to
+|       check and print
+|   - drugAryStr:
+|     o List of antibiotic drugs. It should follow the
+|       same order as the flags
+|   - pHeadBl:
+|     o 1: Print out the header
+|     o 0: Do not print the header
+|   - outFILE:
+|     o File to print the amr's to
+| Output: 
+|   - Prints:
+|     o The amr's that meet the min stats and have at
+|       least one mapped read
+|     o The header if pHeadBl is 1
+|   - Sets:
+|     o pHeadBl to 0 if it is set to 1
+\-------------------------------------------------------*/
+#define pAmrs(\
+   minDepthUI,\
+   minPercMapF,\
+   minPercTotalF,\
+   totalReadsUI,\
+   amrSTAry,\
+   numAmrsUI,\
+   drugAryStr,\
+   pHeadBl,\
+   outFILE\
+){\
+   uint indexUI = 0;\
+   float percSupF = 0;\
+   ulong amrFlagUL = 0;\
+   int flagOnI = 0;\
+   char *drugStr = 0;\
+   \
+   if((pHeadBl))\
+   { /*If: I am printing the header*/\
+      (pHeadBl) = 0;\
+      fprintf((outFILE), "\tGene\tDrug\tVariantId\tType");\
+      fprintf((outFILE), "\trefPos\trefSeq\tamrSeq");\
+      fprintf((outFILE), "\tmappedReads");\
+      fprintf((outFILE), "\tsupportingReads");\
+      fprintf((outFILE), "\teffect\twhoComment\n");\
+   } /*If: I am printing the header*/\
+   \
+   for(indexUI = 0; indexUI < (numAmrsUI); ++indexUI)\
+   { /*Loop:Check and print out amrs*/\
+      if((amrSTAry)[indexUI].numSupReadsUI <(minDepthUI))\
+         continue;\
+      \
+      if((amrSTAry)[indexUI].numMapReadsUI ==0) continue;\
+      \
+      percSupF =\
+           ((float) (amrSTAry)[indexUI].numMapReadsUI)\
+         / (totalReadsUI);\
+      \
+      if(percSupF < (minPercTotalF)) continue;\
+      \
+      percSupF =\
+           ((float) (amrSTAry)[indexUI].numSupReadsUI)\
+         / ((float)(amrSTAry)[indexUI].numMapReadsUI);\
+      \
+      if(percSupF < (minPercMapF)) continue;\
+      \
+      amrFlagUL = (amrSTAry)[indexUI].amrFlagsUL;\
+      flagOnI = 0;\
+      \
+      while(amrFlagUL)\
+      { /*Loop: Checn each flag*/\
+         /*Check if there is resitance to an antibiotic*/\
+         if(!(amrFlagUL & 1))\
+         { /*If: There is no amr to this drug*/\
+            ++flagOnI;\
+            amrFlagUL >>= 1;\
+            continue; /*No resitance*/\
+         } /*If: There is no amr to this drug*/\
+         \
+         drugStr =\
+            getDrugFromDrugAry((drugAryStr), flagOnI);\
+         \
+         /*There is resistance, print it out*/\
+         fprintf(\
+           (outFILE),\
+           "%s\t%s\t%s\t%s",\
+           (amrSTAry)[indexUI].geneIdStr,/*gene id*/\
+           drugStr,\
+           (amrSTAry)[indexUI].varIdStr, /*variant id*/\
+           (amrSTAry)[indexUI].mutTypeStr/*mutationType*/\
+         ); /*Print out the gene id and drug name*/\
+         \
+         fprintf(\
+           (outFILE),\
+           "\t%u\t%s\t%s\t%u\t%u",\
+           (amrSTAry)[indexUI].refPosUI, /*ref Position*/\
+           (amrSTAry)[indexUI].refSeqStr,/*Ref pattern*/\
+           (amrSTAry)[indexUI].amrSeqStr, /*amr pattern*/\
+           (amrSTAry)[indexUI].numMapReadsUI,\
+           (amrSTAry)[indexUI].numSupReadsUI\
+         );\
+         \
+         if((amrSTAry)[indexUI].effectStr)\
+            fprintf(\
+               (outFILE),\
+               "\t%s",\
+               (amrSTAry)[indexUI].effectStr\
+            );\
+         else fprintf((outFILE), "\tNA");\
+         \
+         if((amrSTAry)[indexUI].commentStr)\
+         { /*If: I have a who comment*/\
+            /*This is to handle blanks left by WHO. I
+            ` have not been able to catch this in my
+            ` readin scripts
+            */\
+            if((amrSTAry)[indexUI].commentStr[0] < 33)\
+               fprintf((outFILE), "\tNA\n");\
+            else\
+               fprintf(\
+                  (outFILE),\
+                  "\t%s\n",\
+                  (amrSTAry)[indexUI].commentStr\
+               );\
+         } /*If: I have a who comment*/\
+         else fprintf((outFILE), "\tNA\n");\
+        \
+         ++flagOnI;\
+         amrFlagUL >>= 1;\
+      } /*Loop: Checn each flag*/\
+   } /*Loop:Check and print out amrs*/\
 } /*pAmrs*/
 
 /*-------------------------------------------------------\
-| Fun-07: lookForAmrsSam
+| Fun-08: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
@@ -531,29 +704,88 @@ static struct amrHit * checkAmrSam(
 |   - lenBuffUL:
 |     o Current length of buffStr. This is updated when
 |       buffStr is resized
+|   - readsBl:
+|     o 1: Printing out read stats (use pAmr)
+|     o 0: Printing out consensus stats (use pAmrHitList)
+|   - minDepthUI:
+|     o uinsigned in with  he minumum depth to keep an amr
+|     o This is applied to read checks only
+|   - minPercMapF:
+|     o Float with the min percent of supporting reads
+|       to keep an amr (only compared locally) 
+|     o This is applied to read checks only
+|   - minPercTotalF:
+|     o Float with the min percent of mapped reads needed
+|       to keep an amr (all reads kept)
+|     o This is applied to read checks only
 |   - samFILE:
 |     o Pointer to sam file to read  from
 |   - outFILE:
 |     o Pointer to file to print the amr results to
+|   - idPrefStr:
+|     o Prefix to name the read id file(s). Input 0/null
+|       to not print out any ids
 | Output:
+|   - Prints:
+|     o Stats about AMRs to outFILE
+|     o Read id's to the AMR files they matched, but only
+|       if a idPrefStr was provided
 |   - Returns:
 |     o 0 for no problems
+|     o 2 for file open errors (when printing ids)
 |     o 64 for memory errors
 \-------------------------------------------------------*/
 static char lookForAmrsSam(
    struct amrStruct *amrAryST, /*Has amr's to check*/
    int numAmrI,                /*Length of amrAryST*/
-   char *drugAryStr[], /*Has antibiotic names*/
+   char *drugAryStr, /*Has antibiotic names*/
    char **buffStr,   /*Buffer for readSamLine*/
    ulong *lenBuffUL, /*Current length of buffStr*/
+   char readsBl,     /*1: processing reads not cons*/
+   uint minDepthUI,  /*Min depth to keep amr (read only)*/
+   float minPercMapF,/*Min % support to keep amr (read)*/
+   float minPercTotalF, /*Min % mapped reads to keep*/
    FILE *samFILE,    /*Sam file with reads to check*/
-   FILE *outFILE
-){
-   char errC = 0;
-   char pHeadBl = 1;
-   int numHitsI = 0;
+   FILE *outFILE,
+   char *idPrefStr    /*Prefix for id files*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-14 TOC:P lookForAmrsSam
+   '   - Look for anti-microbial (antibiotic) genes in the
+   '     reads in a sam file
+   '   o fun-08 sec-01:
+   '     - Variable declerations
+   '   o fun-08 sec-02:
+   '     - Get the first sam entry
+   '   o fun-08 sec-03:
+   '     - Check for AMRs
+   '   o fun-08 sec-04:
+   '     - Print out read AMR stats and clean up
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-08 Sec-01:
+   ^   - Variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   char errC = 0;         /*For error checking*/
+   char pHeadBl = 1;      /*To print header*/
+   int numHitsI = 0;      /*Number of amrs hits/con*/
+   uint totalReadsUI = 0; /*Number of kept reads*/
+
    struct samEntry samST;
    struct amrHit *amrHitSTList = 0;
+   struct amrHit *tmpHitST = 0;
+   uint lenFileNameUI = 0;
+   uint lenPrefUI = 0;
+
+   FILE *idFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-08 Sec-02:
+   ^   - Get the first sam entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(idPrefStr) lenPrefUI = cLenStr(idPrefStr, '\0');
 
    initSamEntry(&samST);
 
@@ -564,6 +796,27 @@ static char lookForAmrsSam(
          (lenBuffUL),
          (samFILE)
       ); /*Read in the first line*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-08 Sec-03:
+   ^   - Check for AMRs
+   ^   o fun-08 sec-03 sub-01:
+   ^     - Filter out less usefull entries
+   ^   o fun-08 sec-03 sub-02:
+   ^     - Check for amrs
+   ^   o fun-08 sec-03 sub-03:
+   ^     - Print out consensus sequence AMRS
+   ^   o fun-08 sec-03 sub-04:
+   ^     - Deal with read amrs; print ids if requested/
+   ^       free consensus structuerrs
+   ^   o fun-08 sec-03 sub-05:
+   ^     - Move to the next sam entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun-08 Sec-03 Sub-01:
+   *   - Filter out less usefull entries/start loop
+   \*****************************************************/
 
    while(!errC)
    { /*Loop: Check if have antibiotic resitance*/
@@ -594,7 +847,12 @@ static char lookForAmrsSam(
          continue;
       } /*If: this is an umapped read, 2ndary, sup aln*/
 
-      /*rmHomo call would be here*/
+      /**************************************************\
+      * Fun-08 Sec-03 Sub-02:
+      *   - Check for amrs
+      \**************************************************/
+
+      ++totalReadsUI;
 
       amrHitSTList = 
          checkAmrSam(
@@ -605,12 +863,22 @@ static char lookForAmrsSam(
             &errC     /*For error reporting*/
          ); /*Check if there are any amr's*/
 
-      if(errC) return 64; /*Memory error*/
+      if(errC)
+      { /*If: I had a memroy error*/
+         freeSamEntryStack(&samST);
+         return 64; /*Memory error*/
+      } /*If: I had a memroy error*/
+
+      /**************************************************\
+      * Fun-08 Sec-03 Sub-03:
+      *   - Print out consensus sequence AMRS
+      \**************************************************/
 
       /*Check if I can print out the amr's*/
-      if(amrHitSTList)
+      if(amrHitSTList && !readsBl)
       { /*If: There were amr's*/
-          pAmrs(
+          pAmrHitList(
+             samST.qryIdStr,
              amrHitSTList,
              (drugAryStr),
              pHeadBl,
@@ -620,6 +888,81 @@ static char lookForAmrsSam(
           freeAmrHitList(amrHitSTList);
       } /*If: There were amr's*/
 
+      /**************************************************\
+      * Fun-08 Sec-03 Sub-04:
+      *   - Deal with read amrs; print ids if requested/
+      *     free consensus structuerrs
+      \**************************************************/
+
+      else if(readsBl && amrHitSTList)
+      { /*Else If; I am processing reads*/
+          tmpHitST = amrHitSTList;
+          
+          if(idPrefStr)
+          { /*If: I am printing the read ids*/
+             while(tmpHitST)
+             { /*Loop: Print each amr the read mapped to*/
+                /*Make the file name; add prefix*/
+                lenFileNameUI = lenPrefUI;
+                cCpStr(*buffStr, idPrefStr, lenPrefUI);
+
+                (*buffStr)[lenFileNameUI] = '-';
+                ++lenFileNameUI;
+
+                /*Add the gene id*/
+                cCpStr(
+                   &(*buffStr)[lenFileNameUI],
+                   tmpHitST->amrST->geneIdStr,
+                   tmpHitST->amrST->lenGeneIdUI
+                ); /*Make the file name*/
+
+                lenFileNameUI +=
+                   tmpHitST->amrST->lenGeneIdUI;
+
+                (*buffStr)[lenFileNameUI] = '-';
+                ++lenFileNameUI;
+
+                /*Add the variant id*/
+                cCpStr(
+                   &(*buffStr)[lenFileNameUI],
+                   tmpHitST->amrST->varIdStr,
+                   tmpHitST->amrST->lenVarIdUI
+                ); /*Make the file name*/
+
+                lenFileNameUI +=
+                   tmpHitST->amrST->lenVarIdUI;
+
+                /*Add the file extension*/
+                (*buffStr)[lenFileNameUI] = '.';
+                (*buffStr)[lenFileNameUI + 1] = 'i';
+                (*buffStr)[lenFileNameUI + 2] = 'd';
+                (*buffStr)[lenFileNameUI + 3] = 's';
+                (*buffStr)[lenFileNameUI + 4] = '\0';
+
+                idFILE = fopen(*buffStr, "a");
+
+                if(!idFILE)
+                { /*If: I had a file acess error*/ 
+                   freeSamEntryStack(&samST);
+                   freeAmrHitList(amrHitSTList);
+                   return 2;
+                } /*If: I had a file acess error*/ 
+
+                fprintf(idFILE, "%s\n", samST.qryIdStr);
+                fclose(idFILE);
+                idFILE = 0;
+                tmpHitST = tmpHitST->nextAmr;
+             } /*Loop: Print each amr the read mapped to*/
+          } /*If: I am printing the read ids*/
+
+          freeAmrHitList(amrHitSTList);
+      } /*Else If; I am processing reads*/
+
+      /**************************************************\
+      * Fun-08 Sec-03 Sub-05:
+      *   - Move to the next sam entry
+      \**************************************************/
+
       errC =
          readSamLine(
             &samST,
@@ -628,6 +971,28 @@ static char lookForAmrsSam(
             (samFILE)
          ); /*Get the next sam file entry*/
    } /*Loop: Check if have antibiotic resitance*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-08 Sec-04:
+   ^   - Print out read AMR stats and clean up
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   freeSamEntryStack(&samST);
+
+   if(readsBl)
+   { /*If: I mapped reads, not consensuses*/
+      pAmrs(
+         minDepthUI,
+         minPercMapF,
+         minPercTotalF,
+         totalReadsUI,
+         amrAryST,
+         numAmrI,
+         drugAryStr,
+         pHeadBl,
+         outFILE
+      ); /*Print out the AMRs*/
+   } /*If: I mapped reads, not consensuses*/
 
    return 0;
 } /*lookForAmrsSam*/

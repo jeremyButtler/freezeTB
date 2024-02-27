@@ -2,6 +2,8 @@
 # Name: ulCpStr
 #   - Copies contents of string 1 to string two using
 #     unsigned longs (poor mans vectors)
+#   - These functions are slower than strcpy and strlen,
+#     but they allow deliminators to be used.
 # Libraries:
 #   - "dataTypeShortHand.h"
 #   - "genMath.h"
@@ -24,12 +26,14 @@
 |    - This is a bit slow (9 op), 8 if delimUL can be
 |      deterimined at compile time. This is less efficent
 |      on 32 and 16 bit cpus (no longer borderline).
-|  o fun-04: ulCpStrDelim
-|    - Copies cpStr into dupStr until delimC is found
-|  o fun-05: ulVectCpStr TODO:
-|    - ulCpStr, but can be compiled with vectors
 |  o fun-06: ulVectCpStrDelim TODO:
 |    - ulCpStrDelim, but can be compiled with vectors
+|  o fun-06: cCpStr
+|   - Copies cpStr into dupStr using characters
+|  o fun-07: cCpStrDelim
+|    - Copies cpStr into dupStr until delimC is found
+|  o fun-08: cLenStr
+|    - Finds the length of a string using characters
 |  o fun-0?: cStrEql
 |    - Checks to see if two strings are equal
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -40,25 +44,12 @@
 |     checks
 \-------------------------------------------------------*/
 
-#ifndef UL_CP_STR_H
-#define UL_CP_STR_H
+#ifndef UNSINGED_LONG_COPY_STRING_H
+#define UNSINGED_LONG_COPY_STRING_H
 
 #include "dataTypeShortHand.h"
 #include "genMath.h"
 #include <limits.h> /*for ULONG_MAX*/
-
-/*Using two lines to avoid line overflows*/
-#if defined SSE2 || SSE4 || defined AVX2 || defined AVX512
-   #define defUseVects
-   #include "../../alnSeq/vectWrap/vectWrap.h"
-
-#elif defined NEON || defined NEON64
-   #define defUseVects
-   #include "../../alnSeq/vectWrap/vectWrap.h"
-
-#else
-   typedef unsigned long VI8; /*when not using vectors*/
-#endif
 
 #define defBitsPerChar 8
 #define defNullDelim 0
@@ -71,6 +62,8 @@
    #define defTabDelim 0x0909090909090909   /*9 or 0x9*/
    #define defCommaDelim 0x2c2c2c2c2c2c2c2c /*44 or 0x2c*/
    #define defNewLineDelim 0x0a0a0a0a0a0a0a0a /*0a 0x0a*/
+   #define defHiBit 0x8080808080808080 /*For deliminator*/
+   #define defOne 0x0101010101010101 /*For if delim*/
 
 #elif ULONG_MAX >= 0xffffffff
    #define DEFINED_OS_BIT 32
@@ -80,6 +73,8 @@
    #define defTabDelim 0x09090909      /*9 or 0x9*/
    #define defCommaDelim 0x2c2c2c2c    /*44 or 0x2c*/
    #define defNewLineDelim 0x0a0a0a0a  /*0a or 0x0a*/
+   #define defHiBit 0x80808080 /*For deliminator*/
+   #define defOne 0x01010101 /*For if delim*/
 
 #elif ULONG_MAX >= 0xffff
    #define DEFINED_OS_BIT 16
@@ -89,9 +84,11 @@
    #define defTabDelim 0x0909    /*9 or 0x9*/
    #define defCommaDelim 0x2c2c  /*44 or 0x2c*/
    #define defNewLineDelim 0x0a0a  /*0a or 0x0a*/
+   #define defOne 0x01010101 /*For if delim*/
 
 #else
    #error System only supports 8 bit integers
+
 #endif
 
 /*-------------------------------------------------------\
@@ -126,6 +123,7 @@
    ) (dupStr)[uiCharMac] = (cpStr)[uiCharMac];\
    \
    (dupStr)[lenUI] = '\0';\
+   /*Faster than doing *val1++ = *val2++*/\
 } /*ulCpStr*/
 
 /*-------------------------------------------------------\
@@ -170,8 +168,15 @@
 | Fun-03: ulIfDelim
 |   - Detect if the input deliminator is in the input
 |     unsigned long
-|   - This is a bit slow (9 op), 8 if delimUL is hardcoded
-|     This goes to worse ratios at 32 and 16 bit cpus
+| Variations:
+|   - SAFE_DELIM uses 9 to 8 OP for 64 bit, 7 to 6 OP for
+|     for 32 bit, and 5 to 4 OP for 16 bit. The amount
+|     depends on if the deliminator is hardcoded or not.
+|   - ifndef SAFE_DELIM takes 5 op no matter what your
+|     OS type is. You could reduce it down by removing the
+|     (addUL & 1) + addUL step, but this does cause some
+|     issues with values that are one off the actual. Tab
+|     is safe, since it is odd, but not comma or space.
 | Input:
 |   - strUL:
 |     o Unsigned long to check for the delimintor in
@@ -186,7 +191,34 @@
 |        the left of the character.
 |     o  unsigned long == 0; strUL has deliminator
 \-------------------------------------------------------*/
-#if DEFINED_OS_BIT == 64
+#ifndef SAFE_DELIM
+   #define ulIfDelim(strUL, delimUL)({\
+      ulong macAddUL = ( (ulong) (strUL) ) ^ (delimUL);\
+      ( ((macAddUL & 1) + macAddUL) -defOne ) & defHiBit;\
+   })
+   /*Logic:
+   ` - addUL = strUL ^ delimUL:
+   `   o Converts all values matching delimUL to 0, and
+   `     everything else to > 0. Saves result to addUL
+   ` - (addUL & 1) + addUL
+   `   o Convets odd numbers to even numbers. This gets
+   `     means there is no 1;
+   `   o This is needed to ensure -1 will not cause an
+   `     overflow when 1 is next to an deliminator. The
+   `     & 1 ensures that -1 will alwas remove the sign
+   `     bit, if one character was one off.
+   ` - ((addUL & 1) + addUL) - defOne
+   `   o subtracts one from every character. This results
+   `     in an overflow for only 0, while every other
+   `     value is >= 1, but can go to 0 if next number
+   `     overflowed. This sets the value 0 numbers to -1
+   ` - (( (addUL & 1) + addUL) - defOne) & defHiBit
+   `   o This keeps only the overflow bit (sign bit). This
+   `     means that every non-deliminator value becomes
+   `     0.
+   */
+
+#elif DEFINED_OS_BIT == 64
    #define ulIfDelim(strUL, delimUL)({\
       ulong macRetUL = (strUL) ^ ~(delimUL);\
       \
@@ -264,54 +296,34 @@
 |     o  dupStr to hold the characters from cpStr
 | Note:
 |   - This will likely not be very good at copying short
-|     strings. I also pay a steep cost (11 op) for the
-|     if check. And I still have to pay a bit extra cost
-|     for the end of the buffer, which might not be a
-|     multiple of 8. However, I can copy 8 characters at
-|     once for the main part. I am hoping that pays off.
+|     strings.
 \-------------------------------------------------------*/
-#define ulCpStrDelim(dupStr, cpStr, delimUL)({\
+#define ulCpStrDelim(dupStr, cpStr, delimUL, delimC)({\
    ulong *macCpUL = (ulong *) (cpStr);\
    ulong *macDupUL = (ulong *) (dupStr);\
+   char *dupMacStr = 0;\
+   char *cpMacStr = 0;\
    ulong macAtDelimUL = 0;\
    uint uiCharMac = 0;\
    \
-   macAtDelimUL =ulIfDelim(macCpUL[uiCharMac],(delimUL));\
+   macAtDelimUL =ulIfDelim(*macCpUL, (delimUL));\
    \
-   for(\
-     macAtDelimUL = macAtDelimUL;\
-     !macAtDelimUL;\
-     macAtDelimUL =\
-        ulIfDelim(macCpUL[uiCharMac], (delimUL))\
-   ){ /*Loop: Copy cpStr to dupStr*/\
-      macDupUL[uiCharMac] = macCpUL[uiCharMac];\
-      ++uiCharMac;\
+   while(!macAtDelimUL)\
+   { /*Loop: Copy cpStr to dupStr*/\
+      *macDupUL++ = *macCpUL++;\
+      macAtDelimUL = ulIfDelim(*macCpUL, (delimUL));\
    } /*Loop: Copy cpStr to dupStr*/\
    \
-   if(!((char) macAtDelimUL))\
-   { /*If: cpStr's length is not a multipe of 8*/\
-      uiCharMac <<= defShiftByUL; /*for long index*/\
-      \
-      /*Loop: Till macAtDelimUL says there is no longer
-      ` a deliminator. The last character in the string
-      ' is at the end
-      */\
-      for(\
-         macAtDelimUL = macAtDelimUL;\
-         !((char) macAtDelimUL);\
-         macAtDelimUL = macAtDelimUL >> defBitsPerChar\
-      ){ /*Loop: Finish copying cpStr*/\
-         (dupStr)[uiCharMac] = (cpStr)[uiCharMac];\
-         ++uiCharMac;\
-      } /*Loop: Finish copying cpStr*/\
-   } /*If: cpStr's length is not a multipe of 8*/\
+   cpMacStr = (char *) macCpUL;\
+   dupMacStr = (char *) macDupUL;\
+   /*Loop: Till macAtDelimUL says there is no longer
+   ` a deliminator. The last character in the string
+   ' is at the end
+   */\
+   while(*cpMacStr != (delimC))\
+      *dupMacStr++ = *cpMacStr++;\
    \
-   else \
-   { /*Else: length is multipe of 8*/\
-      macDupUL[uiCharMac] = macCpUL[uiCharMac];\
-      uiCharMac <<= defShiftByUL;\
-   } /*Else: length is multipe of 8*/\
-   \
+   uiCharMac = dupMacStr - (dupStr);\
    (dupStr)[uiCharMac] = '\0';\
    uiCharMac; /*the number of characters copied*/\
 }) /*ulCpStrDelim*/
@@ -329,376 +341,95 @@
 |   - Returns:
 |     o Number of characters in the string
 \-------------------------------------------------------*/
-#define ulLenStr(inStr, delimUL)({\
+#define ulLenStr(inStr, delimUL, delimC)({\
    ulong *macPtrUL = (ulong *) (inStr);\
    ulong macAtDelimUL = 0;\
    uint uiLenStrMac = 0;\
    \
-   macAtDelimUL =\
-         ulIfDelim(macPtrUL[uiLenStrMac], (delimUL));\
+   macAtDelimUL = ulIfDelim(*macPtrUL, (delimUL));\
    \
-   for(\
-      macAtDelimUL = macAtDelimUL;\
-      !macAtDelimUL;\
-      macAtDelimUL = \
-         ulIfDelim(macPtrUL[uiLenStrMac], (delimUL))\
-   ) ++uiLenStrMac;\
+   while(!macAtDelimUL)\
+   { /*Loop: Copy cpStr to dupStr*/\
+      uiLenStrMac += 8;\
+      ++macPtrUL;\
+      macAtDelimUL = ulIfDelim(*macPtrUL, (delimUL));\
+   } /*Loop: Copy cpStr to dupStr*/\
    \
-   uiLenStrMac <<= defShiftByUL;\
+   while((inStr)[uiLenStrMac] !=(delimC)) ++uiLenStrMac;\
    \
-   /*Find out how much I overshot by. The last character
-   ' in the string is closest to the end.
-   */\
-   for(\
-      macAtDelimUL = macAtDelimUL;\
-      !((char) macAtDelimUL);\
-      macAtDelimUL = macAtDelimUL >> defBitsPerChar\
-   ) ++uiLenStrMac;\
-   \
-   uiLenStrMac; /*the number of characters copied*/\
+   uiLenStrMac;\
 }) /*ulCpStrDelim*/
 
-/*-------------------------------------------------------\
-| Fun-06: VI8CpStr
-|   - Copies an input number of elements from one c-string
-|     to another c-string using vectors if complied with
-|     vectors, else ulCpStr()
-| Input:
-|   - cpStr:
-|     o C-string to copy
-|   - dupStr:
-|     o c-string to copy to
-|   - lenUI:
-|     o Number of characters to copy
-| Output:
-|   - Modifies:
-|     o dupStr to hold lenUI characters from cpStr
-\-------------------------------------------------------*/
-#ifdef defUseVects
-   /*#define VI8CpStr(dupStr, cpStr, lenUI){\*/
-   static void VI8CpStr(char *dupStr, char *cpStr, uint lenUI){
-      uint macCpOffUL=
-            noBranchAB(
-              (char *) int8AlnPointer((cpStr)) - (cpStr)
-            );
-      uint macDupOffUL =
-            noBranchAB(
-              (char *) int8AlnPointer((dupStr)) - (dupStr)
-            );
-      
-      VI8 macVI8;
-      uint iIterMac = 0;
-      
-      if(macCpOffUL != macDupOffUL)
-      { /*If: I have to do unaligned vectors*/
-         for(
-          iIterMac = 0; 
-          iIterMac + defNum8BitElms < (lenUI);
-          iIterMac += defNum8BitElms
-         ){ /*Loop: copy with vectors*/
-            macVI8 =
-               loadu_I8Ary_retVI8(&(cpStr)[iIterMac]);
-            
-            storeu_VI8_retAryI8(
-               &(dupStr)[iIterMac],
-               macVI8
-            );
-         } /*Loop: copy with vectors*/
-      } /*If: I have to do unaligned vectors*/
-      
-      else
-      { /*Else: the strings have the same alignment*/
-         for(
-            iIterMac = 0;
-            iIterMac < (lenUI);
-            ++iIterMac
-         ) (dupStr)[iIterMac] = (cpStr)[iIterMac];
-         
-         for(
-          iIterMac = iIterMac;
-          iIterMac + defNum8BitElms < (lenUI);
-          iIterMac += defNum8BitElms
-         ){ /*Loop: copy with vectors*/
-            macVI8 =
-               load_I8Ary_retVI8(&(cpStr)[iIterMac]);
-            
-            store_VI8_retAryI8(
-               &(dupStr)[iIterMac],
-               macVI8
-             );
-         } /*Loop: copy with vectors*/
-      } /*Else: the strings have the same alignment*/
-      
-      iIterMac -= defNum8BitElms;
-      
-      for(iIterMac=iIterMac; iIterMac < lenUI;++iIterMac)
-         (dupStr)[iIterMac] = (cpStr)[iIterMac];
-   } /*VI8CpStr*/
-
-#elif defined NO_UL_CP
-   #define VI8CpStr(cpStr, dupStr, lenUI){\
-      uint uiIterMac = 0;\
-      for(uiIterMac = 0; uiIterMac < lenUI; ++uiIterMac)\
-         (dupStr)[uiIterMac] = (cpStr)[uiIterMac];\
-   }
-
-#else
-   #define VI8CpStr(cpStr, dupStr, lenUI)\
-      {ulCpStr((cpStr), (dupStr), (lenUI))}
-#endif
-
-/*-------------------------------------------------------\
-| Fun-07: VI8CpMakeDelim
-|   - Makes an vector of deliminators for the input
-|     deliminator or if not using vectors calls
-|     ulCpMakeDelim
-| Input:
-|   - delimC:
-|     o A Deliminator (char) to use to end a string copy
-| Output:
-|   - Returns:
-|     o  A VI8 type with the deliminators
-\-------------------------------------------------------*/
-#ifdef defUseVects
-  #define VI8CpMakeDelim(delimC)(set1_I8_retVI8((delimC)))
-#else
-  #define VI8CpMakeDelim(delimC)\
-    ((VI8) ulCpMakeDelim((delimC)))
-#endif
-
-/*-------------------------------------------------------\
-| Fun-08: VI8IfDelim
-|   - Detect if the input deliminator is in the input
-|     unsigned long
-| Input:
-|   - strVI8:
-|     o A VI8 type to do an if equal check on
-|   - delimVI8:
-|     o An VI8 type set to the correct deliminator. Use
-|       VI8CpMakeDelim to get this.
-| Output:
-|   - Returns:
-|     o  unsigned long > 0; strUL has no deliminator.
-|     o  unsigned long == 0; strUL has deliminator
-\-------------------------------------------------------*/
-#ifdef defUseVects
-   #define VI8IfDelim(strVI8, delimVI8)(\
-      store_mask8_retUL(\
-         cmpeq_VI8_retMask8((strVI8), (delimVI8))\
-      )\
-   ) /*VI8IfDelim*/
-
-#else
-   #define VI8IfDelim(strVI8, delimVI8)\
-      (ulIfDelim((strVI8), (delimVI8)))
-
-#endif
-
-/*-------------------------------------------------------\
-| Fun-09: VI8CpStrDelim
-|   - Copy from on string to another until a deliminator
-|     is found. This can use vectors if specified during
-|     compile time or ulCpStrDelim if vectors were not
-|     specified
-| Input:
-|   - cpStr:
-|     o C-string to copy
-|   - dupStr:
-|     o C-string to copy to
-|   - delimVI8:
-|     o A VI8 type holding a deliminator. You can make
-|       this with VI8CpMakeDelim.
-|   - delimC:
-|     o The delimintor ued to make delimVI8
-| Output:
-|   - Modifies:
-|     o dupStr to hold lenUI characters from cpStr
-|   - Returns:
-|     o Number of characters copied
-\-------------------------------------------------------*/
-#ifdef defUseVects
-   #define VI8CpStrDelim(cpStr,dupStr,delimVI8,delimC)({\
-      \
-      uint macCpOffUL =\
-         (char *) int8AlnPointer((cpStr)) - (cpStr);\
-      uint macDupOffUL =\
-         (char *_ int8AlnPointer((dupStr)) - (dupStr);\
-      \
-      VI8 macVI8;\
-      uint uiLenStrMac = 0;\
-      uint uiIterMac = 0;\
-      \
-      if(macCpOffUL != macDupOffUL)\
-      { /*If: I have to do unaligned vectors*/\
-            macVI8 = loadu_I8Ary_retVI8((cpStr));\
-            \
-            for(\
-               macVI8 =\
-                  load_I8Ary_retVI8(&(inStr)[uiLenMac]);\
-               !VI8IfDelim(macVI8, (delimVI8));\
-               macVI8=\
-                  load_I8Ary_retVI8(&(inStr)[uiLenMac])\
-            ){ /*Loop: copy with vectors*/\
-               uiLenMac += defNum8BitElms;\
-               \
-               storeu_VI8_retAryI8(\
-                  &(dupStr)[uiIterMac],\
-                  macVI8\
-               );\
-            } /*Loop: copy with vectors*/\
-      } /*If: I have to do unaligned vectors*/\
-      \
-      else\
-      { /*Else: the strings have the same alignment*/\
-         for(\
-            uiIterMac = 0;\
-            uiIterMac < macCpOffUL;\
-            ++uiIterMac\
-         ){ /*Loop: Copy unaligned parts*/\
-            if((inStr)[uiIterMac] == (delimC)) break;\
-            (dupStr)[uiIterMac] = (inStr)[uiIterMac]\
-         } /*Loop: Copy unaligned parts*/\
-         \
-         if((inStr)[uiIterMac] != (delimC))\
-         { /*If: I have more string to find*/\
-            for(\
-               macVI8 =\
-                  load_I8Ary_retVI8(&(inStr)[uiLenMac]);\
-               !VI8IfDelim(macVI8, (delimVI8));\
-               macVI8=\
-                  load_I8Ary_retVI8(&(inStr)[uiLenMac])\
-            ){ /*Loop: copy with vectors*/\
-               uiLenMac += defNum8BitElms\
-               \
-               store_VI8_retAryI8(\
-                  &(dupStr)[uiIterMac],\
-                  macVI8\
-               );\
-            } /*Loop: copy with vectors*/\
-         } /*If: I have more string to find*/\
-      } /*Else: the strings have the same alignment*/\
-      \
-      for(\
-         uiIterMac = uiIterMac;\
-         (cpStr)[uiIterMac] != (delimC);\
-         ++uiIterMac\
-      ) (dupStr)[uiIterMac]=(cpStr)[uiIterMac];\
-      \
-      uiIterMac;\
-   }) /*VI8CpStrDelim*/
-
-#elif defined NO_UL_CP
-   #define VI8CpStrDelim(dupStr,cpStr,delimVI8,delimC)({\
-      uint uiIterMac = 0;\
-      for(\
-         uiIterMac = 0;\
-         (cpStr)[uiIterMac] != (delimC);\
-         ++uiIterMac\
-      )\
-         (dupStr)[uiIterMac] = (cpStr)[uiIterMac];\
-      \
-      uiIterMac;\
-   })
-
-#else
-   #define VI8CpStrDelim(dupStr,cpStr,delimVI8,delimC)({\
-      (ulCpStrDelim((cpStr), (dupStr), (delimVI8)))
-#endif
-
-
-/*-------------------------------------------------------\
-| Fun-08: VI8LenStr
-|   - Finds the length of a string using vectors, if
-|     specified or ulLenStr if vectors were not specified
-| Input:
-|   - inStr:
-|     o C-string or string with deliminator to find length
-|       of
-|   - delimVI8:
-|     o A VI8 type holding a deliminator. You can make
-|       this with VI8CpMakeDelim.
-|   - delimC:
-|     o The delimintor ued to make delimVI8
-| Output:
-|   - Returns:
-|     o Number of characters in the string
-\-------------------------------------------------------*/
-#ifdef defUseVects
-   #define VI8LenStr(inStr, delimVI8, delimC)({\
-      uint macCpOffUL=\
-        (char *) int8AlnPointer((inStr)) - (inStr);\
-      VI8 macVI8;\
-      uint uiLenMac = 0;\
-      \
-      for(\
-         uiLenMac = 0;\
-         uiLenMac < macCpOffUL;\
-         ++uiLenMac\
-      ) {if((inStr)[uiLenMac] == (delimC)) break;};\
-      \
-      if((inStr)[uiLenMac] != (delimC))\
-      { /*If: I have more string to find*/\
-         for(\
-            macVI8=load_I8Ary_retVI8(&(inStr)[uiLenMac]);\
-            !VI8IfDelim(macVI8, (delimVI8));\
-            macVI8=load_I8Ary_retVI8(&(inStr)[uiLenMac])\
-         ) uiLenMac += defNum8BitElms;\
-         \
-         for(\
-            uiLenMac = uiLenMac;\
-            (inStr)[uiLenMac] != (delimC);\
-            ++uiLenMac\
-         ) {};\
-      } /*If: I have more string to find*/\
-      \
-      uiLenMac;\
-   }) /*ulCpStrDelim*/
-
-#elif defined NO_UL_CP
-   #define VI8LenStr(inStr, delimVI8, delimC)({\
-      uint uiIterMac = 0;\
-      for(\
-         uiIterMac = 0;\
-         (inStr)[uiIterMac] != (delimC);\
-         ++uiIterMac\
-      ) {}\
-      \
-      uiIterMac;\
-   })
-#else
-   #define VI8LenStr(inStr, delimVI8, delimC)\
-      (ulLenStr((inStr), (delimVI8)))
-#endif
 
 /*These are the single byte copy functions*/
+
+/*-------------------------------------------------------\
+| Fun-06: cCpStr
+|   - Copies cpStr into dupStr using characters
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+|   - lenUI:
+|     o length of cpStr
+| Output:
+|   - Modifies:
+|     o  dupStr to hold lenUI characters from cpStr
+\-------------------------------------------------------*/
 #define cCpStr(dupStr, cpStr, lenUI){\
    uint uiIterMac = 0;\
    for(uiIterMac = 0; uiIterMac < lenUI; ++uiIterMac)\
       (dupStr)[uiIterMac] = (cpStr)[uiIterMac];\
+   (dupStr)[uiIterMac] = '\0';\
 }
 
-
+/*-------------------------------------------------------\
+| Fun-07: cCpStrDelim
+|   - Copies cpStr into dupStr until delimC is found
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+|   - delimUL:
+|     o Deliminatro to end at (as long). Use makeULDelim
+|       to build this deliminator
+| Output:
+|   - Modifies:
+|     o  dupStr to hold the characters from cpStr
+\-------------------------------------------------------*/
 #define cCpStrDelim(dupStr, cpStr, delimC)({\
-   uint uiIterMac = 0;\
-   for(\
-      uiIterMac = 0;\
-      (cpStr)[uiIterMac] != (delimC);\
-      ++uiIterMac\
-   )\
-      (dupStr)[uiIterMac] = (cpStr)[uiIterMac];\
+   char *dupMacStr = (dupStr);\
+   char *cpMacStr = (cpStr);\
    \
-   uiIterMac;\
+   while(*(cpMacStr) != (delimC))\
+      *dupMacStr++ = *cpMacStr++;\
+   \
+   *dupMacStr = '\0';\
+   dupMacStr - (dupStr);\
 })
+/*The *dupStr++ = *cpStr++; is faster than incurmenting
+` individually or by number
+*/
 
+/*-------------------------------------------------------\
+| Fun-08: cLenStr
+|   - Finds the length of a string using characters
+| Input:
+|   - inStr:
+|     o C-string or string with deliminator to find length
+|       of
+|   - delimUL:
+|     o Deliminator marking the end of the string
+| Output:
+|   - Returns:
+|     o Number of characters in the string
+\-------------------------------------------------------*/
 #define cLenStr(inStr, delimC)({\
-   uint uiIterMac = 0;\
-   for(\
-      uiIterMac = 0;\
-      (inStr)[uiIterMac] != (delimC);\
-      ++uiIterMac\
-   ) {}\
-   \
-   uiIterMac;\
+   char *inMacStr = (inStr);\
+   while(*inMacStr != (delimC)) ++inMacStr;\
+   inMacStr - (inStr);\
 })
 
 /*-------------------------------------------------------\
@@ -719,16 +450,40 @@
 \-------------------------------------------------------*/
 #define cStrEql(qryStr, refStr, delimC)({\
    int iCntMac = 0;\
-   int retI = 0;\
    \
+   /*This is faster than incurmenting qryMacStr and
+   ` refMacStr separately. Doing *val++ == *val2++ does
+   ` not work here.
+   */\
    while((qryStr)[iCntMac] == (refStr)[iCntMac])\
-   { /*Loop: Check if strings are equal*/\
+   { /*Looop*/\
       if((qryStr)[iCntMac] == (delimC)) break;\
       ++iCntMac;\
-   } /*Loop: Check if strings are equal*/\
+   } /*Looop*/\
    \
-     (-(qryStr)[iCntMac] == (delimC))\
-   & ((qryStr)[iCntMac] - (refStr)[iCntMac]);\
+   (qryStr)[iCntMac] - (refStr)[iCntMac];\
+   \
+   /*this was removed because it caused different behavior
+   ` them strcmp
+   */\
+   /*(-(*(qryStr) !=(delimC))) &(*(qryStr) -*(refStr));*/\
+   /*Logic (for old code):
+   `  - qryStr != delimC:
+   `    o 0 if I have the delimintaor (match)
+   `    o 1 if I do not have the delimintaor (no match)
+   `  - -(qryStr != delimC):
+   `    o Converts 1 to -1 (all bits set) and 0 to 0, no
+   `      bits set
+   `  - qryStr - refStr
+   `    o 0 if the stings were equal
+   `    o < 0 if qryStr is less than refStr
+   `    o > 0 if qryStr is greater than refStr
+   `  - (-(qryStr != delimC)) & (qryStr - refStr)
+   `    o is (-1 & number) = number, if qryStr was not on
+   `      the deliminator
+   `    o is (0 & number) = 0, if qryStr was on the
+   `      deliminator
+   */\
 })
 
 #endif

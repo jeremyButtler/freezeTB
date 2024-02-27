@@ -414,7 +414,7 @@ static void sortGeneCoords(
 |    o Starting coordinate (query) to search for in
 |      geneCoordST
 |  - numGenesUI:
-|    o Number of genes in geneCoordST
+|    o Number of genes in geneCoordST (index 1)
 | Output:
 |  - Returns:
 |    o The index of the starting position
@@ -433,38 +433,32 @@ static int findStartCoordInGeneCoord(
    '  o fun-08 sec-02:
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-   int midI = numGenesI >> 1; /*divide by 2*/
-   int lastMidI = numGenesI;
-   int changeI = 2; /*so loop fires*/
+   int midI = 0;
+   int rightHalfI = numGenesI - 1;
+   int leftHalfI = 0;
 
-   while(changeI > 1 && midI >= 0)
+   while(leftHalfI <= rightHalfI)
    { /*Loop: Search for the starting coordinate*/
-      changeI = lastMidI - midI;
-      changeI = noBranchAB(changeI);
-      changeI = (changeI >> 1) + (changeI & 1);
+      midI = (leftHalfI + rightHalfI) >> 1;
 
-      lastMidI = midI;
-
-      if(   geneST->startAryUI[midI] > qryUI
-         && geneST->endAryUI[midI] > qryUI
-      ) midI -= changeI;
+      if(   qryUI < geneST->startAryUI[midI]
+         && qryUI < geneST->endAryUI[midI]
+      )  rightHalfI = midI - 1;
 
       else if(
-            geneST->startAryUI[midI] < qryUI
-         && geneST->endAryUI[midI] < qryUI
-      ) midI += changeI;
+            qryUI > geneST->startAryUI[midI]
+         && qryUI > geneST->endAryUI[midI]
+      ) leftHalfI = midI + 1;
 
      else return midI;
-
-     /*branchless whith an if return was slower here*/
    } /*Loop: Search for the starting coordinate*/
 
-   if(   geneST->startAryUI[midI] > qryUI
-      && geneST->endAryUI[midI] > qryUI
+   if(   qryUI < geneST->startAryUI[midI]
+      && qryUI < geneST->endAryUI[midI]
    ) return -1;
 
-   if(   geneST->startAryUI[midI] < qryUI
-      && geneST->endAryUI[midI] < qryUI
+   if(   qryUI > geneST->startAryUI[midI]
+      && qryUI > geneST->endAryUI[midI]
    ) return -1;
 
    return midI;
