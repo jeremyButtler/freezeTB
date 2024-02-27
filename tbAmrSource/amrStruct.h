@@ -86,9 +86,11 @@ typedef struct amrStruct{
    uint refPosUI;   /*Starting position on reference*/
    uint codonPosUI; /*Codon starting position on ref*/
    uint codonNumUI; /*Codon number*/
+   uint endCodonNumUI; /*end of an indel*/
 
    char refAaC;     /*What the reference amino acid is*/
    char amrAaC;     /*What the mutant amino acid is*/
+   char frameshiftBl; /*1: is a frame shift*/
 
    char *geneIdStr; /*Gene name*/
    uint lenGeneIdUI;/*Length of gene id*/
@@ -164,9 +166,11 @@ typedef struct amrStruct{
    (amrStructPtr)->refPosUI = 0;\
    (amrStructPtr)->codonPosUI = 0;\
    (amrStructPtr)->codonNumUI = 0;\
+   (amrStructPtr)->endCodonNumUI = 0;\
    \
    (amrStructPtr)->refAaC = 0;\
    (amrStructPtr)->amrAaC = 0;\
+   (amrStructPtr)->frameshiftBl = 0;\
    \
    (amrStructPtr)->dirFlag = def_amrST_unkownDir;\
    (amrStructPtr)->mutTypeStr[0] = '\0';\
@@ -2107,5 +2111,4 @@ static amrStruct * read_2023_WhoAmrTsv(
 
     return amrST;
 } /*read_2023_WhoAmrTsv*/
-
 #endif
