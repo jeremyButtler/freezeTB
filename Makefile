@@ -23,6 +23,9 @@ buildTbAmr:
 	make -C ./tbAmrSource CC="$(CC)" CFLAGS="$(CFLAGS)";
 
 openbsd: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds buildTbAmr
+	sed '1s/#!usr\/bin\/Rscript/#!usr\/local\/bin\/Rscript/;' < graphAmpDepth.r > tmp.r;
+	mv graphAmpDepth.r linuxGraphAmpDepth.r;
+	mv tmp.r graphAmpDepth.r;
 	sed\
       '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
        freezeTBScripts/extractPrimRead.awk\
@@ -53,6 +56,9 @@ openbsd: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds buildTbAmr
 
 
 mac: macAmpDepth macTrimSam macSubsample macFqGetIds macTbAmr
+	sed '1s/#!usr\/bin\/Rscript/#!usr\/local\/bin\/Rscript/;' < graphAmpDepth.r > tmp.r;
+	mv graphAmpDepth.r linuxGraphAmpDepth.r;
+	mv tmp.r graphAmpDepth.r;
 	sed\
       '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
        freezeTBScripts/extractPrimRead.awk\
@@ -109,11 +115,14 @@ install:
 	cp -r tbAmrSource/WHO-TB-catalog-genomeIndicies.csv $(PREFIX)/freezeTBScripts;
 	cp freezeTB.sh $(PREFIX);
 	cp ivarConScript.sh $(PREFIX);
+	cp graphAmpDepth.r $(PREFIX);
 	chmod -R a+x $(PREFIX)/freezeTBScripts;
 	chmod a+x $(PREFIX)/freezeTBScripts/*;
 	chmod a+x $(PREFIX)/freezeTb.sh;
 	chmod a+x $(PREFIX)/ivarConScript.sh;
-	mv ampDepthSource/linuxGraphAmpDepth.r ampDepthSource/graphAmpDepth.r || exit;
+	chmod a+x $(PREFIX)/ampDepth;
+	chmod a+x $(PREFIX)/graphAmpDepth.r;
+	mv linuxGraphAmpDepth.r graphAmpDepth.r || printf "";
 	mv ivarConScriptLinux.sh ivarConScript.sh || exit;
 	mv buildAmpConsLinux.sh freezeTb.sh;
 	rm freezeTBScripts/*.gawk;
