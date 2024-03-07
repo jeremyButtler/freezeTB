@@ -186,6 +186,39 @@ dataDF[
 # the amplicons for each gene separately
 dataDF$genesTag = paste(dataDF$genes,dataDF$flag,sep=" ");
 
+numFlagsI =
+   length(
+      unique(
+         paste(dataDF$flag, dataDF$ampNumber, sep = "")
+      )
+   );
+
+depthDF =
+   data.frame(
+      seq(from = 1, to = numFlagsI, by = 1),
+      rep(20, times = numFlagsI),
+      rep(100, times = numFlagsI),
+      rep("z20x read depth", times = numFlagsI),
+      rep(" 100x read depth", times = numFlagsI)
+);
+
+names(depthDF) =
+   c("xPos", "y20x", "y100x", "depth20x", "depth100x");
+
+legendAry =
+   c(
+      " 100x read depth",   # space forces to start
+      unique(dataDF$flag),
+      "~20x read depth"     # ~ is last ascii character
+    ); # Array for legend orginzation
+
+legendLabelsAry =
+   c(
+      "100x read depth",
+      unique(dataDF$flag),
+      "20x read depth"
+   ); # Names to accutally use in the legend
+
 # Make an mean column for each flag. This is so I can
 # overlay the means
 dataDF$avgCol = paste(dataDF$flag, "mean"); # For legend
@@ -195,7 +228,7 @@ dataDF$avgCol = paste(dataDF$flag, "mean"); # For legend
 #  - graphing (read depth)
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-dataDF$depth20X = "20x read depth";
+dataDF$depth20X = "z 20x read depth";
 dataDF$depth100X = "100x read depth";
 
 # Graph the main data
@@ -209,49 +242,78 @@ graphObj = ggplot(dataDF);
 graphObj =
    graphObj +
    geom_col(
-       aes(x=genesTag,
-       y=maxAmpDepth,
-       fill=flag,
-       col=flag # For legend
+       aes(
+          x = genesTag,
+          y = avgAmpDepth,
+          fill = flag,
+          col = flag # For legend
    ));
 
 # Graph the mean read depth data over the maximum
-graphObj =
-   graphObj +
-   geom_col(
-      aes(
-         x=genesTag,
-         y=avgAmpDepth,
-         fill=avgCol,
-         col = avgCol # For legend
-   ));
+#graphObj =
+#   graphObj +
+#   geom_col(
+#      aes(
+#         x=genesTag,
+#         y=avgAmpDepth,
+#         fill=avgCol,
+#         col = avgCol # For legend
+#   ));
 
 # Add in read depth markers
+
 graphObj =
    graphObj +
    geom_segment(
+      data = depthDF,
       aes(
-         x = 1 + ampNumber - 0.45,
-         xend = 1 + ampNumber + 0.45,
-         y = 20,
-         yend = 20,
-         col = depth20X,
-         fill = depth20X # Errors out, but for legend
+         x = xPos - 0.45,
+         xend = xPos + 0.45,
+         y = y20x,
+         yend = y20x,
+         col = depth20x,
+         fill = depth20x # Errors out, but for legend
       ),
    );
 
 graphObj =
    graphObj +
    geom_segment(
+      data = depthDF,
       aes(
-         x = 1 + ampNumber - 0.45,
-         xend = 1 + ampNumber + 0.45,
-         y = 100,
-         yend = 100,
-         col = depth100X,
-         fill = depth100X # errors out, but for legend
+         x = xPos - 0.45,
+         xend = xPos + 0.45,
+         y = y100x,
+         yend = y100x,
+         col = depth100x,
+         fill = depth100x # Errors out, but for legend
       ),
    );
+#graphObj =
+#   graphObj +
+#   geom_segment(
+#      aes(
+#         x = 1 + ampNumber - 0.45,
+#         xend = 1 + ampNumber + 0.45,
+#         y = 20,
+#         yend = 20,
+#         col = depth20X,
+#         fill = depth20X # Errors out, but for legend
+#      ),
+#   );
+#
+#graphObj =
+#   graphObj +
+#   geom_segment(
+#      aes(
+#         x = 1 + ampNumber - 0.45,
+#         xend = 1 + ampNumber + 0.45,
+#         y = 100,
+#         yend = 100,
+#         col = depth100X,
+#         fill = depth100X # errors out, but for legend
+#      ),
+#   );
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-05:
@@ -261,14 +323,24 @@ graphObj =
 # ADd color to the graph
 graphObj =
    graphObj +
-   scale_fill_viridis_d(name = "Legend", direction = 1);
+   scale_fill_viridis_d(
+      name = "Legend",
+      direction = 1,
+      breaks = legendAry,      # this forsces order
+      labels = legendLabelsAry # this corrects the names
+   );
 
 graphObj =
    graphObj +
-   scale_color_viridis_d(name = "Legend", direction = 1);
+   scale_color_viridis_d(
+      name = "Legend",
+      direction = 1,
+      breaks = legendAry,      # This forces order
+      labels = legendLabelsAry # This corrects the names
+   );
 
 graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
-graphObj = graphObj + ylab("Max read depth");
+graphObj = graphObj + ylab("Mean read depth");
 graphObj = graphObj + theme_classic();
 graphObj = graphObj + theme(legend.position = "top");
 graphObj =
@@ -304,11 +376,11 @@ dataDF =
    ]; # Remove the umapped and off-target columns
 
 # The Z is to force it to be last in the color scheme
-dataDF$ref = "z ref";
+dataDF$ref = "~ref";
 
 # The 0 is to force it to be first in the color scheme
-dataDF$geneEndFlag = "0 gene end";
-dataDF$geneStartFlag = "0 gene start";
+dataDF$geneEndFlag = " gene end";
+dataDF$geneStartFlag = " gene start";
 
 # I need this to handle when diffeernt genes are targeted
 dataDF[
@@ -412,7 +484,7 @@ if(! is.null(amrDF)){
          #geneGroupsStr,
          amrGeneStr,
          rep("AMR-mutation", length(amrPosI)),
-         rep("z ref", length(amrPosI))
+         rep("~ref", length(amrPosI))
        );
    
    names(amrPosDF) =
@@ -430,6 +502,28 @@ if(! is.null(amrDF)){
 # Sec-06 Sub-03:
 #   - Graph my data
 #*********************************************************
+
+legendAry =
+   c(
+      "0 gene start",   # space forces to start
+      unique(dataDF$flag),
+      "~ref",     # ~ is last ascii character
+      "AMR-mutation"
+    ); # Array for legend orginzation
+
+legendLabelsAry =
+   c(
+      "gene start",   # space forces to start
+      unique(dataDF$flag),
+      "ref",     # ~ is last ascii character
+      "AMR mutation"
+    ); # Array for legend orginzation
+
+graphObj =
+   scale_y_discrete(
+      label = function(x) (gsub("~ref", "ref", x))
+   );
+
 
 # Graph the main data
 graphObj = ggplot(dataDF);
@@ -494,7 +588,12 @@ graphObj =
 # ADd color to the graph
 graphObj =
    graphObj +
-   scale_color_viridis_d(name = "Legend", direction=-1);
+   scale_color_viridis_d(
+      name = "Legend",
+      direction=-1,
+      breaks = legendAry,
+      labels = legendLabelsAry
+   );
 
 graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
 graphObj = graphObj + ylab("Method");
