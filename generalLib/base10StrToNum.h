@@ -71,8 +71,6 @@
 #ifndef STRTONUM_H
 #define STRTONUM_H
 
-#include "dataTypeShortHand.h" /*unsigned var to uvar*/
-
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Header Sec-02:
 ^  - Maximum digits and values for unsigned data types
@@ -234,7 +232,7 @@
 #define base10StrToUL(inStr, retUL)({\
    char macroCDig = 0;\
    char *macroRetStr = (inStr);\
-   ulong macroTmpUL = 0;\
+   unsigned long macroTmpUL = 0;\
    (retUL) = 0;\
    \
    for(\
@@ -288,7 +286,7 @@
 #define base10StrToUI(inStr, retUI)({\
    char macroCDig = 0;\
    char *macroRetStr = (inStr);\
-   uint macroTmpUI = 0;\
+   unsigned int macroTmpUI = 0;\
    (retUI) = 0;\
    \
    for(\
@@ -342,7 +340,7 @@
 #define base10StrToUS(inStr, retUS)({\
    char macroCDig = 0;\
    char *macroRetStr = (inStr);\
-   ushort macroTmpUS = 0;\
+   unsigned short macroTmpUS = 0;\
    (retUS) = 0;\
    \
    for(\
@@ -396,7 +394,7 @@
 #define base10StrToUC(inStr, retUC)({\
    char macroCDig = 0;\
    char *macroRetStr = (inStr);\
-   uchar macroTmpUC = 0;\
+   unsigned char macroTmpUC = 0;\
    (retUC) = 0;\
    \
    for(\
@@ -1102,8 +1100,8 @@
 #define base10BackwardsStrToUI(inStr, retUI)({\
    char macroCDig = 0;\
    char *macroRetStr = (inStr);\
-   uint macroTmpUI = 0;\
-   uint powTenUI = 1;\
+   unsigned int macroTmpUI = 0;\
+   unsigned int powTenUI = 1;\
    (retUI) = 0;\
    \
    for(\
@@ -1136,4 +1134,5 @@
    \
    macroRetStr; /*Let the user see were ended at*/\
 }) /*base10BackwardsStrToUI*/
+
 #endif

@@ -5,6 +5,41 @@ library("viridisLite")
 library("data.table")
 # sudo xbps-install R-cran-data.table
 
+pGraphAmpDepthHelp = function(inStr){
+ if(inStr == "-h" ||
+    inStr == "--h" ||
+    inStr == "-help" ||
+    inStr == "--help" ||
+    inStr == "help"){
+       print("RScript graphAmpDepth.r -stats stats.tsv");
+       print("  - Makes a graph of mapped amplicons");
+       print("Input:");
+       print("  - stats: [Required]");
+       print("    o Tsv file with amplicon stats output");
+       print("      by ampDepth");
+       print("  - prefix: [Hufflepuff]");
+       print("    o Prefix to add to output file names");
+       print("  - ext: [tiff]");
+       print("    o File extension to save graphs as");
+       print("  - who: [freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv]");
+       print("    o WHO catalog in tbAmr format (tsv)");
+       print("      having AMR locations to add to the");
+       print("      coverage gaph");
+       print("    o This is not done if the file can");
+       print("      not be opened");
+       print("Output:");
+       print("  - Saves the graphs as file.ext (-ext)");
+       print("    o The -readDepth.ext has the read");
+       print("      depths per amplicon");
+       print("    o The -ampMap.ext has the amplicon");
+       print("      coverage for each amplicon");
+
+       return(TRUE);
+   } # If: I am printig the help message
+
+   return(FALSE);
+} # pGraphAmpDephtHelp
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SOF: Start Of File
 #  o sec-01:
@@ -25,14 +60,20 @@ library("data.table")
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 inputStr = commandArgs(); # Holds the user input
-nameStr = "Hufflepuff";   # name of output file
+prefixStr = "Hufflepuff";   # name of output file
+whoCatalogStr = "freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv";
 
 dataDF = NULL;
 graphObj = NULL; # for holding the graph
 
+# For AMR mappings
+amrDF = NULL;
+amrPosDF = NULL;
+
 # Are for pasting the gene names together
 numBarsI = 0;
-outputStr = "tiff";
+extStr = "tiff";
+dataStr = "";
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-02:
@@ -42,69 +83,75 @@ outputStr = "tiff";
 if(length(inputStr) < 6)
   stop("No tsv file from ampDepth input");
 
-if(inputStr[6] == "-h" ||
-   inputStr[7] == "--h" ||
-   inputStr[6] == "-help" ||
-   inputStr[6] == "--help" ||
-   inputStr[6] == "help"){
-   print("RScript graphAmpDepth.r file.tsv prefix type");
-   print("  - Makes a graph of mapped amplicons from");
-   print("    a tsv from ampDepth. The output graph is");
-   print("    saved to prefix.svg (defualt is out)");
-   print("  - type is the file type (svg, tiff, pdf,");
-   print("    ect...)");
+iArg = 6;
+lenInputI = length(inputStr);
+
+while(iArg <= lenInputI)
+{ # Loop: Process the user input
+   if(pGraphAmpDepthHelp(inputStr[iArg]) == TRUE) q("no");
+
+   if(inputStr[iArg] == "-stats"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI)
+        print("-stats (from ampDepth) needs an arugment");
+
+      dataStr = inputStr[iArg];
+   }else if(inputStr[iArg] == "-prefix"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI)
+         print("-prefix (file prefix) needs an arugment");
+
+      prefixStr = inputStr[iArg];
+   }else if(inputStr[iArg] == "-ext"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI)
+         print("-ext (file extension) needs an arugment");
+
+      extStr = inputStr[iArg];
+   } else if(inputStr[iArg] == "-who"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI)
+         print("-who (who catalog) needs an arugment");
+
+      whoCatalogStr = inputStr[iArg];
+   } else{
+      pGraphAmpDepthHelp("-h");
+      print(paste(inputStr[iArg], "is not recongnzied"));
+      q("no");
+   } # else no arugment was input
+
+   iArg = iArg + 1;
+} # Loop: Process the user input
+
+if(file.exists(dataStr)){
+   dataDF=setDT(read.csv(dataStr, sep="\t", header=TRUE));
+}else{
+   print(paste("Could not open -stats ", dataStr));
    q("no");
 }
-
-if(length(inputStr) > 6)
-{ # If: there is a second argument
- nameStr = inputStr[7];
-
- if(inputStr[7] == "-h" ||
-    inputStr[7] == "--h" ||
-    inputStr[7] == "-help" ||
-    inputStr[7] == "--help" ||
-    inputStr[7] == "help"){
-    print("RScript graphAmpDepth.r file.tsv prefix type");
-    print("  - Makes a graph of mapped amplicons from");
-    print("    a tsv from ampDepth. The output graph is");
-    print("    saved to prefix.svg (defualt is out)");
-    print("  - type is the file type (svg, tiff, pdf,");
-    print("    ect...)");
-    q("no");
- }
-} # If: there is a second argument
-
-
-if(length(inputStr) > 7)
-{ # If: there is a second argument
- outputStr = inputStr[8];
-
- if(inputStr[7] == "-h" ||
-    inputStr[7] == "--h" ||
-    inputStr[7] == "-help" ||
-    inputStr[7] == "--help" ||
-    inputStr[7] == "help"){
-    print("RScript graphAmpDepth.r file.tsv prefix type");
-    print("  - Makes a graph of mapped amplicons from");
-    print("    a tsv from ampDepth. The output graph is");
-    print("    saved to prefix.svg (defualt is out)");
-    print("  - type is the file type (svg, tiff, pdf,");
-    print("    ect...)");
-    q("no");
- }
-} # If: there is a second argument
-
-dataDF=setDT(read.csv(inputStr[6],sep="\t",header=TRUE));
 
 # For deugging
 #dataDF =
 #   setDT(
 #      read.csv(
-#         "04-ONT-Illumina/04-merged-stats.tsv",
+#         "Input file",
 #         sep="\t",
 #         header=TRUE
 #));
+
+if(file.exists(whoCatalogStr)){
+   amrDF =
+      setDT(
+         read.csv(
+            whoCatalogStr,
+            sep = "\t",
+            header = TRUE
+      ));
+} # If: I have a who catalog with amr positions ot map
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-03:
@@ -229,14 +276,25 @@ graphObj =
    theme(axis.text.x = element_text(angle = 90));
 
 ggsave(
-   paste(nameStr, "-readDepth.", outputStr, sep = ""),
-   device = outputStr
+   paste(prefixStr, "-readDepth.", extStr, sep = ""),
+   device = extStr
 ); # Save the graph
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-06:
 #  - graphing (Mapping to genes)
+#  o sec-06 sub-01:
+#    - Merge genes in an amplicon into single amplicons
+#  o sec-06 sub-02:
+#   - Add in the AMR data if provided
+#  o sec-06 sub-03:
+#   - Graph my data
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#*********************************************************
+# Sec-06 Sub-01:
+#   - Merge genes in an amplicon into single amplicons
+#*********************************************************
 
 dataDF =
    dataDF[
@@ -273,8 +331,105 @@ dataDF$geneGroup =
    ); # Remove duplicate names from the gene groups
 
 dataDF[, minRefStart:=min(refStart), by = geneGroup];
-dataDF[, maxRefEnd:=max(refEnd), by = geneGroup];
 
+# This is to avoid minor overlaps ampDepth did not catch
+dataDF[, maxRefEnd:=max(refGeneEnd), by = geneGroup];
+
+#*********************************************************
+# Sec-06 Sub-02:
+#   - Add in the AMR data if provided
+#*********************************************************
+
+# eis is a bit odd. The genome coordiantes in the sam file
+# disagree with the genome coordinates in the database.
+# I am wondering if this is a promoter region?
+
+if(! is.null(amrDF)){
+# If: I have mar coordinates to add
+   # Order my datastructers by starting positoin
+   amrDF = amrDF[order(amrDF$refPosition),];
+   dataDF = dataDF[order(dataDF$maxRefEnd),];
+   dataDF = dataDF[order(dataDF$minRefStart),];
+
+   # Set up my vectors to store my variables
+   amrPosI = amrDF$refPosition;
+   amrGeneStr = 0;
+   amrMaxI = 0;
+   amrMinI = 0;
+
+   dataMinI = dataDF$minRefStart;
+   dataMaxI = dataDF$maxRefEnd;
+   dataGeneStr = dataDF$geneGroup;
+   
+   lenDataI = length(dataDF$geneGroup);
+   lenAmrI = length(amrDF$geneStart);
+   
+   # My data positions seem to be siz of
+   dataMinI = dataMinI - 6;
+   
+   iAmr = 1;
+   iData = 1;
+
+   # Filter out amrs that are no tin my amplicons
+   while(iAmr <= lenAmrI){
+      if(iData > lenDataI){
+         while(iAmr <= lenAmrI){
+            amrGeneStr[iAmr] = 'd';
+            amrPosI[iAmr] = -1;
+            amrMaxI[iAmr] = -1;
+            amrMinI[iAmr] = -1;
+            iAmr = iAmr + 1;
+         }
+      } else if(amrPosI[iAmr] > dataMaxI[iData]){
+         iData = iData + 1;
+      } else if(amrPosI[iAmr] < dataMinI[iData]){
+         amrGeneStr[iAmr] = 'd';
+         amrPosI[iAmr] = -1;
+         amrMaxI[iAmr] = -1;
+         amrMinI[iAmr] = -1;
+   
+         iAmr = iAmr + 1;
+      } else { # Else: I am keeping this value
+         amrGeneStr[iAmr] = dataGeneStr[iData];
+         amrMaxI[iAmr] = dataMaxI[iData];
+         amrMinI[iAmr] = dataMinI[iData];;
+         iAmr = iAmr + 1;
+      } # Else: I am keeping this value
+   } # Loop add in gene gropu names
+   
+   # Remove lazy marked valuesx
+   amrGeneStr = amrGeneStr[amrGeneStr != 'd'];
+   amrPosI = amrPosI[amrPosI > -1];
+   amrMinI = amrMinI[amrMinI > -1];
+   amrMaxI = amrMaxI[amrMaxI > -1];
+   
+   # Make my amr dataframe
+   amrPosDF =
+      data.frame(
+         amrPosI,
+         amrMinI,
+         amrMaxI,
+         #geneGroupsStr,
+         amrGeneStr,
+         rep("AMR-mutation", length(amrPosI)),
+         rep("z ref", length(amrPosI))
+       );
+   
+   names(amrPosDF) =
+      c(
+         "amrStart",
+         "minRefStart",
+         "maxRefEnd",
+         "geneGroup",
+         "legendFlag",
+         "yCol"
+      );
+} # If: I have mar coordinates to add
+
+#*********************************************************
+# Sec-06 Sub-03:
+#   - Graph my data
+#*********************************************************
 
 # Graph the main data
 graphObj = ggplot(dataDF);
@@ -292,6 +447,20 @@ graphObj =
       ) # aes
    );
 
+# graph the amrs
+if(! is.null(amrDF)){
+   graphObj =
+      graphObj +
+      geom_point(
+         data = amrPosDF,
+         aes(
+            x = amrStart - minRefStart,
+            y = yCol,
+            col = legendFlag
+         )
+      );
+} # If: I have amr positions to graph
+         
 # graph the maximum read depth data
 graphObj =
    graphObj +
@@ -305,7 +474,6 @@ graphObj =
       ) # aes
    );
 # Graph the mean read depth data over the maximum
-
 graphObj =
    graphObj +
    geom_vline(
@@ -337,6 +505,6 @@ graphObj =
    theme(axis.text.x = element_text(angle = 90));
 
 ggsave(
-   paste(nameStr, "-ampMap.", outputStr, sep = ""),
-   device = outputStr
+   paste(prefixStr, "-ampMap.", extStr, sep = ""),
+   device = extStr
 ); # Save the graph

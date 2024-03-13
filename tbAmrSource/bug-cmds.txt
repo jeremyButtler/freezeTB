@@ -1,20 +1,13 @@
-#b tbAmr.c:183
-b amrStruct.h:1790
-#b genIndiceStruct.h:644
-#b checkAmr.h:771
-#b ../generalLib/samEntryStruct.h:636
+b tbAmr.c:228
+#b amrStruct.c:934
+#b checkAmr.c:254
+b ../generalLib/samEntryStruct.c:522
 
-# 2021 catalog command (just reads, no id printing)
-#r -who-2021-csv WHO-TB-catalog-genomeIndicies.csv -sam ~/BC33-test.sam
-
-# 2023 catalog command (just reads, no id printing)
-r -who-2023-tab1-tsv WHO-2023-TB-tab1-master.tsv -who-2023-tab2-tsv WHO-2023-TB-tab2-indices.tsv -sam ~/BC33-test.sam
-
-# 2021 catalog command with consensus
-#r -who-2021-csv WHO-TB-catalog-genomeIndicies.csv -sam-con ~/BC33-test-con.sam
-
-# run commands for print ids
-#r -who-2021-csv WHO-TB-catalog-genomeIndicies.csv -sam ~/BC33-test.sam -id-file-pref ~/delete-tbAmrTest/delete
+# Null test
+#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/TB-null-trim.sam
+#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC33-test.sam
+#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/BC33-test-con.sam
+r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC34.sam
 
 define pcross
    set $icnt = 0

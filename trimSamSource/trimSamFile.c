@@ -28,6 +28,11 @@
 #  o <limits.h>
 ########################################################*/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "../generalLib/trimSam.h"
+
+
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' SOP:
 '   main Main function to glue everything together
@@ -86,7 +91,7 @@ int main(int lenArgsInt, char *argsPtrCStr[])
     char errChar = 0;          /*Stores error from checkInput*/
 
     FILE *samFILE = 0; /*Points to file to get data from*/
-    FILE *outFILE;
+    FILE *outFILE = 0;
 
     /******************************************************************\
     * Main Sec-1 Sub-2: help message

@@ -1,0 +1,21 @@
+#b ../amrStruct.c:529
+#b genIndiceStruct.c:644
+#b ../generalLib/samEntryStruct.h:636
+b whoToTbAmr.c:202
+#b cnvt_whoToTbAmr.c:2347
+#b cnvt_whoToTbAmr.c:1372
+
+r -tabone-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab1-master.tsv -tabtwo-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab2-indices.tsv -sam ../../../who2023-TB-catalog-as-tsv/TB-NC000962-gene-maps.sam
+
+define pcross
+   set $icnt = 0
+   set $tmpAmrST = $0
+   set $lenAmr = $1
+
+   while($icnt < lenAmr)
+      if(tmpAmrST[icnt].crossResFlagsUL)
+         p icnt
+      end
+      set $icnt = $icnt + 1
+   end
+end

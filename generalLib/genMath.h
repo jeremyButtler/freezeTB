@@ -51,9 +51,9 @@
 |     o the position of the highest bit
 \-------------------------------------------------------*/
 #define noBanchHiBit2(numI)({\
-   uint tmpNumUI = (uint) (numI);\
-   uint retUI = 0;\
-   uint shiftUI = 0;\
+   unsigned int tmpNumUI = (uint) (numI);\
+   unsigned int retUI = 0;\
+   unsigned int shiftUI = 0;\
    \
    retUI = (tmpNumUI > 0xFFFF) << 4;\
    tmpNumUI >>= retUI;\

@@ -1,23 +1,37 @@
-/*########################################################
-# Name: tbCon
-#  - Builds a consensus using the non-subsampling quick
-#    tbCon method
-# Libraries
-#   - "tbCon-inputFuns.h"                 (No .c file)
-#   o "tbCon.h"                           (No .c file)
-#   o "../generaLib/samEntryStruct.h"     (No .c file)
-#   o "../generaLib/base10StrToNum.h"     (No .c file)
-#   o "../generaLib/dataTypeShortHand.h"  (No .c file)
-#   o "../generaLib/ulCpStr.h"            (No .c file)
-#   o "../generaLib/numToStr.h"           (No .c file)
-# C Standard Libraries:
-#  o <stdlib.h>
-#  o <stdio.h>
-#  o <limits.h>
-#  o <string.h>
-########################################################*/
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header:
+'     - Indcluded libraries
+'   o main:
+'     - Driver function to build the consensus with
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-#include "tbCon-inputFuns.h"
+/*-------------------------------------------------------\
+| Header:
+|   - Indcluded libraries
+\-------------------------------------------------------*/
+
+#ifdef PLAN9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
+
+#include <stdio.h>
+
+#include "../generalLib/dataTypeShortHand.h" /*no .c*/
+#include "../generalLib/ulCpStr.h"           /*no .c*/
+#include "../generalLib/base10StrToNum.h"    /*no .c*/
+#include "../generalLib/samEntryStruct.h"
+
+#include "tbCon-fun.h"
+#include "tbCon-input.h"
+
+/*Hidden libraries
+`   - ../generalLib/numToStr.h       (no .c)
+`   - ../generalLib/genMath.h        (no .c)
+*/
 
 int main(
    int lenArgsI,
@@ -43,8 +57,11 @@ int main(
    char *outFileStr = 0;
    char *tsvFileStr = 0; /*File to print results to*/
 
-   char *refIdStr = defRefNameStr; /*Name of reference*/
    uint lenRefUI = defRefLen;  /*Length of the reference*/
+   char refIdStr[256]; /*Name of reference*/
+      /*I would be supprised if a reference id was longer
+      `   then 64 characters, so 256 should be safe
+      */
 
    struct tbConSet settings;
 
@@ -57,13 +74,17 @@ int main(
    /*Files for input*/
    FILE *samFILE = 0;
    FILE *outFILE = 0;
-   FILE *tsvFILE = 0;
 
    /*Non-user input*/
    /*For the sam file*/
    char *buffStr = 0;
    ulong lenBuffUL = 0;
    struct samEntry samST;
+ 
+   /*Grabbing reference id from sam file*/
+   char *tmpStr = 0;
+   ulong tabUL = ulCpMakeDelim('\t');
+   char multiRefBl = 0; /*1: means multiple refs/exit*/
    
    /*For building the consensus*/
    struct conBase *conBaseAryST;
@@ -71,69 +92,86 @@ int main(
    /*For collapsing the consensus*/
    char errC = 0;
    int numFragmentsI = 0;
-   struct samEntry *samAryST = 0;
+   struct samEntry *samSTAry = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-02:
    ^   - Get user input
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   /*Default reference id*/
+   refIdStr[0] = 'N';
+   refIdStr[2] = 'A';
+   refIdStr[3] = '\0';
+
    initTbConSet(&settings);
-   iIter = 0;
+   iIter = 1;
 
    while(iIter < lenArgsI)
    { /*Loop: through all user input*/
       errS =
-         checkTbConAry(
+         checkTbConArg(
             argsAryStr[iIter],
             argsAryStr[iIter + 1],
             &samFileStr,
             &outFileStr,
             &tsvFileStr,
-            &refIdStr,
             &lenRefUI,
             &settings,
             &shiftC 
          );
 
-      if(errS & def_tbCon_pHelp)
-      { /*If: I printing the help message*/
-         pTbConHelp(errS & def_tbCon_pFullHelp, stdout);
-         exit(0);
-      } /*If: I printing the help message*/
+      if(errS)
+      { /*If: there was an error*/
+         if(errS & def_tbCon_input_pHelp)
+         { /*If: I printing the help message*/
+            pTbConHelp(
+               errS & def_tbCon_input_pFullHelp,
+               stdout
+            );
 
-      else if(errS & def_tbCon_pVersion)
-      { /*If: I printing the help message*/
-         pTbConVersion(stdout);
-         exit(0);
-      } /*If: I printing the help message*/
+            exit(0);
+         } /*If: I printing the help message*/
 
-      else if(errS & def_tbCon_nonNum_Err)
-      { /*If: I had non-numeric input*/
-         if(helpBl)
-         { /*If: this is the first error*/
-            pTbConHelp(errS, stderr);
-            helpBl = 0;
-         } /*If: this is the first error*/
+         else if(errS & def_tbCon_input_pVersion)
+         { /*If: I printing the help message*/
+            pTbConVersion(stdout);
+            exit(0);
+         } /*If: I printing the help message*/
 
-         fprintf(
-            stderr,
-            "%s %s is non-numeric\n",
-             argsAryStr[iIter],
-             argsAryStr[iIter + 1]
-         );
-      } /*If: I had non-numeric input*/
+         else if(errS & def_tbCon_input_nonNum_Err)
+         { /*If: I had non-numeric input*/
+            if(helpBl)
+            { /*If: this is the first error*/
+               pTbConHelp(errS, stderr);
+               helpBl = 0;
+            } /*If: this is the first error*/
 
-      else if(errS & def_tbCon_unkown_Err)
-      { /*Else if: invalid input*/
-         if(helpBl)
-         { /*If: this is the first error*/
-            pTbConHelp(errS, stderr);
-            helpBl = 0;
-         } /*If: this is the first error*/
+            fprintf(
+               stderr,
+               "%s %s is non-numeric\n",
+                argsAryStr[iIter],
+                argsAryStr[iIter + 1]
+            );
+         } /*If: I had non-numeric input*/
 
-         fprintf(stderr, "%s is not recongnized\n");
-      } /*Else if: invalid input*/
+         else if(errS & def_tbCon_input_unkown_Err)
+         { /*Else if: invalid input*/
+            if(helpBl)
+            { /*If: this is the first error*/
+               pTbConHelp(errS, stderr);
+               helpBl = 0;
+            } /*If: this is the first error*/
+
+            fprintf(
+               stderr, 
+               "%s is not recongnized\n",
+               argsAryStr[iIter]
+            );
+         } /*Else if: invalid input*/
+      } /*If: there was an error*/
+
+      tbCon_checkInput_falseErr:;
 
       iIter += 1 + shiftC;
    } /*Loop: through all user input*/
@@ -147,9 +185,6 @@ int main(
    ^     - Check if I can open the sam file
    ^   o main sec-03 sub-02:
    ^     - Check if I can open the output file
-   ^   o main sec-03 sub-03:
-   ^     - Check if I can open the output tsv file for the
-   ^       variant reporting
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
     /****************************************************\
@@ -201,34 +236,6 @@ int main(
        } /*If: I could not open the out file*/
     } /*Else: The user provided a out file*/
 
-    /****************************************************\
-    * Main Sec-03 Sub-02:
-    *   - Check if I can open the output tsv file for the
-    *     variant reporting
-    \****************************************************/
-
-    if(tsvFileStr[0] == '-')
-       tsvFILE = stdout;
-
-    else
-    { /*Else: The user provided a tsv file*/
-       tsvFILE = fopen(tsvFileStr, "r");
-
-       if(!tsvFILE)
-       { /*If: I could not open the tsv file*/
-          fprintf(
-              stderr,
-              "Could not open -tsv %s\n",
-              tsvFileStr
-          );
-
-          fclose(samFILE);
-          fclose(outFILE);
-          exit(-1);
-       } /*If: I could not open the tsv file*/
-    } /*Else: The user provided a tsv file*/
-
-
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-04:
    ^   - Build the consensus
@@ -242,12 +249,82 @@ int main(
    { /*Loop: Read in the sam file/build consensus*/
        /*Check if this line is part of the header*/
        if(samST.extraStr[0] == '@') 
-          pSamEntry(&samST, buffStr, lenBuffUL, outFILE);
+       { /*If: this is an header entry*/
 
-       /*Check if the read is an umapped read (4), or is
-       ` a secondary alignemnt (256)
+          /*This is not perfect because it assumes the
+          `  sam file @SQ entry is in the order of
+          `  @SQ\tSN:reference-name\tLN:reference-length
+          */
+
+          if(! cStrEql("@SQ\t", samST.extraStr, '\t'))
+          { /*If: this has length information*/
+             if(multiRefBl)
+             { /*If: sam file has multiple references*/
+                fprintf(
+                   stderr,
+                   "-sam %s has multiple references\n",
+                   samFileStr
+                ); /*Let user know the problem*/
+
+                if(samFILE != stdin) fclose(samFILE);
+                if(outFILE != stdout) fclose(samFILE);
+
+                freeSamEntryStack(&samST);
+                free(buffStr);
+ 
+                /*This is very unlikely*/
+                if(conBaseAryST)
+                   freeConBaseAry(&conBaseAryST,lenRefUI);
+
+                exit(-1);
+             } /*If: sam file has multiple references*/
+
+             multiRefBl = 1;
+
+             /*Get past "@SQ\t"*/
+             tmpStr = samST.extraStr + 4; 
+
+             while(*tmpStr++ !=':') if(*tmpStr <31) break;
+
+             /*Check if I have a reference id*/
+             if(*(tmpStr - 1) != ':')
+                goto tbCon_main_pSamHead;
+
+             tmpStr +=
+                ulCpStrDelim(refIdStr,tmpStr,tabUL,'\t');
+
+             ++tmpStr;
+            
+             if(*tmpStr < 31 ) goto tbCon_main_pSamHead;
+
+             /*Move past the LN: flag*/
+             while(*tmpStr++ !=':') if(*tmpStr <31) break;
+
+             /*Check if I have a read length*/
+             if(*(tmpStr - 1) != ':')
+                goto tbCon_main_pSamHead;
+
+             /*Get the reference length*/
+             tmpStr = base10StrToUI(tmpStr, lenRefUI);
+
+             /*Check if I had a conversion error*/
+             if(*tmpStr > 31) lenRefUI = defRefLen;
+          } /*If: this has length information*/
+
+          tbCon_main_pSamHead:;
+
+          pSamEntry(&samST,&buffStr,&lenBuffUL,outFILE);
+          goto nextLine;
+       } /*If: this is an header entry*/
+
+       /*Check if the read is an umapped read (4), an
+       `   secondary alignemnt (256), or an supplementary
+       `   alignment (2048)
        */
-       if(samST.mapqUC & (4 | 256)) goto nextLine;
+       if(samST.flagUS & (4 | 256 | 2048)) goto nextLine;
+
+       if(samST.mapqUC < settings.minMapqUC)
+          goto nextLine;
 
        errS =
           addReadToConBaseArray(
@@ -257,77 +334,115 @@ int main(
              &settings
           ); /*Build the consensus; read by read*/
 
-      if(errS & def_tbCon_Memory_Err)
-      { /*If: I had a memory error*/
-         fclose(samFILE);
-         fclose(outFILE);
-         fclose(tsvFILE);
-         freeSamEntryStack(&samST);
-         freeConBaseAry(conBaseAryST, lenRefUI);
+       if(errS & def_tbCon_Memory_Err)
+       { /*If: I had a memory error*/
+          free(buffStr);
+          fclose(samFILE);
+          fclose(outFILE);
+          freeSamEntryStack(&samST);
+          freeConBaseAry(&conBaseAryST, lenRefUI);
 
-         fprintf(
-            stderr,
-            "Memory error while building consensus\n"
-         );
+          fprintf(
+             stderr,
+             "Memory error while building consensus\n"
+          );
 
-         exit(-1);
-      } /*If: I had a memory error*/
+          exit(-1);
+       } /*If: I had a memory error*/
 
-      nextLine:;
+       nextLine:;
 
-      errS =
-         readSamLine(&samST,&buffStr,&lenBuffUL,samFILE);
-   } /*Loop: Read in the sam file/build consensus*/
-      nextLine:;
-
-      errS =
-         readSamLine(&samST,&buffStr,&lenBuffUL,samFILE);
+       errS =
+          readSamLine(&samST,&buffStr,&lenBuffUL,samFILE);
    } /*Loop: Read in the sam file/build consensus*/
 
+   freeSamEntryStack(&samST);
    fclose(samFILE);
-   free(buffStr);
-   buffStr = 0;
-   lenBuffUL = 0;
+
+   fprintf(
+      outFILE,
+      "@tbCom -sam %s\n",
+      samFileStr
+   ); /*Add all settings in*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-05:
    ^   - Print and collapse the consensus
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(tsvFILE)
+   if(tsvFileStr)
    { /*If: the user wanted the variants*/
-      pConBaseArray(
-         conBaseAryST,
-         lenRefUI,
-         refIdStr,
-         settings,
-         tsvFILE
-      ); /*Print out the variants (not a vcf)*/
+      errC =
+         pConBaseArray(
+            conBaseAryST,
+            lenRefUI,
+            refIdStr,
+            &settings,
+            tsvFileStr
+         ); /*Print out the variants (not a vcf)*/
+
+      if(errC)
+      { /*If: I had a file error*/
+         fprintf(
+            stderr,
+            "Could not open -out-tsv %s; skipping diff",
+            tsvFileStr
+         );
+
+         fprintf(
+            stderr,
+            " table print\n"
+         );
+      } /*If: I had a file error*/
    } /*If: the user wanted the variants*/
 
-   if(*tsvFILE == *outFILE) fprintf(tsvFILE, "\n");
-   if(tsvFILE){fclose(tsvFILE); tsvFILE = 0;}
+   /*Check if the ouput and tsv file are the same*/
+   if(outFILE == stdout)
+   { /*If: the ouput file was stdout*/
+     if((tsvFileStr && *tsvFileStr == '-'))
+        fprintf(outFILE, "\n");
+   } /*If: the ouput file was stdout*/
 
-   samAryST =
-      collapseCOnBaseArray(
+   else if(! cStrEql(outFileStr, tsvFileStr, '\0'))
+      fprintf(outFILE, "\n");
+
+   /*Print the consensuses*/
+   samSTAry =
+      (struct samEntry *)
+      collapseConBaseArray(
          conBaseAryST,
          lenRefUI,
          &numFragmentsI,
          refIdStr,
-         settings,
-         errC
+         &settings,
+         &errC
       ); /*Collapse the consensus*/
 
-   freeConBaseAry(conBaseAryST, lenRefUI);
+   freeConBaseAry(&conBaseAryST, lenRefUI);
 
-   /*Print the consensus*/
+   /*Print the consensuses*/
    for(iIter = 0; iIter < numFragmentsI; ++iIter)
    { /*Loop: Print and free each sam entry*/
-      pSamEntryAsFasta(&samST, outFILE);
-      freeSamEntryStack(&samST[iIter]);
+      /*Check if ths was a false entry
+      `   For some odd reason my counting system is
+      `   off here (problem is in collapseConBaseArray)
+      */
+      if(samSTAry[iIter].qryIdStr[0] != '\0')
+          pSamEntry(
+             &samSTAry[iIter],
+             &buffStr,
+             &lenBuffUL,
+             outFILE
+          ); /*Print out the consensuses as a sam file*/
+
+      freeSamEntryStack(&samSTAry[iIter]);
    } /*Loop: Print and free each sam entry*/
 
-   free(samST);
+   free(buffStr);
+   buffStr = 0;
+   lenBuffUL = 0;
+
+   free(samSTAry);
    fclose(outFILE);
 
     exit(0);

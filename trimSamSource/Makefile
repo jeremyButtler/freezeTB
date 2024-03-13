@@ -5,7 +5,7 @@ MACCFLAGS += -O3
 DEBUGFLAGS += -O0 -ggdb -Wall -static -std=c89
 
 all:
-	$(CC) $(CFLAGS) -o trimSam trimSamFile.c
+	$(CC) $(CFLAGS) -o trimSam trimSamFile.c ../generalLib/trimSam.c ../generalLib/samEntryStruct.c
 mac:
 	$(CC) $(MACCFLAGS) -o trimSam trimSamFile.c
 check:

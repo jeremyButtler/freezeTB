@@ -1,6 +1,15 @@
-#include "tbAMR.h" /*Header for this file*/
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "tbAmr.h" /*Header for this file*/
+
 #include "checkAmr.h"
-#include <string.h>
+#include "amrStruct.h"
+
+/*Only .h file*/
+#include "../generalLib/ulCpStr.h"
+#include "../generalLib/dataTypeShortHand.h"
+#include "../generalLib/base10StrToNum.h"
 
 int main(
    int numArgsI,
@@ -19,11 +28,10 @@ int main(
    /*User input variables*/
 
    char *amrTblStr = 0;/*Table with AMR mutations*/
+
    char *samStr = 0;   /*Sequence to check for resitance*/
    char *outStr = 0;   /*Holds path to File to output to*/
-   char *amrTblTab2Str = 0; /*For 2023 catalog*/
    char *idPrefStr = 0; /*Prefix for read id files*/
-   char whoTblFlag = 0; /*amrTblStr is from the who (csv)*/
 
    char readsBl;     /*1: user input reads*/
 
@@ -32,20 +40,16 @@ int main(
    float minPercMapF = defMinPerReadsMap;
    float minPercTotalF = defMinPerReadsTotal;
 
-   char *drugAryStr = 0;
-
-   char *buffStr = 0;   /*For reading sam files*/
-   ulong lenBuffUL = 0; /*Size of buffStr*/
-
+   char *drugAryStr = 0; /*Holds antibiotic names*/
+   int numDrugsI = 0;    /*Holds number drugs in drugAry*/
+   int maxDrugsI = 0;    /*max drugs drugAry can have*/
+   
    char *errStr = 0;
-   uchar errUC = 0;
+   char errC = 0;
 
-   ulong numAmrUL = 0;
+   uint numAmrUI = 0;
 
-   FILE *amrFILE = 0;
-   FILE *amrTwoFILE = 0;
-   FILE *samFILE = 0;
-   FILE *outFILE = 0;
+   FILE *checkFILE = 0;
 
    struct amrStruct *amrST = 0;
 
@@ -68,11 +72,9 @@ int main(
         numArgsI,
         argsAryStr,
         &amrTblStr,  /*Table with AMR mutations*/
-        &amrTblTab2Str, /*For 2023 catalog*/
         &samStr,     /*Sequence to check for resitance*/
         &outStr,     /*File to outuput to*/
         &idPrefStr,   /*Prefix for read id files*/
-        &whoTblFlag,   /*amrTblStr is from the who (csv)*/
         &readsBl,     /*1: user input reads*/
         &minDepthUI,   /*Min read depth to keep an amr*/
         &minPercMapF,/*Min % support to keep amr (read)*/
@@ -87,36 +89,26 @@ int main(
    if(errStr)
    { /*If: I had an error*/
 
-      if(   strcmp(errStr, "-h") == 0
-         || strcmp(errStr, "--h") == 0
-         || strcmp(errStr, "-help") == 0
-         || strcmp(errStr, "--help") == 0
-         || strcmp(errStr, "help") == 0
+      if(   cStrEql(errStr, "-h", '\0') == 0
+         || cStrEql(errStr, "--h", '\0') == 0
+         || cStrEql(errStr, "-help", '\0') == 0
+         || cStrEql(errStr, "--help", '\0') == 0
+         || cStrEql(errStr, "help", '\0') == 0
       ){ /*If: the user requested the help message*/
          pTbAmrHelp(stdout);
          exit(0);
       } /*If: the user requested the help message*/
 
 
-      if(   strcmp(errStr, "-v") == 0
-         || strcmp(errStr, "--v") == 0
-         || strcmp(errStr, "-version") == 0
-         || strcmp(errStr, "--version") == 0
-         || strcmp(errStr, "version") == 0
+      if(   cStrEql(errStr, "-v", '\0') == 0
+         || cStrEql(errStr, "--v", '\0') == 0
+         || cStrEql(errStr, "-version", '\0') == 0
+         || cStrEql(errStr, "--version", '\0') == 0
+         || cStrEql(errStr, "version", '\0') == 0
       ){ /*If: the user requested the version number*/
          pTbAmrVersion(stdout);
          exit(0);
       } /*If: the user requested the version number*/
-
-      if(strcmp(errStr, "-max-homo-len") == 0)
-      { /*If: the user input non-numeric argument*/
-         fprintf(
-            stderr,
-            "Argument from -max-homo-len is not a number"
-         );
-         fprintf(stderr, "\n");
-         exit(-1);
-      } /*If: the user input non-numeric argument*/
 
       pTbAmrHelp(stderr);
 
@@ -143,159 +135,110 @@ int main(
    *   - Check if I can open the sam file
    \*****************************************************/
 
-   if(!samStr || samStr[0] == '-') samFILE = stdin;
+   if(samStr && samStr[0] != '-')
+   { /*If: I was given a sam file*/
+      checkFILE = fopen(samStr, "r");
 
-   else
-   { /*Else: I am getting the sam file from a file*/
-      samFILE = fopen(samStr, "r");
-
-      if(!samFILE)
+      if(! checkFILE)
       { /*If: I could not open the file*/
         fprintf(stderr,"Could not open -sam %s\n",samStr);
         exit(-1);
       } /*If: I could not open the file*/
-   } /*Else: I am getting the sam file from a file*/
+
+      fclose(checkFILE); 
+      checkFILE = 0;
+   } /*If: I was given a sam file*/
 
    /*****************************************************\
    * Main Sec-03 Sub-02:
    *   - Check if I can open the output file
    \*****************************************************/
 
-   if(!outStr || outStr[0] == '-') outFILE = stdout;
+   if(outStr && outStr[0] != '-')
+   { /*If: I was given a out file*/
+      checkFILE = fopen(outStr, "r");
 
-   else
-   { /*Else: I am sending the output to a file*/
-      outFILE = fopen(outStr, "r");
-
-      if(!outFILE)
+      if(! checkFILE)
       { /*If: I could not open the file*/
         fprintf(stderr,"Could not open -out %s\n",outStr);
-        fclose(samFILE);
         exit(-1);
       } /*If: I could not open the file*/
-   } /*Else: I am sending the output to a file*/
+
+      fclose(checkFILE); 
+      checkFILE = 0;
+   } /*If: I was given a out file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-04:
    ^  - Open amr table file and get amr's
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   amrFILE = fopen(amrTblStr, "r");
+   checkFILE = fopen(amrTblStr, "r");
 
-   if(amrFILE == 0)
+   if(checkFILE == 0)
    { /*If: I could not open the WHO catalog*/
-      if(whoTblFlag == defWho2021)
-         fprintf(
-            stderr,
-            "Could not open -who-2021-csv %s\n",
-            amrTblStr
-         );
-
-      if(whoTblFlag == defWho2023)
-         fprintf(
-            stderr,
-            "Could not open -who-2023-tab1-tsv %s\n",
-            amrTblStr
-         );
-
-      fclose(samFILE);
-      fclose(outFILE);
+      fprintf(
+         stderr,
+         "Could not open -amr-tbl %s\n",
+         amrTblStr
+      );
 
       exit(-1);
    } /*If: I could not open the WHO catalog*/
 
-   if(amrTblTab2Str)
-   { /*If: I have a two part amr table*/
-      amrTwoFILE = fopen(amrTblTab2Str, "r");
+   fclose(checkFILE);
+   checkFILE = 0;
 
-      if(!amrTwoFILE)
-      { /*If: I could not open the amr file*/
-         fprintf(
-            stderr,
-            "Unable to open -who-2023-tab2-tsv %s\n",
-            amrTblTab2Str
-          );
+   amrST =
+      readTbAmrTbl(
+         amrTblStr, 
+         &numAmrUI,
+         &drugAryStr,
+         &numDrugsI,
+         &maxDrugsI,
+         &errC
+      ); /*Get the amr entries*/
 
-         fclose(samFILE);
-         fclose(amrFILE);
-         fclose(outFILE);
-
-         exit(-1);
-      } /*If: I could not open the amr file*/
-   } /*If: I have a two part amr table*/
-
-   switch(whoTblFlag)
-   { /*Switch: checking amr input method*/
-      case defWho2021:
-         amrST =
-            read_2021_WhoAmrCsv(
-               amrFILE,
-               &numAmrUL,
-               &drugAryStr
-            ); /*get the amr data (2021 catalog*/
-         break;
-
-      case defWho2023:
-         amrST =
-             read_2023_WhoAmrTsv(
-                amrFILE,
-                amrTwoFILE,
-                &numAmrUL,
-                &drugAryStr,
-                &errUC
-             ); /*Get the amr data (2023 catalog)*/
-
-         fclose(amrTwoFILE);
-         amrTwoFILE = 0;
-         break;
-   } /*Switch: checking amr input method*/
-
-   fclose(amrFILE);
-   amrFILE = 0;
-
-   if(amrST == 0)
-   { /*If: There was a memory error*/
+   if(errC == def_amrST_invalidFILE)
+   { /*If: I could not read in the AMR table*/
       fprintf(
-         stderr,
-         "Memory errror while extracting resistance"
+        stderr,
+        "%s is no in tbAmr format or has no data\n",
+        amrTblStr
       );
 
-      fclose(samFILE);
-      fclose(outFILE);
-
-      fprintf(stderr, " profiles\n from %s\n", amrTblStr);
       exit(-1);
-   } /*If: There was a memory error*/
+   } /*If: I could not read in the AMR table*/
+
+   if(errC == def_amrST_memError)
+   { /*If: I had a memory error*/
+      fprintf(
+        stderr,
+        "(mem) Err; when processing variant id's\n"
+      );
+ 
+      exit(-1);
+   } /*If: I had a memory error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-04:
-   ^  - Check if the sequence (genome) file extis/read in
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-05:
    ^  - Check for resistance mutations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    lookForAmrsSam(
       amrST,
-      (int) numAmrUL,
+      (int) numAmrUI,
       drugAryStr,
-      &buffStr,
-      &lenBuffUL,
       readsBl,    /*Working with reads or consesnsuses*/
       minDepthUI,  /*Minimum read depth*/
       minPercMapF,/*Min % support to keep amr (read)*/
       minPercTotalF, /*Min % mapped reads to keep*/
-      samFILE,
-      outFILE,
+      samStr,
+      outStr,
       idPrefStr /*Prefix for variant read id files*/
    ); /*check for amrs*/
       
-   fclose(samFILE);
-   fclose(outFILE);
-   free(buffStr);
-   freeAmrStructArray(amrST, numAmrUL);
+   freeAmrStructArray(&amrST, numAmrUI);
    free(drugAryStr);
 
    exit(0);
@@ -331,11 +274,9 @@ char * tbAMRGetInput(
    int numArgsI,
    char *argsAryStr[],
    char **amrTblStr,  /*Table with AMR mutations*/
-   char **amrTblTab2Str, /*For 2023 catalog*/
    char **samStr,     /*Sequence to check for resitance*/
    char **outStr,     /*File to output to*/
    char **idPrefStr,   /*Prefix for read id files*/
-   char *whoTblFlag,    /*amrTblStr is from the who (csv)*/
    char *readsBl,     /*1: user input reads*/
    uint *minDepthUI,   /*Min read depth to keep an amr*/
    float *minPercMapF,/*Min % support to keep amr (read)*/
@@ -350,34 +291,11 @@ char * tbAMRGetInput(
    { /*Loop: Get user input*/
       parmStr = argsAryStr[iArg];
 
-      if(cStrEql(parmStr, "-who-2021-csv", '\0') == 0)
-      { /*Else if: this is the amr table (from who)*/
+      if(cStrEql(parmStr, "-amr-tbl", '\0') == 0)
+      { /*If: this is the amr table*/
          ++iArg;
          *amrTblStr = argsAryStr[iArg];
-         *whoTblFlag = defWho2021;
-      } /*Else if: this is the amr table (from who)*/
-
-
-      else if(!cStrEql(parmStr,"-who-2023-tab1-tsv",'\0'))
-      { /*Else if: this is the amr table (from who)*/
-         ++iArg;
-         *amrTblStr = argsAryStr[iArg];
-         *whoTblFlag = defWho2023;
-      } /*Else if: this is the amr table (from who)*/
-
-      else if(!cStrEql(parmStr,"-who-2023-tab2-tsv",'\0'))
-      { /*Else if: this is the amr table (from who)*/
-         ++iArg;
-         *amrTblTab2Str = argsAryStr[iArg];
-         *whoTblFlag = defWho2023;
-      } /*Else if: this is the amr table (from who)*/
-
-      else if(cStrEql(parmStr, "-amr-tbl", '\0') == 0)
-      { /*Else if: this is the amr table*/
-         ++iArg;
-         *amrTblStr = argsAryStr[iArg];
-         *whoTblFlag = defNoWho;
-      } /*Else if: this is the amr table*/
+      } /*If: this is the amr table*/
 
       else if(cStrEql(parmStr, "-sam", '\0') == 0)
       { /*Else if: User input consensus mappings*/
@@ -445,7 +363,7 @@ char * tbAMRGetInput(
 |     o The help message for tbAMR to outFILE
 \-------------------------------------------------------*/
 void pTbAmrHelp(
-   FILE *outFILE
+   void *outVoidFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-02: pHelp
    '   - fun-02 sec-01:
@@ -456,17 +374,24 @@ void pTbAmrHelp(
    '     o Print out the output (TODO)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
+
+   FILE *outFILE = (FILE *) outVoidFILE;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-02 Sec-01:
    ^  - Print out the usate/description
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    fprintf(
-      outFILE,
-      "tbAMR -sam mapped-consenuses.sam -who-amr-tbl"
+     outFILE,
+     "tbAMR -sam-con map-consenuses.sam -amr-tbl file.tsv"
    );
 
-   fprintf(outFILE, " tbl.csv\n");
+   fprintf(outFILE, "\nor\n");
+   fprintf(
+      outFILE,
+      "tbAMR -sam mapped-reads.sam -amr-tbl file.tsv\n"
+   );
 
    fprintf(
       outFILE,
@@ -482,7 +407,7 @@ void pTbAmrHelp(
    ^   o fun-02 sec-02 sub-01:
    ^     - Print out input line
    ^   o fun-02 sec-02 sub-02:
-   ^     - Print out the who table entry
+   ^     - Database entries
    ^   o fun-02 sec-02 sub-03:
    ^     - Print out the -sam entry
    ^   o fun-02 sec-02 sub-04:
@@ -502,114 +427,135 @@ void pTbAmrHelp(
 
    /*****************************************************\
    * Fun-02 Sec-02 Sub-02:
-   *   - Print out the who table entry
+   *   - Database entry
    \*****************************************************/
 
-    fprintf(outFILE, "  -who-amr-tbl: [REQUIRED]\n");
+    fprintf(outFILE, "  -amr-tbl:\n");
 
     fprintf(
        outFILE,
-       "    o Csv with AMR anotations. This is the genome"
+       "    o AMR database in tbAmr format. Use"
     );
-
-    fprintf(outFILE, "\n");
 
     fprintf(
        outFILE,
-       "      indicies sheet from the who TB catalog\n"
+       "    o Use whoToTbAmr to build this from the WHO"
     );
+
+    fprintf(outFILE,  " catalogs\n");
 
    /*****************************************************\
    * Fun-02 Sec-02 Sub-03:
-   *   - Print out the sam entry
+   *   - Sequence input
+   *   o fun-02 sec-02 sub-03 cat-01:
+   *     - Read input
+   *   o fun-02 sec-02 sub-03 cat-02:
+   *     - Consnesus input
    \*****************************************************/
 
-    fprintf(outFILE, "  -sam: [REQUIRED; stdin]\n");
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-01:
+   +   - Read input
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(outFILE, "  -sam: [Default]\n");
 
     fprintf(
        outFILE,
-       "    o Sam file with consensuses mapped to the"
+       "   o Sam file with reads mapped to the same\n"
     );
-
-    fprintf(outFILE,  " same\n");
 
     fprintf(
-       outFILE,
-       "      reference that was used for -who-amr-tbl"
+      outFILE,
+      "      reference that was used to build the"
     );
+
+    fprintf(outFILE,  " database\n");
   
-    fprintf(outFILE, " file.csv\n");
+    fprintf(
+       outFILE,
+       "   o Use \"-sam -\" to specify stdin\n"
+    );
 
     fprintf(
        outFILE,
-       "    o The reference is likely Genbank acession"
+       "   o The reference is likely Genbank acession"
     );
 
     fprintf(outFILE, " NC000962\n");
 
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-01:
+   +   - Consnesus input
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(outFILE, "  -sam-con: [Replaces -sam]\n");
+
+    fprintf(
+       outFILE,
+       "     o Sam file with the consensus(es) mapped"
+    );
+
+    fprintf(outFILE, "to the same\n");
+
+    fprintf(
+      outFILE,
+      "      reference that was used to build the"
+    );
+
+    fprintf(outFILE,  " database\n");
+  
+    fprintf(
+       outFILE,
+       "      o Use \"-sam-con -\" to specify stdin\n"
+    );
+
+   /*****************************************************\
+   * Fun-02 Sec-02 Sub-04:
+   *   - Output options
+   *   o fun-02 sec-02 sub-04 cat-01:
+   *     - General output
+   *   o fun-02 sec-02 sub-04 cat-02:
+   *     - Read id output
+   \*****************************************************/
+
+   fprintf(outFILE,"  Output options:\n");
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-01:
+   +   - General output
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(outFILE, "    -out: [stdout]\n");
+
+    fprintf(
+       outFILE,
+       "      o File to output results to\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-02:
+   +   - Read id output
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(outFILE, "    -id-file-pref: [Not used]\n");
+
+    fprintf(
+       outFILE,
+       "      o Prints the read ids that mapped to each\n"
+    );
+    fprintf(
+       outFILE,
+       "      o variant in a file name prefix-variant.ids"
+    );
+
+    fprintf(outFILE, "\n");
+
    /*****************************************************\
    * Fun-02 Sec-02 Sub-04:
-   *   - Print out the amr table entry
+   *   - Settings
    \*****************************************************/
 
-    /*TODO: Add this feature in
-    fprintf(outFILE, "  -amr-tbl: [REQUIRED]\n");
-    fprintf(
-       outFILE,
-       "    o Tsv with AMR anotations (replaces -who-amr"
-    );
-
-    fprintf(outFILE, "-tbl)\n");
-
-    fprintf(
-       outFILE,
-       "    o Format: gene-id\tfirst-base\tcodon-start\n"
-    );
-
-    fprintf(
-       outFILE,
-       "      mutation-pattern\tamino-mutation\t"
-    );
-
-    fprintf(outFILE, "1st-antibiotic\n");
-
-    fprintf(
-        outFILE,
-        "      2nd-antibiotic\t3rd-antibiotic\t...\n"
-    );
-   */
-
-   /*****************************************************\
-   * Fun-02 Sec-02 Sub-05:
-   *   - Print out the -out entry
-   \*****************************************************/
-
-    fprintf(outFILE, "  -out: [stdout]\n");
-
-    fprintf(
-       outFILE,
-       "    o File to output results to\n"
-    );
-
-   /*****************************************************\
-   * Fun-02 Sec-02 Sub-06:
-   *   - Print out maximum homopolymer length
-   \*****************************************************/
-
-    /*TODO: Add this feature in
-    fprintf(
-       outFILE,
-       "  -max-homo-len: [%i]\n",
-       defMaxHomoLen
-    );
-
-    fprintf(
-       outFILE,
-       "    o Maximum homopolymer size to not discard"
-    );
-
-    fprintf(outFILE, "indels in\n");
-    */
 } /*pHelp*/
 
 /*-------------------------------------------------------\
@@ -622,6 +568,10 @@ void pTbAmrHelp(
 |   - Prints:
 |     o The version for tbAMR to outFILE
 \-------------------------------------------------------*/
-void pTbAmrVersion(FILE *outFILE){
-   fprintf(outFILE,"tbAMR version: %i\n",defTbAmrVersion);
+void pTbAmrVersion(void *outFILE){
+   fprintf(
+      (FILE *) outFILE,
+      "tbAMR version: %i\n",
+      defTbAmrVersion
+   );
 }
