@@ -1,24 +1,27 @@
 CC = cc
 PREFIX=/usr/local/bin
 
-CFLAGS += -static -O3 -Wno-unused-function
+CFLAGS += -static -O3 --std=c89
 
-# For MACS (do not lie -Wno-unused-function
 MACCFLAGS += -O3
 
 # Debuggin
 BUGFLAGS += -ggdb -Wall -O0 -static -o debugAmpDepth
 
-# Path to Rscript
+source=\
+   ../generalLib/samEntryStruct.c\
+   ../generalLib/trimSam.c\
+   ../generalLib/geneCoordStruct.c\
+   ampDepth.c
 
 all:
-	$(CC) $(CFLAGS) -o ampDepth ampDepth.c
+	$(CC) $(CFLAGS) -o ampDepth $(source);
 
 mac:
-	$(CC) $(MACCFLAGS) -o ampDepth ampDepth.c
+	$(CC) $(MACCFLAGS) -o ampDepth $(source);
 
 debug:
-	$(CC) $(BUGFLAGS) -o debugAmpDepth ampDepth.c
+	$(CC) $(BUGFLAGS) -o debugAmpDepth $(source);
 	gdb -x bug-cmds.txt debugAmpDepth
 
 install:

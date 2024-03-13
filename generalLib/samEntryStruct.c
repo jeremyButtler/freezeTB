@@ -435,8 +435,6 @@ readSamLine(
    ushort extraBuffUS = 4096;
 
    ulong oldLenUL = 0;
-   ulong curPosUL = 0;
-   long lenLineL = 0;
    ulong *ulStr = 0;
 
    char *tmpStr = 0;

@@ -4,20 +4,6 @@
 #    amplicons in a sam file. It includes the genes names
 #    in each amplicon and the read depths for each gene in
 #    an amplicon
-# Libraries:
-#   - "../generalLib/trimSam.h"
-#   o "../generalLib/samEntryStruct.h"
-#   o "../generalLib/base10StrToNum.h"
-#   o "../generalLib/dataTypeShortHand.h"
-#   o "../generalLib/ulCpStr.h"
-#   o "../generalLib/numToStr.h"
-#   - "../generalLib/geneCoordStruct.h"
-#   o "../generalLib/genMath.h"
-# C Standard Libraries:
-#   - <string.h>
-#   o <stdlib.h>
-#   o <stdint.h>
-#   o <stdio.h>
 ########################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -37,9 +23,28 @@
 |   - Included libraries, defintions, and global variables
 \-------------------------------------------------------*/
 
-#include "../generalLib/geneCoordStruct.h"
+#ifdef PLAN9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
+
+#include <stdio.h>
+
+#include "../generalLib/samEntryStruct.h"
 #include "../generalLib/trimSam.h"
-#include <string.h>
+#include "../generalLib/geneCoordStruct.h"
+
+/*No .c files*/
+#include "../generalLib/dataTypeShortHand.h"
+#include "../generalLib/ulCpStr.h"
+#include "../generalLib/base10StrToNum.h"
+#include "../generalLib/genMath.h"
+
+/*Hidden dependencies
+  #include "../generalLib/numToStr.h" no .c file
+*/
 
 #define defVersion 20240125
 #define defMinDepth 20
@@ -219,22 +224,22 @@ int main(
 
    if(errStr != 0)
    { /*If: I had an error*/
-     if(   strcmp(errStr, "-h") == 0
-        || strcmp(errStr, "--h") == 0
-        || strcmp(errStr, "-help") == 0
-        || strcmp(errStr, "--help") == 0
-        || strcmp(errStr, "help") == 0
+     if(   ! cStrEql("-h", errStr, '\0')
+        || ! cStrEql("--h", errStr, '\0')
+        || ! cStrEql("-help", errStr, '\0')
+        || ! cStrEql("--help", errStr, '\0')
+        || ! cStrEql("help", errStr, '\0')
      ){ /*If: the user requested the help message*/
         pAmpDepthHelp(stdout);
         exit(0);
      } /*If: the user requested the help message*/
 
 
-     if(   strcmp(errStr, "-v") == 0
-        || strcmp(errStr, "--v") == 0
-        || strcmp(errStr, "-version") == 0
-        || strcmp(errStr, "--version") == 0
-        || strcmp(errStr, "version") == 0
+     if(   ! cStrEql("-v", errStr, '\0')
+        || ! cStrEql("--v", errStr, '\0')
+        || ! cStrEql("-version", errStr, '\0')
+        || ! cStrEql("--version", errStr, '\0')
+        || ! cStrEql("version", errStr, '\0')
      ){ /*If: the user requested the version number*/
         fprintf(
            stdout,
@@ -245,7 +250,7 @@ int main(
      } /*If: the user requested the version number*/
  
 
-     if(strcmp(errStr, "-min-depth") == 0)
+     if(! cStrEql("-min-depth", errStr, '\0'))
      { /*If: the -min-depth value was not numeric*/
         fprintf(
            stderr,
@@ -378,7 +383,7 @@ int main(
    ^  - Extract the genes from the paf file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   genesST = pafGetGeneCoords(pafFILE, numGenesI);
+   genesST = pafGetGeneCoords(pafFILE, &numGenesI);
 
    if(genesST == 0)
    { /*If: I had a memory error*/
@@ -408,7 +413,7 @@ int main(
    if(readMapAryUI == 0)
    { /*If: I had a memory error*/
       fclose(samFILE);
-      freeGeneCoords(genesST);
+      freeGeneCoords(&genesST);
       
       fprintf(stderr, "Memory error (main sec-05)\n");
       exit(-1);
@@ -503,7 +508,7 @@ int main(
 
    if(errUC & 64)
    { /*If: I had a memory error*/
-      freeGeneCoords(genesST);
+      freeGeneCoords(&genesST);
       free(readMapAryUI);
       
       fprintf(
@@ -760,7 +765,7 @@ int main(
       umappedUI
    );
 
-   freeGeneCoords(genesST);
+   freeGeneCoords(&genesST);
    free(readMapAryUI);
    readMapAryUI = 0;
 
@@ -814,17 +819,22 @@ char * ampDepthGetCmdInput(
       parmStr = argsStrAry[iArg];
       argStr = argsStrAry[iArg + 1];
 
-      if(strcmp("-paf", parmStr) == 0) *pafStr = argStr;
-      else if(strcmp("-sam",parmStr) == 0) *samStr=argStr;
-      else if(strcmp("-out",parmStr) == 0) *outStr=argStr;
+      if(! cStrEql("-paf", parmStr, '\0'))
+         *pafStr = argStr;
 
-      else if(strcmp("-min-depth", parmStr) == 0)
+      else if(! cStrEql("-sam", parmStr, '\0'))
+         *samStr=argStr;
+
+      else if(! cStrEql("-out", parmStr, '\0'))
+         *outStr=argStr;
+
+      else if(! cStrEql("-min-depth", parmStr, '\0'))
       { /*Else if: the user input a min depth*/
          errStr = base10StrToSI(argStr, *minDepthI);
          if(errStr[0] > 32) return parmStr;
       } /*Else if: the user input a min depth*/
 
-      else if(strcmp("-flag", parmStr) == 0)
+      else if(! cStrEql("-flag", parmStr, '\0'))
          *extraColStr = argStr;
 
       else return parmStr;
