@@ -17,9 +17,24 @@
 #  - End of file has some general sam file basics
 ########################################################*/
 
-#include "../generalLib/samEntryStruct.h"
-#include <string.h>
+#ifdef PLAN9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
 
+#include <stdio.h>
+#include "../generalLib/samEntryStruct.h"
+
+/*These do not have .c files*/
+#include "../generalLib/dataTypeShortHand.h"
+#include "../generalLib/ulCpStr.h"
+#include "../generalLib/base10StrToNum.h"
+
+/*Hidden dependencies
+#include "../generalLib/numToStr.h" no .c file
+*/
 
 #define defSamPSam 0
 #define defSamPFastq 1
@@ -239,7 +254,7 @@ int main(
       { /*Switch; decide printing method*/
 
          case defSamPSam:
-            pSamEntry(&samST,buffStr,lenBuffUL,outFILE);
+            pSamEntry(&samST,&buffStr,&lenBuffUL,outFILE);
             break;
 
          case defSamPFastq:
@@ -294,28 +309,28 @@ char * getSamFiltInput(
    { /*Loop: Get user input*/
       parmStr = argsAryStr[iArg];
 
-      if(!strcmp("-sam", parmStr))
+      if(! cStrEql("-sam", parmStr, '\0'))
       { /*If: The user input a sam file*/
          ++iArg;
          *samStr = argsAryStr[iArg];
       } /*If: The user input a sam file*/
 
-      else if(!strcmp("-out", parmStr))
+      else if(! cStrEql("-out", parmStr, '\0'))
       { /*Else If: The user provided an output file*/
          ++iArg;
          *outStr = argsAryStr[iArg];
       } /*Else If: The user provided an output file*/
 
-      else if(!strcmp("-out-sam", parmStr))
+      else if(! cStrEql("-out-sam", parmStr, '\0'))
          outFlagC[0] = defSamPSam;
 
-      else if(!strcmp("-out-fastq", parmStr))
+      else if(! cStrEql("-out-fastq", parmStr, '\0'))
          outFlagC[0] = defSamPFastq;
 
-      else if(!strcmp("-out-fasta", parmStr))
+      else if(! cStrEql("-out-fasta", parmStr, '\0'))
          outFlagC[0] = defSamPFasta;
 
-      else if(!strcmp("-out-stats", parmStr))
+      else if(! cStrEql("-out-stats", parmStr, '\0'))
          outFlagC[0] = defSamPStats;
 
       else if(parmStr[0] == '-' && parmStr[1] == 'F')
@@ -342,37 +357,37 @@ char * getSamFiltInput(
          ++(*numKeepFlagsS);
       } /*Else if: this is a removal entry*/
 
-      else if(!strcmp("-min-len", parmStr))
+      else if(! cStrEql("-min-len", parmStr, '\0'))
       { /*Else If: the min length was input*/
          ++iArg;
          base10StrToUI(argsAryStr[iArg], *minLenUI);
       } /*Else If: the min length was input*/
 
-      else if(!strcmp("-max-len", parmStr))
+      else if(! cStrEql("-max-len", parmStr, '\0'))
       { /*Else If: the max length was input*/
          ++iArg;
          base10StrToUI(argsAryStr[iArg], *maxLenUI);
       } /*Else If: the max length was input*/
 
-      else if(!strcmp("-min-aln-len", parmStr))
+      else if(! cStrEql("-min-aln-len", parmStr, '\0'))
       { /*Else If: the min aligned length was input*/
          ++iArg;
          base10StrToUI(argsAryStr[iArg], *minAlnLenUI);
       } /*Else If: the min aligned length was input*/
 
-      else if(!strcmp("-min-median-q", parmStr))
+      else if(! cStrEql("-min-median-q", parmStr, '\0'))
       { /*Else If: the min medain Q score was input*/
          ++iArg;
          *minMedianQF = atof(argsAryStr[iArg]);
       } /*Else If: the min medain Q score was input*/
 
-      else if(!strcmp("-min-mean-q", parmStr))
+      else if(! cStrEql("-min-mean-q", parmStr, '\0'))
       { /*Else If: the min medain Q score was input*/
          ++iArg;
          *minMeanQF = atof(argsAryStr[iArg]);
       } /*Else If: the min medain Q score was input*/
 
-      else if(!strcmp("-min-mapq", parmStr))
+      else if(! cStrEql("-min-mapq", parmStr, '\0'))
       { /*Else If: the min mapq was input*/
          ++iArg;
          base10StrToUC(argsAryStr[iArg], *minMapqUC);

@@ -1,30 +1,22 @@
 CC=cc
 PREFIX=/usr/local/bin
-CFLAGS= -static -O3
+CFLAGS= -static -O3 --std=c89
 MACCFLAGS= -O3
-DEBUGFLAGS= -static -O0 -ggdb -Wall -Wno-unused-function
+DEBUGFLAGS= -static -O0 -ggdb -Wall
+
+source=\
+   ../generalLib/samEntryStruct.c\
+   filtSam.c
 
 all:
-	$(CC) $(CFLAGS) -o filtSam filtSam.c;
+	$(CC) $(CFLAGS) -o filtSam $(source);
 
 mac:
-	$(CC) $(MACCFLAGS) -o filtSam filtSam.c;
-
-sse:
-	$(CC) $(CFLAGS) -msse4 -DSSE4 -o filtSam filtSam.c;
-
-avx2:
-	$(CC) $(CFLAGS) -mavx2 -DAVX2 -o filtSam filtSam.c;
-
-avx512:
-	$(CC) $(CFLAGS) -mavx512bw -DAVX512 -o filtSam filtSam.c;
-
-noulcp:
-	$(CC) $(CFLAGS) -DNO_UL_CP -o filtSam filtSam.c;
+	$(CC) $(MACCFLAGS) -o filtSam $(source);
 
 debug:
-	$(CC) $(DEBUGFLAGS) -mavx512bw -DAVX512 -o debugFiltSam filtSam.c;
+	$(CC) $(DEBUGFLAGS) -mavx512bw -DAVX512 -o debugFiltSam $(source);
 	gdb -x bug-cmds.txt debugFiltSam;
 
 check:
-	$(CC) $(DEBUGFLAGS) -o debugFiltSam filtSam.c;
+	$(CC) $(DEBUGFLAGS) -o debugFiltSam $(source);
