@@ -24,16 +24,19 @@
 '     - Updates the snp (or match)/ins/del counts for a
 '   o fun-06: incCigCnt
 '     - Incurments the cigar counter when all values for
-'   o fun-07: checkAmrSam
+'   o fun-07: isBactStartCodon
+'      - Checks to is if an input codon is an bacterial
+'        start codon
+'   o fun-08: checkAmrSam
 '     - Checks if a sequence in a sam file entry has
 '       amr's (antibiotic resitance)
-'   o fun-08: pCrossRes
+'   o fun-09: pCrossRes
 '     - Print out cross resitance
-'   o fun-09: pAmrHitList
+'   o fun-10: pAmrHitList
 '     - Prints out all amr's that were in a sequence
-'   o fun-10: pAmrs
+'   o fun-11: pAmrs
 '     - Prints out all amr's that meant the min depth
-'   o fun-11: lookForAmrsSam
+'   o fun-12: lookForAmrsSam
 '     - Look for anti-microbial (antibiotic) genes in the
 '       reads in a sam file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -139,7 +142,59 @@ incCigCnt(\
 }
 
 /*-------------------------------------------------------\
-| Fun-07: checkAmrSam
+| Fun-07: isBactStartCodon
+|   - Checks to is if an input codon is an bacterial start
+|     codon
+| Input:
+|   - firstBaseC:
+|     o first base to check; it needs to be the output of
+|       an base to code look up table in
+|      ../generalLib/codonTbl.h
+|   - secBaseC:
+|     o second base to check; it needs to be the output
+|       of an base to code look up table in
+|      ../generalLib/codonTbl.h
+|   - thirdBaseC:
+|     o third base to check; it needs to be the output
+|       of an base to code look up table in
+|      ../generalLib/codonTbl.h
+| Output:
+|   - Returns:
+|     o 1 if this is an bacterial start codon
+|     o 0 if this is not an bacterial start codon
+\-------------------------------------------------------*/
+#define \
+isBactStartCodon(\
+   firstBaseC,\
+   secBaseC,\
+   thirdBaseC\
+)(\
+       (firstBaseC == g_code_codon_tbl)\
+     | (firstBaseC == t_code_codon_tbl)\
+     | (firstBaseC == a_code_codon_tbl)\
+     & ( secBaseC  == t_code_codon_tbl)\
+     & (thirdBaseC == g_code_codon_tbl)\
+     \
+     /*Logic:
+     `   - x = firstBaseC == g_code_codon_tbl:
+     `     o 1 if the first base is a G
+     `     o 0 if not a g
+     `   - x |= (firstBaseC == t_code_codon_tbl):
+     `     o 1 if the first base is an "G" or "T"
+     `     o 0 if not an "G" or "T"
+     `   - x |= (firstBaseC == a_code_codon_tbl):
+     `     o 1 if the first base is an "G", "T", or "A"
+     `     o 0 if not an "G", "T", or "A"
+     `     o This covers the first codon for all posible
+     `       start codons (ATG, GTG, and TTG)
+     `   - The second and thrid base comparisions clear
+     `     the bit (set to 0) if I do not have an
+     `     TTG, GTG, or ATG codon
+     */\
+) /*isBackStartCodon*/
+
+/*-------------------------------------------------------\
+| Fun-08: checkAmrSam
 |   - Checks if a sequence in a sam file entry has
 |     amr's (antibiotic resitance)
 | Input:
@@ -175,19 +230,19 @@ checkAmrSam(
    int *numHitsI,      /*Number amr hits for seq*/
    char *errC          /*For error reporting*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-07 TOC: checkAmrSam
+   ' Fun-08 TOC: checkAmrSam
    '   - Checks if a sequence in a sam file entry has
    '     amr's (antibiotic resitance)
-   '   o Fun-07 Sec-01:
+   '   o Fun-08 Sec-01:
    '     - Variable declerations
-   '   o Fun-07 Sec-02:
+   '   o Fun-08 Sec-02:
    '     - Find the nearest amr to the sequence
-   '   o Fun-07 Sec-03:
+   '   o Fun-08 Sec-03:
    '     - Check for AMRs
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-07 Sec-01:
+   ^ Fun-08 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -241,7 +296,7 @@ checkAmrSam(
    struct samEntry *samST = (struct samEntry *) samSTPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-07 Sec-02:
+   ^ Fun-08 Sec-02:
    ^   - Find the nearest amr
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -260,22 +315,22 @@ checkAmrSam(
    refPosUI = samST->refStartUI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-07 Sec-03:
+   ^ Fun-08 Sec-03:
    ^   - Check for AMRs
-   ^   o fun-07 sec-03 sub-01:
+   ^   o fun-08 sec-03 sub-01:
    ^     - Find the start of the AMR
-   ^   o fun-07 sec-03 sub-02:
+   ^   o fun-08 sec-03 sub-02:
    ^     - Move to the first base in the amr pattern
-   ^   o fun-07 sec-03 sub-03:
+   ^   o fun-08 sec-03 sub-03:
    ^     - Check if the amr has a strict match
-   ^   o fun-07 sec-03 sub-04:
+   ^   o fun-08 sec-03 sub-04:
    ^     - Handle amino acid amr's
-   ^   o fun-07 sec-03 sub-05:
+   ^   o fun-08 sec-03 sub-05:
    ^     - Check if resistance was found
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-07 Sec-03 Sub-01:
+   * Fun-08 Sec-03 Sub-01:
    *   - Find the start of the AMR
    \*****************************************************/
 
@@ -292,7 +347,7 @@ checkAmrSam(
          break; /*Finished with the read*/
 
       /**************************************************\
-      * Fun-07 Sec-03 Sub-02:
+      * Fun-08 Sec-03 Sub-02:
       *   - Move to the first base in the amr pattern
       \**************************************************/
 
@@ -361,7 +416,7 @@ checkAmrSam(
       } /*Loop: Find the start of the reference*/
 
       /**************************************************\
-      * Fun-07 Sec-03 Sub-03:
+      * Fun-08 Sec-03 Sub-03:
       *   - Check if the amr has a strict match
       \**************************************************/
 
@@ -414,20 +469,20 @@ checkAmrSam(
       goto finishChecks_tbAmr_fun07_sec04_sub05;
 
       /**************************************************\
-      * Fun-07 Sec-03 Sub-04:
+      * Fun-08 Sec-03 Sub-04:
       *   - Handle amino acid amr's
-      *   o fun-07 sec-03 sub-04 cat-01:
+      *   o fun-08 sec-03 sub-04 cat-01:
       *     - Check if deletions are resistant
-      *   o fun-07 sec-03 sub-04 cat-02:
+      *   o fun-08 sec-03 sub-04 cat-02:
       *     - Move to the first base in the target codon
-      *   o fun-07 sec-03 sub-04 cat-03:
+      *   o fun-08 sec-03 sub-04 cat-03:
       *     - Check reverse complemnt gene snps/insertions
-      *   o fun-07 sec-03 sub-04 cat-04:
+      *   o fun-08 sec-03 sub-04 cat-04:
       *     - Else I do not know direction, look at snps
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-07 Sec-03 Sub-04 Cat-01: checkAmrSam
+      + Fun-08 Sec-03 Sub-04 Cat-01: checkAmrSam
       +   - Check if deletions are resistant
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -441,7 +496,7 @@ checkAmrSam(
          goto checkSnp_tbAmr_fun07_sec03_sub03;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-07 Sec-03 Sub-04 Cat-02: checkAmrSam
+      + Fun-08 Sec-03 Sub-04 Cat-02: checkAmrSam
       +   - Move to the first base in the target codon
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -452,7 +507,7 @@ checkAmrSam(
       iBase = 0; /*For getting the sequence position*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-07 Sec-03 Sub-04 Cat-03: checkAmrSam
+      + Fun-08 Sec-03 Sub-04 Cat-03: checkAmrSam
       +   - Check reverse complemnt gene snps/insertions
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -494,7 +549,23 @@ checkAmrSam(
             if(
                   amrAryST[iAmr].amrAaStr[iAa] == '?'
                && aaC != amrAryST[iAmr].refAaStr[iAa]
-            ) ; /*? = anything but the reference aa*/
+            ){ /*If: this could be any codon*/
+               if((amrAryST[iAmr].refAaStr[iAa] |32)=='m')
+               { /*If: this is a "start" codon*/
+                  resBl =
+                     isBactStartCodon(
+                        base3UC,
+                        base2UC,
+                        base1UC
+                     );
+
+                  /*If this was not a start codon*/;
+                  if(! resBl)
+                     goto nextAmr_fun07_sec03_sub07;
+
+                  resBl = 0;
+               } /*If: this is a "start" codon*/
+            } /*If: this could be any codon*/
 
             else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
                goto nextAmr_fun07_sec03_sub07;
@@ -504,7 +575,7 @@ checkAmrSam(
       } /*If: This is a reverse complement gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-07 Sec-03 Sub-04 Cat-04: checkAmrSam
+      + Fun-08 Sec-03 Sub-04 Cat-04: checkAmrSam
       +   - Check forward gene snps/insertions
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -540,7 +611,23 @@ checkAmrSam(
             if(
                   amrAryST[iAmr].amrAaStr[iAa] == '?'
                && aaC != amrAryST[iAmr].refAaStr[iAa]
-            ) ; /*? = anything but the reference aa*/
+            ){ /*If: this could be any codon*/
+               if((amrAryST[iAmr].refAaStr[iAa] |32)=='m')
+               { /*If: this is a "start" codon*/
+                  resBl =
+                     isBactStartCodon(
+                        base1UC,
+                        base2UC,
+                        base3UC
+                     );
+
+                  /*If this was not a start codon*/;
+                  if(! resBl)
+                     goto nextAmr_fun07_sec03_sub07;
+
+                  resBl = 0;
+               } /*If: this is a "start" codon*/
+            } /*If: this could be any codon*/
 
             else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
                goto nextAmr_fun07_sec03_sub07;
@@ -550,14 +637,14 @@ checkAmrSam(
       } /*Else If: This is a foward gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-07 Sec-03 Sub-04 Cat-05: checkAmrSam
+      + Fun-08 Sec-03 Sub-04 Cat-05: checkAmrSam
       +   - Else I do not know the direction, look at snp
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       else  goto checkSnp_tbAmr_fun07_sec03_sub03;
 
       /**************************************************\
-      * Fun-07 Sec-03 Sub-05:
+      * Fun-08 Sec-03 Sub-05:
       *   - Make sure there is really resistance
       \**************************************************/
 
@@ -629,7 +716,7 @@ checkAmrSam(
       } /*If: I may have a match*/
 
       /**************************************************\
-      * Fun-07 Sec-03 Sub-06:
+      * Fun-08 Sec-03 Sub-06:
       *   - Check if resistance was found
       \**************************************************/
 
@@ -673,7 +760,7 @@ checkAmrSam(
       } /*If: I found a resitance mutation*/
 
       /**************************************************\
-      * Fun-07 Sec-03 Sub-07:
+      * Fun-08 Sec-03 Sub-07:
       *   - Move to the next amr
       \**************************************************/
 
@@ -687,7 +774,7 @@ checkAmrSam(
 } /*checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun-08: pCrossRes
+| Fun-09: pCrossRes
 |   - Print out cross resitance (for report, not database)
 | Input:
 |   - amrSTPtr:
@@ -741,7 +828,7 @@ pCrossRes(amrSTPtr, drugAryStr, outFILE){\
 } /*pCrossRes*/
 
 /*-------------------------------------------------------\
-| Fun-09: pAmrHitList
+| Fun-10: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
 |   - seqIdStr:
@@ -881,7 +968,7 @@ pAmrHitList(
 } /*pAmrHitList*/
 
 /*-------------------------------------------------------\
-| Fun-10: pAmrs
+| Fun-11: pAmrs
 |   - Prints out all amr's that meant the min depth
 | Input:
 |   - minDepthUI:
@@ -1066,7 +1153,7 @@ pAmrs(
 } /*pAmrs*/
 
 /*-------------------------------------------------------\
-| Fun-11: lookForAmrsSam
+| Fun-12: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
@@ -1120,23 +1207,23 @@ lookForAmrsSam(
    char *outStr,
    char *idPrefStr    /*Prefix for id files*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-11 TOC:P lookForAmrsSam
+   ' Fun-12 TOC:P lookForAmrsSam
    '   - Look for anti-microbial (antibiotic) genes in the
    '     reads in a sam file
-   '   o fun-11 sec-01:
+   '   o fun-12 sec-01:
    '     - Variable declerations
-   '   o fun-11 sec-02:
+   '   o fun-12 sec-02:
    '     - Get the first sam entry
-   '   o fun-11 sec-03:
+   '   o fun-12 sec-03:
    '     - Check for AMRs
-   '   o fun-11 sec-04:
+   '   o fun-12 sec-04:
    '     - Print out read AMR stats
-   '   o fun-11 sec-05:
+   '   o fun-12 sec-05:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-01:
+   ^ Fun-12 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1163,7 +1250,7 @@ lookForAmrsSam(
       (struct amrStruct *) amrSTAryPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-02:
+   ^ Fun-12 Sec-02:
    ^   - Get the first sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1200,23 +1287,23 @@ lookForAmrsSam(
       ); /*Read in the first line*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-03:
+   ^ Fun-12 Sec-03:
    ^   - Check for AMRs
-   ^   o fun-11 sec-03 sub-01:
+   ^   o fun-12 sec-03 sub-01:
    ^     - Filter out less usefull entries
-   ^   o fun-11 sec-03 sub-02:
+   ^   o fun-12 sec-03 sub-02:
    ^     - Check for amrs
-   ^   o fun-11 sec-03 sub-03:
+   ^   o fun-12 sec-03 sub-03:
    ^     - Print out consensus sequence AMRS
-   ^   o fun-11 sec-03 sub-04:
+   ^   o fun-12 sec-03 sub-04:
    ^     - Deal with read amrs; print ids if requested/
    ^       free consensus structuerrs
-   ^   o fun-11 sec-03 sub-05:
+   ^   o fun-12 sec-03 sub-05:
    ^     - Move to the next sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-11 Sec-03 Sub-01:
+   * Fun-12 Sec-03 Sub-01:
    *   - Filter out less usefull entries/start loop
    \*****************************************************/
 
@@ -1250,7 +1337,7 @@ lookForAmrsSam(
       } /*If: this is an umapped read, 2ndary, sup aln*/
 
       /**************************************************\
-      * Fun-11 Sec-03 Sub-02:
+      * Fun-12 Sec-03 Sub-02:
       *   - Check for amrs
       \**************************************************/
 
@@ -1269,7 +1356,7 @@ lookForAmrsSam(
          goto memErr_sec05_sub02_lookForAmrsSam;
 
       /**************************************************\
-      * Fun-11 Sec-03 Sub-03:
+      * Fun-12 Sec-03 Sub-03:
       *   - Print out consensus sequence AMRS
       \**************************************************/
 
@@ -1288,7 +1375,7 @@ lookForAmrsSam(
       } /*If: There were amr's*/
 
       /**************************************************\
-      * Fun-11 Sec-03 Sub-04:
+      * Fun-12 Sec-03 Sub-04:
       *   - Deal with read amrs; print ids if requested/
       *     free consensus structuerrs
       \**************************************************/
@@ -1354,7 +1441,7 @@ lookForAmrsSam(
       } /*Else If; I am processing reads*/
 
       /**************************************************\
-      * Fun-11 Sec-03 Sub-05:
+      * Fun-12 Sec-03 Sub-05:
       *   - Move to the next sam entry
       \**************************************************/
 
@@ -1368,7 +1455,7 @@ lookForAmrsSam(
    } /*Loop: Check if have antibiotic resitance*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-04:
+   ^ Fun-12 Sec-04:
    ^   - Print out read AMR stats
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1395,18 +1482,18 @@ lookForAmrsSam(
    } /*If: I mapped reads, not consensuses*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-05:
+   ^ Fun-12 Sec-05:
    ^   - Clean up
-   ^   o fun-11 sec-05 sub-01:
+   ^   o fun-12 sec-05 sub-01:
    ^     - Clean up after a successful run
-   ^   o fun-11 sec-05 sub-02:
+   ^   o fun-12 sec-05 sub-02:
    ^     - Clean up after a memory error
-   ^   o fun-11 sec-05 sub-03:
+   ^   o fun-12 sec-05 sub-03:
    ^     - Clean up after an file error
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-11 Sec-05 Sub-01:
+   * Fun-12 Sec-05 Sub-01:
    *   - Clean up after a successful run
    \*****************************************************/
 
@@ -1417,7 +1504,7 @@ lookForAmrsSam(
    return 0;
 
    /*****************************************************\
-   * Fun-11 Sec-05 Sub-02:
+   * Fun-12 Sec-05 Sub-02:
    *   - Clean up after a memory error
    \*****************************************************/
 
@@ -1436,7 +1523,7 @@ lookForAmrsSam(
       return 64;
 
    /*****************************************************\
-   * Fun-11 Sec-05 Sub-03:
+   * Fun-12 Sec-05 Sub-03:
    *   - Clean up after an file error
    \*****************************************************/
 

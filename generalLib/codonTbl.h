@@ -27,6 +27,12 @@
 #ifndef CODON_TABLE_H
 #define CODON_TABLE_H
 
+#define t_code_codon_tbl 0
+#define c_code_codon_tbl 1
+#define a_code_codon_tbl 2
+#define g_code_codon_tbl 3
+#define n_code_codon_tbl 4
+
 /*--------------------------------------------------------\
 | Tbl-01 baseToCodeLkTbl:
 |  - Table to convert bases to codes used in the codon
@@ -42,52 +48,52 @@ static char baseToCodeLkTbl[] =
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
 
-      2, /*A (65)*/
-      4, /*B, (C/G/T) treat as N*/
-      1, /*C*/
-      4, /*D (AGT), treat as N*/
+      a_code_codon_tbl, /*A (65)*/
+      n_code_codon_tbl, /*B, (C/G/T) treat as N*/
+      c_code_codon_tbl, /*C*/
+      n_code_codon_tbl, /*D (AGT), treat as N*/
       8, 8,
-      3, /*G*/
-      4, /*H (ACT) treat as N*/
+      g_code_codon_tbl, /*G*/
+      n_code_codon_tbl, /*H (ACT) treat as N*/
       8, 8,
-      4, /*K (GT), treat as N*/
+      n_code_codon_tbl, /*K (GT), treat as N*/
       8,
-      4, /*M (AC), treat as N*/
-      4, /*N (AGCT)*/
+      n_code_codon_tbl, /*M (AC), treat as N*/
+      n_code_codon_tbl, /*N (AGCT)*/
       8, 8, 8,
-      4, /*R (AG), treat as N*/
-      4, /*S (CG), treat as N*/
-      0, /*T*/
-      0, /*U*/
-      4, /*V (ACG), treat as N*/
+      n_code_codon_tbl, /*R (AG), treat as N*/
+      n_code_codon_tbl, /*S (CG), treat as N*/
+      t_code_codon_tbl, /*T*/
+      t_code_codon_tbl, /*U*/
+      n_code_codon_tbl, /*V (ACG), treat as N*/
       8,
-      4, /*X, I treat as an N, but is for amino acids*/
+      n_code_codon_tbl, /*X, as an N, is for amino acids*/
       8, 8,
 
       /*Special characters after upercase letters*/
       8, 8, 8, 8, 8, 8,
 
       /*lower case letters*/
-      2, /*a (65)*/
-      4, /*b, (c/g/t) treat as n*/
-      1, /*c*/
-      4, /*d (agt), treat as n*/
+      a_code_codon_tbl, /*a (65)*/
+      n_code_codon_tbl, /*b, (c/g/t) treat as n*/
+      c_code_codon_tbl, /*c*/
+      n_code_codon_tbl, /*d (agt), treat as n*/
       8, 8,
-      3, /*g*/
-      4, /*h (act) treat as n*/
+      g_code_codon_tbl, /*g*/
+      n_code_codon_tbl, /*h (act) treat as n*/
       8, 8,
-      4, /*k (gt), treat as n*/
+      n_code_codon_tbl, /*k (gt), treat as n*/
       8,
-      4, /*m (ac), treat as n*/
-      4, /*n (agct)*/
+      n_code_codon_tbl, /*m (ac), treat as n*/
+      n_code_codon_tbl, /*n (agct)*/
       8, 8, 8,
-      4, /*r (ag), treat as n*/
-      4, /*s (cg), treat as n*/
-      0, /*t*/
-      0, /*u*/
-      4, /*v (acg), treat as n*/
+      n_code_codon_tbl, /*r (ag), treat as n*/
+      n_code_codon_tbl, /*s (cg), treat as n*/
+      t_code_codon_tbl, /*t*/
+      t_code_codon_tbl, /*u*/
+      n_code_codon_tbl, /*v (acg), treat as n*/
       8,
-      4, /*x, i treat as an n, but is for amino acids*/
+      n_code_codon_tbl, /*x, as an n, is for amino acids*/
       8, 8,
 
       /*Special characters after lowercase letters*/
@@ -110,52 +116,52 @@ static char compBaseToCodeLkTbl[] =
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
 
-      0, /*A (complement is T) (65)*/
-      4, /*B, (C/G/T) treat as N*/
-      3, /*C; complement is G*/
-      4, /*D (AGT), treat as N*/
+      t_code_codon_tbl, /*A (complement is T) (65)*/
+      n_code_codon_tbl, /*B, (C/G/T) treat as N*/
+      g_code_codon_tbl, /*C; complement is G*/
+      n_code_codon_tbl, /*D (AGT), treat as N*/
       8, 8,
-      1, /*G; complement is C*/
-      4, /*H (ACT) treat as N*/
+      c_code_codon_tbl, /*G; complement is C*/
+      n_code_codon_tbl, /*H (ACT) treat as N*/
       8, 8,
-      4, /*K (GT), treat as N*/
+      n_code_codon_tbl, /*K (GT), treat as N*/
       8,
-      4, /*M (AC), treat as N*/
-      4, /*N (AGCT)*/
+      n_code_codon_tbl, /*M (AC), treat as N*/
+      n_code_codon_tbl, /*N (AGCT)*/
       8, 8, 8,
-      4, /*R (AG), treat as N*/
-      4, /*S (CG), treat as N*/
-      2, /*T; complement is A*/
-      2, /*U; complement is A*/
-      4, /*V (ACG), treat as N*/
+      n_code_codon_tbl, /*R (AG), treat as N*/
+      n_code_codon_tbl, /*S (CG), treat as N*/
+      a_code_codon_tbl, /*T; complement is A*/
+      a_code_codon_tbl, /*U; complement is A*/
+      n_code_codon_tbl, /*V (ACG), treat as N*/
       8,
-      4, /*X, I treat as an N, but is for amino acids*/
+      n_code_codon_tbl, /*X, as an N, for amino acids*/
       8, 8,
 
       /*Special characters after upercase letters*/
       8, 8, 8, 8, 8, 8,
 
       /*lower case letters*/
-      0, /*a; complement is T (65)*/
-      4, /*b, (c/g/t) treat as n*/
-      3, /*c; complement is G*/
-      4, /*d (agt), treat as n*/
+      t_code_codon_tbl, /*a; complement is T (65)*/
+      n_code_codon_tbl, /*b, (c/g/t) treat as n*/
+      g_code_codon_tbl, /*c; complement is G*/
+      n_code_codon_tbl, /*d (agt), treat as n*/
       8, 8,
-      1, /*g; complement is C*/
-      4, /*h (act) treat as n*/
+      c_code_codon_tbl, /*g; complement is C*/
+      n_code_codon_tbl, /*h (act) treat as n*/
       8, 8,
-      4, /*k (gt), treat as n*/
+      n_code_codon_tbl, /*k (gt), treat as n*/
       8,
-      4, /*m (ac), treat as n*/
-      4, /*n (agct)*/
+      n_code_codon_tbl, /*m (ac), treat as n*/
+      n_code_codon_tbl, /*n (agct)*/
       8, 8, 8,
-      4, /*r (ag), treat as n*/
-      4, /*s (cg), treat as n*/
-      2, /*t; complement is A*/
-      2, /*u; complement is A*/
-      4, /*v (acg), treat as n*/
+      n_code_codon_tbl, /*r (ag), treat as n*/
+      n_code_codon_tbl, /*s (cg), treat as n*/
+      a_code_codon_tbl, /*t; complement is A*/
+      a_code_codon_tbl, /*u; complement is A*/
+      n_code_codon_tbl, /*v (acg), treat as n*/
       8,
-      4, /*x, i treat as an n, but is for amino acids*/
+      n_code_codon_tbl, /*x, treat as n, for amino acids*/
       8, 8,
 
       /*Special characters after lowercase letters*/

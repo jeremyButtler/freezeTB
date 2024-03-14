@@ -24,16 +24,19 @@
 '     - Updates the snp (or match)/ins/del counts for a
 '   o fun-06: incCigCnt (.c only)
 '     - Incurments the cigar counter when all values for
-'   o fun-07: checkAmrSam
+'   o fun-07: isBactStartCodon (.c only)
+'      - Checks to is if an input codon is an bacterial
+'        start codon
+'   o fun-08: checkAmrSam
 '     - Checks if a sequence in a sam file entry has
 '       amr's (antibiotic resitance)
-'   o fun-08: pCrossRes (.c only)
+'   o fun-09: pCrossRes (.c only)
 '     - Print out cross resitance
-'   o fun-09: pAmrHitList
+'   o fun-10: pAmrHitList
 '     - Prints out all amr's that were in a sequence
-'   o fun-10: pAmrs
+'   o fun-11: pAmrs
 '     - Prints out all amr's that meant the min depth
-'   o fun-11: lookForAmrsSam
+'   o fun-12: lookForAmrsSam
 '     - Look for anti-microbial (antibiotic) genes in the
 '       reads in a sam file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -146,7 +149,7 @@ makeAmrHit() ({\
 
 
 /*-------------------------------------------------------\
-| Fun-07: checkAmrSam
+| Fun-08: checkAmrSam
 |   - Checks if a sequence in a sam file entry has
 |     amr's (antibiotic resitance)
 | Input:
@@ -184,7 +187,7 @@ checkAmrSam(
 );
 
 /*-------------------------------------------------------\
-| Fun-09: pAmrHitList
+| Fun-10: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
 |   - seqIdStr:
@@ -217,7 +220,7 @@ pAmrHitList(
 );
 
 /*-------------------------------------------------------\
-| Fun-10: pAmrs
+| Fun-11: pAmrs
 |   - Prints out all amr's that meant the min depth
 | Input:
 |   - minDepthUI:
@@ -263,7 +266,7 @@ pAmrs(
 );
 
 /*-------------------------------------------------------\
-| Fun-11: lookForAmrsSam
+| Fun-12: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
