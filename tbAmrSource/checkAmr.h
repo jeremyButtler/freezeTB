@@ -215,7 +215,7 @@ pAmrHitList(
    char *seqIdStr,
    struct amrHit *amrHitSTListPtr,
    char *drugAryStr,
-   char pHeadBl,
+   char *pHeadBl,
    void *outFILE
 );
 
@@ -261,7 +261,7 @@ pAmrs(
    struct amrStruct *amrSTAry,
    unsigned int numAmrsUI,
    char *drugAryStr,
-   char pHeadBl,
+   char *pHeadBl,
    void *outFILE
 );
 

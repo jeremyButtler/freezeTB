@@ -70,7 +70,6 @@
 #include "../generalLib/numToStr.h" (.h only)
 */
 
-
 /*-------------------------------------------------------\
 | Fun-05: getCigMutCount
 |   - Updates the snp (or match)/ins/del counts for a
@@ -169,9 +168,11 @@ isBactStartCodon(\
    secBaseC,\
    thirdBaseC\
 )(\
-       (firstBaseC == g_code_codon_tbl)\
-     | (firstBaseC == t_code_codon_tbl)\
-     | (firstBaseC == a_code_codon_tbl)\
+     (  (   (firstBaseC == g_code_codon_tbl)\
+          | (firstBaseC == t_code_codon_tbl)\
+        )\
+      | (firstBaseC == a_code_codon_tbl)\
+     ) \
      & ( secBaseC  == t_code_codon_tbl)\
      & (thirdBaseC == g_code_codon_tbl)\
      \
@@ -554,16 +555,17 @@ checkAmrSam(
                { /*If: this is a "start" codon*/
                   resBl =
                      isBactStartCodon(
-                        base3UC,
+                        base1UC,
                         base2UC,
-                        base1UC
+                        base3UC
                      );
 
                   /*If this was not a start codon*/;
-                  if(! resBl)
+                  if(resBl)
+                  { /*If: this was a bacterial start*/
+                     resBl = 0;
                      goto nextAmr_fun07_sec03_sub07;
-
-                  resBl = 0;
+                  } /*If: this was a bacterial start*/
                } /*If: this is a "start" codon*/
             } /*If: this could be any codon*/
 
@@ -622,10 +624,11 @@ checkAmrSam(
                      );
 
                   /*If this was not a start codon*/;
-                  if(! resBl)
+                  if(resBl)
+                  { /*If: this was a bacterial start*/
+                     resBl = 0;
                      goto nextAmr_fun07_sec03_sub07;
-
-                  resBl = 0;
+                  } /*If: this was a bacterial start*/
                } /*If: this is a "start" codon*/
             } /*If: this could be any codon*/
 
@@ -856,7 +859,7 @@ pAmrHitList(
    char *seqIdStr,
    struct amrHit *amrHitSTListPtr,
    char *drugAryStr,
-   char pHeadBl,
+   char *pHeadBl,
    void *outFILE
 ){
    struct amrHit *tmpST = (amrHitSTListPtr);
@@ -866,9 +869,9 @@ pAmrHitList(
    char firstPrintMacBl = 0;
    int iAmrMac = 0;
    
-   if((pHeadBl))
+   if((*pHeadBl))
    { /*If: I am printing the header*/
-      (pHeadBl) = 0;
+      (*pHeadBl) = 0;
       fprintf((FILE *) outFILE, "Id\tGene\tDrug");
       fprintf((FILE *) outFILE, "\tCrossResitance");
       fprintf((FILE *) outFILE, "\tVariantId\tType");
@@ -898,6 +901,9 @@ pAmrHitList(
       ){ /*Loop: Run through each set of flags*/
          amrFlagUL = tmpST->amrST->amrFlagsUL[iAmrMac];
          
+         flagOnI = 0;
+         if(! amrFlagUL) continue; /*no resitance*/
+
          while(amrFlagUL)
          { /*Loop: Checn each flag in a set*/
             if(!(amrFlagUL & 1))
@@ -1009,7 +1015,7 @@ pAmrs(
    struct amrStruct *amrSTAry,
    unsigned int numAmrsUI,
    char *drugAryStr,
-   char pHeadBl,
+   char *pHeadBl,
    void *outFILE
 ){
    uint indexUI = 0;
@@ -1020,9 +1026,9 @@ pAmrs(
    int iAmrMac = 0;
    char firstPrintMacBl = 1;
    
-   if((pHeadBl))
+   if((*pHeadBl))
    { /*If: I am printing the header*/
-      (pHeadBl) = 0;
+      (*pHeadBl) = 0;
       fprintf((FILE *) outFILE,"\tGene\tDrug");
       fprintf((FILE *) outFILE,"\tcrossResistance");
       fprintf((FILE *) outFILE,"\tVariantId\tType");
@@ -1058,7 +1064,6 @@ pAmrs(
         (amrSTAry)[indexUI].geneIdStr /*gene id*/
       ); /*Pirnt out gene id and drug*/
       
-      
       flagOnI = 0;
       firstPrintMacBl = 1;
       
@@ -1070,6 +1075,9 @@ pAmrs(
          amrFlagUL =
             (amrSTAry)[indexUI].amrFlagsUL[iAmrMac];
          
+         flagOnI = 0;
+         if(! amrFlagUL) continue; /*no resitance*/
+
          while(amrFlagUL)
          { /*Loop: Checn each flag in a set*/
             if(!(amrFlagUL & 1))
@@ -1367,7 +1375,7 @@ lookForAmrsSam(
              samST.qryIdStr,
              amrHitSTList,
              (drugAryStr),
-             pHeadBl,
+             &pHeadBl,
              (outFILE)
           ); /*Print the amr entry*/
 
@@ -1476,7 +1484,7 @@ lookForAmrsSam(
          amrAryST,
          numAmrI,
          drugAryStr,
-         pHeadBl,
+         &pHeadBl,
          outFILE
       ); /*Print out the AMRs*/
    } /*If: I mapped reads, not consensuses*/

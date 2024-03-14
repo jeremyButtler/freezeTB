@@ -490,15 +490,19 @@ readSamLine(
       *buffStr = tmpStr;
       
       tmpStr = *buffStr + oldLenUL - 1;
+
+      /*This is needed to avoid the rare one position off,
+      `   were two nulls are present instead of one
+      */
+      while(*(tmpStr - 1) == '\0') --tmpStr;
+
       tmpStr = fgets(tmpStr, extraBuffUS, samFILE);
 
       if(! tmpStr) break; /*End of file*/
 
-      tmpStr = *buffStr + oldLenUL;
-
       samEntry_Fun_12_Sec_02_checkEOL:;
 
-      ulStr = (ulong *) *buffStr;
+      ulStr = (ulong *) tmpStr;
 
       while(!
          ((   (*ulStr & ( ~ def_samEntry_newLine) )
