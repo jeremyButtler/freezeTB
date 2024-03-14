@@ -4,10 +4,55 @@
 #     genes
 \#######################################################*/
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header:
+'     - Included libraries
+'   o st-01: amrHit (.h only)
+'     - Holds a linked list of postive amrs for each amr
+'       check
+'   o fun-01: initAmrHit (.h only)
+'     - Initializes an amrHit structuer to all zeros
+'   o fun-02: freeAmrHit (.h only)
+'     - Frees a single amrHit structure. This does not
+'       free a list. For lists, use freeAmrHitList; fun-03
+'   o fun-03: freeAmrHitList (.h only)
+'     - Frees a list of amrHit structures
+'   o fun-04: makeAmr (.h only)
+'     - Makes a new, initialized amrHit structer on heap
+'   o fun-05: getCigMutCount
+'     - Updates the snp (or match)/ins/del counts for a
+'   o fun-06: incCigCnt
+'     - Incurments the cigar counter when all values for
+'   o fun-07: checkAmrSam
+'     - Checks if a sequence in a sam file entry has
+'       amr's (antibiotic resitance)
+'   o fun-08: pCrossRes
+'     - Print out cross resitance
+'   o fun-09: pAmrHitList
+'     - Prints out all amr's that were in a sequence
+'   o fun-10: pAmrs
+'     - Prints out all amr's that meant the min depth
+'   o fun-11: lookForAmrsSam
+'     - Look for anti-microbial (antibiotic) genes in the
+'       reads in a sam file
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+/*-------------------------------------------------------\
+| Header:
+|   - Included libraries
+\-------------------------------------------------------*/
+
+#ifdef PLAN9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
+
 #include "checkAmr.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "amrStruct.h"
 #include "drug_str_ary.h"
@@ -18,8 +63,83 @@
 #include "../generalLib/codonTbl.h"
 #include "../generalLib/ulCpStr.h"
 
+/*Hidden files
+#include "../generalLib/numToStr.h" (.h only)
+*/
+
+
 /*-------------------------------------------------------\
-| Fun-05: checkAmrSam
+| Fun-05: getCigMutCount
+|   - Updates the snp (or match)/ins/del counts for a
+|     single cigar entry
+| Input:
+|   - snpCntI:
+|     o snp counter to update
+|   - delCntI:
+|     o deleition counter to update
+|   - insCntI:
+|     o insertion counter to update
+|   - cigC:
+|     o Cigar entry to update for
+| Output:
+|   - Modifies:
+|     o Incurments snpCntI if there is an snp/match
+|     o Incurments insCntI if there is an insertion
+|     o Incurments delCntI if there is an deletion
+\-------------------------------------------------------*/
+#define \
+getCigMutCount(\
+   snpCntI,\
+   insCntI,\
+   delCntI,\
+   cigC\
+){\
+   (snpCntI) += ((cigC) == 'M');\
+   (snpCntI) += ((cigC) == '=');\
+   (snpCntI) += ((cigC) == 'X');\
+   \
+   (insCntI) += ((cigC) == 'I');\
+   (delCntI) += ((cigC) == 'D');\
+} /*getCigMutCount*/
+
+/*-------------------------------------------------------\
+| Fun-06: incCigCnt
+|   - Incurments the cigar counter when all values for
+|     an cigar entry have been reached
+| Input:
+|   - cigCntUI:
+|     o A counter with the number of bases I have checked
+|       for this entry. This is updated with each call.
+|   - cigPosI:
+|     o Position at in the cigar. This is updated when
+|       cigCntUI is > the cigar entry.
+|   - samSTPtr:
+|     o samEntry structure with the cigar to get an
+|       updated position for.
+| Output:
+|   - Modifies:
+|     o Incurments cigCntUI if cigCntUI <  current cigar
+|       entry
+|     o Sets cigCntUI to 0 if I moved to a new cigar
+|       entery (cigCntUI will be > current cigar entry)
+|     o Incurments cigPosI if cigCntUI will be > the
+|       current cigar entry
+\-------------------------------------------------------*/
+#define \
+incCigCnt(\
+   cigCntI,\
+   cigPosI,\
+   samSTPtr\
+){\
+   char tmpBl = 0;\
+   \
+   tmpBl = (cigCntI) < (samST)->cigValAryI[(cigPosI)];\
+   (cigPosI) += (! tmpBl);\
+   (cigCntI) = ((cigCntI) & tmpBl) + tmpBl;\
+}
+
+/*-------------------------------------------------------\
+| Fun-07: checkAmrSam
 |   - Checks if a sequence in a sam file entry has
 |     amr's (antibiotic resitance)
 | Input:
@@ -47,26 +167,27 @@
 |     o List of amrHit structures with the detected amr's
 |     o 0 for memory errors or when no amr's were found
 \-------------------------------------------------------*/
-struct amrHit * checkAmrSam(
+struct amrHit *
+checkAmrSam(
    void *samSTPtr,     /*Sequence to check*/
    void *amrSTAryPtr,  /*Has amr's to check*/
    int numAmrI,        /*Length of amrAryST*/
    int *numHitsI,      /*Number amr hits for seq*/
    char *errC          /*For error reporting*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-05 TOC: checkAmrSam
+   ' Fun-07 TOC: checkAmrSam
    '   - Checks if a sequence in a sam file entry has
    '     amr's (antibiotic resitance)
-   '   o Fun-05 Sec-01:
+   '   o Fun-07 Sec-01:
    '     - Variable declerations
-   '   o Fun-05 Sec-02:
+   '   o Fun-07 Sec-02:
    '     - Find the nearest amr to the sequence
-   '   o Fun-05 Sec-03:
+   '   o Fun-07 Sec-03:
    '     - Check for AMRs
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-05 Sec-01:
+   ^ Fun-07 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -79,6 +200,18 @@ struct amrHit * checkAmrSam(
    int cigBaseOnI = 0; /*Number bases left in cig entry*/
    int iCig = 0;       /*Iterate through the cigar*/
 
+   /*For recording the number of snps/ins/dels when
+   `   comparing AMRs
+   */
+   int snpInAmrI = 0;
+   int insInAmrI = 0;
+   int delInAmrI = 0;
+
+   /*For keeping track of the cigar positions when
+   `   comparing AMRs
+   */
+   int cigPosI = 0;
+   int cigCountI = 0;
 
    /*For checking amr's*/
    uchar *seqUStr = 0;
@@ -86,6 +219,8 @@ struct amrHit * checkAmrSam(
 
    int iAmr = 0;       /*Iterate through the amr's list*/
    int iBase = 0;      /*iterate/compare amr pattern*/
+   int iAa = 0;        /*I base for amino acid amrs*/
+   int iMatch = 0;     /*Holds the last checked base*/
 
    char resBl = 0;     /*-1 is resitance; 0 is not*/
 
@@ -106,7 +241,7 @@ struct amrHit * checkAmrSam(
    struct samEntry *samST = (struct samEntry *) samSTPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-05 Sec-02:
+   ^ Fun-07 Sec-02:
    ^   - Find the nearest amr
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -122,25 +257,25 @@ struct amrHit * checkAmrSam(
    /*Check if this is at the end of the amr list*/
    if(iAmr == -1) return 0;
    
-   refPosUI = samST->refStartUI - 1;
+   refPosUI = samST->refStartUI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-05 Sec-03:
+   ^ Fun-07 Sec-03:
    ^   - Check for AMRs
-   ^   o fun-05 sec-03 sub-01:
+   ^   o fun-07 sec-03 sub-01:
    ^     - Find the start of the AMR
-   ^   o fun-05 sec-03 sub-02:
+   ^   o fun-07 sec-03 sub-02:
    ^     - Move to the first base in the amr pattern
-   ^   o fun-05 sec-03 sub-03:
+   ^   o fun-07 sec-03 sub-03:
    ^     - Check if the amr has a strict match
-   ^   o fun-05 sec-03 sub-04:
+   ^   o fun-07 sec-03 sub-04:
    ^     - Handle amino acid amr's
-   ^   o fun-05 sec-03 sub-05:
+   ^   o fun-07 sec-03 sub-05:
    ^     - Check if resistance was found
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-05 Sec-03 Sub-01:
+   * Fun-07 Sec-03 Sub-01:
    *   - Find the start of the AMR
    \*****************************************************/
 
@@ -154,10 +289,10 @@ struct amrHit * checkAmrSam(
 
       /*Check if I have another amr*/
       if(samST->refEndUI < (amrAryST[iAmr].refPosUI + 1))
-         return amrSTList;
+         break; /*Finished with the read*/
 
       /**************************************************\
-      * Fun-05 Sec-03 Sub-02:
+      * Fun-07 Sec-03 Sub-02:
       *   - Move to the first base in the amr pattern
       \**************************************************/
 
@@ -191,7 +326,8 @@ struct amrHit * checkAmrSam(
                ` move onto the deletion
                */
                if(amrAryST[iAmr].refPosUI < refPosUI)
-                  goto nextArm; /*Move to next amr*/
+                  goto nextAmr_fun07_sec03_sub07;
+                 /*Move to next amr*/
 
                break;
             /*Case: Deletion*/
@@ -225,82 +361,87 @@ struct amrHit * checkAmrSam(
       } /*Loop: Find the start of the reference*/
 
       /**************************************************\
-      * Fun-05 Sec-03 Sub-03:
+      * Fun-07 Sec-03 Sub-03:
       *   - Check if the amr has a strict match
       \**************************************************/
 
       ++amrAryST[iAmr].numMapReadsUI;
-      seqUStr = (uchar *) &samST->seqStr[seqPosUI] - 1;
+      seqUStr = (uchar *) &samST->seqStr[seqPosUI];
+
+      /*amrUStr is needed for the final checks for both
+      `   nucleotide and amino acid checks
+      */
+      amrUStr = (uchar *) amrAryST[iAmr].amrSeqStr;
+
+      /*Set variables for keeping track of cigar entries*/
+      cigPosI = iCig;
+      cigCountI = cigBaseOnI;
+
+      /*Set up counters*/
+      snpInAmrI = 0;
+      insInAmrI = 0;
+      delInAmrI = 0;
+      iMatch = 0;
 
       /*check if the amr is from an amino acid change*/
-      if(amrAryST[iAmr].amrAaStr != 0) goto  checkAaAmr;
+      if(amrAryST[iAmr].amrAaStr != 0)
+         goto checkAmr_tbAmr_fun07_sec03_sub04;
 
-      checkSNP:;
-
-      amrUStr = (uchar *) amrAryST[iAmr].amrSeqStr;
+      checkSnp_tbAmr_fun07_sec03_sub03:;
 
       for(
          iBase = 0;
          (amrUStr[iBase] &~32) == (seqUStr[iBase] &~32);
          ++iBase
-      ) {}
+      ){ /*Loop : See if have extact match to the amr*/
+         getCigMutCount(
+            snpInAmrI,
+            insInAmrI,
+            delInAmrI,
+            samST->cigTypeStr[cigPosI]
+         ); /*Update number of bases in the cigar*/
 
-      /*If there was an extact match to amrStr*/
-      resBl = -(amrUStr[iBase] == '\0');
+         /*See if I need to move to next cigar entry*/
+         incCigCnt(cigCountI, cigPosI, samST);
+      } /*Loop : See if have extact match to the amr*/
 
-      /*If this was a deletion*/
-      if(  amrAryST[iAmr].lenAmrSeqUI
-         < amrAryST[iAmr].lenRefSeqUI
-      ) resBl =
-           -(   (seqUStr[iBase] & ~32)
-             != (uchar)
-                (amrAryST[iAmr].refSeqStr[iBase] & ~32)
-           ); /*Make sure deletion is present*/
+      iMatch = iBase; /*This is for the comparison step*/
 
-      goto checkIfRes;
+      /*Check if this is denfinently not an amr*/
+      if(amrUStr[iBase] != '\0')
+         goto nextAmr_fun07_sec03_sub07;
+
+      goto finishChecks_tbAmr_fun07_sec04_sub05;
 
       /**************************************************\
-      * Fun-05 Sec-03 Sub-04:
+      * Fun-07 Sec-03 Sub-04:
       *   - Handle amino acid amr's
-      *   o fun-05 sec-03 sub-04 cat-01:
+      *   o fun-07 sec-03 sub-04 cat-01:
       *     - Check if deletions are resistant
-      *   o fun-05 sec-03 sub-04 cat-02:
+      *   o fun-07 sec-03 sub-04 cat-02:
       *     - Move to the first base in the target codon
-      *   o fun-05 sec-03 sub-04 cat-03:
+      *   o fun-07 sec-03 sub-04 cat-03:
       *     - Check reverse complemnt gene snps/insertions
-      *   o fun-05 sec-03 sub-04 cat-04:
+      *   o fun-07 sec-03 sub-04 cat-04:
       *     - Else I do not know direction, look at snps
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-05 Sec-03 Sub-04 Cat-01: checkAmrSam
+      + Fun-07 Sec-03 Sub-04 Cat-01: checkAmrSam
       +   - Check if deletions are resistant
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      checkAaAmr:
+      checkAmr_tbAmr_fun07_sec03_sub04:;
 
-      /*For deletions, I know the count, so I do not
-      `   have to worry about the direction of the
-      `   deletion
+      /*For a full deletion; I have no way of checking
+      `   an amino acid sequence. So, I just treat it as
+      `   an snp
       */
       if(amrAryST[iAmr].aaDelBl == def_amrST_del)
-      { /*If: I have a deletion whithout insertions*/
-         if(   samST->cigTypeStr[iCig + 1] != 'D'
-            || cigBaseOnI + (iBase * 3) < numBasesI
-         ) resBl = 0;
-
-         else if(
-              samST->cigValAryI[iCig + 1]
-            < amrAryST[iAmr].lenRefAaUI - 2
-         ) resBl = 0;
-
-         else resBl = -1;
-
-         goto checkIfRes;
-      } /*If: I have a deletion whithout insertions*/
+         goto checkSnp_tbAmr_fun07_sec03_sub03;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-05 Sec-03 Sub-04 Cat-02: checkAmrSam
+      + Fun-07 Sec-03 Sub-04 Cat-02: checkAmrSam
       +   - Move to the first base in the target codon
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -308,62 +449,62 @@ struct amrHit * checkAmrSam(
       seqUStr +=
          (int) amrAryST[iAmr].codonPosUI - (int) refPosUI;
 
+      iBase = 0; /*For getting the sequence position*/
+
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-05 Sec-03 Sub-04 Cat-03: checkAmrSam
+      + Fun-07 Sec-03 Sub-04 Cat-03: checkAmrSam
       +   - Check reverse complemnt gene snps/insertions
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       if(amrAryST[iAmr].dirFlag == def_amrST_revCompDir)
       { /*If: This is a reverse complement gene*/
          for(
-            iBase = 0;
-            iBase < amrAryST[iAmr].lenAmrAaUI;
-            ++iBase 
+            iAa = 0;
+            iAa < amrAryST[iAmr].lenAmrAaUI;
+            ++iAa 
          ){ /*Loop: Check the codon reading frame*/
-            if(*seqUStr == '\0') goto aaNotResitantRev;
+
+            if(*seqUStr == '\0')
+               goto nextAmr_fun07_sec03_sub07;
 
             base1UC =
                (uchar)
                compBaseToCodeLkTbl[*seqUStr--];
 
-            if(*seqUStr == '\0') goto aaNotResitantRev;
+            if(*seqUStr == '\0')
+               goto nextAmr_fun07_sec03_sub07;
 
             base2UC =
                (uchar)
                compBaseToCodeLkTbl[*seqUStr--];
 
-            if(*seqUStr == '\0') goto aaNotResitantRev;
+            if(*seqUStr == '\0')
+               goto nextAmr_fun07_sec03_sub07;
 
             base3UC =
                (uchar)
                compBaseToCodeLkTbl[*seqUStr--];
 
             aaC = codonLkTbl[base1UC][base2UC][base3UC];
-
             /*The 2024 WHO catalog has ? marks for
             ` non-insertions/deletions; so I am safe here
             ` for now
             */
           
             if(
-                  amrAryST[iAmr].amrAaStr[iBase] == '?'
-               && aaC != amrAryST[iAmr].refAaStr[iBase]
-            ) continue; /*is just not reference amr*/
+                  amrAryST[iAmr].amrAaStr[iAa] == '?'
+               && aaC != amrAryST[iAmr].refAaStr[iAa]
+            ) ; /*? = anything but the reference aa*/
 
-            else if(aaC != amrAryST[iAmr].amrAaStr[iBase])
-            { /*If: this does not match the mutant*/
-               aaNotResitantRev:;
-               resBl = 0;
-               goto checkIfRes;
-            } /*If: this does not match the mutant*/
+            else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
+               goto nextAmr_fun07_sec03_sub07;
          } /*Loop: Check the codon reading frame*/
 
-         resBl = -1;
-         goto checkIfRes;
+         iMatch = amrAryST[iAmr].lenAmrSeqUI;
       } /*If: This is a reverse complement gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-05 Sec-03 Sub-04 Cat-04: checkAmrSam
+      + Fun-07 Sec-03 Sub-04 Cat-04: checkAmrSam
       +   - Check forward gene snps/insertions
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -371,61 +512,130 @@ struct amrHit * checkAmrSam(
          amrAryST[iAmr].dirFlag == def_amrST_forwardDir
       ){ /*Else If: This is a foward gene*/
          for(
-            iBase = 0;
-            iBase < amrAryST[iAmr].lenAmrAaUI;
-            ++iBase 
+            iAa = 0;
+            iAa < amrAryST[iAmr].lenAmrAaUI;
+            ++iAa 
          ){ /*Loop: Check the codon reading frame*/
-            if(*seqUStr == '\0') goto aaNotResitantFor;
+            if(*seqUStr == '\0')
+               goto nextAmr_fun07_sec03_sub07;
 
             base1UC = (uchar) baseToCodeLkTbl[*seqUStr++];
 
-            if(*seqUStr == '\0') goto aaNotResitantFor;
+            if(*seqUStr == '\0')
+               goto nextAmr_fun07_sec03_sub07;
 
             base2UC = (uchar) baseToCodeLkTbl[*seqUStr++];
 
-            if(*seqUStr == '\0') goto aaNotResitantFor;
+            if(*seqUStr == '\0')
+               goto nextAmr_fun07_sec03_sub07;
 
             base3UC = (uchar) baseToCodeLkTbl[*seqUStr++];
+
             aaC = codonLkTbl[base1UC][base2UC][base3UC];
 
             /*The 2023 WHO catalog has ? marks for
             ` non-insertions/deletions; so I am safe here
             ` for now
             */
-          
             if(
-                  amrAryST[iAmr].amrAaStr[iBase] == '?'
-               && aaC != amrAryST[iAmr].refAaStr[iBase]
-            ) continue; /*is just not reference amr*/
+                  amrAryST[iAmr].amrAaStr[iAa] == '?'
+               && aaC != amrAryST[iAmr].refAaStr[iAa]
+            ) ; /*? = anything but the reference aa*/
 
-            else if(aaC != amrAryST[iAmr].amrAaStr[iBase])
-            { /*If: this does not match the mutant*/
-               aaNotResitantFor:;
-               resBl = 0;
-               goto checkIfRes;
-            } /*If: this does not match the mutant*/
+            else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
+               goto nextAmr_fun07_sec03_sub07;
          } /*Loop: Check the codon reading frame*/
 
-         resBl = -1;
-         goto checkIfRes;
+         iMatch = amrAryST[iAmr].lenAmrSeqUI;
       } /*Else If: This is a foward gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-05 Sec-03 Sub-04 Cat-05: checkAmrSam
+      + Fun-07 Sec-03 Sub-04 Cat-05: checkAmrSam
       +   - Else I do not know the direction, look at snp
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      else  goto checkSNP;
+      else  goto checkSnp_tbAmr_fun07_sec03_sub03;
 
       /**************************************************\
-      * Fun-05 Sec-03 Sub-05:
+      * Fun-07 Sec-03 Sub-05:
+      *   - Make sure there is really resistance
+      \**************************************************/
+
+      finishChecks_tbAmr_fun07_sec04_sub05:;
+
+      while(iBase < amrAryST[iAmr].lenAmrSeqUI)
+      { /*Loop: to the end of the amr sequence*/
+         getCigMutCount(
+            snpInAmrI,
+            insInAmrI,
+            delInAmrI,
+            samST->cigTypeStr[cigPosI]
+         ); /*Update number of bases in the cigar*/
+
+         /*See if I need to move to next cigar entry*/
+         incCigCnt(cigCountI, cigPosI, samST);
+
+         ++iBase;
+      } /*Loop: to the end of the amr sequence*/
+
+      while(iBase < amrAryST[iAmr].lenRefSeqUI)
+      { /*Loop: to the end of the reference sequence*/
+         getCigMutCount(
+            snpInAmrI,
+            insInAmrI,
+            delInAmrI,
+            samST->cigTypeStr[cigPosI]
+         ); /*Update number of bases in the cigar*/
+
+         /*See if I need to move to next cigar entry*/
+         incCigCnt(cigCountI, cigPosI, samST);
+
+         ++iBase;
+      } /*Loop: to the end of the reference sequence*/
+
+      /*This if statement will often be false*/
+      if(amrUStr[iMatch] == '\0')
+      { /*If: I may have an match*/
+         /*Check if I have a deletion*/
+         resBl =
+            (
+                 (   amrAryST[iAmr].lenAmrSeqUI
+                   < amrAryST[iAmr].lenRefSeqUI
+                 )
+               & (delInAmrI > 0)
+           );
+
+         /*Check if I have an insertion*/
+         resBl |=
+            (
+                 (   amrAryST[iAmr].lenAmrSeqUI
+                   > amrAryST[iAmr].lenRefSeqUI
+                 )
+               & (insInAmrI > 0)
+           );
+
+         /*Check if this was an snp*/
+         resBl |=
+           (
+                amrAryST[iAmr].lenAmrSeqUI
+              == amrAryST[iAmr].lenRefSeqUI
+           );
+
+         resBl &=
+            (
+                 (insInAmrI + snpInAmrI - delInAmrI)
+              == amrAryST[iAmr].lenAmrSeqUI
+            );
+      } /*If: I may have a match*/
+
+      /**************************************************\
+      * Fun-07 Sec-03 Sub-06:
       *   - Check if resistance was found
       \**************************************************/
 
-      checkIfRes:
-
       if(resBl)
       { /*If: I found a resitance mutation*/
+         resBl = 0;
          ++(amrAryST[iAmr].numSupReadsUI);
          ++(*numHitsI);
 
@@ -462,7 +672,12 @@ struct amrHit * checkAmrSam(
          } /*Else: this is the first amr*/
       } /*If: I found a resitance mutation*/
 
-      nextArm:;
+      /**************************************************\
+      * Fun-07 Sec-03 Sub-07:
+      *   - Move to the next amr
+      \**************************************************/
+
+      nextAmr_fun07_sec03_sub07:;
         /*the ; is to deal with label after compound
         ` statement error in some versions of gcc
         */
@@ -472,7 +687,7 @@ struct amrHit * checkAmrSam(
 } /*checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun-18: pCrossRes
+| Fun-08: pCrossRes
 |   - Print out cross resitance (for report, not database)
 | Input:
 |   - amrSTPtr:
@@ -486,7 +701,8 @@ struct amrHit * checkAmrSam(
 |     o drug1-drug2-...-drugn if there is any cross
 |       resistance
 \-------------------------------------------------------*/
-#define pCrossRes(amrSTPtr, drugAryStr, outFILE){\
+#define \
+pCrossRes(amrSTPtr, drugAryStr, outFILE){\
    int iAmrMac = 0; /*Index of amr on*/\
    int iIndexMac = 0;\
    char firstPrintMacBl = 1;\
@@ -525,7 +741,7 @@ struct amrHit * checkAmrSam(
 } /*pCrossRes*/
 
 /*-------------------------------------------------------\
-| Fun-06: pAmrHitList
+| Fun-09: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
 |   - seqIdStr:
@@ -548,12 +764,13 @@ struct amrHit * checkAmrSam(
 |   - Sets:
 |     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
-void pAmrHitList(
+void
+pAmrHitList(
    char *seqIdStr,
    struct amrHit *amrHitSTListPtr,
    char *drugAryStr,
    char pHeadBl,
-   FILE *outFILE
+   void *outFILE
 ){
    struct amrHit *tmpST = (amrHitSTListPtr);
    ulong amrFlagUL = 0;
@@ -565,18 +782,19 @@ void pAmrHitList(
    if((pHeadBl))
    { /*If: I am printing the header*/
       (pHeadBl) = 0;
-      fprintf((outFILE), "Id\tGene\tDrug");
-      fprintf((outFILE), "\tCrossResitance\tVariantId");
-      fprintf((outFILE), "\tType\t\trefPos\tseqPos");
-      fprintf((outFILE), "\trefSeq\tamrSeq\teffect");
-      fprintf((outFILE), "\twhoComment\n");
+      fprintf((FILE *) outFILE, "Id\tGene\tDrug");
+      fprintf((FILE *) outFILE, "\tCrossResitance");
+      fprintf((FILE *) outFILE, "\tVariantId\tType");
+      fprintf((FILE *) outFILE, "\trefPos\tseqPos");
+      fprintf((FILE *) outFILE, "\trefSeq\tamrSeq");
+      fprintf((FILE *) outFILE, "\teffect\twhoComment\n");
    } /*If: I am printing the header*/
    
    while(tmpST)
    { /*Loop: Print out all amr's*/
       /*There is resistance, print it out*/
       fprintf(
-        (outFILE),
+        (FILE *) outFILE,
         "\t%s\t%s\t",
         (seqIdStr),              /*Name of the seq*/
         tmpST->amrST->geneIdStr /*Gene name*/
@@ -607,11 +825,11 @@ void pAmrHitList(
             
             if(firstPrintMacBl)
             { /*If: this is the frist printout*/
-               fprintf((outFILE), "%s", drugStr);
+               fprintf((FILE *) outFILE, "%s", drugStr);
                firstPrintMacBl = 0;
             } /*If: this is the frist printout*/
             
-            else fprintf((outFILE), "_%s", drugStr);
+            else fprintf((FILE *) outFILE, "_%s", drugStr);
             
             ++flagOnI;
             amrFlagUL >>= 1;
@@ -619,18 +837,22 @@ void pAmrHitList(
       } /*Loop: Run through each set of flags*/
       
       
-      fprintf((outFILE), "\t");
-      pCrossRes(tmpST->amrST,(drugAryStr),(outFILE));
+      fprintf((FILE *) outFILE, "\t");
+
+      pCrossRes(
+         tmpST->amrST,(drugAryStr),
+         (FILE *) outFILE
+      );
       
       fprintf(
-        (outFILE),
+        (FILE *) outFILE,
         "\t%s\t%s",
         tmpST->amrST->varIdStr,  /*Variant id*/
         tmpST->amrST->mutTypeStr /*snp/del/ins/LoF*/
       ); /*Print out the variant id and type*/
       
       fprintf(
-        (outFILE),
+        (FILE *) outFILE,
         "\t%u\t%u\t%s\t%s",
         tmpST->amrST->refPosUI,  /*Position on ref*/
         tmpST->seqPosUI,         /*Position on seq*/
@@ -640,26 +862,26 @@ void pAmrHitList(
       
       if(tmpST->amrST->effectStr)
          fprintf(
-            (outFILE),
+            (FILE *) outFILE,
             "\t%s",
             tmpST->amrST->effectStr
          );
-      else fprintf((outFILE), "\tNA");
+      else fprintf((FILE *) outFILE, "\tNA");
       
       if(tmpST->amrST->commentStr)
          fprintf(
-            (outFILE),
+            (FILE *) outFILE,
             "\t%s\n",
             tmpST->amrST->commentStr
          );
-      else fprintf((outFILE), "\tNA\n");
+      else fprintf((FILE *) outFILE, "\tNA\n");
       
       tmpST = tmpST->nextAmr;
    } /*Loop: Print out all amr's*/
 } /*pAmrHitList*/
 
 /*-------------------------------------------------------\
-| Fun-07: pAmrs
+| Fun-10: pAmrs
 |   - Prints out all amr's that meant the min depth
 | Input:
 |   - minDepthUI:
@@ -691,7 +913,8 @@ void pAmrHitList(
 |   - Sets:
 |     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
-void pAmrs(
+void
+pAmrs(
    unsigned int minDepthUI,
    float minPercMapF,
    float minPercTotalF,
@@ -700,7 +923,7 @@ void pAmrs(
    unsigned int numAmrsUI,
    char *drugAryStr,
    char pHeadBl,
-   FILE *outFILE
+   void *outFILE
 ){
    uint indexUI = 0;
    float percSupF = 0;
@@ -713,11 +936,13 @@ void pAmrs(
    if((pHeadBl))
    { /*If: I am printing the header*/
       (pHeadBl) = 0;
-      fprintf((outFILE),"\tGene\tDrug\tcrossResistance");
-      fprintf((outFILE),"\tVariantId\tType\trefPos");
-      fprintf((outFILE),"\trefSeq\tamrSeq\tmappedReads");
-      fprintf((outFILE),"\tsupportingReads");
-      fprintf((outFILE),"\teffect\twhoComment\n");
+      fprintf((FILE *) outFILE,"\tGene\tDrug");
+      fprintf((FILE *) outFILE,"\tcrossResistance");
+      fprintf((FILE *) outFILE,"\tVariantId\tType");
+      fprintf((FILE *) outFILE,"\trefPos\trefSeq");
+      fprintf((FILE *) outFILE,"\tamrSeq\tmappedReads");
+      fprintf((FILE *) outFILE,"\tsupportingReads");
+      fprintf((FILE *) outFILE,"\teffect\twhoComment\n");
    } /*If: I am printing the header*/
    
    for(indexUI = 0; indexUI < (numAmrsUI); ++indexUI)
@@ -741,7 +966,7 @@ void pAmrs(
       
       
       fprintf(
-        (outFILE),
+        (FILE *) outFILE,
         "%s\t",
         (amrSTAry)[indexUI].geneIdStr /*gene id*/
       ); /*Pirnt out gene id and drug*/
@@ -772,34 +997,34 @@ void pAmrs(
             
             if(firstPrintMacBl)
             { /*If: this is the frist printout*/
-               fprintf((outFILE), "%s", drugStr);
+               fprintf((FILE *) outFILE, "%s", drugStr);
                firstPrintMacBl = 0;
             } /*If: this is the frist printout*/
             
-            else fprintf((outFILE), "_%s", drugStr);
+            else fprintf((FILE *) outFILE,"_%s",drugStr);
             
             ++flagOnI;
             amrFlagUL >>= 1;
          } /*Loop: Checn each flag in a set*/
          
          /*There is resistance, print it out*/
-         fprintf((outFILE), "\t");
+         fprintf((FILE *) outFILE, "\t");
          
          pCrossRes(
             &(amrSTAry)[indexUI],
            (drugAryStr),
-           (outFILE)
+           (FILE *) outFILE
          ); /*Print out cross-resistance drugs*/
          
          fprintf(
-           (outFILE),
+           (FILE *) outFILE,
            "\t%s\t%s",
            (amrSTAry)[indexUI].varIdStr, /*variant id*/
            (amrSTAry)[indexUI].mutTypeStr/*mutationType*/
          ); /*Print out the gene id and drug name*/
          
          fprintf(
-           (outFILE),
+           (FILE *) outFILE,
            "\t%u\t%s\t%s\t%u\t%u",
            (amrSTAry)[indexUI].refPosUI, /*ref Position*/
            (amrSTAry)[indexUI].refSeqStr,/*Ref pattern*/
@@ -810,11 +1035,11 @@ void pAmrs(
          
          if((amrSTAry)[indexUI].effectStr)
             fprintf(
-               (outFILE),
+               (FILE *) outFILE,
                "\t%s",
                (amrSTAry)[indexUI].effectStr
             );
-         else fprintf((outFILE), "\tNA");
+         else fprintf((FILE *) outFILE, "\tNA");
          
          if((amrSTAry)[indexUI].commentStr)
          { /*If: I have a who comment*/
@@ -823,16 +1048,16 @@ void pAmrs(
             ` readin scripts
             */
             if((amrSTAry)[indexUI].commentStr[0] < 33)
-               fprintf((outFILE), "\tNA\n");
+               fprintf((FILE *) outFILE, "\tNA\n");
             else
                fprintf(
-                  (outFILE),
+                  (FILE *) outFILE,
                   "\t%s\n",
                   (amrSTAry)[indexUI].commentStr
                );
          } /*If: I have a who comment*/
          
-         else fprintf((outFILE), "\tNA\n");
+         else fprintf((FILE *) outFILE, "\tNA\n");
         
          ++flagOnI;
          amrFlagUL >>= 1;
@@ -841,7 +1066,7 @@ void pAmrs(
 } /*pAmrs*/
 
 /*-------------------------------------------------------\
-| Fun-08: lookForAmrsSam
+| Fun-11: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
@@ -882,35 +1107,36 @@ void pAmrs(
 |     o 2 for file open errors
 |     o 64 for memory errors
 \-------------------------------------------------------*/
-char lookForAmrsSam(
+char
+lookForAmrsSam(
    void *amrSTAryPtr, /*Has amr's to check*/
    int numAmrI,                /*Length of amrAryST*/
    char *drugAryStr, /*Has antibiotic names*/
    char readsBl,     /*1: processing reads not cons*/
-   uint minDepthUI,  /*Min depth to keep amr (read only)*/
+   unsigned int minDepthUI,  /*Min depth to keep amr*/
    float minPercMapF,/*Min % support to keep amr (read)*/
    float minPercTotalF, /*Min % mapped reads to keep*/
    char *samStr,    /*Sam file with reads to check*/
    char *outStr,
    char *idPrefStr    /*Prefix for id files*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-08 TOC:P lookForAmrsSam
+   ' Fun-11 TOC:P lookForAmrsSam
    '   - Look for anti-microbial (antibiotic) genes in the
    '     reads in a sam file
-   '   o fun-08 sec-01:
+   '   o fun-11 sec-01:
    '     - Variable declerations
-   '   o fun-08 sec-02:
+   '   o fun-11 sec-02:
    '     - Get the first sam entry
-   '   o fun-08 sec-03:
+   '   o fun-11 sec-03:
    '     - Check for AMRs
-   '   o fun-08 sec-04:
+   '   o fun-11 sec-04:
    '     - Print out read AMR stats
-   '   o fun-08 sec-05:
+   '   o fun-11 sec-05:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-01:
+   ^ Fun-11 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -937,7 +1163,7 @@ char lookForAmrsSam(
       (struct amrStruct *) amrSTAryPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-02:
+   ^ Fun-11 Sec-02:
    ^   - Get the first sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -953,7 +1179,7 @@ char lookForAmrsSam(
          goto fileErr_sec05_sub02_lookForAmrsSam;
    } /*Else: I am given a sam file*/
 
-   if(! outStr || *outStr == '-') outFILE = stdin;
+   if(! outStr || *outStr == '-') outFILE = stdout;
 
    else
    { /*Else: I am given an output file*/
@@ -974,23 +1200,23 @@ char lookForAmrsSam(
       ); /*Read in the first line*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-03:
+   ^ Fun-11 Sec-03:
    ^   - Check for AMRs
-   ^   o fun-08 sec-03 sub-01:
+   ^   o fun-11 sec-03 sub-01:
    ^     - Filter out less usefull entries
-   ^   o fun-08 sec-03 sub-02:
+   ^   o fun-11 sec-03 sub-02:
    ^     - Check for amrs
-   ^   o fun-08 sec-03 sub-03:
+   ^   o fun-11 sec-03 sub-03:
    ^     - Print out consensus sequence AMRS
-   ^   o fun-08 sec-03 sub-04:
+   ^   o fun-11 sec-03 sub-04:
    ^     - Deal with read amrs; print ids if requested/
    ^       free consensus structuerrs
-   ^   o fun-08 sec-03 sub-05:
+   ^   o fun-11 sec-03 sub-05:
    ^     - Move to the next sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-03 Sub-01:
+   * Fun-11 Sec-03 Sub-01:
    *   - Filter out less usefull entries/start loop
    \*****************************************************/
 
@@ -1010,7 +1236,7 @@ char lookForAmrsSam(
       } /*If: this is a header*/
 
       /*4=unmapped, 256=secondary, 2048=supplemental*/
-      if(samST.flagUS & (4 + 256))
+      if(samST.flagUS & (4 | 256 | 2048))
       { /*If: this is an umapped read, 2ndary*/
          errC =
             readSamLine(
@@ -1024,7 +1250,7 @@ char lookForAmrsSam(
       } /*If: this is an umapped read, 2ndary, sup aln*/
 
       /**************************************************\
-      * Fun-08 Sec-03 Sub-02:
+      * Fun-11 Sec-03 Sub-02:
       *   - Check for amrs
       \**************************************************/
 
@@ -1043,7 +1269,7 @@ char lookForAmrsSam(
          goto memErr_sec05_sub02_lookForAmrsSam;
 
       /**************************************************\
-      * Fun-08 Sec-03 Sub-03:
+      * Fun-11 Sec-03 Sub-03:
       *   - Print out consensus sequence AMRS
       \**************************************************/
 
@@ -1062,7 +1288,7 @@ char lookForAmrsSam(
       } /*If: There were amr's*/
 
       /**************************************************\
-      * Fun-08 Sec-03 Sub-04:
+      * Fun-11 Sec-03 Sub-04:
       *   - Deal with read amrs; print ids if requested/
       *     free consensus structuerrs
       \**************************************************/
@@ -1128,7 +1354,7 @@ char lookForAmrsSam(
       } /*Else If; I am processing reads*/
 
       /**************************************************\
-      * Fun-08 Sec-03 Sub-05:
+      * Fun-11 Sec-03 Sub-05:
       *   - Move to the next sam entry
       \**************************************************/
 
@@ -1142,7 +1368,7 @@ char lookForAmrsSam(
    } /*Loop: Check if have antibiotic resitance*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-04:
+   ^ Fun-11 Sec-04:
    ^   - Print out read AMR stats
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1169,18 +1395,18 @@ char lookForAmrsSam(
    } /*If: I mapped reads, not consensuses*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-05:
+   ^ Fun-11 Sec-05:
    ^   - Clean up
-   ^   o fun-08 sec-05 sub-01:
+   ^   o fun-11 sec-05 sub-01:
    ^     - Clean up after a successful run
-   ^   o fun-08 sec-05 sub-02:
+   ^   o fun-11 sec-05 sub-02:
    ^     - Clean up after a memory error
-   ^   o fun-08 sec-05 sub-03:
+   ^   o fun-11 sec-05 sub-03:
    ^     - Clean up after an file error
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-05 Sub-01:
+   * Fun-11 Sec-05 Sub-01:
    *   - Clean up after a successful run
    \*****************************************************/
 
@@ -1191,7 +1417,7 @@ char lookForAmrsSam(
    return 0;
 
    /*****************************************************\
-   * Fun-08 Sec-05 Sub-02:
+   * Fun-11 Sec-05 Sub-02:
    *   - Clean up after a memory error
    \*****************************************************/
 
@@ -1210,7 +1436,7 @@ char lookForAmrsSam(
       return 64;
 
    /*****************************************************\
-   * Fun-08 Sec-05 Sub-03:
+   * Fun-11 Sec-05 Sub-03:
    *   - Clean up after an file error
    \*****************************************************/
 

@@ -4,7 +4,7 @@ CFLAGS= -static -O3 -std=c89
 MACCFLAGS= -O3
 DEBUGFLAGS= -static -O0 -ggdb -Wall
 
-tbAmrSource=\
+SOURCE=\
    amrStruct.c\
    drug_str_ary.c\
    ../generalLib/samEntryStruct.c\
@@ -12,17 +12,17 @@ tbAmrSource=\
    tbAmr.c
 
 all:
-	$(CC) $(CFLAGS) -o tbAmr $(tbAmrSource)
+	$(CC) $(CFLAGS) -o tbAmr $(SOURCE)
 
 mac:
-	$(CC) $(MACCFLAGS) -o tbAmr $(tbAmrSource)
+	$(CC) $(MACCFLAGS) -o tbAmr $(SOURCE)
 
 debug:
-	$(CC) $(DEBUGFLAGS) -o debugTbAmr $(tbAmrSource)
+	$(CC) $(DEBUGFLAGS) -o debugTbAmr $(SOURCE)
 	gdb -x bug-cmds.txt debugTbAmr;
 
 check:
-	$(CC) $(DEBUGFLAGS) -o debugTbAmr tbAmr.c;
+	$(CC) $(DEBUGFLAGS) -o debugTbAmr $(SOURCE)
 
 buildWhoCnvt:
 	make -C cnvt_whoToTbAmr_src CC=$(CC) CFLAGS=$(CFLAGS)

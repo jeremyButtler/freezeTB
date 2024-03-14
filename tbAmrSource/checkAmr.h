@@ -4,6 +4,44 @@
 #     genes
 \#######################################################*/
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header:
+'     - Definitions/defaults and header guards
+'   o st-01: amrHit
+'     - Holds a linked list of postive amrs for each amr
+'       check
+'   o fun-01: initAmrHit
+'     - Initializes an amrHit structuer to all zeros
+'   o fun-02: freeAmrHit
+'     - Frees a single amrHit structure. This does not
+'       free a list. For lists, use freeAmrHitList; fun-03
+'   o fun-03: freeAmrHitList
+'     - Frees a list of amrHit structures
+'   o fun-04: makeAmr
+'     - Makes a new, initialized amrHit structer on heap
+'   o fun-05: getCigMutCount (.c only)
+'     - Updates the snp (or match)/ins/del counts for a
+'   o fun-06: incCigCnt (.c only)
+'     - Incurments the cigar counter when all values for
+'   o fun-07: checkAmrSam
+'     - Checks if a sequence in a sam file entry has
+'       amr's (antibiotic resitance)
+'   o fun-08: pCrossRes (.c only)
+'     - Print out cross resitance
+'   o fun-09: pAmrHitList
+'     - Prints out all amr's that were in a sequence
+'   o fun-10: pAmrs
+'     - Prints out all amr's that meant the min depth
+'   o fun-11: lookForAmrsSam
+'     - Look for anti-microbial (antibiotic) genes in the
+'       reads in a sam file
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/*-------------------------------------------------------\
+| Header:
+|   - Definitions/defaults and header guards
+\-------------------------------------------------------*/
+
 #ifndef CHECK_AMR_H
 #define CHECK_AMR_H
 
@@ -15,7 +53,11 @@
     /*0% (turn off) of all kept reads mapped to this amr
     `   region
     */
-
+/*-------------------------------------------------------\
+| ST-01: amrHit
+|   - Holds a linked list of postive amrs for each amr
+|     check
+\-------------------------------------------------------*/
 typedef struct amrHit{
    struct amrStruct *amrST;
    unsigned seqPosUI;
@@ -33,7 +75,8 @@ typedef struct amrHit{
 |     o amrST and nextAmr to point to 0 (NULL)
 |     o seqPosUI to be 0
 \-------------------------------------------------------*/
-#define initAmrHit(amrHitSTPtr){\
+#define \
+initAmrHit(amrHitSTPtr){\
    (amrHitSTPtr)->amrST = 0;\
    (amrHitSTPtr)->seqPosUI = 0;\
    (amrHitSTPtr)->nextAmr = 0;\
@@ -52,7 +95,8 @@ typedef struct amrHit{
 |   - Sets:
 |     o amrHitSTPtr to 0
 \-------------------------------------------------------*/
-#define freeAmrHit(amrHitSTPtr){\
+#define \
+freeAmrHit(amrHitSTPtr){\
    free((amrHitSTPtr));\
    (amrHitSTPtr) = 0;\
 } /*freeAmrHit*/
@@ -70,7 +114,8 @@ typedef struct amrHit{
 |   - Sets:
 |     o amrHitSTPtr to 0
 \-------------------------------------------------------*/
-#define freeAmrHitList(amrHitSTListPtr){\
+#define \
+freeAmrHitList(amrHitSTListPtr){\
    struct amrHit *tmpST = (amrHitSTListPtr)->nextAmr;\
    \
    while(tmpST != 0)\
@@ -84,7 +129,7 @@ typedef struct amrHit{
 } /*freeAmrHit*/
 
 /*-------------------------------------------------------\
-| Fun-04:
+| Fun-04: makeAmr
 |   - Makes a new, initialized amrHit structer on heap
 | Input:
 | Output:
@@ -92,7 +137,8 @@ typedef struct amrHit{
 |     o A pointer to the new amrHit structure
 |     o 0 for memory error
 \-------------------------------------------------------*/
-#define makeAmrHit() ({\
+#define \
+makeAmrHit() ({\
    struct amrHit *retST = malloc(sizeof(struct amrHit));\
    if(retST) initAmrHit(retST);\
    retST;\
@@ -100,7 +146,7 @@ typedef struct amrHit{
 
 
 /*-------------------------------------------------------\
-| Fun-05: checkAmrSam
+| Fun-07: checkAmrSam
 |   - Checks if a sequence in a sam file entry has
 |     amr's (antibiotic resitance)
 | Input:
@@ -128,17 +174,96 @@ typedef struct amrHit{
 |     o List of amrHit structures with the detected amr's
 |     o 0 for memory errors or when no amr's were found
 \-------------------------------------------------------*/
-struct amrHit * checkAmrSam(
+struct amrHit *
+checkAmrSam(
    void *samSTPtr,     /*Sequence to check*/
    void *amrSTAryPtr,  /*Has amr's to check*/
-   int numAmrI,                /*Length of amrAryST*/
-   int *numHitsI,              /*Number amr hits for seq*/
-   char *errC                  /*For error reporting*/
+   int numAmrI,        /*Length of amrAryST*/
+   int *numHitsI,      /*Number amr hits for seq*/
+   char *errC          /*For error reporting*/
 );
 
+/*-------------------------------------------------------\
+| Fun-09: pAmrHitList
+|   - Prints out all amr's that were in a sequence
+| Input:
+|   - seqIdStr:
+|     o C-string with name of sequence that had the amr
+|   - amrHitSTListPtr:
+|     o Pointer to a List of amrHit structures with amr's
+|       to print out
+|   - drugAryStr:
+|     o List of antibiotic drugs. It should follow the
+|       same order as the flags
+|   - pHeadBl:
+|     o 1: Print out the header
+|     o 0: Do not print the header
+|   - outFILE:
+|     o File to print the amr's to
+| Output: 
+|   - Prints:
+|     o The amr's in amrHitSTListPtr to outFILE
+|     o The header if pHeadBl is 1
+|   - Sets:
+|     o pHeadBl to 0 if it is set to 1
+\-------------------------------------------------------*/
+void
+pAmrHitList(
+   char *seqIdStr,
+   struct amrHit *amrHitSTListPtr,
+   char *drugAryStr,
+   char pHeadBl,
+   void *outFILE
+);
 
 /*-------------------------------------------------------\
-| Fun-14: lookForAmrsSam
+| Fun-10: pAmrs
+|   - Prints out all amr's that meant the min depth
+| Input:
+|   - minDepthUI:
+|     o uinsigned in with  he minumum depth to keep an amr
+|   - minPercMapF:
+|     o Float with the min percent of supporting reads
+|       to keep an amr (only compared locally)
+|   - minPercTotalF:
+|     o Float with the min percent of mapped reads needed
+|       to keep an amr (all reads kept)
+|   - totalReadsUI:
+|     o total number of reads input
+|   - amrSTAry:
+|     o Pointer to an array of amrStruct structures to
+|       check and print
+|   - drugAryStr:
+|     o List of antibiotic drugs. It should follow the
+|       same order as the flags
+|   - pHeadBl:
+|     o 1: Print out the header
+|     o 0: Do not print the header
+|   - outFILE:
+|     o File to print the amr's to
+| Output: 
+|   - Prints:
+|     o The amr's that meet the min stats and have at
+|       least one mapped read
+|     o The header if pHeadBl is 1
+|   - Sets:
+|     o pHeadBl to 0 if it is set to 1
+\-------------------------------------------------------*/
+void
+pAmrs(
+   unsigned int minDepthUI,
+   float minPercMapF,
+   float minPercTotalF,
+   unsigned int totalReadsUI,
+   struct amrStruct *amrSTAry,
+   unsigned int numAmrsUI,
+   char *drugAryStr,
+   char pHeadBl,
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun-11: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
@@ -176,15 +301,16 @@ struct amrHit * checkAmrSam(
 |       if a idPrefStr was provided
 |   - Returns:
 |     o 0 for no problems
-|     o 2 for file open errors (when printing ids)
+|     o 2 for file open errors
 |     o 64 for memory errors
 \-------------------------------------------------------*/
-char lookForAmrsSam(
+char
+lookForAmrsSam(
    void *amrSTAryPtr, /*Has amr's to check*/
    int numAmrI,                /*Length of amrAryST*/
    char *drugAryStr, /*Has antibiotic names*/
    char readsBl,     /*1: processing reads not cons*/
-   unsigned int minDepthUI,  /*Min depth keep amr (read)*/
+   unsigned int minDepthUI,  /*Min depth to keep amr*/
    float minPercMapF,/*Min % support to keep amr (read)*/
    float minPercTotalF, /*Min % mapped reads to keep*/
    char *samStr,    /*Sam file with reads to check*/

@@ -1,0 +1,1017 @@
+Id	Gene	Drug	CrossResitance	VariantId	Type		refPos	seqPos	refSeq	amrSeq	effect	whoComment
+	760104-761571	rpoB	rifampicin	NA	rpoB_p.His445_Lys446del	del	761137	1033	CCACAAG	C	inframe_deletion	NA
+
+	760104-761571	rpoB	rifampicin	NA	rpoB_p.His445Asp	snp	761138	1034	C	G	missense_variant	NA
+
+	760104-761571	rpoB	rifampicin	NA	rpoB_p.His445Asp	snp	761138	1034	CAC	GAT	missense_variant	NA
+
+Id	Gene	Drug	CrossResitance	VariantId	Type		refPos	seqPos	refSeq	amrSeq	effect	whoComment
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779078	5	G	GA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779078	5	G	GA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Leu32fs	ins	779080	7	G	GTT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu32fs	ins	779080	7	G	GTT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779095	22	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779095	22	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu43fs	ins	779112	39	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779119	46	T	TGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779119	46	T	TGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp47fs	ins	779120	47	G	GGT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp47fs	ins	779120	47	G	GGT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp47fs	ins	779124	51	T	TGTGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Cys46fs	ins	779124	51	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp47fs	ins	779124	51	T	TGTGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Cys46fs	ins	779124	51	T	TG	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp47fs	ins	779126	53	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp47fs	ins	779126	53	T	TGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp47fs	ins	779126	53	T	TGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp47fs	ins	779126	53	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Pro48fs	ins	779126	53	T	TGATC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Pro48fs	ins	779126	53	T	TGATC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Pro48fs	ins	779127	54	G	GAT	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp47fs	ins	779127	54	G	GA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp47fs	ins	779127	54	G	GA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Pro48fs	ins	779127	54	G	GAT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Pro48fs	ins	779128	55	A	ATC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Pro48fs	ins	779128	55	A	ATC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Glu49fs	ins	779129	56	T	TC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Glu49fs	ins	779129	56	T	TC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Gln51fs	ins	779136	63	C	CG	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Gln51fs	ins	779138	65	G	GC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779141	68	G	GT	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779141	68	G	GT	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Glu55fs	ins	779149	76	A	AG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu56fs	ins	779153	80	A	AC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Leu56fs	ins	779153	80	A	AC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779161	88	C	CGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779161	88	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779161	88	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779161	88	C	CGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779162	89	G	GGC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779162	89	G	GGC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779163	90	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779163	90	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779164	91	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779164	91	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779167	94	T	TG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779167	94	T	TG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ala62fs	ins	779170	97	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ala62fs	ins	779170	97	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ile67fs	del	779180	107	CG	C	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ile67fs	del	779180	107	CG	C	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ile67fs	ins	779185	112	G	GGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ile67fs	ins	779185	112	G	GGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Thr69fs	ins	779187	114	A	ATC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ser68fs	ins	779188	115	T	TCA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ser68fs	ins	779188	115	T	TC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ser68fs	ins	779188	115	T	TCA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ser68fs	ins	779188	115	T	TC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asn70fs	ins	779193	120	A	AC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asn70fs	ins	779193	120	A	AC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asn70fs	ins	779195	122	C	CA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asn70fs	ins	779195	122	C	CA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Arg72fs	ins	779198	125	T	TGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Arg72fs	ins	779198	125	T	TGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Arg72fs	ins	779199	126	G	GCC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Arg72fs	ins	779199	126	G	GCC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779214	141	C	CA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779214	141	C	CA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ile80fs	ins	779222	149	G	GT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ile80fs	ins	779222	149	G	GT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu83fs	ins	779230	157	A	AGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779257	184	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779257	184	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr92fs	ins	779262	189	T	TA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Tyr92fs	ins	779262	189	T	TA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asn98fs	ins	779276	203	G	GC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asn98fs	ins	779276	203	G	GC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779306	233	A	AC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779306	233	A	ACG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779306	233	A	ACG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779306	233	A	AC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779308	235	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779308	235	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ala110fs	ins	779313	240	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ala110fs	ins	779313	240	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Met111fs	ins	779316	243	G	GC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Met111fs	ins	779316	243	G	GC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779320	247	T	TGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779320	247	T	TGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779322	249	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779322	249	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779324	251	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779324	251	C	CG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu117fs	ins	779335	262	A	ACC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu117fs	ins	779335	262	A	AC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779350	277	G	GGC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779350	277	G	GGC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Arg123fs	ins	779352	279	C	CT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779355	282	A	AGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779355	282	A	AGG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu125fs	ins	779357	284	G	GGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Leu125fs	ins	779357	284	G	GGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779364	291	G	GGC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779364	291	G	GGC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779367	294	G	GA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779367	294	G	GA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779370	297	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779370	297	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Arg132fs	ins	779380	307	A	AG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Arg132fs	ins	779380	307	A	AG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779382	309	C	CGA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779382	309	C	CGA	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp141fs	ins	779406	333	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp141fs	ins	779406	333	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asp141fs	ins	779408	335	G	GGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Asp141fs	ins	779408	335	G	GGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu143fs	ins	779410	337	A	ATC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Leu142fs	ins	779411	338	T	TC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Leu142fs	ins	779411	338	T	TC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr145fs	ins	779412	339	C	CTGTTGGCA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Met146fs	ins	779414	341	G	GTTGGCATATAT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Ala144fs	ins	779416	343	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Ala144fs	ins	779416	343	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr145fs	ins	779417	344	G	GGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr145fs	ins	779418	345	G	GC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr145fs	ins	779418	345	G	GCA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Met146fs	ins	779419	346	C	CAT	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr145fs	ins	779419	346	C	CA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779422	349	A	ATATGGAGAACGTCGTCTCCGACGCCCTG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779422	349	A	ATATGGAGAACGTCGTCTCCGACGCCCTG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Met146fs	ins	779423	350	T	TA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Asn148fs	ins	779429	356	G	GA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779431	358	A	ACG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779431	358	A	ACG	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_LoF	ins	779445	372	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_LoF	ins	779445	372	G	GC	LoF	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Arg156fs	ins	779449	376	T	TG	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Arg156fs	ins	779449	376	T	TG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Tyr157fs	ins	779452	379	G	GGC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr157fs	ins	779452	379	G	GGC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Arg156fs	ins	779453	380	G	GC	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Arg156fs	ins	779453	380	G	GC	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr157fs	ins	779454	381	C	CGA	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Tyr157fs	ins	779454	381	C	CG	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	clofazimine	NA	Rv0678_p.Tyr157fs	ins	779454	381	C	CGA	frameshift	Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+	779073-779461	Rv0678	bedaquiline	NA	Rv0678_p.Tyr157fs	ins	779454	381	C	CG	frameshift	Includes-data-from-one-site-that-only-submitted-resistant-strains,-which-may-have-inflated-the-PPV.-Can-only-confer-resistance-if-genetically-linked-to-a-functional-MmpL5
+
+Id	Gene	Drug	CrossResitance	VariantId	Type		refPos	seqPos	refSeq	amrSeq	effect	whoComment
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288688	25	TGCAAACCAACTCGACGCTGGCGGTGCGCATCTCCTCCAGCGCGGCGACGGTGGTATCGGCCGACACACCCGCTGTCAGGTCCACCAGCACCCTGGTGGCCAAGCCATTGCGTACCGCGTCCTCGGCCGTCTGGCGCACACAATGATCGGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACG	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288689	26	GCAAACCAACTCGACGCTGGCGGTGCGCATCTCCTCCAGCGCGGCGACGGTGGTATCGGCCGACACACCCGCTGTCAGGTCCACCAGCACCCTGGTGGCCAAGCCATTGCGTACCGCGTCCTCGGCCGTCTGGCGCACACAATGATCGGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGG	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288693	30	A	AC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288695	32	C	CA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu181fs	ins	2288699	36	T	TCGACG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu181fs	ins	2288700	37	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu181fs	ins	2288701	38	G	GA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288703	40	C	CG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288705	42	C	CT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288707	44	G	GGC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr177fs	ins	2288711	48	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr177fs	ins	2288712	49	T	TGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr177fs	ins	2288713	50	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288715	52	G	GCA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met175fs	ins	2288716	53	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met175fs	ins	2288717	54	A	AT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met175fs	ins	2288718	55	T	TCTCCTCCAGCGCGGCGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288720	57	T	TC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288722	59	C	CT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu173fs	ins	2288723	60	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu172fs	ins	2288726	63	A	AGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala171Pro	snp	2288728	65	CGC	GGG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala171Pro	snp	2288728	65	CGC	AGG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala171Pro	snp	2288728	65	CGC	TGG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288730	67	C	CGG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala171Pro	snp	2288730	67	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288739	76	T	TG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp166fs	ins	2288743	80	A	AT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp166fs	ins	2288744	81	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp166fs	ins	2288744	81	T	TCGGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala165fs	ins	2288747	84	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala165fs	ins	2288749	86	C	CGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val163fs	ins	2288754	91	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser164fs	ins	2288755	92	A	ACC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val163fs	ins	2288755	92	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288757	94	C	CCGCTGTCAGG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288757	94	C	CCGCT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288757	94	C	CCG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288760	97	CTGTCAGGTCCACCAGCACCCTGGTGGCCAAGCCATTGCGTACCGCGTCCTCGGCCGTCTGGCGCACACAATGATCGGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCAT	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288763	100	T	TCA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288764	101	C	CAG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu159fs	ins	2288765	102	A	AG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu159fs	ins	2288765	102	A	AGG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp158fs	ins	2288767	104	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp158fs	ins	2288768	105	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp158fs	ins	2288770	107	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu156fs	ins	2288775	112	G	GCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu156fs	ins	2288776	113	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val155fs	ins	2288777	114	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val155fs	ins	2288777	114	A	ACC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val155fs	ins	2288778	115	C	CCCTG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg154fs	ins	2288780	117	C	CT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr153fs	ins	2288784	121	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr153fs	ins	2288784	121	T	TGG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr153fs	ins	2288785	122	G	GGCCAAGCCAT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala152fs	ins	2288790	127	A	AG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala152fs	ins	2288791	128	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly150fs	ins	2288792	129	C	CCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly150fs	ins	2288793	130	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asn149fs	ins	2288794	131	A	ATT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asn149fs	ins	2288795	132	T	TTG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288801	138	A	AC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288802	139	C	CCG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu144fs	ins	2288810	147	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu144fs	ins	2288812	149	G	GGCCGTCTGGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala143fs	ins	2288813	150	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu144fs	ins	2288815	152	C	CGTCTGGCGCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288816	153	G	GTC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288817	154	TCTGGCGCACACAATGATCGGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCC	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288819	156	TGGCGCACACAATGATCGGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCAC	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288820	157	G	GGC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288821	158	G	GCGCA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140Pro	snp	2288821	158	GC	CG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140Pro	snp	2288821	158	GC	TG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140Pro	snp	2288821	158	GC	AG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140Pro	snp	2288822	159	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140fs	ins	2288822	159	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140fs	ins	2288823	160	G	GCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg140fs	ins	2288823	160	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288824	161	CACACAATGATCGGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCAT	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288827	164	A	ACAAT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288828	165	C	CA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288828	165	C	CAATGATCGGTGGCAAT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288828	165	C	CAATG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288830	167	A	ATGAT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288831	168	T	TGATC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288832	169	G	GA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp136fs	ins	2288833	170	A	AT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp136fs	ins	2288835	172	C	CGGTG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288836	173	GGTGGCAATACCGACCACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAG	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288842	179	A	AAT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile133fs	ins	2288843	180	A	AT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile133fs	ins	2288844	181	T	TACCG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile133fs	ins	2288845	182	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly132fs	ins	2288847	184	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly132fs	ins	2288847	184	C	CGACCACA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly132fs	ins	2288848	185	G	GAC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val131fs	ins	2288849	186	A	ACC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val131fs	ins	2288849	186	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val131fs	ins	2288850	187	C	CCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288852	189	ACATCGACCTCATCGACGCCGCGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCAC	A	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp129fs	ins	2288855	192	T	TCG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp129fs	ins	2288856	193	C	CGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val128fs	ins	2288858	195	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val128fs	ins	2288858	195	A	ACC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val128fs	ins	2288859	196	C	CCT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288861	198	T	TCA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp126fs	ins	2288863	200	A	ATC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288873	210	CGTTGCCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGG	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288874	211	G	GT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gln122fs	ins	2288876	213	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg121Pro	snp	2288878	215	CC	GG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg121Pro	snp	2288878	215	CC	TG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg121Pro	snp	2288878	215	CC	AG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288878	215	CCGCAGCCAATTCAGCAGTGGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGT	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg121Pro	snp	2288879	216	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Trp119fs	ins	2288885	222	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu117fs	ins	2288891	228	A	AG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288894	231	A	AGTGGCGT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288894	231	A	AG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288897	234	GGCGTGCCGTTCTCGTCGACTCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATA	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr114fs	ins	2288901	238	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr114fs	ins	2288902	239	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asn112fs	ins	2288905	242	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asn112fs	ins	2288907	244	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288917	254	TCCTTCGAAGCCGCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCG	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288920	257	T	TTCGA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288921	258	T	TCGAA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe106fs	ins	2288924	261	A	AAG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe106fs	ins	2288926	263	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe106fs	ins	2288926	263	G	GCC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288928	265	C	CG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288929	266	GCTGTACGCTCCGGTGTAGGCACCCTTGTAGAACACCGCCTCGATTGCCGACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACT	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288931	268	T	TGTACGCTCCGGTGTAG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala102Pro	snp	2288935	272	CGC	TGG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala102Pro	snp	2288935	272	CGC	AGG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala102Pro	snp	2288935	272	CGC	GGG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr103fs	ins	2288935	272	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala102Pro	snp	2288937	274	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288939	276	C	CCG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288942	279	G	GT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr99fs	ins	2288945	282	T	TAG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr99fs	ins	2288947	284	G	GGCACCCTTGTAGAACACCGCCTC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr99fs	ins	2288947	284	G	GGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr99fs	ins	2288947	284	G	GGCACC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala98fs	ins	2288948	285	G	GCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala98fs	ins	2288949	286	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala98fs	ins	2288950	287	A	ACC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala98fs	ins	2288950	287	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly97fs	ins	2288952	289	C	CCTTGT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Lys96Asn	snp	2288953	290	C	A	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Lys96Asn	snp	2288953	290	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Lys96fs	ins	2288954	291	T	TTGTAGAA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Lys96fs	ins	2288955	292	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Lys96fs	ins	2288956	293	G	GTAGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr95fs	ins	2288957	294	T	TAG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr95fs	ins	2288959	296	G	GA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Tyr95fs	ins	2288959	296	G	GAA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe94fs	ins	2288962	299	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288963	300	A	AC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288967	304	C	CCTCGATTGCCGACGTGTCCAGA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile90Asn	snp	2288971	308	GA	AT	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile90Asn	snp	2288972	309	A	T	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2288978	315	GACGTGTCCAGACTGGGATGGAAGTCCGCGCCGGGAGTACCGCTGACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGC	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288980	317	C	CGT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr87fs	ins	2288981	318	G	GTGTCCAGACTGGGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr87fs	ins	2288981	318	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr87fs	ins	2288982	319	T	TGTCCAGACTGGGATGGAAGTCCGCG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp86fs	ins	2288984	321	T	TCC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp86fs	ins	2288984	321	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp86fs	ins	2288985	322	C	CCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp86fs	ins	2288986	323	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser84fs	ins	2288990	327	C	CTGGGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser84fs	ins	2288991	328	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu85fs	ins	2288992	329	G	GGGAT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Pro83fs	ins	2288994	331	G	GATGGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2288998	335	G	GA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe81fs	ins	2288999	336	A	AAG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe81fs	ins	2289000	337	A	AGT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp80fs	ins	2289001	338	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp80fs	ins	2289004	341	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala79fs	ins	2289006	343	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala79fs	ins	2289007	344	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly78fs	ins	2289009	346	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr76fs	ins	2289016	353	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser74fs	ins	2289019	356	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser74fs	ins	2289021	358	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser74fs	ins	2289022	359	G	GACGCAATGCGGTGGCCACGACGAGGAATAGTCCGGTGTGCCGGAGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289023	360	A	ACGCAATGC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289023	360	A	ACGCAATGCGGTGGCCACGACGAGGAATAGTCC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289024	361	C	CGCAATGCG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289024	361	C	CG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Cys72Tyr	snp	2289025	362	GC	AT	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Cys72Tyr	snp	2289026	363	C	T	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289034	371	T	TG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289035	372	G	GGCCACGACGAGGAATAGTCCGGTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser65fs	ins	2289047	384	G	GA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser65fs	ins	2289048	385	A	AATAGTCC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp63fs	ins	2289052	389	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp63fs	ins	2289052	389	G	GTC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp63fs	ins	2289053	390	T	TCC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp63fs	ins	2289053	390	T	TCCGGTGTGCCGGAGAA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp63fs	ins	2289055	392	C	CGG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289056	393	G	GGT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289057	394	GTGTGCCGGAGAAGTGGTCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCGCTCCGGCCACTGACAGAAAAGG	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr61fs	ins	2289060	397	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289066	403	A	AG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289069	406	A	AG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp56fs	ins	2289073	410	G	GTC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp56fs	ins	2289074	411	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289074	411	TCACCCGGGTCGATGTGGAAGTCCTTGGTTGCCACGACGTGATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCGCTCCGG	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp56fs	ins	2289076	413	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp56fs	ins	2289079	416	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.His51fs	ins	2289088	425	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.His51fs	ins	2289089	426	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.His51fs	ins	2289090	427	G	GGA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp49fs	ins	2289097	434	C	CT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Lys48fs	ins	2289099	436	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289101	438	G	GT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289102	439	T	TTG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289105	442	C	CCA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289111	448	C	CG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289114	451	GATGGTAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTC	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289119	456	TAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTT	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289119	456	TAGTCCGCCGCTTCGGCCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCG	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289119	456	T	TA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp40fs	ins	2289122	459	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp40fs	ins	2289123	460	C	CCG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp40fs	ins	2289124	461	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala39fs	ins	2289125	462	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala39fs	ins	2289125	462	G	GCCGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala39fs	ins	2289126	463	C	CCG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu37fs	ins	2289133	470	G	GGCCAGGTA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala36fs	ins	2289134	471	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289135	472	CCAGGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCG	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala36fs	ins	2289135	472	C	CCAGGTAGTCGCTG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289138	475	GGTAGTCGCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAA	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289139	476	G	GT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289145	482	GCTGATGGCGCGGGCCAGCGCGGCGCCACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCGCTCCGGCCACTG	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289151	488	G	GGCGC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289151	488	G	GGCGCGGGCCA	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289154	491	G	GC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289154	491	G	GCGGGC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg29fs	ins	2289155	492	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Arg29fs	ins	2289157	494	G	GGCCA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala28fs	ins	2289160	497	C	CA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289161	498	A	AG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289163	500	C	CGCGGCGCCACCGGTTACCG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala26fs	ins	2289164	501	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala26fs	ins	2289165	502	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala26fs	ins	2289166	503	G	GGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly24fs	ins	2289171	508	C	CACCGGTT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289171	508	CACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACA	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289171	508	CACCGGTTACCGCCAGCGAGCCACCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCT	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly23fs	ins	2289174	511	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Thr22fs	ins	2289176	513	G	GT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val21fs	ins	2289179	516	A	ACCGCCAG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val21fs	ins	2289179	516	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val21fs	ins	2289181	518	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala20fs	ins	2289182	519	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289187	524	C	CG	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser18fs	ins	2289189	526	A	AG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser18fs	ins	2289189	526	A	AGC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ser18fs	ins	2289190	527	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly17fs	ins	2289193	530	A	AC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289194	531	CCCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCG	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289195	532	CCTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCGCTCCGGCCACTGACAGA	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gly17fs	ins	2289196	533	C	CT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289196	533	CTCGCAGAAGTCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCGC	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Glu15fs	ins	2289198	535	C	CG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Phe13fs	ins	2289203	540	A	AAGTC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289206	543	TCGTTCTGCACGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGCGGCGCTCCGGCCACTG	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp12fs	ins	2289206	543	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289208	545	G	GT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gln10His	snp	2289210	547	TC	GA	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gln10His	snp	2289210	547	TC	AA	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289211	548	C	CT	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gln10His	snp	2289211	548	C	A	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Gln10His	snp	2289211	548	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289213	550	GCACGTCGACGATGATCAACGCCCGCATACGTCCAC	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289216	553	CGTCGACGATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCG	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp8His	snp	2289217	554	GTC	ATG	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp8fs	ins	2289218	555	T	TC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Asp8His	snp	2289219	556	C	G	missense_variant	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Val7fs	ins	2289223	560	G	GA	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289224	561	ATGATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACA	A	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile6fs	ins	2289224	561	A	AT	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ile6fs	ins	2289225	562	T	TG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289226	563	G	GATCAACGC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289227	564	ATCAACGCCCGCATACGTCCACCATACGTTCGGGCGACTGCCCGGGCAGTTTGCCTACCGACGCGGCAGCCACAGATATAGGGTCCATGACGCCGCGACGATCGCGAACATGACCAGCTGAGCGGCGGCCACCCAACCGGCGGGATAGATCACGCCGGTGATGTAGTGAGCGACAAATCCGTCCGGTGACAGAGGTGTCATCGCGGCCTTGGTGCGAGCCCAGCGCTCCACCCAGGTCAGCGGGCAGTCGACCCGCTTAGCGGCGATGCCGATCCCCCATATCACCGCCGGAACATGCAGCCACATCGTGCGTCGCCACCGCAGGGCAAGGAAACCGCCGGCAAGGACGTAAGCGATGAAAGCGAAGTGCATTACCACCGTTGATACAACGACGGTTTCGTACATCTCTCGGGTTGCCTTTCCAGGTCGC	A	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289227	564	A	ATC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_LoF	ins	2289228	565	T	TCAAC	LoF	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Leu4fs	ins	2289231	568	A	ACG	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289233	570	GCCCGCATACGTC	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Ala3fs	ins	2289233	570	G	GC	frameshift	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289234	571	CCCGCATACGT	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289236	573	CGCATACGT	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289237	574	GCATACGTC	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289237	574	GCATACGTCCA	G	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TTA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TCG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TAA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	AAC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TAC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	TC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	AT	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	ATA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GAA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	AG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GGA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TGG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GTA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	ATG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TCC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GCC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GGG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	ACA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	ACG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GGC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	AGC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	TT	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GAC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	AGA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TTC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	GC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GCG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	AAA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GAG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	AGG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	AAG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TCA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GTC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GTG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	ATC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	GG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	GCA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	AC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TTG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TGC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	GT	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TGA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	ACC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CA	TG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289238	575	CAT	TAG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	CC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	GA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	GG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	CA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	A	C	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	CG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	TA	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	TG	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	TC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	del	2289239	576	ATACGTCCACC	A	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	AT	GC	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	A	T	start_lost	NA
+
+	2288663-2289246	pncA	pyrazinamide	NA	pncA_p.Met1?	snp	2289239	576	A	G	start_lost	NA
+

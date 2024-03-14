@@ -1,13 +1,13 @@
 b tbAmr.c:228
 #b amrStruct.c:934
-#b checkAmr.c:254
-b ../generalLib/samEntryStruct.c:522
+b checkAmr.c:125
+#b ../generalLib/samEntryStruct.c:522
 
 # Null test
 #r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/TB-null-trim.sam
 #r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC33-test.sam
-#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/BC33-test-con.sam
-r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC34.sam
+r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/BC33-test-con-eqx.sam
+#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC34.sam
 
 define pcross
    set $icnt = 0
