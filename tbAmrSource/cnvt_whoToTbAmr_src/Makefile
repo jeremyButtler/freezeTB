@@ -23,6 +23,9 @@ debug:
 mac:
 	$(CC) $(MACCFLAGS) -o whoToTbAmr $(cFiles)
 
+check:
+	$(CC) $(DEBUGFLAGS) -o debugWhoToTbAmr $(cFiles)
+
 # Not really worth installing, but just in case
 install: 
 	cp whoToTbAmr $(PREFIX);

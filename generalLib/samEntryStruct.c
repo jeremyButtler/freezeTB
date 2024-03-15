@@ -397,33 +397,33 @@ readSamLine(
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-09 TOC: readSamLine
    '   - Reads a single line from a sam file into samSTPtr
-   '   o fun-09 Sec-01:
+   '   o fun-09 sec-01:
    '     - Variable declerations
-   '   o fun-09 Sec-02:
+   '   o fun-09 sec-02:
    '     - Read in one line from the sam file
-   '   o fun-09 Sec-03:
+   '   o fun-09 sec-03:
    '     - Get the query id from the buffer
-   '   o fun-09 Sec-04:
+   '   o fun-09 sec-04:
    '     - Get the flag
-   '   o fun-09 Sec-05:
+   '   o fun-09 sec-05:
    '     - REad in the reference name/id
-   '   o fun-09 Sec-06:
+   '   o fun-09 sec-06:
    '     - Get the reference position
-   '   o fun-09 Sec-07:
+   '   o fun-09 sec-07:
    '     - Get the mapping quality
-   '   o fun-09 Sec-08:
+   '   o fun-09 sec-08:
    '     - Get the cigar entry
-   '   o fun-09 Sec-09:
+   '   o fun-09 sec-09:
    '     - Get the RNEXT entry
-   '   o fun-09 Sec-10:
+   '   o fun-09 sec-10:
    '     - Get the PNEXT entry
-   '   o fun-09 Sec-11:
+   '   o fun-09 sec-11:
    '     - Get the TLEN entry
-   '   o fun-09 Sec-12:
+   '   o fun-09 sec-12:
    '     - Get the sequence entry
-   '   o fun-09 Sec-13:
+   '   o fun-09 sec-13:
    '     - Get the Q-score entry
-   '   o fun-09 Sec-14:
+   '   o fun-09 sec-14:
    '     - Copy the extra entry; after strict sam entries
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -553,11 +553,12 @@ readSamLine(
     ` hard to tell
    */
    samSTPtr->lenQryIdUC = (uchar)
-      cCpStrDelim(
+      ulCpStrDelim(
          samSTPtr->qryIdStr,
          iterStr,
+         def_samEntry_tab,
          '\t'
-      ); /*Copy the query id/name*/
+      ); /*Copy the reference id/name*/
 
    iterStr += samSTPtr->lenQryIdUC + 1; /*+1 get off tab*/
 
@@ -773,6 +774,8 @@ readSamLine(
 
    samSTPtr->refEndUI = samSTPtr->refStartUI;
    samSTPtr->refEndUI += samSTPtr->alnReadLenUI;
+      /*-1 to convert to index 0*/
+
    samSTPtr->refEndUI -= (samSTPtr->alnReadLenUI > 0);
       /*-1 from (alnReadLen > 0) converts to index 0*/
 

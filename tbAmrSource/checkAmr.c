@@ -32,11 +32,16 @@
 '       amr's (antibiotic resitance)
 '   o fun-09: pCrossRes
 '     - Print out cross resitance
-'   o fun-10: pAmrHitList
+'   o fun-10: pHeadAmrHitList
+'     - Prints the header for an amrHitList table
+'   o fun-11: pAmrHitList
 '     - Prints out all amr's that were in a sequence
-'   o fun-11: pAmrs
+'   o fun-12: pHeadAmrs
+'     - Prints the header for an amr table (reads instead
+'       of consensuses)
+'   o fun-13: pAmrs
 '     - Prints out all amr's that meant the min depth
-'   o fun-12: lookForAmrsSam
+'   o fun-14: lookForAmrsSam
 '     - Look for anti-microbial (antibiotic) genes in the
 '       reads in a sam file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -768,9 +773,6 @@ checkAmrSam(
       \**************************************************/
 
       nextAmr_fun07_sec03_sub07:;
-        /*the ; is to deal with label after compound
-        ` statement error in some versions of gcc
-        */
    } /*Loop: Check if is an amr or not*/
 
    return amrSTList;
@@ -831,7 +833,31 @@ pCrossRes(amrSTPtr, drugAryStr, outFILE){\
 } /*pCrossRes*/
 
 /*-------------------------------------------------------\
-| Fun-10: pAmrHitList
+| Fun-10: pHeadAmrHitList
+|   - Prints the header for an amrHitList table
+| Input:
+|   - outFILE:
+|     o FILE pointer to file to print header to
+| Output:
+|   - Prints:
+|     o amrHitList table header to outFILE
+\-------------------------------------------------------*/
+void
+pHeadAmrHitList(
+   void *outFILE
+){
+   fprintf((FILE *) outFILE, "Id\tgene\tdrug");
+   fprintf((FILE *) outFILE, "\tcrossResitance");
+   fprintf((FILE *) outFILE, "\tvariantId\ttype");
+   fprintf((FILE *) outFILE, "\trefPos\tseqPos");
+   fprintf((FILE *) outFILE, "\tresitanceLevel");
+   fprintf((FILE *) outFILE, "\tresistanceAdditive");
+   fprintf((FILE *) outFILE, "\tneedsGene");
+   fprintf((FILE *) outFILE, "\teffect\twhoComment\n");
+} /*pHeadAmrHitList*/
+
+/*-------------------------------------------------------\
+| Fun-11: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
 |   - seqIdStr:
@@ -842,55 +868,115 @@ pCrossRes(amrSTPtr, drugAryStr, outFILE){\
 |   - drugAryStr:
 |     o List of antibiotic drugs. It should follow the
 |       same order as the flags
-|   - pHeadBl:
-|     o 1: Print out the header
-|     o 0: Do not print the header
 |   - outFILE:
 |     o File to print the amr's to
 | Output: 
 |   - Prints:
 |     o The amr's in amrHitSTListPtr to outFILE
-|     o The header if pHeadBl is 1
-|   - Sets:
-|     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
 void
 pAmrHitList(
    char *seqIdStr,
    struct amrHit *amrHitSTListPtr,
    char *drugAryStr,
-   char *pHeadBl,
    void *outFILE
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-11 TOC: pAmrHitList
+   '   - Prints out the AMRs that were in a sequence. This
+   '     is for consensuses
+   '   o fun-11 sec-01:
+   '     - variable decerations
+   '   o fun-11 sec-02:
+   '     - Print AMRs
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-11 Sec-01:
+   ^   - variable decerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    struct amrHit *tmpST = (amrHitSTListPtr);
+   struct amrHit *lastST = 0;
+   char matchBl = 0;
+
    ulong amrFlagUL = 0;
    int flagOnI = 0;
    char *drugStr = 0;
    char firstPrintMacBl = 0;
    int iAmrMac = 0;
    
-   if((*pHeadBl))
-   { /*If: I am printing the header*/
-      (*pHeadBl) = 0;
-      fprintf((FILE *) outFILE, "Id\tGene\tDrug");
-      fprintf((FILE *) outFILE, "\tCrossResitance");
-      fprintf((FILE *) outFILE, "\tVariantId\tType");
-      fprintf((FILE *) outFILE, "\trefPos\tseqPos");
-      fprintf((FILE *) outFILE, "\trefSeq\tamrSeq");
-      fprintf((FILE *) outFILE, "\teffect\twhoComment\n");
-   } /*If: I am printing the header*/
-   
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-11 Sec-02:
+   ^   - Print AMRs
+   ^   o fun-11 sec-02 sub-01:
+   ^     - Print AMRs/check if already printed the variant
+   ^   o fun-11 sec-02 sub-02:
+   ^     - Print the read/gene ids
+   ^   o fun-11 sec-02 sub-03:
+   ^     - Print out the Antibiotics resitant to
+   ^   o fun-11 sec-02 sub-04:
+   ^     - Print out the cross resistance
+   ^   o fun-11 sec-02 sub-05:
+   ^     - Print out the variant id, mutation type,
+   ^       and positions
+   ^   o fun-11 sec-02 sub-06:
+   ^     - Print out if I have high, unkown (normal?),
+   ^       or low resitance
+   ^   o fun-11 sec-02 sub-07:
+   ^     - Print out if the low resitance is additive
+   ^   o fun-11 sec-02 sub-08:
+   ^     - Print out if the restance needs a functional
+   ^       gene
+   ^   o fun-11 sec-02 sub-09:
+   ^     - Print out the effect of the  mutation
+   ^   o fun-11 sec-02 sub-10:
+   ^     - Print out the WHO's comment
+   ^   o fun-11 sec-02 sub-11:
+   ^     - Move onto the next AMR
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun-11 Sec-02 Sub-01:
+   *   - Print AMRs/check if already printed the variant
+   \*****************************************************/
+
    while(tmpST)
    { /*Loop: Print out all amr's*/
-      /*There is resistance, print it out*/
+
+      if(lastST)
+      { /*If: I need to check previous results*/
+         matchBl =
+            cStrEql(
+               tmpST->amrST->varIdStr,
+               lastST->amrST->varIdStr,
+               '\0'
+            );
+
+         lastST = tmpST;
+         tmpST = tmpST->nextAmr;
+
+         if(! matchBl) continue;
+      } /*If: I need to check previous results*/
+
+      else lastST = tmpST;
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-02:
+      *   - Print the read/gene ids
+      \**************************************************/
+
       fprintf(
         (FILE *) outFILE,
-        "\t%s\t%s\t",
+        "%s\t%s\t",
         (seqIdStr),              /*Name of the seq*/
         tmpST->amrST->geneIdStr /*Gene name*/
       ); /*Pirnt out gene id and drug*/
       
-      
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-03:
+      *   - Print out the Antibiotics resitant to
+      \**************************************************/
+
       flagOnI = 0;
       firstPrintMacBl = 1;
       
@@ -901,7 +987,6 @@ pAmrHitList(
       ){ /*Loop: Run through each set of flags*/
          amrFlagUL = tmpST->amrST->amrFlagsUL[iAmrMac];
          
-         flagOnI = 0;
          if(! amrFlagUL) continue; /*no resitance*/
 
          while(amrFlagUL)
@@ -929,7 +1014,11 @@ pAmrHitList(
          } /*Loop: Checn each flag in a set*/
       } /*Loop: Run through each set of flags*/
       
-      
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-04:
+      *   - Print out the cross resistance
+      \**************************************************/
+
       fprintf((FILE *) outFILE, "\t");
 
       pCrossRes(
@@ -937,22 +1026,69 @@ pAmrHitList(
          (FILE *) outFILE
       );
       
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-05:
+      *   - Print out the variant id, mutation type,
+      *     and positions
+      \**************************************************/
+
       fprintf(
         (FILE *) outFILE,
-        "\t%s\t%s",
+        "\t%s\t%s\t%i\t%i",
         tmpST->amrST->varIdStr,  /*Variant id*/
-        tmpST->amrST->mutTypeStr /*snp/del/ins/LoF*/
+        tmpST->amrST->mutTypeStr, /*snp/del/ins/LoF*/
+        (int) tmpST->amrST->refPosUI,  /*Position on ref*/
+        (int) tmpST->seqPosUI          /*Position on seq*/
       ); /*Print out the variant id and type*/
-      
+
+         /*I am printing the reference and sequence
+         `   position as signed integers because they
+         `   will never go over 2 billion and this will
+         `   avoid compatibilty issues with plan9's
+         `   fprintf function. I just need to assign
+         `   fprintf to printf
+         */
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-06:
+      *   - Print out if I have high, unkown (normal?),
+      *     or low resitance
+      \**************************************************/
+
+      if(tmpST->amrST->highResBl)
+         fprintf((FILE *) outFILE, "\thigh");
+
+      else if(tmpST->amrST->lowResBl)
+         fprintf((FILE *) outFILE, "\tlow");
+
+      else fprintf((FILE *) outFILE, "\tNA");
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-07:
+      *   - Print out if the low resitance is additive
+      \**************************************************/
+
+      if(tmpST->amrST->additiveResBl)
+         fprintf((FILE *) outFILE, "\tAdditive");
+
+      else fprintf((FILE *) outFILE, "\tNA");
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-08:
+      *   - Print out if the restance needs a functional
+      *     gene
+      \**************************************************/
+
       fprintf(
-        (FILE *) outFILE,
-        "\t%u\t%u\t%s\t%s",
-        tmpST->amrST->refPosUI,  /*Position on ref*/
-        tmpST->seqPosUI,         /*Position on seq*/
-        tmpST->amrST->refSeqStr, /*Reference pattern*/
-        tmpST->amrST->amrSeqStr  /*amr pattern*/
-      );
-      
+         (FILE *) outFILE, "\t%s",
+         tmpST->amrST->needsGeneStr
+      ); /*Print out if needs a functional gene*/
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-09:
+      *   - Print out the effect of the  mutation
+      \**************************************************/
+
       if(tmpST->amrST->effectStr)
          fprintf(
             (FILE *) outFILE,
@@ -960,6 +1096,11 @@ pAmrHitList(
             tmpST->amrST->effectStr
          );
       else fprintf((FILE *) outFILE, "\tNA");
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-10:
+      *   - Print out the WHO's comment
+      \**************************************************/
       
       if(tmpST->amrST->commentStr)
          fprintf(
@@ -968,13 +1109,45 @@ pAmrHitList(
             tmpST->amrST->commentStr
          );
       else fprintf((FILE *) outFILE, "\tNA\n");
+
+      /**************************************************\
+      * Fun-11 Sec-02 Sub-11:
+      *   - Move onto the next AMR
+      \**************************************************/
       
       tmpST = tmpST->nextAmr;
    } /*Loop: Print out all amr's*/
 } /*pAmrHitList*/
 
 /*-------------------------------------------------------\
-| Fun-11: pAmrs
+| Fun-12: pHeadAmrs
+|   - Prints the header for an amr table (reads instead
+|     of consensuses)
+| Input:
+|   - outFILE:
+|     o FILE pointer to file to print header to
+| Output:
+|   - Prints:
+|     o amrs table header to outFILE
+\-------------------------------------------------------*/
+void
+pHeadAmrs(
+   void *outFILE
+){
+   fprintf((FILE *) outFILE,"\tgene\tDrug");
+   fprintf((FILE *) outFILE,"\tcrossResistance");
+   fprintf((FILE *) outFILE,"\tvariantId\ttype");
+   fprintf((FILE *) outFILE,"\trefPos");
+   fprintf((FILE *) outFILE,"\tnumSupportingRead");
+   fprintf((FILE *) outFILE, "\tnumMappedReads");
+   fprintf((FILE *) outFILE, "\tresitanceLevel");
+   fprintf((FILE *) outFILE, "\tresistanceAdditive");
+   fprintf((FILE *) outFILE, "\tneedsGene");
+   fprintf((FILE *) outFILE,"\teffect\twhoComment\n");
+} /*pHeadAmrs*/
+
+/*-------------------------------------------------------\
+| Fun-13: pAmrs
 |   - Prints out all amr's that meant the min depth
 | Input:
 |   - minDepthUI:
@@ -993,18 +1166,12 @@ pAmrHitList(
 |   - drugAryStr:
 |     o List of antibiotic drugs. It should follow the
 |       same order as the flags
-|   - pHeadBl:
-|     o 1: Print out the header
-|     o 0: Do not print the header
 |   - outFILE:
 |     o File to print the amr's to
 | Output: 
 |   - Prints:
 |     o The amr's that meet the min stats and have at
 |       least one mapped read
-|     o The header if pHeadBl is 1
-|   - Sets:
-|     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
 void
 pAmrs(
@@ -1015,10 +1182,21 @@ pAmrs(
    struct amrStruct *amrSTAry,
    unsigned int numAmrsUI,
    char *drugAryStr,
-   char *pHeadBl,
    void *outFILE
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-13 TOC: pAmrs
+   '   o fun-13 sec-01:
+   '     - Variable declerations
+   ^   - Start loop and filter AMRs
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-13 Sec-01:
+   ^   - Variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    uint indexUI = 0;
+   uint lastPrintIndexUI = 0;
    float percSupF = 0;
    ulong amrFlagUL = 0;
    int flagOnI = 0;
@@ -1026,24 +1204,32 @@ pAmrs(
    int iAmrMac = 0;
    char firstPrintMacBl = 1;
    
-   if((*pHeadBl))
-   { /*If: I am printing the header*/
-      (*pHeadBl) = 0;
-      fprintf((FILE *) outFILE,"\tGene\tDrug");
-      fprintf((FILE *) outFILE,"\tcrossResistance");
-      fprintf((FILE *) outFILE,"\tVariantId\tType");
-      fprintf((FILE *) outFILE,"\trefPos\trefSeq");
-      fprintf((FILE *) outFILE,"\tamrSeq\tmappedReads");
-      fprintf((FILE *) outFILE,"\tsupportingReads");
-      fprintf((FILE *) outFILE,"\teffect\twhoComment\n");
-   } /*If: I am printing the header*/
-   
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-13 Sec-02:
+   ^   - Start loop and filter AMRs
+   ^   o fun-13 sec-02 Sub-01:
+   ^     - Start loop and remove low depth AMRs
+   ^   o fun-13 sec-02 Sub-02:
+   ^     - Remove AMRs with a lower % of mapped reads
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun-13 Sec-02 Sub-01:
+   *   - Startloop and remove low depth AMRs
+   \*****************************************************/
+
    for(indexUI = 0; indexUI < (numAmrsUI); ++indexUI)
    { /*Loop:Check and print out amrs*/
+
       if((amrSTAry)[indexUI].numSupReadsUI <(minDepthUI))
          continue;
       
       if((amrSTAry)[indexUI].numMapReadsUI ==0) continue;
+
+      /**************************************************\
+      * Fun-13 Sec-02 Sub-02:
+      *   - Remove AMRs with a lower % of mapped reads
+      \**************************************************/
       
       percSupF =
            ((float) (amrSTAry)[indexUI].numMapReadsUI)
@@ -1056,14 +1242,61 @@ pAmrs(
          / ((float)(amrSTAry)[indexUI].numMapReadsUI);
       
       if(percSupF < (minPercMapF)) continue;
+
+       if(indexUI > 0)
+       { /*If: I need to check indexs*/
+          if( !
+              cStrEql(
+                 amrSTAry[indexUI].varIdStr,
+                 amrSTAry[lastPrintIndexUI].varIdStr,
+                 '\0'
+              ) /*Check if I have printed this id*/
+          ) continue; /*Id already printed*/
+       } /*If: I need to check indexs*/
       
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun-13 Sec-03:
+      ^   - 
+      ^   o fun-13 sec-03 Sub-01:
+      ^     - Print out the gene id
+      ^   o fun-13 sec-03 Sub-02:
+      ^     - Print out the antibiotics resitant to
+      ^   o fun-13 sec-03 Sub-03:
+      ^     - Print out antibiotics cross resistanct to
+      ^   o fun-13 sec-03 Sub-04:
+      ^     - Print out variant id, mutation, reference
+      ^       position, number reads supporting AMR and
+      ^       total reads at reference position.
+      ^   o fun-13 sec-03 Sub-05:
+      ^     - Print out if I have high, unkown (normal?),
+      ^       or low resitance
+      ^   o fun-13 sec-03 Sub-06:
+      ^     - Print out if the low resitance is additive
+      ^   o fun-13 sec-03 Sub-07:
+      ^     - Print out if the restance needs a functional
+      ^       gene
+      ^   o fun-13 sec-03 Sub-08:
+      ^     - Print out the mutation effect
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
       
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-01:
+      *   - Print out the gene id
+      \**************************************************/
+
+      lastPrintIndexUI = indexUI;
+
       fprintf(
         (FILE *) outFILE,
         "%s\t",
         (amrSTAry)[indexUI].geneIdStr /*gene id*/
       ); /*Pirnt out gene id and drug*/
       
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-02:
+      *   - Print out the antibiotics resitant to
+      \**************************************************/
+
       flagOnI = 0;
       firstPrintMacBl = 1;
       
@@ -1075,7 +1308,6 @@ pAmrs(
          amrFlagUL =
             (amrSTAry)[indexUI].amrFlagsUL[iAmrMac];
          
-         flagOnI = 0;
          if(! amrFlagUL) continue; /*no resitance*/
 
          while(amrFlagUL)
@@ -1101,67 +1333,115 @@ pAmrs(
             ++flagOnI;
             amrFlagUL >>= 1;
          } /*Loop: Checn each flag in a set*/
+      } /*Loop: Run through each set of flags*/
          
-         /*There is resistance, print it out*/
-         fprintf((FILE *) outFILE, "\t");
-         
-         pCrossRes(
-            &(amrSTAry)[indexUI],
-           (drugAryStr),
-           (FILE *) outFILE
-         ); /*Print out cross-resistance drugs*/
-         
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-03:
+      *   - Print out the antibiotics cross resistanct to
+      \**************************************************/
+
+      /*There is resistance, print it out*/
+      fprintf((FILE *) outFILE, "\t");
+      
+      pCrossRes(
+         &(amrSTAry)[indexUI],
+        (drugAryStr),
+        (FILE *) outFILE
+      ); /*Print out cross-resistance drugs*/
+
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-04:
+      *   - Print out variant id, mutation, reference
+      *     position, number reads supporting AMR and
+      *     total reads at reference position.
+      \**************************************************/
+
+      fprintf(
+        (FILE *) outFILE,
+        "\t%s\t%s\t%i\t%i\t%i",
+        amrSTAry[indexUI].varIdStr,   /*Variant id*/
+        amrSTAry[indexUI].mutTypeStr, /*snp/del/ins/LoF*/
+        (int) amrSTAry[indexUI].refPosUI,
+        (int) amrSTAry[indexUI].numSupReadsUI,
+        (int) amrSTAry[indexUI].numMapReadsUI
+      ); /*Print out the variant id and type*/
+
+         /*I am printing the reference position as an
+         `   signed integer because it will never go
+         `   over 2 billion and this will avoid
+         `   compatibilty issues with plan9's
+         `   fprintf function. I just need to assign
+         `   fprintf to printf
+         */
+      
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-05:
+      *   - Print out if I have high, unkown (normal?),
+      *     or low resitance
+      \**************************************************/
+
+      if(amrSTAry[indexUI].highResBl)
+         fprintf((FILE *) outFILE, "\thigh");
+
+      else if(amrSTAry[indexUI].lowResBl)
+         fprintf((FILE *) outFILE, "\tlow");
+
+      else fprintf((FILE *) outFILE, "\tNA");
+
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-06:
+      *   - Print out if the low resitance is additive
+      \**************************************************/
+
+      if(amrSTAry[indexUI].additiveResBl)
+         fprintf((FILE *) outFILE, "\tAdditive");
+
+      else fprintf((FILE *) outFILE, "\tNA");
+
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-07:
+      *   - Print out if the restance needs a functional
+      *     gene
+      \**************************************************/
+
+      fprintf(
+         (FILE *) outFILE, "\t%s",
+         amrSTAry[indexUI].needsGeneStr
+      ); /*Print out if needs a functional gene*/
+
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-08:
+      *   - Print out the mutation effect
+      \**************************************************/
+      
+      if((amrSTAry)[indexUI].effectStr)
          fprintf(
-           (FILE *) outFILE,
-           "\t%s\t%s",
-           (amrSTAry)[indexUI].varIdStr, /*variant id*/
-           (amrSTAry)[indexUI].mutTypeStr/*mutationType*/
-         ); /*Print out the gene id and drug name*/
-         
-         fprintf(
-           (FILE *) outFILE,
-           "\t%u\t%s\t%s\t%u\t%u",
-           (amrSTAry)[indexUI].refPosUI, /*ref Position*/
-           (amrSTAry)[indexUI].refSeqStr,/*Ref pattern*/
-           (amrSTAry)[indexUI].amrSeqStr, /*amr pattern*/
-           (amrSTAry)[indexUI].numMapReadsUI,
-           (amrSTAry)[indexUI].numSupReadsUI
+            (FILE *) outFILE,
+            "\t%s",
+            (amrSTAry)[indexUI].effectStr
          );
-         
-         if((amrSTAry)[indexUI].effectStr)
-            fprintf(
-               (FILE *) outFILE,
-               "\t%s",
-               (amrSTAry)[indexUI].effectStr
-            );
-         else fprintf((FILE *) outFILE, "\tNA");
-         
-         if((amrSTAry)[indexUI].commentStr)
-         { /*If: I have a who comment*/
-            /*This is to handle blanks left by WHO. I
-            ` have not been able to catch this in my
-            ` readin scripts
-            */
-            if((amrSTAry)[indexUI].commentStr[0] < 33)
-               fprintf((FILE *) outFILE, "\tNA\n");
-            else
-               fprintf(
-                  (FILE *) outFILE,
-                  "\t%s\n",
-                  (amrSTAry)[indexUI].commentStr
-               );
-         } /*If: I have a who comment*/
-         
-         else fprintf((FILE *) outFILE, "\tNA\n");
-        
-         ++flagOnI;
-         amrFlagUL >>= 1;
-      } /*Loop: Checn each flag*/
+      else fprintf((FILE *) outFILE, "\tNA");
+
+      /**************************************************\
+      * Fun-13 Sec-03 Sub-09:
+      *   - Print out the WHOs comment
+      \**************************************************/
+      
+      if((amrSTAry)[indexUI].commentStr)
+      { /*If: I have a who comment*/
+         fprintf(
+            (FILE *) outFILE,
+            "\t%s\n",
+            (amrSTAry)[indexUI].commentStr
+         );
+      } /*If: I have a who comment*/
+      
+      else fprintf((FILE *) outFILE, "\tNA");
    } /*Loop:Check and print out amrs*/\
 } /*pAmrs*/
 
 /*-------------------------------------------------------\
-| Fun-12: lookForAmrsSam
+| Fun-14: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
@@ -1215,23 +1495,23 @@ lookForAmrsSam(
    char *outStr,
    char *idPrefStr    /*Prefix for id files*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-12 TOC:P lookForAmrsSam
+   ' Fun-14 TOC:P lookForAmrsSam
    '   - Look for anti-microbial (antibiotic) genes in the
    '     reads in a sam file
-   '   o fun-12 sec-01:
+   '   o fun-14 sec-01:
    '     - Variable declerations
-   '   o fun-12 sec-02:
+   '   o fun-14 sec-02:
    '     - Get the first sam entry
-   '   o fun-12 sec-03:
+   '   o fun-14 sec-03:
    '     - Check for AMRs
-   '   o fun-12 sec-04:
+   '   o fun-14 sec-04:
    '     - Print out read AMR stats
-   '   o fun-12 sec-05:
+   '   o fun-14 sec-05:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-01:
+   ^ Fun-14 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1239,7 +1519,6 @@ lookForAmrsSam(
    ulong lenBuffUL = 0; /*Current length of buffStr*/
 
    char errC = 0;         /*For error checking*/
-   char pHeadBl = 1;      /*To print header*/
    int numHitsI = 0;      /*Number of amrs hits/con*/
    uint totalReadsUI = 0; /*Number of kept reads*/
 
@@ -1258,7 +1537,7 @@ lookForAmrsSam(
       (struct amrStruct *) amrSTAryPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-02:
+   ^ Fun-14 Sec-02:
    ^   - Get the first sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1295,25 +1574,28 @@ lookForAmrsSam(
       ); /*Read in the first line*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-03:
+   ^ Fun-14 Sec-03:
    ^   - Check for AMRs
-   ^   o fun-12 sec-03 sub-01:
+   ^   o fun-14 sec-03 sub-01:
    ^     - Filter out less usefull entries
-   ^   o fun-12 sec-03 sub-02:
+   ^   o fun-14 sec-03 sub-02:
    ^     - Check for amrs
-   ^   o fun-12 sec-03 sub-03:
+   ^   o fun-14 sec-03 sub-03:
    ^     - Print out consensus sequence AMRS
-   ^   o fun-12 sec-03 sub-04:
+   ^   o fun-14 sec-03 sub-04:
    ^     - Deal with read amrs; print ids if requested/
    ^       free consensus structuerrs
-   ^   o fun-12 sec-03 sub-05:
+   ^   o fun-14 sec-03 sub-05:
    ^     - Move to the next sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-12 Sec-03 Sub-01:
+   * Fun-14 Sec-03 Sub-01:
    *   - Filter out less usefull entries/start loop
    \*****************************************************/
+
+   if(! readsBl) pHeadAmrHitList(outFILE);
+   else pHeadAmrs(outFILE);
 
    while(!errC)
    { /*Loop: Check if have antibiotic resitance*/
@@ -1345,7 +1627,7 @@ lookForAmrsSam(
       } /*If: this is an umapped read, 2ndary, sup aln*/
 
       /**************************************************\
-      * Fun-12 Sec-03 Sub-02:
+      * Fun-14 Sec-03 Sub-02:
       *   - Check for amrs
       \**************************************************/
 
@@ -1364,7 +1646,7 @@ lookForAmrsSam(
          goto memErr_sec05_sub02_lookForAmrsSam;
 
       /**************************************************\
-      * Fun-12 Sec-03 Sub-03:
+      * Fun-14 Sec-03 Sub-03:
       *   - Print out consensus sequence AMRS
       \**************************************************/
 
@@ -1375,7 +1657,6 @@ lookForAmrsSam(
              samST.qryIdStr,
              amrHitSTList,
              (drugAryStr),
-             &pHeadBl,
              (outFILE)
           ); /*Print the amr entry*/
 
@@ -1383,7 +1664,7 @@ lookForAmrsSam(
       } /*If: There were amr's*/
 
       /**************************************************\
-      * Fun-12 Sec-03 Sub-04:
+      * Fun-14 Sec-03 Sub-04:
       *   - Deal with read amrs; print ids if requested/
       *     free consensus structuerrs
       \**************************************************/
@@ -1449,7 +1730,7 @@ lookForAmrsSam(
       } /*Else If; I am processing reads*/
 
       /**************************************************\
-      * Fun-12 Sec-03 Sub-05:
+      * Fun-14 Sec-03 Sub-05:
       *   - Move to the next sam entry
       \**************************************************/
 
@@ -1463,7 +1744,7 @@ lookForAmrsSam(
    } /*Loop: Check if have antibiotic resitance*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-04:
+   ^ Fun-14 Sec-04:
    ^   - Print out read AMR stats
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1484,24 +1765,23 @@ lookForAmrsSam(
          amrAryST,
          numAmrI,
          drugAryStr,
-         &pHeadBl,
          outFILE
       ); /*Print out the AMRs*/
    } /*If: I mapped reads, not consensuses*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-05:
+   ^ Fun-14 Sec-05:
    ^   - Clean up
-   ^   o fun-12 sec-05 sub-01:
+   ^   o fun-14 sec-05 sub-01:
    ^     - Clean up after a successful run
-   ^   o fun-12 sec-05 sub-02:
+   ^   o fun-14 sec-05 sub-02:
    ^     - Clean up after a memory error
-   ^   o fun-12 sec-05 sub-03:
+   ^   o fun-14 sec-05 sub-03:
    ^     - Clean up after an file error
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-12 Sec-05 Sub-01:
+   * Fun-14 Sec-05 Sub-01:
    *   - Clean up after a successful run
    \*****************************************************/
 
@@ -1512,7 +1792,7 @@ lookForAmrsSam(
    return 0;
 
    /*****************************************************\
-   * Fun-12 Sec-05 Sub-02:
+   * Fun-14 Sec-05 Sub-02:
    *   - Clean up after a memory error
    \*****************************************************/
 
@@ -1531,7 +1811,7 @@ lookForAmrsSam(
       return 64;
 
    /*****************************************************\
-   * Fun-12 Sec-05 Sub-03:
+   * Fun-14 Sec-05 Sub-03:
    *   - Clean up after an file error
    \*****************************************************/
 

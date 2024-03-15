@@ -2,8 +2,12 @@
 #b genIndiceStruct.c:644
 #b ../generalLib/samEntryStruct.h:636
 b whoToTbAmr.c:202
-#b cnvt_whoToTbAmr.c:2347
-#b cnvt_whoToTbAmr.c:1372
+#b cnvt_whoToTbAmr.c:2453 if samST.refEndUI > 2287882
+b cnvt_whoToTbAmr.c:2508 if iIndex == 13016
+   # Needs to be 2156108 is set to 09
+#b cnvt_whoToTbAmr.c:2540
+#b cnvt_whoToTbAmr.c:2492 if iIndex == 13061
+#b cnvt_whoToTbAmr.c:2492 if iIndex >= 13077
 
 r -tabone-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab1-master.tsv -tabtwo-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab2-indices.tsv -sam ../../../who2023-TB-catalog-as-tsv/TB-NC000962-gene-maps.sam
 

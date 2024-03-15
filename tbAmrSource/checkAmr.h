@@ -32,11 +32,16 @@
 '       amr's (antibiotic resitance)
 '   o fun-09: pCrossRes (.c only)
 '     - Print out cross resitance
-'   o fun-10: pAmrHitList
+'   o fun-10: pHeadAmrHitList
+'     - Prints the header for an amrHitList table
+'   o fun-11: pAmrHitList
 '     - Prints out all amr's that were in a sequence
-'   o fun-11: pAmrs
+'   o fun-12: pHeadAmrs
+'     - Prints the header for an amr table (reads instead
+'       of consensuses)
+'   o fun-13: pAmrs
 '     - Prints out all amr's that meant the min depth
-'   o fun-12: lookForAmrsSam
+'   o fun-14: lookForAmrsSam
 '     - Look for anti-microbial (antibiotic) genes in the
 '       reads in a sam file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -187,7 +192,22 @@ checkAmrSam(
 );
 
 /*-------------------------------------------------------\
-| Fun-10: pAmrHitList
+| Fun-10: pHeadAmrHitList
+|   - Prints the header for an amrHitList table
+| Input:
+|   - outFILE:
+|     o FILE pointer to file to print header to
+| Output:
+|   - Prints:
+|     o amrHitList table header to outFILE
+\-------------------------------------------------------*/
+void
+pHeadAmrHitList(
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun-11: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
 |   - seqIdStr:
@@ -198,29 +218,39 @@ checkAmrSam(
 |   - drugAryStr:
 |     o List of antibiotic drugs. It should follow the
 |       same order as the flags
-|   - pHeadBl:
-|     o 1: Print out the header
-|     o 0: Do not print the header
 |   - outFILE:
 |     o File to print the amr's to
 | Output: 
 |   - Prints:
 |     o The amr's in amrHitSTListPtr to outFILE
 |     o The header if pHeadBl is 1
-|   - Sets:
-|     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
 void
 pAmrHitList(
    char *seqIdStr,
    struct amrHit *amrHitSTListPtr,
    char *drugAryStr,
-   char *pHeadBl,
    void *outFILE
 );
 
 /*-------------------------------------------------------\
-| Fun-11: pAmrs
+| Fun-12: pHeadAmrs
+|   - Prints the header for an amr table (reads instead
+|     of consensuses)
+| Input:
+|   - outFILE:
+|     o FILE pointer to file to print header to
+| Output:
+|   - Prints:
+|     o amrs table header to outFILE
+\-------------------------------------------------------*/
+void
+pHeadAmrs(
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun-13: pAmrs
 |   - Prints out all amr's that meant the min depth
 | Input:
 |   - minDepthUI:
@@ -239,9 +269,6 @@ pAmrHitList(
 |   - drugAryStr:
 |     o List of antibiotic drugs. It should follow the
 |       same order as the flags
-|   - pHeadBl:
-|     o 1: Print out the header
-|     o 0: Do not print the header
 |   - outFILE:
 |     o File to print the amr's to
 | Output: 
@@ -249,8 +276,6 @@ pAmrHitList(
 |     o The amr's that meet the min stats and have at
 |       least one mapped read
 |     o The header if pHeadBl is 1
-|   - Sets:
-|     o pHeadBl to 0 if it is set to 1
 \-------------------------------------------------------*/
 void
 pAmrs(
@@ -261,12 +286,11 @@ pAmrs(
    struct amrStruct *amrSTAry,
    unsigned int numAmrsUI,
    char *drugAryStr,
-   char *pHeadBl,
    void *outFILE
 );
 
 /*-------------------------------------------------------\
-| Fun-12: lookForAmrsSam
+| Fun-14: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
