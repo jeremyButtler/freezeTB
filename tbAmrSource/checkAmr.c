@@ -1134,7 +1134,7 @@ void
 pHeadAmrs(
    void *outFILE
 ){
-   fprintf((FILE *) outFILE,"\tgene\tDrug");
+   fprintf((FILE *) outFILE,"gene\tDrug");
    fprintf((FILE *) outFILE,"\tcrossResistance");
    fprintf((FILE *) outFILE,"\tvariantId\ttype");
    fprintf((FILE *) outFILE,"\trefPos");
