@@ -13,6 +13,26 @@ One reason why not is that freezeTb assumes that Nanopore
 
 Currently freezeTb uses the WHO 2023 catalog.
 
+I have made the programs in freezeTb to be modular. So,
+  they can be built on there own.
+
+List of programs:
+
+- ampDepth: Makes the read depth tsv's used by
+  graphAmpDepth.r
+- trimSam: trims off soft masked bases
+- tbCon: Builds a consensus
+- tbAmr: is the AMR detection program
+
+Other programs:
+
+- rmHomo: never was completed.
+- filtSam: not useful, but I wanted to see how close I
+  could get to samtools view. It is slower and has no
+  help message.
+- fqGetIds: was here for the original script. It has its
+  own separate repository.
+
 # Requirements 
 
 1. A read mapper that outputs a sam file, minimap2 is what
@@ -59,7 +79,7 @@ sudo make install
 make clean
 ```
 
-## Windows
+y
 
 I am going to say no. I have not tried it.
 
@@ -79,20 +99,23 @@ However, in theory this should be possible, since I have
 
 You can print the help message with `freezeTb -h`.
 
-For the simplest way; the extra files are at install
-  locations. This is done during install time, so you need
-  to run `sudo make install`.
+To make running this program simple, I have put the needed
+  databases in the same location as freezeTb. However,
+  this location is hardcoded in at compile time and so,
+  you need to run `sudo make install` to get the simple
+  method.
 
 ```
-minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq | freezeTB.sh -sam - -prefix good-name
+minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq > reads.sam;
+freezeTb -sam reads.sam -prefix good-name;
 
 # or
 
-freezeTb -sam reads.sam -prefix good-name
+minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq | freezeTB.sh -sam - -prefix good-name
 ```
 
-Just do not use the `--eqx` flag for minimap2. For some
-  odd reason tbCon ahas an issue with the --eqx flag.
+Do not use the `--eqx` flag for minimap2. For some odd
+  reason tbCon has an issue with the --eqx flag.
   **I will need to come back and figure out why.**
 
 Also tbAmr does not work very well with stdin input, but
