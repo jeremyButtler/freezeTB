@@ -186,10 +186,17 @@ dataDF[
 # the amplicons for each gene separately
 dataDF$genesTag = paste(dataDF$genes,dataDF$flag,sep=" ");
 
+#numFlagsI =
+#   length(
+#      unique(
+#         paste(dataDF$flag, dataDF$ampNumber, sep = "")
+#      )
+#   );
+
 numFlagsI =
    length(
       unique(
-         paste(dataDF$flag, dataDF$ampNumber, sep = "")
+         paste(dataDF$flag, dataDF$geneId, sep = "")
       )
    );
 
@@ -228,8 +235,8 @@ dataDF$avgCol = paste(dataDF$flag, "mean"); # For legend
 #  - graphing (read depth)
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-dataDF$depth20X = "z 20x read depth";
-dataDF$depth100X = "100x read depth";
+dataDF$depth20X = "~ 20x read depth";
+dataDF$depth100X = " 100x read depth";
 
 # Graph the main data
 graphObj = ggplot(dataDF);
@@ -243,7 +250,8 @@ graphObj =
    graphObj +
    geom_col(
        aes(
-          x = genesTag,
+          #x = genesTag,
+          x = paste(geneId, flag, sep = "-"),
           y = avgAmpDepth,
           fill = flag,
           col = flag # For legend
@@ -289,31 +297,6 @@ graphObj =
          fill = depth100x # Errors out, but for legend
       ),
    );
-#graphObj =
-#   graphObj +
-#   geom_segment(
-#      aes(
-#         x = 1 + ampNumber - 0.45,
-#         xend = 1 + ampNumber + 0.45,
-#         y = 20,
-#         yend = 20,
-#         col = depth20X,
-#         fill = depth20X # Errors out, but for legend
-#      ),
-#   );
-#
-#graphObj =
-#   graphObj +
-#   geom_segment(
-#      aes(
-#         x = 1 + ampNumber - 0.45,
-#         xend = 1 + ampNumber + 0.45,
-#         y = 100,
-#         yend = 100,
-#         col = depth100X,
-#         fill = depth100X # errors out, but for legend
-#      ),
-#   );
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-05:
@@ -339,7 +322,7 @@ graphObj =
       labels = legendLabelsAry # This corrects the names
    );
 
-graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
+graphObj = graphObj + xlab("Gene-method");
 graphObj = graphObj + ylab("Mean read depth");
 graphObj = graphObj + theme_classic();
 graphObj = graphObj + theme(legend.position = "top");
@@ -382,12 +365,31 @@ dataDF$ref = "~ref";
 dataDF$geneEndFlag = " gene end";
 dataDF$geneStartFlag = " gene start";
 
-# I need this to handle when diffeernt genes are targeted
+# For merged genes to get amplicons
+#I need this to handle when diffeernt genes are targeted
 dataDF[
    ,
    newStart:= min(refStart),
    by = geneId
 ];
+
+#dataDF[
+#   ,
+#   ampGeneStart:= max(ampStart),
+#   by = geneId
+#];
+#
+#dataDF[
+#   ,
+#   ampGeneStart:= min(ampEnd),
+#   by = geneId
+#];
+
+# Get the maximum length of amplicon on the gene
+dataDF$ampGeneStart =
+   max(dataDF$refGeneStart, min(dataDF$ampStart, dataDF$ampEnd));
+
+dataDF$ampGeneEnd = min(dataDF$refGeneEnd, max(dataDF$ampStart, dataDF$ampEnd));
 
 # Merege amplicons covering the same gene
 dataDF[
@@ -428,10 +430,12 @@ if(! is.null(amrDF)){
    amrGeneStr = 0;
    amrMaxI = 0;
    amrMinI = 0;
+   amrIdStr = "";
 
    dataMinI = dataDF$minRefStart;
    dataMaxI = dataDF$maxRefEnd;
    dataGeneStr = dataDF$geneGroup;
+   dataIdStr = dataDF$geneId;
    
    lenDataI = length(dataDF$geneGroup);
    lenAmrI = length(amrDF$geneStart);
@@ -450,6 +454,7 @@ if(! is.null(amrDF)){
             amrPosI[iAmr] = -1;
             amrMaxI[iAmr] = -1;
             amrMinI[iAmr] = -1;
+            amrIdStr[iAmr] = "d";
             iAmr = iAmr + 1;
          }
       } else if(amrPosI[iAmr] > dataMaxI[iData]){
@@ -459,17 +464,20 @@ if(! is.null(amrDF)){
          amrPosI[iAmr] = -1;
          amrMaxI[iAmr] = -1;
          amrMinI[iAmr] = -1;
+         amrIdStr[iAmr] = "d";
    
          iAmr = iAmr + 1;
       } else { # Else: I am keeping this value
          amrGeneStr[iAmr] = dataGeneStr[iData];
          amrMaxI[iAmr] = dataMaxI[iData];
          amrMinI[iAmr] = dataMinI[iData];;
+         amrIdStr[iAmr] = dataIdStr[iData];
          iAmr = iAmr + 1;
       } # Else: I am keeping this value
    } # Loop add in gene gropu names
    
    # Remove lazy marked valuesx
+   amrIdStr = amrIdStr[amrIdStr != 'd'];
    amrGeneStr = amrGeneStr[amrGeneStr != 'd'];
    amrPosI = amrPosI[amrPosI > -1];
    amrMinI = amrMinI[amrMinI > -1];
@@ -481,8 +489,8 @@ if(! is.null(amrDF)){
          amrPosI,
          amrMinI,
          amrMaxI,
-         #geneGroupsStr,
          amrGeneStr,
+         amrIdStr,
          rep("AMR-mutation", length(amrPosI)),
          rep("~ref", length(amrPosI))
        );
@@ -493,6 +501,7 @@ if(! is.null(amrDF)){
          "minRefStart",
          "maxRefEnd",
          "geneGroup",
+         "geneId",
          "legendFlag",
          "yCol"
       );
@@ -568,17 +577,18 @@ graphObj =
       ) # aes
    );
 # Graph the mean read depth data over the maximum
+#graphObj =
+#   graphObj +
+#   geom_vline(
+#      aes(
+#         xintercept = refGeneStart - minRefStart,
+#         col = geneStartFlag
+#      ) # aes
+#   );
 graphObj =
    graphObj +
-   geom_vline(
-      aes(
-         xintercept = refGeneStart - minRefStart,
-         col = geneStartFlag
-      ) # aes
-   );
-graphObj =
-   graphObj +
-   facet_wrap(vars(geneGroup), scales = "free_x");
+   #facet_wrap(vars(geneGroup), scales = "free_x");
+   facet_wrap(vars(geneId), scales = "free_x");
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-07:
@@ -595,7 +605,7 @@ graphObj =
       labels = legendLabelsAry
    );
 
-graphObj = graphObj + xlab("Gene1-gene2-gene3-...-geneN");
+graphObj = graphObj + xlab("Position in gene");
 graphObj = graphObj + ylab("Method");
 graphObj = graphObj + theme_classic();
 graphObj = graphObj + theme(legend.position = "top");
