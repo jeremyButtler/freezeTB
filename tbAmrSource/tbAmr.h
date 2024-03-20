@@ -7,8 +7,6 @@
 #ifndef TB_AMR_H
 #define TB_AMR_H
 
-#define defTbAmrVersion 20240201
-
 /*-------------------------------------------------------\
 | Fun-01: tbAmryGetInput
 |   - Gets the user input
@@ -69,8 +67,6 @@ void pTbAmrHelp(
    '   - fun-02 sec-03:
    '     o Print out the output (TODO)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-
 /*-------------------------------------------------------\
 | Fun-03: pTbAmrVersion
 |   - Prints the version number for tbAMR

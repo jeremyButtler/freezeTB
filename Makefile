@@ -3,132 +3,64 @@ PREFIX = /usr/local/bin
 
 CFLAGS += -std=c89 -O3 -static
 MACCFLAGS += -O3
+DEBUGCFLAGS += -O0 -ggdb -static -std=c89 -Wall
 
-all: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds buildTbAmr
+# There are hidden .h only files. So, this is not
+# the actual full list of source files
+SOURCE=\
+   tbConSource/tbCon-fun.c \
+   tbAmrSource/checkAmr.c \
+   ampDepthSource/ampDepth-fun.c \
+   generalLib/trimSam.c \
+   generalLib/samEntryStruct.c \
+   generalLib/geneCoordStruct.c \
+   tbAmrSource/drug_str_ary.c \
+   tbAmrSource/amrStruct.c \
 
-buildAmpDepth:
-	make -C ./ampDepthSource CC="$(CC)" CFLAGS="$(CFLAGS)";
+# The sed step is to make sure the default file locations
+# are set up. No other way to do this on C
 
-buildTrimSam:
-	make -C ./trimSamSource CC="$(CC)" CFLAGS="$(CFLAGS)";
+all: setUpPath
+	$(CC) $(CFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;
 
 
-buildSubsample:
-	make -C ./subsampleSource CC="$(CC)" CFLAGS="$(CFLAGS)";
+mac: altRScriptPath setUpPath
+	$(CC) $(CFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;
 
-buildFqGetIds:
-	make -C ./fqGetIdsSource CC="$(CC)" CFLAGS="$(CFLAGS)";
+openbsd: altRScriptPath setUpPath
+	$(CC) $(CFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;
 
-buildTbAmr:
-	make -C ./tbAmrSource CC="$(CC)" CFLAGS="$(CFLAGS)";
+check:
+	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE) freezeTb.c;
 
-openbsd: buildAmpDepth buildTrimSam buildSubsample buildFqGetIds buildTbAmr
+debug:
+	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE) freezeTb.c;
+	gdb -x bug-cmds-freezeTb.txt bugFreezeTb
+
+# This is to set up the path to freezeTBFiles
+setUpPath:
+	awk -v pathStr=$(PREFIX) 'BEGIN{pathStr = "char *defPathStr = \"" pathStr "\";"}; {if($$0 ~ /char \*defPathStr/) print pathStr; else print $$0;}' < freezeTb.c > buildFreezeTb.c;
+
+altRScriptPath:
 	sed '1s/#!usr\/bin\/Rscript/#!usr\/local\/bin\/Rscript/;' < graphAmpDepth.r > tmp.r;
 	mv graphAmpDepth.r linuxGraphAmpDepth.r;
 	mv tmp.r graphAmpDepth.r;
-	sed\
-      '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
-       freezeTBScripts/extractPrimRead.awk\
-     > tmp.gawk;
-	mv tmp.gawk freezeTBScripts/extractPrimRead.gawk;
-	sed\
-      '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
-       freezeTBScripts/getMapCoord.awk\
-     > tmp.gawk;
-	mv tmp.gawk freezeTBScripts/getMapCoord.gawk;
-	sed\
-      '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
-       freezeTBScripts/trimCon.awk\
-     > tmp.gawk;
-	mv tmp.gawk freezeTBScripts/trimCon.gawk;
-	sed\
-      '1s/#!\/usr\/bin\/bash/#!\/local\/bin\/bash/'\
-      ivarConScript.sh\
-     > tmp.sh;
-	mv ivarConScript.sh ivarConScriptLinux.sh;
-	mv tmp.sh ivarConScript.sh;
-	sed\
-      '1s/#!\/usr\/bin\/bash/#!\/local\/bin\/bash/; s/awk/gawk/g;'\
-       freezeTb.sh\
-     > tmp.sh;
-	mv freezeTb.sh buildAmpConsLinux.sh;
-	mv tmp.sh freezeTb.sh;
-
-
-mac: macAmpDepth macTrimSam macSubsample macFqGetIds macTbAmr
-	sed '1s/#!usr\/bin\/Rscript/#!usr\/local\/bin\/Rscript/;' < graphAmpDepth.r > tmp.r;
-	mv graphAmpDepth.r linuxGraphAmpDepth.r;
-	mv tmp.r graphAmpDepth.r;
-	sed\
-      '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
-       freezeTBScripts/extractPrimRead.awk\
-     > tmp.gawk;
-	mv tmp.gawk freezeTBScripts/extractPrimRead.gawk;
-	sed\
-      '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
-       freezeTBScripts/getMapCoord.awk\
-     > tmp.gawk;
-	mv tmp.gawk freezeTBScripts/getMapCoord.gawk;
-	sed\
-      '1s/#!\/usr\/bin\/awk/#!\/usr\/bin\/gawk/'\
-       freezeTBScripts/trimCon.awk\
-     > tmp.gawk;
-	mv tmp.gawk freezeTBScripts/trimCon.gawk;
-	sed\
-      '1s/#!\/usr\/bin\/bash/#!\/bin\/bash/'\
-      ivarConScript.sh\
-     > tmp.sh;
-	mv ivarConScript.sh ivarConScriptLinux.sh;
-	mv tmp.sh ivarConScript.sh;
-	sed\
-      '1s/#!\/usr\/bin\/bash/#!\/bin\/bash/; s/awk/gawk/g;'\
-       freezeTb.sh\
-     > tmp.sh;
-	mv freezeTb.sh buildAmpConsLinux.sh;
-	mv tmp.sh freezeTb.sh;
-
-macAmpDepth:
-	make mac -C ./ampDepthSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
-
-macTrimSam:
-	make mac -C ./trimSamSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
-
-macSubsample:
-	make mac -C ./subsampleSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
-
-macFqGetIds:
-	make mac -C ./fqGetIdsSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
-
-macTbAmr:
-	make -C ./tbAmrSource CC="$(CC)" MACCFLAGS="$(MACCFLAGS)";
 
 R:
 	Rscript rDepends.r
 
 install:
-	make -C ampDepthSource PREFIX=$(PREFIX) install;
-	make -C trimSamSource PREFIX=$(PREFIX) install;
-	make -C fqGetIdsSource PREFIX=$(PREFIX) install;
-	make -C subsampleSource PREFIX=$(PREFIX) install;
-	make -C tbAmrSource PREFIX=$(PREFIX) install;
-	cp -r freezeTBScripts $(PREFIX);
-	cp -r tbAmrSource/WHO-TB-catalog-genomeIndicies.csv $(PREFIX)/freezeTBScripts;
-	cp freezeTB.sh $(PREFIX);
-	cp ivarConScript.sh $(PREFIX);
 	cp graphAmpDepth.r $(PREFIX);
+	cp -r freezeTBFiles $(PREFIX);
+	mv freezeTb $(PREFIX);
 	chmod -R a+x $(PREFIX)/freezeTBScripts;
 	chmod a+x $(PREFIX)/freezeTBScripts/*;
-	chmod a+x $(PREFIX)/freezeTb.sh;
-	chmod a+x $(PREFIX)/ivarConScript.sh;
-	chmod a+x $(PREFIX)/ampDepth;
+	chmod a+x $(PREFIX)/freezeTb;
 	chmod a+x $(PREFIX)/graphAmpDepth.r;
 	mv linuxGraphAmpDepth.r graphAmpDepth.r || printf "";
-	mv ivarConScriptLinux.sh ivarConScript.sh || exit;
-	mv buildAmpConsLinux.sh freezeTb.sh;
-	rm freezeTBScripts/*.gawk;
 
 # Currently nothing to clean up
 clean:
-	mv ivarConScriptLinux.sh ivarConScript.sh || exit;
-	mv buildAmpConsLinux.sh freezeTb.sh;
-	rm freezeTBScripts/*.gawk;
+	rm bugFreezeTb || printf "";
+	rm buildFreezeTb.c || printf "":
+	mv linuxGraphAmpDepth.r graphAmpDepth.r || printf "";

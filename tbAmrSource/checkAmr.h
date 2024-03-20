@@ -152,7 +152,6 @@ makeAmrHit() ({\
    retST;\
 }) /*makeAmrHit*/
 
-
 /*-------------------------------------------------------\
 | Fun-08: checkAmrSam
 |   - Checks if a sequence in a sam file entry has

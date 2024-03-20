@@ -37,6 +37,8 @@
 #include "../generalLib/ulCpStr.h"
 #include "tbCon-fun.h"
 
+#include "tbCon-version.h"
+
 /*-------------------------------------------------------\
 | Fun-01: checkTbConArg
 |   - Checks user input to see if was a valid argument,
@@ -171,7 +173,7 @@ checkTbConArg(
 
    else if(! cStrEql("-min-q", parmStr, '\0'))
    { /*If: The user provided the minimum Q-score*/
-      macTmpStr = base10StrToUI(argStr, settings->minQI);
+      macTmpStr = base10StrToSI(argStr, settings->minQI);
 
       /*Check for errors*/
       if(macTmpStr[0] != '\0')
@@ -183,7 +185,7 @@ checkTbConArg(
 
    else if(! cStrEql("-min-q-ins", parmStr, '\0'))
    { /*If: user provided the minimum inserion Q-score*/
-      macTmpStr= base10StrToUI(argStr,settings->minInsQI);
+      macTmpStr= base10StrToSI(argStr,settings->minInsQI);
 
       /*Check for errors*/
       if(macTmpStr[0] != '\0')
@@ -418,7 +420,7 @@ pTbConVersion(
 ){ /*pTbConVersion*/
    fprintf(
        (FILE *) outFILE,
-       "tbCon Version: %i-%i-%i\n",
+       "tbCon Version: %i-%02i-%02i\n",
        def_tbCon_input_year,
        def_tbCon_input_month,
        def_tbCon_input_day

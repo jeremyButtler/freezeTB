@@ -25,10 +25,6 @@
 #ifndef TB_CONSENSUS_INPUT_H
 #define TB_CONSENSUS_INPUT_H
 
-#define def_tbCon_input_year 2024
-#define def_tbCon_input_month 03
-#define def_tbCon_input_day 12
-
 /*Error message flags for user input*/
 #define def_tbCon_input_nonNum_Err 1
 #define def_tbCon_input_unkown_Err 2

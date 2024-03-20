@@ -23,7 +23,7 @@
 |   - Included libraries, defintions, and global variables
 \-------------------------------------------------------*/
 
-#ifdef PLAN9
+#ifdef plan9
    #include <u.h>
    #include <libc.h>
 #else
@@ -36,17 +36,19 @@
 #include "../generalLib/trimSam.h"
 #include "../generalLib/geneCoordStruct.h"
 
+#include "ampDepth-fun.h"
+
 /*No .c files*/
 #include "../generalLib/dataTypeShortHand.h"
 #include "../generalLib/ulCpStr.h"
 #include "../generalLib/base10StrToNum.h"
 #include "../generalLib/genMath.h"
+#include "ampDepth-version.h"
 
 /*Hidden dependencies
   #include "../generalLib/numToStr.h" no .c file
 */
 
-#define defVersion 20240125
 #define defMinDepth 20
 
 char *globalExtraCol = "own";
@@ -147,7 +149,7 @@ int main(
    '  o main sec-08:
    '    - Print out the header
    '  o main sec-09:
-   '    - Find the mapping positions
+   '    - Print out the histogram
    '  o main sec-10:
    '    - clean up and exit
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -173,29 +175,6 @@ int main(
    uint *readMapAryUI = 0; /*Mapped region of reads*/
    uint offTargUI = 0;
    uint umappedUI = 0;
-
-   uint mapStartUI = 0;
-   uint tmpStartUI = 0;
-
-   /*For printing out read counts*/
-   uint readsAtStartUI = 0;
-   uint readsAtEndUI = 0;
-   uint maxReadsUI = 0;
-   uint minReadsUI = 0;
-   ulong avgDepthUL = 0; /*average number of reads*/
-
-
-   /*Entire amplicon stats*/
-   int ampNumI = -1;
-   uint ampMaxReadsUI = 0;
-   uint ampMinReadsUI = 0;
-   ulong ampAvgDepthUL = 0; /*average number of reads*/
-   uint ampStartUI = 0;
-   uint ampEndUI = 0;
-   uint ampGeneStartUI = 0;
-   uint ampGeneEndUI = 0;
-   
-   int tmpI = 0;
 
    struct geneCoords *genesST = 0; 
    struct samEntry readST;
@@ -243,8 +222,10 @@ int main(
      ){ /*If: the user requested the version number*/
         fprintf(
            stdout,
-           "ampDepth version: %i\n",
-           defVersion
+           "ampDepth version: %i-%02i-%02i\n",
+           def_year_ampDepth,
+           def_month_ampDepth,
+           def_day_ampDepth
         );
         exit(0);
      } /*If: the user requested the version number*/
@@ -474,21 +455,13 @@ int main(
       *   - Handle primary mapped reads
       \**************************************************/
 
-      for(
-         mapStartUI = readST.refStartUI;
-         mapStartUI < readST.refEndUI;
-         ++mapStartUI
-      ){ /*Loop: Fill in bases*/
-         if(mapStartUI > genesST->endAryUI[numGenesI])
-         { /*If: the read has an offtarget section*/
-           ++offTargUI;
-           goto nextLine;
-         } /*If: the read has an offtarget section*/
-
-         ++readMapAryUI[mapStartUI];
-      } /*Loop: Fill in bases*/
-
-      nextLine:;
+      addBaseToAmpDepth(
+         &readST,
+         genesST,
+         numCoordsI,
+         readMapAryUI,
+         offTargUI
+      ); /*Add in the coverd bases to the histogram*/
 
       errUC =
          readSamLine(
@@ -526,244 +499,30 @@ int main(
    ^  - Print out the header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   fprintf(outFILE, "flag\tampNumber\trefStart\trefEnd");
-   fprintf(outFILE, "\tampStart\tampEnd\tavgAmpDepth");
-   fprintf(outFILE, "\tminAmpDepth\tmaxAmpDepth\tgeneId");
-   fprintf(outFILE, "\trefGeneStart\trefGeneEnd");
-   fprintf(outFILE, "\tfirstBaseDepth\tlastBaseDepth");
-   fprintf(outFILE, "\tavgDepth\tminDepth\tmaxDepth\n");
+   pHeaderAmpDepth(outFILE);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-09:
-   ^   - Find the mapping positions
-   ^   o main sec-09 sub-01:
-   ^     - Check if positon has enough depth to keep
-   ^   o main sec-09 sub-02:
-   ^     - Find the amplicon stats
-   ^   o main sec-09 sub-03:
-   ^     - Print the amplicon stats
-   ^  o main sec-09 sub-04:
-   ^    - Find the stats for each gene in the amplicon
-   ^  o main sec-09 sub-05:
-   ^    - Print the stats for each gene in the amplicon
+   ^   - Print out the histogram
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*****************************************************\
-   * Main Sec-09 Sub-01:
-   *   - Check if positon has enough depth to keep
-   \*****************************************************/
-
-   mapStartUI = 0;
-
-   while(mapStartUI <= genesST->endAryUI[numGenesI] + 1)
-   { /*Loop: Get the gene positions that mapped*/
-      ++mapStartUI;
-
-      if(mapStartUI < genesST->startAryUI[0]) continue;
-
-      geneIndexI = 
-         findStartCoordInGeneCoord(
-            genesST,
-            mapStartUI,
-            numGenesI
-         ); /*Find the index of the gene at the position*/
-
-      if(geneIndexI < 0) continue; /*Unmapped base*/
-      if(readMapAryUI[mapStartUI] < minDepthI) continue;
-
-
-      /**************************************************\
-      * Main Sec-09 Sub-02:
-      *   - Find amplicon stats
-      \**************************************************/
-
-      ++ampNumI;
-
-      ampGeneEndUI = geneIndexI;
-
-      ampStartUI = mapStartUI;
-      ampGeneStartUI = genesST->startAryUI[geneIndexI];
-      ampAvgDepthUL = 0;
-      ampMaxReadsUI = readMapAryUI[mapStartUI];
-      ampMinReadsUI = ampMaxReadsUI;
-
-      for(
-         ampEndUI = mapStartUI;
-         readMapAryUI[ampEndUI] >= minDepthI;
-         ++ampEndUI
-      ){ /*Loop: Find end of region*/
-          ampGeneEndUI +=
-            ampEndUI > genesST->endAryUI[ampGeneEndUI];
-
-          ampMaxReadsUI = 
-             noBranchMax(
-                ampMaxReadsUI,
-                readMapAryUI[ampEndUI]
-             ); /*Find the maximum*/
-
-          ampMinReadsUI = 
-             noBranchMin(
-                ampMinReadsUI,
-                readMapAryUI[ampEndUI]
-             ); /*Find the maximum*/
-          
-          ampAvgDepthUL += readMapAryUI[ampEndUI];
-      } /*Loop: Find end of region*/
-
-      --ampEndUI; /*Account for overcounting*/
-      ampGeneEndUI = genesST->endAryUI[ampGeneEndUI];
-
-      /*Using interger mean, not decimal*/
-      ampAvgDepthUL /= (ampEndUI - 1 - ampStartUI);
-
-      /**************************************************\
-      * Main Sec-09 Sub-03:
-      *   - Print the amplicon stats
-      \**************************************************/
-
-
-      /**************************************************\
-      * Main Sec-09 Sub-04:
-      *   - Find the stats for each gene in the amplicon
-      \**************************************************/
-
-      tmpI = 0;
-
-      nextGene:
-
-      ++tmpI;
-      tmpStartUI = mapStartUI;
-      avgDepthUL = 0;
-      readsAtStartUI = readMapAryUI[mapStartUI];
-      maxReadsUI = readsAtStartUI;
-      minReadsUI = maxReadsUI;
-
-      for(
-         mapStartUI = mapStartUI;
-         mapStartUI <= genesST->endAryUI[geneIndexI];
-         ++mapStartUI
-      ){ /*Loop: Check if gene is complete*/
-          if(readMapAryUI[mapStartUI] < minDepthI) break;
-
-          maxReadsUI = 
-             noBranchMax(
-                maxReadsUI,
-                readMapAryUI[mapStartUI]
-             ); /*Find the maximum*/
-
-          minReadsUI = 
-             noBranchMin(
-                minReadsUI,
-                readMapAryUI[mapStartUI]
-             ); /*Find the maximum*/
-          
-          avgDepthUL += readMapAryUI[mapStartUI];
-      } /*Loop: Check if gene is complete*/
-
-      readsAtEndUI = readMapAryUI[mapStartUI - 1];
-
-      /*Using interger mean, not decimal*/
-      avgDepthUL /= (mapStartUI - 1 - tmpStartUI);
-
-      /**************************************************\
-      * Main Sec-09 Sub-05:
-      *   - Print the stats for each gene in the amplicon
-      \**************************************************/
-
-
-      fprintf(
-         outFILE,
-         "%s\t%i\t%u\t%u\t%u\t%u\t%lu\t%u\t%u",
-         extraColStr,
-         ampNumI,
-         ampGeneStartUI,
-         ampGeneEndUI,
-         ampStartUI,
-         ampEndUI,
-         ampAvgDepthUL,
-         ampMinReadsUI,
-         ampMaxReadsUI
-      ); /*Print out the starting and ending position*/
-
-      fprintf(
-         outFILE,
-         "\t%s\t%u\t%u\t%u\t%u\t%lu\t%u\t%u\n",
-         genesST->idStrAry[geneIndexI],
-         genesST->startAryUI[geneIndexI],
-         genesST->endAryUI[geneIndexI],
-         readsAtStartUI,
-         readsAtEndUI,
-         avgDepthUL,
-         minReadsUI,
-         maxReadsUI
-      );
-
-      if(readMapAryUI[mapStartUI] > minDepthI)
-      { /*If: I have another gene*/
-         ++geneIndexI;
-         if(geneIndexI > numGenesI) continue;;
-
-         /*Make sure I am on the next gene*/
-         for(
-            mapStartUI = mapStartUI;
-            mapStartUI < genesST->startAryUI[geneIndexI];
-            ++mapStartUI
-         ) if(readMapAryUI[mapStartUI] < minDepthI) break;
-
-         if(readMapAryUI[mapStartUI] <minDepthI) continue;
- 
-         goto nextGene;
-      } /*If: I have another gene*/
-   } /*Loop: Get the gene positions that mapped*/
+   pAMpDepthHistogram(
+      (int *) readMapAryUI,
+      minDepthI,
+      genesST,
+      numGenesI,
+      (int) offTargUI,
+      (int) umappedUI,
+      extraColStr,
+      outFILE
+   ); /*Print out the histogram*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-10:
-   ^  - clean up and exit
+   ^   - Clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   ++ampNumI;
-
-   fprintf(
-      outFILE,
-      "%s\t%i\tNA\tNA\tNA\tNA\t%u\t%u\t%u",
-      extraColStr,
-      ampNumI,
-      offTargUI,
-      offTargUI,
-      offTargUI
-   ); /*Print out the off target reads*/
-
-   fprintf(
-      outFILE,
-      "\tx-off-target\tNA\tNA\t%u\t%u\t%u\t%u\t%u\n",
-      offTargUI,
-      offTargUI,
-      offTargUI,
-      offTargUI,
-      offTargUI
-   );
-
-   ++ampNumI;
-
-   fprintf(
-      outFILE,
-      "%s\t%i\tNA\tNA\tNA\tNA\t%u\t%u\t%u",
-      extraColStr,
-      ampNumI,
-      umappedUI,
-      umappedUI,
-      umappedUI
-   ); /*Print out the off target reads*/
-
-   fprintf(
-      outFILE,
-      "\tz-unmapped\tNA\tNA\t%u\t%u\t%u\t%u\t%u\n",
-      umappedUI,
-      umappedUI,
-      umappedUI,
-      umappedUI,
-      umappedUI
-   );
+   if(outFILE != stdout) fclose(outFILE);
 
    freeGeneCoords(&genesST);
    free(readMapAryUI);

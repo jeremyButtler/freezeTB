@@ -54,6 +54,11 @@
 #define defQAdjust 33 /*offest to get q-score of 0*/
 #define defMaxQScore 94 /*highest possible Q-score*/
 
+#define def_samEntry_newLine ulCpMakeDelim('\n')
+#define def_samEntry_tab ulCpMakeDelim('\t')
+#define def_samEntry_one ulCpMakeDelim(0x01)
+#define def_samEntry_highBit ulCpMakeDelim(0x80)
+
 /*-------------------------------------------------------\
 | ST-01: samEntry
 |  - Holds a single samfile entry

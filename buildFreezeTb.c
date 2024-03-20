@@ -105,7 +105,7 @@ Hidden libraries without .c files (only .h)
 char *def_prefix_freezeTb = "out";
 char *def_extGraph_freezeTb = "tiff";
 
-char *defPathStr = "";
+char *defPathStr = "/home/boom/files/research/publicGitRepositories/freezeTB";
    /*This is set at complie time with awk. The problem
    `   is that there is no universial way to set this
    `   for all OS's. Of course; awk is a unix tool.

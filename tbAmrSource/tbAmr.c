@@ -10,6 +10,7 @@
 #include "../generalLib/ulCpStr.h"
 #include "../generalLib/dataTypeShortHand.h"
 #include "../generalLib/base10StrToNum.h"
+#include "tbAmr-version.h"
 
 int main(
    int numArgsI,
@@ -570,8 +571,10 @@ void pTbAmrHelp(
 \-------------------------------------------------------*/
 void pTbAmrVersion(void *outFILE){
    fprintf(
-      (FILE *) outFILE,
-      "tbAMR version: %i\n",
-      defTbAmrVersion
-   );
-}
+       (FILE *) outFILE,
+       "tbAmr Version: %i-%02i-%02i\n",
+       def_year_tbAmr,
+       def_month_tbAmr,
+       def_day_tbAmr
+   ); /*Version of tbCon*/
+} /*pTbAmrVersion*/

@@ -31,6 +31,7 @@
 /*Hidden libraries
 `   - ../generalLib/numToStr.h       (no .c)
 `   - ../generalLib/genMath.h        (no .c)
+`   - #include "tbCon-version.h"     (no .c)
 */
 
 int main(
@@ -359,11 +360,90 @@ int main(
    freeSamEntryStack(&samST);
    fclose(samFILE);
 
+   /*****************************************************\
+   * Main Sec-04 Sub-02:
+   *   - print tbCon cosensus (same file) settings
+   \*****************************************************/
+
+   fprintf(outFILE, "@consensus: tbCon");
+
+   /*Check if getting sam file from stdin*/
+   if(! samFileStr || *samFileStr == '-')
+     fprintf(outFILE, " -sam -");
+   else
+     fprintf(outFILE, " -sam %s", samFileStr);
+
    fprintf(
       outFILE,
-      "@tbCom -sam %s\n",
-      samFileStr
-   ); /*Add all settings in*/
+      " -min-mapq %i -min-q %i -min-q-ins %i",
+      settings.minMapqUC,
+      settings.minQI,
+      settings.minInsQI
+   );
+
+   fprintf(
+      outFILE,
+      " -min-len %i -min-depth %i -perc-snp-sup %f",
+      settings.minLenI,
+      settings.minDepthI,
+      settings.minPercSnpF
+   );
+
+   fprintf(
+      outFILE,
+      " -perc-ins-sup %f -min-del-sup %f",
+      settings.minPercInsF,
+      settings.minPercDelF
+   );
+
+   if(! outFileStr || *outFileStr == '-')
+     fprintf(outFILE, " -out -\n");
+   else
+     fprintf(outFILE, " -out %s\n", outFileStr);
+
+   /*****************************************************\
+   * Main Sec-04 Sub-03:
+   *   - print tbCon tsv file settings
+   \*****************************************************/
+
+   if(tsvFileStr)
+   { /*If: the user is printing the tsv file*/
+      fprintf(outFILE, "@tsv: tbCon");
+
+      /*Check if getting sam file from stdin*/
+      if(! samFileStr || *samFileStr == '-')
+        fprintf(outFILE, " -sam -");
+      else
+        fprintf(outFILE, " -sam %s", samFileStr);
+
+      fprintf(
+         outFILE,
+         " -min-mapq %i -min-q %i -min-q-ins %i",
+         settings.minMapqUC,
+         settings.minQI,
+         settings.minInsQI
+      );
+
+      fprintf(
+         outFILE,
+         " -p-min-depth %i -p-perc-snp-sup %f",
+         settings.printMinDepthI,
+         settings.printMinSupSnpF
+      );
+
+      fprintf(
+         outFILE,
+         " -p-perc-ins-sup %f -p-min-del-sup %f",
+         settings.printMinSupInsF,
+         settings.printMinSupDelF
+      );
+
+      fprintf(
+         outFILE,
+          " -out-tsv %s\n",
+          tsvFileStr
+      );
+   } /*If: the user is printing the tsv file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-05:

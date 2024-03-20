@@ -65,11 +65,6 @@
 #include "ulCpStr.h"
 #include "numToStr.h"
 
-#define def_samEntry_newLine ulCpMakeDelim('\n')
-#define def_samEntry_tab ulCpMakeDelim('\t')
-#define def_samEntry_one ulCpMakeDelim(0x01)
-#define def_samEntry_highBit ulCpMakeDelim(0x80)
-
 /*-------------------------------------------------------\
 | Fun-02: initSamEntry
 |  - Initializes a samEntry structure for use. This 
@@ -1104,50 +1099,6 @@ pSamEntry(
       (samSTPtr)->lenExtraUI
    );
 
-   tmpStr += (samSTPtr)->lenExtraUI;
-   *tmpStr++ = '\t';
-
-   *tmpStr++ = 'm';
-   *tmpStr++ = 'a';
-   *tmpStr++ = 't';
-   *tmpStr++ = 'c';
-   *tmpStr++ = 'h';
-   *tmpStr++ = ':';
-
-   tmpStr += numToStr(tmpStr, (samSTPtr)->numMatchUI);
-   *tmpStr++ = '\t';
-
-   *tmpStr++ = 'm';
-   *tmpStr++ = 'a';
-   *tmpStr++ = 's';
-   *tmpStr++ = 'k';
-   *tmpStr++ = ':';
-
-   tmpStr += numToStr(tmpStr, (samSTPtr)->numMaskUI);
-   *tmpStr++ = '\t';
-
-   *tmpStr++ = 's';
-   *tmpStr++ = 'n';
-   *tmpStr++ = 'p';
-   *tmpStr++ = ':';
-
-   tmpStr += numToStr(tmpStr, (samSTPtr)->numSnpUI);
-   *tmpStr++ = '\t';
-
-   *tmpStr++ = 'i';
-   *tmpStr++ = 'n';
-   *tmpStr++ = 's';
-   *tmpStr++ = ':';
-
-   tmpStr += numToStr(tmpStr, (samSTPtr)->numInsUI);
-   *tmpStr++ = '\t';
-
-   *tmpStr++ = 'd';
-   *tmpStr++ = 'e';
-   *tmpStr++ = 'l';
-   *tmpStr++ = ':';
-
-   tmpStr += numToStr(tmpStr, (samSTPtr)->numDelUI);
    *tmpStr++ = '\n';
 
    fwrite(

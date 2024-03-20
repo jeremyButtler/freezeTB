@@ -14,34 +14,44 @@
 #        - Keep reads that do not map to a reference (can not trim)
 # Output:
 #    stdout: sam file
-# Includes:
-#   - "../generalLib/trimSam.h"
-#   o "../generalLib/samEntryStruct.h"     (No .c file)
-#   o "../generalLib/base10StrToNum.h"     (No .c file)
-#   o "../generalLib/dataTypeShortHand.h"  (No .c file)
-#   o "../generalLib/ulCpStr.h"            (No .c file)
-#   o "../generalLib/numToStr.h"           (No .c file)
-# C Standard Libraries:
-#  o <string.h>
-#  o <stdlib.h>
-#  o <stdio.h>
-#  o <limits.h>
 ########################################################*/
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'  o main:
+'    -  Main function to glue everything together
+'  o fun-1: checkInput
+'    - Checks the user input [returns: 0 if invalid]
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+/*I still will have issues with fprintf on plan9, so this
+`  is just one part of the problem
+*/
+#ifdef plan9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
+
 #include <stdio.h>
-#include <stdlib.h>
-#include "../generalLib/trimSam.h"
-
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOP:
-'   main Main function to glue everything together
-'   fun-1 checkInput: Checks the user input [returns: 0 if invalid]
-\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+#include <string.h>
 
 #include <string.h> /*strcmp function*/
 #include "../generalLib/trimSam.h"
-#define defTrimSamVersion 20240215
+
+#include "trimSam-version.h" /*.h file only*/
+
+/*Hidden
+   - with .c files
+     - #include "../generalLib/samEntryStruct.h"
+   - .h files only
+     - #include "../generalLib/ulCpStr.h"
+     - #include "../generalLib/numToStr.h"
+     - #include "../generalLib/base10StrToNum.h"
+     - #include "../generalLib/dataTypeShortHand.h"
+*/
+
 
 /*---------------------------------------------------------------------\
 | Output: Modifies: Each input variable to hold user input
@@ -158,8 +168,10 @@ int main(int lenArgsInt, char *argsPtrCStr[])
         ) { /*If the user is requesting the version number*/
             fprintf(
                 stdout,
-                "trimSamFile version: %i\n",
-                defTrimSamVersion
+                "trimSamFile version: %i-%02i-%02i\n",
+                def_year_trimSam,
+                def_month_trimSam,
+                def_day_trimSam
             );
             exit(0);
         } /*If the user is requesting the version number*/
