@@ -1,52 +1,49 @@
 # Use
 
-freezeTB is designed to detect amr resistant tb strains
-   using Nanopore reads.
+freezeTb is designed to detect AMR resistance in Nanopore
+  sequence TB samples. Its goal is to be easy to install,
+  and easy to use. However, it may not give the same
+  quality of results as TBProfile.
 
-Consensuses are built for genes that have enough mapped
-  reads (at least 20) using ivar. Subsampling by mapping
-  quality and median q-score is done when a gene has more
-  than 300 mapped reads.
+One reason why not is that freezeTb assumes that Nanopore
+  reads and consensuses are to noisy and likely have
+  errors that cause frameshifts. So, freezeTb will only
+  treat frame shits as regular nucleotide sequences and
+  not compare their amino acid sequences.
 
-Currently this uses the WHO 2021 catalog.
+Currently freezeTb uses the WHO 2023 catalog.
 
-# Requirements
+# Requirements 
 
-For mac, you can install some of the dependencies by
-  homebrew. Instructions for installing homebrew can be
-  found at [https://brew.sh/](https://brew.sh/).
-
-1. minimap2 [https://github.com/lh3/minimap2](
-   https://github.com/lh3/minimap2)
-2. samtools [https://github.com/samtools/samtools](
-   https://github.com/samtools/samtools)
-   - For Debian/Unbuntu "sudo apt-get install samtools"
-   - For mac you can install samtools with homebrew
-     `brew install samtools`
-3. ivar [https://github.com/andersen-lab/ivar](
-   https://github.com/andersen-lab/ivar)
-   - For mac, you can install ivar with homebrew. I can
-     not remmeber the full name. Do `brew search ivar` and
-     then `brew install` on the found package.
-4. R with ggplot2, viridisLite, svgLite, and data.table
-   - use "sudo make R" to run an install script for the
-     libraries
-5. Basic unix tools, like gawk (awk on linux)
-   - For MAC this will require you to install gawk through
-     homebrew `brew install gawk`
+1. A read mapper that outputs a sam file, minimap2 is what
+   I use [https://github.com/lh3/minimap2](
+          https://github.com/lh3/minimap2)
+2. For graphs. This only applies if you use the `-graph`
+   or `-graph-ext` options.
+   - Rscript (this is R). You will also need some R
+     packages
+     - ggplot2
+     - viridisLite
+     - svgLite
+     - data.table
 
 # Install
 
-Install ivar, minimap2, samtools, and the R packages you
-  need. Then do `sudo make install` for linux or 
-  `make mac` and the `sudo make install` for mac.
+The freezeTb install will install freezeTb,
+  graphAmpDepth.r, and everything in freezeTbFiles to the
+  install location. freezeTb is the program you can run,
+  graphAmpDepth.r is the R script to make graphs with, and
+  freezeTbFiles are the files, such as the WHO catalog,
+  that freezeTb uses for the default files.
 
 ## Linux
 
 ```
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
+make
 sudo make install
+make clean
 ```
 
 ## Mac
@@ -59,41 +56,81 @@ git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
 make mac
 sudo make install
+make clean
 ```
+
+## Windows
+
+I am going to say no. I have not tried it.
+
+However, in theory this should be possible, since I have
+  only use functions from the C standard libraries, so
+  there should be nothing unique to Linux. However, Widows
+  does not come with a C compiler (you have to install
+  it). Windows also does not support awk, which I use to
+  set my default file paths in my Makefile. To set the
+  default file path change
+  line 108 `char *defPathStr = "";` to
+  `char *defPathStr = "C:\\default\file\path";`. You will
+  also likely have a lot of compiler warnings about unsafe
+  functions, which are considered standard C functions.
 
 # Run
 
-Simplest way (needed file are at install locations):
+You can print the help message with `freezeTb -h`.
+
+For the simplest way; the extra files are at install
+  locations. This is done during install time, so you need
+  to run `sudo make install`.
 
 ```
-freezeTB.sh -fastq reads.fastq
+minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq | freezeTB.sh -sam - -prefix good-name
+
+# or
+
+freezeTb -sam reads.sam -prefix good-name
+```
+
+Just do not use the `--eqx` flag for minimap2. For some
+  odd reason tbCon ahas an issue with the --eqx flag.
+  **I will need to come back and figure out why.**
+
+Also tbAmr does not work very well with stdin input, but
+  freezeTb does. **I will need to come back and debug this
+  problem.**
+
+
+A more complex way to run freezeTb is to provide the paths
+  to the AMR database and the gene coordinates.
+
+```
+freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -gene-coords freezeTbFiles/TB-gene-coordinates.paf
 ```
 
 # How it works
 
-1. Map reads to a set of genes (TB by default)
-2. Get number of primary/secondary mappings
-   - This also outputs a prefix-supTbl.tsv which as each
-     row start with a primary alignment. The alignments
-     after are additional genes that the same reads mapped
-     to. These could be duplicate genes or reads that
-     spanned multiple genes.
-3. Build graph of number of read mappings per gene in R.
-4. Split reads up into mapped genes
-5. Map each set of reads to the TB (default) reference
-6. Filter and if needed subsample reads
-   - I have set this up for primers, were we often have
-     many high quality reads of the desired length. So, I
-     only use read length to check if reads should be
-     kept. Read length is not used for subsampling.
-   - Subsampling using mapq and median q-score.
-     The scoring is "mapq * 4 + median Q-score".
-   - This was just a quick way to give some priority
-     to the mapping quality.
-7. Find the largest region the set of reads could cover
-   in the TB (default) genome. Then extract the largest
-   region.
-8. Build a consensus for the subsampled reads using the
-   extracted largest region from the TB referenced.
-9. Use the consensuses to find the amr resistant genes
-   using tbAmr
+1. freezeTb removes:
+   - unmapped reads
+   - secondary alignments
+   - supplemental alignments
+2. freezeTb adds each read to a histogram of read depths.
+   This is the unfiltered histogram.
+3. freezeTb then filters the reads, removing any read that
+   has:
+   - to short by aligned length (number of reference bases
+     covered)
+   - has a low mapping quality
+   - has a low mean Q-score
+   - has a low median Q-score
+4. freezeTb then adds the kept reads to a histogram of
+   filtered reads
+5. freezeTb then checks the read for AMRs
+6. freezeTb then adds the read to the reference
+7. After going though all reads; freezeTb then prints
+   out both histogram (unfiltered and filtered)
+8. freezeTb prints out the AMRs that at least 45% of
+   mapped reads supported
+9. freezeTb then finishes building the consensus and
+   then finds the AMRs for the consensus.
+10. freezeTb then makes the read depth and coverage graphs
+    with R (only if you used -graph or -graph-ext "ext")
