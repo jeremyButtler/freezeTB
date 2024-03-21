@@ -23,9 +23,8 @@ SOURCE=\
 all: setUpPath
 	$(CC) $(CFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;
 
-
 mac: altRScriptPath setUpPath
-	$(CC) $(CFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;
+	$(CC) $(MACCFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;
 
 openbsd: altRScriptPath setUpPath
 	$(CC) $(CFLAGS) -o freezeTb $(SOURCE) buildFreezeTb.c;

@@ -58,6 +58,12 @@ The freezeTb install will install freezeTb,
 
 ## Linux
 
+This is what freezeTb was tested on. You should be
+  able to use the compiled freezeTb code if you plan to
+  install freezeTb in /usr/local/bin (default). Else
+  do `make PREFIX=/path/to/install/at`. This allows
+  freezeTb to know were the default files are.
+
 ```
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
@@ -68,8 +74,8 @@ make clean
 
 ## Mac
 
-This  should work, but I am not sure. You will need to
-  install the dependencies by homebrew.
+In theory this should work, in pratice I have no idea.
+
 
 ```
 git clone https://github.com/jeremybuttler/freezeTB
@@ -79,7 +85,7 @@ sudo make install
 make clean
 ```
 
-y
+## Windows
 
 I am going to say no. I have not tried it.
 
@@ -131,6 +137,11 @@ freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -g
 ```
 
 # How it works
+
+![
+  Clip are flow digram showing how freezeTb works. Tempted
+  to make an ascii digram with dita.
+](freezeTb-flowDiagram.svg)
 
 1. freezeTb removes:
    - unmapped reads

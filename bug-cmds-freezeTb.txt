@@ -1,2 +1,3 @@
-b freezeTb.c:1331
-r -sam ~/BC33-test.sam
+b freezeTb.c:354
+#r -sam ~/BC33-test.sam
+r -sam - < ~/BC33-test.sam

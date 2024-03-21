@@ -660,6 +660,9 @@ struct amrStruct * readTbAmrTbl(
    char *tmpStr = 0;         /*For temporary operations*/
    ulong ulTab = ulCpMakeDelim('\t'); /*for ulCpStrDelim*/
 
+   int maxLineLenI = 0;
+   int tmpI = 0;
+
    /*Boolean to check if I need to make a new drug array*/
    char newDrugAryBl = (*drugStrAry == 0);
    int iEndDrug = 0; /*Marks end of the drug entry*/
@@ -692,17 +695,63 @@ struct amrStruct * readTbAmrTbl(
    ^ Fun-10 Sec-03:
    ^   - Process the header and get the number of lines
    ^   o fun-10 sec-03 sub-01:
-   ^     - Read in the header
+   ^     - Get the number of lines in the file
    ^   o fun-10 sec-03 sub-02:
-   ^     - Get the number of antibiotics
+   ^     - Read in the header
    ^   o fun-10 sec-03 sub-03:
-   ^     - Allocate memory for the antibiotics
+   ^     - Get the number of antibiotics
    ^   o fun-10 sec-03 sub-04:
+   ^     - Allocate memory for the antibiotics
+   ^   o fun-10 sec-03 sub-05:
    ^     - Copy the antibiotics to the drug array
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
    * Fun-10 Sec-03 Sub-01:
+   *   - Get the number of lines in the file
+   \*****************************************************/
+
+   *numAmrUI = 0;
+
+   while(
+      fread(buffStr, sizeof(char), lenBuffUI - 1, amrFILE)
+   ){ /*Loop: Get number of amrs from the file*/
+      
+      buffStr[lenBuffUI - 1] = '\0';
+      tmpStr = buffStr;
+
+      while(*tmpStr != '\0')
+      { /*Loop: Find the number of new lines*/
+         while(*tmpStr & ~ 10)
+         { /*Loop: Find the end of the line*/
+            ++tmpI;
+            ++tmpStr;
+         } /*Loop: Find the end of the line*/
+
+         if(tmpI > maxLineLenI) maxLineLenI = tmpI;
+
+         tmpI &= (int) -(*tmpStr != '\n');
+         (*numAmrUI) += (*tmpStr == '\n');
+         tmpStr += (*tmpStr == '\n');
+      } /*Loop: Find the number of new lines*/
+   } /*Loop: Get number of amrs from the file*/
+
+   ++(*numAmrUI);
+
+   /*Check if there were any AMR(s) in the file*/
+   if(! *numAmrUI) goto fileErr_sec06_sub03_readTbAmrTbl;
+
+   /*Go back to start of file*/
+   fseek(amrFILE, 0, SEEK_SET);
+
+   free(buffStr);
+   buffStr = malloc((maxLineLenI + 2) * sizeof(char));
+   lenBuffUI = maxLineLenI + 1;
+
+   if(buffStr == 0) goto memErr_sec06_sub02_readTbAmrTbl;
+
+   /*****************************************************\
+   * Fun-10 Sec-03 Sub-02:
    *   - Read in the header
    \*****************************************************/
 
@@ -736,7 +785,7 @@ struct amrStruct * readTbAmrTbl(
    } /*Loop: Get the full line*/
    
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-02:
+   * Fun-10 Sec-03 Sub-03:
    *   - Get the number of antibiotics
    \*****************************************************/
 
@@ -760,7 +809,7 @@ struct amrStruct * readTbAmrTbl(
    } /*Loop: Find the end of the antibiotics columns*/
 
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-03:
+   * Fun-10 Sec-03 Sub-04:
    *   - Allocate memory for the antibiotics
    \*****************************************************/
 
@@ -781,7 +830,7 @@ struct amrStruct * readTbAmrTbl(
    } /*If: I need to add more memory to the drug array*/
 
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-04:
+   * Fun-10 Sec-03 Sub-05:
    *   - Copy the antibiotics to the drug array
    \*****************************************************/
 
@@ -798,44 +847,6 @@ struct amrStruct * readTbAmrTbl(
       ++iStartDrug; /*Get off the tab*/
       ++iDrug;
    } /*Loop: Read in the antibiotic entries*/
-
-   /*****************************************************\
-   * Fun-10 Sec-03 Sub-05:
-   *   - Get the number of lines in the file
-   \*****************************************************/
-
-   *numAmrUI = 0;
-   buffStr[lenBuffUI - 2] = '\0';
-
-   while(fgets(buffStr, lenBuffUI, amrFILE))
-   { /*Loop: Get number of amrs from the file*/
-      
-      ++(*numAmrUI);
- 
-      while(tmpStr[lenBuffUI - 2] & ~10)
-      { /*Loop: Get the full line*/
-         /*I really do not char about the contents, I just
-         ` want the line count
-         */
-         free(buffStr);
-         buffStr = malloc((lenBuffUI <<1) * sizeof(char));
-
-         if(!buffStr)
-             goto memErr_sec06_sub02_readTbAmrTbl;
-
-         tmpStr = buffStr + lenBuffUI;
-         lenBuffUI <<= 1;
-
-         /*Add my marker back in*/
-         buffStr[lenBuffUI - 2] = '\0';
-      } /*Loop: Get the full line*/
-   } /*Loop: Get number of amrs from the file*/
-
-   /*Check if there were any AMR(s) in the file*/
-   if(! *numAmrUI) goto fileErr_sec06_sub03_readTbAmrTbl;
-
-   /*Go back to start of file*/
-   fseek(amrFILE, 0, SEEK_SET);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-10 Sec-04:
