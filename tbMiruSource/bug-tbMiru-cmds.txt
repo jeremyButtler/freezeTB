@@ -1,0 +1,3 @@
+b tbMiru.c:93
+
+r -sam side-files/tbRef.sam -miru-tbl miruTbl.tsv -out-tbl del.tsv

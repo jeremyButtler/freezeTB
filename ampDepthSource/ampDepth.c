@@ -458,10 +458,12 @@ int main(
       addBaseToAmpDepth(
          &readST,
          genesST,
-         numCoordsI,
+         numGenesI,
          readMapAryUI,
          offTargUI
       ); /*Add in the coverd bases to the histogram*/
+
+      nextLine:;
 
       errUC =
          readSamLine(
@@ -506,7 +508,7 @@ int main(
    ^   - Print out the histogram
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   pAMpDepthHistogram(
+   pAmpDepthHistogram(
       (int *) readMapAryUI,
       minDepthI,
       genesST,
@@ -616,7 +618,7 @@ char * ampDepthGetCmdInput(
 void pAmpDepthHelp(
    FILE *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' TOC:pAMpDepthHelp
+   ' TOC:paMpDepthHelp
    '   - Print the help message for ampDepth
    '   o fun-02 sec-01:
    '      - Print out the usage and description lines

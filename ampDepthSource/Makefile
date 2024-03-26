@@ -12,6 +12,7 @@ source=\
    ../generalLib/samEntryStruct.c\
    ../generalLib/trimSam.c\
    ../generalLib/geneCoordStruct.c\
+   ampDepth-fun.c\
    ampDepth.c
 
 all:

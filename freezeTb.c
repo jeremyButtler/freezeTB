@@ -1,8 +1,7 @@
 /*########################################################
 # Name: freezeTb
-#   - Process input reads for AMR(s) and (TODO) MIRU
-#     lineages. This also builds a cosenssu and prints out
-#     depths
+#   - Process input reads for AMR(s) and MIRU lineages.
+#     This also builds a cosenssu and prints out depths
 ########################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -51,9 +50,7 @@
 #include "tbConSource/tbCon-fun.h"
 #include "tbAmrSource/checkAmr.h"
 #include "generalLib/trimSam.h"
-
-/*TODO: Need to complete library*/
-/*#include "tbMiruSource/miruTblStruct.h"*/
+#include "tbMiruSource/miruTblStruct.h"
 
 /*libraries that are not modules (used by modules)*/
 #include "generalLib/samEntryStruct.h"
@@ -72,6 +69,7 @@
 #include "tbConSource/tbCon-version.h"
 #include "trimSamSource/trimSam-version.h"
 #include "ampDepthSource/ampDepth-version.h"
+#include "tbMiruSource/tbMiru-version.h"
 
 /*Hidden libraries
 
@@ -114,9 +112,7 @@ char *defPathStr = "";
 char *defAmrDbStr = "freezeTbFiles/who-2023.tsv";
 char *def_graphFlag_freezeTb = "TB";
 
-/*TODO: Add this in
 const char *defMiruTblStr = "freezeTbFiles/miruTbl.tsv";
-*/
 
 char *defGeneCoordStr =
    "freezeTbFiles/TB-gene-coordinates.paf";
@@ -154,7 +150,7 @@ char *defGeneCoordStr =
 |       o This is filled in
 |     - miruDbFileStr:
 |       o C-string (char array) to hold the path to the
-|         MIRU table (database) for lineages TODO
+|         MIRU table (database) for lineages
 |       o This is filled in
 |     - prefixStr:
 |       o Pointer to c-string to hold the users prefix
@@ -181,6 +177,10 @@ char *defGeneCoordStr =
 |     - graphFileTypeStr:
 |       o Pointer to C-string that is set to point to the
 |         file extension for the R graphs
+|   Misc:
+|     - fudgeLenI:
+|       o Pointer to integer to hold the fudge length
+|         for assiging a read to an MIRU lineage
 | Output:
 |   - Modifies:
 |     o Each input variable the user had an agrument for
@@ -207,7 +207,7 @@ getInput_freezeTb(
    char **samFileStr,
    char *amrDbFileStr,
    char *coordFileStr,
-   /*char *miruDbFileStr, TODO*/
+   char *miruDbFileStr,
    char **prefixStr,
 
    /*Read filtering*/
@@ -216,10 +216,13 @@ getInput_freezeTb(
    float *minPercMapF,
    struct tbConSet *settings,
 
-   /*other*/
+   /*graphing*/
    char **graphFlagStr,
    char *mkGraphBl,
-   char **graphFileTypeStr
+   char **graphFileTypeStr,
+
+   /*misc*/
+   int *fudgeLenI
 ); /*getInput_freezeTb*/
 
 /*-------------------------------------------------------\
@@ -238,7 +241,6 @@ pHelp_freezeTb(
    char pPrintBl, /*Print the print (amr/con) settings*/
    void *outFILE
 );
-
 
 /*-------------------------------------------------------\
 | Fun-03: pVersion_freezeTb
@@ -292,14 +294,13 @@ main(
    char conAmrStr[256];
    char spareStr[1024]; /*When I need an extra buffer*/
 
-   /*TODO
-   char *miruDbFileStr;
+   /*Input or output files for MIRU lineages*/
+   char miruTblFileStr[256]; /*Default flie path*/
+   char *miruDbFileStr = miruTblFileStr; /*file path*/
    char readMiruStr[256];
    char conMiruStr[256];
-   */
 
    char refIdStr[256];
-   /*char miruTblFileStr[256]; TODO: add this in*/
 
    char *tmpStr = 0;
    char errC = 0;
@@ -349,6 +350,9 @@ main(
        `  when checking against reads
        */
 
+   /*For the miru lineages*/
+   struct miruTbl *miruST = 0;
+   int fudgeLenI = def_fudgeLen_miruTblST;
 
    /*For consesus building*/
    struct tbConSet tbConSettings;
@@ -367,7 +371,7 @@ main(
    ^   o main sec-02 sub-02:
    ^     - Set the path to the amr database
    ^   o main sec-02 sub-03:
-   ^     - Set the path to the MIRU lineages (TODO: add)
+   ^     - Set the path to the MIRU lineages
    ^   o main sec-02 sub-04:
    ^     - Set the path to the gene coordinates file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -397,20 +401,18 @@ main(
 
    /*****************************************************\
    * Main Sec-02 Sub-03:
-   *   - Set the path to the MIRU lineages (TODO: add in)
+   *   - Set the path to the MIRU lineages
    \*****************************************************/
 
-   /* TODO: ADd this in
    tmpStr = miruTblFileStr;
 
    if(*defPathStr != '\0')
-   {
+   { /*If: I have a file path to my miru database*/
       tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
       *tmpStr++ = '/';
-   }
+   } /*If: I have a file path to my miru database*/
 
    tmpStr += ulCpStrDelim(tmpStr, defMiruTblStr, 0, 0);
-   */
 
    /*****************************************************\
    * Main Sec-02 Sub-04:
@@ -437,9 +439,9 @@ main(
          numArgsI,
          argsStrAry,
          &samFileStr,      /*reads*/
-         amrDbFileStr,    /*AMR database tbAmr*/
-         coordFileStr,    /*Gene coordianges ampDepth*/
-         /*miruDbFileStr, TODO*/
+         amrDbFileStr,     /*AMR database tbAmr*/
+         coordFileStr,     /*Gene coordianges ampDepth*/
+         miruDbFileStr,    /*Miru database file*/
          &prefixStr,       /*output file names*/
          &minMedianQF,     /*median Q-score to filter*/
          &minMeanQF,       /*mean Q-score to filter with*/
@@ -447,7 +449,8 @@ main(
          &tbConSettings,   /*Consensus/variants settings*/
          &graphFlagStr,    /*ampDepth column 1*/
          &mkGraphBl,       /*Make a graph*/
-         &graphFileTypeStr /*graph extension*/
+         &graphFileTypeStr,/*graph extension*/
+         &fudgeLenI        /*Fudge size for MIRU tables*/
    ); /*getInput_freezeTb*/
 
    if(errI)
@@ -519,7 +522,7 @@ main(
    ^   o main sec-04 sub-06:
    ^     - output file for MIRU lineages (consensus)
    ^   o main sec-04 sub-07:
-   ^     - Check if the MIRU table exists TODO
+   ^     - Check if the MIRU table exists
    ^   o main sec-04 sub-08:
    ^     - Check if amr table exists
    ^   o main sec-04 sub-09:
@@ -641,17 +644,16 @@ main(
    *   - Set up the name for the MIRU reads table
    \*****************************************************/
 
-   /*
    tmpStr = readMiruStr;
    tmpStr += ulCpStrDelim(tmpStr, prefixStr, 0, '\0');
 
    tmpStr +=
-      ulCpStrDelim(tmpStr, "-read-miru.tsv", 0, '\0');
+      ulCpStrDelim(tmpStr, "-miru-read-tbl.tsv", 0, '\0');
 
    outFILE = fopen(readMiruStr, "w");
 
    if(errC)
-   {
+   { /*If: I could not open the file*/
       fprintf(
          stderr,
          "unable to open %s for output\n",
@@ -659,18 +661,16 @@ main(
       );
 
       exit(-1);
-   }
+   } /*If: I could not open the file*/
 
-   flcose(outFILE);
+   fclose(outFILE);
    outFILE = 0;
-   */
 
    /*****************************************************\
    * Main Sec-04 Sub-06:
    *   - Set up the name for the MIRU consensus table
    \*****************************************************/
 
-   /*
    tmpStr = conMiruStr;
    tmpStr += ulCpStrDelim(tmpStr, prefixStr, 0, '\0');
 
@@ -680,7 +680,7 @@ main(
    outFILE = fopen(conMiruStr, "w");
 
    if(errC)
-   {
+   { /*If: I could not open the file*/
       fprintf(
          stderr,
          "unable to open %s for output\n",
@@ -688,22 +688,20 @@ main(
       );
 
       exit(-1);
-   }
+   } /*If: I could not open the file*/
 
-   flcose(outFILE);
+   fclose(outFILE);
    outFILE = 0;
-   */
 
    /*****************************************************\
    * Main Sec-04 Sub-07:
-   *   - Check if the MIRU table exists TODO
+   *   - Check if the MIRU table exists
    \*****************************************************/
 
-   /*
    outFILE = fopen(miruDbFileStr, "r");
 
    if(! outFILE)
-   {
+   { /*If I could not open the MIRU table*/
       fprintf(
          stderr,
          "unable to open -miru-tbl %s\n",
@@ -711,11 +709,10 @@ main(
       );
 
       exit(-1);
-   }
+   } /*If I could not open the MIRU table*/
 
    fclose(outFILE);
    outFILE = 0;
-   */
 
    /*****************************************************\
    * Main Sec-04 Sub-08:
@@ -820,7 +817,7 @@ main(
    ^   o main sec-05 sub-02:
    ^     - Read in the amr table
    ^   o main sec-05 sub-03:
-   ^     - Read in the MIRU lineage table TODO: add
+   ^     - Read in the MIRU lineage table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -883,34 +880,40 @@ main(
 
    /*****************************************************\
    * Main Sec-05 Sub-03:
-   *   - Read in the MIRU lineage table TODO: add
+   *   - Read in the MIRU lineage table
    \*****************************************************/
  
-   /*
-   outFILE = fopen(miruFileStr, "r");
+   miruST = readMiruTbl(miruDbFileStr, &errC);
 
    if(errC)
-   {
+   { /*If: I had an error with the MIRU database*/
       freeSamEntryStack(&samST);
       freeGeneCoords(&coordsST);
-      freeAmrStructArray(&amrSTAry);
+      freeAmrStructArray(&amrSTAry, numAmrI);
 
       if(samFILE != stdin) fclose(samFILE);
 
       fclose(samConFILE);
 
-      fprintf(
-         stderr,
-         "Error with -miru-tbl %s\n",
-         miruFileStr
-      );
+      if(errC == def_fileErr_miruTblST)
+         fprintf(
+            stderr,
+            "Could not open -miru -tbl %s\n",
+            miruDbFileStr
+          ); /*Let the user know the error type*/
+
+      else if(errC == def_memErr_miruTblST)
+         fprintf(stderr, "Ran out of memory\n");
+
+      else
+         fprintf(
+            stderr,
+            "Error while reading -miru-tbl %s\n",
+               miruDbFileStr
+         ); /*Let the user know the error*/
 
       exit(-1);
-   }
-
-   flcose(outFILE);
-   outFILE = 0;
-   */
+   } /*If: I had an error with the MIRU database*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-06:
@@ -959,6 +962,7 @@ main(
             freeSamEntryStack(&samST);
             freeGeneCoords(&coordsST);
             freeAmrStructArray(&amrSTAry, numAmrI);
+            freeMiruTbl(&miruST);
             free(buffStr);
             
             fprintf(
@@ -1124,7 +1128,7 @@ main(
    ^   o main sec-06 sub-06:
    ^     - Check for AMRs
    ^   o main sec-06 sub-07:
-   ^     - Check for MIRU lineages (TODO)
+   ^     - Check for MIRU lineages
    ^   o main sec-06 sub-08:
    ^     - Move to the next read
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -1141,6 +1145,7 @@ main(
       freeSamEntryStack(&samST);
       freeGeneCoords(&coordsST);
       freeAmrStructArray(&amrSTAry, numAmrI);
+      freeMiruTbl(&miruST);
       free(buffStr);
             
       fclose(samConFILE);
@@ -1159,6 +1164,7 @@ main(
       freeSamEntryStack(&samST);
       freeGeneCoords(&coordsST);
       freeAmrStructArray(&amrSTAry, numAmrI);
+      freeMiruTbl(&miruST);
 
       free(buffStr);
       free(readMapIAry);
@@ -1255,6 +1261,7 @@ main(
          freeGeneCoords(&coordsST);
          freeAmrStructArray(&amrSTAry, numAmrI);
          freeConBaseAry(&conBaseSTAry, lenRefI);
+         freeMiruTbl(&miruST);
 
          free(buffStr);
          free(readMapIAry);
@@ -1283,6 +1290,7 @@ main(
          freeGeneCoords(&coordsST);
          freeAmrStructArray(&amrSTAry, numAmrI);
          freeConBaseAry(&conBaseSTAry, lenRefI);
+         freeMiruTbl(&miruST);
 
          free(buffStr);
          free(readMapIAry);
@@ -1298,8 +1306,10 @@ main(
 
       /**************************************************\
       * Main Sec-07 Sub-06:
-      *   - Check for MIRU lineages (TODO)
+      *   - Check for MIRU lineages 
       \**************************************************/
+
+      inc_matching_len_lineages(&samST,fudgeLenI,miruST);
 
       /**************************************************\
       * Main Sec-07 Sub-07:
@@ -1333,6 +1343,8 @@ main(
    ^   o main sec-08 sub-03:
    ^     - Print out the AMR hits for the reads
    ^   o main sec-08 sub-04:
+   ^     - Print out read MIRU table
+   ^   o main sec-08 sub-05:
    ^     - Print out the tsv file of variants
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1414,6 +1426,23 @@ main(
 
    /*****************************************************\
    * Main Sec-08 Sub-04:
+   *   - Print out read MIRU table
+   \*****************************************************/
+
+   errC = pMiruTbl(miruST, readMiruStr);
+
+   /*this should never happen*/
+   if(errC)
+   { /*If: I could not open the output file*/
+      fprintf(
+         stderr,
+         "Could not write read MIRU table to %s\n",
+         readMiruStr
+      ); /*Let the user know the file problem*/
+   } /*If: I could not open the output file*/
+
+   /*****************************************************\
+   * Main Sec-08 Sub-05:
    *   - Print out the tsv file of variants
    \*****************************************************/
 
@@ -1433,7 +1462,7 @@ main(
    ^   o main sec-09 sub-02:
    ^     - print consensus and AMRs/lineages for consensus
    ^   o main sec-09 sub-03:
-   ^     - Print out consensus MIRU lineages TODO
+   ^     - Print out consensus MIRU lineages
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -1457,6 +1486,7 @@ main(
    if(! samConSTAry)
    { /*If: I could not build the consensus*/
       freeAmrStructArray(&amrSTAry, numAmrI);
+      freeMiruTbl(&miruST);
       free(drugStrAry);
       free(buffStr);
 
@@ -1474,6 +1504,9 @@ main(
 
    outFILE = fopen(conAmrStr, "w");
    errC = 0;
+
+   /*Remove all the read counters*/
+   resetCnt_miruTbl(miruST);
 
    pHeadAmrHitList(outFILE);
 
@@ -1498,6 +1531,12 @@ main(
          samConFILE
       );
 
+      inc_matching_len_lineages(
+         &samConSTAry[iCon],
+         fudgeLenI,
+         miruST
+      ); /*Get the MIRU lineages in this consensus*/
+
       amrHitSTList =
          checkAmrSam(
             &samConSTAry[iCon],
@@ -1520,10 +1559,7 @@ main(
 
          freeAmrHitList(amrHitSTList);
       } /*If: I had AMRs*/
-
-      /*TODO: Add MIRU lineage stuff*/
    } /*Loop: Process each consensus*/
-
 
    fclose(outFILE);
    outFILE = 0;
@@ -1538,8 +1574,19 @@ main(
 
    /*****************************************************\
    * Main Sec-09 Sub-03:
-   *   - Print out consensus MIRU lineages TODO
+   *   - Print out consensus MIRU lineages
    \*****************************************************/
+
+   errC = pLineages(miruST, conMiruStr);
+
+   if(errC)
+      fprintf(
+         stderr,
+         "Could not write consensuses MIRU lineages %s\n",
+         conMiruStr
+      ); /*Let the user know the file problem*/
+
+   freeMiruTbl(&miruST);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-10:
@@ -1606,7 +1653,7 @@ main(
 |       o This is filled in
 |     - miruDbFileStr:
 |       o C-string (char array) to hold the path to the
-|         MIRU table (database) for lineages TODO
+|         MIRU table (database) for lineages
 |       o This is filled in
 |     - prefixStr:
 |       o Pointer to c-string to hold the users prefix
@@ -1633,6 +1680,10 @@ main(
 |     - graphFileTypeStr:
 |       o Pointer to C-string that is set to point to the
 |         file extension for the R graphs
+|   Misc:
+|     - fudgeLenI:
+|       o Pointer to integer to hold the fudge length
+|         for assiging a read to an MIRU lineage
 | Output:
 |   - Modifies:
 |     o Each input variable the user had an agrument for
@@ -1659,7 +1710,7 @@ getInput_freezeTb(
    char **samFileStr,
    char *amrDbFileStr,
    char *coordFileStr,
-   /*char *miruDbFileStr, TODO*/
+   char *miruDbFileStr,
    char **prefixStr,
 
    /*Read filtering*/
@@ -1671,7 +1722,10 @@ getInput_freezeTb(
    /*graphing*/
    char **graphFlagStr,
    char *mkGraphBl,
-   char **graphFileTypeStr
+   char **graphFileTypeStr,
+
+   /*misc*/
+   int *fudgeLenI
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: getInput_freezeTb
    '   - Gets the user commandline input for freezeTb
@@ -1761,7 +1815,6 @@ getInput_freezeTb(
             '\0'
          );
 
-      /*TODO
       else if(! cStrEql("-miru-tbl", argStr, '\0'))
          ulCpStrDelim(
             miruDbFileStr,
@@ -1769,7 +1822,6 @@ getInput_freezeTb(
             0,
             '\0'
          );
-      */
 
       else if(! cStrEql("-prefix", argStr, '\0'))
          *prefixStr = argsStrAry[iArg + 1];
@@ -1943,6 +1995,16 @@ getInput_freezeTb(
 
       else if(! cStrEql(argStr,"-graph-flag",'\0'))
          *graphFlagStr = argsStrAry[iArg + 1];
+
+      else if(! cStrEql(argStr,"-fudge",'\0'))
+      { /*Else If: Is the MIRU table fudge length*/
+         argStr = argsStrAry[iArg + 1];
+         tmpStr= base10StrToUI(argStr, *fudgeLenI);
+   
+         /*Check for errors*/
+         if(tmpStr[0] != '\0')
+            return (iArg<<8) | def_nonNumeric_freezeTb;
+      } /*Else If: Is the MIRU table fudge length*/
 
       /**************************************************\
       * Fun-01 Sec-02 Sub-07:
@@ -2151,6 +2213,8 @@ pHelp_freezeTb(
    ^   o fun-02 sec-03 sub-05:
    ^     - Print out the graph settings
    ^   o fun-02 sec-03 sub-06:
+   ^     - Print out the MIRU table settings
+   ^   o fun-02 sec-03 sub-07:
    ^     - Print out the help message and version numbers
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2168,7 +2232,7 @@ pHelp_freezeTb(
    *   o fun-02 sec-03 sub-01 cat-05:
    *     - Gene coordinates (paf) input
    *   o fun-02 sec-03 sub-01 cat-06:
-   *     - MIRU table input TODO
+   *     - MIRU table input
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2326,10 +2390,9 @@ pHelp_freezeTb(
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun-02 Sec-03 Sub-01 Cat-06:
-   +   - MIRU table input TODO
+   +   - MIRU table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   /* TODO
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
       "    -miru-tbl: [",
@@ -2338,7 +2401,7 @@ pHelp_freezeTb(
    );
 
    if(*defPathStr != '\0')
-   {
+   { /*If: I have an default file path*/
       lenHelpI += ulCpStrDelim(
          &helpStr[lenHelpI],
          defPathStr,
@@ -2348,7 +2411,7 @@ pHelp_freezeTb(
 
       helpStr[lenHelpI] = '/';
       ++lenHelpI;
-   }
+   } /*If: I have an default file path*/
 
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
@@ -2376,7 +2439,6 @@ pHelp_freezeTb(
       0,
       '\0'         
    );
-   */
 
    /*****************************************************\
    * Fun-02 Sec-03 Sub-02:
@@ -3162,6 +3224,45 @@ pHelp_freezeTb(
 
    /*****************************************************\
    * Fun-02 Sec-03 Sub-06:
+   *   - Print out the MIRU table settings
+   \*****************************************************/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "  MIRU Lineage setting:\n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -fudge: [",
+      0,
+      '\0'         
+   );
+
+   lenHelpI +=
+      numToStr(&helpStr[lenHelpI],def_fudgeLen_miruTblST);
+
+   helpStr[lenHelpI++] = ']';
+   helpStr[lenHelpI++] = '\n';
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o Range to fudge lengths by to call lineage",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "\n      o Lineage length range is + or - fudge\n",
+       0,
+      '\0'         
+   );
+
+   /*****************************************************\
+   * Fun-02 Sec-03 Sub-06:
    *   - Print out the help message and version numbers
    *   o fun-02 sec-03 sub-06 cat-01:
    *     - Other settings header
@@ -3225,14 +3326,18 @@ pHelp_freezeTb(
    ^   o fun-02 sec-04 sub-02:
    ^     - Print out the consensus amrs file
    ^   o fun-02 sec-04 sub-03:
-   ^     - Print out the consensus file
+   ^     - Print consensus mirufile
    ^   o fun-02 sec-04 sub-04:
-   ^     - Print out the variants file
+   ^     - Print out the consensus file
    ^   o fun-02 sec-04 sub-05:
-   ^     - Print out the reads amr table
+   ^     - Print out the variants file
    ^   o fun-02 sec-04 sub-06:
-   ^     - Print out the filtered histogram file
+   ^     - Print out the reads amr table
    ^   o fun-02 sec-04 sub-07:
+   ^     - Print out the reads MIRU table
+   ^   o fun-02 sec-04 sub-08:
+   ^     - Print out the filtered histogram file
+   ^   o fun-02 sec-04 sub-09:
    ^     - Print out the unfiltered histogram file
    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3269,6 +3374,25 @@ pHelp_freezeTb(
 
    /*****************************************************\
    * Fun-02 Sec-04 Sub-03:
+   *   - Print consensus mirufile
+   \*****************************************************/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "  - prefix-con-miru.tsv\n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    o tsv file with MIRU lineages\n",
+      0,
+      '\0'         
+   );
+
+   /*****************************************************\
+   * Fun-02 Sec-04 Sub-04:
    *   - Print out the consensus file
    \*****************************************************/
 
@@ -3287,7 +3411,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-04:
+   * Fun-02 Sec-04 Sub-05:
    *   - Print out the variants file
    \*****************************************************/
 
@@ -3306,7 +3430,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-05:
+   * Fun-02 Sec-04 Sub-06:
    *   - Print out the reads amr table
    \*****************************************************/
 
@@ -3326,7 +3450,27 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-06:
+   * Fun-02 Sec-04 Sub-07:
+   *   - Print out the reads MIRU table
+   \*****************************************************/
+
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "  - prefix-miru-read-tbl.tsv \n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    o tsv file with the MIRU read count table\n",
+      0,
+      '\0'         
+   );
+
+   /*****************************************************\
+   * Fun-02 Sec-04 Sub-08:
    *   - Print out the filtered histogram file
    \*****************************************************/
 
@@ -3352,7 +3496,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-07:
+   * Fun-02 Sec-04 Sub-09:
    *   - Print out the unfiltered histogram file
    \*****************************************************/
 
@@ -3410,20 +3554,28 @@ pVersion_freezeTb(
 
    fprintf(
        (FILE *) outFILE,
+       "   compliled with tbAmr Version: %i-%02i-%02i\n",
+       def_year_tbAmr,
+       def_month_tbAmr,
+       def_day_tbAmr
+   ); /*Version of tbAmr*/
+
+   fprintf(
+       (FILE *) outFILE,
+       "   compliled with tbMiru Version: %i-%02i-%02i\n",
+       def_year_tbMiru,
+       def_month_tbMiru,
+       def_day_tbMiru
+   ); /*Version of tbAmr*/
+
+   fprintf(
+       (FILE *) outFILE,
        "   complied with tbCon version: %i-%02i-%02i\n",
        def_tbCon_input_year,
        def_tbCon_input_month,
        def_tbCon_input_day
    ); /*Version of tbCon*/
 
-
-   fprintf(
-       (FILE *) outFILE,
-       "   compliled with tbAmr Version: %i-%02i-%02i\n",
-       def_year_tbAmr,
-       def_month_tbAmr,
-       def_day_tbAmr
-   ); /*Version of tbAmr*/
 
    fprintf(
       stdout,

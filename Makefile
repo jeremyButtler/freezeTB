@@ -16,6 +16,7 @@ SOURCE=\
    generalLib/geneCoordStruct.c \
    tbAmrSource/drug_str_ary.c \
    tbAmrSource/amrStruct.c \
+   tbMiruSource/miruTblStruct.c
 
 # The sed step is to make sure the default file locations
 # are set up. No other way to do this on C

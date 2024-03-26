@@ -469,29 +469,24 @@ readSamLine(
 
    while(*tmpStr != '\n')
    { /*Loop: Find the length of  the line*/
-      oldLenUL = *lenBuffUL;
-      *lenBuffUL += extraBuffUS;
+      *lenBuffUL <<= 1;
+        /*This is a little agressive for memory usage, but
+        `   it is fast*/
 
-      tmpStr =
-         realloc(
-            *buffStr,
-            (*lenBuffUL + 1) * sizeof(char)
-         ); /*Increase the buffers size*/
+      tmpStr = malloc((*lenBuffUL + 1) * sizeof(char));
 
       /*Check for memory errors; let user handle
       `   freeing buffStr when have memory errors
       */
       if(! tmpStr) return 64;
+
+      /*This avoids odd memory issues with realloc*/
+      oldLenUL = ulCpStrDelim(tmpStr, *buffStr, 0, '\0');
+      free(*buffStr);
       *buffStr = tmpStr;
       
-      tmpStr = *buffStr + oldLenUL - 1;
-
-      /*This is needed to avoid the rare one position off,
-      `   were two nulls are present instead of one
-      */
-      while(*(tmpStr - 1) == '\0') --tmpStr;
-
-      tmpStr = fgets(tmpStr, extraBuffUS, samFILE);
+      tmpStr = *buffStr + oldLenUL;
+      tmpStr = fgets(tmpStr, *lenBuffUL >> 1, samFILE);
 
       if(! tmpStr) break; /*End of file*/
 
@@ -769,7 +764,6 @@ readSamLine(
 
    samSTPtr->refEndUI = samSTPtr->refStartUI;
    samSTPtr->refEndUI += samSTPtr->alnReadLenUI;
-      /*-1 to convert to index 0*/
 
    samSTPtr->refEndUI -= (samSTPtr->alnReadLenUI > 0);
       /*-1 from (alnReadLen > 0) converts to index 0*/

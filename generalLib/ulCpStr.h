@@ -24,17 +24,18 @@
 '     - This is a bit slow (9 op), 8 if delimUL can be
 '       deterimined at compile time. This is less efficent
 '       on 32 and 16 bit cpus (no longer borderline).
-'   o fun-06: ulVectCpStrDelim TODO:
-'     - ulCpStrDelim, but can be compiled with vectors
-'   o fun-06: cCpStr
+'   o fun-06: ulEndStrLine
+'     - Finds the end of a c-string. This assumes that
+'       the line ends in an '\0' or an '\n'
+'   o fun-07: cCpStr
 '    - Copies cpStr into dupStr using characters
-'   o fun-07: cCpStrDelim
+'   o fun-08: cCpStrDelim
 '     - Copies cpStr into dupStr until delimC is found
-'   o fun-08: cLenStr
+'   o fun-09: cLenStr
 '     - Finds the length of a string using characters
 '   o fun-0?: cStrEql
 '     - Checks to see if two strings are equal
-'   o fun-09: cStrMatch
+'   o fun-10: cStrMatch
 '     - Checks to see if two strings are equal, but does
 '       not check to see if there is anything past the
 '       query's deliminator. This is to deal with strings
@@ -122,8 +123,8 @@
 |     o  dupStr to hold lenUI characters from cpStr
 \-------------------------------------------------------*/
 #define ulCpStr(dupStr, cpStr, lenUI){\
-   unsigned long *macCpUL = (ulong *) (cpStr);\
-   unsigned long *macDupUL = (ulong *) (dupStr);\
+   unsigned long *macCpUL = (unsigned long *) (cpStr);\
+   unsigned long *macDupUL = (unsigned long *) (dupStr);\
    unsigned int uiCharMac = 0;\
    \
    for(\
@@ -206,7 +207,7 @@
 |   - Returns:
 |     o  unsigned long == 0; strUL has no deliminator. The
 |        position of the delimintor can be found with
-|        log2(returned ulong) >> 8. The 1 is shifted to
+|        log2(returned unsigned long) >> 8. The 1 is shifted to
 |        the left of the character.
 |     o  unsigned long > 0; strUL has deliminator
 \-------------------------------------------------------*/
@@ -257,8 +258,8 @@
 |     strings.
 \-------------------------------------------------------*/
 #define ulCpStrDelim(dupStr, cpStr, delimUL, delimC)({\
-   unsigned long *macCpUL = (ulong *) (cpStr);\
-   unsigned long *macDupUL = (ulong *) (dupStr);\
+   unsigned long *macCpUL = (unsigned long *) (cpStr);\
+   unsigned long *macDupUL = (unsigned long *) (dupStr);\
    char *dupMacStr = 0;\
    char *cpMacStr = 0;\
    unsigned long macAtDelimUL = 0;\
@@ -300,7 +301,7 @@
 |     o Number of characters in the string
 \-------------------------------------------------------*/
 #define ulLenStr(inStr, delimUL, delimC)({\
-   unsigned long *macPtrUL = (ulong *) (inStr);\
+   unsigned long *macPtrUL = (unsigned long *) (inStr);\
    unsigned long macAtDelimUL = 0;\
    unsigned int uiLenStrMac = 0;\
    \
@@ -318,11 +319,44 @@
    uiLenStrMac;\
 }) /*ulCpStrDelim*/
 
+/*-------------------------------------------------------\
+| Fun-06: ulEndStrLine
+|   - Finds the end of a c-string. This assumes that the
+|     line ends in an '\0' or an '\n'
+| Input:
+|   - inStr:
+|     o C-string or string to look for end in
+| Output:
+|   - Returns:
+|     o Number of characters in the string
+\-------------------------------------------------------*/
+#define \
+ulEndStrLine(\
+   inStr\
+)({\
+   unsigned long *macPtrUL = (unsigned long *) (inStr);\
+   unsigned int uiLenStrMac = 0;\
+   \
+   unsigned long newLineMacUL = ulCpMakeDelim('\n');\
+   unsigned long oneMacUL = ulCpMakeDelim(0x01);\
+   unsigned long highBitMacUL = ulCpMakeDelim(0x80);\
+   \
+   while( !\
+     (\
+           (((*macPtrUL++) & (~ newLineMacUL)) - oneMacUL)\
+         & highBitMacUL\
+     )\
+   ) uiLenStrMac += defCharPerUL;\
+   \
+   while((inStr)[uiLenStrMac] & (~ '\n')) ++uiLenStrMac;\
+   \
+   uiLenStrMac;\
+}) /*ulEndStrLine*/
 
 /*These are the single byte copy functions*/
 
 /*-------------------------------------------------------\
-| Fun-06: cCpStr
+| Fun-07: cCpStr
 |   - Copies cpStr into dupStr using characters
 | Input:
 |   - dupStr:
@@ -343,7 +377,7 @@
 }
 
 /*-------------------------------------------------------\
-| Fun-07: cCpStrDelim
+| Fun-08: cCpStrDelim
 |   - Copies cpStr into dupStr until delimC is found
 | Input:
 |   - dupStr:
@@ -357,7 +391,12 @@
 |   - Modifies:
 |     o  dupStr to hold the characters from cpStr
 \-------------------------------------------------------*/
-#define cCpStrDelim(dupStr, cpStr, delimC)({\
+#define \
+cCpStrDelim(\
+   dupStr,\
+   cpStr,\
+   delimC\
+)({\
    char *dupMacStr = (dupStr);\
    char *cpMacStr = (cpStr);\
    \
@@ -372,7 +411,7 @@
 */
 
 /*-------------------------------------------------------\
-| Fun-08: cLenStr
+| Fun-09: cLenStr
 |   - Finds the length of a string using characters
 | Input:
 |   - inStr:
@@ -445,7 +484,7 @@
 })
 
 /*-------------------------------------------------------\
-| Fun-09: cStrMatch
+| Fun-10: cStrMatch
 |   - Checks to see if two strings are equal, but does
 |     not check to see if there is anything past the
 |     query's deliminator. This is to deal with strings

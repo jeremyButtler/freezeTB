@@ -23,6 +23,8 @@ List of programs:
 - trimSam: trims off soft masked bases
 - tbCon: Builds a consensus
 - tbAmr: is the AMR detection program
+- tbMiru: detects MIRU lineages in reads
+  - See tbMiru's read me for building your own MIRU table
 
 Other programs:
 
@@ -32,19 +34,22 @@ Other programs:
   help message.
 - fqGetIds: was here for the original script. It has its
   own separate repository.
+- subsample: was here to help with subsampling reads for
+  the original bash script. No longer used.
 
 # Requirements 
 
 1. A read mapper that outputs a sam file, minimap2 is what
    I use [https://github.com/lh3/minimap2](
-          https://github.com/lh3/minimap2)
+          https://github.com/lh3/minimap2), but you can
+   use something else.
 2. For graphs. This only applies if you use the `-graph`
    or `-graph-ext` options.
    - Rscript (this is R). You will also need some R
      packages
      - ggplot2
      - viridisLite
-     - svgLite
+     - svgLite (if you request svgs)
      - data.table
 
 # Install
@@ -133,7 +138,7 @@ A more complex way to run freezeTb is to provide the paths
   to the AMR database and the gene coordinates.
 
 ```
-freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -gene-coords freezeTbFiles/TB-gene-coordinates.paf
+freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -miru-tbl freezeTbFiles/miruTbl.tsv -gene-coords freezeTbFiles/TB-gene-coordinates.paf
 ```
 
 # How it works
@@ -159,12 +164,16 @@ freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -g
 4. freezeTb then adds the kept reads to a histogram of
    filtered reads
 5. freezeTb then checks the read for AMRs
-6. freezeTb then adds the read to the reference
-7. After going though all reads; freezeTb then prints
+6. freezeTb then checks for any MIRU lineages in an read
+7. freezeTb then adds the read to the reference
+8. After going though all reads; freezeTb then prints
    out both histogram (unfiltered and filtered)
-8. freezeTb prints out the AMRs that at least 45% of
+9. freezeTb prints out the AMRs that at least 45% of
    mapped reads supported
-9. freezeTb then finishes building the consensus and
-   then finds the AMRs for the consensus.
-10. freezeTb then makes the read depth and coverage graphs
+10. freezEtB THen prints out the MIRU lineage table of
+    read counts for the reads
+11. freezeTb then finishes building the consensus
+12. freezeTb finds the AMRs for the consensus
+13. freezeTb finds the MIRU lineages for the consensus
+14. freezeTb then makes the read depth and coverage graphs
     with R (only if you used -graph or -graph-ext "ext")

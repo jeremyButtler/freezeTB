@@ -705,10 +705,15 @@
 |  - This function will only convert the first number of
 |    digits in an integer or till non-numeric character
 \-------------------------------------------------------*/
-#define base10StrToSI(inStr, retSI)({\
+#define \
+base10StrToSI(\
+   inStr,\
+   retSI\
+)({\
    char macroCDig = 0;\
    char *macroRetStr = (inStr);\
    int macroTmpI = 0;\
+   \
    (retSI) = 0;\
    \
    if(*inStr == '-') ++macroRetStr;\
