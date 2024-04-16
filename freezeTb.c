@@ -17,7 +17,10 @@
 '     - Prints the help message for freezeTb
 '   o fun-03: pVersion_freezeTb
 '     - Prints the version number for freezeTb and its
-'       submodules
+'   o note-01:
+'     - Windows enviromental variables
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -71,16 +74,12 @@
 #include "ampDepthSource/ampDepth-version.h"
 #include "tbMiruSource/tbMiru-version.h"
 
-/*Hidden libraries
-
-#include "tbAmrSource/drug_str_ary.h"
-
-Hidden libraries without .c files (only .h)
-
-#include "generalLib/genMath.h"
-#include "generalLib/codonTbl.h"
-*/
-
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden libraries
+!   o .c #include "tbAmrSource/drug_str_ary.h"
+!   o .h #include "generalLib/genMath.h"
+!   o .h #include "generalLib/codonTbl.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Header Sec-02:
@@ -100,22 +99,31 @@ Hidden libraries without .c files (only .h)
 #define def_conHelp_freezeTb 8
 #define def_printHelp_freezeTb 16
 
-char *def_prefix_freezeTb = "out";
+char *def_prefix_freezeTb = "Hufflepuff";
+   /*This is here to tweak Tara's nose a bit.
+   `   She is an Harry Potter Ravenclaw fan. I figure
+   `   Ravenclaw is the worst thing other then Slytherin,
+   `   which is evil.
+   */
 char *def_extGraph_freezeTb = "tiff";
 
-char *defPathStr = "";
-   /*This is set at complie time with awk. The problem
-   `   is that there is no universial way to set this
-   `   for all OS's. Of course; awk is a unix tool.
-   `   For windows this would have to be set manually
-   */
-char *defAmrDbStr = "freezeTbFiles/who-2023.tsv";
-char *def_graphFlag_freezeTb = "TB";
+/*Setting up some default paths. I will use getenv in
+`   the main function to get the full file paths.
+` NOTE: These paths should always in an \\ or /
+*/
+#ifdef WINDOWS
+   char *defPathStr = "\\Documents\\freezeTbFiles\\";
+   char *defAltPathStr = "\\Documents\\freezeTbFiles\\";
+#else
+   char *defPathStr = "/share/freezeTbFiles/";
+   char *defAltPathStr = "/Documents/freezeTbFiles/";
+#endif
 
-const char *defMiruTblStr = "freezeTbFiles/miruTbl.tsv";
+char *defAmrDbStr = "who-2023.tsv";
+const char *defMiruTblStr = "miruTbl.tsv";
+char *defGeneCoordStr = "gene-tbl.tsv";
 
-char *defGeneCoordStr =
-   "freezeTbFiles/TB-gene-coordinates.paf";
+char *def_graphFlag_freezeTb = "tb";
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Header Sec-03:
@@ -178,6 +186,8 @@ char *defGeneCoordStr =
 |       o Pointer to C-string that is set to point to the
 |         file extension for the R graphs
 |   Misc:
+|     - frameshiftBl:
+|       o 1: users wants frame shift checking on consensus
 |     - fudgeLenI:
 |       o Pointer to integer to hold the fudge length
 |         for assiging a read to an MIRU lineage
@@ -222,6 +232,7 @@ getInput_freezeTb(
    char **graphFileTypeStr,
 
    /*misc*/
+   char *frameshiftBl,
    int *fudgeLenI
 ); /*getInput_freezeTb*/
 
@@ -279,6 +290,14 @@ main(
    char amrDbFileStr[256]; 
    char coordFileStr[256];
 
+   #ifdef WINDOWS
+      char *sharePathStr = getenv("PUBLIC");
+      char *homePathStr = getenv("HOMEPATH");
+   #else
+      char *sharePathStr = "/usr/local";
+      char *homePathStr = getenv("HOME");
+   #endif
+
    /*Graphing output*/
    char *graphFlagStr = def_graphFlag_freezeTb;
    char *graphFileTypeStr = def_extGraph_freezeTb;
@@ -291,6 +310,7 @@ main(
    char conTsvStr[256];
 
    char readAmrStr[256];
+   char idFileStr[256]; /*For read id printing*/
    char conAmrStr[256];
    char spareStr[1024]; /*When I need an extra buffer*/
 
@@ -324,7 +344,6 @@ main(
    float minMeanQF = def_freezeTb_minMeanQ;
 
    /*For make the ampDepth tsv files*/
-   FILE *pafFILE = 0;
    struct geneCoords *coordsST = 0; /*From function*/
    int numCoordsI = 0;
 
@@ -335,6 +354,8 @@ main(
    int umapReadCntI = 0;
 
    /*For amr detection*/
+   FILE *idFILE = 0; /*For read id printing*/
+   char frameshiftBl = def_checkFrameshift_checkAmr;
    struct amrStruct *amrSTAry = 0;
    struct amrHit *amrHitSTList = 0;
    int numAmrI = 0;
@@ -390,14 +411,32 @@ main(
    \*****************************************************/
 
    tmpStr = amrDbFileStr;
-
-   if(*defPathStr != '\0')
-   { /*If: I have a file path*/
-      tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
-      *tmpStr++ = '/';
-   } /*If: I have a file path*/
-
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
    tmpStr += ulCpStrDelim(tmpStr, defAmrDbStr, 0, 0);
+   outFILE = fopen(amrDbFileStr, "r");
+
+   if(! outFILE)
+   { /*If: I could not open the database*/
+      tmpStr = amrDbFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr, defAmrDbStr, 0, 0);
+      outFILE = fopen(amrDbFileStr, "r");
+
+      if(! outFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = amrDbFileStr;
+         tmpStr += ulCpStrDelim(tmpStr,defAmrDbStr,0,0);
+         outFILE = fopen(amrDbFileStr, "r");
+
+         if(! outFILE)
+            amrDbFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(outFILE) fclose(outFILE);
+   outFILE = 0;
 
    /*****************************************************\
    * Main Sec-02 Sub-03:
@@ -405,14 +444,32 @@ main(
    \*****************************************************/
 
    tmpStr = miruTblFileStr;
-
-   if(*defPathStr != '\0')
-   { /*If: I have a file path to my miru database*/
-      tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
-      *tmpStr++ = '/';
-   } /*If: I have a file path to my miru database*/
-
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
    tmpStr += ulCpStrDelim(tmpStr, defMiruTblStr, 0, 0);
+   outFILE = fopen(miruTblFileStr, "r");
+
+   if(! outFILE)
+   { /*If: I could not open the database*/
+      tmpStr = miruTblFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr, defMiruTblStr, 0, 0);
+      outFILE = fopen(miruTblFileStr, "r");
+
+      if(! outFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = miruTblFileStr;
+         tmpStr += ulCpStrDelim(tmpStr,defMiruTblStr,0,0);
+         outFILE = fopen(miruTblFileStr, "r");
+
+         if(! outFILE)
+            miruTblFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(outFILE) fclose(outFILE);
+   outFILE = 0;
 
    /*****************************************************\
    * Main Sec-02 Sub-04:
@@ -420,14 +477,32 @@ main(
    \*****************************************************/
 
    tmpStr = coordFileStr;
-
-   if(*defPathStr != '\0')
-   { /*If: I have a file path*/
-      tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
-      *tmpStr++ = '/';
-   } /*If: I have a file path*/
-
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
    tmpStr += ulCpStrDelim(tmpStr, defGeneCoordStr, 0, 0);
+   outFILE = fopen(coordFileStr, "r");
+
+   if(! outFILE)
+   { /*If: I could not open the database*/
+      tmpStr = coordFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defGeneCoordStr,0, 0);
+      outFILE = fopen(coordFileStr, "r");
+
+      if(! outFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = coordFileStr;
+         tmpStr+=ulCpStrDelim(tmpStr,defGeneCoordStr,0,0);
+         outFILE = fopen(coordFileStr, "r");
+
+         if(! outFILE)
+            coordFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(outFILE) fclose(outFILE);
+   outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-03:
@@ -450,6 +525,7 @@ main(
          &graphFlagStr,    /*ampDepth column 1*/
          &mkGraphBl,       /*Make a graph*/
          &graphFileTypeStr,/*graph extension*/
+         &frameshiftBl,    /*AMR frame shift checking*/
          &fudgeLenI        /*Fudge size for MIRU tables*/
    ); /*getInput_freezeTb*/
 
@@ -516,20 +592,22 @@ main(
    ^   o main sec-04 sub-03:
    ^     - output file for the AMRs found in reads
    ^   o main sec-04 sub-04:
-   ^     - output file for the AMRs found in consensus
+   ^     - Set up read id AMR hit table
    ^   o main sec-04 sub-05:
-   ^     - output file for MIRU lineages (reads)
+   ^     - output file for the AMRs found in consensus
    ^   o main sec-04 sub-06:
-   ^     - output file for MIRU lineages (consensus)
+   ^     - output file for MIRU lineages (reads)
    ^   o main sec-04 sub-07:
-   ^     - Check if the MIRU table exists
+   ^     - output file for MIRU lineages (consensus)
    ^   o main sec-04 sub-08:
-   ^     - Check if amr table exists
+   ^     - Check if the MIRU table exists
    ^   o main sec-04 sub-09:
-   ^     - Open the sam file
+   ^     - Check if amr table exists
    ^   o main sec-04 sub-10:
-   ^     - Set up name for and open consensus output file
+   ^     - Open the sam file
    ^   o main sec-04 sub-11:
+   ^     - Set up name for and open consensus output file
+   ^   o main sec-04 sub-12:
    ^     - Open the paf (gene coordinates) file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -614,6 +692,34 @@ main(
 
    /*****************************************************\
    * Main Sec-04 Sub-04:
+   *   - Set up read id AMR hit table
+   \*****************************************************/
+
+   tmpStr = idFileStr;
+
+   tmpStr += ulCpStrDelim(tmpStr, prefixStr, 0, '\0');
+
+   tmpStr +=
+      ulCpStrDelim(tmpStr, "-id-amrs.tsv", 0, '\0');
+
+   outFILE = fopen(idFileStr, "w");
+
+   if(! outFILE)
+   { /*If: I could not open the filtered read stats file*/
+      fprintf(
+         stderr,
+         "unable to open %s for output\n",
+         idFileStr
+      );
+
+      exit(-1);
+   } /*If: I could not open the filtered read stats file*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-04 Sub-05:
    *   - Set up the name for the consensus AMRs table
    \*****************************************************/
 
@@ -640,7 +746,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-05:
+   * Main Sec-04 Sub-06:
    *   - Set up the name for the MIRU reads table
    \*****************************************************/
 
@@ -667,7 +773,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-06:
+   * Main Sec-04 Sub-07:
    *   - Set up the name for the MIRU consensus table
    \*****************************************************/
 
@@ -694,7 +800,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-07:
+   * Main Sec-04 Sub-08:
    *   - Check if the MIRU table exists
    \*****************************************************/
 
@@ -715,7 +821,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-08:
+   * Main Sec-04 Sub-09:
    *   - Check if amr table exists
    \*****************************************************/
 
@@ -737,7 +843,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-09:
+   * Main Sec-04 Sub-10:
    *   - Open the sam file
    \*****************************************************/
    
@@ -760,7 +866,7 @@ main(
    } /*Else: I need to open the sam file*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-10:
+   * Main Sec-04 Sub-11:
    *   - Set up name for and open consensus output file
    \*****************************************************/
 
@@ -786,13 +892,13 @@ main(
    } /*If: I could not open the filtered read stats file*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-11:
+   * Main Sec-04 Sub-12:
    *   - Open the paf (gene coordinates) file
    \*****************************************************/
    
-   pafFILE = fopen(coordFileStr, "r");
+   outFILE = fopen(coordFileStr, "r");
 
-   if(! pafFILE)
+   if(! outFILE)
    { /*If: I could not open the gene coordinates file*/
       fprintf(
          stderr,
@@ -808,6 +914,9 @@ main(
 
       exit(-1);
    } /*If: I could not open the gene coordinates file*/
+
+   fclose(outFILE);
+   outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-05:
@@ -825,9 +934,8 @@ main(
    *   - Read in the gene mapping coodiantes
    \*****************************************************/
 
-   coordsST = pafGetGeneCoords(pafFILE, &numCoordsI);
-   fclose(pafFILE);
-   pafFILE = 0;
+   coordsST =
+      getGeneCoords(coordFileStr,&numCoordsI,&lenBuffUL);
 
    if(! coordsST)
    { /*If: I had a memory error*/
@@ -837,6 +945,8 @@ main(
 
       exit(-1);
    } /*If: I had a memory error*/
+
+   lenBuffUL = 0;
 
    /*****************************************************\
    * Main Sec-05 Sub-02:
@@ -855,13 +965,6 @@ main(
 
    if(errC)
    { /*If: I had an error of some kind*/
-      freeSamEntryStack(&samST);
-      freeGeneCoords(&coordsST);
-
-      if(samFILE != stdin) fclose(samFILE);
-
-      fclose(samConFILE);
-
       if(errC == def_amrST_invalidFILE)
          fprintf(
            stderr,
@@ -875,7 +978,7 @@ main(
            "(mem) Err; when processing variant id's\n"
          );
 
-      exit(-1);
+      goto err_main_sec11_sub02;
    } /*If: I had an error of some kind*/
 
    /*****************************************************\
@@ -887,14 +990,6 @@ main(
 
    if(errC)
    { /*If: I had an error with the MIRU database*/
-      freeSamEntryStack(&samST);
-      freeGeneCoords(&coordsST);
-      freeAmrStructArray(&amrSTAry, numAmrI);
-
-      if(samFILE != stdin) fclose(samFILE);
-
-      fclose(samConFILE);
-
       if(errC == def_fileErr_miruTblST)
          fprintf(
             stderr,
@@ -912,7 +1007,7 @@ main(
                miruDbFileStr
          ); /*Let the user know the error*/
 
-      exit(-1);
+      goto err_main_sec11_sub02;
    } /*If: I had an error with the MIRU database*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -955,25 +1050,13 @@ main(
       { /*If: this has length information*/
          if(multiRefBl)
          { /*If: sam file has multiple references*/
-            if(samFILE != stdin) fclose(samFILE);
-
-            fclose(samConFILE);
-
-            freeSamEntryStack(&samST);
-            freeGeneCoords(&coordsST);
-            freeAmrStructArray(&amrSTAry, numAmrI);
-            freeMiruTbl(&miruST);
-            free(buffStr);
-            
             fprintf(
                stderr,
                "-sam %s has multiple references\n",
                samFileStr
             ); /*Let user know the problem*/
 
-            if(samFILE != stdin) fclose(samFILE);
-
-            exit(-1);
+            goto err_main_sec11_sub02;
          } /*If: sam file has multiple references*/
 
          multiRefBl = 1;
@@ -1142,46 +1225,24 @@ main(
 
    if(! readMapIAry)
    { /*If: I had an memory error*/
-      freeSamEntryStack(&samST);
-      freeGeneCoords(&coordsST);
-      freeAmrStructArray(&amrSTAry, numAmrI);
-      freeMiruTbl(&miruST);
-      free(buffStr);
-            
-      fclose(samConFILE);
-
-      if(samFILE != stdin) fclose(samFILE);
-
       fprintf(stderr, "Ran out of memory\n");
-
-      exit(-1);
+      goto err_main_sec11_sub02;
    } /*If: I had an memory error*/
 
    filt_readMapIAry = calloc(lenRefI, sizeof(int));
 
    if(! filt_readMapIAry)
    { /*If: I had an memory error*/
-      freeSamEntryStack(&samST);
-      freeGeneCoords(&coordsST);
-      freeAmrStructArray(&amrSTAry, numAmrI);
-      freeMiruTbl(&miruST);
-
-      free(buffStr);
-      free(readMapIAry);
-
-      fclose(samConFILE);
-            
-      if(samFILE != stdin) fclose(samFILE);
-
       fprintf(stderr, "Ran out of memory\n");
-
-      exit(-1);
+      goto err_main_sec11_sub02;
    } /*If: I had an memory error*/
 
    /*****************************************************\
    * Main Sec-07 Sub-02:
    *   - filter the reads
    \*****************************************************/
+
+   idFILE = fopen(idFileStr, "w");
 
    while(! errS)
    { /*Loop: Process each read in the sam file*/
@@ -1257,17 +1318,8 @@ main(
             
       if(errS & def_tbCon_Memory_Err)
       { /*If: memory error for consensus*/
-         freeSamEntryStack(&samST);
-         freeGeneCoords(&coordsST);
-         freeAmrStructArray(&amrSTAry, numAmrI);
-         freeConBaseAry(&conBaseSTAry, lenRefI);
-         freeMiruTbl(&miruST);
-
-         free(buffStr);
-         free(readMapIAry);
-         free(filt_readMapIAry);
-            
-         if(samFILE != stdin) fclose(samFILE);
+         fprintf(stderr, "Memory error\n");
+         goto err_main_sec11_sub02;
       } /*If: memory error for consensus*/
 
       /**************************************************\
@@ -1281,28 +1333,22 @@ main(
             amrSTAry,
             numAmrI,
             &numHitsI,
+            0,
             &errC
          ); /*Check if read has antibiotic resistance*/
 
       if(errC)
-      { /*If: memory error for consensus*/
-         freeSamEntryStack(&samST);
-         freeGeneCoords(&coordsST);
-         freeAmrStructArray(&amrSTAry, numAmrI);
-         freeConBaseAry(&conBaseSTAry, lenRefI);
-         freeMiruTbl(&miruST);
-
-         free(buffStr);
-         free(readMapIAry);
-         free(filt_readMapIAry);
-            
-         fclose(samConFILE);
-
-         if(samFILE != stdin) fclose(samFILE);
-      } /*If: memory error for consensus*/
+      { /*If: memory error for AMR*/
+         fprintf(stderr, "Memory error\n");
+         goto err_main_sec11_sub02;
+      } /*If: memory error for AMR*/
 
       /*I only care about this for consensuses*/
-      if(amrHitSTList) freeAmrHitList(amrHitSTList);
+      if(amrHitSTList)
+      { /*If: I had AMRs*/
+         pAmrReadIds(samST.qryIdStr,amrHitSTList,idFILE);
+         freeAmrHitList(amrHitSTList);
+      } /*If: I had AMRs*/
 
       /**************************************************\
       * Main Sec-07 Sub-06:
@@ -1332,6 +1378,9 @@ main(
    if(samFILE != stdin) fclose(samFILE);
 
    samFILE = 0;
+
+   fclose(idFILE);
+   idFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-08:
@@ -1370,6 +1419,7 @@ main(
     ); /*Print out the unfilterd read stats*/
 
    free(readMapIAry);
+   readMapIAry = 0;
 
    /*****************************************************\
    * Main Sec-08 Sub-02:
@@ -1398,7 +1448,10 @@ main(
    outFILE = 0;
 
    free(filt_readMapIAry);
-   freeGeneCoords(&coordsST);
+   filt_readMapIAry = 0;
+
+   freeGeneCoords(coordsST);
+   coordsST = 0;
 
    /*****************************************************\
    * Main Sec-08 Sub-03:
@@ -1447,11 +1500,12 @@ main(
    \*****************************************************/
 
    /*Build the tsv of variants table*/
-   errC = pConBaseArray( conBaseSTAry,
-        lenRefI,
-        refIdStr,
-        &tbConSettings,
-        conTsvStr
+   errC =
+      pConBaseArray( conBaseSTAry,
+         lenRefI,
+         refIdStr,
+         &tbConSettings,
+         conTsvStr
       ); /*Print out the variants (not a vcf)*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1485,16 +1539,8 @@ main(
 
    if(! samConSTAry)
    { /*If: I could not build the consensus*/
-      freeAmrStructArray(&amrSTAry, numAmrI);
-      freeMiruTbl(&miruST);
-      free(drugStrAry);
-      free(buffStr);
-
-      fclose(samConFILE);
-
       fprintf(stderr, "Could not build consensus\n");
-
-      exit(-1);
+      goto err_main_sec11_sub02;
    } /*If: I could not build the consensus*/
    
    /*****************************************************\
@@ -1543,10 +1589,12 @@ main(
             amrSTAry,
             numAmrI,
             &numHitsI,
+            frameshiftBl,
             &errC
          ); /*Check if read has antibiotic resistance*/
 
-      if(errC) continue;
+      if(errC)
+         continue; /*At this piont easier to keep moving*/
 
       if(amrHitSTList)
       { /*If: I had AMRs*/
@@ -1600,7 +1648,7 @@ main(
       tmpStr +=
          ulCpStrDelim(
             tmpStr,
-            "Rscript graphAmpDepth.r -stats ",
+            "graphAmpDepth.r -stats ",
             0,
             '\0'
          ); /*Copy the Rscript name*/
@@ -1620,11 +1668,74 @@ main(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-11:
    ^   - Clean up
+   ^   o main sec-11 sub-01:
+   ^     - Clean up for no errors
+   ^   o main sec-11 sub-02:
+   ^     - Error clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Main Sec-11 Sub-01:
+   *   - Clean up for no errors
+   \*****************************************************/
 
    free(buffStr);
 
    exit(0);
+
+   /*****************************************************\
+   * Main Sec-11 Sub-02:
+   *   - Error clean up
+   \*****************************************************/
+
+   err_main_sec11_sub02:;
+
+   freeSamEntryStack(&samST);
+
+   freeGeneCoords(coordsST);
+   coordsST = 0;
+
+   if(numAmrI > 0)
+      freeAmrStructArray(&amrSTAry, numAmrI);
+
+   amrSTAry = 0;
+
+   freeMiruTbl(&miruST);
+   miruST = 0;
+
+   freeConBaseAry(&conBaseSTAry, lenRefI);
+   conBaseSTAry = 0;
+
+   free(buffStr);
+   buffStr = 0;
+
+   free(readMapIAry);
+   readMapIAry = 0;
+
+   free(filt_readMapIAry);
+   filt_readMapIAry = 0;
+
+   free(drugStrAry);
+   drugStrAry = 0;
+
+   if(samFILE && samFILE != stdin)
+      fclose(samFILE);
+
+   samFILE = 0;
+
+   if(outFILE && outFILE != stdout)
+      fclose(outFILE);
+
+   outFILE = 0;
+
+   if(samConFILE) fclose(samConFILE);
+
+   if(idFILE)
+      fclose(idFILE);
+
+   idFILE = 0;
+
+   exit(-1);
 } /*main*/
 
 /*-------------------------------------------------------\
@@ -1681,6 +1792,8 @@ main(
 |       o Pointer to C-string that is set to point to the
 |         file extension for the R graphs
 |   Misc:
+|     - frameshiftBl:
+|       o 1: users wants frame shift checking on consensus
 |     - fudgeLenI:
 |       o Pointer to integer to hold the fudge length
 |         for assiging a read to an MIRU lineage
@@ -1725,6 +1838,7 @@ getInput_freezeTb(
    char **graphFileTypeStr,
 
    /*misc*/
+   char *frameshiftBl,
    int *fudgeLenI
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: getInput_freezeTb
@@ -1756,9 +1870,9 @@ getInput_freezeTb(
    ^   o fun-01 sec-02 sub-03:
    ^     - Printing settings (for consensus tsv)
    ^   o fun-01 sec-02 sub-04:
-   ^     - One unique setting for tbAmr
+   ^     - tbAmr settings
    ^   o fun-01 sec-02 sub-05:
-   ^     - Read Median/mean q-scores (freezeTb only)
+   ^     - Read filterin
    ^   o fun-01 sec-02 sub-06:
    ^     - ampDepth tsv read depth file column 1 value
    ^   o fun-01 sec-02 sub-07:
@@ -1863,16 +1977,6 @@ getInput_freezeTb(
             return (iArg<<8) | def_nonNumeric_freezeTb;
       } /*If: user provided the minimum inserion Q-score*/
 
-      else if(! cStrEql("-min-mapq", argStr, '\0'))
-      { /*If: user provided the minimum mapping quality*/
-         argStr = argsStrAry[iArg + 1];
-         tmpStr=base10StrToUC(argStr,settings->minMapqUC);
-
-         /*Check for errors*/
-         if(tmpStr[0] != '\0')
-            return (iArg<<8) | def_nonNumeric_freezeTb;
-      } /*If: user provided the minimum mapping quality*/
-
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun-01 Sec-02 Sub-02 Cat-02:
       +    - Consensus min depth/length settings
@@ -1971,16 +2075,38 @@ getInput_freezeTb(
 
       /**************************************************\
       * Fun-01 Sec-02 Sub-04:
-      *   - One unique setting for tbAmr
+      *   - AMR settings
       \**************************************************/
 
       else if(! cStrEql(argStr,"-min-amr-map-perc",'\0'))
          *minPercMapF= atof(argsStrAry[iArg + 1]);
 
+      else if(! cStrEql(argStr,"-frameshift",'\0'))
+      { /*Else if: The user wanted frameshift checking*/
+         *frameshiftBl = 1;
+         ++iArg;
+      } /*Else if: The user wanted frameshift checking*/
+
+      else if(! cStrEql(argStr,"-no-frameshift",'\0'))
+      { /*Else if: user did not want frameshift checking*/
+         *frameshiftBl = 0;
+         ++iArg;
+      } /*Else if: user did not want frameshift checking*/
+
       /**************************************************\
       * Fun-01 Sec-02 Sub-05:
-      *   - Read Median/mean q-scores (freezeTb only)
+      *   - Filterting (mapq/mean/median)
       \**************************************************/
+
+      else if(! cStrEql("-min-mapq", argStr, '\0'))
+      { /*If: user provided the minimum mapping quality*/
+         argStr = argsStrAry[iArg + 1];
+         tmpStr=base10StrToUC(argStr,settings->minMapqUC);
+
+         /*Check for errors*/
+         if(tmpStr[0] != '\0')
+            return (iArg<<8) | def_nonNumeric_freezeTb;
+      } /*If: user provided the minimum mapping quality*/
 
       else if(! cStrEql(argStr,"-min-median-q",'\0'))
          *minMedianQF = atof(argsStrAry[iArg + 1]);
@@ -2162,13 +2288,15 @@ pHelp_freezeTb(
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    '   o fun-02 sec-01:
    '     - Variable declerations
-   '   o fun-02 sec-02:
-   '     - Build the usage entry
+   '   o fun-02 Sec-02:
+   '     - Find default file paths
    '   o fun-02 sec-03:
-   '     - Build the input entry
+   '     - Build the usage entry
    '   o fun-02 sec-04:
-   '     - Build the output entry
+   '     - Build the input entry
    '   o fun-02 sec-05:
+   '     - Build the output entry
+   '   o fun-02 sec-06:
    '     - Print the help message
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -2180,8 +2308,134 @@ pHelp_freezeTb(
    char helpStr[4096];
    int lenHelpI = 0;
 
+   /*For finding default database locations*/
+   #ifdef WINDOWS
+      char *sharePathStr = getenv("PUBLIC");
+      char *homePathStr = getenv("HOMEPATH");
+   #else
+      char *sharePathStr = "/usr/local";
+      char *homePathStr = getenv("HOME");
+   #endif
+
+   char *tmpStr = 0;
+   char amrDbFileStr[256];
+   char miruTblFileStr[256];
+   char coordFileStr[256];
+
+   FILE *testFILE = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-02 Sec-02:
+   ^   - Find default file paths
+   ^   o main sec-02 sub-01:
+   ^     - Set the path to the amr database
+   ^   o main sec-02 sub-02:
+   ^     - Set the path to the MIRU lineages
+   ^   o main sec-02 sub-03:
+   ^     - Set the path to the gene coordinates file
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Main Sec-02 Sub-01:
+   *   - Set the path to the amr database
+   \*****************************************************/
+
+   tmpStr = amrDbFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defAmrDbStr, 0, 0);
+   testFILE = fopen(amrDbFileStr, "r");
+
+   if(! testFILE)
+   { /*If: I could not open the database*/
+      tmpStr = amrDbFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr, defAmrDbStr, 0, 0);
+      testFILE = fopen(amrDbFileStr, "r");
+
+      if(! testFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = amrDbFileStr;
+         tmpStr += ulCpStrDelim(tmpStr,defAmrDbStr,0,0);
+         testFILE = fopen(amrDbFileStr, "r");
+
+         if(! testFILE)
+            amrDbFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(testFILE) fclose(testFILE);
+   testFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-02 Sub-02:
+   *   - Set the path to the MIRU lineages
+   \*****************************************************/
+
+   tmpStr = miruTblFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defMiruTblStr, 0, 0);
+   testFILE = fopen(miruTblFileStr, "r");
+
+   if(! testFILE)
+   { /*If: I could not open the database*/
+      tmpStr = miruTblFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr, defMiruTblStr, 0, 0);
+      testFILE = fopen(miruTblFileStr, "r");
+
+      if(! testFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = miruTblFileStr;
+         tmpStr += ulCpStrDelim(tmpStr,defMiruTblStr,0,0);
+         testFILE = fopen(miruTblFileStr, "r");
+
+         if(! testFILE)
+            miruTblFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(testFILE) fclose(testFILE);
+   testFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-02 Sub-03:
+   *   - Set the path to the gene coordinates file
+   \*****************************************************/
+
+   tmpStr = coordFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defGeneCoordStr, 0, 0);
+   testFILE = fopen(coordFileStr, "r");
+
+   if(! testFILE)
+   { /*If: I could not open the database*/
+      tmpStr = coordFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defGeneCoordStr,0, 0);
+      testFILE = fopen(coordFileStr, "r");
+
+      if(! testFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = coordFileStr;
+         tmpStr+=ulCpStrDelim(tmpStr,defGeneCoordStr,0,0);
+         testFILE = fopen(coordFileStr, "r");
+
+         if(! testFILE)
+            coordFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(testFILE) fclose(testFILE);
+   testFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-02 Sec-03:
    ^   - Build the usage entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
  
@@ -2200,43 +2454,43 @@ pHelp_freezeTb(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-03:
+   ^ Fun-02 Sec-04:
    ^   - Build the input entry
-   ^   o fun-02 sec-03 sub-01:
+   ^   o fun-02 sec-04 sub-01:
    ^     - Build the input header/File IO input
-   ^   o fun-02 sec-03 sub-02:
+   ^   o fun-02 sec-04 sub-02:
    ^     - Fitering settings
-   ^   o fun-02 sec-03 sub-03:
+   ^   o fun-02 sec-04 sub-03:
    ^     - Consensus settings
-   ^   o fun-02 sec-03 sub-04:
+   ^   o fun-02 sec-04 sub-04:
    ^     - Print out the print settings
-   ^   o fun-02 sec-03 sub-05:
+   ^   o fun-02 sec-04 sub-05:
    ^     - Print out the graph settings
-   ^   o fun-02 sec-03 sub-06:
+   ^   o fun-02 sec-04 sub-06:
    ^     - Print out the MIRU table settings
-   ^   o fun-02 sec-03 sub-07:
+   ^   o fun-02 sec-04 sub-07:
    ^     - Print out the help message and version numbers
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-01:
+   * Fun-02 Sec-04 Sub-01:
    *   - Build the input header/File IO input
-   *   o fun-02 sec-03 sub-01 cat-01:
+   *   o fun-02 sec-04 sub-01 cat-01:
    *     - Build the input header
-   *   o fun-02 sec-03 sub-01 cat-02:
+   *   o fun-02 sec-04 sub-01 cat-02:
    *     - Sam file input
-   *   o fun-02 sec-03 sub-01 cat-03:
+   *   o fun-02 sec-04 sub-01 cat-03:
    *     - Prefix to name output files
-   *   o fun-02 sec-03 sub-01 cat-04:
+   *   o fun-02 sec-04 sub-01 cat-04:
    *     - AMR table input
-   *   o fun-02 sec-03 sub-01 cat-05:
+   *   o fun-02 sec-04 sub-01 cat-05:
    *     - Gene coordinates (paf) input
-   *   o fun-02 sec-03 sub-01 cat-06:
+   *   o fun-02 sec-04 sub-01 cat-06:
    *     - MIRU table input
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-01 Cat-01:
+   + Fun-02 Sec-04 Sub-01 Cat-01:
    +   - Build the input header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2248,7 +2502,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-01 Cat-02:
+   + Fun-02 Sec-04 Sub-01 Cat-02:
    +   - Sam file input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2267,7 +2521,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-01 Cat-03:
+   + Fun-02 Sec-04 Sub-01 Cat-03:
    +   - Prefix to name output files
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2299,7 +2553,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-01 Cat-04:
+   + Fun-02 Sec-04 Sub-01 Cat-04:
    +   - AMR table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2310,25 +2564,25 @@ pHelp_freezeTb(
       '\0'         
    );
 
-   if(*defPathStr != '\0')
+   if(amrDbFileStr[0] != '\0')
    { /*If: I have a path*/
       lenHelpI += ulCpStrDelim(
          &helpStr[lenHelpI],
-         defPathStr,
+         amrDbFileStr,
          0,
          '\0'         
       );
-
-      helpStr[lenHelpI] = '/';
-      ++lenHelpI;
    } /*If: I have a path*/
 
-   lenHelpI += ulCpStrDelim(
-      &helpStr[lenHelpI],
-      defAmrDbStr,
-      0,
-      '\0'         
-   );
+   else
+   { /*Else: I could not find the database*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "Required",
+         0,
+         '\0'         
+      );
+   } /*Else: I could not find the database*/
 
    helpStr[lenHelpI] = ']';
    ++lenHelpI;
@@ -2344,7 +2598,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-01 Cat-05:
+   + Fun-02 Sec-04 Sub-01 Cat-05:
    +   - Gene coordinates (paf) input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2355,25 +2609,25 @@ pHelp_freezeTb(
       '\0'         
    );
 
-   if(*defPathStr != '\0')
-   { /*If: I have an default file path*/
+   if(coordFileStr[0] != '\0')
+   { /*If: I have a path*/
       lenHelpI += ulCpStrDelim(
          &helpStr[lenHelpI],
-         defPathStr,
+         coordFileStr,
          0,
          '\0'         
       );
+   } /*If: I have a path*/
 
-      helpStr[lenHelpI] = '/';
-      ++lenHelpI;
-   } /*If: I have an default file path*/
-
-   lenHelpI += ulCpStrDelim(
-      &helpStr[lenHelpI],
-      defGeneCoordStr,
-      0,
-      '\0'         
-   );
+   else
+   { /*Else: I could not find the database*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "Required",
+         0,
+         '\0'         
+      );
+   } /*Else: I could not find the database*/
 
    helpStr[lenHelpI] = ']';
    ++lenHelpI;
@@ -2383,13 +2637,13 @@ pHelp_freezeTb(
 
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
-      "      o Paf file with NC000962 gene coordinates\n",
+      "      o Gene coordinate table (for NC000962.3)\n",
       0,
       '\0'         
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-01 Cat-06:
+   + Fun-02 Sec-04 Sub-01 Cat-06:
    +   - MIRU table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2400,25 +2654,25 @@ pHelp_freezeTb(
       '\0'         
    );
 
-   if(*defPathStr != '\0')
-   { /*If: I have an default file path*/
+   if(miruTblFileStr[0] != '\0')
+   { /*If: I have a path*/
       lenHelpI += ulCpStrDelim(
          &helpStr[lenHelpI],
-         defPathStr,
+         miruTblFileStr,
          0,
          '\0'         
       );
+   } /*If: I have a path*/
 
-      helpStr[lenHelpI] = '/';
-      ++lenHelpI;
-   } /*If: I have an default file path*/
-
-   lenHelpI += ulCpStrDelim(
-      &helpStr[lenHelpI],
-      defMiruTblStr,
-      0,
-      '\0'         
-   );
+   else
+   { /*Else: I could not find the database*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "Required",
+         0,
+         '\0'         
+      );
+   } /*Else: I could not find the database*/
 
    helpStr[lenHelpI] = ']';
    ++lenHelpI;
@@ -2441,22 +2695,22 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-02:
+   * Fun-02 Sec-04 Sub-02:
    *   - Fitering settings
-   *   o fun-02 sec-03 sub-02 cat-01:
+   *   o fun-02 sec-04 sub-02 cat-01:
    *     - Print the header
-   *   o fun-02 sec-03 sub-02 cat-02:
+   *   o fun-02 sec-04 sub-02 cat-02:
    *     - Print mapping quality filter
-   *   o fun-02 sec-03 sub-02 cat-03:
+   *   o fun-02 sec-04 sub-02 cat-03:
    *     - Print out the min length filter
-   *   o fun-02 sec-03 sub-02 cat-04:
+   *   o fun-02 sec-04 sub-02 cat-04:
    *     - Print out the mean Q-score filter
-   *   o fun-02 sec-03 sub-02 cat-05:
+   *   o fun-02 sec-04 sub-02 cat-05:
    *     - Print out the median Q-score filter
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-02 Cat-01:
+   + Fun-02 Sec-04 Sub-02 Cat-01:
    +   - Print the read fitering header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2468,7 +2722,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-02 Cat-02:
+   + Fun-02 Sec-04 Sub-02 Cat-02:
    +   - Print mapping quality filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2495,7 +2749,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-02 Cat-03:
+   + Fun-02 Sec-04 Sub-02 Cat-03:
    +   - Print out the min length filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2522,7 +2776,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-02 Cat-04:
+   + Fun-02 Sec-04 Sub-02 Cat-04:
    +   - Print out the mean Q-score filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2553,7 +2807,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-02 Cat-05:
+   + Fun-02 Sec-04 Sub-02 Cat-05:
    +   - Print out the median Q-score filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2584,28 +2838,28 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-03:
+   * Fun-02 Sec-04 Sub-03:
    *   - Consensus settings
-   *   o fun-02 sec-03 sub-03 cat-01:
+   *   o fun-02 sec-04 sub-03 cat-01:
    *     - Print out the consensus setting header
-   *   o fun-02 sec-03 sub-03 cat-02:
+   *   o fun-02 sec-04 sub-03 cat-02:
    *     - Print out the min depth filter
-   *   o fun-02 sec-03 sub-03 cat-03:
+   *   o fun-02 sec-04 sub-03 cat-03:
    *     - Print out the min length to keep a fragment
-   *   o fun-02 sec-03 sub-03 cat-04:
+   *   o fun-02 sec-04 sub-03 cat-04:
    *     - Print out the min snp/match Q-score
-   *   o fun-02 sec-03 sub-03 cat-05:
+   *   o fun-02 sec-04 sub-03 cat-05:
    *     - Print out the min insertion Q-score
-   *   o fun-02 sec-03 sub-03 cat-06:
+   *   o fun-02 sec-04 sub-03 cat-06:
    *     - Print out the min percdent snp/match support
-   *   o fun-02 sec-03 sub-03 cat-07:
+   *   o fun-02 sec-04 sub-03 cat-07:
    *     - Print out the min percdent insertion support
-   *   o fun-02 sec-03 sub-03 cat-08:
+   *   o fun-02 sec-04 sub-03 cat-08:
    *     - Print out the min percent deletion support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-01:
+   + Fun-02 Sec-04 Sub-03 Cat-01:
    +   - Print out the consensus setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2619,7 +2873,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-02:
+   + Fun-02 Sec-04 Sub-03 Cat-02:
    +   - Print out the min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2646,7 +2900,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-03:
+   + Fun-02 Sec-04 Sub-03 Cat-03:
    +   - Print out the min length to keep a fragment
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2677,7 +2931,7 @@ pHelp_freezeTb(
 
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-04:
+   + Fun-02 Sec-04 Sub-03 Cat-04:
    +   - Print out the min snp/match Q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2704,7 +2958,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-05:
+   + Fun-02 Sec-04 Sub-03 Cat-05:
    +   - Print out the min insertion Q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2731,7 +2985,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-06:
+   + Fun-02 Sec-04 Sub-03 Cat-06:
    +   - Print out the min percdent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2768,7 +3022,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-07:
+   + Fun-02 Sec-04 Sub-03 Cat-07:
    +   - Print out the min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2810,7 +3064,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-03 Cat-08:
+   + Fun-02 Sec-04 Sub-03 Cat-08:
    +   - Print out the min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2852,24 +3106,24 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-04:
+   * Fun-02 Sec-04 Sub-04:
    *   - Print out the print settings
-   *   o fun-02 sec-03 sub-04 cat-01:
+   *   o fun-02 sec-04 sub-04 cat-01:
    *     - Print out the print setting header
-   *   o fun-02 sec-03 sub-04 cat-02:
+   *   o fun-02 sec-04 sub-04 cat-02:
    *     - Print out the print min depth filter
-   *   o fun-02 sec-03 sub-04 cat-03:
+   *   o fun-02 sec-04 sub-04 cat-03:
    +     - Print out min percent of reads to keep read AMR
-   *   o fun-02 sec-03 sub-04 cat-04:
+   *   o fun-02 sec-04 sub-04 cat-04:
    *     - Print out the min perccent snp/match support
-   *   o fun-02 sec-03 sub-04 cat-05:
+   *   o fun-02 sec-04 sub-04 cat-05:
    *     - Print out the min percent insertion support
-   *   o fun-02 sec-03 sub-04 cat-06:
+   *   o fun-02 sec-04 sub-04 cat-06:
    *     - Print out the min percent deletion support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-04 Cat-01:
+   + Fun-02 Sec-04 Sub-04 Cat-01:
    +   - Print out the print setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2885,7 +3139,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-04 Cat-02:
+   + Fun-02 Sec-04 Sub-04 Cat-02:
    +   - Print out the print min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2920,7 +3174,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-04 Cat-03:
+   + Fun-02 Sec-04 Sub-04 Cat-03:
    +   - Print out min percent of reads to keep read AMR
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2932,13 +3186,24 @@ pHelp_freezeTb(
    );
 
    lenHelpI +=
-      numToStr(&helpStr[lenHelpI], defMinPerReadsMap);
+      numToStr(
+         &helpStr[lenHelpI],
+         (ulong) defMinPerReadsMap
+      );
 
-   helpStr[lenHelpI] = ']';
-   ++lenHelpI;
+   helpStr[lenHelpI++] = '.';
 
-   helpStr[lenHelpI] = '\n';
-   ++lenHelpI;
+   lenHelpI +=
+      numToStr(
+         &helpStr[lenHelpI],
+         (ulong) (
+              (defMinPerReadsMap * 100) -
+            - (((ulong) defMinPerReadsMap) * 100)
+         ) /*Get the decimal digits*/
+      );
+
+   helpStr[lenHelpI++] = ']';
+   helpStr[lenHelpI++] = '\n';
 
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
@@ -2951,7 +3216,7 @@ pHelp_freezeTb(
    ++lenHelpI;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-04 Cat-04:
+   + Fun-02 Sec-04 Sub-04 Cat-04:
    +   - Print out the min percent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3000,7 +3265,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-04 Cat-05:
+   + Fun-02 Sec-04 Sub-04 Cat-05:
    +   - Print out the min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3042,7 +3307,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-04 Cat-06:
+   + Fun-02 Sec-04 Sub-04 Cat-06:
    +   - Print out the min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3084,20 +3349,20 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-05:
+   * Fun-02 Sec-04 Sub-05:
    *   - Print out the final settings
-   *   o fun-02 sec-03 sub-04 cat-01:
+   *   o fun-02 sec-04 sub-04 cat-01:
    *     - Graph settings header
-   *   o fun-02 sec-03 sub-04 cat-02:
+   *   o fun-02 sec-04 sub-04 cat-02:
    *     - -graph-flag setting
-   *   o fun-02 sec-03 sub-04 cat-03:
+   *   o fun-02 sec-04 sub-04 cat-03:
    *     - Make graphs flag
-   *   o fun-02 sec-03 sub-04 cat-04:
+   *   o fun-02 sec-04 sub-04 cat-04:
    *     - Graph extension flag
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-05 Cat-01:
+   + Fun-02 Sec-04 Sub-05 Cat-01:
    +   - Graph settings header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3111,7 +3376,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-05 Cat-02:
+   + Fun-02 Sec-04 Sub-05 Cat-02:
    +   - -graph-flag setting
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3145,7 +3410,7 @@ pHelp_freezeTb(
 
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-05 Cat-03:
+   + Fun-02 Sec-04 Sub-05 Cat-03:
    +   - Make graphs flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3187,7 +3452,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-05 Cat-04:
+   + Fun-02 Sec-04 Sub-05 Cat-04:
    +   - Graph extension flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3223,7 +3488,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-06:
+   * Fun-02 Sec-04 Sub-06:
    *   - Print out the MIRU table settings
    \*****************************************************/
 
@@ -3262,16 +3527,18 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-03 Sub-06:
+   * Fun-02 Sec-04 Sub-06:
    *   - Print out the help message and version numbers
-   *   o fun-02 sec-03 sub-06 cat-01:
+   *   o fun-02 sec-04 sub-06 cat-01:
    *     - Other settings header
-   *   o fun-02 sec-03 sub-06 cat-02:
+   *   o fun-02 sec-04 sub-06 cat-02:
+   *     - Checking frameshifts
+   *   o fun-02 sec-04 sub-06 cat-03:
    *     - help messages/version
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-06 Cat-01:
+   + Fun-02 Sec-04 Sub-06 Cat-01:
    +   - Other settings header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3283,7 +3550,69 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-03 Sub-06 Cat-02:
+   + Fun-02 Sec-04 Sub-06 Cat-02:
+   +   - Checking frameshifts
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI +=
+      ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "    -frameshift: [",
+         0,
+         '\0'
+      );
+
+   if(! def_checkFrameshift_checkAmr)
+   { /*If: I am not doing frameshift checks*/
+      helpStr[lenHelpI++] = 'N';
+      helpStr[lenHelpI++] = 'o';
+   } /*If: I am not doing frameshift checks*/
+
+   else
+   { /*Else: I am doing frameshift checking*/
+      helpStr[lenHelpI++] = 'Y';
+      helpStr[lenHelpI++] = 'e';
+      helpStr[lenHelpI++] = 's';
+   } /*Else: I am doing frameshift checking*/
+
+   helpStr[lenHelpI++] = ']';
+   helpStr[lenHelpI++] = '\n';
+
+   lenHelpI +=
+      ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "      o On: checks for AMRs in frameshifts",
+         0,
+         '\0'
+       );
+   lenHelpI +=
+      ulCpStrDelim(
+         &helpStr[lenHelpI],
+         " (consensus only)\n",
+         0,
+         '\0'
+       );
+
+   lenHelpI +=
+      ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "      o Off: frameshifts are exact matches\n",
+         0,
+         '\0'
+       );
+
+   lenHelpI +=
+     ulCpStrDelim(
+       &helpStr[lenHelpI],
+       "      o Disable: with -no-frameshift (recommend)",
+       0,
+       '\0'
+      );
+
+   helpStr[lenHelpI++] = '\n';
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-06 Cat-03:
    +   - help messages/version
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3319,30 +3648,32 @@ pHelp_freezeTb(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-04:
+   ^ Fun-02 Sec-05:
    ^   - Print the output message
-   ^   o fun-02 sec-04 sub-01:
+   ^   o fun-02 sec-05 sub-01:
    ^     - Print out the output header
-   ^   o fun-02 sec-04 sub-02:
+   ^   o fun-02 sec-05 sub-02:
    ^     - Print out the consensus amrs file
-   ^   o fun-02 sec-04 sub-03:
+   ^   o fun-02 sec-05 sub-03:
    ^     - Print consensus mirufile
-   ^   o fun-02 sec-04 sub-04:
+   ^   o fun-02 sec-05 sub-04:
    ^     - Print out the consensus file
-   ^   o fun-02 sec-04 sub-05:
+   ^   o fun-02 sec-05 sub-05:
    ^     - Print out the variants file
-   ^   o fun-02 sec-04 sub-06:
+   ^   o fun-02 sec-05 sub-06:
    ^     - Print out the reads amr table
-   ^   o fun-02 sec-04 sub-07:
+   ^   o fun-02 sec-05 sub-07:
+   ^     - Print out the reads ids of AMR reads
+   ^   o fun-02 sec-05 sub-08:
    ^     - Print out the reads MIRU table
-   ^   o fun-02 sec-04 sub-08:
+   ^   o fun-02 sec-05 sub-09:
    ^     - Print out the filtered histogram file
-   ^   o fun-02 sec-04 sub-09:
+   ^   o fun-02 sec-05 sub-10:
    ^     - Print out the unfiltered histogram file
    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-01:
+   * Fun-02 Sec-05 Sub-01:
    *   - Print out the output header
    \*****************************************************/
 
@@ -3354,7 +3685,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-02:
+   * Fun-02 Sec-05 Sub-02:
    *   - Print out the consensus amrs file
    \*****************************************************/
 
@@ -3373,7 +3704,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-03:
+   * Fun-02 Sec-05 Sub-03:
    *   - Print consensus mirufile
    \*****************************************************/
 
@@ -3392,7 +3723,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-04:
+   * Fun-02 Sec-05 Sub-04:
    *   - Print out the consensus file
    \*****************************************************/
 
@@ -3411,7 +3742,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-05:
+   * Fun-02 Sec-05 Sub-05:
    *   - Print out the variants file
    \*****************************************************/
 
@@ -3430,7 +3761,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-06:
+   * Fun-02 Sec-05 Sub-06:
    *   - Print out the reads amr table
    \*****************************************************/
 
@@ -3450,7 +3781,27 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-07:
+   * Fun-02 Sec-05 Sub-07:
+   *   - Print out the reads ids of AMR reads
+   \*****************************************************/
+
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "  - prefix-id-amrs.tsv \n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+     &helpStr[lenHelpI],
+     "    o tsv file with ids of reads that had an AMR\n",
+     0,
+     '\0'         
+   );
+
+   /*****************************************************\
+   * Fun-02 Sec-05 Sub-08:
    *   - Print out the reads MIRU table
    \*****************************************************/
 
@@ -3470,7 +3821,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-08:
+   * Fun-02 Sec-05 Sub-09:
    *   - Print out the filtered histogram file
    \*****************************************************/
 
@@ -3496,7 +3847,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-09:
+   * Fun-02 Sec-05 Sub-10:
    *   - Print out the unfiltered histogram file
    \*****************************************************/
 
@@ -3522,7 +3873,7 @@ pHelp_freezeTb(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-05:
+   ^ Fun-02 Sec-06:
    ^   - Print the help message
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3593,3 +3944,122 @@ pVersion_freezeTb(
        def_day_trimSam
    );
 } /*pVersion_freezeTb*/
+
+/* Note-01:
+     - Windows enviromental variables
+` From: https://pureinfotech.com/list-environment-variables-windows-10/
+`  %ALLUSERSPROFILE%           C:\ProgramData
+`  %APPDATA%                   C:\Users\{username}\AppData\Roaming
+`  %COMMONPROGRAMFILES%        C:\Program Files\Common Files
+`  %COMMONPROGRAMFILES(x86)%   C:\Program Files (x86)\Common Files
+`  %CommonProgramW6432%        C:\Program Files\Common Files
+`  %COMSPEC%                   C:\Windows\System32\cmd.exe
+`  %HOMEDRIVE%                 C:\
+`  %HOMEPATH%                  C:\Users\{username}
+`  %LOCALAPPDATA%              C:\Users\{username}\AppData\Local
+`  %LOGONSERVER%               \\{domain_logon_server}
+`  %PATH%                      C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+`  %PathExt%                   .com;.exe;.bat;.cmd;.vbs;.vbe;.js;.jse;.wsf;.wsh;.msc
+`  %PROGRAMDATA%               C:\ProgramData
+`  %PROGRAMFILES%              C:\Program Files
+`  %ProgramW6432%              C:\Program Files
+`  %PROGRAMFILES(X86)%         C:\Program Files (x86)
+`  %PROMPT%                    $P$G
+`  %SystemDrive%               C:
+`  %SystemRoot%                C:\Windows
+`  %TEMP%                      C:\Users\{username}\AppData\Local\Temp
+`  %TMP%                       C:\Users\{username}\AppData\Local\Temp
+`  %USERDOMAIN%                Userdomain associated with current user.
+`  %USERDOMAIN_ROAMINGPROFILE% Userdomain associated with roaming profile.
+`  %USERNAME%                  {username}
+`  %USERPROFILE%               C:\Users\{username}
+`  %WINDIR%                    C:\Windows
+`  %PUBLIC%                    C:\Users\Public
+`  %PSModulePath%              %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\
+`  %OneDrive%                  C:\Users\{username}\OneDrive
+`  %DriverData%                C:\Windows\System32\Drivers\DriverData
+`  %CD%                        Outputs current directory path. (Command Prompt.)
+`  %CMDCMDLINE%                Outputs command line used to launch current Command Prompt session. (Command Prompt.)
+`  %CMDEXTVERSION%             Outputs the number of current command processor extensions. (Command Prompt.)
+`  %COMPUTERNAME%              Outputs the system name.
+`  %DATE%                      Outputs current date. (Command Prompt.)
+`  %TIME%                      Outputs time. (Command Prompt.)
+`  %ERRORLEVEL%                Outputs the number of defining exit status of previous command. (Command Prompt.)
+`  %PROCESSOR_IDENTIFIER%      Outputs processor identifier.
+`  %PROCESSOR_LEVEL%           Outputs processor level.
+`  %PROCESSOR_REVISION%        Outputs processor revision.
+`  %NUMBER_OF_PROCESSORS%      Outputs the number of physical and virtual cores.
+`  %RANDOM%                    Outputs random number from 0 through 32767.
+`  %OS%                        Windows_NT
+*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

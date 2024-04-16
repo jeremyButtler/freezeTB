@@ -9,11 +9,11 @@
 ' SOF: Start Of File
 '  o header:
 '    - Included libraries
-'  o st-01 samEntry: (.h only)
+'  o .h st-01 samEntry:
 '    - Holds a single samfile entry
-'  o fun-01 blankSamEntry: (.h only)
+'  o .h fun-01 blankSamEntry:
 '    - Sets all non-alloacted variables in samEntryST to 0
-'  o fun-02 initSamEntry: (.h only)
+'  o fun-02 initSamEntry:
 '    - Initalize a samEntry struct to 0's
 '  o fun-03 freeSamEntryStack:
 '    - Frees heap allocations in a stack allocated
@@ -22,25 +22,30 @@
 '    - Frees a samEntry structer (and sets to null)
 '  o fun-05: makeSamEntry
 '    - Makes an heap allocated samEntry structure
-'  o fun-08: cpQScore
+'  o .c fun-08: cpQScore
 '    - Copies Q-scores from a string into a samEntry
 '      structure
 '  o fun-09: readSamLine
 '    - Reads in a single line from a sam file
-'  o fun-10: pSamEntry
+'  o .h fun-10: samEntryFindRefPos
+'    - Find an reference coordinate in an sequence in
+'      an sam entry structure
+'  o fun-11: pSamEntry
 '    - Prints the sam file entry to a file. This does not
 '      print any extra stats that were found.
-'  o fun-11: pSamEntryAsFastq
+'  o fun-12: pSamEntryAsFastq
 '    - Prints the sam entry as a fastq entry to a fastq
 '      file
-'  o fun-12: pSamEntryAsFasta
+'  o fun-13: pSamEntryAsFasta
 '    - Prints the sam entry as a fasta entry to a fasta
 '      file
-'  o fun-13: pSamEntryStats
+'  o fun-14: pSamEntryStats
 '    - Prints out the stats in a samEntry struct to a file
-'  o note-01: (.h file only)
+'  o .h note-01:
 '     - Notes about the sam file format from the sam file
 '       pdf
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -919,7 +924,7 @@ readSamLine(
 } /*readSamLine*/
 
 /*-------------------------------------------------------\
-| Fun-10: pSamEntry
+| Fun-11: pSamEntry
 |  - Prints the sam file entry to a file. This does not
 |    print any extra stats that were found.
 | Input:
@@ -1106,7 +1111,7 @@ pSamEntry(
 } /*pSamEntry*/
 
 /*-------------------------------------------------------\
-| Fun-11: pSamEntryAsFastq
+| Fun-12: pSamEntryAsFastq
 |  - Prints the sam entry as a fastq entry to a fastq file
 | Input:
 |  - samST:
@@ -1163,7 +1168,7 @@ void pSamEntryAsFastq(
 } /*pSamEntryAsFq*/
 
 /*-------------------------------------------------------\
-| Fun-12: pSamEntryAsFasta
+| Fun-13: pSamEntryAsFasta
 |  - Prints the sam entry as a fasta entry to a fasta file
 | Input:
 |  - samST:
@@ -1214,7 +1219,7 @@ void pSamEntryAsFasta(
 } /*pSamEntryAsFasta*/
 
 /*-------------------------------------------------------\
-| Fun-13: pSamEntryStats
+| Fun-14: pSamEntryStats
 |  - Prints out the stats in a samEntry struct to a file
 | Input:
 |  - samEntryST:
@@ -1232,23 +1237,24 @@ void pSamEntryAsFasta(
 \-------------------------------------------------------*/
 void pSamEntryStats(
    struct samEntry *samSTPtr,
-   char pHeadBl,
+   char *pHeadBl,
    void *outFILE
 ){
    if(   (samSTPtr)->extraStr[0] != '@'
       && (samSTPtr)->qryIdStr[0] != '\0'
    ){ /*If: This is not a comment*/
-      if((pHeadBl))
+      if(*(pHeadBl))
       { /*If: I need to print the header*/
         fprintf((FILE *) (outFILE), "Read\tRef\tFlag");
         fprintf((FILE *) (outFILE), "\tMapQ\tRefPos"); 
         fprintf((FILE *) (outFILE), "\tReadLength");
         fprintf((FILE *) (outFILE), "\tRefAlnLength");
-        fprintf((FILE *) (outFILE), "\tMatches\tInss");
-        fprintf((FILE *) (outFILE), "\tDels\tSnps");
+        fprintf((FILE *) (outFILE), "\tMatches\tSnps");
+        fprintf((FILE *) (outFILE), "\tInss\tDels");
+        fprintf((FILE *) (outFILE), "\tsoftMask");
         fprintf((FILE *) (outFILE), "\tMedianQ\tMeanQ\n");
 
-        (pHeadBl) = 0;
+        *(pHeadBl) = 0;
       } /*If: I need to print the header*/
       
       fprintf(
@@ -1264,15 +1270,86 @@ void pSamEntryStats(
       
       fprintf(
         (FILE *) (outFILE),
-        "\t%u\t%u\t%u\t%u\t%u\t%f\t%f\n",
+        "\t%u\t%u\t%u\t%u\t%u\t%u\t%f\t%f\n",
         (samSTPtr)->alnReadLenUI,
         (samSTPtr)->numMatchUI,
         (samSTPtr)->numSnpUI,
         (samSTPtr)->numInsUI,
         (samSTPtr)->numDelUI,
+        (samSTPtr)->numMaskUI,
         (samSTPtr)->meanQF,
         (samSTPtr)->medianQF
       );
    } /*If: This is not a comment*/
 } /*pSamEntryStats*/
 
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconvient / not possible, this code is under the
+:   MIT license.
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

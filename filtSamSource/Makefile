@@ -6,17 +6,18 @@ DEBUGFLAGS= -static -O0 -ggdb -Wall
 
 source=\
    ../generalLib/samEntryStruct.c\
-   filtSam.c
+   ../generalLib/trimSam.c\
+   filtsam.c
 
 all:
-	$(CC) $(CFLAGS) -o filtSam $(source);
+	$(CC) $(CFLAGS) -o filtsam $(source);
 
 mac:
-	$(CC) $(MACCFLAGS) -o filtSam $(source);
+	$(CC) $(MACCFLAGS) -o filtsam $(source);
 
 debug:
-	$(CC) $(DEBUGFLAGS) -mavx512bw -DAVX512 -o debugFiltSam $(source);
-	gdb -x bug-cmds.txt debugFiltSam;
+	$(CC) $(DEBUGFLAGS) -o debugFiltsam $(source);
+	gdb -x bug-cmds.txt debugFiltsam;
 
 check:
-	$(CC) $(DEBUGFLAGS) -o debugFiltSam $(source);
+	$(CC) $(DEBUGFLAGS) -o debugFiltsam $(source);

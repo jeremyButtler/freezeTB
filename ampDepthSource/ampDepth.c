@@ -16,6 +16,8 @@
 '    - Gets the command line input supplied by the user
 '  o fun-02: pAmpDepthHelp
 '    - Prints the help message for ampDepth
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -45,9 +47,10 @@
 #include "../generalLib/genMath.h"
 #include "ampDepth-version.h"
 
-/*Hidden dependencies
-  #include "../generalLib/numToStr.h" no .c file
-*/
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden dependencies:
+!   o .h #include "../generalLib/numToStr.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define defMinDepth 20
 
@@ -160,30 +163,30 @@ int main(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*User input*/
-   char *pafStr = 0;
+   char *geneTblFileStr = 0;
    char *samStr = 0;
    char *outStr = 0;
    int minDepthI = defMinDepth;
    char *extraColStr = globalExtraCol;
 
-   char *errStr = 0;
-   uchar errUC = 0; /*Error report*/
+   char *errStr = 0; /*User inpupt invalid paramater*/
+   uchar errUC = 0;  /*Error report*/
+   ulong errUL = 0;  /*For gene table reading errors*/
    
    int numGenesI = 0;
-   int geneIndexI = 0;
 
-   uint *readMapAryUI = 0; /*Mapped region of reads*/
+   uint *readMapHeapAryUI = 0; /*Mapped region of reads*/
    uint offTargUI = 0;
    uint umappedUI = 0;
 
-   struct geneCoords *genesST = 0; 
+   struct geneCoords *genesHeapST = 0; 
+
    struct samEntry readST;
-   char *samBuffStr = 0;
+   char *samBuffHeapStr = 0;
    ulong lenSamBuffUL = 0;
 
-   FILE *pafFILE = 0;
    FILE *samFILE = 0;
-   FILE *outFILE = stdout;
+   FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-02:
@@ -194,7 +197,7 @@ int main(
       ampDepthGetCmdInput(
          argsStrAry,  /*User input arguments*/
          numArgsI,    /*Number of arguments input*/
-         &pafStr,     /*Name/path to paf file*/
+         &geneTblFileStr, /*Has gene coordinates*/
          &samStr,     /*Name/path to sam file*/
          &outStr,     /*Name/path to output file*/
          &minDepthI,  /*Min depth to use*/
@@ -227,6 +230,7 @@ int main(
            def_month_ampDepth,
            def_day_ampDepth
         );
+
         exit(0);
      } /*If: the user requested the version number*/
  
@@ -237,6 +241,7 @@ int main(
            stderr,
            "value from -min-depth is non-numeric\n"
         );
+
         exit(-1);
      } /*If: the -min-depth value was not numeric*/
 
@@ -255,61 +260,13 @@ int main(
    ^ Main Sec-03:
    ^  - Check the input files
    ^  o main sec-03 sub-01:
-   ^    - Check the paf file with gene coordinates
-   ^  o main sec-03 sub-02:
    ^    - Check the sam file (has reads)
-   ^  o main sec-03 sub-03:
+   ^  o main sec-03 sub-02:
    ^   - Check the output file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
    * Main Sec-03 Sub-01:
-   *   - Check the paf file with gene coordinates
-   \*****************************************************/
-
-   if(pafStr == 0)
-   { /*If: No paf file was input*/
-      fprintf(
-         stderr,
-        "No paf file with gene positions input (-paf)\n"
-      );
-
-      exit(-1);
-   } /*If: No paf file was input*/
-
-   else if(pafStr[0] == '-')
-   { /*If: the paf file is comming from stdin*/
-      if(samStr == 0 || samStr[0] == '-')
-      { /*If: I have two stdin file*/
-         fprintf(
-            stderr,
-           "ERROR both -paf and -sam are set to stdin\n"
-         );
-
-         exit(-1);
-      } /*If: I have two stdin file*/
-
-      pafFILE = stdin;
-   } /*If: the paf file is comming from stdin*/
-
-   else
-   { /*Else: the user supplied a paf file*/
-      pafFILE = fopen(pafStr, "r");
-
-      if(pafFILE == 0)
-      { /*If: the file could not be opened*/
-         fprintf(
-            stderr,
-            "-paf %s could not be opened\n",
-            pafStr
-          );
-
-          exit(-1);
-      } /*If: the file could not be opened*/
-   } /*Else: the user supplied a paf file*/
-
-   /*****************************************************\
-   * Main Sec-03 Sub-02:
    *   - Check the input sam file with reads
    \*****************************************************/
 
@@ -321,20 +278,18 @@ int main(
 
       if(samFILE == 0)
       { /*If: the file could not be opened*/
-         fclose(pafFILE);
-
          fprintf(
             stderr,
             "-sam %s could not be opened\n",
             samStr
           );
 
-          exit(-1);
+          goto errCleanUp_main;
       } /*If: the file could not be opened*/
    } /*Else: the user supplied a paf file*/
 
    /*****************************************************\
-   * Main Sec-03 Sub-03:
+   * Main Sec-03 Sub-02:
    *   - Check the output file
    \*****************************************************/
 
@@ -346,16 +301,13 @@ int main(
 
       if(outFILE == 0)
       { /*If: the file could not be opened*/
-         fclose(pafFILE);
-         fclose(outFILE);
-
          fprintf(
             stderr,
             "-out %s could not be opened\n",
             outStr
           );
 
-          exit(-1);
+          goto errCleanUp_main;
       } /*If: the file could not be opened*/
    } /*Else: the user supplied a paf file*/
 
@@ -364,40 +316,63 @@ int main(
    ^  - Extract the genes from the paf file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   genesST = pafGetGeneCoords(pafFILE, &numGenesI);
+   genesHeapST =
+      getGeneCoords(
+         geneTblFileStr,
+         &numGenesI,
+         &errUL
+      ); /*Get the gene coordinates from the file*/
 
-   if(genesST == 0)
-   { /*If: I had a memory error*/
-      fclose(pafFILE);
-      fclose(samFILE);
+   if(! genesHeapST)
+   { /*If: I had an error*/
+      if(errUL & def_fileErr_geneCoord)
+      { /*If: This was an file error*/;
+         fprintf(
+            stderr,
+            "Could not open %s\n",
+            geneTblFileStr
+         );
+      } /*If: This was an file error*/
 
-      fprintf(stderr, "Memory error\n");
-      exit(-1);
-   } /*If: I had a memory error*/
+      else if(errUL & def_memErr_geneCoord)
+      { /*Else If: This was an memory error*/;
+         fprintf(
+            stderr,
+            "Memory error when reading in %s\n",
+            geneTblFileStr
+         );
+      } /*Else If: This was an memory error*/
 
-   fclose(pafFILE);
-   pafFILE = 0;
+      else if(errUL & def_invalidEntry_geneCoord)
+      { /*Else If: This was an memory error*/;
+         fprintf(
+            stderr,
+            "Line number %lu in %s is not valid\n",
+            (errUL >> 8),
+            geneTblFileStr
+         );
+      } /*Else If: This was an memory error*/
+
+      goto errCleanUp_main;
+   } /*If: I had an error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-05:
    ^  - Get the read mapping tables set up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   offTargUI = genesST->endAryUI[numGenesI] + 2;
+   offTargUI = genesHeapST->endAryUI[numGenesI] + 2;
      /*These are genes that did not map to the end of the
      ` gene range, but still mapped to the reference
      ` The + 2 is to account for index 1 and to ensure
      `   thre array ends in 0
      */
-   readMapAryUI = calloc(offTargUI, sizeof(uint));
+   readMapHeapAryUI = calloc(offTargUI, sizeof(uint));
 
-   if(readMapAryUI == 0)
+   if(readMapHeapAryUI == 0)
    { /*If: I had a memory error*/
-      fclose(samFILE);
-      freeGeneCoords(&genesST);
-      
       fprintf(stderr, "Memory error (main sec-05)\n");
-      exit(-1);
+      goto errCleanUp_main;
    } /*If: I had a memory error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -423,7 +398,7 @@ int main(
    errUC =
       readSamLine(
           &readST,
-          &samBuffStr,
+          &samBuffHeapStr,
           &lenSamBuffUL,
           samFILE
       );
@@ -457,9 +432,9 @@ int main(
 
       addBaseToAmpDepth(
          &readST,
-         genesST,
+         genesHeapST,
          numGenesI,
-         readMapAryUI,
+         readMapHeapAryUI,
          offTargUI
       ); /*Add in the coverd bases to the histogram*/
 
@@ -468,33 +443,30 @@ int main(
       errUC =
          readSamLine(
              &readST,
-             &samBuffStr,
+             &samBuffHeapStr,
              &lenSamBuffUL,
              samFILE
          );
    } /*Loop: read in the samfile*/
 
-   free(samBuffStr);
-   fclose(samFILE);
+   if(samFILE != stdin)
+      fclose(samFILE);
 
    samFILE = 0;
-   samBuffStr = 0;
+
+   free(samBuffHeapStr);
+   samBuffHeapStr = 0;
    lenSamBuffUL = 0;
 
    if(errUC & 64)
    { /*If: I had a memory error*/
-      freeGeneCoords(&genesST);
-      free(readMapAryUI);
-      
       fprintf(
          stderr,
          "Memory error while reading sam file\n"
       );
 
-      exit(-1);
+      goto errCleanUp_main;
    } /*If: I had a memory error*/
-
-   samFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-08:
@@ -509,9 +481,9 @@ int main(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    pAmpDepthHistogram(
-      (int *) readMapAryUI,
+      (int *) readMapHeapAryUI,
       minDepthI,
-      genesST,
+      genesHeapST,
       numGenesI,
       (int) offTargUI,
       (int) umappedUI,
@@ -519,18 +491,59 @@ int main(
       outFILE
    ); /*Print out the histogram*/
 
+   if(outFILE != stdout) fclose(outFILE);
+   outFILE = 0;
+
+   freeGeneCoords(genesHeapST); /*Finished with this*/
+   genesHeapST = 0;
+
+   free(readMapHeapAryUI);      /*Finished with this*/
+   readMapHeapAryUI = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-10:
    ^   - Clean up
+   ^   o main sec-10 sub-01:
+   ^     - Clean up after success (nothing)
+   ^   o main sec-10 sub-02:
+   ^     - Clean up after an error
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(outFILE != stdout) fclose(outFILE);
-
-   freeGeneCoords(&genesST);
-   free(readMapAryUI);
-   readMapAryUI = 0;
+   /*****************************************************\
+   * Main Sec-10 Sub-01:
+   *   - Clean up after success (nothing)
+   \*****************************************************/
 
    exit(0);
+
+   /*****************************************************\
+   * Main Sec-10 Sub-02:
+   *   - Clean up after an error
+   \*****************************************************/
+
+   errCleanUp_main:;
+
+   free(samBuffHeapStr);
+   samBuffHeapStr = 0;
+   lenSamBuffUL = 0;
+
+   freeGeneCoords(genesHeapST);
+   genesHeapST = 0;
+
+   free(readMapHeapAryUI);
+   readMapHeapAryUI = 0;
+
+   if(samFILE && samFILE != stdin)
+      fclose(samFILE);
+
+   samFILE = 0;
+
+   if(outFILE && outFILE != stdout)
+      fclose(outFILE);
+
+   outFILE = 0;
+
+   exit(-1);
 } /*main*/
 
 
@@ -580,7 +593,7 @@ char * ampDepthGetCmdInput(
       parmStr = argsStrAry[iArg];
       argStr = argsStrAry[iArg + 1];
 
-      if(! cStrEql("-paf", parmStr, '\0'))
+      if(! cStrEql("-gene-tbl", parmStr, '\0'))
          *pafStr = argStr;
 
       else if(! cStrEql("-sam", parmStr, '\0'))
@@ -636,7 +649,7 @@ void pAmpDepthHelp(
    /*General*/
    fprintf(
      outFILE,
-     "ampDepth -paf gene-coordinates.paf -sam reads.sam\n"
+     "ampDepth -gene-tbl gene-tbl.tsv -sam reads.sam\n"
    );
 
    fprintf(
@@ -660,13 +673,11 @@ void pAmpDepthHelp(
 
    fprintf(outFILE, "\n");
 
-
-
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-02 Sec-02:
    ^   - Print out the user input ilneS
    ^   o fun-02 sec-02 sub-01:
-   ^     - Print out the -paf entry (gene coordinates)
+   ^     - Print out -gene-tbl entry (gene coordinates)
    ^   o fun-02 sec-02 sub-02:
    ^     - Print out the -sam entry (mapped reads)
    ^   o fun-02 sec-02 sub-03:
@@ -679,7 +690,7 @@ void pAmpDepthHelp(
    
    /*****************************************************\
    * Fun-02 Sec-02 Sub-01:
-   *   - Print out the -paf entry (gene coordinates)
+   *   - Print out the -gene-tbl entry (gene coordinates)
    \*****************************************************/
 
    fprintf(
@@ -687,12 +698,11 @@ void pAmpDepthHelp(
       "Input:\n"
    );
 
-   /*-paf*/
-   fprintf(outFILE, "  -paf: [Required]\n");
+   fprintf(outFILE, "  -gene-tbl: [Required]\n");
 
    fprintf(
      outFILE,
-     "    o Paf file with the coordiantes of each gene in"
+     "    o Tsv file with the coordiantes of each gene in"
    );
 
    fprintf(outFILE, "\n");
@@ -705,15 +715,22 @@ void pAmpDepthHelp(
 
    fprintf(
      outFILE,
-     "    o Paf file: minimap2 reference.fa reads.fq\n"
+     "    o Format: \n"
    );
-
 
    fprintf(
      outFILE,
-     "    o You can use \"-\" to specify stdin input\n"
+     "      - There is no header (ref = reference)\n"
    );
 
+   fprintf(
+     outFILE,
+     "      - gene_name\\tref_name\\tdirection"
+   );
+   fprintf(
+     outFILE,
+     "\\tref_start\\tref_end\n"
+   );
 
    /*****************************************************\
    * Fun-02 Sec-02 Sub-02:
@@ -750,7 +767,7 @@ void pAmpDepthHelp(
 
    fprintf(
      outFILE,
-     "    o  File to output the tsv file to\n"
+     "    o File to output the tsv file to\n"
    );
 
    fprintf(
@@ -768,10 +785,10 @@ void pAmpDepthHelp(
 
    fprintf(
      outFILE,
-     "    o  Minimum read depth to count base as part of"
+     "    o Minimum read depth to count base as part of"
    );
 
-   fprintf(outFILE, "\n       an amplicon\n");
+   fprintf(outFILE, "\n      an amplicon\n");
 
    /*****************************************************\
    * Fun-02 Sec-02 Sub-05:
@@ -782,7 +799,7 @@ void pAmpDepthHelp(
 
    fprintf(
      outFILE,
-     "    o  Flag to add to the first column\n"
+     "    o Flag to add to the first column\n"
    );
 
 
@@ -793,7 +810,7 @@ void pAmpDepthHelp(
 
    fprintf(
       outFILE,
-      "Output:"
+      "Output:\n"
    );
 
    fprintf(
@@ -803,70 +820,158 @@ void pAmpDepthHelp(
 
    fprintf(
       outFILE,
-      "    o Column 1 is the string from -flag\n"
+      "    o 01: Value input for -flag\n"
    );
 
    fprintf(
       outFILE,
-      "    o Column 2 is the  first base in the first\n"
+      "    o 02: Number marking wich amplicon on\n"
    );
 
    fprintf(
       outFILE,
-      "      gene in the amplicont\n"
+      "    o 03: First base of first mapped gene\n"
    );
 
    fprintf(
       outFILE,
-      "    o Column 3 is last base of the last gene in\n"
-   );
-
-
-   fprintf(
-      outFILE,
-      "      the amplicont\n"
+      "    o 04: Last base of last mapped gene\n"
    );
 
    fprintf(
       outFILE,
-      "    o Column 4 is the mean amplicon read depth\n"
+      "    o 05: First reference base in amplicon\n"
    );
 
    fprintf(
-     outFILE,
-     "    o Column 5 is the minimum amplicon read depth\n"
+      outFILE,
+      "    o 06: Last reference base in amplicon\n"
    );
 
-
    fprintf(
-     outFILE,
-     "    o Column 6 is the maximum amplicon read depth\n"
+      outFILE,
+      "    o 07: Mean read depth for amplicon\n"
    );
 
-
    fprintf(
-    outFILE,
-    "    o  Remaining columns are specific to each gene\n"
+      outFILE,
+      "    o 08: Minimum read depth for amplicon\n"
    );
 
 
    fprintf(
       outFILE,
-      "      and are read depth of first base, read depth" 
+      "    o 09: Maximum read depth for amplicon\n"
    );
 
-   fprintf(outFILE, "\n");
-
    fprintf(
-       outFILE,
-       "of last base, mean read depth, minimum read depth"
+      outFILE,
+      "    o 10: Gene name\n" 
    );
 
-   fprintf(outFILE, "\n");
-
+   fprintf(
+      outFILE,
+      "    o 11: Start of gene on reference\n" 
+   );
 
    fprintf(
-       outFILE,
-       "maximum read depth, and the gene name\n"
+      outFILE,
+      "    o 12: End of gene on reference\n" 
+   );
+
+   fprintf(
+      outFILE,
+      "    o 13: Read depth of first base in gene\n" 
+   );
+
+   fprintf(
+      outFILE,
+      "    o 14: Read depth of last base in gene\n" 
+   );
+
+   fprintf(
+      outFILE,
+      "    o 15: Mean read depth for gene\n" 
+   );
+
+   fprintf(
+      outFILE,
+      "    o 16: Minimum read depth for gene\n" 
+   );
+
+   fprintf(
+      outFILE,
+      "    o 17: Maximum read depth for gene\n" 
    );
 } /*pAmpDepthHelp*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

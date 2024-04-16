@@ -10,15 +10,15 @@
 ' SOF: Start Of File
 '   o header:
 '     - Include libraries
-'   o st-01: amrStruct (amrStruct.h only)
+'   o .h st-01: amrStruct
 '     - Holds the information for a single amr mutation
 '       that was extracted from the WHO catalog
-'   o fun-01: blankAmrStruct (amrStruct.h only)
+'   o .h fun-01: blankAmrStruct
 '     - Sets all non-pointer values in amrStructPtr to 0
-'   o fun-02: initAmrStruct (amrStruct.h)
+'   o .h fun-02: initAmrStruct
 '     - Sets all values, including pointers in the
 '       amrStruct structure to 0
-'   o fun-03: freeAmrStructStack (amrStruct.h)
+'   o fun-03: freeAmrStructStack
 '     - Frees the geneIdStr, refSeqStr, and amrSeqStr
 '       arrays and sets all values to 0 in the input
 '       amrStruct 
@@ -27,18 +27,23 @@
 '   o fun-05: freeAmrStructArray
 '     - Frees an heap allocated array of amrStruct
 '       structures
-'   o fun-06: swapAmrStructs (.h only)
+'   o .h fun-06: swapAmrStructs
 '     - Swaps the values in two amrStruct structures
 '   o fun-07: sortAmrStructArray
 '     - Sort on an amrStruct array structures by reference
 '       coordiante (uses shell sort)
-'   o fun-08: findNearestAmr
+'   o fun-08: geneIdSortAmrSTAry
+'     - Sort on an amrStruct array structures by the
+'       gene names (ids) (uses shell short)
+'   o fun-09: findNearestAmr
 '      - Finds the nearest amr at or after the input query
-'   o fun-09: pAmrDB
+'   o fun-10: pAmrDB
 '     - Print out the amr database used
-'   o fun-10: readTbAmrTbl
+'   o fun-11: readTbAmrTbl
 '     - Gets data from a tbAmr tsv file output from pAmrDB
-'       (fun-09)
+'       (fun-10)
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -46,9 +51,15 @@
 |   - Included libraries
 \-------------------------------------------------------*/
 
+#ifdef PLAN9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
+
 #include "amrStruct.h"
 
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "drug_str_ary.h"
@@ -161,9 +172,9 @@ void sortAmrStructArray(
    uint startUI,
    uint endUI
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-07 TOC: sortGenIndice
-   '  - Sorts the arrays in a genIndice struct by variant
-   '    id with shell short.
+   ' Fun-07 TOC:
+   '   - Sort on an amrStruct array structures by
+   '     reference coordiante (uses shell sort)
    '  - Shell sort taken from:
    '    - Adam Drozdek. 2013. Data Structures and
    '      Algorithims in c++. Cengage Leraning. fourth
@@ -175,12 +186,12 @@ void sortAmrStructArray(
    '  o fun-07 sec-02:
    '    - Find the number of rounds to sort for
    '  o fun-07 sec-03:
-   '    - Sort the arrays in genIndiceST
+   '    - Sort the amrStruct array by reference position
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun-07 Sec-01:
-  ^  - Variable declerations
+  ^   - Variable declerations
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Number of elements to sort*/
@@ -200,7 +211,7 @@ void sortAmrStructArray(
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun-07 Sec-02:
-  ^  - Find the max search value (number rounds to sort)
+  ^   - Find the max search value (number rounds to sort)
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
@@ -209,7 +220,7 @@ void sortAmrStructArray(
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ^ Fun-07 Sec-03:
-  ^  - Sort the arrays in genIndiceST
+  ^   - Sort the amrStruct array by reference position
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   while(subUL > 0)
@@ -254,10 +265,129 @@ void sortAmrStructArray(
     
     subUL = (subUL - 1) / 3; /*Move to the next round*/
   } /*loop through all sub arrays to sort the subarrays*/
-} /*sortGenIndice*/
+} /*sortAmrStructArray*/
 
 /*-------------------------------------------------------\
-| Fun-08: findNearestAmr
+| Fun-08: geneIdSortAmrSTAry
+|   - Sort on an amrStruct array structures by the gene
+|     names (ids) (uses shell short)
+| Input:
+|   - amrAryST:
+|     - Pointer to start of amrStruct array to sort
+| Output:
+|   - Modifies:
+|     o The amrAryST to be sorted by starting
+|       gene names (ids)
+\-------------------------------------------------------*/
+void geneIdSortAmrSTAry(
+   struct amrStruct *amrAryST,
+   unsigned int startUI,
+   unsigned int endUI
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-08 TOC:
+   '  - Sorts an array of amrStructs by gene names (ids)
+   '  - Shell sort taken from:
+   '    - Adam Drozdek. 2013. Data Structures and
+   '      Algorithims in c++. Cengage Leraning. fourth
+   '      edition. pages 505-508
+   '    - I made some minor changes, but is mostly the
+   '      same
+   '  o fun-08 sec-01:
+   '    - Variable declerations
+   '  o fun-08 sec-02:
+   '    - Find the number of rounds to sort for
+   '  o fun-08 sec-03:
+   '    - Sort the amrStructs by variant id
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-08 Sec-01:
+  ^   - Variable declerations
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Number of elements to sort*/
+  ulong numElmUL = (endUI) - (startUI);
+  
+  /*Number of sorting rounds*/
+  ulong subUL = 0;
+  ulong nextElmUL = 0;
+  ulong lastElmUL = 0;
+  ulong elmOnUL = 0;
+  
+  /*Get arrays to sort from the matrix (for sanity)*/
+  
+  /*Variables to incurment loops*/
+  ulong ulIndex = 0;
+  ulong ulElm = 0;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-08 Sec-02:
+  ^   - Find the max search value (number rounds to sort)
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
+  subUL = 1; /*Initialzie first array*/
+  while(subUL < numElmUL - 1) subUL = (3 * subUL) + 1;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ^ Fun-08 Sec-03:
+  ^   - Sort the amrStructs by variant id
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  while(subUL > 0)
+  { /*loop trhough all sub arrays sort the subarrays*/
+    for(ulIndex = 0; ulIndex <= subUL; ++ulIndex)
+    { /*For each element in the subarray*/
+      for(ulElm = ulIndex;
+          ulElm + subUL <= endUI;
+          ulElm += subUL
+      ){ /*Loop; swap each nth element of the subarray*/
+        nextElmUL = ulElm + subUL;
+        
+        if( cStrEql(
+               amrAryST[ulElm].geneIdStr,
+               amrAryST[nextElmUL].geneIdStr,
+               '\0'
+            )
+          > 0
+        ){ /*If I need to swap an element*/
+          swapAmrStructs(
+             amrAryST[ulElm],
+             amrAryST[nextElmUL]
+          ); /*Swap the values in the two structuers*/
+          
+          lastElmUL = ulElm;
+          elmOnUL = ulElm;
+          
+          while(lastElmUL >= subUL)
+          { /*loop; move swapped element back*/
+            lastElmUL -= subUL;
+            
+            if( cStrEql(
+                   amrAryST[elmOnUL].geneIdStr,
+                   amrAryST[lastElmUL].geneIdStr,
+                   '\0'
+                )
+              > 0
+            ) break; /*Positioned the element*/
+            
+             swapAmrStructs(
+                amrAryST[elmOnUL],
+                amrAryST[lastElmUL]
+             ); /*Swap the values in the two structuers*/
+            
+            elmOnUL = lastElmUL;
+          } /*loop; move swapped element back*/
+        } /*If I need to swap elements*/
+      } /*Loop; swap each nth element of the subarray*/
+    } /*For each element in the subarray*/
+    
+    subUL = (subUL - 1) / 3; /*Move to the next round*/
+  } /*loop through all sub arrays to sort the subarrays*/
+} /*geneIdSortAmrSTAry*/
+
+/*-------------------------------------------------------\
+| Fun-09: findNearestAmr
 |  - Does a binary search for the nearest amr at or after
 |    to the input query coordiante
 | Input:
@@ -279,7 +409,7 @@ int findNearestAmr(
    uint qryUI,
    int numAmrI
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   ' Fun-08 TOC: findNearestAmr
+   ' Fun-09 TOC: findNearestAmr
    '   - Finds the nearest amr at or after the input query
    '     coordiante
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -341,7 +471,7 @@ int findNearestAmr(
 } /*findNearestAmr*/
 
 /*-------------------------------------------------------\
-| Fun-09: pAmrDB
+| Fun-10: pAmrDB
 |  - Print out the amr database used
 | Input:
 |  - amrAryST:
@@ -370,7 +500,26 @@ char pAmrDB(
    char *drugStrAry,
    int numDrugsI,
    char *outStr
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-10 TOC: pAmrDB
+   '   - Prints out the AMRs to an tbAmr database
+   '   o fun-10 sec-01:
+   '     - Variable declerations
+   '   o fun-10 sec-02:
+   '     - Open output file check
+   '   o fun-10 sec-03:
+   '     - Print the header
+   '   o fun-10 sec-04:
+   '     - Print the AMRs
+   '   o fun-10 sec-05:
+   '     - Close file and exit
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-10 Sec-01:
+   ^   - Variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    ulong ulAmr = 0;  /*For looping through amrSTAry*/
 
    int iDrug = 0;    /*For looping through drugStrAry*/
@@ -382,7 +531,14 @@ char pAmrDB(
    int iDrugOn = 0; /*Drug on*/
    char resBl = 0;
 
+   char *tmpStr = 0;
+
    FILE *outFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-10 Sec-02:
+   ^   - Open output file check
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(! outStr) outFILE = stdout;
    else if(*outStr == '-') outFILE = stdout;
@@ -391,14 +547,14 @@ char pAmrDB(
    if(outFILE == 0) return def_amrST_invalidFILE;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-09 Sec-03:
+   ^ Fun-10 Sec-03:
    ^   - Print the header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    fprintf(outFILE,"gene\tvariantID\trefPosition");
    fprintf(outFILE,"\tdirection\tmutation\tframeshift");
    fprintf(outFILE,"\trefSeq\tamrSeq\tcodonRefPos");
-   fprintf(outFILE,"\tcodonNumber\tlastCodon\trefeAA");
+   fprintf(outFILE,"\tcodonNumber\tlastCodon\trefAA");
    fprintf(outFILE, "\tamrAA\tgeneStart\tgeneEnd");
    fprintf(outFILE, "\thighResistance\tlowResitance");
    fprintf(outFILE, "\tadditiveResitance\tneedsGene");
@@ -409,7 +565,38 @@ char pAmrDB(
       fprintf(outFILE, "\t%s", drugStr);
    } /*Loop: Print out the antibiotic names*/
 
-   fprintf(outFILE,"\tendAntibiotics\teffect\tcomment\n");
+   fprintf(outFILE,"\tendAntibiotics\teffect\tcomment");
+   fprintf(outFILE, "\tgrade\tentireGene\tunkownEntry");
+   fprintf(outFILE, "\n");
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-10 Sec-04:
+   ^   - Print the AMRs
+   ^   o fun-10 sec-04 sub-01:
+   ^     - Start loop; print out ids & reference position
+   ^   o fun-10 sec-04 sub-02:
+   ^     - Print out direction and AMR type/sequence
+   ^   o fun-10 sec-04 sub-03:
+   ^     - Print out amino acid sequence and coordinates
+   ^   o fun-10 sec-04 sub-04:
+   ^     - Print out gene coordinates
+   ^   o fun-10 sec-04 sub-05:
+   ^     - Print out resistance level/if additive
+   ^   o fun-10 sec-04 sub-06:
+   ^     - Print out the drugs resistant to
+   ^   o fun-10 sec-04 sub-07:
+   ^     - Print out the effect entry
+   ^   o fun-10 sec-04 sub-08:
+   ^     - Print out the comment entry
+   ^   o fun-10 sec-04 sub-09:
+   ^     - Print grade (main drug), if the effect
+   ^       appies to entire gene, and if unknown entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun-10 Sec-04 Sub-01:
+   *   - Start loop; print out ids and reference position
+   \*****************************************************/
 
    for(ulAmr = 0; ulAmr < numAmrUL; ++ulAmr)
    { /*Loop: Print out each  amr*/
@@ -420,6 +607,11 @@ char pAmrDB(
          amrSTAry[ulAmr].varIdStr,  /*variant name*/
          amrSTAry[ulAmr].refPosUI + 1   /*ref position*/
       ); /*Print out the first few entries*/
+
+      /**************************************************\
+      * Fun-10 Sec-04 Sub-02:
+      *   - Print out direction and AMR type/sequence
+      \**************************************************/
 
       /*Print out the reading frame of the gene*/
       if(amrSTAry[ulAmr].dirFlag == def_amrST_forwardDir)
@@ -443,16 +635,30 @@ char pAmrDB(
          amrSTAry[ulAmr].amrSeqStr
       );
 
+      /**************************************************\
+      * Fun-10 Sec-04 Sub-03:
+      *   - Print out amino acid sequence and coordinates
+      \**************************************************/
+
       if(amrSTAry[ulAmr].refAaStr != 0)
       { /*If: I had an amino acid change*/
          fprintf(
             outFILE,
-            "\t%u\t%u\t%u\t%s",
+            "\t%u\t%u\t%u",
             amrSTAry[ulAmr].codonPosUI + 1,
             amrSTAry[ulAmr].codonNumUI,
-            amrSTAry[ulAmr].endCodonNumUI,
-            amrSTAry[ulAmr].refAaStr
+            amrSTAry[ulAmr].endCodonNumUI
          );
+
+         /*Check if I have an reference aa sequence*/
+         if(amrSTAry[ulAmr].refAaStr != 0)
+            fprintf(
+                outFILE,
+                "\t%s",
+                amrSTAry[ulAmr].refAaStr
+            );
+
+         else fprintf(outFILE, "\t0");
 
          /*Check if I have an amr aa sequence*/
          if(amrSTAry[ulAmr].amrAaStr != 0)
@@ -467,17 +673,27 @@ char pAmrDB(
 
       else fprintf(outFILE, "\tNA\tNA\tNA\t0\t0");
 
+      /**************************************************\
+      * Fun-10 Sec-04 Sub-04:
+      *   - Print out gene coordinates
+      \**************************************************/
+
       /*Print out the gene position*/
       if(amrSTAry[ulAmr].geneLastRefUI > 0)
          fprintf(
             outFILE,
             "\t%u\t%u",
-            amrSTAry[ulAmr].geneFirstRefUI,
-            amrSTAry[ulAmr].geneLastRefUI 
+            amrSTAry[ulAmr].geneFirstRefUI + 1,
+            amrSTAry[ulAmr].geneLastRefUI + 1
          );
 
       else fprintf(outFILE, "\tNA\tNA");
             
+      /**************************************************\
+      * Fun-10 Sec-04 Sub-05:
+      *   - Print out resistance level/if additive
+      \**************************************************/
+
       fprintf(
          outFILE,
         "\t%i\t%i\t%i",
@@ -499,6 +715,11 @@ char pAmrDB(
            "\t%s",
            amrSTAry[ulAmr].needsGeneStr
         );
+
+      /**************************************************\
+      * Fun-10 Sec-04 Sub-06:
+      *   - Print out the drugs resistant to
+      \**************************************************/
 
       iDrugOn = 0;
 
@@ -552,30 +773,72 @@ char pAmrDB(
          /*Mark end of antibiotics*/
          fprintf(outFILE, "\t*");
 
-         /*Print out the effect entry*/
+         /***********************************************\
+         * Fun-10 Sec-04 Sub-07:
+         *   - Print out the effect entry
+         \***********************************************/
+
          if(! amrSTAry[ulAmr].effectStr)
             fprintf(outFILE, "\tNA");
-         else if(*amrSTAry[ulAmr].effectStr < 32)
-            fprintf(outFILE, "\tNA");
          else
-            fprintf(
-               outFILE,
-               "\t%s",
-               amrSTAry[ulAmr].effectStr
-             );
+         { /*Else: If I may have an comment*/
+
+            /*For some odd reason there are some blank
+            `  effect entries in the catalog that escape
+            `  me
+            */
+            tmpStr = amrSTAry[ulAmr].effectStr;
+            while(*tmpStr++ < 32) if(*tmpStr=='\0') break;
+
+            if(*tmpStr == '\0') fprintf(outFILE, "\tNA");
+
+            else
+               fprintf(
+                  outFILE,
+                  "\t%s",
+                  amrSTAry[ulAmr].effectStr
+               );
+         } /*Else: If I may have an comment*/
  
-         /*Print out the comment entry*/
+         /***********************************************\
+         * Fun-10 Sec-04 Sub-08:
+         *   - Print out the comment entry
+         \***********************************************/
+
          if(! amrSTAry[ulAmr].commentStr)
             fprintf(outFILE, "\tNA");
-         else if(*amrSTAry[ulAmr].commentStr < 32)
-            fprintf(outFILE, "\tNA");
          else
-            fprintf(
-               outFILE,
-               "\t%s",
-               amrSTAry[ulAmr].commentStr
-             );
+         { /*Else: If I may have an comment*/
+            /*For some odd reason there are some blank
+            `  comment entries in the catalog that escape
+            `  me
+            */
+            tmpStr = amrSTAry[ulAmr].commentStr;
+            while(*tmpStr++ < 32) if(*tmpStr=='\0') break;
+
+            if(*tmpStr == '\0') fprintf(outFILE, "\tNA");
+
+            else
+               fprintf(
+                  outFILE,
+                  "\t%s",
+                  amrSTAry[ulAmr].commentStr
+               );
+         } /*Else: If I may have an comment*/
  
+         /***********************************************\
+         * Fun-10 Sec-04 Sub-09:
+         *   - Print grade (main drug), if the effect
+         *     appies to entire gene, and if unknown entry
+         \***********************************************/
+
+         fprintf(
+            outFILE,
+            "\t%i\t%i\t%i",
+            amrSTAry[ulAmr].gradeC,
+            amrSTAry[ulAmr].wholeGeneFlag,
+            amrSTAry[ulAmr].unknownBl
+         ); /*Print out the final columns*/
 
          /*Print out the newline*/
          fprintf(outFILE, "\n");
@@ -583,15 +846,20 @@ char pAmrDB(
 
    } /*Loop: Print out each  amr*/
 
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-10 Sec-05:
+   ^   - Close file and exit
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    if(outFILE != stdout) fclose(outFILE);
 
    return 0;
 } /*pAmrDB*/
 
 /*-------------------------------------------------------\
-| Fun-10: readTbAmrTbl
+| Fun-11: readTbAmrTbl
 |   - Gets data from a tbAmr tsv file output from pAmrDB
-|     (fun-09)
+|     (fun-10)
 | Input:
 |   - tbAmrTblStr:
 |     o C-string with path to the AMR database/table
@@ -633,25 +901,25 @@ struct amrStruct * readTbAmrTbl(
    int *maxDrugsI,          /*Max drugs for drugStrAry*/
    char *errC               /*Holds errors*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-10 TOC: readTbAmrTbl
+   ' Fun-11 TOC: readTbAmrTbl
    '   - Gets data from a tbAmr tsv file output from
-   '     pAmrDB (fun-09)
-   '   o fun-10 sec-01:
+   '     pAmrDB (fun-10)
+   '   o fun-11 sec-01:
    '     - Variable declerations
-   '   o fun-10 sec-02:
+   '   o fun-11 sec-02:
    '     - Process the header
-   '   o fun-10 sec-03:
+   '   o fun-11 sec-03:
    '     - Process the header and get the number of lines
-   '   o fun-10 sec-04:
+   '   o fun-11 sec-04:
    '     - Prepare buffers for extracting AMRs
-   '   o fun-10 sec-05:
+   '   o fun-11 sec-05:
    '     - Extract the information from the file
-   '   o fun-10 sec-06:
+   '   o fun-11 sec-06:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-01:
+   ^ Fun-11 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -677,7 +945,7 @@ struct amrStruct * readTbAmrTbl(
    FILE *amrFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-02:
+   ^ Fun-11 Sec-02:
    ^   - Check if file eixists and set up the buffer
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -692,22 +960,22 @@ struct amrStruct * readTbAmrTbl(
    if(buffStr == 0) goto memErr_sec06_sub02_readTbAmrTbl;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-03:
+   ^ Fun-11 Sec-03:
    ^   - Process the header and get the number of lines
-   ^   o fun-10 sec-03 sub-01:
+   ^   o fun-11 sec-03 sub-01:
    ^     - Get the number of lines in the file
-   ^   o fun-10 sec-03 sub-02:
+   ^   o fun-11 sec-03 sub-02:
    ^     - Read in the header
-   ^   o fun-10 sec-03 sub-03:
+   ^   o fun-11 sec-03 sub-03:
    ^     - Get the number of antibiotics
-   ^   o fun-10 sec-03 sub-04:
+   ^   o fun-11 sec-03 sub-04:
    ^     - Allocate memory for the antibiotics
-   ^   o fun-10 sec-03 sub-05:
+   ^   o fun-11 sec-03 sub-05:
    ^     - Copy the antibiotics to the drug array
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-01:
+   * Fun-11 Sec-03 Sub-01:
    *   - Get the number of lines in the file
    \*****************************************************/
 
@@ -751,7 +1019,7 @@ struct amrStruct * readTbAmrTbl(
    if(buffStr == 0) goto memErr_sec06_sub02_readTbAmrTbl;
 
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-02:
+   * Fun-11 Sec-03 Sub-02:
    *   - Read in the header
    \*****************************************************/
 
@@ -785,7 +1053,7 @@ struct amrStruct * readTbAmrTbl(
    } /*Loop: Get the full line*/
    
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-03:
+   * Fun-11 Sec-03 Sub-03:
    *   - Get the number of antibiotics
    \*****************************************************/
 
@@ -809,7 +1077,7 @@ struct amrStruct * readTbAmrTbl(
    } /*Loop: Find the end of the antibiotics columns*/
 
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-04:
+   * Fun-11 Sec-03 Sub-04:
    *   - Allocate memory for the antibiotics
    \*****************************************************/
 
@@ -830,7 +1098,7 @@ struct amrStruct * readTbAmrTbl(
    } /*If: I need to add more memory to the drug array*/
 
    /*****************************************************\
-   * Fun-10 Sec-03 Sub-05:
+   * Fun-11 Sec-03 Sub-05:
    *   - Copy the antibiotics to the drug array
    \*****************************************************/
 
@@ -849,7 +1117,7 @@ struct amrStruct * readTbAmrTbl(
    } /*Loop: Read in the antibiotic entries*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-04:
+   ^ Fun-11 Sec-04:
    ^   - Prepare buffers for extracting AMRs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -857,61 +1125,67 @@ struct amrStruct * readTbAmrTbl(
    if(! amrSTAry) goto memErr_sec06_sub02_readTbAmrTbl;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-05:
+   ^ Fun-11 Sec-05:
    ^   - Extract the information from the file
-   ^   o fun-10 sec-05 sub-02:
+   ^   o fun-11 sec-05 sub-02:
    ^     - Get first entry, start read in loop, &
    ^       initailze the new variables
-   ^   o fun-10 sec-05 sub-02:
+   ^   o fun-11 sec-05 sub-02:
    ^     - Read in the gene id
-   ^   o fun-10 sec-05 sub-03:
+   ^   o fun-11 sec-05 sub-03:
    ^     - Read in the variaint id
-   ^   o fun-10 sec-05 sub-04:
+   ^   o fun-11 sec-05 sub-04:
    ^     - Read in the refernce positon
-   ^   o fun-10 sec-05 sub-05:
+   ^   o fun-11 sec-05 sub-05:
    ^     - Read in the direction
-   ^   o fun-10 sec-05 sub-06:
+   ^   o fun-11 sec-05 sub-06:
    ^     - Read in the mutation type
-   ^   o fun-10 sec-05 sub-07:
+   ^   o fun-11 sec-05 sub-07:
    ^     - Read in the frame shift entry
-   ^   o fun-10 sec-05 sub-08:
+   ^   o fun-11 sec-05 sub-08:
    ^     - Read in the reference sequence
-   ^   o fun-10 sec-05 sub-09:
+   ^   o fun-11 sec-05 sub-09:
    ^     - Read in the amr sequence
-   ^   o fun-10 sec-05 sub-10:
+   ^   o fun-11 sec-05 sub-10:
    ^     - Read in the frist codon base in reference
-   ^   o fun-10 sec-05 sub-11:
+   ^   o fun-11 sec-05 sub-11:
    ^     - Read in the starting codon number
-   ^   o fun-10 sec-05 sub-12:
+   ^   o fun-11 sec-05 sub-12:
    ^     - Read in the ending codon number
-   ^   o fun-10 sec-05 sub-13:
+   ^   o fun-11 sec-05 sub-13:
    ^     - Read in the reference amino acid sequence
-   ^   o fun-10 sec-05 sub-14:
+   ^   o fun-11 sec-05 sub-14:
    ^     - Read in the amr amino acid sequence
-   ^   o fun-10 sec-05 sub-15:
+   ^   o fun-11 sec-05 sub-15:
    ^     - Read in the gene starting position
-   ^   o fun-10 sec-05 sub-16:
+   ^   o fun-11 sec-05 sub-16:
    ^     - Read in the gene ending position
-   ^   o fun-10 sec-05 sub-17:
+   ^   o fun-11 sec-05 sub-17:
    ^     - Check if is a high resistance gene
-   ^   o fun-10 sec-05 sub-18:
+   ^   o fun-11 sec-05 sub-18:
    ^     - Check if is a low resistance gene
-   ^   o fun-10 sec-05 sub-19:
+   ^   o fun-11 sec-05 sub-19:
    ^     - Check if resistance is additive
-   ^   o fun-10 sec-05 sub-20:
+   ^   o fun-11 sec-05 sub-20:
    ^     - Read in the if it needs a functional gene
-   ^   o fun-10 sec-05 sub-21:
+   ^   o fun-11 sec-05 sub-21:
    ^     - Read in the antibiotic flags
-   ^   o fun-10 sec-05 sub-22:
+   ^   o fun-11 sec-05 sub-22:
    ^     - Read in the effect entry
-   ^   o fun-10 sec-05 sub-23:
+   ^   o fun-11 sec-05 sub-23:
    ^     - Read in the commenht entry
-   ^   o fun-10 sec-05 sub-24:
+   ^   o fun-11 sec-05 sub-24:
+   ^     - Read in the grade entry
+   ^   o fun-11 sec-05 sub-25:
+   ^     - Read in if the entry effects the entire gene
+   ^   o fun-11 sec-05 sub-26:
+   ^     - Read in the unkown type entry
+   ^   o fun-11 sec-05 sub-27:
    ^     - Get the next line
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-10 Sec-05 Sub-01:
+   * Fun-11 Sec-05 Sub-01:
    *   - Get first entry, start read in loop, & initailze`
    \*****************************************************/
 
@@ -926,7 +1200,7 @@ struct amrStruct * readTbAmrTbl(
       tmpStr = buffStr;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-02:
+      * Fun-11 Sec-05 Sub-02:
       *   - Read in the gene id
       \**************************************************/
 
@@ -950,7 +1224,7 @@ struct amrStruct * readTbAmrTbl(
       tmpStr += amrSTAry[uiAmr].lenGeneIdUI + 1;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-03:
+      * Fun-11 Sec-05 Sub-03:
       *   - Read in the variaint id
       \**************************************************/
 
@@ -975,7 +1249,7 @@ struct amrStruct * readTbAmrTbl(
       tmpStr += amrSTAry[uiAmr].lenVarIdUI + 1;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-04:
+      * Fun-11 Sec-05 Sub-04:
       *   - Read in the refernce positon
       \**************************************************/
 
@@ -987,7 +1261,7 @@ struct amrStruct * readTbAmrTbl(
       ++tmpStr; /*get off the tab*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-05:
+      * Fun-11 Sec-05 Sub-05:
       *   - Read in the direction
       \**************************************************/
 
@@ -1002,7 +1276,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-06:
+      * Fun-11 Sec-05 Sub-06:
       *   - Read in the mutation type
       \**************************************************/
 
@@ -1041,7 +1315,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-07:
+      * Fun-11 Sec-05 Sub-07:
       *   - Read in the frame shift entry
       \**************************************************/
 
@@ -1050,7 +1324,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-08:
+      * Fun-11 Sec-05 Sub-08:
       *   - Read in the reference sequence
       \**************************************************/
 
@@ -1074,7 +1348,7 @@ struct amrStruct * readTbAmrTbl(
       tmpStr += amrSTAry[uiAmr].lenRefSeqUI + 1;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-09:
+      * Fun-11 Sec-05 Sub-09:
       *   - Read in the amr sequence
       \**************************************************/
 
@@ -1098,7 +1372,7 @@ struct amrStruct * readTbAmrTbl(
       tmpStr += amrSTAry[uiAmr].lenAmrSeqUI + 1;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-10:
+      * Fun-11 Sec-05 Sub-10:
       *   - Read in the frist codon base in reference
       \**************************************************/
 
@@ -1122,7 +1396,7 @@ struct amrStruct * readTbAmrTbl(
       } /*Else: I have a number*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-11:
+      * Fun-11 Sec-05 Sub-11:
       *   - Read in the starting codon number
       \**************************************************/
 
@@ -1146,7 +1420,7 @@ struct amrStruct * readTbAmrTbl(
 
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-12:
+      * Fun-11 Sec-05 Sub-12:
       *   - Read in the ending codon number
       \**************************************************/
 
@@ -1170,65 +1444,55 @@ struct amrStruct * readTbAmrTbl(
 
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-13:
+      * Fun-11 Sec-05 Sub-13:
       *   - Read in the reference amino acid sequence
       \**************************************************/
 
-      if(*tmpStr != '0')
-      { /*If: there is an reference amino acid sequence*/
-         amrSTAry[uiAmr].lenRefAaUI= cLenStr(tmpStr,'\t');
+      amrSTAry[uiAmr].lenRefAaUI= cLenStr(tmpStr,'\t');
 
-         amrSTAry[uiAmr].refAaStr =
-            malloc(
-                 (amrSTAry[uiAmr].lenRefAaUI + 1)
-               * sizeof(char)
-            ); /*Allocate memory for refernce aa seq*/
+      amrSTAry[uiAmr].refAaStr =
+         malloc(
+              (amrSTAry[uiAmr].lenRefAaUI + 1)
+            * sizeof(char)
+         ); /*Allocate memory for refernce aa seq*/
    
-         if(! amrSTAry[uiAmr].refAaStr)
-            goto memErr_sec06_sub02_readTbAmrTbl;
+      if(! amrSTAry[uiAmr].refAaStr)
+         goto memErr_sec06_sub02_readTbAmrTbl;
 
-         cCpStr(
-            amrSTAry[uiAmr].refAaStr,
-            tmpStr,
-            amrSTAry[uiAmr].lenRefAaUI
-         );
+      cCpStr(
+         amrSTAry[uiAmr].refAaStr,
+         tmpStr,
+         amrSTAry[uiAmr].lenRefAaUI
+      );
 
-         tmpStr += amrSTAry[uiAmr].lenRefAaUI + 1;
-      } /*If: there is an reference amino acid sequence*/
-
-      else while(*tmpStr++ != '\t') {}
+      tmpStr += amrSTAry[uiAmr].lenRefAaUI + 1;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-14:
+      * Fun-11 Sec-05 Sub-14:
       *   - Read in the amr amino acid sequence
       \**************************************************/
 
-      if(*tmpStr != '0')
-      { /*If: there is an amr amino acid sequence*/
-         amrSTAry[uiAmr].lenAmrAaUI= cLenStr(tmpStr,'\t');
+      amrSTAry[uiAmr].lenAmrAaUI= cLenStr(tmpStr,'\t');
 
-         amrSTAry[uiAmr].amrAaStr =
-            malloc(
-                 (amrSTAry[uiAmr].lenAmrAaUI + 1)
-               * sizeof(char)
-            ); /*Allocate memory for amr aa seq*/
+      amrSTAry[uiAmr].amrAaStr =
+         malloc(
+              (amrSTAry[uiAmr].lenAmrAaUI + 1)
+            * sizeof(char)
+         ); /*Allocate memory for amr aa seq*/
    
-         if(! amrSTAry[uiAmr].amrAaStr)
-            goto memErr_sec06_sub02_readTbAmrTbl;
+      if(! amrSTAry[uiAmr].amrAaStr)
+         goto memErr_sec06_sub02_readTbAmrTbl;
 
-         cCpStr(
-            amrSTAry[uiAmr].amrAaStr,
-            tmpStr,
-            amrSTAry[uiAmr].lenAmrAaUI
-         );
+      cCpStr(
+         amrSTAry[uiAmr].amrAaStr,
+         tmpStr,
+         amrSTAry[uiAmr].lenAmrAaUI
+      );
 
-         tmpStr += amrSTAry[uiAmr].lenAmrAaUI + 1;
-      } /*If: there is an amr amino acid sequence*/
-
-      else while(*tmpStr++ != '\t') {}
+      tmpStr += amrSTAry[uiAmr].lenAmrAaUI + 1;
          
       /**************************************************\
-      * Fun-10 Sec-05 Sub-15:
+      * Fun-11 Sec-05 Sub-15:
       *   - Read in the gene starting position
       \**************************************************/
 
@@ -1252,7 +1516,7 @@ struct amrStruct * readTbAmrTbl(
       } /*Else: I have a number*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-16:
+      * Fun-11 Sec-05 Sub-16:
       *   - Read in the gene ending position
       \**************************************************/
 
@@ -1276,7 +1540,7 @@ struct amrStruct * readTbAmrTbl(
       } /*Else: I have a number*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-17:
+      * Fun-11 Sec-05 Sub-17:
       *   - Check if is a high resistance gene
       \**************************************************/
       
@@ -1285,7 +1549,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-18:
+      * Fun-11 Sec-05 Sub-18:
       *   - Check if is a low resistance gene
       \**************************************************/
       
@@ -1294,7 +1558,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-19:
+      * Fun-11 Sec-05 Sub-19:
       *   - Check if resistance is additive
       \**************************************************/
       
@@ -1303,7 +1567,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-20:
+      * Fun-11 Sec-05 Sub-20:
       *   - Read in the if it needs a functional gene
       \**************************************************/
 
@@ -1350,7 +1614,7 @@ struct amrStruct * readTbAmrTbl(
       } /*Else if: there  an entry (may be NA)*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-21:
+      * Fun-11 Sec-05 Sub-21:
       *   - Read in the antibiotic flags
       \**************************************************/
 
@@ -1384,7 +1648,7 @@ struct amrStruct * readTbAmrTbl(
       while(*tmpStr++ != '\t') {}
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-22:
+      * Fun-11 Sec-05 Sub-22:
       *   - Read in the effect entry
       \**************************************************/
 
@@ -1409,8 +1673,8 @@ struct amrStruct * readTbAmrTbl(
       tmpStr += amrSTAry[uiAmr].lenEffectUI + 1;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-23:
-      *   - Read in the commenht entry
+      * Fun-11 Sec-05 Sub-23:
+      *   - Read in the comment entry
       \**************************************************/
 
       amrSTAry[uiAmr].lenCommentUI = 0;
@@ -1435,27 +1699,65 @@ struct amrStruct * readTbAmrTbl(
 
       tmpStr += amrSTAry[uiAmr].lenCommentUI + 1;
 
+      while(*tmpStr > 31) ++tmpStr;
+
       /**************************************************\
-      * Fun-10 Sec-05 Sub-24:
+      * Fun-11 Sec-05 Sub-24:
+      *   - Read in the grade entry
+      \**************************************************/
+
+      if(*tmpStr == '\n') goto nextLine_readAmrST;
+      ++tmpStr; /*Get off the tab*/
+
+      amrSTAry[uiAmr].gradeC = 48 - *tmpStr;
+
+      while(*tmpStr > 31) ++tmpStr;
+
+      /**************************************************\
+      * Fun-11 Sec-05 Sub-25:
+      *   - Read in if the entry effects the entire gene
+      \**************************************************/
+
+      if(*tmpStr == '\n') goto nextLine_readAmrST;
+      ++tmpStr; /*Get off the tab*/
+
+      amrSTAry[uiAmr].wholeGeneFlag = 48 - *tmpStr;
+
+      while(*tmpStr > 31) ++tmpStr;
+
+      /**************************************************\
+      * Fun-11 Sec-05 Sub-26:
+      *   - Read in the unkown type entry
+      \**************************************************/
+
+      if(*tmpStr == '\n') goto nextLine_readAmrST;
+      ++tmpStr; /*Get off the tab*/
+
+      amrSTAry[uiAmr].unknownBl = 48 - *tmpStr;
+
+      /**************************************************\
+      * Fun-11 Sec-05 Sub-27:
       *   - Get the next line
       \**************************************************/
+
+      nextLine_readAmrST:;
 
       tmpStr = fgets(buffStr, lenBuffUI, amrFILE);
    } /*Loop: Read in the file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-06:
+   ^ Fun-11 Sec-06:
    ^   - Clean up
-   ^   o fun-10 sec-06 sub-01:
+   ^   o fun-11 sec-06 sub-01:
    ^     - Clean up when everything worked
-   ^   o fun-10 sec-06 sub-02:
+   ^   o fun-11 sec-06 sub-02:
    ^     - Clean up for memory erorrs
-   ^   o fun-10 sec-06 sub-03:
+   ^   o fun-11 sec-06 sub-03:
    ^     - Clean up for file erorrs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-01:
+   * Fun-11 Sec-06 Sub-01:
    *   - Clean up when everything worked
    \*****************************************************/
 
@@ -1471,7 +1773,7 @@ struct amrStruct * readTbAmrTbl(
    return amrSTAry;
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-02:
+   * Fun-11 Sec-06 Sub-02:
    *   - Clean up for memory erorrs
    \*****************************************************/
 
@@ -1496,7 +1798,7 @@ struct amrStruct * readTbAmrTbl(
    return 0;
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-03:
+   * Fun-11 Sec-06 Sub-03:
    *   - Clean up for file erorrs
    \*****************************************************/
 
@@ -1519,3 +1821,74 @@ struct amrStruct * readTbAmrTbl(
 
    return 0;
 } /*readTbAmrTbl*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

@@ -4,27 +4,26 @@ CFLAGS= -static -O3 -std=c89
 MACCFLAGS= -O3
 DEBUGFLAGS= -static -O0 -ggdb -Wall
 
-cFiles=\
+SOURCE=\
    whoToTbAmr.c\
    cnvt_whoToTbAmr.c\
-   ../../generalLib/samEntryStruct.c\
    genIndiceStruct.c\
    ../drug_str_ary.c\
    ../amrStruct.c
 
 
 all:
-	$(CC) $(CFLAGS) -o whoToTbAmr $(cFiles)
+	$(CC) $(CFLAGS) -o whoToTbAmr $(SOURCE)
 
 debug:
-	$(CC) $(DEBUGFLAGS) -o debugWhoToTbAmr $(cFiles)
+	$(CC) $(DEBUGFLAGS) -o debugWhoToTbAmr $(SOURCE)
 	gdb -x bug-cmds.txt debugWhoToTbAmr
 
 mac:
-	$(CC) $(MACCFLAGS) -o whoToTbAmr $(cFiles)
+	$(CC) $(MACCFLAGS) -o whoToTbAmr $(SOURCE)
 
 check:
-	$(CC) $(DEBUGFLAGS) -o debugWhoToTbAmr $(cFiles)
+	$(CC) $(DEBUGFLAGS) -o debugWhoToTbAmr $(SOURCE)
 
 # Not really worth installing, but just in case
 install: 

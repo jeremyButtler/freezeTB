@@ -9,11 +9,6 @@ ampDepth gets the rough location of an amplicon, the genes
 
 # Install:
 
-If Rscript is not in `/usr/bin/`, then set the top line
-  (`#!/usr/Rscript`) of graphAmpMap.r to the correct
-  location. On a Unix OS you can find this by
-  using `find / -name Rscript 2>/dev/null | grep -v "lib"`
-
 ```
 sudo make install; # Run make if you have issues
 
@@ -22,25 +17,21 @@ make mac;
 sudo make install;
 ```
 
+Put the graphAmpDepth.r script were you want to run it.
+
 The binary for ampDepth is compliled on void linux with
    musl. So, it should be smaller in size then other linux
-   distributions. It is compiled statically, so linux
-   distrubution should not be a concern.
+   distributions. It is compiled statically, so it should
+   work on all linux distrubutions.
 
 # Running:
 
-You will need a paf file with the reference gene
-  coordinates to run this code. This can be gotten by
-  mapping the genes (can download from genbank) to the
-  reference genome
-  with `minimap2 ref.fasta genes.fasta > out.paf`. You
-  will then need to map your reads to the same reference
-  and make a sam file
-  `minimap2 -a -x map-ont ref.fasta reads.fastq > out.sam`
-
-The first column in the output tsv file is a flag which
-  separates out runs in graphAmpDepth.r. You can change
-  this with the `-flag "newFlag"` argument.
+You will need a tsv file with the reference gene
+  coordinates for each gene to run this code. I have
+  included the gene coordinates for NC000962.3.fa in
+  "genes-tbl.tsv". If you want to use a different
+  reference, then make a file in the same format as
+  "genes-tbl.tsv" (see help message for format).
 
 Print the help message for ampDepth with `ampDepth -h`.
 
@@ -48,23 +39,17 @@ Print the help message for graphAmpDepth with
   `graphAmpDepth -h`.
 
 ```
-# Make the paf file
-minimap2 ref.fasta genes.fasta > out.paf;
-
 # Map the reads to the reference
 minimap2 -a -x map-ont ref.fasta reads.fastq > out.sam;
 
-# Get the tsv file read read stats
-
 ## Minimum
-ampDepth -paf out.paf -sam out.sam -out out.tsv;
+ampDepth -gene-tbl gene-tbl.tsv -sam out.sam -out out.tsv;
 
 ## Change the label in column one to ONT
-ampDepth -flag ONT -paf out.paf -sam out.sam -out out.tsv;
+ampDepth -flag Filtered -gene-tbl gene-tbl.tsv -sam out.sam -out out.tsv;
 
-# Get the graphs
-
-graphAmpDepth out.tsv;
+# Build the graphs
+graphAmpDepth.r -stats out.tsv -who ../freezeTbFiles/who-2023.tsv;
 ```
 
 You can grab the row of a gene from the tsv made by
@@ -73,10 +58,10 @@ You can grab the row of a gene from the tsv made by
 # Dummy figure
 
 ![Read depth figure made by graphAmpDepth.r](
-  test-readDepth.svg)
+  demo-readDepth.svg)
 
 ![Ampilcon gene coverage figure made by graphAmpDepth.r](
-  test-ampMap.svg)
+  demo-ampMap.svg)
 
 | flag | ampNumber | refStart | refEnd | ampStart | ampEnd | avgAmpDepth | minAmpDepth | maxAmpDepth | geneId       | refGeneStart | refGeneEnd | firstBaseDepth | lastBaseDepth | avgDepth | minDepth | maxDepth |
 |:----:|:----------|:---------|:-------|:---------|:-------|:------------|:------------|:------------|:------------:|:-------------|:-----------|:---------------|:--------------|:---------|:---------|:---------|

@@ -1,3 +1,35 @@
+/*########################################################
+# Name: trimSam
+#   - Holds functions for trimming softmasked regoins at
+#     the start and end of sequences in an sam file
+########################################################*/
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header:
+'     - Included libraries and defined variables
+'   o fun-01 trimSamEntry:
+'     o Trim soft mask regions off end of sam entry
+'   o fun-02 trimSamReads:
+'     o Trims soft mask regions for all reads with a
+'       sequence in a sam file
+'   o license:
+'     - Licensing for this code (public domain / mit)
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+/*-------------------------------------------------------\
+| Header:
+|   - Included libraries and defined variables
+|   o header Sec-01:
+|     - Included libraries
+|   o header Sec-02:
+\-------------------------------------------------------*/
+
+/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+^ Header Sec-01:
+^   - Included libraries
+\<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
 #ifdef PLAN9
    #include <u.h>
    #include <libc.h>
@@ -13,10 +45,16 @@
 #include "ulCpStr.h"
 #include "dataTypeShortHand.h"
 
-/*Hidden depenencies
-  #include "../generalLib/base10StrToNum.h" no .c file
-  #include "../generalLib/numToStr.h"       no .c file
-*/
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden depenencies
+!   o .h #include "../generalLib/base10StrToNum.h"
+!   o .h #include "../generalLib/numToStr.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+^ Header Sec-02:
+^   - Defined varialbes
+\<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
 /*This .c version is slightly slower, but it works*/
 /*This will work so long as the integer is beneath
@@ -44,33 +82,8 @@
 `       to add a correction in
 */
 
-/* This works, but requires limits.h
-#if UINT_MAX >= 0xffffffffffffffff
-   #define defShiftIntToGetChar 3
-
-#elif UINT_MAX >= 0xffffffff
-   #define defShiftIntToGetChar 2
-
-#elif ULONG_MAX >= 0xffff
-   #define defShiftIntToGetChar 1
-
-#else
-   #error This is an 8 bit system
-#endif
-*/
-
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-| trimSam SOF: Start Of Functions
-|  - fun-01 trimSamEntry:
-|    o Trim soft mask regions off end of sam entry
-|  - fun-02 trimSamReads:
-|    o Trims soft mask regions for all reads with a
-|      sequence in a sam file
-\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
 /*-------------------------------------------------------\
-| Name: trimSamEntry (Fun-01:)
+| Fun-01: trimSamEntry
 | Use:
 |  - Trims off the soft masked regions of a sam entry
 | Input:
@@ -279,7 +292,7 @@ unsigned char trimSamEntry(
 } /*trimSamEntry*/
 
 /*-------------------------------------------------------\
-| Name: trimSamReads (Fun-02:)
+| Fun-02: trimSamReads
 | Use:
 |  - Goes though sam file and calls trimSamEntry for each
 |    entry
@@ -379,3 +392,74 @@ unsigned char trimSamReads(
     freeSamEntryStack(&samST);
     return errUC & ~1;
 } /*trimSamReads*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconvient / not possible, this code is under the
+:   MIT license.
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

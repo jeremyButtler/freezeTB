@@ -1,20 +1,22 @@
-#b tbAmr.c:228
-#b amrStruct.c:934
-b checkAmr.c:733
-b checkAmr.c:445 if iAmr == 13016
-#b ../generalLib/samEntryStruct.c:522
-#b ../generalLib/samEntryStruct.c:471 if *tmpStr == '3' && tmpStr[1] == '7' && tmpStr[2] == '3' && tmpStr[3] == 'e'
-b checkAmr.c:511 if iAmr == 13079
+b checkAmr.c:2374
+
+# Check entire gene for frameshift
+b checkAmr.c:944
+
+# First kept frameshift case (BC33)
+b checkAmr.c:1053 if iAmr == 3059
+
+# If I had resistance
+#b checkAmr.c:1391
 
 # Null test
-#r -amr-tbl cnvt_whoToTbAmr_src/del.tsv -sam-con ~/TB-null-trim.sam
-r -amr-tbl cnvt_whoToTbAmr_src/del.tsv -sam ~/BC33-test.sam
 
-#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/TB-null-trim.sam
-#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC33-test.sam
-#r -amr-tbl cnvt_whoToTbAmr_src/del.tsv -sam-con ~/TB-null-trim.sam
-#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam-con ~/BC33-test-con-eqx.sam
-#r -amr-tbl ../freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv -sam ~/BC34.sam
+# NUll tests (frist is one gene; second individaul genes)
+#r -frameshift -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con ~/files/testing/null-con.sam
+#r -frameshift -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con ~/files/testing/null.sam
+
+# Actual test
+r -frameshift -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con ~/files/testing/BC33-clean.sam -id-file ~/files/testing/tbAmr-BC33.ids
 
 define pcross
    set $icnt = 0

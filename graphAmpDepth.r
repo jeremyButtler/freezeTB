@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 library("ggplot2")
 library("viridisLite")
@@ -52,6 +52,8 @@ pGraphAmpDepthHelp = function(inStr){
 #    - Final preperations and graphing
 #  o sec-05:
 #    - Format and save the graph
+#   o license:
+#     - Licensing for this code (public domain / mit)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -127,21 +129,16 @@ while(iArg <= lenInputI)
    iArg = iArg + 1;
 } # Loop: Process the user input
 
+# For debuging
+#dataStr = "del.tsv";
+#whoCatalogStr = "../freezeTbFiles/who-2023.tsv";
+
 if(file.exists(dataStr)){
    dataDF=setDT(read.csv(dataStr, sep="\t", header=TRUE));
 }else{
    print(paste("Could not open -stats ", dataStr));
    q("no");
 }
-
-# For deugging
-#dataDF =
-#   setDT(
-#      read.csv(
-#         "Input file",
-#         sep="\t",
-#         header=TRUE
-#));
 
 if(file.exists(whoCatalogStr)){
    amrDF =
@@ -185,13 +182,6 @@ dataDF[
 # Add the flat to the gene names. This allows me to graph
 # the amplicons for each gene separately
 dataDF$genesTag = paste(dataDF$genes,dataDF$flag,sep=" ");
-
-#numFlagsI =
-#   length(
-#      unique(
-#         paste(dataDF$flag, dataDF$ampNumber, sep = "")
-#      )
-#   );
 
 numFlagsI =
    length(
@@ -359,7 +349,7 @@ dataDF =
    ]; # Remove the umapped and off-target columns
 
 # The Z is to force it to be last in the color scheme
-dataDF$ref = "~ref";
+dataDF$ref = "ref";
 
 # The 0 is to force it to be first in the color scheme
 dataDF$geneEndFlag = " gene end";
@@ -373,23 +363,18 @@ dataDF[
    by = geneId
 ];
 
-#dataDF[
-#   ,
-#   ampGeneStart:= max(ampStart),
-#   by = geneId
-#];
-#
-#dataDF[
-#   ,
-#   ampGeneStart:= min(ampEnd),
-#   by = geneId
-#];
-
 # Get the maximum length of amplicon on the gene
 dataDF$ampGeneStart =
-   max(dataDF$refGeneStart, min(dataDF$ampStart, dataDF$ampEnd));
+   max(
+      dataDF$refGeneStart,
+      min(dataDF$ampStart, dataDF$ampEnd)
+   );
 
-dataDF$ampGeneEnd = min(dataDF$refGeneEnd, max(dataDF$ampStart, dataDF$ampEnd));
+dataDF$ampGeneEnd =
+   min(
+      dataDF$refGeneEnd,
+      max(dataDF$ampStart, dataDF$ampEnd)
+   );
 
 # Merege amplicons covering the same gene
 dataDF[
@@ -422,8 +407,8 @@ if(! is.null(amrDF)){
 # If: I have mar coordinates to add
    # Order my datastructers by starting positoin
    amrDF = amrDF[order(amrDF$refPosition),];
-   dataDF = dataDF[order(dataDF$maxRefEnd),];
-   dataDF = dataDF[order(dataDF$minRefStart),];
+   dataDF = dataDF[order(dataDF$refGeneEnd),];
+   dataDF = dataDF[order(dataDF$refGeneStart),];
 
    # Set up my vectors to store my variables
    amrPosI = amrDF$refPosition;
@@ -432,8 +417,8 @@ if(! is.null(amrDF)){
    amrMinI = 0;
    amrIdStr = "";
 
-   dataMinI = dataDF$minRefStart;
-   dataMaxI = dataDF$maxRefEnd;
+   dataMinI = dataDF$refGeneStart;
+   dataMaxI = dataDF$refGeneEnd;
    dataGeneStr = dataDF$geneGroup;
    dataIdStr = dataDF$geneId;
    
@@ -442,6 +427,7 @@ if(! is.null(amrDF)){
    
    # My data positions seem to be siz of
    dataMinI = dataMinI - 6;
+   dataMaxI = dataMaxI + 6;
    
    iAmr = 1;
    iData = 1;
@@ -454,7 +440,7 @@ if(! is.null(amrDF)){
             amrPosI[iAmr] = -1;
             amrMaxI[iAmr] = -1;
             amrMinI[iAmr] = -1;
-            amrIdStr[iAmr] = "d";
+            amrIdStr[iAmr] = 'd';
             iAmr = iAmr + 1;
          }
       } else if(amrPosI[iAmr] > dataMaxI[iData]){
@@ -464,7 +450,7 @@ if(! is.null(amrDF)){
          amrPosI[iAmr] = -1;
          amrMaxI[iAmr] = -1;
          amrMinI[iAmr] = -1;
-         amrIdStr[iAmr] = "d";
+         amrIdStr[iAmr] = 'd';
    
          iAmr = iAmr + 1;
       } else { # Else: I am keeping this value
@@ -482,7 +468,7 @@ if(! is.null(amrDF)){
    amrPosI = amrPosI[amrPosI > -1];
    amrMinI = amrMinI[amrMinI > -1];
    amrMaxI = amrMaxI[amrMaxI > -1];
-   
+
    # Make my amr dataframe
    amrPosDF =
       data.frame(
@@ -492,7 +478,7 @@ if(! is.null(amrDF)){
          amrGeneStr,
          amrIdStr,
          rep("AMR-mutation", length(amrPosI)),
-         rep("~ref", length(amrPosI))
+         rep("ref", length(amrPosI))
        );
    
    names(amrPosDF) =
@@ -514,15 +500,13 @@ if(! is.null(amrDF)){
 
 legendAry =
    c(
-      "0 gene start",   # space forces to start
       unique(dataDF$flag),
-      "~ref",     # ~ is last ascii character
+      "ref",     # ~ is last ascii character
       "AMR-mutation"
     ); # Array for legend orginzation
 
 legendLabelsAry =
    c(
-      "gene start",   # space forces to start
       unique(dataDF$flag),
       "ref",     # ~ is last ascii character
       "AMR mutation"
@@ -530,7 +514,7 @@ legendLabelsAry =
 
 graphObj =
    scale_y_discrete(
-      label = function(x) (gsub("~ref", "ref", x))
+      label = function(x) (gsub("ref", "ref", x))
    );
 
 
@@ -617,3 +601,74 @@ ggsave(
    paste(prefixStr, "-ampMap.", extStr, sep = ""),
    device = extStr
 ); # Save the graph
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

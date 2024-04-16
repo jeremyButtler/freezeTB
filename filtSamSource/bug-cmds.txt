@@ -1,3 +1,3 @@
-b ../generalLib/numToStr.h:23
+b filtsam.c:683
 
-r -sam rm.sam
+r -sam ~/BC33-test.sam

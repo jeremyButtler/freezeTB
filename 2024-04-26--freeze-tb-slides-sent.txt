@@ -1,0 +1,175 @@
+freezeTb; the software side
+  - Detecting Tuberculosis AMRs with Nanopore sequencing
+
+Why TB?
+  - 5 to 7 million infections per year (WHO 2023)
+  - 1 million deaths (WHO 2023)
+  - Antibiotics; fatal clinical outcomes from 24% to 7% (Chowdury, et al. 2023)
+
+Drug resistant TB
+  - 410000 people per year (rifampicin or multiple) (WHO 2023)
+  - First line antibiotics are less effective (Chowdury 2023)
+
+Drug resistant detection (Campelo et al. 2021; Mukherjee et al. 2023)
+  - Culture (weeks)
+  - Rapid molecular diagnostic test; specific targets only
+  - Sequencing; unspecific, but costly and needs reference
+
+# Add in MIRU lineages (spologiotyping)
+
+2023 WHO catalog; a reference of mutations causing AMRs
+
+# I need refs
+Types of sequencing
+  - Whole genome sequencing; everything, but also costly
+  - Targeted sequencing; genes of interest at less cost
+
+# I need refs
+Platforms
+  - Short read; accurate but time consuming (REF)
+  - Long read; less accurate, but single day times (REF)
+
+TBProfiler; the current resource
+  - Uses 2023 catalog
+  - Merges several tools together and works
+  - > 5 dependencies or conda; not fun to install
+ 
+
+Other solutions; A lot of small programs not designed to
+  work together, but can be made to work together.
+
+
+Goal: A zero dependency tuberculosis pipeline that is
+  designed for Nanopore with every component working
+  together
+
+FreezeTb; the software side
+  - CLI; user provides a sam file
+  - R GUI; user provides fastq file, but requires minimap2
+  - Modular; you like a part you can get it separate
+  - Everything works on a sam file/sam structure
+
+1. GUI only; map reads to the reference genome
+
+
+2. Update read depth histogram with new read
+
+
+3. Filter reads
+  - Mapping Quality < 15
+  - Median Q-score < 7
+  - Mean Q-score < 7
+  - Under 200 bases
+
+
+4. Update the kept read depth histogram
+
+
+5. Add read to consensus "graph"
+  - Ignore bases with Q-scores < 7
+
+
+6. Check read for AMRs (2023 catalog)
+  - Uses 2023 WHO catalog
+  - Frame shifts (indels) treated as nucleotide sequence
+
+
+7. Check read for MIRU lineage
+
+
+8. Repeat 1 to 7 till no more reads
+  - Print AMRs mutations with 20x depth and 45% support
+  - Print counts for detected MIRU lineage (table)
+
+
+9. Collapse the consensus "graph" into sam entries
+  - Fragment has 20X depth for at least 200 bases
+  - SNPs/Matches have 50% support (else masked)
+  - Indels have 70% support (else removed)
+
+
+10. Check consensus fragments for AMRs (and print)
+
+
+11. Check consensus fragments for MIRU lineage (and print)
+
+
+12. R; the dependency I did not want to get around
+  - Can use R to make read depth and coverage graphs
+
+Wrap up:
+  - FreezeTb; works, but not an replacement
+
+# These are more of notes. I need to filter though this
+#   and decide what to keep an what to remove
+#Why Tuberculosis matters  (Global tuberculosis report 2023)
+#- Worlds second leading cause of death for an single infectious agent
+#- In 2019 13th highest cause of death of top 20 deaths (Fi. 8)
+#- Causes 1.3 million deaths per year 
+#- 10 million people sick/year
+#- 5 to 7 million infections per year
+# This is different from sickness
+#- Untreated fatality of 50%
+#- Treatment can cure 85% of people
+#- 410000 people developed multi drug/rifampicin tuberculosis resistance
+#
+#
+#
+#Campelo TA, Cardoso de Sousa PR, Nogueira LL, Frota CC,
+#   Zuquim Antas PR. Revisiting the methods for detecting
+#   Mycobacterium tuberculosis: what has the new millennium
+#   brought thus far?
+#   Access Microbiol. 2021 Aug 2;3(8):000245.
+#   doi: 10.1099/acmi.0.000245.
+#   Erratum in: Access Microbiol. 2022 Jan 12;4(1):000294.
+#   PMID: 34595396; PMCID: PMC8479963.
+#- cell division 18-20 hours (slow), several weeks to see
+#  visible colonies (solid culture media).
+#- Also lists several methods
+#
+#Chowdhury K, Ahmad R, Sinha S, Dutta S,  Haque M.
+#  Multidrug-Resistant TB (MDR-TB) and Extensively
+#  Drug-Resistant TB (XDR-TB) Among Children: Where We
+#  Stand Now. Cureus. 2023 Feb 18;15(2):e35154.
+#  doi: 10.7759/cureus.35154. PMID: 36819973;
+#  PMCID: PMC9938784.
+#- fatal clinical outcomes 24% to 7% with drugs
+#- first line drugs are less effective
+#
+#Mukherjee S, Perveen S, Negi A, Sharma R.
+#   Evolution of tuberculosis diagnostics: From molecular
+#   strategies to nanodiagnostics.
+#   Tuberculosis (Edinb). 2023 May;140:102340.
+#   doi: 10.1016/j.tube.2023.102340. Epub 2023 Apr 5.
+#   PMID: 37031646; PMCID: PMC10072981.
+#- This has a really good section on AMR detection methods
+#- PCR/non-sequencing nucleotides methods are limited to known, common targets
+#
+#Vasiliu A, Saktiawati AMI, Duarte R, Lange C, Cirillo DM.
+#  Implementing molecular tuberculosis diagnostic methods
+#  in limited-resource and high-burden countries.
+#  Breathe (Sheff). 2022 Dec;18(4):220226.
+#  doi: 10.1183/20734735.0226-2022. Epub 2023 Feb 14.
+#  PMID: 36865933; PMCID: PMC9973455.
+#- This has some comparisons and limitations. Table 1 is
+#  messy, but is really good.
+#- It also includes some cost issues, such as commercial
+#  software.
+#
+#Doyle RM, Burgess C, Williams R, Gorton R, Booth H, Brown J, Bryant JM, Chan J, Creer D, Holdstock J, Kunst H, Lozewicz S, Platt G, Romero EY, Speight G, Tiberi S, Abubakar I, Lipman M, McHugh TD, Breuer J. Direct Whole-Genome Sequencing of Sputum Accurately Identifies Drug-Resistant Mycobacterium tuberculosis Faster than MGIT Culture Sequencing. J Clin Microbiol. 2018 Jul 26;56(8):e00666-18. doi: 10.1128/JCM.00666-18. PMID: 29848567; PMCID: PMC6062781.
+#- whole genome sequencing using baits
+#
+# Notes on sent commands
+# Image: @file.png
+#
+# List:
+#  - item 1
+#  - item 2
+#
+# Empty lines break into new slides (end of paragraph)
+#
+# Make a blank slide with: \ 
+# Escape '#', '@', and '\' with: \
+
+#   Global tuberculosis report 2023
+# https://www.who.int/publications-detail-redirect/9789240083851

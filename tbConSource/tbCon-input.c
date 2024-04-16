@@ -5,6 +5,7 @@
 ########################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
 '   o header:
 '     - Included libraries
 '   o fun-01: checkTbConArg
@@ -14,6 +15,8 @@
 '     - Prints out the tbCon help message
 '   o fun-03: pTbConVersion
 '     - Prints out the version number for tbCon
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -374,22 +377,470 @@ checkTbConArg(
 void
 pTbConHelp(
    char pFullC,
-   void *outVoidFILE
-){
-   /*This is for my sanity*/
-   FILE *outFILE = (FILE *) outVoidFILE;
+   void *outFILE
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-02 TOC:
+   '   - Print the help message for tbCon
+   '   o fun-02 sec-01:
+   '     - Print out the usage and description entry
+   '   o fun-02 sec-02:
+   '     - Print out the input paramaters
+   '   o fun-02 sec-03:
+   '     - Print output block
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-   fprintf(outFILE, "Usage: tbCon -sam file.sam\n");
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-02 Sec-01:
+   ^   - Print out the usage and description entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    fprintf(
-      outFILE,
+      (FILE *) outFILE,
+      "Usage: tbCon -sam file.sam\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
       "  - Makes an consensus genome from input sam file"
     );
 
-    fprintf(outFILE, "\n");
-    fprintf(outFILE, "Input:\n");
+    fprintf((FILE *) outFILE, "\n");
 
-   /*TODO: Make full help message*/
+    fprintf((FILE *) outFILE, "Input:\n");
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-02 Sec-02:
+   ^   - Print out the input paramaters
+   ^   o fun-02 sec-02 sub-02:
+   ^     - Print out user input/output options
+   ^   o fun-02 sec-02 sub-03:
+   ^     - Print cosnesus settings
+   ^   o fun-02 sec-02 sub-04:
+   ^     - Print variant file settings
+   ^   o fun-02 sec-02 sub-05:
+   ^     - Help message and version numbers
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+    /****************************************************\
+    * Fun-02 Sec-02 Sub-02:
+    *   - Print out user input/output options
+    *   o fun-02 sec-02 sub-02 cat-01:
+    *     - File IO header
+    *   o fun-02 sec-02 sub-02 cat-02:
+    *     - sam file input parameter
+    *   o fun-02 sec-02 sub-02 cat-03:
+    *     - output file parameter
+    *   o fun-02 sec-02 sub-02 cat-04:
+    *     - output variant tsv parameter
+    \****************************************************/
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun-02 Sec-02 Sub-02 Cat-01:
+    +   - File IO header
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf((FILE *) outFILE, "  Input and Output:\n");
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun-02 Sec-02 Sub-02 Cat-02:
+    +   - sam file input parameter
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(
+       (FILE *) outFILE,
+       "    -sam: [Required; stdin]\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Sam file with mapped reads\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Use '-' for stdin input\n"
+    );
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun-02 Sec-02 Sub-02 Cat-03:
+    +   - output file parameter
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(
+       (FILE *) outFILE,
+       "    -out: [stdout]\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Sam file to save output cosnesuses in\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Use '-' for stdout output\n"
+    );
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun-02 Sec-02 Sub-02 Cat-04:
+    +   - output variant tsv parameter
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(
+       (FILE *)outFILE,
+       "    -out-tsv: [Not used]\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Name of tsv to save filtered variants to"
+    );
+
+    fprintf((FILE *) outFILE, "\n");
+
+   if(! pFullC)
+      goto skipExtaSettings_fun02_sec02_sub05;
+
+   /****************************************************\
+   * Fun-02 Sec-02 Sub-03:
+   *   - Print cosnesus settings
+   *   o fun-02 sec-02 sub-03 cat-01:
+   *     - Consensus settings header
+   *   o fun-02 sec-02 sub-03 cat-02:
+   *     - Minimum mapping quality parameter
+   *   o fun-02 sec-02 sub-03 cat-03:
+   *     - Minimum Base Q-score value parameter
+   *   o fun-02 sec-02 sub-03 cat-04:
+   *     - Minimum insertion Q-score value parameter
+   *   o fun-02 sec-02 sub-03 cat-05:
+   *     - Minimum depth setting
+   *   o fun-02 sec-02 sub-03 cat-06:
+   *     - Minimum length setting
+   *   o fun-02 sec-02 sub-03 cat-07:
+   *     - Mask parameter
+   *   o fun-02 sec-02 sub-03 cat-08:
+   *     - Minimum percent SNP support setting
+   *   o fun-02 sec-02 sub-03 cat-09:
+   *     - Minimum percent insertion support setting
+   *   o fun-02 sec-02 sub-03 cat-10:
+   *     - Minimum percent deletion support setting
+   \****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-01:
+   +   - Consensus settings header
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf((FILE *) outFILE, "  Cosensus settings:\n");
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-02:
+   +   - Minimum mapping quality parameter
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -min-mapq: [%i]\n",
+      defMinMapQ
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum mapping quailty to keep an read\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-03:
+   +   - Minimum Base Q-score value parameter
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+   
+   fprintf(
+      (FILE *) outFILE,
+      "    -min-q: [%i]\n",
+      defMinBaseQ
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum Q-score to keep an base\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-04:
+   +   - Minimum insertion Q-score value parameter
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+   
+   fprintf(
+      (FILE *) outFILE,
+      "    -min-q-ins: [%i]\n",
+      defMinInsQ
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum Q-score to keep an insertion\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-05:
+   +   - Minimum depth setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -min-depth: [%i]\n",
+      defMinDepth
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum read depth to not break consensus"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "\n        into fragments\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-06:
+   +   - Minimum length setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -min-len: [%i]\n",
+      defMinLen
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum fragment length (-min-depth)"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       " needed\n        to keep an fragment\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-06:
+   +   - Mask parameter
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -mask: [%c]\n",
+      defMaskBase
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Base to mask unsupported positions with\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-07:
+   +   - Minimum percent SNP support setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -perc-snp-sup: [%.2f]\n",
+      defMinPerSnp
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum percent support needed to not"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "\n        mask an SNP/match (range: 0 to 1)\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-08:
+   +   - Minimum percent insertion support setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -perc-ins-sup: [%.2f]\n",
+      defMinPerIns
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum percent support needed to keep an"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "\n        insertion (range: 0 to 1)\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Unsupported positions are removed\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-03 Cat-09:
+   +   - Minimum percent deltion support setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -perc-del-sup: [%.2f]\n",
+      defMinPerDel
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum percent support needed to keep an"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "\n        deletion (range: 0 to 1)\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Unsupported positions are replaced with"
+    );
+
+   fprintf((FILE *) outFILE, " -mask\n");
+
+   /****************************************************\
+   * Fun-02 Sec-02 Sub-04:
+   *   - Print variant file settings
+   *   o fun-02 sec-02 sub-04 cat-01:
+   *     - Variant file header
+   *   o fun-02 sec-02 sub-04 cat-02:
+   *     - Print Minimum depth setting
+   *   o fun-02 sec-02 sub-04 cat-03:
+   *     - Print Minimum percent SNP support setting
+   *   o fun-02 sec-02 sub-04 cat-04:
+   *     - Print Minimum percent insertion support setting
+   *   o fun-02 sec-02 sub-04 cat-05:
+   *     - Minimum percent deltion support setting
+   \****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-01:
+   +   - Consensus settings header
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf((FILE *) outFILE, "  Print variants:\n");
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-02:
+   +   - Print Minimum depth setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -p-min-depth: [%i]\n",
+      defMinPrintDepth
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum read depth print out an variant\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-03:
+   +   - Print Minimum percent SNP support setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -p-perc-snp-sup: [%.2f]\n",
+      defMinPrintPerSnp
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum percent support needed to print"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "\n        an SNP/match variant (range: 0 to 1)\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-04:
+   +   - Print Minimum percent insertion support setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -p-perc-ins-sup: [%.2f]\n",
+      defMinPrintPerIns
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum percent support needed to print"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       " an\n        insertion variant (range: 0 to 1)\n"
+    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-02 Sub-04 Cat-05:
+   +   - Minimum percent deltion support setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -p-perc-del-sup: [%.2f]\n",
+      defMinPrintPerDel
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "      o Minimum percent support needed to print"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       " an\n        deletion variant (range: 0 to 1)\n"
+    );
+
+   /****************************************************\
+   * Fun-02 Sec-02 Sub-05:
+   *   - Help message and version numbers
+   \****************************************************/
+
+   skipExtaSettings_fun02_sec02_sub05:;
+
+   fprintf(
+      (FILE *) outFILE,
+      "  -h: Print the shortened help message\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "  -h-all: Print the entire help message\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "  -v: Print the version number\n"
+   );
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-02 Sec-03:
+   ^   - Print output block
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    fprintf(outFILE, "Output:\n");
 
@@ -400,7 +851,7 @@ pTbConHelp(
 
     fprintf(
        outFILE,
-      "  - Prints the variants to the tsv file (-tsv)\n"
+      "  - Prints variants to -out-tsv (if provided)\n"
     );
 } /*pTbConHelp*/
 
@@ -426,3 +877,74 @@ pTbConVersion(
        def_tbCon_input_day
    ); /*Version of tbCon*/
 } /*pTbConVersion*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconvient / not possible, this code is under the
+:   MIT license.
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

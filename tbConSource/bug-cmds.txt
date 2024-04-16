@@ -2,5 +2,5 @@ b tbCon.c:95
 b tbCon.c:286
 b tbCon-fun.c:1076
 
-#r  -sam - -out-tsv delete.tsv < ~/BC33-test.sam
-r  -out-tsv delete.tsv -sam - < <( minimap2 -a ../freezeTBScripts/TB-NC000962.fa  ~/../shared/Eric-TB-project/20240202_1719_MN20517_FAX66077_2b83f706/BC33/BC33.fastq)
+r  -sam - -out-tsv delete.tsv < ~/BC33-eqx.sam
+#r  -out-tsv delete.tsv -sam - < <( minimap2 -a ../freezeTBScripts/TB-NC000962.fa  ~/../shared/Eric-TB-project/20240202_1719_MN20517_FAX66077_2b83f706/BC33/BC33.fastq)

@@ -1,3 +1,4 @@
 b tbMiru.c:93
+b miruTblStruct.c:1236
 
 r -sam side-files/tbRef.sam -miru-tbl miruTbl.tsv -out-tbl del.tsv

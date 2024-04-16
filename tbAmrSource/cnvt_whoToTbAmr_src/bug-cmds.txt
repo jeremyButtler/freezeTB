@@ -1,15 +1,20 @@
-#b ../amrStruct.c:529
-#b genIndiceStruct.c:644
-#b ../generalLib/samEntryStruct.h:636
-b whoToTbAmr.c:202
-#b cnvt_whoToTbAmr.c:2453 if samST.refEndUI > 2287882
-b cnvt_whoToTbAmr.c:2508 if iIndex == 13016
-   # Needs to be 2156108 is set to 09
-#b cnvt_whoToTbAmr.c:2540
-#b cnvt_whoToTbAmr.c:2492 if iIndex == 13061
-#b cnvt_whoToTbAmr.c:2492 if iIndex >= 13077
+b whoToTbAmr.c:420
 
-r -tabone-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab1-master.tsv -tabtwo-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab2-indices.tsv -sam ../../../who2023-TB-catalog-as-tsv/TB-NC000962-gene-maps.sam
+# LOF assignment in tab1 read in
+#b cnvt_whoToTbAmr.c:1605
+
+# Parse variant Ids, whole Gene LoF
+#b cnvt_whoToTbAmr.c:2056
+
+b cnvt_whoToTbAmr.c:3069 if amrST[iIndex].codonNumUI == 499
+
+b ../amrStruct.c:645 if amrSTAry[ulAmr].codonNumUI == 499
+
+#b cnvt_whoToTbAmr.c:3123
+
+#r -all-amrs -tabone-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab1-master.tsv -tabtwo-who-2023-tsv ../../../who2023-TB-catalog-as-tsv/WHO-2023-TB-tab2-indices.tsv -ref ../../freezeTbFiles/TB-NC000962.fa -coords gene-tbl.tsv
+
+r -tabone-who-2023-tsv ~/files/publicGitRepositories/who2023-TB-catalog-as-tsv/WHO-2023-TB-tab1-master.tsv -tabtwo-who-2023-tsv ~/files/publicGitRepositories/who2023-TB-catalog-as-tsv/WHO-2023-TB-tab2-indices.tsv -ref ../../freezeTbFiles/TB-NC000962.fa -coords gene-tbl.tsv
 
 define pcross
    set $icnt = 0

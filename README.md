@@ -1,20 +1,17 @@
 # Use
 
-freezeTb is designed to detect AMR resistance in Nanopore
-  sequence TB samples. Its goal is to be easy to install,
-  and easy to use. However, it may not give the same
-  quality of results as TBProfile.
-
-One reason why not is that freezeTb assumes that Nanopore
-  reads and consensuses are to noisy and likely have
-  errors that cause frameshifts. So, freezeTb will only
-  treat frame shits as regular nucleotide sequences and
-  not compare their amino acid sequences.
+freezeTb is a program that detects AMR resistance in
+  Nanopore sequence tuberculosis samples. It does not have
+  all the features that TBProfiler has.
 
 Currently freezeTb uses the WHO 2023 catalog.
 
-I have made the programs in freezeTb to be modular. So,
-  they can be built on there own.
+I have made the programs in freezeTb to be modular. This
+  means that if you like a particular program, then you
+  can compile it separatley. I have set the default build
+  methods to be static for the modules, so you will need
+  to do `make mac` on anything that is not freezeTb. All
+  of these programs take sam files as inputs.
 
 List of programs:
 
@@ -28,29 +25,39 @@ List of programs:
 
 Other programs:
 
-- rmHomo: never was completed.
-- filtSam: not useful, but I wanted to see how close I
-  could get to samtools view. It is slower and has no
+- filtSam: For filtering and converting sam files. You
+  would be better off using samtools. I have used it for
+  the `filtSam -sam fil.sam -out-stats -` option for
+  samfiles with eqx cigar entries. Again, this is me, so
+  you will not likely find it really useful. It has no
   help message.
 - fqGetIds: was here for the original script. It has its
-  own separate repository.
-- subsample: was here to help with subsampling reads for
-  the original bash script. No longer used.
+  own separate repository. It is designed to extact read
+  ids from an fastq file. I need to come back to this and
+  improve it.
+- oldCode: This has old code I am not quite ready to throw
+  away yet. I may use it later or in another project.
+  Some of it was never finished, other parts of it no
+  longer work do to an change in my coding style.
 
 # Requirements 
 
-1. A read mapper that outputs a sam file, minimap2 is what
-   I use [https://github.com/lh3/minimap2](
-          https://github.com/lh3/minimap2), but you can
-   use something else.
-2. For graphs. This only applies if you use the `-graph`
-   or `-graph-ext` options.
-   - Rscript (this is R). You will also need some R
-     packages
+1. A read mapper that outputs a sam file.
+   - Your choice for the command line version 
+   - For the GUI you will need minimap2
+     [https://github.com/lh3/minimap2](
+      https://github.com/lh3/minimap2)
+2. R and several R libraries. The R libraries will be
+   installed when you install freezeTb.
+   - For command line version this is only needed with
+     the `-graph` options.
      - ggplot2
-     - viridisLite
      - svgLite (if you request svgs)
-     - data.table
+   - For the GUI version you will need
+     - ggplot2
+     - fs
+     - tcltk (often is in base R) or tcltk2
+     - svgLite (if you request svgs)
 
 # Install
 
@@ -61,13 +68,7 @@ The freezeTb install will install freezeTb,
   freezeTbFiles are the files, such as the WHO catalog,
   that freezeTb uses for the default files.
 
-## Linux
-
-This is what freezeTb was tested on. You should be
-  able to use the compiled freezeTb code if you plan to
-  install freezeTb in /usr/local/bin (default). Else
-  do `make PREFIX=/path/to/install/at`. This allows
-  freezeTb to know were the default files are.
+## Linux or Mac
 
 ```
 git clone https://github.com/jeremybuttler/freezeTB
@@ -75,46 +76,53 @@ cd freezeTB
 make
 sudo make install
 make clean
-```
 
-## Mac
+# or for an static build (Non-Mac)
 
-In theory this should work, in pratice I have no idea.
-
-
-```
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
-make mac
+make static
 sudo make install
 make clean
 ```
 
+This installs freezeTb, freezeTbGui.r, and graphAmpDepth.r
+  into `/usr/local/bin/`. It also installs the
+  freezeTbFiles folder to `/usr/local/share`.
+
+
+If you are having problems installing try doing a local
+  install.
+
+```
+make
+make PREFIX=~/local/path/ dbPREFIX=~/Documents/ install
+```
+
+The PREFIX changes the were freezeTb, freezeTbGui.r, and
+  graphAmpDepth.r are installed. While dbPREFIX changes
+  were the database is installed. The only supported
+  locations are `/usr/local/share/` and `~/Documents/`.
+  You can change these by changing defPathStr
+  (`/usr/local/share/`; global path) and defAltPathStr
+  (`~/Documents/`; local path) in freezeTb.c
+  (Header Sec-02: lines 112 to 116). The lines beneath it
+  (119 to 121) have the expected file names. For the 
+  gui, change the values in Header Sec-02 Sub-01 and
+  Header Sec-02 Sub-02 in freezeTbGui.r.
+
 ## Windows
 
-I am going to say no. I have not tried it.
-
-However, in theory this should be possible, since I have
-  only use functions from the C standard libraries, so
-  there should be nothing unique to Linux. However, Widows
-  does not come with a C compiler (you have to install
-  it). Windows also does not support awk, which I use to
-  set my default file paths in my Makefile. To set the
-  default file path change
-  line 108 `char *defPathStr = "";` to
-  `char *defPathStr = "C:\\default\file\path";`. You will
-  also likely have a lot of compiler warnings about unsafe
-  functions, which are considered standard C functions.
+I have not tried it.
 
 # Run
+
+## CLI
 
 You can print the help message with `freezeTb -h`.
 
 To make running this program simple, I have put the needed
-  databases in the same location as freezeTb. However,
-  this location is hardcoded in at compile time and so,
-  you need to run `sudo make install` to get the simple
-  method.
+  databases in `/usr/local/share`.
 
 ```
 minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq > reads.sam;
@@ -125,21 +133,19 @@ freezeTb -sam reads.sam -prefix good-name;
 minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq | freezeTB.sh -sam - -prefix good-name
 ```
 
-Do not use the `--eqx` flag for minimap2. For some odd
-  reason tbCon has an issue with the --eqx flag.
-  **I will need to come back and figure out why.**
-
-Also tbAmr does not work very well with stdin input, but
-  freezeTb does. **I will need to come back and debug this
-  problem.**
-
-
 A more complex way to run freezeTb is to provide the paths
-  to the AMR database and the gene coordinates.
+  to all the databases (AMR, MIRU, and gene-table). These
+  are just tsvs, so they are easy to edit.
 
 ```
 freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -miru-tbl freezeTbFiles/miruTbl.tsv -gene-coords freezeTbFiles/TB-gene-coordinates.paf
 ```
+
+## GUI
+
+For the gui, just run `freezeTbGui.r`. The just fill in
+  the values needed. This should be only fastq file if the
+  databases were detected.
 
 # How it works
 
@@ -170,7 +176,7 @@ freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -m
    out both histogram (unfiltered and filtered)
 9. freezeTb prints out the AMRs that at least 45% of
    mapped reads supported
-10. freezEtB THen prints out the MIRU lineage table of
+10. freezeTb THen prints out the MIRU lineage table of
     read counts for the reads
 11. freezeTb then finishes building the consensus
 12. freezeTb finds the AMRs for the consensus

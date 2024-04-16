@@ -8,10 +8,10 @@
 ' SOF: Start Of File
 '   o header:
 '     - Definitions/defaults and header guards
-'   o st-01: amrHit
+'   o .h st-01: amrHit
 '     - Holds a linked list of postive amrs for each amr
 '       check
-'   o fun-01: initAmrHit
+'   o .h fun-01: initAmrHit
 '     - Initializes an amrHit structuer to all zeros
 '   o fun-02: freeAmrHit
 '     - Frees a single amrHit structure. This does not
@@ -20,31 +20,44 @@
 '     - Frees a list of amrHit structures
 '   o fun-04: makeAmr
 '     - Makes a new, initialized amrHit structer on heap
-'   o fun-05: getCigMutCount (.c only)
+'   o .c fun-05: getCigMutCount
 '     - Updates the snp (or match)/ins/del counts for a
-'   o fun-06: incCigCnt (.c only)
+'   o .c fun-06: incCigCnt
 '     - Incurments the cigar counter when all values for
-'   o fun-07: isBactStartCodon (.c only)
-'      - Checks to is if an input codon is an bacterial
-'        start codon
-'   o fun-08: checkAmrSam
+'   o .c fun-07: LoFForwardCheck
+'     - Gets the number of indels in an gene and checks
+'       for early stops or missing stops and starts.
+'   o .c fun-08: LoFReverseCheck
+'     - Gets the number of indels in an gene and checks
+'       for early stops or missing stops and starts. For
+'       an reverse complement gene
+'   o fun-09: checkAmrSam
 '     - Checks if a sequence in a sam file entry has
 '       amr's (antibiotic resitance)
-'   o fun-09: pCrossRes (.c only)
+'   o .c fun-10: pCrossRes
 '     - Print out cross resitance
-'   o fun-10: pHeadAmrHitList
+'   o fun-11: pHeadAmrHitList
 '     - Prints the header for an amrHitList table
-'   o fun-11: pAmrHitList
+'   o fun-12: pAmrHitList
 '     - Prints out all amr's that were in a sequence
-'   o fun-12: pHeadAmrs
+'   o fun-13: pHeadAmrs
 '     - Prints the header for an amr table (reads instead
 '       of consensuses)
-'   o fun-13: pAmrs
+'   o fun-14: pAmrs
 '     - Prints out all amr's that meant the min depth
-'   o fun-14: lookForAmrsSam
+'   o fun-15: pHeadAmrReadIds
+'     - Prints out the header for the read id mapped
+'       variant file
+'   o fun-16: pAmrReadIds
+'     - Prints out the read id and the ARMs variant ids
+'       that it supported
+'   o fun-17: lookForAmrsSam
 '     - Look for anti-microbial (antibiotic) genes in the
 '       reads in a sam file
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
 /*-------------------------------------------------------\
 | Header:
 |   - Definitions/defaults and header guards
@@ -53,10 +66,13 @@
 #ifndef CHECK_AMR_H
 #define CHECK_AMR_H
 
+#define def_checkFrameshift_checkAmr 0
+  /*1: check frameshifts*/
+
 #define defMinDepth 20
 
-#define defMinPerReadsMap 0.45f
-    /*At least 45% of reads with region support the amr*/
+#define defMinPerReadsMap 0.05f
+    /*At least 5% of reads with region support the amr*/
 #define defMinPerReadsTotal 0.00f
     /*0% (turn off) of all kept reads mapped to this amr
     `   region
@@ -100,14 +116,11 @@ initAmrHit(amrHitSTPtr){\
 | Output:
 |   - Frees:
 |     o amrHitSTPtr
-|   - Sets:
-|     o amrHitSTPtr to 0
 \-------------------------------------------------------*/
-#define \
-freeAmrHit(amrHitSTPtr){\
-   free((amrHitSTPtr));\
-   (amrHitSTPtr) = 0;\
-} /*freeAmrHit*/
+void
+freeAmrHit(
+   struct amrHit *amrHitSTPtr
+);
 
 /*-------------------------------------------------------\
 | Fun-03: freeAmrHitList
@@ -119,22 +132,11 @@ freeAmrHit(amrHitSTPtr){\
 | Output:
 |   - Frees:
 |     o All amrHits structures in amrHitSTPtr
-|   - Sets:
-|     o amrHitSTPtr to 0
 \-------------------------------------------------------*/
-#define \
-freeAmrHitList(amrHitSTListPtr){\
-   struct amrHit *tmpST = (amrHitSTListPtr)->nextAmr;\
-   \
-   while(tmpST != 0)\
-   { /*Loop: Free all amrHit structures in list*/\
-      freeAmrHit((amrHitSTListPtr));\
-      (amrHitSTListPtr) = tmpST;\
-      tmpST = (amrHitSTListPtr)->nextAmr;\
-   } /*Loop: Free all amrHit structures in list*/\
-   \
-   freeAmrHit((amrHitSTListPtr));\
-} /*freeAmrHit*/
+void
+freeAmrHitList(
+   struct amrHit *amrHitSTListPtr
+);
 
 /*-------------------------------------------------------\
 | Fun-04: makeAmr
@@ -145,15 +147,11 @@ freeAmrHitList(amrHitSTListPtr){\
 |     o A pointer to the new amrHit structure
 |     o 0 for memory error
 \-------------------------------------------------------*/
-#define \
-makeAmrHit() ({\
-   struct amrHit *retST = malloc(sizeof(struct amrHit));\
-   if(retST) initAmrHit(retST);\
-   retST;\
-}) /*makeAmrHit*/
+struct amrHit *
+makeAmrHit();
 
 /*-------------------------------------------------------\
-| Fun-08: checkAmrSam
+| Fun-09: checkAmrSam
 |   - Checks if a sequence in a sam file entry has
 |     amr's (antibiotic resitance)
 | Input:
@@ -168,6 +166,9 @@ makeAmrHit() ({\
 |   - numHitsI:
 |     o Updated to hold the number of amr's found in
 |       the sequence stored in samST
+|   - frameshiftBl:
+|     o 1: Check for LoFs in frameshift
+|     o 0: Treat frameshifts as exact matches
 |   - errC:
 |     o Pointer to character to hold the error output
 | Output:
@@ -187,11 +188,12 @@ checkAmrSam(
    void *amrSTAryPtr,  /*Has amr's to check*/
    int numAmrI,        /*Length of amrAryST*/
    int *numHitsI,      /*Number amr hits for seq*/
+   char frameshiftBl,  /*1: Handle frameshifts*/
    char *errC          /*For error reporting*/
 );
 
 /*-------------------------------------------------------\
-| Fun-10: pHeadAmrHitList
+| Fun-11: pHeadAmrHitList
 |   - Prints the header for an amrHitList table
 | Input:
 |   - outFILE:
@@ -206,7 +208,7 @@ pHeadAmrHitList(
 );
 
 /*-------------------------------------------------------\
-| Fun-11: pAmrHitList
+| Fun-12: pAmrHitList
 |   - Prints out all amr's that were in a sequence
 | Input:
 |   - seqIdStr:
@@ -233,7 +235,7 @@ pAmrHitList(
 );
 
 /*-------------------------------------------------------\
-| Fun-12: pHeadAmrs
+| Fun-13: pHeadAmrs
 |   - Prints the header for an amr table (reads instead
 |     of consensuses)
 | Input:
@@ -249,7 +251,7 @@ pHeadAmrs(
 );
 
 /*-------------------------------------------------------\
-| Fun-13: pAmrs
+| Fun-14: pAmrs
 |   - Prints out all amr's that meant the min depth
 | Input:
 |   - minDepthUI:
@@ -289,19 +291,63 @@ pAmrs(
 );
 
 /*-------------------------------------------------------\
-| Fun-14: lookForAmrsSam
+| Fun-15: pHeadAmrReadIds
+|   - Prints out the header for the read id mapped variant
+|     file
+| Input:
+|   - outFILE:
+|     o Pointer to FILE structure to print header to
+| Output:
+|   - Prints:
+|     o The header for the read id mapped variant table
+\-------------------------------------------------------*/
+void
+pHeadAmrReadIds(
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun-16: pAmrReadIds
+|   - Prints out the read id and the ARMs variant ids that
+|     it supported
+| Input:
+|   - idStr:
+|     o C-string with read id to print out
+|   - amrHitSTListPtr:
+|     o Pointer to an list of amrHit structures having the
+|       AMRs that the read supported
+|   - outFILE:
+|     o Pointer to FILE structure to print header to
+| Output:
+|   - Prints:
+|     o The read id and any AMRs that it supported (tsv)
+\-------------------------------------------------------*/
+void
+pAmrReadIds(
+   char *idStr,
+   struct amrHit *amrHitSTListPtr,
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun-17: lookForAmrsSam
 |   - Look for anti-microbial (antibiotic) genes in the
 |     reads in a sam file
 | Input:
-|   - buffStr:
-|     o Temporary buffer (c-string) to use when reading in
-|       the sam file. This is resized as needed.
-|   - lenBuffUL:
-|     o Current length of buffStr. This is updated when
-|       buffStr is resized
+|   - amrSTAryPtr
+|     o Pointer to an array of amrStructs with AMRs to
+|       check
+|   - numAmrI:
+|     o Number of AMRs in amrSTAryPtr
+|   - drugAryStr:
+|     o C-string array (see drug_str_ary.c/h) with
+|       antibiotic names
 |   - readsBl:
 |     o 1: Printing out read stats (use pAmr)
 |     o 0: Printing out consensus stats (use pAmrHitList)
+|   - framshiftBl:
+|     o 1: Check for framshifts if LoF and frameshift AMRs
+|     o 0: Treat all frameshifts and LoFs as exact matches
 |   - minDepthUI:
 |     o uinsigned in with  he minumum depth to keep an amr
 |     o This is applied to read checks only
@@ -313,13 +359,12 @@ pAmrs(
 |     o Float with the min percent of mapped reads needed
 |       to keep an amr (all reads kept)
 |     o This is applied to read checks only
-|   - samFILE:
-|     o Pointer to sam file to read  from
-|   - outFILE:
-|     o Pointer to file to print the amr results to
-|   - idPrefStr:
-|     o Prefix to name the read id file(s). Input 0/null
-|       to not print out any ids
+|   - samFileStr:
+|     o C-string with sam file to check for AMRs
+|   - outFileStr:
+|     o C-string with name to print AMR hits to
+|   - idFileStr:
+|     o C-sring with name of file to print read ids to
 | Output:
 |   - Prints:
 |     o Stats about AMRs to outFILE
@@ -332,16 +377,88 @@ pAmrs(
 \-------------------------------------------------------*/
 char
 lookForAmrsSam(
-   void *amrSTAryPtr, /*Has amr's to check*/
-   int numAmrI,                /*Length of amrAryST*/
-   char *drugAryStr, /*Has antibiotic names*/
-   char readsBl,     /*1: processing reads not cons*/
-   unsigned int minDepthUI,  /*Min depth to keep amr*/
-   float minPercMapF,/*Min % support to keep amr (read)*/
-   float minPercTotalF, /*Min % mapped reads to keep*/
-   char *samStr,    /*Sam file with reads to check*/
-   char *outStr,
-   char *idPrefStr    /*Prefix for id files*/
+   void *amrSTAryPtr,     /*Has amr's to check*/
+   int numAmrI,           /*Length of amrAryST*/
+   char *drugAryStr,      /*Has antibiotic names*/
+   char readsBl,          /*1: processing reads not cons*/
+   char frameshiftBl,     /*1: check frameshitfs AMRs*/
+   unsigned int minDepthUI,/*Min depth to keep amr*/
+   float minPercMapF,     /*% support to keep amr; read*/
+   float minPercTotalF,   /*% mapped reads to keep read*/
+   char *samFileStr,      /*Sam file with reads to check*/
+   char *outFileStr,      /*File to output results to*/
+   char *idFileStr        /*File to print read ids to*/
 );
 
 #endif
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

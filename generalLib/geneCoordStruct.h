@@ -16,7 +16,7 @@
 '     - Header guards
 '   o st: geneCoords
 '     - Holds the arrays for the gene coordinates and ids 
-'       in a paf file
+'       in an gene coordiantes table
 '   o fun-01: freeGeneCoordsStack
 '     - Frees the arrays in a geneCoords structure
 '   o fun-02: freeGeneCoords
@@ -38,7 +38,10 @@
 '     - Does a binary search by starting coordinate for a
 '       potentail gene in a geneCoords structure
 '   o fun-09: pafGetGeneCoords
-'     - Gets the gene coordinates from a paf file
+'     - Gets the gene coordinates from an gene coordinates
+'       table
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -49,10 +52,14 @@
 #ifndef GENE_COORD_STRUCT_H
 #define GENE_COORD_STRUCT_H
 
+#define def_fileErr_geneCoord 2
+#define def_invalidEntry_geneCoord 4
+#define def_memErr_geneCoord 64
+
 /*-------------------------------------------------------\
 | ST: geneCoords
 |   - Holds the arrays for the gene coordinates and ids 
-|     in a paf file
+|     in an gene coordinates table
 \-------------------------------------------------------*/
 typedef struct geneCoords{
    char (*idStrAry)[64];
@@ -85,11 +92,11 @@ freeGeneCoordsStack(
 |     o Pointer to a geneCoords structure to free
 | Output:
 |   - Frees:
-|     o geneCoordsST (and sets to 0)
+|     o geneCoordsST
 \-------------------------------------------------------*/
 void
 freeGeneCoords(
-   struct geneCoords **geneCoordsST
+   struct geneCoords *geneCoordsST
 );
 
 /*-------------------------------------------------------\
@@ -203,26 +210,108 @@ findStartCoordInGeneCoord(
 );
 
 /*-------------------------------------------------------\
-| Fun-09: pafGetGeneCoords
-|  - Gets the gene coordinates from a paf file
+| Fun-09: getGeneCoords
+|  - Gets the gene coordinates from a gene table (tsv)
 | Input:
-|  - pafFILE:
-|    o Pointer to paf FILE to get gene coordinates from
-|  - numGenesUI:
-|    o Number of genes extracted
+|  - geneTblFileStr:
+|    o C-string with name of the gene table file to
+|      extract the gene coordinates and names from
+|  - numGenesSI:
+|    o Will hold the Number of genes extracted
+|  - errULPtr:
+|    o Will hold the error return value
 | Output:
 |  - Returns:
 |    o Pointer to an sorted geneCoords structure with the 
 |      gene coordinates
-|    o 0 for memory error
+|    o 0 for errors
 |  - Modifies:
 |    o numGenesI to have the number of genes (index 0)
 |      extracted
+|    o errULPtr to hold the error
+|      - 0 for no errors
+|      - def_fileErr_geneCoord for an file opening error
+|      - def_memErr_geneCoord for an memor error
+|      - (line_number << 8) | def_invalidEntry_geneCoord
+|        for an invalid line in the file
+|        o Get the line number with (*errULPtr >> 8)
 \-------------------------------------------------------*/
 struct geneCoords *
-pafGetGeneCoords(
-   void *pafFILE, /*Paf file get gene coordinates from*/\
-   int *numGenesI /*Number of genes extracted*/\
+getGeneCoords(
+   char *geneTblFileStr,
+   int *numGenesSI, /*Number of genes extracted*/\
+   unsigned long *errULPtr
 );
 
 #endif
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconvient / not possible, this code is under the
+:   MIT license.
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/
