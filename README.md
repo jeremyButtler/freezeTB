@@ -27,10 +27,9 @@ Other programs:
 
 - filtSam: For filtering and converting sam files. You
   would be better off using samtools. I have used it for
-  the `filtSam -sam fil.sam -out-stats -` option for
-  samfiles with eqx cigar entries. Again, this is me, so
-  you will not likely find it really useful. It has no
-  help message.
+  finding the number of SNPs, deletions, and, insertions
+  for each read in an sam file with
+  - `minimap2 -a --eqx ref.fa reads.fq | filtSam -sam - -out-stats > read-stats.tsv`
 - fqGetIds: was here for the original script. It has its
   own separate repository. It is designed to extact read
   ids from an fastq file. I need to come back to this and
