@@ -70,16 +70,16 @@ The freezeTb install will install freezeTb,
 ## Linux or Mac
 
 ```
-git clone https://github.com/jeremybuttler/freezeTB
-cd freezeTB
+git clone https://github.com/jeremybuttler/freezeTb
+cd freezeTb
 make
 sudo make install
 make clean
 
 # or for an static build (Non-Mac)
 
-git clone https://github.com/jeremybuttler/freezeTB
-cd freezeTB
+git clone https://github.com/jeremybuttler/freezeTb
+cd freezeTb
 make static
 sudo make install
 make clean
@@ -124,12 +124,12 @@ To make running this program simple, I have put the needed
   databases in `/usr/local/share`.
 
 ```
-minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq > reads.sam;
+minimap -a /usr/local/share/freezeTbFiles/NC000962.fa reads.fastq > reads.sam;
 freezeTb -sam reads.sam -prefix good-name;
 
 # or
 
-minimap -a /usr/local/bin/freezeTbFiles/TB-NC000962.fa reads.fastq | freezeTB.sh -sam - -prefix good-name
+minimap -a /usr/local/share/freezeTbFiles/NC000962.fa reads.fastq | freezeTb.sh -sam - -prefix good-name
 ```
 
 A more complex way to run freezeTb is to provide the paths
@@ -137,7 +137,7 @@ A more complex way to run freezeTb is to provide the paths
   are just tsvs, so they are easy to edit.
 
 ```
-freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFILES/who-2023.tsv -miru-tbl freezeTbFiles/miruTbl.tsv -gene-coords freezeTbFiles/TB-gene-coordinates.paf
+freezeTb -sam reads.sam -prefix good-name -amr-tbl freezeTbFiles/who-2023.tsv -miru-tbl freezeTbFiles/miruTbl.tsv -gene-coords freezeTbFiles/TB-gene-coordinates.paf
 ```
 
 ## GUI
