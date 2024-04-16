@@ -1,4 +1,5 @@
 CC=cc
+PREFIX=/usr/local/bin
 
 CFLAGS=-O3 -std=c89 -static
 MACCFLAGS=-O3
@@ -21,3 +22,7 @@ check:
 
 mac:
 	$(CC) $(MACCFLAGS) -o tbMiru $(SOURCE)
+
+install:
+	cp tbMiru $(PREFIX);
+	chmod a+x $(PREFIX)/tbMiru;
