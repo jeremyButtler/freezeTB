@@ -21,3 +21,7 @@ debug:
 
 check:
 	$(CC) $(DEBUGFLAGS) -o debugFiltsam $(source);
+
+install:
+	cp filtsam $(PREFIX);
+	chmod a+x $(PREFIX)/filtsam;
