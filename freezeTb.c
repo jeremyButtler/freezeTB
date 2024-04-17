@@ -1903,7 +1903,7 @@ getInput_freezeTb(
       else if(! cStrEql("-graph", argStr, '\0'))
       { /*Else If: the user wanted graphs*/
          *mkGraphBl = 1;
-         ++iArg;
+         --iArg;
          continue;
       } /*Else If: the user wanted graphs*/
 
@@ -2084,13 +2084,13 @@ getInput_freezeTb(
       else if(! cStrEql(argStr,"-frameshift",'\0'))
       { /*Else if: The user wanted frameshift checking*/
          *frameshiftBl = 1;
-         ++iArg;
+         --iArg;
       } /*Else if: The user wanted frameshift checking*/
 
       else if(! cStrEql(argStr,"-no-frameshift",'\0'))
       { /*Else if: user did not want frameshift checking*/
          *frameshiftBl = 0;
-         ++iArg;
+         --iArg;
       } /*Else if: user did not want frameshift checking*/
 
       /**************************************************\

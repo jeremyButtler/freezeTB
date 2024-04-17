@@ -70,12 +70,14 @@ The freezeTb install will install freezeTb,
 
 ## Linux or Mac
 
-Non arm processors (Not an M chip mac)
+Non arm processors (Not an M chip mac). You can skip
+  the mkminimap2 step if you already have minimap2.
 
 ```
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make
+make mkminimap2
 sudo make install
 make clean
 
@@ -84,6 +86,7 @@ make clean
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make static
+make mkminimap2
 sudo make install
 make clean
 ```
@@ -94,6 +97,7 @@ Mchip macs
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make mchipmac
+make mkNeonMinimap2
 sudo make install
 make clean
 ```

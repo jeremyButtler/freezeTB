@@ -26,17 +26,14 @@ SOURCE=\
 # The sed step is to make sure the default file locations
 # are set up. No other way to do this on C
 
-all: getminimap2 mkminimap2
+all:
 	$(CC) $(CFLAGS) -o freezeTb $(SOURCE);
 
 # Just in case the user trys this
-mac: getminimap2 mkminimap2
+mac:
 	$(CC) $(CFLAGS) -o freezeTb $(SOURCE);
 
-mchipmac: getminimap2 mkNeonMinimap2
-	$(CC) $(CFLAGS) -o freezeTb $(SOURCE);
-
-static: getminimap2 mkminimap2
+static:
 	$(CC) $(staticCFLAGS) -o freezeTb $(SOURCE);
 
 check:
@@ -46,16 +43,16 @@ debug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
 	gdb -x bug-cmds-freezeTb.txt bugFreezeTb
 
-getminimap2:
-	ls minimap2 || git clone https://github.com/lh3/minimap2;
-
-mkminimap2:
+mkminimap2: getminimap2
 	make clean -C minimap2;
 	make -C minimap2;
 
-mkNeonMinimap2:
+mkNeonMinimap2: getminimap2
 	make clean -C minimap2;
 	ls minimap2 && make arm_neon=1 -C minimap2 || printf "";
+
+getminimap2:
+	ls minimap2 || git clone https://github.com/lh3/minimap2;
 
 install:
 	cp graphAmpDepth.r $(PREFIX);
