@@ -1,3 +1,5 @@
+@freezeTb-flowDiagram.png
+
 freezeTb; the software side
   - Detecting Tuberculosis AMRs with Nanopore sequencing
 

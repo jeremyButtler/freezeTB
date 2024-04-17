@@ -1,5 +1,6 @@
 CC = cc
 PREFIX = /usr/local/bin
+MANPREFIX = /usr/local/share/man/man1
 
 # Location to install the database files
 dbPREFIX = /usr/local/share
@@ -25,14 +26,17 @@ SOURCE=\
 # The sed step is to make sure the default file locations
 # are set up. No other way to do this on C
 
-all:
+all: getminimap2 mkminimap2
 	$(CC) $(CFLAGS) -o freezeTb $(SOURCE);
 
 # Just in case the user trys this
-mac:
+mac: getminimap2 mkminimap2
 	$(CC) $(CFLAGS) -o freezeTb $(SOURCE);
 
-static:
+mchipmac: getminimap2 mkNeonMinimap2
+	$(CC) $(CFLAGS) -o freezeTb $(SOURCE);
+
+static: getminimap2 mkminimap2
 	$(CC) $(staticCFLAGS) -o freezeTb $(SOURCE);
 
 check:
@@ -41,6 +45,17 @@ check:
 debug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
 	gdb -x bug-cmds-freezeTb.txt bugFreezeTb
+
+getminimap2:
+	ls minimap2 || git clone https://github.com/lh3/minimap2;
+
+mkminimap2:
+	make clean -C minimap2;
+	make -C minimap2;
+
+mkNeonMinimap2:
+	make clean -C minimap2;
+	ls minimap2 && make arm_neon=1 -C minimap2 || printf "";
 
 install:
 	cp graphAmpDepth.r $(PREFIX);
@@ -53,6 +68,10 @@ install:
 	chmod a+x freezeTbGui.r $(PREFIX);
 	chmod a+x $(PREFIX)/graphAmpDepth.r;
 	Rscript rDepends.r;
+	minimap2 --version || sudo cp $(PREIFX);
+	minimap2 --version || sudo chmod a+x $(PREFIX)/minimap2;
+	minimap2 --version || sudo cp minimap2/minimap2.1 $(MANPREFIX);
+	make clean -C minimap2
 
 # Currently nothing to clean up
 clean:

@@ -230,13 +230,15 @@ pAmpDepthHistogram(
       ampGeneEndI = genesST->endAryUI[ampGeneEndI];
 
       /*Using interger mean, not decimal*/
-      ampAvgDepthL /= (ampEndI - 1 - ampStartI);
+      tmpI = (ampEndI - ampStartI);
+
+      if(tmpI)
+         ampAvgDepthL /= tmpI;
 
       /**************************************************\
       * Fun-03 Sec-02 Sub-03:
       *   - Print the amplicon stats
       \**************************************************/
-
 
       /**************************************************\
       * Fun-03 Sec-02 Sub-04:
@@ -279,7 +281,10 @@ pAmpDepthHistogram(
       readsAtEndI = readHistIAry[mapStartI - 1];
 
       /*Using interger mean, not decimal*/
-      avgDepthL /= (mapStartI - 1 - tmpStartI);
+      tmpI = (mapStartI - 1 - tmpStartI);
+
+      if(tmpI)
+         avgDepthL /= tmpI;
 
       /**************************************************\
       * Fun-03 Sec-02 Sub-05:

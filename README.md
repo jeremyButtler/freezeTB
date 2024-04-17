@@ -46,6 +46,7 @@ Other programs:
    - For the GUI you will need minimap2
      [https://github.com/lh3/minimap2](
       https://github.com/lh3/minimap2)
+   - Installed with make file (git is needed)
 2. R and several R libraries. The R libraries will be
    installed when you install freezeTb.
    - For command line version this is only needed with
@@ -69,6 +70,8 @@ The freezeTb install will install freezeTb,
 
 ## Linux or Mac
 
+Non arm processors (Not an M chip mac)
+
 ```
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
@@ -81,6 +84,16 @@ make clean
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make static
+sudo make install
+make clean
+```
+
+Mchip macs
+
+```
+git clone https://github.com/jeremybuttler/freezeTb
+cd freezeTb
+make mchipmac
 sudo make install
 make clean
 ```

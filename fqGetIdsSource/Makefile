@@ -31,7 +31,7 @@ avx2:
 	$(CC) $(CFLAGS) -DAVX2 -mavx -mavx2 $(FILES) -o $(NAME);
 
 avx512:
-	$(CC) $(CFLAGS) -DAVX512 -mavx512bw $(FILES) -o $(NAME));
+	$(CC) $(CFLAGS) -DAVX512 -mavx512bw $(FILES) -o $(NAME);
 
 neon:
 	$(CC) $(CFLAGS) -DNEON -mfpu=neon $(FILES) -o $(NAME);
