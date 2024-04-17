@@ -1,7 +1,80 @@
-@freezeTb-flowDiagram.png
-
 freezeTb; the software side
   - Detecting Tuberculosis AMRs with Nanopore sequencing
+
+TBProfiler; the current resource
+  - Uses 2023 catalog
+  - Merges several tools together and works
+  - > 5 dependencies or conda; not fun to install
+ 
+
+Other solutions; A lot of small programs not designed to
+  work together, but can be made to work together.
+
+Goal: A low dependency tuberculosis pipeline that is
+  designed for Nanopore long reads
+
+FreezeTb; the software side
+  - CLI; requires sam file
+  - R GUI; fastq file only, but requires minimap2
+  - Modular; you like; you get
+  - Everything works on a sam file
+
+@diagrams/freezeTb-filterStep.png
+
+#1. GUI only; map reads to the reference genome
+
+#2. Update read depth histogram with new read
+
+#3. Filter reads
+#  - Mapping Quality < 15
+#  - Median Q-score < 7
+#  - Mean Q-score < 7
+#  - Under 200 bases
+
+#4. Update the kept read depth histogram
+
+@diagrams/freezeTb-consensusStep.png
+#5. Add read to consensus "graph"
+#  - Ignore bases with Q-scores < 7
+
+#9. Collapse the consensus "graph" into sam entries
+#  - Fragment has 20X depth for at least 200 bases
+#  - SNPs/Matches have 50% support (else masked)
+#  - Indels have 70% support (else removed)
+
+@diagrams/freezeTb-amrStep.png
+#6. Check read for AMRs (2023 catalog)
+#  - Uses 2023 WHO catalog
+#  - Frame shifts (indels) treated as nucleotide sequence
+
+@diagrams/freezeTb-spoligotypeStep.png
+#7. Check read for MIRU lineage
+
+@diagrams/freezeTb-diagram.png
+#8. Repeat 1 to 7 till no more reads
+#  - Print AMRs mutations with 20x depth and 45% support
+#  - Print counts for detected MIRU lineage (table)
+
+#10. Check consensus fragments for AMRs and print
+
+#11. Check consensus fragments for MIRU lineage and print
+
+#12. R; the dependency I did not want to get around
+#  - Can use R to make read depth and coverage graphs
+
+Read depth and coverage graphs
+
+@diagrams/graphs-readDepth.png
+
+@diagrams/graphs-ampMap.png
+
+Wrap up:
+  - FreezeTb; works, but not an replacement
+  - Freeze
+
+?
+
+Old slides:
 
 Why TB?
   - 5 to 7 million infections per year (WHO 2023)
@@ -31,76 +104,6 @@ Platforms
   - Short read; accurate but time consuming (REF)
   - Long read; less accurate, but single day times (REF)
 
-TBProfiler; the current resource
-  - Uses 2023 catalog
-  - Merges several tools together and works
-  - > 5 dependencies or conda; not fun to install
- 
-
-Other solutions; A lot of small programs not designed to
-  work together, but can be made to work together.
-
-
-Goal: A zero dependency tuberculosis pipeline that is
-  designed for Nanopore with every component working
-  together
-
-FreezeTb; the software side
-  - CLI; user provides a sam file
-  - R GUI; user provides fastq file, but requires minimap2
-  - Modular; you like a part you can get it separate
-  - Everything works on a sam file/sam structure
-
-1. GUI only; map reads to the reference genome
-
-
-2. Update read depth histogram with new read
-
-
-3. Filter reads
-  - Mapping Quality < 15
-  - Median Q-score < 7
-  - Mean Q-score < 7
-  - Under 200 bases
-
-
-4. Update the kept read depth histogram
-
-
-5. Add read to consensus "graph"
-  - Ignore bases with Q-scores < 7
-
-
-6. Check read for AMRs (2023 catalog)
-  - Uses 2023 WHO catalog
-  - Frame shifts (indels) treated as nucleotide sequence
-
-
-7. Check read for MIRU lineage
-
-
-8. Repeat 1 to 7 till no more reads
-  - Print AMRs mutations with 20x depth and 45% support
-  - Print counts for detected MIRU lineage (table)
-
-
-9. Collapse the consensus "graph" into sam entries
-  - Fragment has 20X depth for at least 200 bases
-  - SNPs/Matches have 50% support (else masked)
-  - Indels have 70% support (else removed)
-
-
-10. Check consensus fragments for AMRs (and print)
-
-
-11. Check consensus fragments for MIRU lineage (and print)
-
-
-12. R; the dependency I did not want to get around
-  - Can use R to make read depth and coverage graphs
-
-Wrap up:
-  - FreezeTb; works, but not an replacement
 
 # These are more of notes. I need to filter though this
 #   and decide what to keep an what to remove

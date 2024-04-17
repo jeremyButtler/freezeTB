@@ -164,7 +164,7 @@ For the gui, just run `freezeTbGui.r`. The just fill in
 ![
   Clip are flow digram showing how freezeTb works. Tempted
   to make an ascii digram with dita.
-](freezeTb-flowDiagram.svg)
+](diagrams/freezeTb-diagram.svg)
 
 1. freezeTb removes:
    - unmapped reads
