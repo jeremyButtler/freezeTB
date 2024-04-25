@@ -8,15 +8,18 @@
 ' SOF: Start Of File
 '  o header:
 '    - Header guards
-'  o fun-01: arySortNumeric
+'  o .h fun-01: binSearchNumeric
+'    - Does an binary search on an array of numeric items
+'    - This is here because it is linked with sorting
+'  o .h fun-02: arySortNumeric
 '    - Sorts the input array from least to greatest with
 '      shell sort. This uses numeric input.
-'  o fun-02: twoArySortNumeric
+'  o .h fun-03: twoArySortNumeric
 '    - Sorts the first input array from least to greatest
 '      and keeps the second input arrar in order with the
 '      first array. This is set up for numeric input using
 '      shell short. Both arrays must be the same size.
-'  o fun-03: threeArySortNumeric
+'  o .h fun-04: threeArySortNumeric
 '    - Sorts three arrays by the first input array (as
 '      numeric) with shell short. All three arrays must be
 '      the same size.
@@ -33,7 +36,51 @@
 #define GENERAL_SHELL_SHORT_H
 
 /*-------------------------------------------------------\
-| Fun-01: arySortNumeric
+| Fun-01: binSearchNumeric
+|  - Does an binary search on an array of numeric items
+| Input:
+|  - numAryPtr:
+|    o Pointer to an array of numeric values
+|  - qrySI:
+|    o number to look up
+|  - lenAryUI:
+|    o length of qrySIPtr (index 1)
+| Output:
+|  - Returns:
+|    o The index of qrySI in arySIPtr
+|    o -1 if qrySI is not in arySIPtr
+\-------------------------------------------------------*/
+#define \
+binSearchNumeric(\
+   numAryPtr,\
+   qrySI,\
+   lenAryUI\
+)({\
+   unsigned int midMacUI = 0;\
+   unsigned int rightHalfMacUI = (lenAryUI) - 1;\
+   unsigned int leftHalfMacUI = 0;\
+   \
+   while(leftHalfMacUI <= rightHalfMacUI)\
+   { /*Loop: Search for the querys index*/\
+      midMacUI = (leftHalfMacUI + rightHalfMacUI) >> 1;\
+     \
+     if((qrySI) > (numAryPtr)[midMacUI])\
+         leftHalfMacUI = midMacUI + 1;\
+      \
+     else if((qrySI) < (numAryPtr)[midMacUI])\
+         rightHalfMacUI = midMacUI - 1;\
+     \
+     else
+        break; /*Found the query*/\
+   } /*Loop: Search for the querys index*/\
+   \
+   /*See if the query was found*/\
+   midMacSI |= ( -((long) (midMacSI >= (lenAryUI))) );\
+   midMacSI;\
+}) /*binSearchNumeric*/
+
+/*-------------------------------------------------------\
+| Fun-02: arySortNumeric
 |  - Sorts the input array from least to greatest with
 |    shell sort. This uses numeric input.
 | Input:
@@ -53,137 +100,9 @@ arySortNumeric( \
    startUL, \
    endUL \
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-01 TOC:
+   ' Fun-02 TOC:
    '  - Sorts the input array from least to greatest with
    '    shell sort. This uses numeric input.
-   '  - Shell sort taken from:
-   '    - Adam Drozdek. 2013. Data Structures and
-   '      Algorithims in c++. Cengage Leraning. fourth
-   '      edition. pages 505-508
-   '    - I made some minor changes, but is mostly the
-   '      same
-   '  o fun-01 sec-01:
-   '    - Variable declerations
-   '  o fun-01 sec-02:
-   '    - Find the number of rounds to sort for
-   '  o fun-01 sec-03:
-   '    - Sort the arrays
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/\
-  \
-  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun-01 Sec-01:
-  ^  - Variable declerations
-  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
-  \
-  /*Number of elements to sort*/\
-  unsigned long numElmMacUL = (endUL) - (startUL);\
-  long swapMacL = 0;\
-  \
-  /*Number of sorting rounds*/\
-  unsigned long subMacUL = 0;\
-  unsigned long nextElmMacUL = 0;\
-  unsigned long lastElmMacUL = 0;\
-  unsigned long elmOnMacUL = 0;\
-  \
-  /*Get arrays to sort from the matrix (for sanity)*/\
-  \
-  /*Variables to incurment loops*/\
-  unsigned long ulIndexMac = 0;\
-  unsigned long ulElmMac = 0;\
-  \
-  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun-01 Sec-02:
-  ^  - Find the max search value (number rounds to sort)
-  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
-  \
-  /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/\
-  subMacUL = 1; /*Initialzie first array*/\
-  \
-  while(subMacUL < numElmMacUL - 1)\
-     subMacUL = (3 * subMacUL) + 1;\
-  \
-  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun-01 Sec-03:
-  ^  - Sort the arrays in genIndiceST
-  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
-  \
-  while(subMacUL > 0)\
-  { /*loop trhough all sub arrays sort the subarrays*/\
-    for( \
-       ulIndexMac = 0;\
-       ulIndexMac <= subMacUL;\
-       ++ulIndexMac\
-    ){ /*For each element in the subarray*/\
-      for(ulElmMac = ulIndexMac;\
-          ulElmMac + subMacUL <= endUL;\
-          ulElmMac += subMacUL\
-      ){ /*Loop; swap each nth element of the subarray*/\
-        nextElmMacUL = ulElmMac + subMacUL;\
-        \
-        if((firstAry)[ulElmMac]>(firstAry)[nextElmMacUL])\
-        { /*If I need to swap an element*/\
-          swapMacL = (firstAry)[ulElmMac];\
-          (firstAry)[ulElmMac]= (firstAry)[nextElmMacUL];\
-          (firstAry)[nextElmMacUL] = swapMacL;\
-          \
-          lastElmMacUL = ulElmMac;\
-          elmOnMacUL = ulElmMac;\
-          \
-          while(lastElmMacUL >= subMacUL)\
-          { /*loop; move swapped element back*/\
-            lastElmMacUL -= subMacUL;\
-            \
-            if(  (firstAry)[elmOnMacUL]\
-               > (firstAry)[lastElmMacUL]\
-            ) break; /*Positioned the element*/\
-            \
-            \
-            swapMacL = (firstAry)[elmOnMacUL];\
-            (firstAry)[elmOnMacUL] =\
-               (firstAry)[lastElmMacUL];\
-            (firstAry)[lastElmMacUL] = swapMacL;\
-            \
-            elmOnMacUL = lastElmMacUL;\
-          } /*loop; move swapped element back*/\
-        } /*If I need to swap elements*/\
-      } /*Loop; swap each nth element of the subarray*/\
-    } /*For each element in the subarray*/\
-    \
-    subMacUL = (subMacUL - 1) / 3; /*Move to next round*/\
-  } /*loop through all sub arrays to sort the subarrays*/\
-} /*arySortNumeric*/
-
-/*-------------------------------------------------------\
-| Fun-02: twoArySortNumeric
-|  - Sorts the first input array from least to greatest
-|    and keeps the second input arrar in order with the
-|    first array. This is set up for numeric input using
-|    shell short. Both arrays must be the same size.
-| Input:
-|  - firstAry:
-|    o First array, this is the array to sort
-|  - secAry:
-|    o Second array to keep sorted with first array
-|  - startUL:
-|    o First element to start sorting at
-|  - endUL:
-|    o Last element to sort (index 0)
-| Output:
-|  - Modifies:
-|    o First array to be sorted form least to greatest
-|    o secAry to be kept in order with firstAry
-\-------------------------------------------------------*/
-#define \
-twoArySortNumeric( \
-   firstAry, \
-   secAry, \
-   startUL, \
-   endUL \
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-02 TOC:
-   '  - Sorts the first input array from least to greatest
-   '    and keeps the second input arrar in order with the
-   '    first array.
    '  - Shell sort taken from:
    '    - Adam Drozdek. 2013. Data Structures and
    '      Algorithims in c++. Cengage Leraning. fourth
@@ -254,10 +173,6 @@ twoArySortNumeric( \
           (firstAry)[ulElmMac]= (firstAry)[nextElmMacUL];\
           (firstAry)[nextElmMacUL] = swapMacL;\
           \
-          swapMacL = (secAry)[ulElmMac];\
-          (secAry)[ulElmMac] = (secAry)[nextElmMacUL];\
-          (secAry)[nextElmMacUL] = swapMacL;\
-          \
           lastElmMacUL = ulElmMac;\
           elmOnMacUL = ulElmMac;\
           \
@@ -275,10 +190,6 @@ twoArySortNumeric( \
                (firstAry)[lastElmMacUL];\
             (firstAry)[lastElmMacUL] = swapMacL;\
             \
-            swapMacL = (secAry)[elmOnMacUL];\
-            (secAry)[elmOnMacUL]= (secAry)[lastElmMacUL];\
-            (secAry)[lastElmMacUL] = swapMacL;\
-            \
             elmOnMacUL = lastElmMacUL;\
           } /*loop; move swapped element back*/\
         } /*If I need to swap elements*/\
@@ -287,20 +198,19 @@ twoArySortNumeric( \
     \
     subMacUL = (subMacUL - 1) / 3; /*Move to next round*/\
   } /*loop through all sub arrays to sort the subarrays*/\
-} /*twoArySortNumeric*/
+} /*arySortNumeric*/
 
 /*-------------------------------------------------------\
-| Fun-03: threeArySortNumeric
-|  - Sorts three arrays by the first input array (as
-|    numeric) with shell short. All three arrays must be
-|    the same size.
+| Fun-03: twoArySortNumeric
+|  - Sorts the first input array from least to greatest
+|    and keeps the second input arrar in order with the
+|    first array. This is set up for numeric input using
+|    shell short. Both arrays must be the same size.
 | Input:
 |  - firstAry:
 |    o First array, this is the array to sort
 |  - secAry:
 |    o Second array to keep sorted with first array
-|  - thirdAry:
-|    o Third arra to keep sorted with the first array
 |  - startUL:
 |    o First element to start sorting at
 |  - endUL:
@@ -309,20 +219,18 @@ twoArySortNumeric( \
 |  - Modifies:
 |    o First array to be sorted form least to greatest
 |    o secAry to be kept in order with firstAry
-|    o thirdAry to be kept in order with firstAry
 \-------------------------------------------------------*/
 #define \
-threeArySortNumeric( \
+twoArySortNumeric( \
    firstAry, \
    secAry, \
-   thirdAry,\
    startUL, \
    endUL \
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-03 TOC:
-   '  - Sorts three arrays by the first input array (as
-   '    numeric) with shell short. All three arrays must
-   '    be the same size.
+   '  - Sorts the first input array from least to greatest
+   '    and keeps the second input arrar in order with the
+   '    first array.
    '  - Shell sort taken from:
    '    - Adam Drozdek. 2013. Data Structures and
    '      Algorithims in c++. Cengage Leraning. fourth
@@ -371,6 +279,145 @@ threeArySortNumeric( \
   \
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun-03 Sec-03:
+  ^  - Sort the arrays in genIndiceST
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
+  \
+  while(subMacUL > 0)\
+  { /*loop trhough all sub arrays sort the subarrays*/\
+    for( \
+       ulIndexMac = 0;\
+       ulIndexMac <= subMacUL;\
+       ++ulIndexMac\
+    ){ /*For each element in the subarray*/\
+      for(ulElmMac = ulIndexMac;\
+          ulElmMac + subMacUL <= endUL;\
+          ulElmMac += subMacUL\
+      ){ /*Loop; swap each nth element of the subarray*/\
+        nextElmMacUL = ulElmMac + subMacUL;\
+        \
+        if((firstAry)[ulElmMac]>(firstAry)[nextElmMacUL])\
+        { /*If I need to swap an element*/\
+          swapMacL = (firstAry)[ulElmMac];\
+          (firstAry)[ulElmMac]= (firstAry)[nextElmMacUL];\
+          (firstAry)[nextElmMacUL] = swapMacL;\
+          \
+          swapMacL = (secAry)[ulElmMac];\
+          (secAry)[ulElmMac] = (secAry)[nextElmMacUL];\
+          (secAry)[nextElmMacUL] = swapMacL;\
+          \
+          lastElmMacUL = ulElmMac;\
+          elmOnMacUL = ulElmMac;\
+          \
+          while(lastElmMacUL >= subMacUL)\
+          { /*loop; move swapped element back*/\
+            lastElmMacUL -= subMacUL;\
+            \
+            if(  (firstAry)[elmOnMacUL]\
+               > (firstAry)[lastElmMacUL]\
+            ) break; /*Positioned the element*/\
+            \
+            \
+            swapMacL = (firstAry)[elmOnMacUL];\
+            (firstAry)[elmOnMacUL] =\
+               (firstAry)[lastElmMacUL];\
+            (firstAry)[lastElmMacUL] = swapMacL;\
+            \
+            swapMacL = (secAry)[elmOnMacUL];\
+            (secAry)[elmOnMacUL]= (secAry)[lastElmMacUL];\
+            (secAry)[lastElmMacUL] = swapMacL;\
+            \
+            elmOnMacUL = lastElmMacUL;\
+          } /*loop; move swapped element back*/\
+        } /*If I need to swap elements*/\
+      } /*Loop; swap each nth element of the subarray*/\
+    } /*For each element in the subarray*/\
+    \
+    subMacUL = (subMacUL - 1) / 3; /*Move to next round*/\
+  } /*loop through all sub arrays to sort the subarrays*/\
+} /*twoArySortNumeric*/
+
+/*-------------------------------------------------------\
+| Fun-04: threeArySortNumeric
+|  - Sorts three arrays by the first input array (as
+|    numeric) with shell short. All three arrays must be
+|    the same size.
+| Input:
+|  - firstAry:
+|    o First array, this is the array to sort
+|  - secAry:
+|    o Second array to keep sorted with first array
+|  - thirdAry:
+|    o Third arra to keep sorted with the first array
+|  - startUL:
+|    o First element to start sorting at
+|  - endUL:
+|    o Last element to sort (index 0)
+| Output:
+|  - Modifies:
+|    o First array to be sorted form least to greatest
+|    o secAry to be kept in order with firstAry
+|    o thirdAry to be kept in order with firstAry
+\-------------------------------------------------------*/
+#define \
+threeArySortNumeric( \
+   firstAry, \
+   secAry, \
+   thirdAry,\
+   startUL, \
+   endUL \
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun-04 TOC:
+   '  - Sorts three arrays by the first input array (as
+   '    numeric) with shell short. All three arrays must
+   '    be the same size.
+   '  - Shell sort taken from:
+   '    - Adam Drozdek. 2013. Data Structures and
+   '      Algorithims in c++. Cengage Leraning. fourth
+   '      edition. pages 505-508
+   '    - I made some minor changes, but is mostly the
+   '      same
+   '  o fun-04 sec-01:
+   '    - Variable declerations
+   '  o fun-04 sec-02:
+   '    - Find the number of rounds to sort for
+   '  o fun-04 sec-03:
+   '    - Sort the arrays
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/\
+  \
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-04 Sec-01:
+  ^  - Variable declerations
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
+  \
+  /*Number of elements to sort*/\
+  unsigned long numElmMacUL = (endUL) - (startUL);\
+  long swapMacL = 0;\
+  \
+  /*Number of sorting rounds*/\
+  unsigned long subMacUL = 0;\
+  unsigned long nextElmMacUL = 0;\
+  unsigned long lastElmMacUL = 0;\
+  unsigned long elmOnMacUL = 0;\
+  \
+  /*Get arrays to sort from the matrix (for sanity)*/\
+  \
+  /*Variables to incurment loops*/\
+  unsigned long ulIndexMac = 0;\
+  unsigned long ulElmMac = 0;\
+  \
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-04 Sec-02:
+  ^  - Find the max search value (number rounds to sort)
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
+  \
+  /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/\
+  subMacUL = 1; /*Initialzie first array*/\
+  \
+  while(subMacUL < numElmMacUL - 1)\
+     subMacUL = (3 * subMacUL) + 1;\
+  \
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun-04 Sec-03:
   ^  - Sort the arrays in genIndiceST
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
   \

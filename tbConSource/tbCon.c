@@ -101,7 +101,7 @@ int main(
    char multiRefBl = 0; /*1: means multiple refs/exit*/
    
    /*For building the consensus*/
-   struct conBase *conBaseAryST;
+   struct conBase *conBaseAryST = 0;
 
    /*For collapsing the consensus*/
    char errC = 0;
@@ -185,8 +185,6 @@ int main(
          } /*Else if: invalid input*/
       } /*If: there was an error*/
 
-      tbCon_checkInput_falseErr:;
-
       iIter += 1 + shiftC;
    } /*Loop: through all user input*/
 
@@ -235,7 +233,7 @@ int main(
 
     else
     { /*Else: The user provided a out file*/
-       outFILE = fopen(outFileStr, "r");
+       outFILE = fopen(outFileStr, "w");
 
        if(!outFILE)
        { /*If: I could not open the out file*/

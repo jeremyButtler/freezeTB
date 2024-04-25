@@ -33,9 +33,9 @@
 
 #include <stdio.h>
 
-#include "memwater.h"
-#include "alnSetStruct.h"
-#include "seqStruct.h"
+#include "../../memwater/memwater.h"
+#include "../../memwater/alnSetStruct.h"
+#include "../../memwater/seqStruct.h"
 
 /*.h files only*/
 #include "../../generalLib/ulCpStr.h"

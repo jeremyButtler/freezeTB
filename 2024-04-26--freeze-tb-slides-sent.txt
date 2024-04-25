@@ -1,112 +1,207 @@
+freezeTb; detecting anti-microbal resistance in TB
+
+@diagrams/yearlyDeaths.png
+# Figure showing why TB is important (data from WHO 2023)
+#  - 5 to 7 million sick per year from TB
+#    - This is an cronic, multi year infection
+#    - Opertunistic pathogen that requires an weakened
+#      immune system to cause disease
+#  - 10 million sick per year from TB
+#  - 1 million deaths per year from TB
+
+@diagrams/treatmentSuccesRate.png
+# Figure showing the treament success rate for TB
+#  Data from WHO 2023
+#  - 85% success for non-drug resistant cases
+#  - 63% success for drug resistant cases
+
+#@diagrams/num2022AmrCases.png
+# Figure showing the percentage of drug resistance cases
+#  No longer used
+#  - 3.3% of new cases (410000 people) per year have
+#    antimicrobial resistance (WHO 2023)
+#  - 17% of cases from reinfections (WHO 2023)
+
+Drug resistant detection
+
+@diagrams/cultureTime.png
+# Figuring showing how long it takes to do an liqued TB
+#   culture. The acutal figure shows an solid culture
+#   of an Kriby Bower assay because, that is what most
+#   people to in microbiology class
+#   - Culture over 14 days (Campelo et al. 2021)
+
+Rapid molecular diagnostic test; specific targets only
+  - Campelo et al. 2021; Mukherjee et al. 2023
+
+Sequencing; unspecific, but more expertise
+  - Campelo et al. 2021; Mukherjee et al. 2023
+
+@diagrams/sequencers.png
+# Figuring showing an MiSeq for short read sequencing and
+#   an Minion (ONT) for long read.
+#
+# Short read pros:
+#  - Short read; higher capital (initial down) cost
+#  - short read; accuracy is higher (Minimum Q30 = 99.9%)
+#
+# Short read cons:
+#  - Short read; short 150bp long reads
+#  - Short read; Not portable
+#
+# Long read cons:
+#  - Long read; accuracy is lower (Q20 = 99%)
+#
+# Long read pros:
+#  - Long read; low captial cost
+#  - Long read; amplicon sized reads
+#  - Long read; is very portable
+
 freezeTb; the software side
-  - Detecting Tuberculosis AMRs with Nanopore sequencing
+
+Expected output
+
+@diagrams/freezeTb-amrStep.png
+# Figure showing we want to detect AMRs
+
+@diagrams/lineage.png
+# Figure showing we want lineage detection (surviellance)
+
+2. a. MIRU-VNTR
+   - Amplicons target 24 repeat regions across the genome
+   - Amplicons lineage found by Length of amplicon
+   - Current gold standard
+
+2. b. Spoligotyping
+   - Amplicon targets direct repeat region (1 primer)
+   - Lineage found by detecting 43 internal spaces
+   - Lineage id is barcode with presence/absence of spacer
+
+@diagrams/consensus.png
+# Figure showing that we want an consensus
 
 TBProfiler; the current resource
-  - Uses 2023 catalog
-  - Merges several tools together and works
+
+TBProfiler; pros
+  - Detects AMRs uses WHO's 2023 catalog
+  - Detects spoligotypes and SNP lineages (Nanopore?)
+  - Outputs an vcf files 
+
+TBProfiler; cons
+  - More focused on Illumina
   - > 5 dependencies or conda; not fun to install
- 
 
-Other solutions; A lot of small programs not designed to
-  work together, but can be made to work together.
+Other solutions;
 
-Goal: A low dependency tuberculosis pipeline that is
-  designed for Nanopore long reads
+ONTs: Have not tried
+  - Detects spoligotypes
+  - Likely more to add
+
+Plentaly of small programs that add in more dependencies
+
+AMR detection; no small program I know of
+
+Lineage detection is simple
+
+Consensus building; non-model methods are simple
+
+Most of it is simple, why not make our own?
 
 FreezeTb; the software side
   - CLI; requires sam file
   - R GUI; fastq file only, but requires minimap2
-  - Modular; you like; you get
-  - Everything works on a sam file
 
 @diagrams/freezeTb-filterStep.png
-
-#1. GUI only; map reads to the reference genome
-
-#2. Update read depth histogram with new read
-
-#3. Filter reads
+# Figure showing the filtering step (see comments beneath)
+#
+#1. Filter out reads with
 #  - Mapping Quality < 15
 #  - Median Q-score < 7
 #  - Mean Q-score < 7
 #  - Under 200 bases
+#
+#2. Make read depth reports with filtered and unfilterd
+#   reads
 
-#4. Update the kept read depth histogram
+@diagrams/consensus.png
+# Figure showing I am moving to consensus bulding slide
 
-@diagrams/freezeTb-consensusStep.png
-#5. Add read to consensus "graph"
-#  - Ignore bases with Q-scores < 7
+Filters out bases with Q-scores under 7
 
-#9. Collapse the consensus "graph" into sam entries
-#  - Fragment has 20X depth for at least 200 bases
-#  - SNPs/Matches have 50% support (else masked)
-#  - Indels have 70% support (else removed)
+Break up consensuses
+  - Fragments assemblies under 20x read depth
+  - Remove fragments less than 200 bases long
+
+Masking:
+  - Select nucleotides with most support
+  - Mask nucleotides with less than 50% of mapped reads
+
+Indel removal:
+  - Remove indels with less than 70% of mapped reads
+
+Ouput and sam file
 
 @diagrams/freezeTb-amrStep.png
-#6. Check read for AMRs (2023 catalog)
-#  - Uses 2023 WHO catalog
-#  - Frame shifts (indels) treated as nucleotide sequence
+# Figure to show that I am moving to AMR detection slide
 
-@diagrams/freezeTb-spoligotypeStep.png
-#7. Check read for MIRU lineage
+Using 2023 WHO tuberculosis AMR mutation catalog
+
+Gene deletions are ignored
+
+Frames shifts / LoF's treated as normal AMR
+  - Less false positives due to indel errors
+
+For amino acid catalog variants
+  - AMR region in read converted to amino acids
+
+AMR called if
+  - Sequences match
+  - Read AMR region length = catalog AMR length
+
+@diagrams/lineage.png
+# Figure to show I am moving to the lineage slides
+
+Miru lineages:
+  - See if read has primer coordinates (from sam file)
+  - Check reads repeat length
+
+Spoligotyping:
+  - Get direct repeat (DR) region from consensus
+  - Map spacer sequences to DR with Waterman alignment
+  - Make barcode from mapped spacers and find lineage
 
 @diagrams/freezeTb-diagram.png
-#8. Repeat 1 to 7 till no more reads
-#  - Print AMRs mutations with 20x depth and 45% support
-#  - Print counts for detected MIRU lineage (table)
+# Figure shows the full pipeline
+#  - It shows that we are doing each step, except
+#    spoligotyping both the consensus and reads
 
-#10. Check consensus fragments for AMRs and print
+Each step in freezeTb is modular:
+  - You like an module; you can get an module
+  - Each module takes an sam file
 
-#11. Check consensus fragments for MIRU lineage and print
+FreezeTb; works, but not an replacement
 
-#12. R; the dependency I did not want to get around
-#  - Can use R to make read depth and coverage graphs
+Future steps:
+  - Finish and integrate spoligotyping
+  - Maybe add in fast kmer seeding for spoligotyping
 
-Read depth and coverage graphs
+Fast kmer seeding is close to an read mapper
 
-@diagrams/graphs-readDepth.png
-
-@diagrams/graphs-ampMap.png
-
-Wrap up:
-  - FreezeTb; works, but not an replacement
-  - Freeze
+Why not add an read mapper? Ok probrably not.
 
 ?
 
-Old slides:
-
-Why TB?
-  - 5 to 7 million infections per year (WHO 2023)
-  - 1 million deaths (WHO 2023)
-  - Antibiotics; fatal clinical outcomes from 24% to 7% (Chowdury, et al. 2023)
-
-Drug resistant TB
-  - 410000 people per year (rifampicin or multiple) (WHO 2023)
-  - First line antibiotics are less effective (Chowdury 2023)
-
-Drug resistant detection (Campelo et al. 2021; Mukherjee et al. 2023)
-  - Culture (weeks)
-  - Rapid molecular diagnostic test; specific targets only
-  - Sequencing; unspecific, but costly and needs reference
-
-# Add in MIRU lineages (spologiotyping)
-
-2023 WHO catalog; a reference of mutations causing AMRs
-
-# I need refs
-Types of sequencing
-  - Whole genome sequencing; everything, but also costly
-  - Targeted sequencing; genes of interest at less cost
-
-# I need refs
-Platforms
-  - Short read; accurate but time consuming (REF)
-  - Long read; less accurate, but single day times (REF)
-
-
 # These are more of notes. I need to filter though this
 #   and decide what to keep an what to remove
+#
+# ONT price
+#  Xia, Yu, Xiang Li, Ziqi Wu, Cailong Nie, Zhanwen Cheng,
+#    Yuhong Sun, Lei Liu, and Tong Zhang. 2023.
+#    “ Strategies and tools in illumina and
+#    nanopore-integrated metagenomic analysis of
+#    microbiome data.” iMeta, 2, e72.
+#    https://doi.org/10.1002/imt2.72
+#
 #Why Tuberculosis matters  (Global tuberculosis report 2023)
 #- Worlds second leading cause of death for an single infectious agent
 #- In 2019 13th highest cause of death of top 20 deaths (Fi. 8)
@@ -164,6 +259,10 @@ Platforms
 #Doyle RM, Burgess C, Williams R, Gorton R, Booth H, Brown J, Bryant JM, Chan J, Creer D, Holdstock J, Kunst H, Lozewicz S, Platt G, Romero EY, Speight G, Tiberi S, Abubakar I, Lipman M, McHugh TD, Breuer J. Direct Whole-Genome Sequencing of Sputum Accurately Identifies Drug-Resistant Mycobacterium tuberculosis Faster than MGIT Culture Sequencing. J Clin Microbiol. 2018 Jul 26;56(8):e00666-18. doi: 10.1128/JCM.00666-18. PMID: 29848567; PMCID: PMC6062781.
 #- whole genome sequencing using baits
 #
+#Castillos de Ibrahim das Neves Y, Reis AJ, Xavier Maio N, Vianna J, Perdigão J, Bastos Ramis I, Almeida da Silva PE, Von Groll A. Genotyping methods and their contributions to the study of tuberculosis dynamic in Latin America. J Infect Dev Ctries. 2023 Nov 12;17(10):1373-1386. doi: 10.3855/jidc.17840. PMID: 37956372.
+#  - Metanalysis of who is using what lineage. Good for
+#    delving into lineage methods.
+#  - MIRU is not spoligotyping
 # Notes on sent commands
 # Image: @file.png
 #

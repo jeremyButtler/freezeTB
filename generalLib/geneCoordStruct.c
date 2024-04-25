@@ -208,13 +208,8 @@ getPafGene(
    
    for(ucEntry = 1; ucEntry < 7; ++ucEntry)
    { /*Loop: Move to the reference start position*/
-      for(
-         uiChar = uiChar;
-         (pafLineStr)[uiChar] > 32;
-         ++uiChar
-      ){} /*Move to the next entry (tab)*/
-      
-      ++uiChar;
+      /*Move off the tab*/
+      while((pafLineStr)[uiChar++] > 32) ;
    } /*Loop: Move to the reference start position*/
    
    tmpStr =

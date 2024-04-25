@@ -274,11 +274,12 @@ unsigned char trimSamEntry(
     \****************************************************/
 
     /*Adjust for having removed q-scores at the end*/
-    for(iSeq = iSeq; qCpStr[iSeq] != '\0'; ++iSeq)
+    while(qCpStr[iSeq] != '\0')
     { /*Loop: adjust for the timmed ending Q-scores*/
        qUC = (uchar) samST->qStr[iSeq] - defQAdjust;
        --(samST->qHistUI[qUC]);
        samST->sumQUL -= qUC;
+       ++iSeq;
     } /*Loop: adjust for the timmed ending Q-scores*/
 
     /*Make sure they are c-strings*/

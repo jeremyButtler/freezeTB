@@ -937,12 +937,8 @@ checkAmrSam(
    /*Mark that this is an new frameshift*/
    if(frameshiftBl) frameshiftBl = 3; /*2 and 1 bit set*/
  
-   for(
-      iAmr = iAmr;
-      iAmr < numAmrI;
-      ++iAmr
-   ){ /*Loop: Check if is an amr or not*/
-
+   while(iAmr < numAmrI)
+   { /*Loop: Check if I have any AMR mutations*/
       /*Check if I have another amr*/
       if(samST->refEndUI < (amrAryST[iAmr].refPosUI + 1))
          break; /*Finished with the read*/
@@ -953,10 +949,21 @@ checkAmrSam(
          + amrAryST[iAmr].lenRefSeqUI;
 
       if(samST->refEndUI < amrEndI)
-         continue; /*read does not cover whole pattern*/
+         goto nextAmr_fun09_sec03_sub08;
 
       if(samST->readLenUI < amrAryST[iAmr].lenAmrAaUI)
-         continue; /*The AMR is longer then the read*/
+         goto nextAmr_fun09_sec03_sub08;
+
+      if(frameshiftBl & iAmr)
+      { /*If: frameshift checking is set up*/
+         if(
+            cStrEql(
+               amrAryST[iAmr].geneIdStr,
+               amrAryST[iAmr - 1].geneIdStr,
+               '\0'
+             )
+         ) frameshiftBl |= 2; /*Changing genes*/
+      } /*If: frameshift checking is set up*/
 
       /**************************************************\
       * Fun-09 Sec-03 Sub-03:
@@ -1029,7 +1036,7 @@ checkAmrSam(
       if(samST->cigTypeStr[iCig] == 'D')
       { /*If: this entry is an deletion*/
          if(!frameshiftBl || !amrAryST[iAmr].frameshiftBl)
-            goto nextAmr_fun09_sec03_sub07;
+            goto nextAmr_fun09_sec03_sub08;
       } /*If: this entry is an deletion*/
 
       /**************************************************\
@@ -1156,7 +1163,7 @@ checkAmrSam(
       iMatch = iBase; /*This is for the comparison step*/
 
       if(amrUStr[iBase] != '\0')
-         goto nextAmr_fun09_sec03_sub07; /*Not an AMR*/
+         goto nextAmr_fun09_sec03_sub08; /*Not an AMR*/
 
       /*This may be an AMR; need to make sure not a
       `   false positive
@@ -1211,21 +1218,21 @@ checkAmrSam(
          ){ /*Loop: Check the codon reading frame*/
 
             if(*seqUStr == '\0')
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
 
             base1UC =
                (uchar)
                compBaseToCodeLkTbl[*seqUStr--];
 
             if(*seqUStr == '\0')
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
 
             base2UC =
                (uchar)
                compBaseToCodeLkTbl[*seqUStr--];
 
             if(*seqUStr == '\0')
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
 
             base3UC =
                (uchar)
@@ -1254,13 +1261,13 @@ checkAmrSam(
                   if(resBl)
                   { /*If: this was a bacterial start*/
                      resBl = 0;
-                     goto nextAmr_fun09_sec03_sub07;
+                     goto nextAmr_fun09_sec03_sub08;
                   } /*If: this was a bacterial start*/
                } /*If: this is a "start" codon*/
             } /*If: this could be any codon*/
 
             else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
          } /*Loop: Check the codon reading frame*/
 
          iMatch = amrAryST[iAmr].lenAmrSeqUI;
@@ -1280,17 +1287,17 @@ checkAmrSam(
             ++iAa 
          ){ /*Loop: Check the codon reading frame*/
             if(*seqUStr == '\0')
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
 
             base1UC = (uchar) baseToCodeLkTbl[*seqUStr++];
 
             if(*seqUStr == '\0')
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
 
             base2UC = (uchar) baseToCodeLkTbl[*seqUStr++];
 
             if(*seqUStr == '\0')
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
 
             base3UC = (uchar) baseToCodeLkTbl[*seqUStr++];
 
@@ -1317,13 +1324,13 @@ checkAmrSam(
                   if(resBl)
                   { /*If: this was a bacterial start*/
                      resBl = 0;
-                     goto nextAmr_fun09_sec03_sub07;
+                     goto nextAmr_fun09_sec03_sub08;
                   } /*If: this was a bacterial start*/
                } /*If: this is a "start" codon*/
             } /*If: this could be any codon*/
 
             else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
-               goto nextAmr_fun09_sec03_sub07;
+               goto nextAmr_fun09_sec03_sub08;
          } /*Loop: Check the codon reading frame*/
 
          iMatch = amrAryST[iAmr].lenAmrSeqUI;
@@ -1451,18 +1458,9 @@ checkAmrSam(
       *   - Move to the next amr
       \**************************************************/
 
-      nextAmr_fun09_sec03_sub07:;
+      nextAmr_fun09_sec03_sub08:;
 
-      if(frameshiftBl & iAmr)
-      { /*If: frameshift checking is set up*/
-         if(
-            cStrEql(
-               amrAryST[iAmr].geneIdStr,
-               amrAryST[iAmr - 1].geneIdStr,
-               '\0'
-             )
-         ) frameshiftBl |= 2; /*Changing genes*/
-      } /*If: frameshift checking is set up*/
+      ++iAmr;
    } /*Loop: Check if is an amr or not*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

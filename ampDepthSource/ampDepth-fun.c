@@ -256,11 +256,8 @@ pAmpDepthHistogram(
       maxReadsI = readsAtStartI;
       minReadsI = maxReadsI;
 
-      for(
-         mapStartI = mapStartI;
-         mapStartI <= genesST->endAryUI[geneIndexI];
-         ++mapStartI
-      ){ /*Loop: Check if gene is complete*/
+      while(mapStartI <= genesST->endAryUI[geneIndexI])
+      { /*Loop: Check if gene is complete*/
           if(readHistIAry[mapStartI] < minDepthI) break;
 
           maxReadsI = 
@@ -276,6 +273,8 @@ pAmpDepthHistogram(
              ); /*Find the maximum*/
           
           avgDepthL += readHistIAry[mapStartI];
+
+         ++mapStartI;
       } /*Loop: Check if gene is complete*/
 
       readsAtEndI = readHistIAry[mapStartI - 1];
@@ -325,11 +324,13 @@ pAmpDepthHistogram(
          if(geneIndexI > numGenesI) continue;;
 
          /*Make sure I am on the next gene*/
-         for(
-            mapStartI = mapStartI;
-            mapStartI < genesST->startAryUI[geneIndexI];
-            ++mapStartI
-         ) if(readHistIAry[mapStartI] < minDepthI) break;
+         while(mapStartI <genesST->startAryUI[geneIndexI])
+         { /*Loop: Move to next gene*/
+            if(readHistIAry[mapStartI] < minDepthI)
+               break;
+
+            ++mapStartI;
+         } /*Loop: Move to next gene*/
 
          if(readHistIAry[mapStartI] <minDepthI) continue;
  

@@ -347,9 +347,11 @@ addReadToConBaseArray(
 
       * conBaseAry = baseST; 
 
-      /*Initialize the new strutures*/
-      for(uiBase = uiBase; uiBase < *lenRefUI; ++uiBase)
+      while(uiBase < *lenRefUI)
+      { /*Loop: Initialize the new structures*/
           initConBase(conBaseAry[uiBase]);
+          ++uiBase;
+      } /*Loop: Initialize the new structures*/
    } /*If: I need to add more bases*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

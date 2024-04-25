@@ -1,0 +1,5 @@
+b tbSpoligo.c:113
+
+#r -fa ../freezeTbFiles/NC000962.fa -spoligo ../freezeTbFiles/spoligotype-seq.fa
+#r -db ../freezeTbFiles/spoligo-lineages.csv -sam ~/files/testing/null-con.sam -spoligo ../freezeTbFiles/spoligotype-seq.fa
+r -sam ~/files/testing/null-con.sam -spoligo ../freezeTbFiles/spoligotype-seq.fa

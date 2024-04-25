@@ -33,7 +33,14 @@ Other programs:
 - fqGetIds: was here for the original script. It has its
   own separate repository. It is designed to extact read
   ids from an fastq file. I need to come back to this and
-  improve it.
+  improve it (I have an few ids).
+- memwater: This is more of an library. It took it from
+  my alnSeq side project (fixed a few bugs). It is an
+  waterman that operates in linear time and that takes
+  close to as much time as an traditional waterman (so
+  slow). It is desigend for CPUs with branch prediction.
+  It only returns the scores and the start/end coordinates
+  of the alignment.
 - oldCode: This has old code I am not quite ready to throw
   away yet. I may use it later or in another project.
   Some of it was never finished, other parts of it no
@@ -70,6 +77,8 @@ The freezeTb install will install freezeTb,
 
 ## Linux or Mac
 
+### If you have minimap2 already installed
+
 Non arm processors (Not an M chip mac). You can skip
   the mkminimap2 step if you already have minimap2.
 
@@ -77,41 +86,60 @@ Non arm processors (Not an M chip mac). You can skip
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make
-make mkminimap2
 sudo make install
 make clean
 
 # or for an static build (Non-Mac)
 
+# Install minimap2
+
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make static
-make mkminimap2
 sudo make install
 make clean
 ```
+### If you need to install minimap2
 
-Mchip macs
+If you do not have minimap2 then you can install
+  minimap2 and freezeTb with the mk commands. You will
+  need git and an internet connection to download
+  Minimap2. This always does an non-static install.
+
+Here are the install inscturctions for non-arm CPUs.
+  Mac's with M1/M2/M3/... chips have arm CPUs.
 
 ```
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
-make mchipmac
-make mkNeonMinimap2
+make mk
 sudo make install
 make clean
 ```
+
+Here are the install inscturctions for arm CPUs, so for
+  Macs with M1/M2/M3/... chips.
+
+```
+git clone https://github.com/jeremybuttler/freezeTb
+cd freezeTb
+make mkneon
+sudo make install
+make clean
+```
+
+## More advanced
 
 This installs freezeTb, freezeTbGui.r, and graphAmpDepth.r
   into `/usr/local/bin/`. It also installs the
   freezeTbFiles folder to `/usr/local/share`.
-
 
 If you are having problems installing try doing a local
   install.
 
 ```
 make
+# or make mk or make mkneon
 make PREFIX=~/local/path/ dbPREFIX=~/Documents/ install
 ```
 

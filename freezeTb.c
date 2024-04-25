@@ -285,6 +285,11 @@ main(
    int numArgsI,
    char *argsStrAry[]
 ){ /*main*/
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec-01:
+   ^   - Variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    char *samFileStr = 0;
    char *prefixStr = def_prefix_freezeTb;
    char amrDbFileStr[256]; 
@@ -377,7 +382,7 @@ main(
 
    /*For consesus building*/
    struct tbConSet tbConSettings;
-   struct conBase *conBaseSTAry;
+   struct conBase *conBaseSTAry = 0;
    FILE *samConFILE = 0;
 
    struct samEntry *samConSTAry = 0;
@@ -1904,7 +1909,6 @@ getInput_freezeTb(
       { /*Else If: the user wanted graphs*/
          *mkGraphBl = 1;
          --iArg;
-         continue;
       } /*Else If: the user wanted graphs*/
 
       else if(! cStrEql("-graph-ext", argStr, '\0'))

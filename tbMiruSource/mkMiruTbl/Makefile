@@ -8,9 +8,9 @@ DEBUGFLAGS=-Wall -ggdb -std=c89 -O0 -static
 variantFlags=-DNOGAPEXTEND
 
 SOURCE=\
-   alnSetStruct.c\
-   seqStruct.c\
-   memwater.c\
+   ../../memwater/alnSetStruct.c\
+   ../../memwater/seqStruct.c\
+   ../../memwater/memwater.c\
    mkMiruTbl.c
 
 all:

@@ -1,9 +1,9 @@
 CC = cc
 PREFIX=/usr/local/bin
 
-CFLAGS += -static -O3 --std=c89
+CFLAGS = -static -O3 --std=c89 -Wall
 
-MACCFLAGS += -O3
+MACCFLAGS = -O3 -Wall
 
 # Debuggin
 BUGFLAGS += -ggdb -Wall -O0 -static -o debugAmpDepth

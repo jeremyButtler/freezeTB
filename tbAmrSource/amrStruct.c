@@ -425,8 +425,8 @@ int findNearestAmr(
      if(qryUI > amrAryST[midI].refPosUI)
          leftHalfI = midI + 1;
 
-      else if(qryUI < amrAryST[midI].refPosUI)
-         rightHalfI = midI - 1;
+     else if(qryUI < amrAryST[midI].refPosUI)
+        rightHalfI = midI - 1;
 
      else
      { /*Else: I found the query*/

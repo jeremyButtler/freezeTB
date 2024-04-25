@@ -43,11 +43,11 @@ debug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
 	gdb -x bug-cmds-freezeTb.txt bugFreezeTb
 
-mkminimap2: getminimap2
+mk: getminimap2 all
 	make clean -C minimap2;
 	make -C minimap2;
 
-mkNeonMinimap2: getminimap2
+mkneon: getminimap2 all
 	make clean -C minimap2;
 	ls minimap2 && make arm_neon=1 -C minimap2 || printf "";
 
@@ -55,10 +55,12 @@ getminimap2:
 	ls minimap2 || git clone https://github.com/lh3/minimap2;
 
 install:
+	mkdir $(PREFIX) || printf "";
 	cp graphAmpDepth.r $(PREFIX);
 	cp freezeTb $(PREFIX);
 	cp freezeTbGui.r $(PREFIX);
-	cp -r freezeTbFiles $(dbPREFIX);
+	mkdir $(dbPREFIX)/freezeTbFiles || printf "";
+	cp freezeTbFiles/* $(dbPREFIX)/freezeTbFiles/;
 	chmod -R a+x $(dbPREFIX)/freezeTbFiles;
 	chmod a+x $(dbPREFIX)/freezeTbFiles/*;
 	chmod a+x $(PREFIX)/freezeTb;

@@ -66,10 +66,10 @@
 #define def_minAlnLen_filtsam 0
 
 #define def_minMapq_filtsam 0
-#define def_minMedQ_filtsam 7.0f
-#define def_minMeanQ_filtsam 7.0f
+#define def_minMedQ_filtsam 0.0f
+#define def_minMeanQ_filtsam 0.0f
 
-#define def_trimReadsBl_filtsam 1
+#define def_trimReadsBl_filtsam 0
 
 /*Flags for the printout type*/
 #define defSamPSam 0
@@ -659,7 +659,7 @@ int main(
 
    else
    { /*Else: The user supplied a out file*/
-      outFILE = fopen(outStr, "r");
+      outFILE = fopen(outStr, "w");
 
       if(!outFILE)
       { /*If: I could not open the out file*/
