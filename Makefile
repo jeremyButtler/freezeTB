@@ -64,7 +64,7 @@ install:
 	chmod -R a+x $(dbPREFIX)/freezeTbFiles;
 	chmod a+x $(dbPREFIX)/freezeTbFiles/*;
 	chmod a+x $(PREFIX)/freezeTb;
-	chmod a+x freezeTbGui.r $(PREFIX);
+	chmod a+x $(PREFIX)/freezeTbGui.r;
 	chmod a+x $(PREFIX)/graphAmpDepth.r;
 	Rscript rDepends.r;
 	minimap2 --version || sudo cp $(PREIFX);
