@@ -292,39 +292,34 @@ main(
    ^   - Read in the spoligotype sequences
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(fastBl) ;
+   spoligoHeapAryST =
+     getSpoligoRefs(
+        spoligoFileStr,
+        &numSpoligosSI,
+        &errSC
+     );
 
-   else
-   { /*Else: The user is using the slower method*/
-      spoligoHeapAryST =
-        getSpoligoRefs(
-           spoligoFileStr,
-           &numSpoligosSI,
-           &errSC
+   if(errSC)
+   { /*If: I had an error*/
+      if(errSC == fileErr_tbSpoligo)
+      { /*If: I had an file error*/
+         fprintf(
+            stderr,
+            "-spoligo %s has a non-fasta entry\n",
+            spoligoFileStr
         );
+      } /*If: I had an file error*/
 
-      if(errSC)
-      { /*If: I had an error*/
-         if(errSC == fileErr_tbSpoligo)
-         { /*If: I had an file error*/
-            fprintf(
-               stderr,
-               "-spoligo %s has a non-fasta entry\n",
-               spoligoFileStr
-           );
-         } /*If: I had an file error*/
+      else
+      { /*Else: This is an memory error*/
+         fprintf(
+            stderr,
+            "Ran out of memory getting spoligo seq\n"
+        );
+      } /*Else: This is an memory error*/
 
-         else
-         { /*Else: This is an memory error*/
-            fprintf(
-               stderr,
-               "Ran out of memory getting spoligo seq\n"
-           );
-         } /*Else: This is an memory error*/
-
-         goto errCleanUp_main_sec06_sub02;
-      } /*If: I had an error*/
-   } /*Else: The user is using the slower method*/
+      goto errCleanUp_main_sec06_sub02;
+   } /*If: I had an error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-04:
@@ -368,7 +363,7 @@ main(
    ^ Main Sec-05:
    ^   - Check reads for spoligotypes
    ^   o main sec-05 sub-01:
-   ^     - Initialize variables
+   ^     - Initialize variables and print header
    ^   o main sec-05 sub-02:
    ^     - fastx file spoligotype detection
    ^   o main sec-05 sub-03:
@@ -377,7 +372,7 @@ main(
 
    /*****************************************************\
    * Main Sec-05 Sub-01:
-   *   - Initialize variables
+   *   - Initialize variables and print header
    \*****************************************************/
 
    initSeqST(&seqStackST);
@@ -390,6 +385,8 @@ main(
       fprintf(stderr, "Ran out of memory\n");
       goto errCleanUp_main_sec06_sub02;
    } /*If: I had an memory error*/
+
+   pSpoligoHead(outFILE);
 
    /*****************************************************\
    * Main Sec-05 Sub-02:
@@ -424,7 +421,7 @@ main(
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       while(errSC == 1)
-      { /*Loop: Check read read for spoligotypes*/
+      { /*Loop: Check read for spoligotypes*/
          errSC =
             fxSpoligoSearch(
                &seqStackST,

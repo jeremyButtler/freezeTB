@@ -1,10 +1,11 @@
 b checkAmr.c:2374
+b checkAmr.c:2053
 
 # Check entire gene for frameshift
-b checkAmr.c:944
+#b checkAmr.c:944
 
 # First kept frameshift case (BC33)
-b checkAmr.c:1053 if iAmr == 3059
+#b checkAmr.c:1053 if iAmr == 3059
 
 # If I had resistance
 #b checkAmr.c:1391
@@ -16,7 +17,8 @@ b checkAmr.c:1053 if iAmr == 3059
 #r -frameshift -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con ~/files/testing/null.sam
 
 # Actual test
-r -frameshift -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con ~/files/testing/BC33-clean.sam -id-file ~/files/testing/tbAmr-BC33.ids
+#r -frameshift -amr-tbl ../freezeTBFiles/who-2023.tsv -sam ~/files/testing/bug.sam
+r -amr-tbl ../freezeTBFiles/who-2023.tsv -sam ~/files/testing/bug.sam
 
 define pcross
    set $icnt = 0

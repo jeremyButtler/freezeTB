@@ -1,11 +1,104 @@
 /*########################################################
-# Name: freezeTb-version
-#   - Has the version number for freezeTb
+# Name: primMask-input
+#   - get input the user provided by commandline and print
+#     help message
 ########################################################*/
 
-#define def_year_freezeTb 2024
-#define def_month_freezeTb 5
-#define def_day_freezeTb 5
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header
+'     - defined variables and guards
+'   o .c fun-01: checkIfHelp
+'     - Checks if input paramter is help message request
+'   o .c fun-02: checkIfVersion
+'     - Checks if input paramter is an version request
+'   o fun-03: getInputPrimMask
+'     - processes user command line supplied input
+'   o fun-04: pHelpPrimMask
+'     - print the help message for primMask
+'   o license:
+'     - Licensing for this code (public domain / mit)
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+/*-------------------------------------------------------\
+| Header:
+|   - defined variables and guards
+\-------------------------------------------------------*/
+
+#ifndef PRIMER_MASK_INPUT_H
+#define PRIMER_MASK_INPUT_H
+
+#define def_help_primMask 1
+#define def_version_primMask 2
+#define def_nonNumeric_primMask 4
+#define def_unkownInput_primMask 8
+
+/*-------------------------------------------------------\
+| Fun-03: getInputPrimMask
+|   - processes user command line supplied input
+| Input:
+|   - numArgsUI:
+|     o number of arguments the user input
+|   - argAryStr:
+|     o array of c-strings with the users input
+|   - samFileStr:
+|     o pointer to c-string to point to the input sam file
+|       name
+|   - primFileStr:
+|     o pointer to c-string to point to the input primer
+|       coorindates file name
+|   - outFileStr:
+|     o pointer to c-string to point to ouput file name
+|   - maskSC:
+|     o Pointer to char to hold charcter to mask with
+|   - fudgeSI:
+|     o int Pointer to hold the amount to fudge primer
+|       start/end by
+|   - filterBl:
+|     o character set to 1 or 0 if doing filtering.
+|       - 1 removing reads without primers
+|       - 0 not removing reads without primers
+| Output:
+|   - Modifies:
+|     o all input values except numArgsUI and argAryStr
+|       to the user input.
+|   - Returns:
+|     o 0 for no errors
+|     o def_help_primMask if help message requested
+|     o def_version_primMask if version number requested
+|     o def_nonNumeric | (arg_index << 8) for numeric
+|       errors
+|     o def_unkownInput | (arg_index << 8) if an argument
+|       could not be recongnized
+\-------------------------------------------------------*/
+signed long
+getInputPrimMask(
+   unsigned int numArgsUI,
+   char *argAryStr[],
+   signed char **samFileStr,
+   signed char **primFileStr,
+   signed char **outFileStr,
+   signed char *maskSC,
+   signed int *fudgeSI,
+   signed char *filterBl
+);
+
+/*-------------------------------------------------------\
+| Fun-04: pHelpPrimMask
+|   - print the help message for primMask
+| Input:
+|   - outFILE:
+|     o file to print the help message to
+| Output:
+|   - Prints:
+|     o the help messge to outFILE
+\-------------------------------------------------------*/
+void
+pHelpPrimMask(
+   void *outFILE
+);
+
+#endif
 
 /*=======================================================\
 : License:

@@ -39,7 +39,7 @@
 '  o fun-12: cpSeqST
 '    - Copies an seqStruct structure
 '  o license:
-'    - Licensing for this code (public domain / mit)
+'    - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*--------------------------------------------------------\

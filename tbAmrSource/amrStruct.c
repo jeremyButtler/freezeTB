@@ -1620,7 +1620,7 @@ struct amrStruct * readTbAmrTbl(
 
       iDrug = 0;
       drugResUL = amrSTAry[uiAmr].amrFlagsUL;
-      drugCrossResUL = amrSTAry[uiAmr].amrFlagsUL;
+      drugCrossResUL = amrSTAry[uiAmr].crossResFlagsUL;
 
       while(*tmpStr != '*')
       { /*Loop: Check for antibiotic resistance*/

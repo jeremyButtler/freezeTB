@@ -31,11 +31,19 @@ Drug resistant detection
 #   people to in microbiology class
 #   - Culture over 14 days (Campelo et al. 2021)
 
-Rapid molecular diagnostic test; specific targets only
-  - Campelo et al. 2021; Mukherjee et al. 2023
+@diagrams/fastMoleculeQPcr.png
+# Figure showing an rapid molecular diagnostic test
+#   - The sequence with the common AMR variant is bound by
+#     the probe
+#   - The non-AMR sequence is not bound by the probe
+#   - The rare AMR sequence is not bound by the probe and
+#     thus missed
+#   - From Campelo et al. 2021; Mukherjee et al. 2023
 
-Sequencing; unspecific, but more expertise
-  - Campelo et al. 2021; Mukherjee et al. 2023
+@diagrams/amrSequencer.png
+
+#Sequencing; unspecific, but more expertise
+#  - Campelo et al. 2021; Mukherjee et al. 2023
 
 @diagrams/sequencers.png
 # Figuring showing an MiSeq for short read sequencing and

@@ -22,6 +22,12 @@
 '    - Frees a samEntry structer (and sets to null)
 '  o fun-05: makeSamEntry
 '    - Makes an heap allocated samEntry structure
+'  o .h fun-06: samEntryQHistToMed
+'    - Gets the median Q-score for an histogram of
+'      q-scores in a samStruct
+'  o fun-07: samEntryFindQScores
+'     - Gets the median and mean Q-scores from a samEntry
+'       Structure.
 '  o .c fun-08: cpQScore
 '    - Copies Q-scores from a string into a samEntry
 '      structure
@@ -380,6 +386,7 @@ cpQScores(
 | Output:
 |  - Modifies:
 |    o samSTPtr to have the next line
+|      - Comments are in extraStr
 |    o samFILE to be on the next line
 |    o buffStr to hold a sam file line (resized if needed)
 |    o lenBuffUL to hold the resized length of buffStr

@@ -24,7 +24,7 @@ sudo make install;
 To run tbAmr you will need to have an database of AMRs
   in the tbAmr format. A database for the 2023 WHO TB
   AMR catalog with only grade 1/2 AMRs is include with
-  freezeTb (../freezeTbFiles/who-2023.tsv). However, if
+  freezeTB (../freezeTBFiles/who-2023.tsv). However, if
   you wish to make your catalog based off the WHO 2023
   catalog or 2021 catalog you can install and use
   whoToTbAmr in cnvt_whoToTbAmr_src. The other option is
@@ -49,18 +49,18 @@ For raw reads my filtering settings are quite low and are
   consensuses, then I would recommend setting
   the `-min-amr-map-perc` (percentage of reads covering
   the AMR variant that supported the AMR variant) to at
-  least 0.45 (45%).
+  least 0.05 (5%).
 
 ```
-minimap2 -a ../freezeTbFiles/TB-NC000962.fa reads.fastq > tmp.sam;
-tbAmr -amr-tbl ../freezeTbFiles/who-2023.tsv -sam tmp.sam;
+minimap2 -a ../freezeTBFiles/NC000962.fa reads.fastq > tmp.sam;
+tbAmr -amr-tbl ../freezeTBFiles/who-2023.tsv -sam tmp.sam;
 ```
 
 or
 
 ```
-minimap2 -a ../freezeTbFiles/TB-NC000962.fa reads.fastq |
-  tbAmr -amr-tbl ../freezeTbFiles/who-2023.tsv -sam -;
+minimap2 -a ../freezeTBFiles/NC000962.fa reads.fastq |
+  tbAmr -amr-tbl ../freezeTBFiles/who-2023.tsv -sam -;
 ```
 
 ## Running consensuses
@@ -69,25 +69,27 @@ Make sure you use the -sam-con entry for consensus.
   Otherwise tbAmr will apply read depth filters.
 
 ```
-minimap2 -a ../freezeTbFiles/TB-NC000962.fa consensus.fasta > tmp.sam;
-tbAmr -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con tmp.sam;
+minimap2 -a ../freezeTBFiles/NC000962.fa consensus.fasta > tmp.sam;
+tbAmr -amr-tbl ../freezeTBFiles/who-2023.tsv -sam-con tmp.sam;
 ```
 
 or
 
 ```
-minimap2 -a ../freezeTbFiles/TB-NC000962.fa reads.fastq |
-  tbAmr -amr-tbl ../freezeTbFiles/who-2023.tsv -sam-con -;
+minimap2 -a ../freezeTBFiles/NC000962.fa reads.fastq |
+  tbAmr -amr-tbl ../freezeTBFiles/who-2023.tsv -sam-con -;
 ```
 
 # Some extra commands:
 
 ## Printing read ids for AMR sequences
 
-You can print out the read ids that mapped to each unique
-  variant by providing a file name with `-id-file`. You
-  can use seqkit or my fqGetIds to extract the sequences
-  from an fastq file using the read ids.
+You can print out the read ids and the variants they
+  mapped to using `-id-file file.tsv`. Each line will have
+  an read id and one variant that it mapped to. Multiple
+  lines are used for read ids that mapped to multple
+  variants. You can use fqGetIds or seqkit extract the
+  fastq entries using the read ids.
 
 ## Frameshift checking (not recommended)
 

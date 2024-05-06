@@ -33,7 +33,9 @@
 '   o fun-10: readSpoligoDb
 '     - Reads in an database of spoligotypes and returns
 '       an array of spoligoST structures sorted by barcode
-'   o fun-11: pSpoligo
+'   o fun-11: pSpoligoHead
+'     - Print out the header for the spoligotype output
+'   o fun-12: pSpoligo
 '     - Print out an spoligotype and matching lineage
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -430,9 +432,23 @@ readSpoligoDb(
    signed char *errSC
 );
 
+/*-------------------------------------------------------\
+| Fun-11: pSpoligoHead
+|   - Print out the header for the spoligotype output
+| Input:
+|   - outFILE:
+|     o FILE pointer with file to print to
+| Output:
+|   - Prints:
+|     o the header to the output file
+\-------------------------------------------------------*/
+void
+pSpoligoHead(
+   void *outFILE
+);
 
 /*-------------------------------------------------------\
-| Fun-11: pSpoligo
+| Fun-12: pSpoligo
 |   - Print out an spoligotype and matching lineage
 | Input:
 |   - idStr:

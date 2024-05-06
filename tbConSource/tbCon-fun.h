@@ -73,7 +73,7 @@
 #define defMinPerDel 0.7f  /*% support to keep an del*/
 
 /*Settings for printing*/
-#define defMinPrintDepth 20 
+#define defMinPrintDepth 10 
 #define defMinPrintPerSnp 0.01f
 #define defMinPrintPerIns 0.1f
 #define defMinPrintPerDel 0.1f

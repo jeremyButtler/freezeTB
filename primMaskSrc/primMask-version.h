@@ -1,13 +1,30 @@
 /*########################################################
-# Name: tbCon-version
-#   - Has the version number for tbCon
+# Name: primMask-version.h
+#   - has version number and print function for primMask
 ########################################################*/
 
-#define def_tbCon_input_year 2024
-#define def_tbCon_input_month 5
-#define def_tbCon_input_day 5
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header:
+'     - guards and defined variables
+'   o license:
+'     - Licensing for this code (public domain / mit)
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-/*Not needed, but might as well add the license*/
+/*-------------------------------------------------------\
+| Header:
+|   - guards and defined variables
+\-------------------------------------------------------*/
+
+#ifndef PRIMER_MASK_VERSION_H
+#define PRIMER_MASK_VERSION_H
+
+#define def_year_primMask 2024
+#define def_month_primMask 5
+#define def_day_primMask 2
+
+#endif
+
 /*=======================================================\
 : License:
 : 
@@ -15,8 +32,8 @@
 :   However, for cases were the public domain is not
 :   suitable, such as countries that do not respect the
 :   public domain or were working with the public domain
-:   is inconvient / not possible, this code is under the
-:   MIT license.
+:   is inconveint / not possible, this code is under the
+:   MIT license
 : 
 : Public domain:
 : 

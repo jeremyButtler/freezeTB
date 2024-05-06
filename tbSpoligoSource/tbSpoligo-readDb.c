@@ -33,7 +33,9 @@
 '   o fun-10: readSpoligoDb
 '     - Reads in an database of spoligotypes and returns
 '       an array of spoligoST structures sorted by barcode
-'   o fun-11: pSpoligo
+'   o fun-11: pSpoligoHead
+'     - Print out the header for the spoligotype output
+'   o fun-12: pSpoligo
 '     - Print out an spoligotype and matching lineage
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -596,7 +598,28 @@ readSpoligoDb(
 } /*readSpoligoDB*/
 
 /*-------------------------------------------------------\
-| Fun-11: pSpoligo
+| Fun-11: pSpoligoHead
+|   - Print out the header for the spoligotype output
+| Input:
+|   - outFILE:
+|     o FILE pointer with file to print to
+| Output:
+|   - Prints:
+|     o the header to the output file
+\-------------------------------------------------------*/
+void
+pSpoligoHead(
+   void *outFILE
+){
+   fprintf(
+    (FILE *) outFILE,
+    "ref\tstrain\tbarcode\toctal\tlineage\tSIT\tcountries"
+   );
+   fprintf((FILE *) outFILE, "\n");
+} /*pSpoligoHead*/
+
+/*-------------------------------------------------------\
+| Fun-12: pSpoligo
 |   - Print out an spoligotype and matching lineage
 | Input:
 |   - idStr:
@@ -618,18 +641,18 @@ pSpoligo(
    signed int numSpoligosSI,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-11 TOC:
+   ' Fun-12 TOC:
    '   - Print out an spoligotype and matching lineage
-   '   o fun-11 sec-01:
+   '   o fun-12 sec-01:
    '     - Variable declerations
-   '   o fun-11 sec-02:
+   '   o fun-12 sec-02:
    '     - Convert barcode to numeric & "octal" formats
-   '   o fun-11 sec-03:
+   '   o fun-12 sec-03:
    '     - Find the lineage and print out the entry
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-01:
+   ^ Fun-12 Sec-01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -645,7 +668,7 @@ pSpoligo(
    ulong codeUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-02:
+   ^ Fun-12 Sec-02:
    ^   - Convert the barcode to numeric & "octal" formats
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -692,7 +715,7 @@ pSpoligo(
    } /*Loop: Translate the barcode to number and octal*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-03:
+   ^ Fun-12 Sec-03:
    ^   - Find the lineage and print out the entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 

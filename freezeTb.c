@@ -9,7 +9,7 @@
 '   - header:
 '     o Included libraries
 '   o main:
-'     - Main function which drives everything
+'     - main function which drives everything
 '   o fun-01: getInput_freezeTb
 '     - Gets the user input from the arguments array for
 '       freezeTb
@@ -26,11 +26,11 @@
 /*-------------------------------------------------------\
 | Header:
 |   - Included libraries
-|   o header Sec-01:
+|   o header sec-01:
 |     - Included libraries
-|   o header Sec-02:
+|   o header sec-02:
 |     - Defined variables/default settings
-|   o header Sec-03:
+|   o header sec-03:
 |     - Function headers
 \-------------------------------------------------------*/
 
@@ -54,31 +54,44 @@
 #include "tbAmrSource/checkAmr.h"
 #include "generalLib/trimSam.h"
 #include "tbMiruSource/miruTblStruct.h"
+#include "tbSpoligoSource/tbSpoligo-memwater-fun.h"
+#include "primMaskSrc/primMask-fun.h"
 
 /*libraries that are not modules (used by modules)*/
 #include "generalLib/samEntryStruct.h"
 #include "generalLib/geneCoordStruct.h"
 #include "tbAmrSource/amrStruct.h"
 
+/*.c libraries for tbSpoligo*/
+#include "tbSpoligoSource/tbSpoligo-readDb.h"
+#include "memwater/seqStruct.h"
+#include "memwater/alnSetStruct.h"
+
 /*No .c files (only a .h file)*/
 #include "generalLib/base10StrToNum.h"
 #include "generalLib/dataTypeShortHand.h"
 #include "generalLib/numToStr.h"
 #include "generalLib/ulCpStr.h"
+#include "tbSpoligoSource/tbSpoligo-errors.h" 
 
-/*Version numbers (.h files only)*/
+/*Version numbers (not using print version number)*/
 #include "freezeTb-version.h"
 #include "tbAmrSource/tbAmr-version.h"
 #include "tbConSource/tbCon-version.h"
 #include "trimSamSource/trimSam-version.h"
 #include "ampDepthSource/ampDepth-version.h"
 #include "tbMiruSource/tbMiru-version.h"
+#include "tbSpoligoSource/tbSpoligo-version.h"
+#include "primMaskSrc/primMask-version.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
 !   o .c #include "tbAmrSource/drug_str_ary.h"
 !   o .h #include "generalLib/genMath.h"
 !   o .h #include "generalLib/codonTbl.h"
+!   o .c #include "../memwater/memwater.h"
+!   o .h #include "../memwater/alnSeqDefaults.h"
+!   o .h #include "../generalLib/genMath.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -112,16 +125,19 @@ char *def_extGraph_freezeTb = "tiff";
 ` NOTE: These paths should always in an \\ or /
 */
 #ifdef WINDOWS
-   char *defPathStr = "\\Documents\\freezeTbFiles\\";
-   char *defAltPathStr = "\\Documents\\freezeTbFiles\\";
+   char *defPathStr = "\\Documents\\freezeTBFiles\\";
+   char *defAltPathStr = "\\Documents\\freezeTBFiles\\";
 #else
-   char *defPathStr = "/share/freezeTbFiles/";
-   char *defAltPathStr = "/Documents/freezeTbFiles/";
+   char *defPathStr = "/share/freezeTBFiles/";
+   char *defAltPathStr = "/Documents/freezeTBFiles/";
 #endif
 
 char *defAmrDbStr = "who-2023.tsv";
 const char *defMiruTblStr = "miruTbl.tsv";
 char *defGeneCoordStr = "gene-tbl.tsv";
+char *defSpoligoRefsStr = "spoligotype-seq.fa";
+char *defSpoligoDbStr = "spoligo-lineages.csv";
+char *defMaskPrimStr = "mask.tsv";
 
 char *def_graphFlag_freezeTb = "tb";
 
@@ -160,6 +176,19 @@ char *def_graphFlag_freezeTb = "tb";
 |       o C-string (char array) to hold the path to the
 |         MIRU table (database) for lineages
 |       o This is filled in
+|     - spoligoRefFileStr:
+|       o C-string (char array) to hold the path to the
+|         fasta file with the spoligotyping internal
+|         spaces sequences
+|       o This is filled in
+|     - spoligoDbFileStr:
+|       o C-string (char array) to hold the path to the
+|         csv file with the spoligotyping lineages
+|       o This is filled in
+|     - primMaskFileStr:
+|       o C-string (char array) to hold the path to the
+|         primer masking tsv file
+|       o This is filled in
 |     - prefixStr:
 |       o Pointer to c-string to hold the users prefix
 |       o This is modified to point to user input
@@ -185,12 +214,21 @@ char *def_graphFlag_freezeTb = "tb";
 |     - graphFileTypeStr:
 |       o Pointer to C-string that is set to point to the
 |         file extension for the R graphs
-|   Misc:
+|   Lineages:
 |     - frameshiftBl:
 |       o 1: users wants frame shift checking on consensus
 |     - fudgeLenI:
 |       o Pointer to integer to hold the fudge length
 |         for assiging a read to an MIRU lineage
+|     - spoligoPercScoreF:
+|       o Pointer to an float to hold the mininum percent
+|         score to count an spoligotype
+|     - drStartSI:
+|       o Pointer to an int to hold the first base in the
+|         direct repeat region (spoligotyping)
+|     - drEndSI:
+|       o Pointer to an int to hold the last base in the
+|         direct repeat region (spoligotyping)
 | Output:
 |   - Modifies:
 |     o Each input variable the user had an agrument for
@@ -218,6 +256,9 @@ getInput_freezeTb(
    char *amrDbFileStr,
    char *coordFileStr,
    char *miruDbFileStr,
+   char *spoligoRefFileStr,/*Spoligotype seqeunces*/
+   char *spoligoDbFileStr, /*Lineage database*/
+   schar *primMaskFileStr,
    char **prefixStr,
 
    /*Read filtering*/
@@ -231,9 +272,12 @@ getInput_freezeTb(
    char *mkGraphBl,
    char **graphFileTypeStr,
 
-   /*misc*/
+   /*Lineages*/
    char *frameshiftBl,
-   int *fudgeLenI
+   int *fudgeLenI,
+   float *spoligoPercScoreF,
+   signed int *drStartSI,
+   signed int *drEndSI
 ); /*getInput_freezeTb*/
 
 /*-------------------------------------------------------\
@@ -280,20 +324,71 @@ pVersion_freezeTb(
 | Output:
 |    - 
 \-------------------------------------------------------*/
+#ifdef PLAN9
+void
+#else
 int
+#endif
 main(
    int numArgsI,
    char *argsStrAry[]
-){ /*main*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Main TOC:
+   '   - Run freezeTB on user input
+   '   o main sec-01:
+   '     - Variable declerations
+   '   o main sec-02:
+   '     -  Set up program default values not assigned
+   '   o main sec-03:
+   '     - Get and check user input
+   '   o main sec-04:
+   '     - Check files and set up the output file names
+   '   o main sec-06:
+   '     - Get reference name and length + get past header
+   '   o main sec-07:
+   '     - Read in the masking primer coordinates
+   '   o main sec-08:
+   '     - Do read analysis
+   '   o main sec-09:
+   '     - Print out the data collected for the reads
+   '   o main sec-10:
+   '     - Collapse consensus and do consensus analysis
+   '   o main sec-11:
+   '     - Run R to build graphs
+   '   o main sec-12:
+   '     - Clean up
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-01:
    ^   - Variable declerations
+   ^   o main sec-01 sub-01:
+   ^     - General IO variables (applies to multple subs)
+   ^   o main sec-01 sub-02:
+   ^     - Temporay and error reporting variables
+   ^   o main sec-01 sub-03:
+   ^     - Filtering and sam file variables
+   ^   o main sec-01 sub-04:
+   ^     - Read depth and coverage stats variables
+   ^   o main sec-01 sub-05:
+   ^     - AMR detection variables
+   ^   o main sec-01 sub-06:
+   ^     - Miru lineage unique variables
+   ^   o main sec-01 sub-07:
+   ^     - Spoligotyping unique variables
+   ^   o main sec-01 sub-08:
+   ^     - Consensus building unique variables
+   ^   o main sec-01 sub-09:
+   ^     - Masking unique variables
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   char *samFileStr = 0;
+   /*****************************************************\
+   * Main Sec-01 Sub-01:
+   *   - General IO variables (applies to multple subs)
+   \*****************************************************/
+
    char *prefixStr = def_prefix_freezeTb;
-   char amrDbFileStr[256]; 
-   char coordFileStr[256];
+
 
    #ifdef WINDOWS
       char *sharePathStr = getenv("PUBLIC");
@@ -303,52 +398,56 @@ main(
       char *homePathStr = getenv("HOME");
    #endif
 
-   /*Graphing output*/
-   char *graphFlagStr = def_graphFlag_freezeTb;
-   char *graphFileTypeStr = def_extGraph_freezeTb;
-   char mkGraphBl = def_graphBl_freezeTb;
+   FILE *outFILE = 0;
 
-   /*Output file names*/
-   char readStatsStr[256];
+   /*****************************************************\
+   * Main Sec-01 Sub-02:
+   *   - Temporay and error reporting variables
+   \*****************************************************/
 
-   char samConStr[256];
-   char conTsvStr[256];
-
-   char readAmrStr[256];
-   char idFileStr[256]; /*For read id printing*/
-   char conAmrStr[256];
    char spareStr[1024]; /*When I need an extra buffer*/
-
-   /*Input or output files for MIRU lineages*/
-   char miruTblFileStr[256]; /*Default flie path*/
-   char *miruDbFileStr = miruTblFileStr; /*file path*/
-   char readMiruStr[256];
-   char conMiruStr[256];
-
-   char refIdStr[256];
-
    char *tmpStr = 0;
+
    char errC = 0;
    short errS = 0;
    int errI = 0;
+   slong errSL = 0;
 
-   FILE *outFILE = 0;
+   /*****************************************************\
+   * Main Sec-01 Sub-03:
+   *   - Filtering and sam file variables
+   \*****************************************************/
+
+   char *samFileStr = 0;
 
    /*For sam file processing*/
-   struct samEntry samST;
-   char *buffStr = 0;
+   struct samEntry samStackST;
+   char *buffHeapStr = 0;
    ulong lenBuffUL = 0;
    FILE *samFILE = 0;
 
-   ulong tabUL = ulCpMakeDelim('\t');
    char multiRefBl = 0; /*1: means multiple refs/exit*/
    int lenRefI = 0;
+   ulong tabUL = ulCpMakeDelim('\t'); /*Only used in ref*/
+   char refIdStr[256];
 
    /*For filtering reads*/
    float minMedianQF = def_freezeTb_minMedianQ;
    float minMeanQF = def_freezeTb_minMeanQ;
 
-   /*For make the ampDepth tsv files*/
+   /*****************************************************\
+   * Main Sec-01 Sub-04:
+   *   - Read depth and coverage stats variables
+   \*****************************************************/
+
+   char coordFileStr[256]; /*Input*/
+   char readStatsStr[256]; /*Output file name*/
+
+   /*Graphing output*/
+   char *graphFlagStr = def_graphFlag_freezeTb;
+   char *graphFileTypeStr = def_extGraph_freezeTb;
+   char mkGraphBl = def_graphBl_freezeTb;
+
    struct geneCoords *coordsST = 0; /*From function*/
    int numCoordsI = 0;
 
@@ -358,7 +457,16 @@ main(
    int oldOfTargI = 0;
    int umapReadCntI = 0;
 
-   /*For amr detection*/
+   /*****************************************************\
+   * Main Sec-01 Sub-05:
+   *   - AMR detection variables
+   \*****************************************************/
+
+   char idFileStr[256]; /*For read id printing*/
+   char conAmrStr[256];
+   char amrDbFileStr[256]; 
+   char readAmrStr[256];
+
    FILE *idFILE = 0; /*For read id printing*/
    char frameshiftBl = def_checkFrameshift_checkAmr;
    struct amrStruct *amrSTAry = 0;
@@ -380,7 +488,51 @@ main(
    struct miruTbl *miruST = 0;
    int fudgeLenI = def_fudgeLen_miruTblST;
 
-   /*For consesus building*/
+   /*****************************************************\
+   * Main Sec-01 Sub-06:
+   *   - Miru lineage unique variables
+   \*****************************************************/
+
+   /*Input or output files for MIRU lineages*/
+   char miruTblFileStr[256]; /*Default flie path*/
+   char *miruDbFileStr = miruTblFileStr; /*file path*/
+   char readMiruStr[256];
+   char conMiruStr[256];
+
+   /*****************************************************\
+   * Main Sec-01 Sub-07:
+   *   - Spoligotyping unique variables
+   \*****************************************************/
+
+   char spoligoRefFileStr[256];
+   char spoligoDbFileStr[256];
+   schar checkSpoligoLinBl = 1;
+   char barcodeStr[1024];
+   char outSpoligoFileStr[256];
+
+   FILE *spoligoOutFILE = 0;
+
+   float spoligoPercScoreF =
+      def_minPercScore_tbSpoligoWater;
+
+   signed int drStartSI =  def_DRStart_tbSpoligo;
+   signed int drEndSI =  def_DREnd_tbSpoligo;
+   struct alnSet alnSetStackST; /*Alingment settings*/
+
+   struct spoligoST *lineageHeapAryST = 0;
+   sint numLineagesSI = 0;
+
+   struct seqStruct *spoligoHeapAryST = 0;
+   sint numSpoligosSI = 0;
+
+   /*****************************************************\
+   * Main Sec-01 Sub-08:
+   *   - Consensus building unique variables
+   \*****************************************************/
+
+   char samConStr[256];
+   char conTsvStr[256];
+
    struct tbConSet tbConSettings;
    struct conBase *conBaseSTAry = 0;
    FILE *samConFILE = 0;
@@ -388,6 +540,17 @@ main(
    struct samEntry *samConSTAry = 0;
    int numFragmentsI = 0;
    int iCon = 0; /*Iterator for consensus step*/
+
+   /*****************************************************\
+   * Main Sec-01 Sub-09:
+   *   - Masking unique variables
+   \*****************************************************/
+
+   schar primMaskFileStr[256];
+   uint *maskStartHeapAryUI = 0;
+   uint *maskEndHeapAryUI = 0;
+   uint *maskFlagHeapAryUI = 0;
+   uint maskNumPrimUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-02:
@@ -400,6 +563,12 @@ main(
    ^     - Set the path to the MIRU lineages
    ^   o main sec-02 sub-04:
    ^     - Set the path to the gene coordinates file
+   ^   o main sec-02 sub-05:
+   ^     - Set the path to the spoligo reference file
+   ^   o main sec-02 sub-06:
+   ^     - Set the path to the spoligo lineages database
+   ^   o main sec-02 sub-07:
+   ^     - Set primer masking file path
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -408,7 +577,10 @@ main(
    \*****************************************************/
 
    initTbConSet(&tbConSettings);
+   initAlnSet(&alnSetStackST);
    refIdStr[0] = '\0';
+   primMaskFileStr[0] = '\0';
+   initSamEntry(&samStackST);
 
    /*****************************************************\
    * Main Sec-02 Sub-02:
@@ -509,6 +681,142 @@ main(
    if(outFILE) fclose(outFILE);
    outFILE = 0;
 
+   /*****************************************************\
+   * Main Sec-02 Sub-05:
+   *   - Set the path to the spoligo reference file
+   \*****************************************************/
+
+   tmpStr = spoligoRefFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defSpoligoRefsStr, 0, 0);
+
+   outFILE = fopen(spoligoRefFileStr, "r");
+
+   if(! outFILE)
+   { /*If: I could not open the database*/
+      tmpStr = spoligoRefFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defSpoligoRefsStr,0,0);
+
+      outFILE = fopen(spoligoRefFileStr, "r");
+
+      if(! outFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = spoligoRefFileStr;
+
+         tmpStr +=
+            ulCpStrDelim(
+               tmpStr,
+               defSpoligoRefsStr,
+               0,
+               0
+            ); /*Fasta with spoligotype reference seqs*/
+
+         outFILE = fopen(spoligoRefFileStr, "r");
+
+         if(! outFILE)
+            spoligoRefFileStr[0] = '\0'; /*No idea*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(outFILE) fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-02 Sub-06:
+   *   - Set the path to the spoligo iinages database
+   \*****************************************************/
+
+   tmpStr = spoligoDbFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+
+   tmpStr +=
+       ulCpStrDelim(
+          tmpStr,
+          defSpoligoDbStr,
+          0,
+          0
+      );
+
+   outFILE = fopen(spoligoDbFileStr, "r");
+
+   if(! outFILE)
+   { /*If: I could not open the database*/
+      tmpStr = spoligoDbFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+
+
+      tmpStr +=
+          ulCpStrDelim(
+             tmpStr,
+             defSpoligoDbStr,
+             0,
+             0
+         );
+
+      outFILE = fopen(spoligoDbFileStr, "r");
+
+      if(! outFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = spoligoRefFileStr;
+
+         tmpStr +=
+             ulCpStrDelim(
+                tmpStr,
+                defSpoligoDbStr,
+                0,
+                0
+            );
+
+         outFILE = fopen(spoligoDbFileStr, "r");
+
+         if(! outFILE)
+            spoligoDbFileStr[0] = '\0'; /*No idea*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(outFILE) fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-02 Sub-07:
+   *   - Set primer masking file path
+   \*****************************************************/
+
+   tmpStr = (char *) primMaskFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defMaskPrimStr, 0, 0);
+   outFILE = fopen((char *) primMaskFileStr, "r");
+
+   if(! outFILE)
+   { /*If: I could not open the database*/
+      tmpStr = (char *) primMaskFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defMaskPrimStr,0,0);
+      outFILE = fopen((char *) primMaskFileStr, "r");
+
+      if(! outFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = (char *) primMaskFileStr;
+         tmpStr+= ulCpStrDelim(tmpStr,defMaskPrimStr,0,0);
+         outFILE = fopen((char *) primMaskFileStr, "r");
+
+         if(! outFILE)
+            primMaskFileStr[0] = '\0'; /*No idea were at*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(outFILE)
+      fclose(outFILE);
+
+   outFILE = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-03:
    ^   - Get and check user input
@@ -522,6 +830,9 @@ main(
          amrDbFileStr,     /*AMR database tbAmr*/
          coordFileStr,     /*Gene coordianges ampDepth*/
          miruDbFileStr,    /*Miru database file*/
+         spoligoRefFileStr,/*Spoligotype seqeunces*/
+         spoligoDbFileStr, /*Lineage database*/
+         primMaskFileStr,  /*Masking file for primers*/
          &prefixStr,       /*output file names*/
          &minMedianQF,     /*median Q-score to filter*/
          &minMeanQF,       /*mean Q-score to filter with*/
@@ -531,7 +842,10 @@ main(
          &mkGraphBl,       /*Make a graph*/
          &graphFileTypeStr,/*graph extension*/
          &frameshiftBl,    /*AMR frame shift checking*/
-         &fudgeLenI        /*Fudge size for MIRU tables*/
+         &fudgeLenI,       /*Fudge size for MIRU tables*/
+         &spoligoPercScoreF, /*% score to count map*/
+         &drStartSI,       /*Start of direct repeat*/
+         &drEndSI          /*End of direct repeat*/
    ); /*getInput_freezeTb*/
 
    if(errI)
@@ -605,14 +919,20 @@ main(
    ^   o main sec-04 sub-07:
    ^     - output file for MIRU lineages (consensus)
    ^   o main sec-04 sub-08:
-   ^     - Check if the MIRU table exists
+   ^     - Build spoligotyping output file name
    ^   o main sec-04 sub-09:
-   ^     - Check if amr table exists
+   ^     - Check if the MIRU table exists
    ^   o main sec-04 sub-10:
-   ^     - Open the sam file
+   ^     - Check if spoligotyping lineage database
    ^   o main sec-04 sub-11:
-   ^     - Set up name for and open consensus output file
+   ^     - Check if spoligotyping lineage database
    ^   o main sec-04 sub-12:
+   ^     - Check if amr table exists
+   ^   o main sec-04 sub-13:
+   ^     - Open the sam file
+   ^   o main sec-04 sub-14:
+   ^     - Set up name for and open consensus output file
+   ^   o main sec-04 sub-15:
    ^     - Open the paf (gene coordinates) file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -635,7 +955,7 @@ main(
          readStatsStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the read stats file*/
  
    fclose(outFILE);
@@ -662,7 +982,7 @@ main(
          conTsvStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the filtered read stats file*/
 
    fclose(outFILE);
@@ -689,7 +1009,7 @@ main(
          readAmrStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the filtered read stats file*/
 
    fclose(outFILE);
@@ -717,7 +1037,7 @@ main(
          idFileStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the filtered read stats file*/
 
    fclose(outFILE);
@@ -744,7 +1064,7 @@ main(
          conAmrStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the filtered read stats file*/
 
    fclose(outFILE);
@@ -771,7 +1091,7 @@ main(
          readMiruStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the file*/
 
    fclose(outFILE);
@@ -798,7 +1118,7 @@ main(
          conMiruStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the file*/
 
    fclose(outFILE);
@@ -806,6 +1126,33 @@ main(
 
    /*****************************************************\
    * Main Sec-04 Sub-08:
+   *   - Build spoligotyping output file name
+   \*****************************************************/
+
+   tmpStr = outSpoligoFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, prefixStr, 0, '\0');
+
+   tmpStr +=
+      ulCpStrDelim(tmpStr, "-con-spoligo.tsv", 0, '\0');
+
+   outFILE = fopen(outSpoligoFileStr, "w");
+
+   if(! outFILE)
+   { /*If: I could not open the spoligo output file*/
+      fprintf(
+         stderr,
+         "unable to open %s for output\n",
+         outSpoligoFileStr
+      );
+
+      goto err_main_sec12_sub02;
+   } /*If: I could not open the spoligo output file*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-04 Sub-09:
    *   - Check if the MIRU table exists
    \*****************************************************/
 
@@ -819,14 +1166,66 @@ main(
          miruDbFileStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If I could not open the MIRU table*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-09:
+   * Main Sec-04 Sub-10:
+   *   - Check if spoligotyping reference sequences exists
+   \*****************************************************/
+
+   outFILE = fopen(spoligoRefFileStr, "r");
+
+   if(! outFILE)
+   { /*If I could not open the spoligo spacer sequences*/
+      fprintf(
+         stderr,
+         "unable to open -spoligo %s\n",
+         spoligoRefFileStr
+      );
+
+      goto err_main_sec12_sub02;
+   } /*If I could not open the spoligo spacer sequences*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-04 Sub-11:
+   *   - Check if spoligotyping lineage database
+   \*****************************************************/
+
+   outFILE = fopen(spoligoDbFileStr, "r");
+
+   if(! outFILE)
+   { /*If I could not open the spoligo spacer sequences*/
+      fprintf(
+         stderr,
+         "unable to open -db-spoligo %s\n",
+         spoligoDbFileStr
+      );
+
+      fprintf(
+         stderr,
+         "Spoligotype lineages will be ignored\n"
+      );
+
+      checkSpoligoLinBl = 0;
+   } /*If I could not open the spoligo spacer sequences*/
+
+   else
+   { /*Else: have valid spoligotype lineage database*/
+      checkSpoligoLinBl = 0;
+      fclose(outFILE);
+   } /*Else: have valid spoligotype lineage database*/
+
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec-04 Sub-12:
    *   - Check if amr table exists
    \*****************************************************/
 
@@ -841,14 +1240,14 @@ main(
          amrDbFileStr
       );
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the filtered read stats file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-10:
+   * Main Sec-04 Sub-13:
    *   - Open the sam file
    \*****************************************************/
    
@@ -871,7 +1270,7 @@ main(
    } /*Else: I need to open the sam file*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-11:
+   * Main Sec-04 Sub-14:
    *   - Set up name for and open consensus output file
    \*****************************************************/
 
@@ -893,11 +1292,11 @@ main(
 
       if(samFILE != stdin) fclose(samFILE);
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the filtered read stats file*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-12:
+   * Main Sec-04 Sub-15:
    *   - Open the paf (gene coordinates) file
    \*****************************************************/
    
@@ -917,7 +1316,7 @@ main(
 
       fclose(samConFILE);
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I could not open the gene coordinates file*/
 
    fclose(outFILE);
@@ -948,7 +1347,7 @@ main(
 
       fclose(samConFILE);
 
-      exit(-1);
+      goto err_main_sec12_sub02;
    } /*If: I had a memory error*/
 
    lenBuffUL = 0;
@@ -983,7 +1382,7 @@ main(
            "(mem) Err; when processing variant id's\n"
          );
 
-      goto err_main_sec11_sub02;
+      goto err_main_sec12_sub02;
    } /*If: I had an error of some kind*/
 
    /*****************************************************\
@@ -1012,7 +1411,7 @@ main(
                miruDbFileStr
          ); /*Let the user know the error*/
 
-      goto err_main_sec11_sub02;
+      goto err_main_sec12_sub02;
    } /*If: I had an error with the MIRU database*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1033,25 +1432,28 @@ main(
    *   - Get the reference length from the header
    \*****************************************************/
 
-   initSamEntry(&samST);
-
    errS =
-      readSamLine(&samST, &buffStr, &lenBuffUL, samFILE);
+      readSamLine(
+         &samStackST,
+         &buffHeapStr,
+         &lenBuffUL,
+         samFILE
+      );
 
    while(! errS)
    { /*Loop: read in the header*/
 
       /*Check if I have a comment*/
-      if(*samST.extraStr != '@') break;
+      if(*samStackST.extraStr != '@') break;
 
-      fprintf(samConFILE, "%s\n", samST.extraStr);
+      fprintf(samConFILE, "%s\n", samStackST.extraStr);
 
       /*This is not perfect because it assumes the
       `  sam file @SQ entry is in the order of
       `  @SQ\tSN:reference-name\tLN:reference-length
       */
 
-      if(! cStrEql("@SQ\t", samST.extraStr, '\t'))
+      if(! cStrEql("@SQ\t", samStackST.extraStr, '\t'))
       { /*If: this has length information*/
          if(multiRefBl)
          { /*If: sam file has multiple references*/
@@ -1061,13 +1463,13 @@ main(
                samFileStr
             ); /*Let user know the problem*/
 
-            goto err_main_sec11_sub02;
+            goto err_main_sec12_sub02;
          } /*If: sam file has multiple references*/
 
          multiRefBl = 1;
 
          /*Get past "@SQ\t"*/
-         tmpStr = samST.extraStr + 4; 
+         tmpStr = samStackST.extraStr + 4; 
 
          while(*tmpStr++ !=':') if(*tmpStr <31) break;
 
@@ -1098,8 +1500,8 @@ main(
 
       errS =
          readSamLine(
-            &samST,
-            &buffStr,
+            &samStackST,
+            &buffHeapStr,
             &lenBuffUL,
             samFILE
          ); /*Get the next line*/
@@ -1204,11 +1606,68 @@ main(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-07:
-   ^   - Do the reade analysis
+   ^   - Read in the masking primer coordinates
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(
+         primMaskFileStr[0] != '-' 
+      && primMaskFileStr[0] != '\0'
+   ){ /*If: an primer masking file was input*/
+      maskNumPrimUI =
+         readPrimCoords(
+            primMaskFileStr,
+            &maskStartHeapAryUI,
+            &maskEndHeapAryUI,
+            &maskFlagHeapAryUI,
+            &errSL
+         );
+
+      if(! maskNumPrimUI)
+      { /*If: I had an error*/
+         if(errSL & def_emptyFileErr_primMask)
+         { /*If: I had an empty file*/
+            fprintf(
+               stderr,
+               "-mask-prim %s is emtpy\n",
+               primMaskFileStr
+            );
+         } /*If: I had an empty file*/
+
+         else if(errSL & def_emptyFileErr_primMask)
+         { /*Else If: I had an invalid line*/
+            fprintf(
+               stderr,
+               "line %lu in -mask-prim %s is invalid\n",
+               (errSL >> 8),
+               primMaskFileStr
+            );
+         } /*Else If: I had an invalid line*/
+         
+         else
+         { /*Else: I had an memory error*/
+            fprintf(
+               stderr,
+               "Memory error reading -mask-prim %s\n",
+               primMaskFileStr
+            );
+         } /*Else: I had an memory error*/
+
+         goto err_main_sec12_sub02;
+      } /*If: I had an error*/
+   } /*If: an primer masking file was input*/
+
+   else
+      maskNumPrimUI = 0; /*Just making sure*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec-08:
+   ^   - Do read analysis
    ^   o main sec-06 sub-01:
    ^     - Allocate memory for the read stats arrays
-   ^   o main sec-06 sub-03:
+   ^   o main sec-06 sub-02:
    ^     - Filter sam entries
+   ^   o main sec-06 sub-03:
+   ^     - Mask primers in reads
    ^   o main sec-06 sub-04:
    ^     - Build the filtered histogram
    ^   o main sec-06 sub-05:
@@ -1222,7 +1681,7 @@ main(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-07 Sub-01:
+   * Main Sec-08 Sub-01:
    *   - Allocate memory for the read stats arrays
    \*****************************************************/
 
@@ -1231,7 +1690,7 @@ main(
    if(! readMapIAry)
    { /*If: I had an memory error*/
       fprintf(stderr, "Ran out of memory\n");
-      goto err_main_sec11_sub02;
+      goto err_main_sec12_sub02;
    } /*If: I had an memory error*/
 
    filt_readMapIAry = calloc(lenRefI, sizeof(int));
@@ -1239,11 +1698,11 @@ main(
    if(! filt_readMapIAry)
    { /*If: I had an memory error*/
       fprintf(stderr, "Ran out of memory\n");
-      goto err_main_sec11_sub02;
+      goto err_main_sec12_sub02;
    } /*If: I had an memory error*/
 
    /*****************************************************\
-   * Main Sec-07 Sub-02:
+   * Main Sec-08 Sub-02:
    *   - filter the reads
    \*****************************************************/
 
@@ -1251,22 +1710,22 @@ main(
 
    while(! errS)
    { /*Loop: Process each read in the sam file*/
-      if(samST.flagUS & (4 | 256 | 2048))
+      if(samStackST.flagUS & (4 | 256 | 2048))
       { /*If:umapped 4, secondary 256, or suplemtal 2048*/
          /*If this was an unmapped read*/
-         if(samST.flagUS & 4) ++umapReadCntI;
+         if(samStackST.flagUS & 4) ++umapReadCntI;
 
          goto nextSamRead_freezeTb;
       } /*If:umapped 4, secondary 256, or suplemtal 2048*/
 
       /*Remove soft masked bases*/
-      trimSamEntry(&samST);
+      trimSamEntry(&samStackST);
 
       oldOfTargI = offTargReadsI;
 
       /*Build up the histogram of stats*/
       addBaseToAmpDepth(
-         &samST,
+         &samStackST,
          coordsST,
          numCoordsI,
          readMapIAry,
@@ -1278,29 +1737,48 @@ main(
          goto nextSamRead_freezeTb;
 
       /*Check the Q-scores*/
-      if(samST.medianQF < minMedianQF)
+      if(samStackST.medianQF < minMedianQF)
          goto nextSamRead_freezeTb;
 
-      if(samST.medianQF < minMedianQF)
+      if(samStackST.medianQF < minMedianQF)
          goto nextSamRead_freezeTb;
 
       /*Check the mapping quality*/
-      if(samST.mapqUC < tbConSettings.minMapqUC)
+      if(samStackST.mapqUC < tbConSettings.minMapqUC)
          goto nextSamRead_freezeTb;
 
       /*Check if the read is to short*/
-      if(samST.alnReadLenUI < tbConSettings.minLenI)
+      if(samStackST.alnReadLenUI < tbConSettings.minLenI)
          goto nextSamRead_freezeTb;
 
       /**************************************************\
-      * Main Sec-07 Sub-03:
+      * Main Sec-08 Sub-03:
+      *   - Mask primers in reads
+      \**************************************************/
+
+      if(maskNumPrimUI)
+      { /*If: We are masking primers*/
+         errSL =
+            maskPrimers(
+               &samStackST,
+               maskStartHeapAryUI,
+               maskEndHeapAryUI,
+               maskFlagHeapAryUI,
+               maskNumPrimUI,
+               -1, /*Mask any found primer sites*/
+               'N' /*Add masking*/
+            );
+      } /*If: We are masking primers*/
+
+      /**************************************************\
+      * Main Sec-08 Sub-04:
       *   - Build the filtered histogram
       \**************************************************/
 
       ++totalReadsUI;
 
       addBaseToAmpDepth(
-         &samST,
+         &samStackST,
          coordsST,
          numCoordsI,
          filt_readMapIAry,
@@ -1308,14 +1786,14 @@ main(
       );
 
       /**************************************************\
-      * Main Sec-07 Sub-04:
+      * Main Sec-08 Sub-05:
       *   - Build the consensus
       \**************************************************/
 
       /*Add the read to the consensus*/
       errS =
          addReadToConBaseArray(
-            &samST,
+            &samStackST,
             &conBaseSTAry,
             (uint *) &lenRefI,
             &tbConSettings
@@ -1324,17 +1802,17 @@ main(
       if(errS & def_tbCon_Memory_Err)
       { /*If: memory error for consensus*/
          fprintf(stderr, "Memory error\n");
-         goto err_main_sec11_sub02;
+         goto err_main_sec12_sub02;
       } /*If: memory error for consensus*/
 
       /**************************************************\
-      * Main Sec-07 Sub-05:
+      * Main Sec-08 Sub-06:
       *   - Check for AMRs
       \**************************************************/
 
       amrHitSTList =
          checkAmrSam(
-            &samST,
+            &samStackST,
             amrSTAry,
             numAmrI,
             &numHitsI,
@@ -1345,25 +1823,34 @@ main(
       if(errC)
       { /*If: memory error for AMR*/
          fprintf(stderr, "Memory error\n");
-         goto err_main_sec11_sub02;
+         goto err_main_sec12_sub02;
       } /*If: memory error for AMR*/
 
       /*I only care about this for consensuses*/
       if(amrHitSTList)
       { /*If: I had AMRs*/
-         pAmrReadIds(samST.qryIdStr,amrHitSTList,idFILE);
+         pAmrReadIds(
+            samStackST.qryIdStr,
+            amrHitSTList,
+            idFILE
+         );
+
          freeAmrHitList(amrHitSTList);
       } /*If: I had AMRs*/
 
       /**************************************************\
-      * Main Sec-07 Sub-06:
+      * Main Sec-08 Sub-07:
       *   - Check for MIRU lineages 
       \**************************************************/
 
-      inc_matching_len_lineages(&samST,fudgeLenI,miruST);
+      inc_matching_len_lineages(
+         &samStackST,
+         fudgeLenI,
+         miruST
+      );
 
       /**************************************************\
-      * Main Sec-07 Sub-07:
+      * Main Sec-08 Sub-08:
       *   - Move to the next read
       \**************************************************/
 
@@ -1371,14 +1858,14 @@ main(
 
       errS =
          readSamLine(
-            &samST,
-            &buffStr,
+            &samStackST,
+            &buffHeapStr,
             &lenBuffUL,
             samFILE
          ); /*Get the next line*/
    } /*Loop: Process each read in the sam file*/
 
-   freeSamEntryStack(&samST);
+   freeSamEntryStack(&samStackST);
 
    if(samFILE != stdin) fclose(samFILE);
 
@@ -1387,23 +1874,33 @@ main(
    fclose(idFILE);
    idFILE = 0;
 
+   /*Memory for masking primers*/
+   free(maskStartHeapAryUI);
+   maskStartHeapAryUI = 0;
+
+   free(maskEndHeapAryUI);
+   maskEndHeapAryUI = 0;
+
+   free(maskFlagHeapAryUI);
+   maskFlagHeapAryUI = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-08:
+   ^ Main Sec-09:
    ^   - Print out the data collected for the reads
-   ^   o main sec-08 sub-01:
+   ^   o main sec-09 sub-01:
    ^     - Print out the unfiltered read stats
-   ^   o main sec-08 sub-02:
+   ^   o main sec-09 sub-02:
    ^     - Print out the filtered read stats
-   ^   o main sec-08 sub-03:
+   ^   o main sec-09 sub-03:
    ^     - Print out the AMR hits for the reads
-   ^   o main sec-08 sub-04:
+   ^   o main sec-09 sub-04:
    ^     - Print out read MIRU table
-   ^   o main sec-08 sub-05:
+   ^   o main sec-09 sub-05:
    ^     - Print out the tsv file of variants
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-08 Sub-01:
+   * Main Sec-09 Sub-01:
    *   - Print out the unfiltered read stats
    \*****************************************************/
 
@@ -1427,7 +1924,7 @@ main(
    readMapIAry = 0;
 
    /*****************************************************\
-   * Main Sec-08 Sub-02:
+   * Main Sec-09 Sub-02:
    *   - Print out the filtered read stats
    \*****************************************************/
 
@@ -1459,7 +1956,7 @@ main(
    coordsST = 0;
 
    /*****************************************************\
-   * Main Sec-08 Sub-03:
+   * Main Sec-09 Sub-03:
    *   - Print out the AMR hits for the reads
    \*****************************************************/
 
@@ -1483,7 +1980,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-08 Sub-04:
+   * Main Sec-09 Sub-04:
    *   - Print out read MIRU table
    \*****************************************************/
 
@@ -1500,7 +1997,7 @@ main(
    } /*If: I could not open the output file*/
 
    /*****************************************************\
-   * Main Sec-08 Sub-05:
+   * Main Sec-09 Sub-05:
    *   - Print out the tsv file of variants
    \*****************************************************/
 
@@ -1514,18 +2011,23 @@ main(
       ); /*Print out the variants (not a vcf)*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-09:
-   ^   - Collapse and print stats for the consensus
-   ^   o main sec-09 sub-01:
+   ^ Main Sec-10:
+   ^   - Collapse consensus and do consensus analysis
+   ^   o main sec-10 sub-01:
    ^     - Collapse the consensus
-   ^   o main sec-09 sub-02:
-   ^     - print consensus and AMRs/lineages for consensus
-   ^   o main sec-09 sub-03:
+   ^   o main sec-10 sub-02:
+   ^     - Read in spoligotyping spacer sequences
+   ^   o main sec-10 sub-03:
+   ^     - Read in spoligotyping lineage database
+   ^   o main sec-10 sub-04:
+   ^     - print consensus and detect/print AMRs and
+   ^       lineages for consensus
+   ^   o main sec-10 sub-05:
    ^     - Print out consensus MIRU lineages
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-09 Sub-01:
+   * Main Sec-10 Sub-01:
    *   - Collapse the consensus
    \*****************************************************/
 
@@ -1545,15 +2047,117 @@ main(
    if(! samConSTAry)
    { /*If: I could not build the consensus*/
       fprintf(stderr, "Could not build consensus\n");
-      goto err_main_sec11_sub02;
+      goto err_main_sec12_sub02;
    } /*If: I could not build the consensus*/
    
    /*****************************************************\
-   * Main Sec-09 Sub-02:
-   *   - print consensus and AMRs/lineages for consensus
+   * Main Sec-10 Sub-02:
+   *   - Read in spoligotyping spacer sequences
    \*****************************************************/
 
+   if(checkSpoligoLinBl)
+   { /*If: I could open the spoligo lineage database*/
+      spoligoHeapAryST =
+        getSpoligoRefs(
+           (schar *) spoligoRefFileStr,
+           &numSpoligosSI,
+           (schar *) &errC
+        );
+
+      if(errC)
+      { /*If: I had an error*/
+        if(errC == fileErr_tbSpoligo)
+        { /*If: I had an file error*/
+           fprintf(
+              stderr,
+              "-db-spoligo %s is not valid\n",
+              spoligoRefFileStr
+           );
+
+           fprintf(
+              stderr,
+              "Skipping spoligotype lineage detection\n"
+           );
+        } /*If: I had an file error*/
+
+        else
+        { /*Else: I had an memory error*/
+           fprintf(
+              stderr,
+              "Ran out of memory getting spoligo seqs\n"
+           );
+
+            goto err_main_sec12_sub02;
+        } /*Else: I had an memory error*/
+      } /*If: I had an error*/
+   } /*If: I could open the spoligo lineage database*/
+
+   /*****************************************************\
+   * Main Sec-10 Sub-03:
+   *   - Read in spoligotyping lineage database
+   \*****************************************************/
+
+   lineageHeapAryST =
+      readSpoligoDb(
+         (schar *) spoligoDbFileStr,
+         &numLineagesSI,
+         (schar *) &errC
+   );
+
+   if(errC)
+   { /*If: I had an error*/
+      if(errC == fileErr_tbSpoligo)
+      { /*If: I had an file error*/
+         fprintf(
+            stderr,
+            "Could not open -db-spoligo %s\n",
+            spoligoDbFileStr
+         );
+
+         fprintf(stderr, "Skipping spoligotype checks\n");
+      } /*If: I had an file error*/
+
+      else
+      { /*Else: I had an memory error*/
+         fprintf(
+            stderr,
+            "Ran out of memory reading -db %s\n",
+            spoligoDbFileStr
+         );
+
+         goto err_main_sec12_sub02;
+      } /*Else: I had an memory error*/
+
+   } /*If: I had an error*/
+
+   /*****************************************************\
+   * Main Sec-10 Sub-04:
+   *   - print consensus and detect/print AMRs and
+   *     lineages for consensus
+   *   o main sec-10 sub-04 cat-01:
+   *     - Open files and run consensus fragment loop
+   *   o main sec-10 sub-04 cat-02:
+   *     - Consensus printing
+   *   o main sec-10 sub-04 cat-03:
+   *     - AMR detection and printing
+   *   o main sec-10 sub-04 cat-04:
+   *     - MIRU-VNTR lineage detection and printing
+   *   o main sec-10 sub-04 cat-05:
+   *     - Detect spoligotypes
+   *   o main sec-10 sub-04 cat-06:
+   *     - Close output files and free memory
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Main Sec-10 Sub-04 Cat-01:
+   +   - Open files and run consensus fragment loop
+   \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
    outFILE = fopen(conAmrStr, "w");
+   spoligoOutFILE = fopen(outSpoligoFileStr, "w");
+
+   pSpoligoHead(spoligoOutFILE);
+
    errC = 0;
 
    /*Remove all the read counters*/
@@ -1563,6 +2167,12 @@ main(
 
    for(iCon = 0; iCon < numFragmentsI; ++iCon)
    { /*Loop: Process each consensus*/
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec-10 Sub-04 Cat-02:
+     +   - Consensus printing
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
       if(errC)
       { /*If: I had an error*/
          freeSamEntryStack(&samConSTAry[iCon]);
@@ -1577,16 +2187,15 @@ main(
 
       pSamEntry(
          &samConSTAry[iCon],
-         &buffStr,
+         &buffHeapStr,
          &lenBuffUL,
          samConFILE
       );
 
-      inc_matching_len_lineages(
-         &samConSTAry[iCon],
-         fudgeLenI,
-         miruST
-      ); /*Get the MIRU lineages in this consensus*/
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec-10 Sub-04 Cat-03:
+     +   - AMR detection and printing
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       amrHitSTList =
          checkAmrSam(
@@ -1612,21 +2221,86 @@ main(
 
          freeAmrHitList(amrHitSTList);
       } /*If: I had AMRs*/
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec-10 Sub-04 Cat-04:
+     +   - MIRU-VNTR lineage detection and printing
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      inc_matching_len_lineages(
+         &samConSTAry[iCon],
+         fudgeLenI,
+         miruST
+      ); /*Get the MIRU lineages in this consensus*/
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec-10 Sub-04 Cat-05:
+     +   - Spoligotype detection and printing
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+     errSL =
+        samSpoligoSearch(
+           &samConSTAry[iCon].qryIdStr,
+           spoligoHeapAryST,
+           numSpoligosSI,
+           drStartSI,
+           drEndSI,
+           spoligoPercScoreF,
+           (schar *) barcodeStr,
+           &alnSetStackST
+        ); /*Detect spoligotypes*/
+
+     if(errSL == memErr_tbSpoligo)
+        goto err_main_sec12_sub02;
+
+     if(! errSL)
+     { /*If: I could detect spoligotypes*/
+        pSpoligo(
+           (schar *) samConSTAry[iCon].qryIdStr,
+           (schar *) barcodeStr,
+           lineageHeapAryST,
+           numLineagesSI,
+           spoligoOutFILE
+        );
+     } /*If: I could detect spoligotypes*/
    } /*Loop: Process each consensus*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Main Sec-10 Sub-04 Cat-06:
+   +   - Close output files and free memory
+   \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fclose(spoligoOutFILE);
+   spoligoOutFILE = 0;
 
    fclose(outFILE);
    outFILE = 0;
+
+   /*Consensus memory*/
+
+   free(buffHeapStr);
+   buffHeapStr = 0;
 
    fclose(samConFILE);
    samConFILE = 0;
 
    free(samConSTAry);
+
+   /*AMR memory*/
    freeAmrStructArray(&amrSTAry, numAmrI);
-   
    free(drugStrAry);
 
+   /*Spoligotyping memory*/
+   freeAlnSetStack(&alnSetStackST);
+
+   freeSpoligoSTAry(lineageHeapAryST, numLineagesSI);
+   lineageHeapAryST = 0;
+
+   freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
+   spoligoHeapAryST = 0;
+
    /*****************************************************\
-   * Main Sec-09 Sub-03:
+   * Main Sec-10 Sub-05:
    *   - Print out consensus MIRU lineages
    \*****************************************************/
 
@@ -1642,7 +2316,7 @@ main(
    freeMiruTbl(&miruST);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-10:
+   ^ Main Sec-11:
    ^   - Run R to build graphs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1671,31 +2345,29 @@ main(
    } /*If: The user wanted graphs*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-11:
+   ^ Main Sec-12:
    ^   - Clean up
-   ^   o main sec-11 sub-01:
+   ^   o main sec-12 sub-01:
    ^     - Clean up for no errors
-   ^   o main sec-11 sub-02:
+   ^   o main sec-12 sub-02:
    ^     - Error clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-11 Sub-01:
+   * Main Sec-12 Sub-01:
    *   - Clean up for no errors
    \*****************************************************/
-
-   free(buffStr);
 
    exit(0);
 
    /*****************************************************\
-   * Main Sec-11 Sub-02:
+   * Main Sec-12 Sub-02:
    *   - Error clean up
    \*****************************************************/
 
-   err_main_sec11_sub02:;
+   err_main_sec12_sub02:;
 
-   freeSamEntryStack(&samST);
+   freeSamEntryStack(&samStackST);
 
    freeGeneCoords(coordsST);
    coordsST = 0;
@@ -1711,8 +2383,16 @@ main(
    freeConBaseAry(&conBaseSTAry, lenRefI);
    conBaseSTAry = 0;
 
-   free(buffStr);
-   buffStr = 0;
+   freeAlnSetStack(&alnSetStackST);
+
+   freeSpoligoSTAry(lineageHeapAryST, numLineagesSI);
+   lineageHeapAryST = 0;
+
+   freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
+   spoligoHeapAryST = 0;
+
+   free(buffHeapStr);
+   buffHeapStr = 0;
 
    free(readMapIAry);
    readMapIAry = 0;
@@ -1722,6 +2402,15 @@ main(
 
    free(drugStrAry);
    drugStrAry = 0;
+
+   free(maskStartHeapAryUI);
+   maskStartHeapAryUI = 0;
+
+   free(maskEndHeapAryUI);
+   maskEndHeapAryUI = 0;
+
+   free(maskFlagHeapAryUI);
+   maskFlagHeapAryUI = 0;
 
    if(samFILE && samFILE != stdin)
       fclose(samFILE);
@@ -1739,6 +2428,11 @@ main(
       fclose(idFILE);
 
    idFILE = 0;
+
+   if(spoligoOutFILE)
+      fclose(spoligoOutFILE);
+
+   spoligoOutFILE = 0;
 
    exit(-1);
 } /*main*/
@@ -1771,6 +2465,19 @@ main(
 |       o C-string (char array) to hold the path to the
 |         MIRU table (database) for lineages
 |       o This is filled in
+|     - spoligoRefFileStr:
+|       o C-string (char array) to hold the path to the
+|         fasta file with the spoligotyping internal
+|         spaces sequences
+|       o This is filled in
+|     - spoligoDbFileStr:
+|       o C-string (char array) to hold the path to the
+|         csv file with the spoligotyping lineages
+|       o This is filled in
+|     - primMaskFileStr:
+|       o C-string (char array) to hold the path to the
+|         primer masking tsv file
+|       o This is filled in
 |     - prefixStr:
 |       o Pointer to c-string to hold the users prefix
 |       o This is modified to point to user input
@@ -1802,6 +2509,15 @@ main(
 |     - fudgeLenI:
 |       o Pointer to integer to hold the fudge length
 |         for assiging a read to an MIRU lineage
+|     - spoligoPercScoreF:
+|       o Pointer to an float to hold the mininum percent
+|         score to count an spoligotype
+|     - drStartSI:
+|       o Pointer to an int to hold the first base in the
+|         direct repeat region (spoligotyping)
+|     - drEndSI:
+|       o Pointer to an int to hold the last base in the
+|         direct repeat region (spoligotyping)
 | Output:
 |   - Modifies:
 |     o Each input variable the user had an agrument for
@@ -1829,6 +2545,9 @@ getInput_freezeTb(
    char *amrDbFileStr,
    char *coordFileStr,
    char *miruDbFileStr,
+   char *spoligoRefFileStr,/*Spoligotype seqeunces*/
+   char *spoligoDbFileStr, /*Lineage database*/
+   schar *primMaskFileStr,
    char **prefixStr,
 
    /*Read filtering*/
@@ -1844,7 +2563,10 @@ getInput_freezeTb(
 
    /*misc*/
    char *frameshiftBl,
-   int *fudgeLenI
+   int *fudgeLenI,
+   float *spoligoPercScoreF,
+   signed int *drStartSI,
+   signed int *drEndSI
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun-01 TOC: getInput_freezeTb
    '   - Gets the user commandline input for freezeTb
@@ -1879,7 +2601,7 @@ getInput_freezeTb(
    ^   o fun-01 sec-02 sub-05:
    ^     - Read filterin
    ^   o fun-01 sec-02 sub-06:
-   ^     - ampDepth tsv read depth file column 1 value
+   ^     - Lineages and graph output
    ^   o fun-01 sec-02 sub-07:
    ^     - Check for help message requests (normal)
    ^   o fun-01 sec-02 sub-08:
@@ -1936,6 +2658,30 @@ getInput_freezeTb(
       else if(! cStrEql("-miru-tbl", argStr, '\0'))
          ulCpStrDelim(
             miruDbFileStr,
+            argsStrAry[iArg + 1],
+            0,
+            '\0'
+         );
+
+      else if(! cStrEql("-spoligo", argStr, '\0'))
+         ulCpStrDelim(
+            spoligoRefFileStr,
+            argsStrAry[iArg + 1],
+            0,
+            '\0'
+         );
+
+      else if(! cStrEql("-db-spoligo", argStr, '\0'))
+         ulCpStrDelim(
+            spoligoDbFileStr,
+            argsStrAry[iArg + 1],
+            0,
+            '\0'
+         );
+
+      else if(! cStrEql("-mask-prim", argStr, '\0'))
+         ulCpStrDelim(
+            (char *) primMaskFileStr,
             argsStrAry[iArg + 1],
             0,
             '\0'
@@ -2120,7 +2866,7 @@ getInput_freezeTb(
 
       /**************************************************\
       * Fun-01 Sec-02 Sub-06:
-      *   - ampDepth tsv read depth file column 1 value
+      *   - Lineages and graph output
       \**************************************************/
 
       else if(! cStrEql(argStr,"-graph-flag",'\0'))
@@ -2135,6 +2881,29 @@ getInput_freezeTb(
          if(tmpStr[0] != '\0')
             return (iArg<<8) | def_nonNumeric_freezeTb;
       } /*Else If: Is the MIRU table fudge length*/
+
+      else if(! cStrEql("-spoligo-min-score", argStr, 0))
+         *spoligoPercScoreF = atof((char *) argStr);
+
+      else if(! cStrEql(argStr,"-dr-start",'\0'))
+      { /*Else If: Start of direct repeat region*/
+         argStr = argsStrAry[iArg + 1];
+         tmpStr= base10StrToSI(argStr, *drStartSI);
+   
+         /*Check for errors*/
+         if(tmpStr[0] != '\0')
+            return (iArg<<8) | def_nonNumeric_freezeTb;
+      } /*Else If: Start of direct repeat region*/
+
+      else if(! cStrEql(argStr,"-dr-end",'\0'))
+      { /*Else If: End of direct repeat region*/
+         argStr = argsStrAry[iArg + 1];
+         tmpStr= base10StrToSI(argStr, *drStartSI);
+   
+         /*Check for errors*/
+         if(tmpStr[0] != '\0')
+            return (iArg<<8) | def_nonNumeric_freezeTb;
+      } /*Else If: End of direct repeat region*/
 
       /**************************************************\
       * Fun-01 Sec-02 Sub-07:
@@ -2326,21 +3095,31 @@ pHelp_freezeTb(
    char miruTblFileStr[256];
    char coordFileStr[256];
 
+   char spoligoRefFileStr[256];
+   char spoligoDbFileStr[256];
+   char maskPrimFileStr[256];
+
    FILE *testFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-02 Sec-02:
    ^   - Find default file paths
-   ^   o main sec-02 sub-01:
+   ^   o fun-02 sec-02 sub-01:
    ^     - Set the path to the amr database
-   ^   o main sec-02 sub-02:
+   ^   o fun-02 sec-02 sub-02:
    ^     - Set the path to the MIRU lineages
-   ^   o main sec-02 sub-03:
+   ^   o fun-02 sec-02 sub-03:
    ^     - Set the path to the gene coordinates file
+   ^   o fun-02 sec-02 sub-04:
+   ^     - Set the path to the spoligo reference file
+   ^   o fun-02 sec-02 sub-05:
+   ^     - Set the path to the spoligo lineages database
+   ^   o fun-02 sec-02 sub-06:
+   ^     - Set up primer masking path
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-02 Sub-01:
+   * Fun-02 Sec-02 Sub-01:
    *   - Set the path to the amr database
    \*****************************************************/
 
@@ -2373,7 +3152,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-02:
+   * Fun-02 Sec-02 Sub-02:
    *   - Set the path to the MIRU lineages
    \*****************************************************/
 
@@ -2406,7 +3185,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-03:
+   * Fun-02 Sec-02 Sub-03:
    *   - Set the path to the gene coordinates file
    \*****************************************************/
 
@@ -2436,6 +3215,170 @@ pHelp_freezeTb(
    } /*If: I could not open the database*/
 
    if(testFILE) fclose(testFILE);
+   testFILE = 0;
+
+   /*****************************************************\
+   * Fun-02 Sec-02 Sub-04:
+   *   - Set the path to the spoligo reference file
+   \*****************************************************/
+
+   tmpStr = spoligoRefFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defSpoligoRefsStr, 0, 0);
+
+   testFILE = fopen(spoligoRefFileStr, "r");
+
+   if(! testFILE)
+   { /*If: I could not open the database*/
+      tmpStr = spoligoRefFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defSpoligoRefsStr,0,0);
+
+      testFILE = fopen(spoligoRefFileStr, "r");
+
+      if(! testFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = spoligoRefFileStr;
+
+         tmpStr +=
+            ulCpStrDelim(
+               tmpStr,
+               defSpoligoRefsStr,
+               0,
+               0
+            ); /*Fasta with spoligotype reference seqs*/
+
+         testFILE = fopen(spoligoRefFileStr, "r");
+
+         if(! testFILE)
+            spoligoRefFileStr[0] = '\0'; /*No idea*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(testFILE) fclose(testFILE);
+   testFILE = 0;
+
+   /*****************************************************\
+   * Fun-02 Sec-02 Sub-05:
+   *   - Set the path to the spoligo lineages database
+   \*****************************************************/
+
+   tmpStr = spoligoDbFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+
+   tmpStr +=
+       ulCpStrDelim(
+          tmpStr,
+          defSpoligoDbStr,
+          0,
+          0
+      );
+
+   testFILE = fopen(spoligoDbFileStr, "r");
+
+   if(! testFILE)
+   { /*If: I could not open the database*/
+      tmpStr = spoligoDbFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+
+
+      tmpStr +=
+          ulCpStrDelim(
+             tmpStr,
+             defSpoligoDbStr,
+             0,
+             0
+         );
+
+      testFILE = fopen(spoligoDbFileStr, "r");
+
+      if(! testFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = spoligoDbFileStr;
+
+         tmpStr +=
+             ulCpStrDelim(
+                tmpStr,
+                defSpoligoDbStr,
+                0,
+                0
+            );
+
+         testFILE = fopen(spoligoDbFileStr, "r");
+
+         if(! testFILE)
+            spoligoDbFileStr[0] = '\0'; /*No idea*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(testFILE)
+      fclose(testFILE);
+
+   testFILE = 0;
+
+
+   /*****************************************************\
+   * Fun-02 Sec-02 Sub-06:
+   *   - Set up primer masking path
+   \*****************************************************/
+
+   tmpStr = maskPrimFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, sharePathStr, 0, '\0');
+   tmpStr += ulCpStrDelim(tmpStr, defPathStr, 0, '\0');
+
+   tmpStr +=
+       ulCpStrDelim(
+          tmpStr,
+          defMaskPrimStr,
+          0,
+          0
+      );
+
+   testFILE = fopen(maskPrimFileStr, "r");
+
+   if(! testFILE)
+   { /*If: I could not open the database*/
+      tmpStr = maskPrimFileStr;
+      tmpStr += ulCpStrDelim(tmpStr,homePathStr,0,'\0');
+      tmpStr += ulCpStrDelim(tmpStr,defAltPathStr,0,'\0');
+
+
+      tmpStr +=
+          ulCpStrDelim(
+             tmpStr,
+             defMaskPrimStr,
+             0,
+             0
+         );
+
+      testFILE = fopen(maskPrimFileStr, "r");
+
+      if(! testFILE)
+      { /*If: I could not open the alternate path*/
+         tmpStr = maskPrimFileStr;
+
+         tmpStr +=
+             ulCpStrDelim(
+                tmpStr,
+                defMaskPrimStr,
+                0,
+                0
+            );
+
+         testFILE = fopen(maskPrimFileStr, "r");
+
+         if(! testFILE)
+            maskPrimFileStr[0] = '\0'; /*No idea*/ 
+      } /*If: I could not open the alternate path*/
+   } /*If: I could not open the database*/
+
+   if(testFILE)
+      fclose(testFILE);
+
    testFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2471,7 +3414,7 @@ pHelp_freezeTb(
    ^   o fun-02 sec-04 sub-05:
    ^     - Print out the graph settings
    ^   o fun-02 sec-04 sub-06:
-   ^     - Print out the MIRU table settings
+   ^     - Print out the lineage (non-database) settings
    ^   o fun-02 sec-04 sub-07:
    ^     - Print out the help message and version numbers
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -2491,6 +3434,12 @@ pHelp_freezeTb(
    *     - Gene coordinates (paf) input
    *   o fun-02 sec-04 sub-01 cat-06:
    *     - MIRU table input
+   *   o fun-02 sec-04 sub-01 cat-07:
+   *     - spoligotype spacer sequence input
+   *   o fun-02 sec-04 sub-01 cat-08:
+   *     - spoligotype linage database
+   *   o fun-02 sec-04 sub-01 cat-09:
+   *     - primer masking database
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2694,6 +3643,190 @@ pHelp_freezeTb(
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
       " with\n",
+      0,
+      '\0'         
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-01 Cat-07:
+   +   - spoligotype spacer sequence input
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -spoligo: [",
+      0,
+      '\0'         
+   );
+
+   if(spoligoRefFileStr[0] != '\0')
+   { /*If: I have a path*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         spoligoRefFileStr,
+         0,
+         '\0'         
+      );
+   } /*If: I have a path*/
+
+   else
+   { /*Else: I could not find the database*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "Required",
+         0,
+         '\0'         
+      );
+   } /*Else: I could not find the database*/
+
+   helpStr[lenHelpI] = ']';
+   ++lenHelpI;
+
+   helpStr[lenHelpI] = '\n';
+   ++lenHelpI;
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o Fasta file with direct repeat spacer",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      " sequences\n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "        for spoligotyping\n",
+      0,
+      '\0'         
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-01 Cat-08:
+   +   - spoligotype linage database
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -db-spoligo: [",
+      0,
+      '\0'         
+   );
+
+   if(spoligoDbFileStr[0] != '\0')
+   { /*If: I have a path*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         spoligoDbFileStr,
+         0,
+         '\0'         
+      );
+   } /*If: I have a path*/
+
+   else
+   { /*Else: I could not find the database*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "Required",
+         0,
+         '\0'         
+      );
+   } /*Else: I could not find the database*/
+
+   helpStr[lenHelpI] = ']';
+   ++lenHelpI;
+
+   helpStr[lenHelpI] = '\n';
+   ++lenHelpI;
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o Csv file with spoligotype lineages\n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o strain,barcode,ignore,lineage,SIT,",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "countries\n",
+      0,
+      '\0'         
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-01 Cat-09:
+   +   - primer masking database
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -mask-prim: [",
+      0,
+      '\0'         
+   );
+
+   if(maskPrimFileStr[0] != '\0')
+   { /*If: I have a path*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         maskPrimFileStr,
+         0,
+         '\0'         
+      );
+   } /*If: I have a path*/
+
+   else
+   { /*Else: I could not find the database*/
+      lenHelpI += ulCpStrDelim(
+         &helpStr[lenHelpI],
+         "No masking",
+         0,
+         '\0'         
+      );
+   } /*Else: I could not find the database*/
+
+   helpStr[lenHelpI] = ']';
+   ++lenHelpI;
+
+   helpStr[lenHelpI] = '\n';
+   ++lenHelpI;
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o Tsv file with primer positions to mask\n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o ignored\tigonored\t0\tforward_start",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "\tforward_end\treverse_start\treverse_end\n",
+      0,
+      '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o Do `-prim-mask -` to disable\n",
       0,
       '\0'         
    );
@@ -3493,15 +4626,35 @@ pHelp_freezeTb(
 
    /*****************************************************\
    * Fun-02 Sec-04 Sub-06:
-   *   - Print out the MIRU table settings
+   *   - Print lineage settings
+   *   o fun-02 sec-04 sub-06 cat-01:
+   *     - Lineage setting block
+   *   o fun-02 sec-04 sub-06 cat-02:
+   *     - MIRU fudge setting
+   *   o fun-02 sec-04 sub-06 cat-03:
+   *     - Spoligtyping min perc score
+   *   o fun-02 sec-04 sub-06 cat-04:
+   *     - Spoligtyping dr-start
+   *   o fun-02 sec-04 sub-06 cat-05:
+   *     - Spoligtyping dr-end
    \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-06 Cat-01:
+   +   - Lineage setting block
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
-      "  MIRU Lineage setting:\n",
+      "  Lineage settings:\n",
       0,
       '\0'         
    );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-06 Cat-02:
+   +   - MIRU fudge setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    lenHelpI += ulCpStrDelim(
       &helpStr[lenHelpI],
@@ -3528,6 +4681,91 @@ pHelp_freezeTb(
       "\n      o Lineage length range is + or - fudge\n",
        0,
       '\0'         
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-06 Cat-03:
+   +   - Spoligtyping min perc score
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -spoligo-min-score: [",
+      0,
+      '\0'         
+   );
+
+   lenHelpI +=
+      numToStr(
+         &helpStr[lenHelpI],
+         def_minPercScore_tbSpoligoWater * 100
+   );
+
+   helpStr[lenHelpI++] = ']';
+   helpStr[lenHelpI++] = '\n';
+
+   lenHelpI += ulCpStrDelim(
+     &helpStr[lenHelpI],
+     "      o Minimum percent score needed to count an\n",
+     0,
+     '\0'         
+   );
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "      o spoligo space as mapped\n",
+      0,
+      '\0'         
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-06 Cat-04:
+   +   - Spoligtyping dr-start
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -dr-start: [",
+      0,
+      '\0'         
+   );
+
+   lenHelpI +=
+      numToStr(&helpStr[lenHelpI], def_DRStart_tbSpoligo);
+
+   helpStr[lenHelpI++] = ']';
+   helpStr[lenHelpI++] = '\n';
+
+   lenHelpI += ulCpStrDelim(
+     &helpStr[lenHelpI],
+     "      o Start of reference direct repeat region\n",
+     0,
+     '\0'         
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun-02 Sec-04 Sub-06 Cat-05:
+   +   - Spoligtyping dr-end
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   lenHelpI += ulCpStrDelim(
+      &helpStr[lenHelpI],
+      "    -dr-end: [",
+      0,
+      '\0'         
+   );
+
+   lenHelpI +=
+      numToStr(&helpStr[lenHelpI], def_DREnd_tbSpoligo);
+
+   helpStr[lenHelpI++] = ']';
+   helpStr[lenHelpI++] = '\n';
+
+   lenHelpI += ulCpStrDelim(
+     &helpStr[lenHelpI],
+     "      o End of reference direct repeat region\n",
+     0,
+     '\0'         
    );
 
    /*****************************************************\
@@ -3946,6 +5184,22 @@ pVersion_freezeTb(
        def_year_trimSam,
        def_month_trimSam,
        def_day_trimSam
+   );
+
+   fprintf(
+     stdout,
+     "   complied with tbSpoligo version: %i-%02i-%02i\n",
+     def_year_tbSpoligo,
+     def_month_tbSpoligo,
+     def_day_tbSpoligo
+   );
+
+   fprintf(
+     stdout,
+     "   complied with primMask version: %i-%02i-%02i\n",
+     def_year_primMask,
+     def_month_primMask,
+     def_day_primMask
    );
 } /*pVersion_freezeTb*/
 

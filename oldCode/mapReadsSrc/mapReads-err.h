@@ -1,13 +1,31 @@
 /*########################################################
-# Name: tbCon-version
-#   - Has the version number for tbCon
+# Name: mapReads-err
+#   - Has defined variables for the error types in
+#     mapReads
 ########################################################*/
 
-#define def_tbCon_input_year 2024
-#define def_tbCon_input_month 5
-#define def_tbCon_input_day 5
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' SOF: Start Of File
+'   o header:
+'     - defined error types and header guards
+'  o license:
+'    - licensing for this code (public domain / mit)
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-/*Not needed, but might as well add the license*/
+/*-------------------------------------------------------\
+| Header:
+|   - defined error types and header guards
+\-------------------------------------------------------*/
+
+#ifndef MAP_READS_ERRORS_H
+#define MAP_READS_ERRORS_H
+
+#define def_eof_mapReads 1
+#define def_fileErr_mapReads 2
+#define def_memErr_mapReads 64
+
+#endif
+
 /*=======================================================\
 : License:
 : 

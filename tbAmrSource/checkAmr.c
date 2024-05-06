@@ -287,7 +287,6 @@ LoFForwardCheck(\
    int siCigMac = (cigPosSI);\
    int baseOnMacSI = (cigBaseSI);\
    int extraNtMacSI = 0; /*Extra bases from last entry*/\
-   \
    char aaC = 0;\
    char LoFMacBl = 0;\
    char haveStartBl = 0;\
@@ -317,6 +316,15 @@ LoFForwardCheck(\
        \
        else\
        { /*Else: This is not an deletion*/\
+          aaC =\
+            codonToAA(\
+               samSTPtr->seqStr[readPosMacUI],\
+               samSTPtr->seqStr[readPosMacUI +1],\
+               samSTPtr->seqStr[readPosMacUI +2]\
+            );\
+          \
+          aaC = (aaC != 'x');\
+          \
           LoFMacBl =\
              ! (\
                bacteriaStart_check(\
@@ -325,6 +333,8 @@ LoFForwardCheck(\
                  (samSTPtr)->seqStr[readPosMacUI + 2]\
                 )\
              ); /*Check if I have an start codon*/\
+          \
+          LoFMacBl &= aaC; /*Account for masking*/\
        } /*Else: This is not an deletion*/\
        \
        haveStartBl = 1;\
@@ -448,15 +458,15 @@ LoFForwardCheck(\
                      break; /*Check outside the loop*/\
                   \
                   /*Check if I had an early stop*/\
-                  LoFMacBl |= (aaC== '*');\
+                  LoFMacBl |= (aaC == '*');\
                } /*Loop: Check indel reading frame*/\
             } /*If: had an start, check for LoFs*/\
             \
             /*Check if this is the last base*/\
             if(refPosMacUI >= (endGeneSI))\
-               LoFMacBl |= (aaC != '*');\
+               LoFMacBl |= ((aaC != '*') & (aaC != 'x'));\
             else\
-               LoFMacBl |= (aaC== '*');\
+               LoFMacBl |= (aaC == '*');\
             \
             ++siCigMac;\
             break;\
@@ -589,7 +599,7 @@ LoFReverseCheck(\
             ); /*Get the last codon*/\
          \
          /*See if the last codon is an stop*/\
-         LoFMacBl = aaC != '*';\
+         LoFMacBl = ((aaC != '*') & (aaC != 'x'));\
       } /*Else: This is not an deletion*/\
       \
       haveEndBl = 1;\
@@ -647,7 +657,7 @@ LoFReverseCheck(\
                   readPosMacUI += 3;\
                   \
                   /*Check if I had an early stop*/\
-                  LoFMacBl |= (aaC== '*');\
+                  LoFMacBl |= (aaC == '*');\
                   extraNtMacSI -= 3;\
                } /*Loop: Check indel reading frame*/\
             } /*If: had an end, check for LoFs*/\
@@ -714,23 +724,33 @@ LoFReverseCheck(\
                   readPosMacUI += 3;\
                   \
                   /*Check if I had an early stop*/\
-                  LoFMacBl |= (aaC== '*');\
+                  LoFMacBl |= (aaC == '*');\
                } /*Loop: Check indel reading frame*/\
             } /*If: had an end, check for LoFs*/\
             \
             /*Check if this is the last base*/\
             if(refPosMacUI >= (endGeneSI))\
             { /*If: At end; check if have start codon*/\
-                LoFMacBl =\
+               aaC =\
+                  revCompCodonToAA(\
+                     samSTPtr->seqStr[readPosMacUI],\
+                     samSTPtr->seqStr[readPosMacUI + 1],\
+                     samSTPtr->seqStr[readPosMacUI + 2]\
+                  );\
+               \
+               aaC = (aaC != 'x');\
+               aaC &=\
+                 !(\
                    bacteriaReverseStart_check(\
                       samSTPtr->seqStr[readPosMacUI],\
                       samSTPtr->seqStr[readPosMacUI + 1],\
                       samSTPtr->seqStr[readPosMacUI + 2]\
-                   ); /*Check if I have an start codon*/\
+                   ) /*Check if I have an start codon*/\
+                 );\
                \
                readPosMacUI += 3;\
                \
-               LoFMacBl = !LoFMacBl;\
+               LoFMacBl |= aaC;\
             } /*If: At end; check if have start codon*/\
             \
             else\
@@ -744,7 +764,7 @@ LoFReverseCheck(\
                \
                readPosMacUI += 3;\
                \
-               LoFMacBl |= (aaC== '*');\
+               LoFMacBl |= (aaC == '*');\
             } /*Else: check if have early stop*/\
             \
             ++siCigMac;\
@@ -935,7 +955,8 @@ checkAmrSam(
    cigBaseOnI = samST->cigValAryI[0];
 
    /*Mark that this is an new frameshift*/
-   if(frameshiftBl) frameshiftBl = 3; /*2 and 1 bit set*/
+   if(frameshiftBl)
+      frameshiftBl = 3; /*2 and 1 bit set*/
  
    while(iAmr < numAmrI)
    { /*Loop: Check if I have any AMR mutations*/
@@ -1258,7 +1279,7 @@ checkAmrSam(
                      );
 
                   /*If this was not a start codon*/;
-                  if(resBl)
+                  if(resBl || aaC == 'x')
                   { /*If: this was a bacterial start*/
                      resBl = 0;
                      goto nextAmr_fun09_sec03_sub08;
@@ -1321,7 +1342,7 @@ checkAmrSam(
                      );
 
                   /*If this was not a start codon*/;
-                  if(resBl)
+                  if(resBl || aaC == 'x')
                   { /*If: this was a bacterial start*/
                      resBl = 0;
                      goto nextAmr_fun09_sec03_sub08;
@@ -1564,6 +1585,9 @@ pCrossRes(amrSTPtr, drugAryStr, outFILE){\
             firstPrintMacBl = 0;\
             fprintf((outFILE), "%s", drugMacStr);\
          } /*Else: This is the first drug I am printing*/\
+         \
+         ++iIndexMac;\
+         flagsMacUL >>= 1;\
       } /*Loop: Check if flags support an antibiotic*/\
       \
    } /*Loop: Go though all amr elements*/\

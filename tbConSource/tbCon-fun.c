@@ -413,6 +413,9 @@ addReadToConBaseArray(
                   } /*If: the base is beneath min Q*/
                } /*If: I have a q-score entry*/
 
+               /*Incurmenting total base count here so
+               `  masked positions are still kept
+               */
                ++((*conBaseAry)[uiRef].totalBasesKeptI);
 
                switch(samST->seqStr[uiBase] & ~32)
@@ -657,6 +660,12 @@ collapseConBaseArray(
    '     - Allocate memory for each fragment
    '   o fun-12 sec-04:
    '     - Collapse each fragment into a samEntry struct
+   '   o fun-12 sec-05:
+   '     - Collapse the consensus fragment
+   '   o fun-12 sec-06:
+   '     - Handle clean up for memory errors
+   '   o fun-12 sec-07:
+   '     - Handle clean up for successful collapse
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -681,6 +690,7 @@ collapseConBaseArray(
    float delPerSupF = 0;
 
    /*Support for a particler snp/match*/
+   uint nonMaskBaseUI = 0; /*number of non-anonymous*/
    float aPercSupF = 0;
    float tPercSupF = 0;
    float cPercSupF = 0;
@@ -1082,24 +1092,14 @@ collapseConBaseArray(
       uiBase = 0;
       uiCig = 0;
 
-      delPerSupF =
-           (float) conBaseAry[uiRef].numDelI
-         / (float) conBaseAry[uiRef].totalBasesKeptI;
-
-      snpPerSupF = 1 - delPerSupF;
-
-      if(snpPerSupF >= settings->minPercSnpF)
-         retSamST[iFrag].cigTypeStr[uiCig] = 'M';
-      else
-         retSamST[iFrag].cigTypeStr[uiCig] = 'D';
-
+      retSamST[iFrag].cigTypeStr[uiCig] = '\0';
 
       while(uiRef < uiEndRef)
       { /*Loop: Collapse the fragment*/
 
          /*The insertion is inbetween bases, which makes
          ` it hard to gauge. So, I am taking the worst
-         ` case
+         ` case. Here I want all positoins
          */
          keptReadsI =
            noBranchMax(
@@ -1115,11 +1115,25 @@ collapseConBaseArray(
               (float) conBaseAry[uiRef].numInsI
             / (float) keptReadsI;
 
-         delPerSupF =
-              (float) conBaseAry[uiRef].numDelI
-            / (float) conBaseAry[uiRef].totalBasesKeptI;
+         /*For deletions an masked base is equivlent to no
+         `   support
+         */
+         delPerSupF = (float) conBaseAry[uiRef].numDelI;
 
-         snpPerSupF = 1 - delPerSupF;
+         delPerSupF /=
+            (float) conBaseAry[uiRef].totalBasesKeptI;
+
+         /*Find the number of non-anonymous bases
+         `   For tbCon all anonymous bases are N's (masked)
+         */
+         nonMaskBaseUI = conBaseAry[uiRef].numAI;
+         nonMaskBaseUI += conBaseAry[uiRef].numTI;
+         nonMaskBaseUI += conBaseAry[uiRef].numGI;
+         nonMaskBaseUI += conBaseAry[uiRef].numCI;
+
+         snpPerSupF = nonMaskBaseUI;
+         nonMaskBaseUI += conBaseAry[uiRef].numDelI;
+         snpPerSupF /= (float) nonMaskBaseUI;
 
          /***********************************************\
          * Fun-12 Sec-05 Sub-02:
@@ -1204,30 +1218,33 @@ collapseConBaseArray(
          +     support for each base type
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
-         if(snpPerSupF >= settings->minPercSnpF)
+         if(nonMaskBaseUI < settings->minDepthI)
+            goto maskPos_fun12_sec05_sub05;
+
+         else if(snpPerSupF >= settings->minPercSnpF)
          { /*If: snps were the best choice*/
             if(retSamST[iFrag].cigTypeStr[uiCig] != 'M')
             { /*If: This is a new cigar entry*/
-               ++uiCig;
+               uiCig +=
+                  (retSamST[iFrag].cigTypeStr[uiCig]
+                   != '\0'
+                  );
+
                retSamST[iFrag].cigTypeStr[uiCig] = 'M';
                retSamST[iFrag].cigValAryI[uiCig] = 0;
             } /*If: This is a new cigar entry*/
 
-             aPercSupF =
-                (float) conBaseAry[uiRef].numAI
-              / (float) conBaseAry[uiRef].totalBasesKeptI;
+             aPercSupF = (float) conBaseAry[uiRef].numAI;
+             aPercSupF /= (float) nonMaskBaseUI;
 
-             tPercSupF =
-                (float) conBaseAry[uiRef].numTI
-              / (float) conBaseAry[uiRef].totalBasesKeptI;
+             tPercSupF = (float) conBaseAry[uiRef].numTI;
+             tPercSupF /= (float) nonMaskBaseUI;
 
-             cPercSupF =
-                (float) conBaseAry[uiRef].numCI
-              / (float) conBaseAry[uiRef].totalBasesKeptI;
+             gPercSupF = (float) conBaseAry[uiRef].numGI;
+             gPercSupF /= (float) nonMaskBaseUI;
 
-             gPercSupF =
-                (float) conBaseAry[uiRef].numGI
-              / (float) conBaseAry[uiRef].totalBasesKeptI;
+             cPercSupF = (float) conBaseAry[uiRef].numCI;
+             cPercSupF /= (float) nonMaskBaseUI;
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
             + Fun-12 Sec-05 Sub-03 Cat-02:
@@ -1322,7 +1339,11 @@ collapseConBaseArray(
          { /*Else if: there was a deletion*/
             if(retSamST[iFrag].cigTypeStr[uiCig] != 'D')
             { /*If: This is a new cigar entry*/
-               ++uiCig;
+               uiCig +=
+                  (retSamST[iFrag].cigTypeStr[uiCig]
+                   != '\0'
+                  );
+
                retSamST[iFrag].cigTypeStr[uiCig] = 'D';
                retSamST[iFrag].cigValAryI[uiCig] = 0;
             } /*If: This is a new cigar entry*/
@@ -1339,9 +1360,15 @@ collapseConBaseArray(
 
          else
          { /*Else: I have no support, assume mask snp*/
+            maskPos_fun12_sec05_sub05:;
+
             if(retSamST[iFrag].cigTypeStr[uiCig] != 'M')
             { /*If: This is a new cigar entry*/
-               ++uiCig;
+               uiCig +=
+                  (retSamST[iFrag].cigTypeStr[uiCig]
+                   != '\0'
+                  );
+
                retSamST[iFrag].cigTypeStr[uiCig] = 'M';
                retSamST[iFrag].cigValAryI[uiCig] = 0;
             } /*If: This is a new cigar entry*/
@@ -1369,7 +1396,7 @@ collapseConBaseArray(
    goto cleanUp;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-0?:
+   ^ Fun-12 Sec-06:
    ^   - Handle clean up for memory errors
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1387,7 +1414,7 @@ collapseConBaseArray(
    return 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-0?:
+   ^ Fun-12 Sec-07:
    ^   - Handle clean up for successful collapse
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1442,7 +1469,11 @@ pConBaseArray(
 
    uint uiBase = 0;
    struct insBase *insST = 0;
+
+   uint nonMaskBaseUI = 0; /*number of non-anonymous*/
+   uint maskedBasesUI = 0; /*number of non-anonymous*/
    float percSupF = 0;
+
    int insLeastSupI = 0;
    int insTotalI = 0;
 
@@ -1464,15 +1495,13 @@ pConBaseArray(
    /*Print the header*/
    fprintf(
       outFILE,
-      "refId\tposition\ttype\tsequence\treadsSupporting"
+      "refId\tposition\ttype\tsequence\tsupport"
    );
 
    fprintf(
      outFILE,
-     "\tkeptBasesAtPosition\ttotalMappedBases"
+     "\tpercSupport\tmasked\tkeptBases\ttotalBases\n"
    );
-
-   fprintf(outFILE, "\tpercSuport\n");
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-13 Sec-03:
@@ -1534,7 +1563,7 @@ pConBaseArray(
 
          fprintf(
             outFILE,
-            "%s\t%i\tins\t%s\t%i\t%f\t%i\t%i\n",
+            "%s\t%i\tins\t%s\t%i\t%f\tNA\t%i\t%i\n",
             refIdStr,
             uiBase,
             insST->insStr,
@@ -1554,100 +1583,127 @@ pConBaseArray(
 
       firstBaseNoIns:;
 
-      if(  conBaseAry[uiBase].numAI
-         > settings->printMinDepthI
-      ){ /*If: The a base has enough depth*/
-         percSupF =
-              (float) conBaseAry[uiBase].numAI
-            / (float) conBaseAry[uiBase].totalBasesKeptI;
+      if(
+           conBaseAry[uiBase].totalBasesKeptI
+         < settings->printMinDepthI
+      ) continue; /*Not enough support to print out*/
 
-         if(percSupF >= settings->printMinSupSnpF)
-            fprintf(
-               outFILE,
-               "%s\t%i\tbase\tA\t%i\t%f\t%i\t%i\n",
-               refIdStr,
-               uiBase + 1,
-               conBaseAry[uiBase].numAI,
-               percSupF,
-               conBaseAry[uiBase].totalBasesKeptI,
-               conBaseAry[uiBase].totalBasesI
-            );
-      } /*If: The a base has enough depth*/
+      nonMaskBaseUI = conBaseAry[uiBase].numAI;
+      nonMaskBaseUI += conBaseAry[uiBase].numTI;
+      nonMaskBaseUI += conBaseAry[uiBase].numGI;
+      nonMaskBaseUI += conBaseAry[uiBase].numCI;
+      nonMaskBaseUI += conBaseAry[uiBase].numDelI;
+
+      maskedBasesUI = conBaseAry[uiBase].totalBasesKeptI;
+      maskedBasesUI -= nonMaskBaseUI;
+
+      percSupF = (float) conBaseAry[uiBase].numAI;
+      percSupF /= (float) nonMaskBaseUI;
+
+
+      if(
+           conBaseAry[uiBase].numAI
+         < settings->printMinDepthI
+      ) ;
+
+      else if(percSupF >= settings->printMinSupSnpF)
+      { /*If: I had enough support to print out A*/
+         fprintf(
+            outFILE,
+            "%s\t%i\tbase\tA\t%i\t%f\t%u\t%i\t%i\n",
+            refIdStr,
+            uiBase + 1,
+            conBaseAry[uiBase].numAI,
+            percSupF,
+            maskedBasesUI,
+            conBaseAry[uiBase].totalBasesKeptI,
+            conBaseAry[uiBase].totalBasesI
+         );
+      } /*If: I had enough support to print out A*/
 
       /**************************************************\
       * Fun-13 Sec-03 Sub-03:
       *   - Print out the snp/match entry for T
       \**************************************************/
 
-      if(  conBaseAry[uiBase].numTI
-         > settings->printMinDepthI
-      ){ /*If: The a base has enough depth*/
-         percSupF =
-              (float) conBaseAry[uiBase].numTI
-            / (float) conBaseAry[uiBase].totalBasesKeptI;
+      percSupF = (float) conBaseAry[uiBase].numTI;
+      percSupF /= (float) nonMaskBaseUI;
 
-         if(percSupF >= settings->printMinSupSnpF)
-            fprintf(
-               outFILE,
-               "%s\t%i\tbase\tT\t%i\t%f\t%i\t%i\n",
-               refIdStr,
-               uiBase + 1,
-               conBaseAry[uiBase].numTI,
-               percSupF,
-               conBaseAry[uiBase].totalBasesKeptI,
-               conBaseAry[uiBase].totalBasesI
-            );
-      } /*If: The a base has enough depth*/
+      if(
+           conBaseAry[uiBase].numTI
+         < settings->printMinDepthI
+      ) ;
+
+      else if(percSupF >= settings->printMinSupSnpF)
+      { /*If: I had enough support to print an T*/
+         fprintf(
+            outFILE,
+            "%s\t%i\tbase\tT\t%i\t%f\t%u\t%i\t%i\n",
+            refIdStr,
+            uiBase + 1,
+            conBaseAry[uiBase].numTI,
+            percSupF,
+            maskedBasesUI,
+            conBaseAry[uiBase].totalBasesKeptI,
+            conBaseAry[uiBase].totalBasesI
+         );
+      } /*If: I had enough support to print an T*/
 
       /**************************************************\
       * Fun-13 Sec-03 Sub-04:
       *   - Print out the snp/match entry for C
       \**************************************************/
 
-      if(  conBaseAry[uiBase].numCI
-         > settings->printMinDepthI
-      ){ /*If: The a base has enough depth*/
-         percSupF =
-              (float) conBaseAry[uiBase].numCI
-            / (float) conBaseAry[uiBase].totalBasesKeptI;
+      percSupF = (float) conBaseAry[uiBase].numCI;
+      percSupF /= (float) nonMaskBaseUI;
 
-         if(percSupF >= settings->printMinSupSnpF)
-            fprintf(
-               outFILE,
-               "%s\t%i\tbase\tC\t%i\t%f\t%i\t%i\n",
-               refIdStr,
-               uiBase + 1,
-               conBaseAry[uiBase].numCI,
-               percSupF,
-               conBaseAry[uiBase].totalBasesKeptI,
-               conBaseAry[uiBase].totalBasesI
-            );
-      } /*If: The a base has enough depth*/
+      if(
+           conBaseAry[uiBase].numCI
+         < settings->printMinDepthI
+      ) ;
+
+      else if(percSupF >= settings->printMinSupSnpF)
+      { /*If: I had enough support to print an C*/
+         fprintf(
+            outFILE,
+            "%s\t%i\tbase\tC\t%i\t%f\t%u\t%i\t%u\n",
+            refIdStr,
+            uiBase + 1,
+            conBaseAry[uiBase].numCI,
+            percSupF,
+            maskedBasesUI,
+            conBaseAry[uiBase].totalBasesKeptI,
+            conBaseAry[uiBase].totalBasesI
+         );
+      } /*If: I had enough support to print an C*/
 
       /**************************************************\
       * Fun-13 Sec-03 Sub-05:
       *   - Print out the snp/match entry for G
       \**************************************************/
 
-      if(  conBaseAry[uiBase].numGI
-         > settings->printMinDepthI
-      ){ /*If: The a base has enough depth*/
-         percSupF =
-              (float) conBaseAry[uiBase].numGI
-            / (float) conBaseAry[uiBase].totalBasesKeptI;
+      percSupF = (float) conBaseAry[uiBase].numGI;
+      percSupF /= (float) nonMaskBaseUI;
 
-         if(percSupF >= settings->printMinSupSnpF)
-            fprintf(
-               outFILE,
-               "%s\t%i\tbase\tG\t%i\t%f\t%i\t%i\n",
-               refIdStr,
-               uiBase + 1,
-               conBaseAry[uiBase].numGI,
-               percSupF,
-               conBaseAry[uiBase].totalBasesKeptI,
-               conBaseAry[uiBase].totalBasesI
-            );
-      } /*If: The a base has enough depth*/
+      if(
+           conBaseAry[uiBase].numGI
+         < settings->printMinDepthI
+      ) ;
+
+      else if(percSupF >= settings->printMinSupSnpF)
+      { /*If: I had enough support to print an G*/
+         fprintf(
+            outFILE,
+            "%s\t%i\tbase\tG\t%i\t%f\t%u\t%i\t%u\n",
+            refIdStr,
+            uiBase + 1,
+            conBaseAry[uiBase].numGI,
+            percSupF,
+            maskedBasesUI,
+            conBaseAry[uiBase].totalBasesKeptI,
+            conBaseAry[uiBase].totalBasesI
+         );
+      } /*If: I had enough support to print an G*/
 
       /**************************************************\
       * Fun-13 Sec-03 Sub-06:
@@ -1657,18 +1713,20 @@ pConBaseArray(
       if(  conBaseAry[uiBase].numDelI
          > settings->printMinDepthI
       ){ /*If: The a base has enough depth*/
-         percSupF =
-              (float) conBaseAry[uiBase].numDelI
-            / (float) conBaseAry[uiBase].totalBasesKeptI;
+         percSupF = (float) conBaseAry[uiBase].numDelI;
+
+         percSupF /=
+            (float) conBaseAry[uiBase].totalBasesKeptI;
 
          if(percSupF >= settings->printMinSupDelF)
             fprintf(
                outFILE,
-               "%s\t%i\tdel\tdel\t%i\t%f\t%i\t%i\n",
+               "%s\t%i\tdel\tdel\t%i\t%f\t%u\t%i\t%u\n",
                refIdStr,
                uiBase + 1,
                conBaseAry[uiBase].numDelI,
                percSupF,
+               maskedBasesUI,
                conBaseAry[uiBase].totalBasesKeptI,
                conBaseAry[uiBase].totalBasesI
             );
