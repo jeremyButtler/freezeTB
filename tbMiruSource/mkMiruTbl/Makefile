@@ -28,4 +28,4 @@ check:
 
 install:
 	sudo cp mkMiruTbl $(PREFIX);
-	sudo chmod a+x $(PREFIX)/mkMiruTbl;
+	sudo chmod a+xr $(PREFIX)/mkMiruTbl;

@@ -778,7 +778,7 @@ get_miruAmpIndex_FromMiruTbl(
    int leftI = 0;  /*left (lower) half of search range*/
    struct miruAmp *tmpST = miruTblSTPtr->miruAmpSTAry;
 
-   rightI = miruTblSTPtr->numLineagesI - 1;
+   rightI = miruTblSTPtr->numPrimI - 1;
 
    while(leftI <= rightI)
    { /*Loop: Find the target index*/
@@ -913,223 +913,43 @@ findAmpLen(
    int *cigPosIPtr, /*Num of bases left in cigar entry*/
    unsigned int *cigIndexUIPtr, /*index on in cigar*/
    void *samSTPtr   /*sequence I am finding length of*/
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-20 TOC: findAmpLen
-   '   - Finds the length of the MIRU amplicon on the
-   '     reference sequence
-   '   o fun-20 sec-01:
-   '     - Variable declerations
-   '   o fun-20 sec-02:
-   '   - Find the start of the amplicon
-   '   o fun-20 sec-03:
-   '   - Find the length of an amplicon/read
-    '   o fun-20 sec-04:
-  '   - Return the read length
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-20 Sec-01:
-   ^   - Variable declerations
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   int iBase = 0;
-   int readLenI = 0;
+){ 
+   sint seqPosSI = 0; /*Temporary variable*/
+   sint seqStartSI = 0; /*Temporary variable*/
    struct samEntry *samST = (struct samEntry *) samSTPtr;
 
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-20 Sec-02:
-   ^   - Find the start of the amplicon
-   ^   o fun-20 sec-02 sub-01:
-   ^     - See how many bases I have not checked in cigar
-   ^   o fun-20 sec-02 sub-02:
-   ^     - Advance reference position for matchs, snps,
-   ^       and deletions
-   ^   o fun-20 sec-02 sub-03:
-   ^     - Skip soft masked regions and insertions
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   /*Find the start of the amplicon*/
 
-   /*****************************************************\
-   * Fun-20 Sec-02 Sub-01:
-   *   - See how many bases I have not checked in cigar
-   \*****************************************************/
-
-   while(*refPosIPtr < startAmpI)
-   { /*Loop: Find the primer starting position*/
-
-      /*Check if I am at the end of the cigar*/
-      if(*cigIndexUIPtr >= samST->lenCigUI) return -1;
-
-      /**************************************************\
-      * Fun-20 Sec-02 Sub-02:
-      *   - Advance reference position for matchs, snps,
-      *     and deletions
-      \**************************************************/
-
-      switch(samST->cigTypeStr[*cigIndexUIPtr])
-      { /*Switch: Check the cigar entry type*/
-         case 'M':
-         case '=':
-         case 'X':
-         case 'D':
-         /*Case: match/snp or deletion*/
-
-            if(*refPosIPtr + *cigPosIPtr < startAmpI)
-            { /*If: I am not at position*/
-               *refPosIPtr += *cigPosIPtr;
-               ++(*cigIndexUIPtr);
-               *cigPosIPtr = 0;
-               break;
-            } /*If: I am not at position*/
-
-            while(*refPosIPtr < startAmpI)
-            { /*Loop: Move until at position*/
-               ++iBase;
-               ++(*refPosIPtr);
-            } /*Loop until I find the position*/
-
-            /*Find how many bases I actually used*/
-            *cigPosIPtr -= iBase;
-
-            break; 
-         /*Case: match/snp or deletion*/
-
-         /***********************************************\
-         * Fun-20 Sec-02 Sub-02:
-         *   - Skip soft masked regions and insertions
-         \***********************************************/
-
-         case 'S':
-         case 'I':
-         /*Case: insertion or softmasked*/
-            ++(*cigIndexUIPtr);
-            *cigPosIPtr = 0;
-            break;
-         /*Case: insertion or softmasked*/
-      } /*Switch: check the cigar entry type*/
-   } /*Loop: Find the primer starting position*/
+   samEntryFindRefPos(
+      samST,
+      *cigIndexUIPtr,
+      *cigPosIPtr,
+      startAmpI,
+      *refPosIPtr,
+      seqPosSI
+   );
 
    /*If: there is an incomplete mapping*/
-   if(*refPosIPtr != startAmpI) return -1;
+   if(*refPosIPtr != startAmpI)
+      return -1;
 
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-20 Sec-03:
-   ^   - Find the length of an amplicon/read
-   ^   o fun-20 sec-03 sub-01:
-   ^     - See how many bases I have not checked in cigar
-   ^   o fun-20 sec-03 sub-02:
-   ^     - Count snps and matches for read length
-   ^   o fun-20 sec-03 sub-03:
-   ^     - Count insertions and soft masked regions in
-   ^       read length
-   ^   o fun-20 sec-03 sub-04:
-   ^     - Move past deletion entries
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   seqStartSI = seqPosSI;
 
-   /*****************************************************\
-   * Fun-20 Sec-03 Sub-01:
-   *   - See how many bases I have not checked in cigar
-   \*****************************************************/
+   /*Find the length of an amplicon/read*/
 
-   while(*refPosIPtr < endAmpI)
-   { /*Loop: Find the amplicon length*/
+   samEntryFindRefPos(
+      samST,
+      *cigIndexUIPtr,
+      *cigPosIPtr,
+      endAmpI,
+      *refPosIPtr,
+      seqPosSI
+   );
 
-      /*Check if I am at the end of the cigar*/
-      if(*cigIndexUIPtr >= samST->lenCigUI) return -1;
+   if(*refPosIPtr != endAmpI)
+      return -1;
 
-      /**************************************************\
-      * Fun-20 Sec-03 Sub-02:
-      *   - Count snps and matches for read length
-      \**************************************************/
-
-      switch(samST->cigTypeStr[*cigIndexUIPtr])
-      { /*Switch: Check the cigar entry type*/
-         case 'M':
-         case '=':
-         case 'X':
-         /*Case: match/snp*/
-            if(*refPosIPtr + *cigPosIPtr < endAmpI)
-            { /*If: I am not at position*/
-               *refPosIPtr += *cigPosIPtr;
-               readLenI += *cigPosIPtr;
-
-               *cigPosIPtr = 0;
-               ++(*cigIndexUIPtr);
-
-               break;
-            } /*If: I am not at position*/
-
-            iBase = 0;
-
-            while(*refPosIPtr < endAmpI)
-            { /*Loop: Finish of the read length*/
-               ++(*refPosIPtr);
-               ++(readLenI);
-               ++iBase;
-            } /*Loop: Finish off the read length*/
-
-           /*Find how many bases I actually used*/
-           *cigPosIPtr -= iBase;
-
-           break; 
-         /*Case: match/snp*/
-
-         /***********************************************\
-         * Fun-20 Sec-03 Sub-03:
-         *   - Count insertions and soft masked regions in
-         *     read length
-         \***********************************************/
-
-         case 'S': /*should never happen, but in case*/
-         case 'I':
-         /*Case: insertion or softmasked*/
-            readLenI += samST->cigValAryI[*cigIndexUIPtr];
-            ++(*cigIndexUIPtr);
-            *cigPosIPtr = 0;
-            break;
-         /*Case: insertion or softmasked*/
-
-         /***********************************************\
-         * Fun-20 Sec-03 Sub-04:
-         *   - Move past deletion entries
-         \***********************************************/
-
-         /*At this point I do not mind overshooting the
-         `    ending primer. I just need the length
-         */
-         case 'D':
-         /*Case: deletion*/
-            if(*refPosIPtr + *cigPosIPtr < endAmpI)
-            { /*If: I am not at position*/
-               *refPosIPtr += *cigPosIPtr;
-
-               *cigPosIPtr = 0;
-               ++(*cigIndexUIPtr);
-
-               break;
-            } /*If: I am not at position*/
-
-            iBase = 0;
-
-            while(*refPosIPtr < endAmpI)
-            { /*Loop: Finish of the read length*/
-               ++(*refPosIPtr);
-               ++iBase;
-            } /*Loop: Finish off the read length*/
-
-           /*Find how many bases I actually used*/
-           *cigPosIPtr -= iBase;
-
-           break; 
-         /*Case: deletion*/
-      } /*Switch: check the cigar entry type*/
-   } /*Loop: Find the amplicon length*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-20 Sec-04:
-   ^   - Return the read length
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   return readLenI;
+   return seqPosSI - seqStartSI;
 } /*findAmpLen*/
 
 /*-------------------------------------------------------\
@@ -1239,17 +1059,8 @@ inc_matching_len_lineages(
 
    while(endAmpI <= samST->refEndUI)
    { /*Loop: Update table for each MIRU amp in read*/
-      ++(
-         miruTblSTPtr->miruAmpSTAry[
-            ampIndexI
-         ].mapReadsI
-      ); /*Incurment the read counter*/
-
       startAmpI =
          miruTblSTPtr->miruAmpSTAry[ampIndexI].forPosI;
-
-      /*startAmpI +=
-         miruTblSTPtr->miruAmpSTAry[ampIndexI].forLenI;*/
 
       readLenI = 
          findAmpLen(
@@ -1268,6 +1079,7 @@ inc_matching_len_lineages(
       \**************************************************/
 
       if(readLenI > -1)
+      { /*If: I have the read length, find lineage*/
          linIndexI =
             get_linCountIndex_fromMiruAmp(
                readLenI, /*Length of amplicon*/
@@ -1275,9 +1087,17 @@ inc_matching_len_lineages(
                ampIndexI, /*Index of amplicon to search*/
                miruTblSTPtr /*Has a miruTbl column*/
             ); /*Get the index of the first length*/
+      } /*If: I have the read length, find lineage*/
 
-      else linIndexI = -1;
+      else
+         goto nextAmp_fun21_sec03_sub03;
 
+      ++(
+         miruTblSTPtr->miruAmpSTAry[
+            ampIndexI
+         ].mapReadsI
+      ); /*Incurment the read counter*/
+ 
       if(linIndexI >= 0)
       { /*If: I have lineages to incurment*/
          lenIAry =
@@ -1302,17 +1122,22 @@ inc_matching_len_lineages(
          } /*Loop: Incurment each lineage hit*/
       } /*If: I have lineages to incurment*/
 
+      else
+      { /*Else: I could not find the lineage*/
+        ++(miruTblSTPtr->miruAmpSTAry[ampIndexI].noLinSI);
+      } /*Else: I could not find the lineage*/
+
       /**************************************************\
       * Fun-21 Sec-03 Sub-03:
       *   - See if there are more MIRU amplicons in read
       \**************************************************/
 
+      nextAmp_fun21_sec03_sub03:;
+
       ampIndexI++;
 
       endAmpI =
          miruTblSTPtr->miruAmpSTAry[ampIndexI].revPosI;
-
-      /*--endAmpI;*/ /*Get off last reverse primer base*/
 
       if(ampIndexI >= miruTblSTPtr->numPrimI) break;
    } /*Loop: Update table for each MIRU amp in read*/
@@ -2317,12 +2142,19 @@ pMiruTbl(
          +   - Find and copy percentage of mapped reads
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
+         if(lenBuffI - posI < def_lenStr_miruTblST)
+         { /*If: I need to print out the buffer*/
+            fwrite(buffStr, sizeof(char), posI, outFILE);
+            posI = 0;
+         } /*If: I need to print out the buffer*/
+
          if(! miruTblSTPtr->miruAmpSTAry[iAmp].mapReadsI)
          { /*If: no reads mapped to this primer*/
             buffStr[posI++] = '0';
             buffStr[posI++] = '\t';
             buffStr[posI++] = '0';
-            continue;            /*Move to the next read*/
+
+            goto linCpTotal_fun26_sec04_sub02_cat03;
          } /*If: no reads mapped to this primer*/
 
          /*This is to allow me to keep the percentage as
@@ -2354,6 +2186,14 @@ pMiruTbl(
          +   - copy the total number of reads to buffer
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
+         linCpTotal_fun26_sec04_sub02_cat03:;
+
+         if(lenBuffI - posI < def_lenStr_miruTblST)
+         { /*If: I need to print out the buffer*/
+            fwrite(buffStr, sizeof(char), posI, outFILE);
+            posI = 0;
+         } /*If: I need to print out the buffer*/
+
          posI +=
             numToStr(
                &buffStr[posI],
@@ -2374,6 +2214,152 @@ pMiruTbl(
 
       buffStr[posI++] = '\n';
    } /*Loop: Copy the entries for each lineage*/
+
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun-26 Sec-05:
+   ^   - Copy the number of missed reads
+   ^   o fun-26 sec-05 sub-01:
+   ^     - Copy unkown lineage id and start print loop
+   ^   o fun-26 sec-05 sub-02:
+   ^     - Copy number of no lineage detected reads
+   ^   o fun-26 sec-05 sub-03:
+   ^     - Get and copy percentage of no lineage reads
+   ^   o fun-26 sec-05 sub-04:
+   ^     - copy total number of reads to buffer
+   ^   o fun-26 sec-05 sub-05:
+   ^     - Add new line to end of unkown lineage line
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun-26 Sec-05 Sub-01:
+   *   - Copy unkown lineage id and start print loop
+   \*****************************************************/
+
+   if(lenBuffI - posI < def_lenStr_miruTblST)
+   { /*If: I need to print out the buffer*/
+      fwrite(buffStr, sizeof(char), posI, outFILE);
+      posI = 0;
+   } /*If: I need to print out the buffer*/
+
+   posI +=
+      cCpStrDelim(
+         &buffStr[posI],
+         "NA",
+         '\0'
+      );
+
+   for(iAmp = 0; iAmp < miruTblSTPtr->numPrimI; ++iAmp)
+   { /*Loop: Copy the unmapped counts*/
+
+      if(lenBuffI - posI < def_lenStr_miruTblST)
+      { /*If: I need to print out the buffer*/
+         fwrite(buffStr, sizeof(char), posI, outFILE);
+         posI = 0;
+      } /*If: I need to print out the buffer*/
+
+      /**************************************************\
+      * Fun-26 Sec-05 Sub-02:
+      *   - Copy number of no lineage detected reads
+      \**************************************************/
+
+      if(lenBuffI - posI < def_lenStr_miruTblST + 32)
+      { /*If: I need to print out the buffer*/
+         fwrite(buffStr, sizeof(char), posI, outFILE);
+         posI = 0;
+      } /*If: I need to print out the buffer*/
+
+      buffStr[posI++] = '\t';
+
+      posI +=
+         numToStr(
+            &buffStr[posI],
+            miruTblSTPtr->miruAmpSTAry[iAmp].noLinSI
+         ); /*Copy the number of hits to lineage*/
+
+      buffStr[posI++] = '\t';
+
+      /**************************************************\
+      * Fun-26 Sec-05 Sub-03:
+      *   - Get and copy percentage of no lineage reads
+      \**************************************************/
+
+      if(lenBuffI - posI < def_lenStr_miruTblST + 32)
+      { /*If: I need to print out the buffer*/
+         fwrite(buffStr, sizeof(char), posI, outFILE);
+         posI = 0;
+      } /*If: I need to print out the buffer*/
+
+      if(! miruTblSTPtr->miruAmpSTAry[iAmp].noLinSI)
+      { /*If: no reads mapped to this primer*/
+         buffStr[posI++] = '0';
+         buffStr[posI++] = '\t';
+         buffStr[posI++] = '0';
+
+         goto noLinCpTotal_fun26_sec05_sub03;
+      } /*If: no reads mapped to this primer*/
+
+      /*This is to allow me to keep the percentage as
+      `    an integer
+      */
+      percMappedUL =
+           10000
+         * (miruTblSTPtr->miruAmpSTAry[iAmp].noLinSI);
+        
+      percMappedUL /=
+         miruTblSTPtr->miruAmpSTAry[iAmp].mapReadsI;
+
+      /*Copy the non-decimal part of the percentage*/
+      posI +=
+         numToStr(
+            &buffStr[posI],
+            percMappedUL / 100
+         );
+
+      buffStr[posI++] = '.';
+      
+      /*Copy the decimal part of the percentage*/
+      posI +=
+         numToStr(
+            &buffStr[posI],
+            percMappedUL % 100
+         );
+
+      buffStr[posI++] = '\t';
+
+      /**************************************************\
+      * Fun-26 Sec-05 Sub-04:
+      *   - copy total number of reads to buffer
+      \**************************************************/
+
+      noLinCpTotal_fun26_sec05_sub03:;
+
+      if(lenBuffI - posI < def_lenStr_miruTblST)
+      { /*If: I need to print out the buffer*/
+         fwrite(buffStr, sizeof(char), posI, outFILE);
+         posI = 0;
+      } /*If: I need to print out the buffer*/
+
+      posI +=
+         numToStr(
+            &buffStr[posI],
+            miruTblSTPtr->miruAmpSTAry[iAmp].mapReadsI
+         ); /*Copy total number mapped reads*/
+
+   } /*Loop: Copy the unmapped counts*/
+
+   /*****************************************************\
+   * Fun-26 Sec-05 Sub-05:
+   *   - Add new line to end of unkown lineage line
+   \*****************************************************/
+
+   if(lenBuffI - posI < def_lenStr_miruTblST)
+   { /*If: I need to print out the buffer*/
+      fwrite(buffStr, sizeof(char), posI, outFILE);
+      posI = 0;
+   } /*If: I need to print out the buffer*/
+
+   buffStr[posI++] = '\n';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun-26 Sec-05:

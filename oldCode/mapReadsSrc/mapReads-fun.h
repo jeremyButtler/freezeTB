@@ -10,18 +10,18 @@
 '     - defined variables (?) and guards
 '   o .h st-01: kmerTbl
 '     - Holds an kmer table for an single sequence
-'   o .h fun-01: kmerTblBlank
+'   o .h fun01: kmerTblBlank
 '     - blank the kmer counters (set to -1) in an kmerTbl
 '       structure
-'   o .h fun-02: kmerTblInit
+'   o .h fun02: kmerTblInit
 '     - Initialize an kmerTbl structure
-'   o fun-03: kmerTblFreeStack(
+'   o fun03: kmerTblFreeStack(
 '     - Frees an stack allocated kmerTbl structer
-'   o fun-04: kmerTblFreeHeap
+'   o fun04: kmerTblFreeHeap
 '     - Frees an heap allocated kmerTbl structer
-'   o fun-05: kmerTblFreeHeapAry
+'   o fun05: kmerTblFreeHeapAry
 '     - Frees an heap allocated array of kmerTbl structers
-'   o fun-06: kmerTblSetSeq
+'   o fun06: kmerTblSetSeq
 '     - Set the seqeuence for the kmer table
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -36,7 +36,7 @@
 #define MAP_READS_FUNCTIONS_H
 
 /*-------------------------------------------------------\
-| ST-01: kmerTbl
+| ST01: kmerTbl
 |   - Holds an kmer table for an single sequence
 \-------------------------------------------------------*/
 typedef
@@ -50,7 +50,48 @@ kmerTbl
 }kmerTbl;
 
 /*-------------------------------------------------------\
-| ST-02: seqStruct
+| ST01: kmerSearch
+|   - Holds search array for an kmer join step
+\-------------------------------------------------------*/
+typedef
+kmerSearch
+   signed int *searchTblSI;   /*Has kmer patterns*/
+   signed int *tblIndxArySI;  /*Index of each kmer*/
+   signed int *refPosArySI;   /*ref coords for searchTbl*/
+   signed int *kmerIndxArySI; /*Kmer index for tblIndx*/
+      /* How these arrays/tables interact
+      `    - searchTblSI has the patterns and branches
+      `      o Length is length of reference genome
+      `      o negative numbers mark branches
+      `        - Remove negative flag to get the branch
+      `          number
+      `    - tblIndxAry has the index of every kmer in
+      `      searchTblSI (as blocks)
+      `      o Length is length of reference genome
+      `    - refPosArySI:
+      `      o Has the starting position for each branch
+      `        in searchTblSI. This is the index from
+      `        tblIndexAry
+      `      o Each entry starts with the number of
+      `        entries supporting this position and the
+      `        coordinates
+      `    - kmerIndxAry has the location and length of
+      `      every kmer block in tblIndxAry
+      `      o Each kmer has two values; the index and
+      `        the length (use kmer << 1) to find kmer.
+      */
+      
+   unsigned char lenKmerUC; /*length of one kmer*/
+   signed int maxKmersSI;   /*Max number kmers possible*/
+   signed int lenRefSI;     /*length of reference; same
+                              `   as length of searchTbl
+                              `   and tblIndx
+                              */
+   unsigned int lenKmerIndxUI;/*length of kmerIndxArySI*/
+}kmerSearch;
+
+/*-------------------------------------------------------\
+| ST02: seqStruct
 |   - Forward decleration of seqStruct in
 |     ../memwater/seqStruct.h
 |   - I am trying to avoid having included files in .h
@@ -60,7 +101,7 @@ struct seqStruct;
 typedef struct seqStruct seqStuct;
 
 /*-------------------------------------------------------\
-| ST-03: qyrKmers
+| ST03: qyrKmers
 |   - Kmer sequence for an single query
 \-------------------------------------------------------*/
 typedef
@@ -76,7 +117,7 @@ qryKmers
 }qryKmer;
 
 /*-------------------------------------------------------\
-| Fun-01: kmerTblBlank
+| Fun01: kmerTblBlank
 |   - blank the kmer counters (set to -1) in an kmerTbl
 |     strucuter
 | Input:
@@ -116,7 +157,7 @@ kmerTblBlank(\
 } /*kmerTblBlank*/
 
 /*-------------------------------------------------------\
-| Fun-02: kmerTblInit
+| Fun02: kmerTblInit
 |   - initialize an kmerTbl structure
 | Input:
 |   - kmerTblSTPtr:
@@ -143,7 +184,7 @@ kmerTblInit( \
 
 
 /*-------------------------------------------------------\
-| Fun-03: kmerTblFreeStack
+| Fun03: kmerTblFreeStack
 |   - Frees an stack allocated kmerTbl structer
 | Input:
 |   - kmerTblSTPtr:
@@ -164,7 +205,7 @@ kmerTblFreeStack(
 );
 
 /*-------------------------------------------------------\
-| Fun-04: kmerTblFreeHeap
+| Fun04: kmerTblFreeHeap
 |   - Frees an heap allocated kmerTbl structer
 | Input:
 |   - kmerTblSTPtr:
@@ -179,7 +220,7 @@ kmerTblFreeHeap(
 );
 
 /*-------------------------------------------------------\
-| Fun-05: kmerTblFreeAryHeap
+| Fun05: kmerTblFreeAryHeap
 |   - frees an heap allocated array of kmerTbl structers
 | Input:
 |   - kmerTblSTPtr:
@@ -198,7 +239,7 @@ kmerTblFreeAryHeap(
 );
 
 /*-------------------------------------------------------\
-| Fun-06: kmerTblSetSeq
+| Fun06: kmerTblSetSeq
 |   - set the seqeuence for the kmer table
 | Input:
 |   - kmerTblSTPtr:
@@ -222,6 +263,42 @@ kmerTblInit(
    unsigned char lenKmerUC,
    void *seqSTVoidPtr
 );
+
+/*-------------------------------------------------------\
+| Fun07: kmerSearch_getTblIndx
+|   - Gets the kmer index and block size for tblIndxArySI
+|     in an kmerSearch structure.
+| Input:
+|   - kmerSI:
+|     o int with kmer to look up
+|   - indxSI:
+|     o int to hold index of first kmer in kmer block
+|   - lenKmerBlockSI:
+|     o int to hold length of kmer block in tblIndexArySI
+|   - kmerSearchSTPtr:
+|     o Pointer to an kmerSearch structure to get the
+|       kmer index from
+| Output:
+|   - Modifies:
+|     o indxSI to hold index of first matching kmer in
+|       tblIndxArySI
+|     o lenKmerBlockSI to hold number of times the kmer
+|       is repeated (block size)
+\-------------------------------------------------------*/
+#define \
+kmerSearch_getTblIndx(
+   kmerSI,
+   indxSI,
+   lenKmerBlockSI,
+   kmerSearchSTPtr
+){ \
+   unsinged int posMacUI = (kmerSI) << 1;
+   \
+   (indexSI) = kmerSearchSTPtr->kmerIndxArySI[posMacUI]; \
+   \
+   (lenKmerBlockSI) = \
+      kmerSearchSTPtr->kmerIndxArySI[posMacUI]; \
+} /*kmerSearch_getTblIndx*/
 
 #endif
 

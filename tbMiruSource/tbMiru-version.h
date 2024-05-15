@@ -4,8 +4,8 @@
 ########################################################*/
 
 #define def_year_tbMiru 2024
-#define def_month_tbMiru 04
-#define def_day_tbMiru 10
+#define def_month_tbMiru 5
+#define def_day_tbMiru 6
 
 /*=======================================================\
 : License:

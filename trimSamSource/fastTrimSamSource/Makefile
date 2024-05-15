@@ -7,6 +7,9 @@ DEBUGFLAGS += -O0 -ggdb -Wall -static -std=c89
 all:
 	$(CC) $(CFLAGS) -o fastTrimSam oldTrimSamFile.c
 
+mac:
+	$(CC) $(MACCFLAGS) -o fastTrimSam oldTrimSamFile.c
+
 install:
-	mv fastTrimSam $(PREFIX);
-	chmod a+x $(PREFIX)/fastTrimSam;
+	cp fastTrimSam $(PREFIX);
+	chmod a+xr $(PREFIX)/fastTrimSam;

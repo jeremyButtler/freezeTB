@@ -10,7 +10,9 @@
 '     - header guards
 '   o fun-01 trimSamEntry:
 '     o Trim soft mask regions off end of sam entry
-'   o fun-02 trimSamReads:
+'   o fun-02: trimByCoords
+'     - Trim an sam file entry by coordinates
+'   o fun-03 trimSamReads:
 '     o Trims soft mask regions for all reads with a
 '       sequence in a sam file
 '   o license:
@@ -24,6 +26,10 @@
 
 #ifndef TRIMSAM_H
 #define TRIMSAM_H
+
+/*Forward decleration*/
+struct samEntry;
+/*typdef struct samEntry samEntry;*/
 
 /*-------------------------------------------------------\
 | Fun-01: trimSamEntry
@@ -45,7 +51,33 @@
 unsigned char trimSamEntry(void *samVoidST);
 
 /*-------------------------------------------------------\
-| Fun-02: trimSamReads
+| Fun-02: trimByCoords
+|   - Trim an sam file entry by coordinates
+| Input:
+|   - samSTPtr:
+|     o Pointer to an sam entry structure with an read to
+|       trim
+|   - startSI:
+|     o Singed integer with the starting coordinate
+|   - endSI:
+|     o Singed integer with the ending coordinate
+|     o < 1 is treated as do not trim
+| Output:
+|   - Modifies:
+|     o samSTPtr to be trimmed
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for coordinates out of range
+\-------------------------------------------------------*/
+signed char
+trimByCoords(
+   struct samEntry *samSTPtr,
+   signed int startSI,
+   signed int endSI
+);
+
+/*-------------------------------------------------------\
+| Fun-03: trimSamReads
 | Use:
 |  - Goes though sam file and calls trimSamEntry for each
 |    entry

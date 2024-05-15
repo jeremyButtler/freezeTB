@@ -30,4 +30,4 @@ check:
 
 install:
 	cp $(outNameStr) $(PREFIX)
-	chmod a+x $(outNameStr) $(PREFIX)/$(outNameStr)
+	chmod a+xr $(outNameStr) $(PREFIX)/$(outNameStr)

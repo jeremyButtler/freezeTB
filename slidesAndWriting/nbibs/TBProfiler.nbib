@@ -1,0 +1,153 @@
+PMID- 31234910
+OWN - NLM
+STAT- MEDLINE
+DCOM- 20191227
+LR  - 20210930
+IS  - 1756-994X (Electronic)
+IS  - 1756-994X (Linking)
+VI  - 11
+IP  - 1
+DP  - 2019 Jun 24
+TI  - Integrating informatics tools and portable sequencing technology for rapid 
+      detection of resistance to anti-tuberculous drugs.
+PG  - 41
+LID - 10.1186/s13073-019-0650-x [doi]
+LID - 41
+AB  - BACKGROUND: Mycobacterium tuberculosis resistance to anti-tuberculosis drugs is a 
+      major threat to global public health. Whole genome sequencing (WGS) is rapidly 
+      gaining traction as a diagnostic tool for clinical tuberculosis settings. To 
+      support this informatically, previous work led to the development of the widely 
+      used TBProfiler webtool, which predicts resistance to 14 drugs from WGS data. 
+      However, for accurate and rapid high throughput of samples in clinical or 
+      epidemiological settings, there is a need for a stand-alone tool and the ability 
+      to analyse data across multiple WGS platforms, including Oxford Nanopore MinION. 
+      RESULTS: We present a new command line version of the TBProfiler webserver, which 
+      includes hetero-resistance calling and will facilitate the batch processing of 
+      samples. The TBProfiler database has been expanded to incorporate 178 new markers 
+      across 16 anti-tuberculosis drugs. The predictive performance of the mutation 
+      library has been assessed using > 17,000 clinical isolates with WGS and 
+      laboratory-based drug susceptibility testing (DST) data. An integrated MinION 
+      analysis pipeline was assessed by performing WGS on 34 replicates across 3 
+      multi-drug resistant isolates with known resistance mutations. TBProfiler 
+      accuracy varied by individual drug. Assuming DST as the gold standard, 
+      sensitivities for detecting multi-drug-resistant TB (MDR-TB) and extensively 
+      drug-resistant TB (XDR-TB) were 94% (95%CI 93-95%) and 83% (95%CI 79-87%) with 
+      specificities of 98% (95%CI 98-99%) and 96% (95%CI 95-97%) respectively. Using 
+      MinION data, only one resistance mutation was missed by TBProfiler, involving an 
+      insertion in the tlyA gene coding for capreomycin resistance. When compared to 
+      alternative platforms (e.g. Mykrobe predictor TB, the CRyPTIC library), 
+      TBProfiler demonstrated superior predictive performance across first- and 
+      second-line drugs. CONCLUSIONS: The new version of TBProfiler can rapidly and 
+      accurately predict anti-TB drug resistance profiles across large numbers of 
+      samples with WGS data. The computing architecture allows for the ability to 
+      modify the core bioinformatic pipelines and outputs, including the analysis of 
+      WGS data sourced from portable technologies. TBProfiler has the potential to be 
+      integrated into the point of care and WGS diagnostic environments, including in 
+      resource-poor settings.
+FAU - Phelan, Jody E
+AU  - Phelan JE
+AD  - Faculty of Infectious and Tropical Diseases, London School of Hygiene & Tropical 
+      Medicine, London, WC1E 7HT, UK.
+FAU - O'Sullivan, Denise M
+AU  - O'Sullivan DM
+AD  - Molecular Biology, LGC Ltd, Queens Road, Teddington, Middlesex, TW11 0LY, UK.
+FAU - Machado, Diana
+AU  - Machado D
+AD  - Global Health and Tropical Medicine, GHTM, Instituto de Higiene e Medicina 
+      Tropical, IHMT, Universidade NOVA de Lisboa, UNL, Lisbon, Portugal.
+FAU - Ramos, Jorge
+AU  - Ramos J
+AD  - Global Health and Tropical Medicine, GHTM, Instituto de Higiene e Medicina 
+      Tropical, IHMT, Universidade NOVA de Lisboa, UNL, Lisbon, Portugal.
+FAU - Oppong, Yaa E A
+AU  - Oppong YEA
+AD  - Faculty of Infectious and Tropical Diseases, London School of Hygiene & Tropical 
+      Medicine, London, WC1E 7HT, UK.
+FAU - Campino, Susana
+AU  - Campino S
+AD  - Faculty of Infectious and Tropical Diseases, London School of Hygiene & Tropical 
+      Medicine, London, WC1E 7HT, UK.
+FAU - O'Grady, Justin
+AU  - O'Grady J
+AD  - Norwich Medical School, University of East Anglia, Norwich Research Park, 
+      Norwich, NR4 7TJ, UK.
+FAU - McNerney, Ruth
+AU  - McNerney R
+AD  - Department of Medicine, University of Cape Town, Observatory, Cape Town, 7925, 
+      South Africa.
+FAU - Hibberd, Martin L
+AU  - Hibberd ML
+AD  - Faculty of Infectious and Tropical Diseases, London School of Hygiene & Tropical 
+      Medicine, London, WC1E 7HT, UK.
+FAU - Viveiros, Miguel
+AU  - Viveiros M
+AD  - Global Health and Tropical Medicine, GHTM, Instituto de Higiene e Medicina 
+      Tropical, IHMT, Universidade NOVA de Lisboa, UNL, Lisbon, Portugal.
+FAU - Huggett, Jim F
+AU  - Huggett JF
+AD  - Molecular Biology, LGC Ltd, Queens Road, Teddington, Middlesex, TW11 0LY, UK.
+AD  - School of Biosciences & Medicine, Faculty of Health & Medical Science, University 
+      of Surrey, Guildford, GU2 7XH, UK.
+FAU - Clark, Taane G
+AU  - Clark TG
+AUID- ORCID: 0000-0001-8985-9265
+AD  - Faculty of Infectious and Tropical Diseases, London School of Hygiene & Tropical 
+      Medicine, London, WC1E 7HT, UK. taane.clark@lshtm.ac.uk.
+AD  - Global Health and Tropical Medicine, GHTM, Instituto de Higiene e Medicina 
+      Tropical, IHMT, Universidade NOVA de Lisboa, UNL, Lisbon, Portugal. 
+      taane.clark@lshtm.ac.uk.
+AD  - Faculty of Epidemiology and Population Health, London School of Hygiene & 
+      Tropical Medicine, London, WC1E 7HT, UK. taane.clark@lshtm.ac.uk.
+LA  - eng
+GR  - MR/N010469/1/MRC_/Medical Research Council/United Kingdom
+GR  - BB/R013063/1/BB_/Biotechnology and Biological Sciences Research Council/United 
+      Kingdom
+GR  - MR/R025576/1/MRC_/Medical Research Council/United Kingdom
+GR  - MR/R020973/1/MRC_/Medical Research Council/United Kingdom
+GR  - MR/N013956/1/MRC_/Medical Research Council/United Kingdom
+GR  - MR/M01360X/1/MRC_/Medical Research Council/United Kingdom
+PT  - Journal Article
+PT  - Research Support, Non-U.S. Gov't
+DEP - 20190624
+PL  - England
+TA  - Genome Med
+JT  - Genome medicine
+JID - 101475844
+RN  - 0 (Antitubercular Agents)
+SB  - IM
+MH  - Antitubercular Agents/pharmacology
+MH  - *Drug Resistance, Microbial
+MH  - Genome, Bacterial
+MH  - Humans
+MH  - Molecular Diagnostic Techniques/*methods
+MH  - Mycobacterium tuberculosis/drug effects/*genetics
+MH  - Point-of-Care Testing
+MH  - *Software
+MH  - Tuberculosis, Multidrug-Resistant/diagnosis/*microbiology
+MH  - Whole Genome Sequencing/*methods
+PMC - PMC6591855
+OTO - NOTNLM
+OT  - Diagnostics
+OT  - Drug resistance
+OT  - Drug-susceptibility testing
+OT  - MDR-TB
+OT  - Tuberculosis
+OT  - WGS
+OT  - XDR-TB
+COIS- The authors declare that they have no competing interests. There is no competing 
+      interest for authors affiliated to LGC.
+EDAT- 2019/06/27 06:00
+MHDA- 2019/12/28 06:00
+PMCR- 2019/06/24
+CRDT- 2019/06/26 06:00
+PHST- 2019/04/08 00:00 [received]
+PHST- 2019/05/30 00:00 [accepted]
+PHST- 2019/06/26 06:00 [entrez]
+PHST- 2019/06/27 06:00 [pubmed]
+PHST- 2019/12/28 06:00 [medline]
+PHST- 2019/06/24 00:00 [pmc-release]
+AID - 10.1186/s13073-019-0650-x [pii]
+AID - 650 [pii]
+AID - 10.1186/s13073-019-0650-x [doi]
+PST - epublish
+SO  - Genome Med. 2019 Jun 24;11(1):41. doi: 10.1186/s13073-019-0650-x.

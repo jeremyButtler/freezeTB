@@ -334,6 +334,9 @@ maskPrimers(
          if(uiEndCig >= samSTPtr->lenCigUI)
             break; /*sequence had part of primer only*/
 
+         if(refEndPosUI > samSTPtr->refEndUI)
+            break;
+
          switch(samSTPtr->cigTypeStr[uiEndCig])
          { /*Switch: Find the cigar entry type*/
             case 'M':
@@ -343,7 +346,7 @@ maskPrimers(
                while(cigEndBaseLeftUI > 0)
                { /*Loop: Mask the bases*/
                   if(refEndPosUI > forEndUI)
-                     break; /*Finished masking*/
+                     goto checkPair_fun08_sec02_sub06;
 
                   samSTPtr->seqStr[seqEndPosUI] = maskSC;
                   ++seqEndPosUI;
@@ -401,6 +404,33 @@ maskPrimers(
 
                break;
             /*Case: Deletions*/
+
+            case 'S':
+            /*Case: softmasks*/
+               while(cigEndBaseLeftUI > 0)
+               { /*Loop: Mask the bases*/
+                  samSTPtr->seqStr[seqEndPosUI] = maskSC;
+                  ++seqEndPosUI;
+                  --cigEndBaseLeftUI;
+               } /*Loop: Mask the bases*/
+
+               ++uiEndCig;
+
+               cigEndBaseLeftUI =
+                     samSTPtr->cigValAryI[uiEndCig];
+
+               break;
+            /*Case: softmasks*/
+
+            default:
+            /*Case: hard mask of some kind*/
+               ++uiEndCig;
+
+               cigEndBaseLeftUI =
+                     samSTPtr->cigValAryI[uiEndCig];
+
+               break;
+            /*Case: hard mask of some kind*/
          } /*Switch: Find the cigar entry type*/
       } /*Loop: Mask bases and adjust cigar*/
 
@@ -408,6 +438,8 @@ maskPrimers(
       * Fun-08 Sec-02 Sub-06:
       *   - For paired primers, set up reverse primer mask
       \**************************************************/
+
+      checkPair_fun08_sec02_sub06:;
 
       if(pairPrimBl)
       { /*If: I have primer pairs to check*/

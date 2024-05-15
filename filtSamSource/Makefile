@@ -24,4 +24,4 @@ check:
 
 install:
 	cp filtsam $(PREFIX);
-	chmod a+x $(PREFIX)/filtsam;
+	chmod a+xr $(PREFIX)/filtsam;

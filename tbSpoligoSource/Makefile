@@ -30,3 +30,7 @@ debug:
 
 check:
 	$(CC) $(DEBUGFLAGS) $(varFlags) -o bug-tbSpoligo $(source);
+
+install:
+	cp tbSpoligo $(PREFIX);
+	chmod a+xr $(PREFIX)/tbSpoligo;

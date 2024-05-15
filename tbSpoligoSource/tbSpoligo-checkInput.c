@@ -325,11 +325,15 @@ phelp_tbSpoligo(
    ' Fun-02 TOC:
    '   - prints the help messge for tbSpoligo
    '   o fun-02 sec-01:
-   ^   - Variable declerations
-   ^   - Open the output file
-   ^   - Print usage lines
-   ^   - Print user input lines
-   ^   - Print output options
+   '     - Variable declerations
+   '   o fun-02 sec-02:
+   '     - Open the output file
+   '   o fun-02 sec-03:
+   '     - Print usage lines
+   '   o fun-02 sec-04:
+   '     - Print user input lines
+   '   o fun-02 sec-05:
+   '     - Print output options
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -524,7 +528,7 @@ phelp_tbSpoligo(
 
    fprintf(
       outFILE,
-      "  -dr-start: [%ui]\n",
+      "  -dr-start: [%i]\n",
       def_DRStart_tbSpoligo
    );
 
@@ -540,7 +544,7 @@ phelp_tbSpoligo(
 
    fprintf(
       outFILE,
-      "  -dr-end: [%ui]\n",
+      "  -dr-end: [%i]\n",
       def_DREnd_tbSpoligo
    );
 

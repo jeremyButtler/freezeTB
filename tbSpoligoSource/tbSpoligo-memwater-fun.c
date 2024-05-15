@@ -641,10 +641,11 @@ samSpoligoSearch(
    ^   - Find direct repeat (DR) region coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(samST->refEndUI <= dirStartSI)
+    /*Check if I have the full DR region*/
+   if(samST->refEndUI < dirEndSI)
       return noSpoligo_tbSpoligo; /*DR Not present*/
 
-   if(samST->refStartUI >= dirEndSI)
+   if(samST->refStartUI > dirStartSI)
       return noSpoligo_tbSpoligo; /*DR Not present*/
 
    initSeqST(&seqST);

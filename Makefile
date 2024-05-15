@@ -27,20 +27,26 @@ SOURCE=\
    memwater/seqStruct.c \
    memwater/alnSetStruct.c \
    memwater/memwater.c \
-   freezeTb.c
+   freezeTBSrc/freezeTb.c
 
 # The sed step is to make sure the default file locations
 # are set up. No other way to do this on C
 
 all:
 	$(CC) $(CFLAGS) -o freezeTB $(SOURCE);
+	make mac -C adjCoordsSrc;
+	mv adjCoordsSrc/adjCoords ./;
 
 # Just in case the user trys this
 mac:
 	$(CC) $(CFLAGS) -o freezeTB $(SOURCE);
+	make mac -C adjCoordsSrc;
+	mv adjCoordsSrc/adjCoords ./;
 
 static:
 	$(CC) $(staticCFLAGS) -o freezeTB $(SOURCE);
+	make -C adjCoordsSrc;
+	mv adjCoordsSrc/adjCoords ./;
 
 check:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
@@ -51,7 +57,7 @@ debug:
 
 macbug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
-	lldb --source bug-cmds-freezeTb.txt bugFreezeTb
+	lldb --source freezeTBSrc/bug-cmds-freezeTb.txt bugFreezeTb
 
 mk: getminimap2 all
 	make clean -C minimap2;
@@ -66,17 +72,19 @@ getminimap2:
 
 install:
 	mkdir $(PREFIX) || printf "";
-	cp graphAmpDepth.r $(PREFIX);
+	cp scripts/graphAmpDepth.r $(PREFIX);
+	cp scripts/freezeTBGui.r $(PREFIX);
 	cp freezeTB $(PREFIX);
-	cp freezeTBGui.r $(PREFIX);
+	cp adjCoords $(PREFIX);
 	mkdir $(dbPREFIX)/freezeTBFiles || printf "";
 	cp freezeTBFiles/* $(dbPREFIX)/freezeTBFiles/;
 	chmod -R a+x $(dbPREFIX)/freezeTBFiles;
 	chmod a+rx $(dbPREFIX)/freezeTBFiles/*;
 	chmod a+rx $(PREFIX)/freezeTB;
-	chmod a+x $(PREFIX)/freezeTBGui.r;
-	chmod a+x $(PREFIX)/graphAmpDepth.r;
-	Rscript rDepends.r || printf "R is not on system\n";
+	chmod a+rx $(PREFIX)/adjCoords;
+	chmod a+rx $(PREFIX)/freezeTBGui.r;
+	chmod a+rx $(PREFIX)/graphAmpDepth.r;
+	Rscript scripts/rDepends.r || printf "R is not on system\n";
 	ls minimap2 1>/dev/null && sudo cp minimap2/minimap2.1 $(MANPREFIX) || printf "";
 	ls minimap2 1>/dev/null && sudo cp minimap2/minimap2 $(PREFIX)/minimap2 || printf "";
 	ls minimap2 1>/dev/null && sudo chmod a+x $(PREFIX)/minimap2 || printf "";

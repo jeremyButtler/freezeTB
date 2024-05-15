@@ -15,5 +15,5 @@ debug:
 	gdb -x bug-cmds.txt bug-trimSam
 
 install:
-	mv trimSam $(PREFIX);
-	chmod a+x $(PREFIX)/trimSam;
+	cp trimSam $(PREFIX);
+	chmod a+xr $(PREFIX)/trimSam;

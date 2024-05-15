@@ -11,59 +11,6 @@ freezeTb is a program that detects AMR resistance in
 Currently freezeTb uses an WHO 2023 catalog that has had
   all grade 3, 4, and 5 variants removed.
 
-I have made the programs in freezeTb to be modular. This
-  means that if you like a particular program, then you
-  can compile it separately. I have set the default build
-  methods to be static for the modules, so you will need
-  to do `make mac` on anything that is not freezeTB. All
-  of these programs take sam files as inputs.
-
-List of programs:
-
-- ampDepth: Makes the read depth tsv's that can be
-  converted to graphs of mean read depth and coverage
-  using graphAmpDepth.r
-- trimSam: trims off soft masked bases in an sam file
-- tbCon: Builds an consensus (output is sam file)
-- tbAmr: AMR detection
-- tbMiru: detects MIRU-VNTR lineages in reads
-- tbSpoligo: does spoligotyping
-  - fasta/fastq is slow, sam is somewhat fast.
-- primMask: Masks primers in sequences (sam file) using
-  coordinates. This can also do some filtering.
-  - You can make an basic mask file file using your
-    primers and catPrimers.sh
-
-Other programs:
-
-- filtSam: For filtering and converting sam files. You
-  would be better off using samtools. I have used it for
-  finding the number of SNPs (includes anonymous bases),
-  deletions, and, insertions for each read in an sam file.
-  - `minimap2 -a --eqx ref.fa reads.fq | filtSam -sam - -out-stats > read-stats.tsv`
-- catPrimers.sh: bash script that uses minimap2 and awk
-  to merge amplicons. It also prints out the amplicon and
-  primer coordaintes.
-- fqGetIds: was here for the original script and has its
-  own separate repository. It is designed to extract read
-  ids from an fastq file. I want to come back to this and
-  see if I can improve it at some point.
-- memwater:
-  - This is more of an library. I took it from my alnSeq
-    side project and fixed a few bugs. It is an waterman
-    that operates in linear memory and takes close to as
-    much time as an traditional waterman (slow, at least 
-    10x slower then the complete striped smith waterman
-    library).
-  - It is designed for CPUs with branch prediction and so,
-    often favors branch less operations.
-  - It only returns the scores and the start and end
-    coordinates of the alignment.
-- oldCode: This has old code I am not quite ready to throw
-  away yet. I may use it later or in another project.
-  Some of it was never finished, other parts of it no
-  longer work do to an change in my coding style.
-
 # Requirements 
 
 1. A read mapper that outputs a sam file.
@@ -110,8 +57,6 @@ make clean
 
 # or for an static build (Non-Mac)
 
-# Install minimap2
-
 git clone https://github.com/jeremybuttler/freezeTb
 cd freezeTb
 make static
@@ -134,8 +79,7 @@ If you are having problems installing try doing a local
   install.
 
 ```
-make
-# or make mk or make mkneon
+make # or make mk or make mkneon
 make PREFIX=~/local/path/ dbPREFIX=~/Documents/ install
 ```
 
@@ -196,7 +140,8 @@ For the gui, just run `freezeTBGui.r`. The just fill in
    - unmapped reads
    - secondary alignments
    - supplemental alignments
-2. Soft masking is trimmed of the ends of each read
+2. Soft masking is trimmed of the ends of each read and
+   amplicons are masked
 3. freezeTB adds each read to a histogram of read depths.
    This is the unfiltered histogram.
 4. freezeTB then filters the reads, removing any read that
@@ -208,26 +153,197 @@ For the gui, just run `freezeTBGui.r`. The just fill in
    - has a low median Q-score
 5. freezeTB then adds the kept reads to a histogram of
    filtered reads
-6. freezeTB then checks the read for AMRs
-7. freezeTB then checks for any MIRU-VNTR lineages in an
+6. freezeTB then masks reads by coordiantes (if requested)
+7. freezeTB then checks the read for AMRs
+8. freezeTB then checks for any MIRU-VNTR lineages in an
    read (Probably nothing for rapdid kits)
-8. freezeTB then adds the read to the reference
+9. freezeTB then adds the read to the reference
    - Bases with Q-scores under 7 are removed
-9. After going though all reads; freezeTB then prints
+10. After going though all reads; freezeTB then prints
    out both histogram (unfiltered and filtered)
-10. freezeTB prints out the AMRs that at least 5% of
+11. freezeTB prints out the AMRs that at least 5% of
    mapped reads supported
-11. freezeTB Then prints out the MIRU-VNTR lineage table
+12. freezeTB Then prints out the MIRU-VNTR lineage table
     of read counts for the reads
-12. freezeTB then collapses the consensus
+13. freezeTB then collapses the consensus
     - Split into fragments with 20x or greater read depth
     - Fragments with under 200x read depth are removed
     - Most supported snp/match/deletion selected
     - Snps/matches with less than 50% support are masked
     - Most supported insertion selected
     - Indels wit less than 70% support are removed
-13. freezeTB finds the AMRs for the consensus
-14. freezeTB finds the MIRU-VNTR lineages for consensus
-15. freezeTB finds spoligotype for consensus
-16. freezeTB then makes the read depth and coverage graphs
+14. freezeTB finds the AMRs for the consensus
+15. freezeTB finds the MIRU-VNTR lineages for consensus
+16. freezeTB finds spoligotype for consensus
+17. freezeTB then makes the read depth and coverage graphs
     with R (only if you used -graph or -graph-ext "ext")
+
+# Programs included with freezeTB
+
+I have made the programs in freezeTb to be modular. This
+  means that if you like a particular program, then you
+  can compile it separately. I have set the default build
+  methods to be static for the modules, so you will need
+  to do `make mac` on anything that is not freezeTB. All
+  of these programs take sam files as inputs.
+
+List of modules:
+
+- ampDepth: Makes the read depth tsv's that can be
+  converted to graphs of mean read depth and coverage
+  using scripts/graphAmpDepth.r
+- trimSam: trims off soft masked bases in an sam file
+- primMask: Masks primers in sequences (sam file) using
+  coordinates. This can also do some filtering.
+  - You can make an basic mask file file using your
+    primers and catPrimers.sh
+- tbCon: Builds an consensus (output is sam file)
+- tbAmr: AMR detection
+- tbMiru: detects MIRU-VNTR lineages in reads
+  - This also includes a couple of awk scripts for
+    processing the table made with `-out-tbl miru-tlb.tsv`
+    - awk -f `getPercMiruTbl.awk miru-tbl.tsv` is here to
+      print out the percentage of mapped  reads for each
+      primer
+    - awk -f `getHitMiruTbl.awk miru-tbl.tsv` is here to
+      print out the number of reads supporting each primer
+- tbSpoligo: does spoligotyping
+  - fasta/fastq is slow, sam is somewhat fast.
+
+Other, less usefull programs:
+
+- filtSam: For filtering trimming softmasked regions, and
+  converting sam files. You would be better off using
+  samtools.
+  - I have used it for finding the number of SNPs,
+    deletions, and, insertions for each read in an sam
+    file.
+    - `filtSam -p-n -out-stats -sam file.sam > stats.tsv`
+  - I have also used it to filter reads by coordinates
+    on an reference `filtsam -sam reads.sam -coords x,y`
+    or `fitsam -sam reads.sam -coords-file filters.tsv`
+  - If you only want trimming, then trimSam might be an
+    better option. Go with the faster version.
+- adjCoords: Adjust coordinates in sam file using an
+  list of genes. The idea is that you map your amplicons
+  to an list of genes and then correct the coordinates to
+  the reference with adjCoords.
+  - You can find the commands to make an gene table for
+    adjCoords in `slidesAndWriting/making-gene-table.md`
+  - adjCoords removes any entry it can not adjust (not in
+    the gene table) so, it does do some filtering
+- cigToEqxCig: Converts an sam file with an normal cigar
+  to an eqx cigar
+  - Mainly here to avoid running minimap2 again on
+    consensuses from tbCon
+  - `cigToEqxCig -sam file.sam -ref ref.fasta > out.sam`
+- scrpits/catPrimers.sh: bash script that uses minimap2
+  and awk to merge amplicons.
+  - It also prints out the amplicon and primer coordaintes
+    needed for primMask.
+  - `bash scripts/catPrimers.sh -ref ref.fasta -tsv primers.tsv -prefix prefix`
+- memwater:
+  - This is more of an library. I took it from my alnSeq
+    side project and fixed a few bugs. It is an waterman
+    that operates in linear memory and takes close to as
+    much time as an traditional waterman (slow, at least 
+    10x slower then the complete striped smith waterman
+    library).
+  - It is designed for CPUs with branch prediction and so,
+    uses branchless operations instead of branched.
+  - It only returns the scores and the start and end
+    coordinates of the alignment.
+- oldCode: This has old code I am not quite ready to throw
+  away yet. I may use it later or in another project.
+  Some of it was never finished, other parts of it no
+  longer work do to an change in my coding style.
+
+
+# How to simulated freezeTB with the smaller programs
+
+A better picture of how freezeTB works might be gotten by
+  showing how it would look if I used an bash script.
+
+```
+minimap2 \
+    -a \
+    -x map-ont \
+     freezeTBFiles/NC000962.fa \
+     reads.fastq \
+  > reads.sam;
+
+ampDepth \
+    -gene-tbl freezeTBFiles/gene-tbl.tsv \
+    -flag "unfiltered" \
+    -sam reads.sam \
+    -out reads-stats.tsv;
+
+filtsam \
+    -F 4 \
+    -F 256 \
+    -F 2048 \
+    -trim \
+    -min-aln-len 200 \
+    -min-mapq 15 \
+    -min-mean-q 7 \
+    -min-median-q 7 \
+    -sam reads.sam \
+    -out reads-filt.sam;
+
+primMask \
+   -sam reads-filt.sam \
+   -prim freezeTBFiles/mask.tsv \
+   -out reads-filt-mask.sam;
+
+# These steps could be run in parallel
+
+ampDepth \
+    -gene-tbl freezeTBFiles/gene-tbl.tsv \
+    -flag "filtered" \
+    -sam reads-filt-mask.sam |
+  tail -n+1 \
+  >> read-stats.tsv;
+
+tbCon \
+    -sam reads-filt-mask.sam \
+    -out-tsv reads-filt-mask-con.tsv \
+    -out reads-filt-mask-con.sam;
+
+tbMiru \
+    -miru-tbl freezeTBFiles/miruTbl.tsv \
+    -sam reads-filt-mask.sam \
+    out-tbl reads-filt-mask-miru-tbl.tsv;
+
+tbAmr \
+   -amr-tbl freezeTBFiles/who-2023.tsv \
+   -sam reads-filt-mask.sam \
+   -id-file reads-filt-mask-amrIds.tsv \
+   -out reads-filt-mask-amrs.tsv;
+
+# These steps can only be run after tbCon has finshed
+# However, they could be run in parrallel
+
+tbMiru \
+    -miru-tbl freezeTBFiles/miruTbl.tsv \
+    -sam reads-filt-mask-con.sam \
+    out-tbl reads-filt-mask-con-miru.tsv;
+
+tbSpoligo \
+    -spoligo freezeTBFiles/spoliogtype-seq.fa \
+    -db freezeTBFiles/spoligo-lineages.csv \
+    -sam reads-filt-mask-con.sam \
+    -out reads-filt-maks-con-spoligo.tsv;
+
+tbAmr \
+   -amr-tbl freezeTBFiles/who-2023.tsv \
+   -sam-con reads-filt-mask-con.sam \
+   -out reads-filt-mask-con-amrs.tsv;
+
+# For graphing (wait till ampDepth finishes)
+Rscript graphAmpDepth.r \
+   -stats read-stats.tsv \
+   -who freezeTBFiles/who-2023.tsv \
+   -ext svg \
+   -prefix reads;
+```
+

@@ -102,6 +102,7 @@ main(
    sint numPrimSI = 0;
 
    struct samEntry samStackST;
+   schar firstReadBl =0;/*marks if print primMask header*/
 
    FILE *samFILE = 0;
    FILE *outFILE = 0;
@@ -313,13 +314,21 @@ main(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-04:
    ^   - Mask primers
-   * Main Sec-04 Sub-01:
-   *  - Mask primers
+   ^   o main sec-04 sub-01:
+   ^     - read in the first line
+   ^   o main sec-04 sub-02:
+   ^     - print out any comments/header
+   ^   o main sec-04 sub-03:
+   ^     - make and print the primMask header
+   ^   o main sec-04 sub-04:
+   ^     - mask primers and print entry
+   ^   o main sec-04 sub-05:
+   ^     - get the next entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
    * Main Sec-04 Sub-01:
-   *  - Mask primers
+   *  - read in the first line and start loop
    \*****************************************************/
 
    errSC =
@@ -333,6 +342,12 @@ main(
 
    while(! errSC)
    { /*Loop: Read in all lines and mask primers*/
+
+      /**************************************************\
+      * Main Sec-04 Sub-02:
+      *  - print out any comments/header
+      \**************************************************/
+
       if(*samStackST.extraStr == '@')
       { /*If: this is an comment; print out*/
          pSamEntry(
@@ -344,6 +359,77 @@ main(
 
          goto nextLine_main_sec04;
       } /*If: this is an comment; print out*/
+
+      /**************************************************\
+      * Main Sec-04 Sub-03:
+      *  - make and print the primMask header
+      \**************************************************/
+
+      if(! firstReadBl)
+      { /*If: I need to print out the program header*/
+         fprintf(
+            outFILE,
+            "@PG\tID:primMask\tPN:primMask"
+         );
+
+         fprintf(
+            outFILE,
+            "\tVN:%i-%02i-%02i\tCL:primMask -mask %c",
+            def_year_primMask,
+            def_month_primMask,
+            def_day_primMask,
+            maskSC
+         );
+
+         if(filterBl)
+            fprintf(
+               outFILE,
+               "\t-filter"
+            );
+         else
+            fprintf(
+               outFILE,
+               "\t-no-filter"
+            );
+
+         fprintf(
+            outFILE,
+            "\t-fudge %i -prim %s",
+            fudgeSI,
+            primFileStr
+         );
+
+         if(samFileStr)
+            fprintf(
+               outFILE,
+               "\t-sam %s",
+               samFileStr
+            );
+         else
+            fprintf(
+               outFILE,
+               "\t-sam -"
+            );
+
+         if(outFileStr)
+            fprintf(
+               outFILE,
+               "\t-out %s\n",
+               outFileStr
+            );
+         else
+            fprintf(
+               outFILE,
+               "\t-out -\n"
+            );
+
+         firstReadBl = 1;
+      } /*If: I need to print out the program header*/
+
+      /**************************************************\
+      * Main Sec-04 Sub-04:
+      *  - mask primers and print entry
+      \**************************************************/
 
       errSL =
          maskPrimers(
@@ -366,6 +452,11 @@ main(
          outFILE
       );
 
+      /**************************************************\
+      * Main Sec-04 Sub-05:
+      *  - get the next entry
+      \**************************************************/
+
       nextLine_main_sec04:;
 
       errSC =
@@ -377,11 +468,6 @@ main(
            samFILE
          ); /*Get the first line in the sam file*/
    } /*Loop: Read in all lines and mask primers*/
-
-   /*****************************************************\
-   * Main Sec-04 Sub-02:
-   *  - Check for errors
-   \*****************************************************/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-05:

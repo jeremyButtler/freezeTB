@@ -10,19 +10,24 @@
 '     - included libraries
 '   o .h st-01: kmerTbl
 '     - Holds an kmer table for an single sequence
-'   o .h fun-01: kmerTblBlank
+'   o .h fun01: kmerTblBlank
 '     - blank the kmer counters (set to -1) in an kmerTbl
 '       structure
-'   o .h fun-02: kmerTblInit
+'   o .h fun02: kmerTblInit
 '     - Initialize an kmerTbl structure
-'   o fun-03: kmerTblFreeStack(
+'   o fun03: kmerTblFreeStack(
 '     - Frees an stack allocated kmerTbl structer
-'   o fun-04: kmerTblFreeHeap
+'   o fun04: kmerTblFreeHeap
 '     - Frees an heap allocated kmerTbl structer
-'   o fun-05: kmerTblFreeHeapAry
+'   o fun05: kmerTblFreeHeapAry
 '     - Frees an heap allocated array of kmerTbl structers
-'   o fun-06: kmerTblSetSeq
+'   o fun06: kmerTblSetSeq
 '     - Set the seqeuence for the kmer table
+'   o .c fun-08: buildKmerMask
+'     - builds an mask for removing unneeded bases from an
+'       kmer
+'   o .c fun09: getNextKmer
+'     - Adds the next base to the kmer and adjusts kmer
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -49,14 +54,19 @@
 #include "../generalLib/dataTypeShortHand.h"
 #include "../generalLib/codonTbl.h"
 #include "../generalLib/gen-shellSort.h"
+#include "ntToBit.h"/*Convert nucleotides to xbit values*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
 !   - .h ../generalLib/ulCpStr.h
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+/*For building the kmer mask*/
+#define def_ntOnePos 0x3 /*Equivlanet to 11 or two bits*/
+#define def_kmerShift 2
+
 /*-------------------------------------------------------\
-| Fun-03: kmerTblFreeStack
+| Fun03: kmerTblFreeStack
 |   - Frees an stack allocated kmerTbl structer
 | Input:
 |   - kmerTblSTPtr:
@@ -92,7 +102,7 @@ kmerTblFreeStack(
 } /*kmerTblFreeStack*/
 
 /*-------------------------------------------------------\
-| Fun-04: kmerTblFreeHeap
+| Fun04: kmerTblFreeHeap
 |   - Frees an heap allocated kmerTbl structer
 | Input:
 |   - kmerTblSTPtr:
@@ -111,7 +121,7 @@ kmerTblFreeHeap(
 } /*kmerTblFreeHeap*/
 
 /*-------------------------------------------------------\
-| Fun-05: kmerTblFreeAryHeap
+| Fun05: kmerTblFreeAryHeap
 |   - Frees an heap allocated array of kmerTbl structers
 | Input:
 |   - kmerTblSTPtr:
@@ -138,7 +148,7 @@ kmerTblFreeAryHeap(
 } /*kmerTblFreeHeap*/
 
 /*-------------------------------------------------------\
-| Fun-06: kmerTblSetSeq
+| Fun06: kmerTblSetSeq
 |   - Set the seqeuence for the kmer table
 | Input:
 |   - kmerTblSTPtr:
@@ -162,24 +172,24 @@ kmerTblInit(
    unsigned char lenKmerUC,
    void *seqSTVoidPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-06 TOC:
+   ' Fun06 TOC:
    '   - Set the sequence in an kmer table
-   '   o fun-06 sec-01:
+   '   o fun06 sec01:
    '     - Variable declerations
-   '   o fun-06 sec-02:
+   '   o fun06 sec02:
    '     - Allocate memory
-   '   o fun-06 sec-03:
+   '   o fun06 sec03:
    '     - Find the number of kmers in the sequence
-   '   o fun-06 sec-04:
+   '   o fun06 sec04:
    '     - Find the index of each kmer
-   '   o fun-06 sec-05:
+   '   o fun06 sec05:
    '     - Add kmers to table
-   '   o fun-06 sec-06:
+   '   o fun06 sec06:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-06 Sec-01:
+   ^ Fun06 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -196,20 +206,20 @@ kmerTblInit(
    struct seqStruct *seqSTPtr= (seqStruct *) seqSTVoidPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-06 Sec-02:
+   ^ Fun06 Sec02:
    ^   - Allocate memory
-   ^   o fun-06 sec-02 sub-01:
+   ^   o fun06 sec02 sub01:
    ^     - Find the number of kmers in the table
-   ^   o fun-06 sec-02 sub-02:
+   ^   o fun06 sec02 sub02:
    ^     - Kmer index (for table) allocation
-   ^   o fun-06 sec-02 sub-03:
+   ^   o fun06 sec02 sub03:
    ^     - Kmer table memory allocation
-   ^   o fun-06 sec-02 sub-04:
+   ^   o fun06 sec02 sub04:
    ^     - Temporary index memory allocation
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-06 Sec-02 Sub-01:
+   * Fun06 Sec02 Sub01:
    *   - Find the number of kmers in the table
    \*****************************************************/
 
@@ -224,7 +234,7 @@ kmerTblInit(
       kmerUI << 2;
 
    /*****************************************************\
-   * Fun-06 Sec-02 Sub-02:
+   * Fun06 Sec02 Sub02:
    *   - Kmer index (for table) allocation
    \*****************************************************/
 
@@ -268,7 +278,7 @@ kmerTblInit(
    } /*Else: The user provided an index entry*/
 
    /*****************************************************\
-   * Fun-06 Sec-02 Sub-03:
+   * Fun06 Sec02 Sub03:
    *   - Kmer table memory allocation
    \*****************************************************/
 
@@ -281,7 +291,7 @@ kmerTblInit(
       goto memErr_fun06_sec06_sub02;
 
    /*****************************************************\
-   * Fun-06 Sec-02 Sub-04:
+   * Fun06 Sec02 Sub04:
    *   - Temporary index memory allocation
    \*****************************************************/
 
@@ -295,7 +305,7 @@ kmerTblInit(
       goto memErr_fun06_sec06_sub02;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-06 Sec-03:
+   ^ Fun06 Sec03:
    ^   - Find the number of kmers in the sequence
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -334,7 +344,7 @@ kmerTblInit(
    } /*Loop: Find the number of kmers*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-06 Sec-04:
+   ^ Fun06 Sec04:
    ^   - Find the index of each kmer
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -356,7 +366,7 @@ kmerTblInit(
    } /*Loop: Find kmer index's*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-06 Sec-05:
+   ^ Fun06 Sec05:
    ^   - Add kmers to table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -405,18 +415,18 @@ kmerTblInit(
    } /*Loop: Find the number of kmers*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-06 Sec-06:
+   ^ Fun06 Sec06:
    ^   - Clean up
-   ^   o fun-06 sec-06 sub-01:
+   ^   o fun06 sec06 sub01:
    ^     - Handle no error cases
-   ^   o fun-06 sec-06 sub-02:
+   ^   o fun06 sec06 sub02:
    ^     - Deal with memory errors
-   ^   o fun-06 sec-06 sub-03:
+   ^   o fun06 sec06 sub03:
    ^     - Clean up after memory errors
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-06 Sec-06 Sub-01:
+   * Fun06 Sec06 Sub01:
    *   - Handle no error cases
    \*****************************************************/
 
@@ -426,7 +436,7 @@ kmerTblInit(
    return kmerTblSTPtr;
 
    /*****************************************************\
-   * Fun-06 Sec-06 Sub-02:
+   * Fun06 Sec06 Sub02:
    *   - Deal with memory errors
    \*****************************************************/
 
@@ -436,7 +446,7 @@ kmerTblInit(
    goto errClean_fun06_sec06_sub03;
 
    /*****************************************************\
-   * Fun-06 Sec-06 Sub-03:
+   * Fun06 Sec06 Sub03:
    *   - Clean up after memory errors
    \*****************************************************/
 
@@ -451,7 +461,7 @@ kmerTblInit(
 } /*kmerTblBlank*/
 
 /*-------------------------------------------------------\
-| Fun-08: kmerTblJoinKmers
+| Fun08: kmerTblJoinKmers
 |   - joins neighboring kmers together into an single
 |     large kmer
 | Input:
@@ -515,17 +525,17 @@ kmerTblJoinKmers(
    unsigned int *maxKmersUIPtr, /*holds size of arrays*/
    unsinged int minLenUI        /*Min joined kmer length*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-08 TOC:
+   ' Fun08 TOC:
    '   - joins neighboring kmers together into an single
    '     large kmer
-   '   o fun-08 sec-01:
+   '   o fun08 sec01:
    '     - variable declerations
-   '   o fun-08 sec-02:
+   '   o fun08 sec02:
    '     - Check if I need to allocate memory for arrays
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-01:
+   ^ Fun08 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -541,7 +551,7 @@ kmerTblJoinKmers(
    uint numBasesUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-02:
+   ^ Fun08 Sec02:
    ^   - Check if I need to allocate memory for arrays
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -599,7 +609,7 @@ kmerTblJoinKmers(
    } /*Else If: I need to resize arrays*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-03:
+   ^ Fun08 Sec03:
    ^   - Set up the query indexs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -614,7 +624,7 @@ kmerTblJoinKmers(
    } /*Loop: initialize the index array*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-04:
+   ^ Fun08 Sec04:
    ^   - Set up the query indexs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -662,17 +672,17 @@ kmerTblJoinKmers(
    } /*Loop: Join kmers*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-0x:
+   ^ Fun08 Sec0x:
    ^   - clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-0x Sub-01:
+   * Fun08 Sec0x Sub01:
    *   - No error clean up
    \*****************************************************/
 
    /*****************************************************\
-   * Fun-08 Sec-0x Sub-02:
+   * Fun08 Sec0x Sub02:
    *   - Clean up after errors
    \*****************************************************/
 
@@ -681,6 +691,287 @@ kmerTblJoinKmers(
    return 0;
 } /*kmerTblJoinKmers*/
 
+/*-------------------------------------------------------\
+| Fun-08: buildKmerMask
+|   - builds an mask for removing unneeded bases from an
+|     kmer
+| Input:
+|   - maskSI:
+|     o made into be the kmer mask
+|   - lenKmerUC:
+|     o length of one kmer
+| Output:
+|   - Modifies:
+|     o maskSI to hold the new mask
+\-------------------------------------------------------*/
+#define \
+buildKmerMask( \
+   maskSI,
+   lenKmerUC \
+){ \
+   unsigned char ucNtMac = 0; \
+   maskSI = 0; \
+   \
+   for(ucNtMac = 0; ucNtMac <  (lenKmerUC); ++ucNtMac) \
+   { /*Loop: build the kmer mask*/ \
+      (maskSI <<= def_kmerShift); \
+      (maskSI) |= (def_ntOnePos); \
+   } /*Loop: build the kmer mask*/ \
+} /*buildKmerMask*/
+
+
+/*-------------------------------------------------------\
+| Fun09: getNextKmer
+|   - Adds the next base to the kmer and adjusts kmer
+| Input:
+|   - ntUC:
+|     o nuceotide to add to the kmer
+|   - kmerSI:
+|     o kmer to add nucleotide to
+|   - maskSI:
+|     o mask to remove the old kmer (once shifted out)
+|   - ntInKmerSI:
+|     o Number of nucleotides in the current kmer
+| Output:
+|   - Modifies:
+|     o kmerSI to have the old base remove an ntUC added
+|       in
+|     o ntInKmerSI:
+|       - 0 if I had an anonymous base or an error
+|       - number if no anonymous base. This value can be
+|         geater then the kmer size. It is just a way to
+|         make sure I did not reset after an anonymous
+|         base
+\-------------------------------------------------------*/
+#define \
+getNextKmer( \
+   ntUC, \
+   kmerSI, \
+   maskSI, \
+   ntInKmerSI \
+){ \
+   unsigned char codeMacUC = 0; \
+   \
+   codeMacUC = ntToTwoBit[refStr[(unsigned char) (ntUC)];\
+   \
+   (kmerSI) <<= 2; \
+   (kmerSI) |= (codeMacUC); \
+   \
+   (kmerSI) &= (maskSI); /*remove old base in kmer*/ \
+   \
+   codeMacUC = !( ntUC & (err_sixBit | n_fiveBit) ); \
+   (ntInKmerSI) &= (-codeMacUC); \
+   (ntInKmerSI) += codeMacUC; \
+      /*Logic
+      `   - ntCU = !( ntUC & (err | n) )
+      `     o 1 if no error or anonymous base
+      `     o 0 if error or anonymous base
+      `   - ntInKmerSI &= (-ntUC)
+      `     o For no error or anonymous base case; goes
+      `       to ntInKmerSI & -1 = ntInKmersSI
+      `     o For error or anonymous base case; goes to
+      `       ntInKmerSI & 0 = 0
+      `   - ntInKmerSI += ntUC
+      `     o For no error or anonymous base case; goes
+      `       to ntInKmerSI + 1
+      `     o For error or anonymous base case; goes to
+      `       ntInKmerSI + 0
+      */ \ 
+} /*getNextKmer*/
+
+struct kmerSearch *
+kmerSearch_mk(
+   signed char *refStr,
+   signed int lenRefSI,
+   signed char lenKmerSC
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun10 TOC:
+   '   o fun10 Sec01:
+   '     - variable declerations
+   '   o fun10 Sec02:
+   '     - make and allocate memrory for kmerSearch struct
+   '   o fun10 sec03:
+   '     - get kmer counts
+   '   o fun10 Sec04:
+   '     - build the search table
+   '   o fun10 Sec05:
+   '     - clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun10 Sec01:
+   ^   - variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   uchar ntUC = 0;
+
+   sint siKmer = 0;
+   sint ntInKmerSI = 0;
+   sint siNt = 0;
+   sint kmerIndxSI = 0;
+   sint lastKmerSI = 0;
+
+   sint maskSI = 0; /*Mask to remove old kmers*/
+   struct kmerSearch *retHeapST = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun10 Sec02:
+   ^   - make and allocate memrory for kmerSearch struct
+   ^   o fun10 sec02 sub01:
+   ^     - make and initialize kmerSearch structure
+   ^   o fun10 sec02 sub02:
+   ^     - allocate memory for ref positions and tables
+   ^   o fun10 sec02 sub03:
+   ^     - get max kmers in table & allocate kmerIndxArySI
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun10 Sec02 Sub01:
+   *   - make and initialize kmerSearch structure
+   \*****************************************************/
+
+   retHeapST = malloc(sizeof(struct kmerSearch));
+
+   if(! retHeapST)
+      errCleanUp_fun10_sec0x_sub02;
+
+   if(! kmerTblSTPtr)
+      return 0;   /*No kmer table input*/
+
+   kmerSearch_init(retHeapST);
+   retHeapST->lenRefSI = lenRefSI;
+
+   /*****************************************************\
+   * Fun10 Sec02 Sub02:
+   *   - allocate memory for ref positions and tables
+   \*****************************************************/
+
+   retHeapST->refPosArySI =
+      malloc(lenRefSI * sizeof(sint));
+
+   if(! retHeapST->refPosArySI)
+      goto errCleanUp_fun10_sec0x_sub02;
+
+   retHeapST->tblIndexArySI =
+      malloc(lenRefSI * sizeof(sint));
+
+   if(! retHeapST->tblIndexArySI)
+      goto errCleanUp_fun10_sec0x_sub02;
+
+   retHeapST->searchTblSI =
+      malloc(lenRefSI * sizeof(sint));
+
+   if(! retHeapST->searchTblSI)
+      goto errCleanUp_fun10_sec0x_sub02;
+
+   /*****************************************************\
+   * Fun10 Sec02 Sub03:
+   *   - find max kmers in table & allocate kmerIndxArySI
+   \*****************************************************/
+
+   retHeapST->lenKmerUC = lenKmerUC;
+
+   /*Find the number of kmers in the table*/
+   retHeapST->maxKmersSI = 1;
+
+   for(siKmer = 0; siKmer < lenKmerUC; ++siKmer)
+      (retHeapST->maxKmersSI) <<= 2;
+
+   retHeapST->lenKmerIndxUI = (retHeapST->maxKmersSI) <<2;
+
+   retHeapST->kmerIndxArySI =
+      malloc((retHeapST)->kmerInxUI * sizeof(sint));
+
+   if(! retHeapST->kmerIndxArySI)
+      goto errCleanUp_fun10_sec0x_sub02;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun10 Sec03:
+   ^   - get kmer counts (sets index for tblIndxArySI)
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   buildKmerMask(maskSI, lenKmerUC);
+   ntInKmerSI = 0;
+
+   for(siNt = 0; siNt < refLenSI; ++siNt)
+   { /*Loop: Count how number of times each kmer repeats*/
+      getNextKmer(
+         refStr[siNt],
+         siKmer,
+         maskSI,     /*built in fun10 sec02 sub03*/
+         ntInKmerSI
+      );
+
+      retHeapST->kmerIndexArySI[siKmer << 1] +=
+         (ntInKmerSI >= lenKmerUC);
+         /* ntInKmerSI > lenKmerUC means that its been an
+         `    bit since I had an error or anonymous base
+         */
+   } /*Loop: Count how number of times each kmer repeats*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun10 Sec04:
+   ^   - build the search table
+   ^   o fun10 sec02 sub01:
+   ^   o fun10 sec02 sub02:
+   ^   o fun10 sec02 sub03:
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   ntInKmerSI = 0;
+
+   for(siNt = 0; siNt < refLenSI; ++siNt)
+   { /*Loop: Count how number of times each kmer repeats*/
+      getNextKmer(
+         refStr[siNt],
+         siKmer,
+         maskSI,     /*built in fun10 sec02 sub03*/
+         ntInKmerSI
+      );
+
+      if(ntInKmerSI < lenKmerUC)
+         continue; /*Anoymous base in kmer*/
+
+      kmerIndxSI = siKmer << 1;
+
+      siKmer = retHeapST->kmerIndexArySI[kmerIndxSI];
+
+      ++kmerIndexSI;
+      ++(retHeapST->kmerIndexArySI[kmerIndxSI]);
+
+      lastKmerSI = kmerIndexSI;
+
+      siKmer += retHeapST->kmerIndexArySI[kmerIndxSI];
+   } /*Loop: Count how number of times each kmer repeats*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun10 Sec05:
+   ^   - clean up and return
+   ^   o fun10 sec05 sub01:
+   ^     - no error clean up
+   ^   o fun10 sec05 sub02:
+   ^     - error clean up
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun10 Sec05 Sub01:
+   *   - no error clean up
+   \*****************************************************/
+
+   return retHeapST;
+
+   /*****************************************************\
+   * Fun10 Sec05 Sub02:
+   *   - error clean up
+   \*****************************************************/
+
+   errCleanUp_fun10_sec0x_sub02:;
+
+   kmerSearch_freeHeap(retHeapST);
+   retHeapST = 0;
+
+   return 0;
+} /*kmerSearch_addRef*/
+
 
 /*=======================================================\
 : License:
@@ -688,7 +979,7 @@ kmerTblJoinKmers(
 : This code is under the unlicense (public domain).
 :   However, for cases were the public domain is not
 :   suitable, such as countries that do not respect the
-:   public domain or were working with the public domain
+:   public domain or were working with the publikc domain
 :   is inconvient / not possible, this code is under the
 :   MIT license.
 : 

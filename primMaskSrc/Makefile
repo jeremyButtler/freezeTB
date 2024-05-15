@@ -38,3 +38,7 @@ debug:
 
 check:
 	$(CC) $(DEBUGFLAGS) -o bugPrimMask $(SOURCE);
+
+install:
+	cp primMask $(PREFIX);
+	chmod a+xr $(PREFIX)/primMask;

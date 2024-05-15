@@ -29,6 +29,7 @@
 
 #include "tbCon-fun.h"
 #include "tbCon-input.h"
+#include "tbCon-version.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden files
@@ -58,7 +59,11 @@ int main(
    '   o main sec-02:
    '     - Get and check user input
    '   o main sec-03:
+   '     - Open files
+   '   o main sec-04:
    '     - Build consensus
+   '   o main sec-05:
+   '     - Print and collapse the consensus
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -251,7 +256,18 @@ int main(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-04:
    ^   - Build the consensus
+   ^   o main sec-04 sub-01:
+   ^     - build the consensus
+   ^   o main sec-04 sub-02:
+   ^     - build the consensus
+   ^   o main sec-04 sub-03:
+   ^     - print tbCon tsv file settings
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Main Sec-04 Sub-01:
+   *   - build the consensus
+   \*****************************************************/
 
    initSamEntry(&samST);
    errS =
@@ -376,7 +392,18 @@ int main(
    *   - print tbCon cosensus (same file) settings
    \*****************************************************/
 
-   fprintf(outFILE, "@consensus: tbCon");
+   fprintf(
+      outFILE,
+      "@PG\tID:tbCon\tPN:tbCon"
+   );
+
+   fprintf(
+      outFILE,
+      "\tVN:%i-%02i-%02i\tCL:tbCon",
+      def_tbCon_input_year,
+      def_tbCon_input_month,
+      def_tbCon_input_day
+   );
 
    /*Check if getting sam file from stdin*/
    if(! samFileStr || *samFileStr == '-')
@@ -407,11 +434,6 @@ int main(
       settings.minPercDelF
    );
 
-   if(! outFileStr || *outFileStr == '-')
-     fprintf(outFILE, " -out -\n");
-   else
-     fprintf(outFILE, " -out %s\n", outFileStr);
-
    /*****************************************************\
    * Main Sec-04 Sub-03:
    *   - print tbCon tsv file settings
@@ -419,22 +441,6 @@ int main(
 
    if(tsvFileStr)
    { /*If: the user is printing the tsv file*/
-      fprintf(outFILE, "@tsv: tbCon");
-
-      /*Check if getting sam file from stdin*/
-      if(! samFileStr || *samFileStr == '-')
-        fprintf(outFILE, " -sam -");
-      else
-        fprintf(outFILE, " -sam %s", samFileStr);
-
-      fprintf(
-         outFILE,
-         " -min-mapq %i -min-q %i -min-q-ins %i",
-         settings.minMapqUC,
-         settings.minQI,
-         settings.minInsQI
-      );
-
       fprintf(
          outFILE,
          " -p-min-depth %i -p-perc-snp-sup %f",
@@ -455,6 +461,11 @@ int main(
           tsvFileStr
       );
    } /*If: the user is printing the tsv file*/
+
+   if(! outFileStr || *outFileStr == '-')
+     fprintf(outFILE, " -out -\n");
+   else
+     fprintf(outFILE, " -out %s\n", outFileStr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec-05:

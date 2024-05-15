@@ -29,4 +29,4 @@ buildWhoCnvt:
 
 install: 
 	cp tbAmr $(PREFIX);
-	chmod a+x $(PREFIX)/tbAmr;
+	chmod a+xr $(PREFIX)/tbAmr;

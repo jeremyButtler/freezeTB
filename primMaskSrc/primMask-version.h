@@ -21,7 +21,7 @@
 
 #define def_year_primMask 2024
 #define def_month_primMask 5
-#define def_day_primMask 2
+#define def_day_primMask 14
 
 #endif
 

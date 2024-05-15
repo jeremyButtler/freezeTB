@@ -27,4 +27,4 @@ debug:
 
 install:
 	mv ampDepth $(PREFIX);
-	chmod a+x $(PREFIX)/ampDepth;
+	chmod a+xr $(PREFIX)/ampDepth;

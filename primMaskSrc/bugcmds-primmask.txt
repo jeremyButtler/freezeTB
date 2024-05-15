@@ -2,7 +2,7 @@ b primMask.c:109
 b primMaskc-fun.c:193
 
 #r -filter -fudge 100 -prim test-coords.tsv -sam ~/files/testing/null-con.sam > tmp.sam
-r -fud
+r -fudge -1 -prim ../freezeTBFiles/mask.tsv -sam ~/files/testing/BC33.sam
 
 define pflag
   set $cnt = 0

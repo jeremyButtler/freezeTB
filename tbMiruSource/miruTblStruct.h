@@ -132,11 +132,13 @@ typedef struct miruAmp{
    int *numHitsIAry;/*Number of hits for each lineage*/
    int numLinI;     /*Defensive coding (array lengths)*/
    int *indexIAry;  /*Index for each lineage miruTbl)*/
-
       /*indexIAry is here so I can sort the primers by
       `   length, but still be able find the lineage
       `   they represent later
       */
+
+   /*Number of hits were the lineage could not be found*/
+   signed int noLinSI;
 }miruAmp;
 
 /*-------------------------------------------------------\
@@ -181,6 +183,7 @@ blankMiruAmp(\
    (miruAmpSTPtr)->revPosI = -1;\
    (miruAmpSTPtr)->revLenI = -1;\
    (miruAmpSTPtr)->mapReadsI = 0;\
+   (miruAmpSTPtr)->noLinSI = 0;\
    \
    for(\
       iLinMac = 0;\
@@ -212,6 +215,7 @@ resetCnt_miruAmp(\
    int iLinMac = 0; /*Lineage on in MIRU amplicon*/\
    \
    (miruAmpSTPtr)->mapReadsI = 0;\
+   (miruAmpSTPtr)->noLinSI = 0;\
    \
    for(\
       iLinMac = 0;\

@@ -392,7 +392,7 @@ LoFForwardCheck(\
                   readPosMacUI += 3;\
                   \
                   /*Check if I had an early stop*/\
-                  LoFMacBl |= (aaC== '*');\
+                  LoFMacBl |= (aaC == '*');\
                   extraNtMacSI -= 3;\
                } /*Loop: Check indel reading frame*/\
             } /*If: had an start, check for LoFs*/\
@@ -590,7 +590,7 @@ LoFReverseCheck(\
         LoFMacBl = 1; /*Is an indel*/\
       \
       else\
-      { /*Else: This is not an deletion*/\
+      { /*Else: See if this is not an deletion*/\
          aaC =\
             revCompCodonToAA(\
                (samSTPtr)->seqStr[readPosMacUI],\
@@ -600,7 +600,7 @@ LoFReverseCheck(\
          \
          /*See if the last codon is an stop*/\
          LoFMacBl = ((aaC != '*') & (aaC != 'x'));\
-      } /*Else: This is not an deletion*/\
+      } /*Else: See if this is not an deletion*/\
       \
       haveEndBl = 1;\
    } /*If: I have the last base in the gene*/\
@@ -1265,10 +1265,13 @@ checkAmrSam(
             ` for now
             */
           
-            if(
+            if(aaC == 'x') /*Any aa*/
+               goto nextAmr_fun09_sec03_sub08;
+
+            else if(
                   amrAryST[iAmr].amrAaStr[iAa] == '?'
                && aaC != amrAryST[iAmr].refAaStr[iAa]
-            ){ /*If: this could be any codon*/
+            ){ /*Else If: this could be any codon*/
                if((amrAryST[iAmr].refAaStr[iAa] |32)=='m')
                { /*If: this is a "start" codon*/
                   resBl =
@@ -1279,13 +1282,13 @@ checkAmrSam(
                      );
 
                   /*If this was not a start codon*/;
-                  if(resBl || aaC == 'x')
+                  if(resBl)
                   { /*If: this was a bacterial start*/
                      resBl = 0;
                      goto nextAmr_fun09_sec03_sub08;
                   } /*If: this was a bacterial start*/
                } /*If: this is a "start" codon*/
-            } /*If: this could be any codon*/
+            } /*Else If: this could be any codon*/
 
             else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
                goto nextAmr_fun09_sec03_sub08;
@@ -1328,10 +1331,13 @@ checkAmrSam(
             ` non-insertions/deletions; so I am safe here
             ` for now
             */
-            if(
+            if(aaC == 'x') /*Any aa*/
+               goto nextAmr_fun09_sec03_sub08;
+
+            else if(
                   amrAryST[iAmr].amrAaStr[iAa] == '?'
                && aaC != amrAryST[iAmr].refAaStr[iAa]
-            ){ /*If: this could be any codon*/
+            ){ /*Else If: this could be any codon*/
                if((amrAryST[iAmr].refAaStr[iAa] |32)=='m')
                { /*If: this is a "start" codon*/
                   resBl =
@@ -1342,13 +1348,13 @@ checkAmrSam(
                      );
 
                   /*If this was not a start codon*/;
-                  if(resBl || aaC == 'x')
+                  if(resBl)
                   { /*If: this was a bacterial start*/
                      resBl = 0;
                      goto nextAmr_fun09_sec03_sub08;
                   } /*If: this was a bacterial start*/
                } /*If: this is a "start" codon*/
-            } /*If: this could be any codon*/
+            } /*Else If: this could be any codon*/
 
             else if(aaC != amrAryST[iAmr].amrAaStr[iAa])
                goto nextAmr_fun09_sec03_sub08;
@@ -1579,7 +1585,7 @@ pCrossRes(amrSTPtr, drugAryStr, outFILE){\
             getDrugFromDrugAry((drugAryStr), iIndexMac);\
          \
          if(! firstPrintMacBl)\
-            fprintf((outFILE), "-%s", drugMacStr);\
+            fprintf((outFILE), "_%s", drugMacStr);\
          else \
          { /*Else: This is the first drug I am printing*/\
             firstPrintMacBl = 0;\
@@ -1612,7 +1618,7 @@ pHeadAmrHitList(
 ){
    fprintf((FILE *) outFILE, "Id\tgene\tdrug");
    fprintf((FILE *) outFILE, "\tcrossResitance");
-   fprintf((FILE *) outFILE, "\tvariantId\ttype");
+   fprintf((FILE *) outFILE, "\tvariantId\ttype\tgrade");
    fprintf((FILE *) outFILE, "\trefPos\tseqPos");
    fprintf((FILE *) outFILE, "\tresitanceLevel");
    fprintf((FILE *) outFILE, "\tresistanceAdditive");
@@ -1799,9 +1805,10 @@ pAmrHitList(
 
       fprintf(
         (FILE *) outFILE,
-        "\t%s\t%s\t%i\t%i",
+        "\t%s\t%s\t%i\t%i\t%i",
         tmpST->amrST->varIdStr,  /*Variant id*/
         tmpST->amrST->mutTypeStr, /*snp/del/ins/LoF*/
+        tmpST->amrST->gradeC,
         (int) tmpST->amrST->refPosUI,  /*Position on ref*/
         (int) tmpST->seqPosUI          /*Position on seq*/
       ); /*Print out the variant id and type*/
@@ -1901,7 +1908,7 @@ pHeadAmrs(
 ){
    fprintf((FILE *) outFILE,"gene\tDrug");
    fprintf((FILE *) outFILE,"\tcrossResistance");
-   fprintf((FILE *) outFILE,"\tvariantId\ttype");
+   fprintf((FILE *) outFILE,"\tvariantId\ttype\tgrade");
    fprintf((FILE *) outFILE,"\trefPos");
    fprintf((FILE *) outFILE,"\tnumSupportingReads");
    fprintf((FILE *) outFILE,"\tpercSupportReads");
@@ -2127,9 +2134,10 @@ pAmrs(
 
       fprintf(
         (FILE *) outFILE,
-        "\t%s\t%s\t%i\t%i\t%.2f\t%i",
+        "\t%s\t%s\t%i\t%i\t%i\t%.2f\t%i",
         amrSTAry[indexUI].varIdStr,   /*Variant id*/
         amrSTAry[indexUI].mutTypeStr, /*snp/del/ins/LoF*/
+        amrSTAry[indexUI].gradeC,
         (int) amrSTAry[indexUI].refPosUI,
         (int) amrSTAry[indexUI].numSupReadsUI,
         percSupF * 100,

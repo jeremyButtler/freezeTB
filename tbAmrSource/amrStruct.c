@@ -1699,17 +1699,14 @@ struct amrStruct * readTbAmrTbl(
 
       tmpStr += amrSTAry[uiAmr].lenCommentUI + 1;
 
-      while(*tmpStr > 31) ++tmpStr;
-
       /**************************************************\
       * Fun-11 Sec-05 Sub-24:
       *   - Read in the grade entry
       \**************************************************/
 
       if(*tmpStr == '\n') goto nextLine_readAmrST;
-      ++tmpStr; /*Get off the tab*/
 
-      amrSTAry[uiAmr].gradeC = 48 - *tmpStr;
+      amrSTAry[uiAmr].gradeC = *tmpStr - 48;
 
       while(*tmpStr > 31) ++tmpStr;
 
@@ -1721,7 +1718,7 @@ struct amrStruct * readTbAmrTbl(
       if(*tmpStr == '\n') goto nextLine_readAmrST;
       ++tmpStr; /*Get off the tab*/
 
-      amrSTAry[uiAmr].wholeGeneFlag = 48 - *tmpStr;
+      amrSTAry[uiAmr].wholeGeneFlag = *tmpStr - 48;
 
       while(*tmpStr > 31) ++tmpStr;
 
@@ -1733,7 +1730,7 @@ struct amrStruct * readTbAmrTbl(
       if(*tmpStr == '\n') goto nextLine_readAmrST;
       ++tmpStr; /*Get off the tab*/
 
-      amrSTAry[uiAmr].unknownBl = 48 - *tmpStr;
+      amrSTAry[uiAmr].unknownBl = *tmpStr - 48;
 
       /**************************************************\
       * Fun-11 Sec-05 Sub-27:

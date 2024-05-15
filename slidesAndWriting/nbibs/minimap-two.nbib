@@ -1,0 +1,57 @@
+PMID- 34623391
+OWN - NLM
+STAT- MEDLINE
+DCOM- 20230413
+LR  - 20230416
+IS  - 1367-4811 (Electronic)
+IS  - 1367-4803 (Print)
+IS  - 1367-4803 (Linking)
+VI  - 37
+IP  - 23
+DP  - 2021 Dec 7
+TI  - New strategies to improve minimap2 alignment accuracy.
+PG  - 4572-4574
+LID - 10.1093/bioinformatics/btab705 [doi]
+AB  - SUMMARY: We present several recent improvements to minimap2, a versatile pairwise 
+      aligner for nucleotide sequences. Now minimap2 v2.22 can more accurately map long 
+      reads to highly repetitive regions and align through insertions or deletions up 
+      to 100 kb by default, addressing major weakness in minimap2 v2.18 or earlier. 
+      AVAILABILITY AND IMPLEMENTATION: https://github.com/lh3/minimap2.
+CI  - © The Author(s) 2021. Published by Oxford University Press. All rights reserved. 
+      For permissions, please e-mail: journals.permissions@oup.com.
+FAU - Li, Heng
+AU  - Li H
+AUID- ORCID: 0000-0003-4874-2874
+AD  - Department of Data Sciences, Dana-Farber Cancer Institute, Boston, MA 02215, USA.
+AD  - Department of Biomedical Informatics, Harvard Medical School, Boston, MA 02215, 
+      USA.
+LA  - eng
+GR  - R01 HG010040/HG/NHGRI NIH HHS/United States
+PT  - Journal Article
+PT  - Research Support, N.I.H., Extramural
+PL  - England
+TA  - Bioinformatics
+JT  - Bioinformatics (Oxford, England)
+JID - 9808944
+SB  - IM
+MH  - *Software
+MH  - *Algorithms
+MH  - Sequence Analysis, DNA
+MH  - Base Sequence
+PMC - PMC8652018
+EDAT- 2021/10/09 06:00
+MHDA- 2023/04/13 06:42
+PMCR- 2022/10/08
+CRDT- 2021/10/08 12:19
+PHST- 2021/08/07 00:00 [received]
+PHST- 2021/10/04 00:00 [revised]
+PHST- 2021/10/06 00:00 [accepted]
+PHST- 2023/04/13 06:42 [medline]
+PHST- 2021/10/09 06:00 [pubmed]
+PHST- 2021/10/08 12:19 [entrez]
+PHST- 2022/10/08 00:00 [pmc-release]
+AID - 6384570 [pii]
+AID - btab705 [pii]
+AID - 10.1093/bioinformatics/btab705 [doi]
+PST - ppublish
+SO  - Bioinformatics. 2021 Dec 7;37(23):4572-4574. doi: 10.1093/bioinformatics/btab705.

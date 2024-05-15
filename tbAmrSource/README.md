@@ -106,6 +106,5 @@ For regular frameshifts (not entire gene) it will also
   it. This means that there will be a lot of false
   positives for reads.
 
-Given that Nanopore is less likely, but still has errors
-  as indel's in homopolymers, I would suggest not using
-  `-frameshift`.
+Given that Nanopore sequence reads still have indel's
+  errors in homopolymers, I would not ise `-frameshift`.

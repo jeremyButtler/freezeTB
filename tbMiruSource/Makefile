@@ -25,4 +25,4 @@ mac:
 
 install:
 	cp tbMiru $(PREFIX);
-	chmod a+x $(PREFIX)/tbMiru;
+	chmod a+xr $(PREFIX)/tbMiru;

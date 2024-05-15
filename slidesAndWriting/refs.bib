@@ -1,0 +1,335 @@
+/********************************************************\
+* WHO Catalog (2023):
+\********************************************************/
+
+# Repo: https://github.com/GTB-tbsequencing/mutation-catalogue-2023
+
+@techreport{WHO-TB-2023,
+   Title={
+      Catalogue of mutations in Mycobacterium tuberculosis
+      complex and their association with drug resistance
+   },
+   Number={2},
+   Author={Geneva: World Health Organization},
+   Year={2023},
+   Note={second edition},
+   Note={Licence: CC BY-NC-SA 3.0 IGO},
+}
+
+/********************************************************\
+* TBProfiler:
+\********************************************************/
+
+@Article{phelan-2019-pmid-31234910,
+  Title={
+    Integrating informatics tools and portable sequencing
+    technology for rapid detection of resistance to
+    anti-tuberculous drugs.
+  },
+  Author={
+    Phelan, Jody E and O'Sullivan, Denise M and
+    Machado, Diana and Ramos, Jorge and
+    Oppong, Yaa E A and Campino, Susana and
+    O'Grady, Justin and McNerney, Ruth and
+    Hibberd, Martin L and Viveiros, Miguel and
+    Huggett, Jim F and Clark, Taane G
+  },
+  Journal={Genome medicine},
+  JournalId={101475844},
+  Year={2019},
+  Month={Jun},
+  Day={24},
+  Volume={11},
+  Number={1},
+  Pages={41},
+  doi={10.1186/s13073-019-0650-x},
+  url={https://dx.doi.org/10.1186/s13073-019-0650-x},
+  ISSN={1756-994X},
+  PMID={31234910},
+  PMC={PMC6591855},
+  File={2019-pmid-31234910.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={
+    Diagnostics, Drug resistance,
+    Drug-susceptibility testing, MDR-TB, Tuberculosis,
+    WGS, XDR-TB
+  },
+  NotesP={
+  },
+  Abstract={
+    BACKGROUND: Mycobacterium tuberculosis resistance to
+    anti-tuberculosis drugs is a major threat to global
+    public health. Whole genome sequencing (WGS) is
+    rapidly gaining traction as a diagnostic tool for
+    clinical tuberculosis settings. To support this
+    informatically, previous work led to the development
+    of the widely used TBProfiler webtool, which predicts
+    resistance to 14 drugs from WGS data. However, for
+    accurate and rapid high throughput of samples in
+    clinical or epidemiological settings, there is a need
+    for a stand-alone tool and the ability to analyse
+    data across multiple WGS platforms, including Oxford
+    Nanopore MinION. RESULTS: We present a new command
+    line version of the TBProfiler webserver, which
+    includes hetero-resistance calling and will
+    facilitate the batch processing of samples. The
+    TBProfiler database has been expanded to incorporate
+    178 new markers across 16 anti-tuberculosis drugs.
+    The predictive performance of the mutation library
+    has been assessed using > 17,000 clinical isolates
+    with WGS and laboratory-based drug susceptibility
+    testing (DST) data. An integrated MinION analysis
+    pipeline was assessed by performing WGS on 34
+    replicates across 3 multi-drug resistant isolates
+    with known resistance mutations. TBProfiler accuracy
+    varied by individual drug. Assuming DST as the gold
+    standard, sensitivities for detecting
+    multi-drug-resistant TB (MDR-TB) and extensively
+    drug-resistant TB (XDR-TB) were 94% (95%CI 93-95%)
+    and 83% (95%CI 79-87%) with specificities of 98%
+    (95%CI 98-99%) and 96% (95%CI 95-97%) respectively.
+    Using MinION data, only one resistance mutation was
+    missed by TBProfiler, involving an insertion in the
+    tlyA gene coding for capreomycin resistance. When
+    compared to alternative platforms (e.g. Mykrobe
+    predictor TB, the CRyPTIC library), TBProfiler
+    demonstrated superior predictive performance across
+    first- and second-line drugs. CONCLUSIONS: The new
+    version of TBProfiler can rapidly and accurately
+    predict anti-TB drug resistance profiles across large
+    numbers of samples with WGS data. The computing
+    architecture allows for the ability to modify the
+    core bioinformatic pipelines and outputs, including
+    the analysis of WGS data sourced from portable
+    technologies. TBProfiler has the potential to be
+    integrated into the point of care and WGS diagnostic
+    environments, including in resource-poor settings.
+  },
+}
+
+/********************************************************\
+* Minimap2:
+\********************************************************/
+
+@Article{li-2018-pmid-29750242,
+  Title={
+    Minimap2: pairwise alignment for nucleotide sequences.
+  },
+  Author={Li, Heng},
+  Journal={Bioinformatics (Oxford, England)},
+  JournalId={9808944},
+  Year={2018},
+  Month={Sep},
+  Day={15},
+  Volume={34},
+  Number={18},
+  Pages={3094-3100},
+  doi={10.1093/bioinformatics/bty191},
+  url={https://dx.doi.org/10.1093/bioinformatics/bty191},
+  ISSN={1367-4803},
+  PMID={29750242},
+  PMC={PMC6137996},
+  File={2018-pmid-29750242.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={},
+  NotesP={
+  },
+  Abstract={
+    MOTIVATION: Recent advances in sequencing
+    technologies promise ultra-long reads of ∼100 kb in
+    average, full-length mRNA or cDNA reads in high
+    throughput and genomic contigs over 100 Mb in length.
+    Existing alignment programs are unable or inefficient
+    to process such data at scale, which presses for the
+    development of new alignment algorithms. RESULTS:
+    Minimap2 is a general-purpose alignment program to
+    map DNA or long mRNA sequences against a large
+    reference database. It works with accurate short
+    reads of ≥100 bp in length, ≥1 kb genomic
+    reads at error rate ∼15%, full-length noisy Direct
+    RNA or cDNA reads and assembly contigs or closely
+    related full chromosomes of hundreds of megabases in
+    length. Minimap2 does split-read alignment, employs
+    concave gap cost for long insertions and deletions
+    and introduces new heuristics to reduce spurious
+    alignments. It is 3-4 times as fast as mainstream
+    short-read mappers at comparable accuracy, and is
+    ≥30 times faster than long-read genomic or cDNA
+    mappers at higher accuracy, surpassing most aligners
+    specialized in one type of alignment. AVAILABILITY
+    AND IMPLEMENTATION: https://github.com/lh3/minimap2.
+    SUPPLEMENTARY INFORMATION: Supplementary data are
+    available at Bioinformatics online.
+  },
+}
+
+@Article{li-2021-pmid-34623391,
+  Title={
+    New strategies to improve minimap2 alignment accuracy.
+  },
+  Author={Li, Heng},
+  Journal={Bioinformatics (Oxford, England)},
+  JournalId={9808944},
+  Year={2021},
+  Month={Dec},
+  Day={7},
+  Volume={37},
+  Number={23},
+  Pages={4572-4574},
+  doi={10.1093/bioinformatics/btab705},
+  url={https://dx.doi.org/10.1093/bioinformatics/btab705},
+  ISSN={1367-4803},
+  PMID={34623391},
+  PMC={PMC8652018},
+  File={2021-pmid-34623391.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={},
+  NotesP={
+  },
+  Abstract={
+    SUMMARY: We present several recent improvements to
+    minimap2, a versatile pairwise aligner for nucleotide
+    sequences. Now minimap2 v2.22 can more accurately map
+    long reads to highly repetitive regions and align
+    through insertions or deletions up to 100 kb by
+    default, addressing major weakness in minimap2 v2.18
+    or earlier. AVAILABILITY AND IMPLEMENTATION:
+    https://github.com/lh3/minimap2.
+  },
+}
+
+/********************************************************\
+* bcftools/samtools:
+\********************************************************/
+
+@Article{danecek-2021-pmid-33590861,
+  Title={Twelve years of SAMtools and BCFtools.},
+  Author={
+    Danecek, Petr and Bonfield, James K and
+    Liddle, Jennifer and Marshall, John and
+    Ohan, Valeriu and Pollard, Martin O and
+    Whitwham, Andrew and Keane, Thomas and
+    McCarthy, Shane A and Davies, Robert M and
+    Li, Heng
+  },
+  Journal={GigaScience},
+  JournalId={101596872},
+  Year={2021},
+  Month={Feb},
+  Day={16},
+  Volume={10},
+  Number={2},
+  Pages={giab008},
+  doi={10.1093/gigascience/giab008},
+  url={https://dx.doi.org/10.1093/gigascience/giab008},
+  ISSN={2047-217X},
+  PMID={33590861},
+  PMC={PMC7931819},
+  File={2021-pmid-33590861.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={
+    bcftools, data analysis, high-throughput sequencing,
+    next generation sequencing, samtools,
+    variant calling
+  },
+  NotesP={
+  },
+  Abstract={
+    BACKGROUND: SAMtools and BCFtools are widely used
+    programs for processing and analysing high-throughput
+    sequencing data. They include tools for file format
+    conversion and manipulation, sorting, querying,
+    statistics, variant calling, and effect analysis
+    amongst other methods. FINDINGS: The first version
+    appeared online 12 years ago and has been maintained
+    and further developed ever since, with many new
+    features and improvements added over the years. The
+    SAMtools and BCFtools packages represent a unique
+    collection of tools that have been used in numerous
+    other software projects and countless genomic
+    pipelines. CONCLUSION: Both SAMtools and BCFtools are
+    freely available on GitHub under the permissive MIT
+    licence, free for both non-commercial and commercial
+    use. Both packages have been installed >1 million
+    times via Bioconda. The source code and documentation
+    are available from https://www.htslib.org.
+  },
+}
+
+/********************************************************\
+* R and R packages:
+\********************************************************/
+
+# Get citation with `citation("package")`
+# Base R is just `citation()`
+
+# Get version number with `packageVersion("package")`
+# Base R version is `version$version.string`
+
+@Manual{R,
+  title = {
+     R: A Language and Environment for Statistical
+     Computing
+  },
+  author = {{R Core Team}},
+  organization = {R Foundation for Statistical Computing},
+  address = {Vienna, Austria},
+  year = {2020},
+  url = {https://www.R-project.org/},
+}
+  
+@Book{ggplot2,
+  author = {Hadley Wickham},
+  title = {ggplot2: Elegant Graphics for Data Analysis},
+  publisher = {Springer-Verlag New York},
+  year = {2016},
+  isbn = {978-3-319-24277-4},
+  url = {https://ggplot2.tidyverse.org},
+}  
+  
+@Manual{dataTbl,
+  title = {data.table: Extension of `data.frame`},
+  author = {Matt Dowle and Arun Srinivasan},
+  year = {2019},
+  note = {R package version 1.12.8},
+  url = {https://CRAN.R-project.org/package=data.table},
+}
+  
+@Manual{viridisLite,
+  title = {
+     viridisLite: Default Color Maps from 'matplotlib'
+     (Lite Version)
+  },
+  author = {Simon Garnier},
+  year = {2018},
+  note = {R package version 0.3.0},
+  url = {https://CRAN.R-project.org/package=viridisLite},
+}  
+
+# Limited to the GUI side
+
+@Manual{RFsPkg,
+  title = {
+     fs: Cross-Platform File System Operations Based on
+     'libuv'
+  },
+  author = {Jim Hester and Hadley Wickham},
+  year = {2019},
+  note = {R package version 1.3.1},
+  url = {https://CRAN.R-project.org/package=fs},
+} 
+
+# sciviews includes tcltk2
+@Manual{sciviews-tcltk2,
+  title = {SciViews-R: A GUI API for R},
+  author = {Philippe Grosjean},
+  organization = {UMONS},
+  address = {MONS, Belgium},
+  year = {2020},
+  url = {http://www.sciviews.org/SciViews-R},
+}  
+ 

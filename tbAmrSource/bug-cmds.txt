@@ -1,5 +1,6 @@
-b checkAmr.c:2374
-b checkAmr.c:2053
+#b checkAmr.c:2374
+#b checkAmr.c:2053
+b amrStruct.c:1710
 
 # Check entire gene for frameshift
 #b checkAmr.c:944

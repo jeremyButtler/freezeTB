@@ -32,8 +32,8 @@
 #define def_matchScore_tbSpoligoWater 5
 
 /*These are a bit wide, but they should work*/
-#define def_DRStart_tbSpoligo 3119000
-#define def_DREnd_tbSpoligo 3124000
+#define def_DRStart_tbSpoligo 3119037
+#define def_DREnd_tbSpoligo 3123624
 
 /*-------------------------------------------------------\
 | Fun-01: getSpoligoRefs
