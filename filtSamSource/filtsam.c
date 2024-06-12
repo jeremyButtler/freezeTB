@@ -1034,15 +1034,15 @@ int main(
    ' Main TOC:
    '   - Filters sam files and converts sam output to the
    '     desiered format
-   '   o main Sec01:
+   '   o main sec01:
    '     - Variable declerations
-   '   o main Sec02:
+   '   o main sec02:
    '     - Check user input
-   '   o main Sec03:
+   '   o main sec03:
    '     - Check user supplied files
-   '   o main Sec04:
+   '   o main sec04:
    '     - Filter the user input
-   '   o main Sec05:
+   '   o main sec05:
    '     - Clean up and exit
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 

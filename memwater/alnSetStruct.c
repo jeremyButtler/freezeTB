@@ -12,28 +12,28 @@
 '    - included libraries
 '  o .h st-01 alnSet:
 '     o Holds settings for my alignment program
-'  o .h fun-01 setBpScore:
+'  o .h fun01 setBpScore:
 '    - Sets the score for a base pair (reference/query)
-'  o .h fun-02 setIfBpMatch:
+'  o .h fun02 setIfBpMatch:
 '    - Sets if two bases are a match or mismtach
-'  o fun-03 freeAlnSetStack:
+'  o fun03 freeAlnSetStack:
 '    o Frees variables inside alnSet
-'  o fun-04 freeAlnSet:
+'  o fun04 freeAlnSet:
 '    o Frees an alnSet structure (and sets to 0)
-'  o .h fun-05 getBaseScore:
+'  o .h fun05 getBaseScore:
 '    - Get the score for a pair of bases from an alignment
-'  o .h fun-06 matchOrSnp:
+'  o .h fun06 matchOrSnp:
 '    - Check if two bases were a match or mismatch
-'  o fun-07 readInScoreFile
+'  o fun07 readInScoreFile
 '     - Reads in a file of scores for a scoring matrix
-'  o fun-08 readInMatchFile:
+'  o fun08 readInMatchFile:
 '    - Reads in a file of matches
-'  o .h fun-09 seqToLookupIndex:
+'  o .h fun09 seqToLookupIndex:
 '    - Converts a sequence to a look up table index
-'  o .h fun-10 lookupIndexToSeq:
+'  o .h fun10 lookupIndexToSeq:
 '    - Converts a sequence of lookup indexs back into
 '      uppercase characters (a-z)
-'  o fun-11 initAlnSet:
+'  o fun11 initAlnSet:
 '    - Set all values in altSet (alingment settings)
 '      structure to defaults
 '  o license:
@@ -61,7 +61,7 @@
 #include "../generalLib/dataTypeShortHand.h"
 
 /*-------------------------------------------------------\
-| Fun-03: freeAlnSetStack
+| Fun03: freeAlnSetStack
 |  - Does a stack free of an alnSet structer
 | Input:
 |  - alnSetSTPtr:
@@ -78,7 +78,7 @@ freeAlnSetStack(
 ){}
 
 /*-------------------------------------------------------\
-| Fun-04: freeAlnSet
+| Fun04: freeAlnSet
 |  - Frees and alnSet (alignment settings) structure
 | Input:
 |  - alnSetSTPtr:
@@ -98,7 +98,7 @@ freeAlnSet(
 } /*freeAlnSet*/
 
 /*-------------------------------------------------------\
-| Fun-07: readInScoreFile
+| Fun07: readInScoreFile
 |  - Reads in a file of scores for a scoring matrix
 | Input:
 |  - alnSetSTPtr:
@@ -120,19 +120,19 @@ readInScoreFile(
     struct alnSet *alnSetSTPtr, /*score matrix to change*/
     FILE *scoreFILE  /*File of scores for scoring matrix*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-07 TOC: readInScoreFile
-   '  o fun-07 sec-01:
+   ' Fun07 TOC: readInScoreFile
+   '  o fun07 sec-01:
    '    - Variable declerations & set up
-   '  o fun-07 sec-02:
+   '  o fun07 sec-02:
    '    - Blank the scoring matrix
-   '  o fun-07 sec-03:
+   '  o fun07 sec-03:
    '    - Read in line and check if comment
-   '  o fun-07 sec-04:
+   '  o fun07 sec-04:
    '    - Convert score & add to matrix
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-07 Sec-01:
+   ^ Fun07 Sec-01:
    ^  - Variable declerations and set up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -148,7 +148,7 @@ readInScoreFile(
    buffCStr[lenBuffUS - 2] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-07 Sec-02:
+   ^ Fun07 Sec-02:
    ^  - Blank the scoring matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -159,7 +159,7 @@ readInScoreFile(
    } /*Loop: blank all values in the scoring matrix*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-07 Sec-03:
+   ^ Fun07 Sec-03:
    ^  - Read in line and check if comment
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -183,7 +183,7 @@ readInScoreFile(
        } /*On a comment, move onto the next line*/
 
        /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-       ^ Fun-07 Sec-04:
+       ^ Fun07 Sec-04:
        ^  - Convert score & add to matrix
        \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -221,7 +221,7 @@ readInScoreFile(
 } /*readInScoreFile*/
 
 /*-------------------------------------------------------\
-| Fun-08: readInMatchFile
+| Fun08: readInMatchFile
 |  - Reads in a file of matches
 | Input:
 |  - alnSetSTPtr:
@@ -243,19 +243,19 @@ readInMatchFile(
     struct alnSet *alnSetSTPtr,
     void *matchFILE  /*File of matchs for scoring matrix*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-08 TOC: readInMatchFile
-   '  o fun-08 sec-01:
+   ' Fun08 TOC: readInMatchFile
+   '  o fun08 sec-01:
    '    - Variable declerations & set up
-   '  o fun-08 sec-02:
+   '  o fun08 sec-02:
    '    - Blank the match matrix
-   '  o fun-08 sec-03:
+   '  o fun08 sec-03:
    '    - Read in line and check if comment
-   '  o fun-08 sec-04:
+   '  o fun08 sec-04:
    '    - Add match/snp (mismatch) to match matrix
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-01:
+   ^ Fun08 Sec-01:
    ^  - Variable declerations and set up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -269,7 +269,7 @@ readInMatchFile(
    buffCStr[lenBuffUS - 2] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-02:
+   ^ Fun08 Sec-02:
    ^  - Blank the scoring matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -280,7 +280,7 @@ readInMatchFile(
    } /*Loop: blank all values in the scoring matrix*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-03:
+   ^ Fun08 Sec-03:
    ^  - Read in line and check if comment
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -304,7 +304,7 @@ readInMatchFile(
        } /*On a comment, move onto the next line*/
 
        /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-       ^ Fun-08 Sec-04:
+       ^ Fun08 Sec-04:
        ^  - Convert match & add to matrix
        \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -338,7 +338,7 @@ readInMatchFile(
 } /*readInMatchFile*/
 
 /*-------------------------------------------------------\
-| Fun-11: initAlnSet
+| Fun11: initAlnSet
 |  - Set values in altSet (alingment settings) structure
 |    to default values
 | Input:
@@ -353,23 +353,23 @@ void
 initAlnSet(
     struct alnSet *alnSetST /*Has settings to initialize*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-11 TOC: initAlnSet
+   ' Fun11 TOC: initAlnSet
    '  - Set values in altSet (alingment settings)
    '    structure to defaults
-   '  o fun-11 sec-01:
+   '  o fun11 sec-01:
    '    - Set non-matrix variables
-   '  o fun-11 sec-02:
+   '  o fun11 sec-02:
    '    - Initialize scoring matrix
-   '  o fun-11 sec-03:
+   '  o fun11 sec-03:
    '    - Initialize match matrix
-   '  o fun-11 sec-04:
+   '  o fun11 sec-04:
    '    - Handle special DNA scoring cases
-   '  o fun-11 sec-05:
+   '  o fun11 sec-05:
    '    - Handle special DNA match cases
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-01:
+   ^ Fun11 Sec-01:
    ^  - Set non-matrix variables
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -381,7 +381,7 @@ initAlnSet(
    alnSetST->gapExtendC = defGapExtend;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-02:
+   ^ Fun11 Sec-02:
    ^  - Initialize scoring matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -394,7 +394,7 @@ initAlnSet(
    } /*loop for all columns in the comparison matrix*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-03:
+   ^ Fun11 Sec-03:
    ^  - Initialize match matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -415,7 +415,7 @@ initAlnSet(
     } /*loop for all columns in the comparison matrix*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-11 Sec-04:
+   ^ Fun11 Sec-04:
    ^  - Handle special DNA scoring cases
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 

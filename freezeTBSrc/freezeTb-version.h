@@ -4,8 +4,8 @@
 ########################################################*/
 
 #define def_year_freezeTb 2024
-#define def_month_freezeTb 5
-#define def_day_freezeTb 14
+#define def_month_freezeTb 6
+#define def_day_freezeTb 11
 
 /*=======================================================\
 : License:

@@ -335,7 +335,6 @@ twoArySortNumeric( \
   \
   /*Number of elements to sort*/\
   unsigned long numElmMacUL = (endUL) - (startUL);\
-  long swapMacL = 0;\
   \
   /*Number of sorting rounds*/\
   unsigned long subMacUL = 0;\

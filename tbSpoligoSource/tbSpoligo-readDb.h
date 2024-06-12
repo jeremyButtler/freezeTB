@@ -9,33 +9,33 @@
 '     - guards
 '   o .h st-01: spoligoST
 '     - Holds an single spoligotype lineage
-'   o .h fun-01: blankSpoligoST
+'   o .h fun01: blankSpoligoST
 '     - Blanks all variables in and spoligoST structure
-'   o .h fun-02: initSpoligoST
+'   o .h fun02: initSpoligoST
 '      - Sets all pointers to null and other variables
 '       (none) to defaults in an spoligoST struct
-'   o fun-03: mkSpoligoAryST
+'   o fun03: mkSpoligoAryST
 '     - Makes array of initialized spoligotype structers
-'   o fun-04: freeSpoligoSTStack
+'   o fun04: freeSpoligoSTStack
 '     - Frees an spoligoST struct on the stack
-'   o fun-05: freeSpoligoST
+'   o fun05: freeSpoligoST
 '     - Frees an spoligoST struct (on heap)
-'   o fun-06: freeSpoligoSTAry
+'   o fun06: freeSpoligoSTAry
 '     - Frees an array of spoligoST struct (on heap)
-'   o .h fun-07: swapSpoligos
+'   o .h fun07: swapSpoligos
 '     - Swaps values in two spoligoST structures
-'   o .h fun-08: sortSpoligoSTAry
+'   o .h fun08: sortSpoligoSTAry
 '     - Sorts an array of spoligoST structures by least to
 '       greatest with shell sort
-'   o .h fun-09: findSpoligoBarcode
+'   o .h fun09: findSpoligoBarcode
 '     - Finds an spoligo barcode in an array of spoligoST
 '       structures using an binary search
-'   o fun-10: readSpoligoDb
+'   o fun10: readSpoligoDb
 '     - Reads in an database of spoligotypes and returns
 '       an array of spoligoST structures sorted by barcode
-'   o fun-11: pSpoligoHead
+'   o fun11: pSpoligoHead
 '     - Print out the header for the spoligotype output
-'   o fun-12: pSpoligo
+'   o fun12: pSpoligo
 '     - Print out an spoligotype and matching lineage
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -66,7 +66,7 @@ spoligoST
 }spoligoST; /*spoligoST*/
 
 /*-------------------------------------------------------\
-| Fun-01: blankSpoligoST
+| Fun01: blankSpoligoST
 |   - Blanks all variables in and spoligoST structure
 | Input:
 |   - spoligoSTPtr:
@@ -95,7 +95,7 @@ blankSpoligoST(\
 } /*blankSpoligoST*/
 
 /*-------------------------------------------------------\
-| Fun-02: initSpoligoST
+| Fun02: initSpoligoST
 |   - Sets all pointers to null and other variables
 |     (currently none) to defaults in an spoligoST struct
 | Input:
@@ -119,7 +119,7 @@ initSpoligoST(\
 } /*initPoligoST*/
 
 /*-------------------------------------------------------\
-| Fun-03: mkSpoligoAryST
+| Fun03: mkSpoligoAryST
 |   - Makes an array of initialized spoligotype structers
 | Input:
 |   - numSpoligosSI:
@@ -135,7 +135,7 @@ mkSpoligoAryST(
 );
 
 /*-------------------------------------------------------\
-| Fun-04: freeSpoligoSTStack
+| Fun04: freeSpoligoSTStack
 |   - Frees an spoligoST struct on the stack
 | Input:
 |   - spoligoSTPtr:
@@ -150,7 +150,7 @@ freeSpoligoSTStack(
 );
 
 /*-------------------------------------------------------\
-| Fun-05: freeSpoligoST
+| Fun05: freeSpoligoST
 |   - Frees an spoligoST struct (on heap)
 | Input:
 |   - spoligoSTPtr:
@@ -165,7 +165,7 @@ freeSpoligoST(
 );
 
 /*-------------------------------------------------------\
-| Fun-06: freeSpoligoSTAry
+| Fun06: freeSpoligoSTAry
 |   - Frees an array of spoligoST struct (on heap)
 | Input:
 |   - spoligoArySTPtr:
@@ -183,7 +183,7 @@ freeSpoligoSTAry(
 );
 
 /*-------------------------------------------------------\
-| Fun-07: swapSpoligos
+| Fun07: swapSpoligos
 |   - Swaps values in two spoligoST structures
 | Input:
 |   - firstSpoligoSTPtr
@@ -229,7 +229,7 @@ swapSpoligos(\
 } /*swapSpoligos*/
 
 /*-------------------------------------------------------\
-| Fun-08: sortSpoligoSTAry
+| Fun08: sortSpoligoSTAry
 |  - Sorts an array of spoligoST structures by least to
 |    greatest with shell sort
 | Input:
@@ -250,7 +250,7 @@ sortSpoligoSTAry(\
    startUL,\
    endUL\
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-08 TOC:
+   ' Fun08 TOC:
    '  - Sorts an array of spoligoST structures by least to
    '    greatest with shell sort
    '  - Shell sort taken from:
@@ -259,16 +259,16 @@ sortSpoligoSTAry(\
    '      edition. pages 505-508
    '    - I made some minor changes, but is mostly the
    '      same
-   '  o fun-08 sec-01:
+   '  o fun08 sec01:
    '    - Variable declerations
-   '  o fun-08 sec-02:
+   '  o fun08 sec02:
    '    - Find the number of rounds to sort for
-   '  o fun-08 sec-03:
+   '  o fun08 sec03:
    '    - Sort the arrays
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/\
   \
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun-08 Sec-01:
+  ^ Fun08 Sec01:
   ^  - Variable declerations
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
   \
@@ -288,7 +288,7 @@ sortSpoligoSTAry(\
   unsigned long ulElmMac = 0;\
   \
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun-08 Sec-02:
+  ^ Fun08 Sec02:
   ^  - Find the max search value (number rounds to sort)
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
   \
@@ -299,7 +299,7 @@ sortSpoligoSTAry(\
      subMacUL = (3 * subMacUL) + 1;\
   \
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun-08 Sec-03:
+  ^ Fun08 Sec03:
   ^  - Sort the arrays in genIndiceST
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/\
   \
@@ -354,7 +354,7 @@ sortSpoligoSTAry(\
 } /*sortSpoligoSTAry*/
 
 /*-------------------------------------------------------\
-| Fun-09: findSpoligoBarcode
+| Fun09: findSpoligoBarcode
 |  - Finds an spoligo barcode in an array of spoligoST
 |    structures using an binary search
 | Input:
@@ -401,7 +401,7 @@ findSpoligoBarcode(\
 }) /*findSpoligoBarcode*/
 
 /*-------------------------------------------------------\
-| Fun-10: readSpoligoDb
+| Fun10: readSpoligoDb
 |   - Reads in an database of spoligotypes and returns
 |     an array of spoligoST structures sorted by barcodes
 | Input:
@@ -433,9 +433,14 @@ readSpoligoDb(
 );
 
 /*-------------------------------------------------------\
-| Fun-11: pSpoligoHead
+| Fun11: pSpoligoHead
 |   - Print out the header for the spoligotype output
 | Input:
+|   - fragBl:
+|     o 1: printing out header for sequence fragments
+|          that  not have the entire direct repeat region.
+|     o 0: header for sequences with full DR. An consensus
+|          with fragments will use this header as well.
 |   - outFILE:
 |     o FILE pointer with file to print to
 | Output:
@@ -444,17 +449,24 @@ readSpoligoDb(
 \-------------------------------------------------------*/
 void
 pSpoligoHead(
+   signed char fragBl,
    void *outFILE
 );
 
 /*-------------------------------------------------------\
-| Fun-12: pSpoligo
+| Fun12: pSpoligo
 |   - Print out an spoligotype and matching lineage
 | Input:
 |   - idStr:
 |     o C-string with id/name of sequence
-|   - codeStr:
-|     o C-string with the spoligotype barcode for idStr
+|   - codeAryUI:
+|     o unsigned int array with the spoligotype counts
+|   - fragmentBl:
+|     o 1: fragment mode, do not find lineages
+|     o 0: complete reads find lineages
+|   - numSupUI:
+|     o unsigned int with the number of reads that had at
+|       least one spacer (for fragment mode)
 |   - spoligoAryST:
 |     o Array of spoligotype lineages to get lineage from
 |   - numSpoligosSI:
@@ -465,7 +477,9 @@ pSpoligoHead(
 void
 pSpoligo(
    signed char *idStr,
-   signed char *codeStr,
+   unsigned int *codeAryUI,
+   signed char fragmentBl,
+   unsigned int numSupUI,
    struct spoligoST *spoligoAryST,
    signed int numSpoligosSI,
    void *outFILE

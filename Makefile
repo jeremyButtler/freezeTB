@@ -23,6 +23,7 @@ SOURCE=\
    tbMiruSource/miruTblStruct.c \
    tbSpoligoSource/tbSpoligo-memwater-fun.c \
    tbSpoligoSource/tbSpoligo-readDb.c \
+   tbSpoligoSource/kmerFind.c \
    primMaskSrc/primMask-fun.c \
    memwater/seqStruct.c \
    memwater/alnSetStruct.c \
@@ -53,7 +54,7 @@ check:
 
 debug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
-	gdb -x bug-cmds-freezeTb.txt bugFreezeTb
+	gdb -x freezeTBSrc/bug-cmds-freezeTb.txt bugFreezeTb
 
 macbug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);

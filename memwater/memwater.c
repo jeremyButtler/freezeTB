@@ -9,35 +9,38 @@
 ' SOF: Start Of Functions
 '   o header:
 '     - Included libraries
-'   o .c fun-01: macroMax
+'   o .c fun01: macroMax
 '     - Find the maximum value (branchless)
-'   o .c fun-02: macroIfMax
+'   o .c fun02: macroIfMax
 '     - Set a value (ret) to a value based on which value
 '       is greater.
-'   o .c fun-03: indexToQry
+'   o .c fun03: indexToQry
 '     - Gets the query coordinates of the query sequence
 '       in an matrix.
-'   o .c fun-04: indexToRef
+'   o .c fun04: indexToRef
 '     - Gets the coordinates of the reference sequence in
 '       in an matrix.
-'   o .c fun-05: indexToCoord
+'   o .c fun05: indexToCoord
 '     - Gets the coordinates of the reference and query
 '       sequence in an matrix.
-'   o .c fun-06: getHiScore
+'   o .c fun06: getHiScore
 '     - Selects the max score and direction selected for
 '       the max score.
-'   o .c fun-07: getIndelScore
+'   o .c fun07: getIndelScore
 '     - Gets the indel score for a memwater alignment
-'   o .c fun-08: scoreGt0
+'   o .c fun08: scoreGt0
 '     - Checks to see if the score is greater then zero.
 '       If not, this resets the input values
-'   o .c fun-06: waterMaxScore
+'   o .c fun06: waterMaxScore
 '     - Maximizes the score for a single base pair in an
 '       waterman query reference scan
-'   o .c fun-07: waterMaxEndRowScore
+'   o .c fun07: waterMaxEndRowScore
 '     - Maximizes the score for a single waterman
 '       alignment when at the end of an row
-'   o fun-08 memWater:
+'   o .c fun08: scoreGt0
+'     - Checks to see if the score is greater then zero.
+'       if not, this resets the input values
+'   o fun09 memWater:
 '     - Run a memory efficent Waterman Smith alignment on
 '       input sequences
 '   o license:
@@ -73,7 +76,7 @@
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
-| Fun-01: macroMax
+| Fun01: macroMax
 |  - Find the maximum value (branchless)
 | Input:
 |  o ret:
@@ -108,7 +111,7 @@ macroMax(\
 )
 
 /*-------------------------------------------------------\
-| Fun-02: macroIfMax
+| Fun02: macroIfMax
 |  - Set a value (ret) to a value based on which value
 |    is greater.
 | Input:
@@ -143,7 +146,7 @@ macroIfMax(\
 )
 
 /*-------------------------------------------------------\
-| Fun-03: indexToQry
+| Fun03: indexToQry
 |   - Gets the query coordinates of the query sequence in
 |     an matrix.
 | Input
@@ -181,7 +184,7 @@ indexToQry(\
 ) /*indexToQry*/
 
 /*-------------------------------------------------------\
-| Fun-04: indexToRef
+| Fun04: indexToRef
 |   - Gets the coordinates of the reference sequence in
 |     an matrix.
 | Input
@@ -222,7 +225,7 @@ indexToRef(\
 ) /*indexToRef*/
 
 /*-------------------------------------------------------\
-| Fun-05: indexToCoord
+| Fun05: indexToCoord
 |   - Gets the coordinates of the reference and query
 |     sequence in an matrix.
 | Input
@@ -251,7 +254,7 @@ indexToCoord(\
 } /*indexToCoord*/
 
 /*-------------------------------------------------------\
-| Fun-06: getHiScore
+| Fun06: getHiScore
 |  - Selects the max score and direction selected for the
 |    max score.
 | Input:
@@ -274,19 +277,19 @@ indexToCoord(\
 |  - delPos:
 |    o Index for an deletion
 | Variations:
-|  - fun-06 var-a: insDelSnp
+|  - fun06 var-a: insDelSnp
 |    o Insertions over deleitons over snps/matches
-|  - fun-06 var-b: delInsSnp
+|  - fun06 var-b: delInsSnp
 |    o deletions over Insertions over snps/matches
-|  - fun-06 var-c: insSnpDel
+|  - fun06 var-c: insSnpDel
 |    o Insertions over snps/matches over deletions
-|  - fun-06 var-d: delSnpIns
+|  - fun06 var-d: delSnpIns
 |    o Deletions over snps/matches over insertions
-|  - fun-06 var-e: snpInsDel
+|  - fun06 var-e: snpInsDel
 |    o Snps/matches over insertions over deletions
-|  - fun-06 var-f: snpDelIns
+|  - fun06 var-f: snpDelIns
 |    o Snps/matches over deletions over insertions
-|  - fun-06 var-g: Default (insDelSnp)
+|  - fun06 var-g: Default (insDelSnp)
 |    o Default option (Ins over del over snps/matches)
 | Output:
 |  - Sets:
@@ -295,7 +298,7 @@ indexToCoord(\
 \-------------------------------------------------------*/
 
 /*_______________________________________________________\
-@ Fun-06 Var-A:
+@ Fun06 Var-A:
 @   - Insertions over deleitons over snps/matches
 \_______________________________________________________*/
 #ifdef INSDELSNP
@@ -345,7 +348,7 @@ indexToCoord(\
 #endif
 
 /*_______________________________________________________\
-@ Fun-06 Var-B: delInsSnp
+@ Fun06 Var-B: delInsSnp
 @   - deletions over Insertions over snps/matches
 \_______________________________________________________*/
 #ifdef DELINSSNP
@@ -395,7 +398,7 @@ indexToCoord(\
 #endif
 
 /*_______________________________________________________\
-@ Fun-06 Var-C: insSnpDel
+@ Fun06 Var-C: insSnpDel
 @   - Insertions over snps/matches over deletions
 \_______________________________________________________*/
 #ifdef INSSNPDEL
@@ -447,7 +450,7 @@ indexToCoord(\
 #endif
 
 /*_______________________________________________________\
-@ Fun-06 Var-D: delSnpIns
+@ Fun06 Var-D: delSnpIns
 @   _ Deletions over snps/matches over insertions
 \_______________________________________________________*/
 #ifdef DELSNPINS
@@ -499,7 +502,7 @@ indexToCoord(\
 #endif
 
 /*_______________________________________________________\
-@ Fun-06 Var-E: snpInsDel
+@ Fun06 Var-E: snpInsDel
 @   - Snps/matches over insertions over deletions
 \_______________________________________________________*/
 #ifdef SNPINSDEL
@@ -547,7 +550,7 @@ indexToCoord(\
 #endif
 
 /*_______________________________________________________\
-@ Fun-06 Var-F: snpDelIns
+@ Fun06 Var-F: snpDelIns
 @   - Snps/matches over deletions over insertions
 \_______________________________________________________*/
 #ifdef SNPDELINS
@@ -598,7 +601,7 @@ indexToCoord(\
 #endif
 
 /*_______________________________________________________\
-@ Fun-06 Var-g: default
+@ Fun06 Var-g: default
 @   - Default option (del over ins over snps/matches)
 \_______________________________________________________*/
 #ifndef INSDELSNP
@@ -658,7 +661,7 @@ indexToCoord(\
 #endif
 
 /*-------------------------------------------------------\
-| Fun-07: getIndelScore
+| Fun07: getIndelScore
 |   - Gets the indel score for a memwater alignment
 | Input:
 |   - lastScoreSL:
@@ -671,16 +674,16 @@ indexToCoord(\
 |   - dirSC:
 |     o Direction moved (indel or snp) for last score
 | Variations:
-|   - fun-07 var-a: nogapextend
+|   - fun07 var-a: nogapextend
 |     o Does not use the gap extension penatly
-|   - fun-07 var-b: default
+|   - fun07 var-b: default
 |     o Applies the gap extension penalty
 | Output:
 |   - Returns the calcualted score for an indel
 \-------------------------------------------------------*/
 
 /*_______________________________________________________\
-@ Fun-07 Var-A: nogapextend
+@ Fun07 Var-A: nogapextend
 @   - Does not use the gap extension penatly
 \_______________________________________________________*/
 #ifdef NOGAPEXTEND
@@ -693,7 +696,7 @@ indexToCoord(\
    )( (lastScoreSL) + (gapOpenSC) )
 
 /*_______________________________________________________\
-@ Fun-07 Var-B: default
+@ Fun07 Var-B: default
 @   - Applies the gap extension penalty
 \_______________________________________________________*/
 #else
@@ -728,7 +731,7 @@ indexToCoord(\
 #endif
 
 /*-------------------------------------------------------\
-| Fun-08: scoreGt0
+| Fun08: scoreGt0
 |   - Checks to see if the score is greater then zero. If
 |     not, this resets the input values
 | Input:
@@ -761,7 +764,7 @@ scoreGt0(\
 } /*scoreGt0*/
 
 /*-------------------------------------------------------\
-| Fun-08: memWater
+| Fun09: memWater
 |   - Performs a memory efficent Smith Waterman alignment
 |     on a pair of sequences
 | Input;
@@ -808,36 +811,36 @@ memWater(
     unsigned long *qryEndUL,
     void *alnSetVoidPtr      /*Settings for alignment*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-08 TOC: memWaterAln
+   ' Fun09 TOC: memWaterAln
    '  - Run a memory efficent Waterman Smith alignment on
    '    input sequences
-   '  o fun-08 sec-01:
+   '  o fun09 sec01:
    '    - Variable declerations
-   '  o fun-08 sec-02:
+   '  o fun09 sec02:
    '    - Allocate memory for alignment
-   '  o fun-08 sec-03:
+   '  o fun09 sec03:
    '    - Fill in initial negatives for ref
-   '  o fun0 sec-04:
+   '  o fun0 sec04:
    '    - Fill the matrix with scores
-   '  o fun-08 sec-05:
+   '  o fun09 sec05:
    '    - Set up for returing matrix (clean up/wrap up)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-01: Variable declerations
-   ^  o fun-08 sec-01 sub-01:
+   ^ Fun09 Sec01: Variable declerations
+   ^  o fun09 sec01 sub01:
    ^    - Variables dealing with the query and reference
    ^      starting positions
-   ^  o fun-08 sec-01 sub-02:
+   ^  o fun09 sec01 sub02:
    ^    - Variables holding the scores (only two rows)
-   ^  o fun-08 sec-01 sub-03:
+   ^  o fun09 sec01 sub03:
    ^    - Directinol matrix variables
-   ^  o fun-08 sec-01 sub-04:
+   ^  o fun09 sec01 sub04:
    ^    - Variables for building returend alignment array
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-01 Sub-01:
+   * Fun09 Sec01 Sub01:
    *  - Variables dealing with the query and reference
    *    starting positions
    \*****************************************************/
@@ -868,7 +871,7 @@ memWater(
    ulong ulQryBase = 0;
 
    /*****************************************************\
-   * Fun-08 Sec-01 Sub-02:
+   * Fun09 Sec01 Sub02:
    *  - Variables holding the scores (only two rows)
    \*****************************************************/
 
@@ -878,12 +881,14 @@ memWater(
    long nextSnpScoreSL = 0;/*Score for next match/snp*/
    long *scoreHeapSL = 0;  /*matrix to use in alignment*/
 
-   /*Used in finding if useing gap extension*/
-   short gapDiffS =
-      settings->gapExtendC - settings->gapOpenC;
+   #ifndef NOGAPEXTEND
+      /*Used in finding if useing gap extension*/
+      short gapDiffS =
+         settings->gapExtendC - settings->gapOpenC;
+   #endif
 
    /*****************************************************\
-   * Fun-08 Sec-01 Sub-03:
+   * Fun09 Sec01 Sub03:
    *  - Directional matrix variables
    \*****************************************************/
 
@@ -897,32 +902,32 @@ memWater(
    ulong *swapPtrUL = 0;   /*For swapping ulongs*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-02:
+   ^ Fun09 Sec02:
    ^  - Allocate memory for alignment
-   ^  o fun-08 sec-02 sub-01:
+   ^  o fun09 sec02 sub01:
    ^    - Allocate memory for the alignment
-   ^  o fun-08 sec-02 sub-02:
+   ^  o fun09 sec02 sub02:
    ^    - Allocate memory for keeping track of indexes
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-02 Sub-01:
+   * Fun09 Sec02 Sub01:
    *  - Allocate memory for the alignment
    \****************************************************/
 
    dirRowHeapSC = malloc((lenRefUL + 1) * sizeof(char));
 
    if(dirRowHeapSC == 0)
-      goto memErr_fun08_sec05_sub01;
+      goto memErr_fun09_sec05_sub01;
 
    scoreHeapSL = malloc((lenRefUL + 1) * sizeof(long));
    /*+ 1 is for the indel column*/
 
    if(scoreHeapSL == 0)
-      goto memErr_fun08_sec05_sub01;
+      goto memErr_fun09_sec05_sub01;
 
    /*****************************************************\
-   * Fun-08 Sec-02 Sub-02:
+   * Fun09 Sec02 Sub02:
    *  - Get memory for keeping track of starting indexes
    \*****************************************************/
 
@@ -930,16 +935,16 @@ memWater(
    indexHeapUL = malloc((lenRefUL + 1) * sizeof(ulong));
 
    if(indexHeapUL == 0)
-      goto memErr_fun08_sec05_sub01;
+      goto memErr_fun09_sec05_sub01;
 
    /*Set up the second row of indexs (so have two rows)*/
    oldIndexHeapUL = malloc((lenRefUL +1) * sizeof(ulong));
 
    if(oldIndexHeapUL == 0)
-      goto memErr_fun08_sec05_sub01;
+      goto memErr_fun09_sec05_sub01;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-03:
+   ^ Fun09 Sec03:
    ^  - Fill in initial negatives for reference
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -951,24 +956,24 @@ memWater(
    } /*loop; till have initalized the first row*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-04:
+   ^ Fun09 Sec04:
    ^  - Fill the matrix with scores
-   ^  o fun-08 sec-04 sub-01:
+   ^  o fun09 sec04 sub01:
    ^    - Final set up before scoring the matrix
-   ^  o fun-08 sec-04 sub-02:
+   ^  o fun09 sec04 sub02:
    ^    - Start loops and get each score
-   ^  o fun-08 sec-04 sub-03:
+   ^  o fun09 sec04 sub03:
    ^    - Check if is an alternative base best score
-   ^  o fun-08 sec-04 sub-04:
+   ^  o fun09 sec04 sub04:
    ^    - Find the best score for the last base
-   ^  o fun-08 sec-04 sub-05:
+   ^  o fun09 sec04 sub05:
    ^    - Is last base in row an alternative alignment?
-   ^  o fun-08 sec-04 sub-06:
+   ^  o fun09 sec04 sub06:
    ^    - Prepare to score the next row in the matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-04 Sub-01:
+   * Fun09 Sec04 Sub01:
    *  - Final set up before scoring the matrix
    \*****************************************************/
 
@@ -996,7 +1001,7 @@ memWater(
       */
 
    /*****************************************************\
-   * Fun-08 Sec-04 Sub-02:
+   * Fun09 Sec04 Sub02:
    *  - Start loops and get each score
    \*****************************************************/
 
@@ -1059,7 +1064,7 @@ memWater(
             );
 
          /***********************************************\
-         * Fun-08 Sec-04 Sub-03:
+         * Fun09 Sec04 Sub03:
          *  - Determine if is best score (keep as primary)
          \***********************************************/
 
@@ -1074,7 +1079,7 @@ memWater(
       } /*loop; compare one query to one reference base*/
 
      /***************************************************\
-     *  Fun-08 Sec-04 Sub-06:
+     *  Fun09 Sec04 Sub06:
      *   - Prepare for the next round
      \***************************************************/
 
@@ -1093,16 +1098,16 @@ memWater(
    } /*loop; compare query base against all ref bases*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-08 Sec-05:
+   ^ Fun09 Sec05:
    ^  - Set up for returing the matrix (clean up/wrap up)
-   ^  o fun-08 sec-05 sub-01:
+   ^  o fun09 sec05 sub01:
    ^    - clean up
-   ^  o fun-08 sec-05 sub-02:
+   ^  o fun09 sec05 sub02:
    ^    - find the best score
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-08 Sec-05 Sub-01:
+   * Fun09 Sec05 Sub01:
    *  - clean up
    \*****************************************************/
 
@@ -1140,7 +1145,7 @@ memWater(
 
    return scoreSL;
 
-   memErr_fun08_sec05_sub01:;
+   memErr_fun09_sec05_sub01:;
 
    free(dirRowHeapSC);
    dirRowHeapSC = 0;

@@ -8,9 +8,9 @@
 ' SOF: Start Of File
 '   o header:
 '     - included libraries
-'   o fun-01: checkInput_tbSpoligo
+'   o fun01: checkInput_tbSpoligo
 '     - checks the users input & sets to correct variable
-'   o fun-02: phelp_tbSpoligo
+'   o fun02: phelp_tbSpoligo
 '     - prints the help messge for tbSpoligo
 '   o license:
 '     - Licensing for this code (public domain / mit)
@@ -38,12 +38,17 @@
    `   in this case I am only using a few default values
    `   from the header file.
    */
+#include "kmerFind.h"
+   /*Normally this would include an .c file, but this is
+   `   in this case I am only using a few default values
+   `   from the header file.
+   */
 
 #include "../generalLib/ulCpStr.h"
 #include "../generalLib/base10StrToNum.h"
 
 /*-------------------------------------------------------\
-| Fun-01: checkInput_tbSpoligo
+| Fun01: checkInput_tbSpoligo
 |   - checks the users input and sets to correct variable
 | Input:
 |   o parmStr:
@@ -69,12 +74,19 @@
 |     - Will hold the start of the DR region
 |   o dirEndSI:
 |     - Will hold the end of the DR region
-|   o minKmersSI:
-|     - int to hold the minimum number of kmer matches to
-|       have to do an waterman alignment (kmer method)
+|   o minKmersPercF:
+|     - pointer to float to hold the minimum percent of
+|       kmers needed to do an waterman alignment on an
+|       window in the fast kmer method
 |   o fastTypingBl:
 |     - Set to 1 if user wants faster kmer method
 |     - Set to 0 if user wants slower method
+|   o fragBl:
+|     - Set to 1 if user is inputing fragments
+|     - Set to 0 if user is inputing direct repeat regions
+|   o conFragBl:
+|     - Set to 1 if user is inputing consensus fragments
+|     - Set to 0 if user not consensus or not fragments
 | Output:
 |   - Modifies:
 |     o All input variables except parmStr and argStr to
@@ -105,35 +117,37 @@ checkInput_tbSpoligo(
    float *minPercScoreF,     /*min % score to count hit*/
    signed int *dirStartSI,   /*start of DR region*/
    signed int *dirEndSI,     /*start of DR region*/
-   signed int *minKmersSI,   /*Min number kmers for fast*/
-   signed char *fastTypingBl /*1: Do fast spoligo typing*/
+   float *minKmersPercF,     /*Min number kmers for fast*/
+   signed char *fastTypingBl,/*1: Do fast spoligo typing*/
+   signed char *fragBl,      /*1: fragment checking*/
+   signed char *conFragBl    /*1: non-con fragment mode*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-01 TOC:
-   '   o fun-01 sec-01:
+   ' Fun01 TOC:
+   '   o fun01 sec01:
    '     - Variable declerations
-   '   o fun-01 sec-02:
+   '   o fun01 sec02:
    '     - Check if the input was an file
-   '   o fun-01 sec-03:
+   '   o fun01 sec03:
    '     - Return invalid arguments
-   '   o fun-01 sec-04:
+   '   o fun01 sec04:
    '     - Check if the input is an filerting parameter
-   '   o fun-01 sec-05:
+   '   o fun01 sec05:
    '     - Check if the user wanted the help message
-   '   o fun-01 sec-06:
+   '   o fun01 sec06:
    '     - Check if the user wanted the version number
-   '   o fun-01 sec-07:
+   '   o fun01 sec07:
    '     - Check if user is choosing an alignment method
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-01:
+   ^ Fun01 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed char *tmpStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-02:
+   ^ Fun01 Sec02:
    ^   - Check if the input was an file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -184,7 +198,7 @@ checkInput_tbSpoligo(
    } /*Else If: an sam file of an consensus was input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-03:
+   ^ Fun01 Sec03:
    ^   - Check if the input is an filerting parameter
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -218,13 +232,11 @@ checkInput_tbSpoligo(
       return 1;
    } /*Else If: min score to keep an spoligotype*/
 
-   else if(! cStrEql("-min-kmers", parmStr, 0))
+   else if(! cStrEql("-min-perc-kmer", parmStr, 0))
    { /*Else If: Min kmers for fast method selected*/
-      tmpStr =
-         (signed char *)
-         base10StrToSI((char *) argStr,*minKmersSI);
+      *minKmersPercF = atof((char *) argStr);
 
-      if(*tmpStr != '\0')
+      if(*minKmersPercF == 0)
          return 1 | def_numericErr_tbSpoligo;
 
       *fastTypingBl = 1;
@@ -232,7 +244,7 @@ checkInput_tbSpoligo(
    } /*Else If: Min kmers for fast method selected*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-04:
+   ^ Fun01 Sec04:
    ^   - Check if user is choosing an alignment method
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -248,8 +260,35 @@ checkInput_tbSpoligo(
       return 0;
    } /*Else If: the slow waterman was slected*/
 
+   else if(! cStrEql("-frag", parmStr, 0))
+   { /*Else If: sequence is in fragments*/
+      *fragBl = 1;
+      return 0;
+   } /*Else If: sequence is in fragments*/
+
+   else if(! cStrEql("-con-frag", parmStr, 0))
+   { /*Else If: consensus is in fragments*/
+      *conFragBl = 1; /*using consensuses*/
+      *fragBl = 1;
+      return 0;
+   } /*Else If: consensus is in fragments*/
+
+   else if(! cStrEql("-read-frag", parmStr, 0))
+   { /*Else If: sequence is in fragments*/
+      *conFragBl = 0; /*using consensuses*/
+      *fragBl = 1;
+      return 0;
+   } /*Else If: sequence is in fragments*/
+
+   else if(! cStrEql("-no-frag", parmStr, 0))
+   { /*Else If: sequence is in fragments*/
+      *fragBl = 0;
+      *conFragBl = 0; /*using consensuses*/
+      return 0;
+   } /*Else If: sequence is in fragments*/
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-05:
+   ^ Fun01 Sec05:
    ^   - Check if the user wanted the help message
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -269,7 +308,7 @@ checkInput_tbSpoligo(
       return 1 | def_phelp_tbSpoligo;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-06:
+   ^ Fun01 Sec06:
    ^   - Check if the user wanted the version number
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -295,7 +334,7 @@ checkInput_tbSpoligo(
       return 1 | def_pversion_tbSpoligo;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-07:
+   ^ Fun01 Sec07:
    ^   - Return invalid arguments
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -304,7 +343,7 @@ checkInput_tbSpoligo(
 } /*checkInput_tbSpoligo*/
 
 /*-------------------------------------------------------\
-| Fun-02: phelp_tbSpoligo
+| Fun02: phelp_tbSpoligo
 |   - prints the help messge for tbSpoligo
 | Input:
 |   o outFileStr:
@@ -322,29 +361,29 @@ signed char
 phelp_tbSpoligo(
    signed char *outFileStr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-02 TOC:
+   ' Fun02 TOC:
    '   - prints the help messge for tbSpoligo
-   '   o fun-02 sec-01:
+   '   o fun02 sec01:
    '     - Variable declerations
-   '   o fun-02 sec-02:
+   '   o fun02 sec02:
    '     - Open the output file
-   '   o fun-02 sec-03:
+   '   o fun02 sec03:
    '     - Print usage lines
-   '   o fun-02 sec-04:
+   '   o fun02 sec04:
    '     - Print user input lines
-   '   o fun-02 sec-05:
+   '   o fun02 sec05:
    '     - Print output options
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-01:
+   ^ Fun02 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-02:
+   ^ Fun02 Sec02:
    ^   - Open the output file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -366,7 +405,7 @@ phelp_tbSpoligo(
    } /*Else: The user wants to print to an file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-03:
+   ^ Fun02 Sec03:
    ^   - Print usage lines
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -386,33 +425,39 @@ phelp_tbSpoligo(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-04:
+   ^ Fun02 Sec04:
    ^   - Print user input line
-   ^   o fun-02 sec-04 sub-01:
+   ^   o fun02 sec04 sub01:
    ^     - Print input header
-   ^   o fun-02 sec-04 sub-02:
+   ^   o fun02 sec04 sub02:
    ^     - Print spoligotype sequence input
-   ^   o fun-02 sec-04 sub-03:
+   ^   o fun02 sec04 sub03:
    ^     - Print sam/fasta/fastq input options
-   ^   o fun-02 sec-04 sub-04:
+   ^   o fun02 sec04 sub04:
    ^     - Print database input
-   ^   o fun-02 sec-04 sub-05:
+   ^   o fun02 sec04 sub05:
    ^     - Print mapping coordinates options
-   ^   o fun-02 sec-04 sub-06:
+   ^   o fun02 sec04 sub06:
    ^     - Print the filtering paramerters
-   ^   o fun-02 sec-04 sub-07:
+   ^   o fun02 sec04 sub07:
    ^     - Print alignment method
+   ^   o fun02 sec04 sub08:
+   ^     - Print alignment method
+   ^   o fun02 sec04 sub09:
+   ^     - fragment mode options
+   ^   o fun02 sec04 sub10:
+   ^     - Print help/verson command
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-01:
+   * Fun02 Sec04 Sub01:
    *   - Print input header
    \*****************************************************/
 
    fprintf(outFILE, "Input:\n");
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-02:
+   * Fun02 Sec04 Sub02:
    *   - Print spoligotype sequence input
    \*****************************************************/
 
@@ -427,7 +472,7 @@ phelp_tbSpoligo(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-03:
+   * Fun02 Sec04 Sub03:
    *   - Print sam/fasta/fastq input options
    \*****************************************************/
 
@@ -493,7 +538,7 @@ phelp_tbSpoligo(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-04:
+   * Fun02 Sec04 Sub04:
    *   - Print database input
    \*****************************************************/
 
@@ -510,7 +555,7 @@ phelp_tbSpoligo(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-05:
+   * Fun02 Sec04 Sub05:
    *   - Print output file
    \*****************************************************/
 
@@ -522,7 +567,7 @@ phelp_tbSpoligo(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-06:
+   * Fun02 Sec04 Sub06:
    *   - Print mapping coordinates options
    \*****************************************************/
 
@@ -559,7 +604,7 @@ phelp_tbSpoligo(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-07:
+   * Fun02 Sec04 Sub07:
    *   - Print the filtering paramerters
    \*****************************************************/
 
@@ -581,51 +626,152 @@ phelp_tbSpoligo(
 
    fprintf(
       outFILE,
-      "  -min-kmers: [FUTURE]\n"
+      "  -min-kmer-perc: [%f]\n",
+      def_minKmerPerc_kmerFind
    );
 
    fprintf(
      outFILE,
-     "    o This is a future option for an kmer search\n"
+     "    o Minimum percent of kmers needed to do an\n"
    );
 
    fprintf(
      outFILE,
-     "    o May never be implemented\n"
+     "      waterman alignment on an window for -fast\n"
+   );
+
+   fprintf(
+     outFILE,
+     "    o 50%% is 10 or more kmers for spoligotypes\n"
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-08:
+   * Fun02 Sec04 Sub08:
    *   - Print alignment method
    \*****************************************************/
 
+   if(def_fastSeach_tbSpoligoCheckInput)
+   { /*If: I fast kmer is default method*/
+      fprintf(
+         outFILE,
+         "  -fast: [Default]\n"
+      );
+   } /*If: I fast kmer is default method*/
+
+   else
+   { /*Else: I slow is default method*/
+      fprintf(
+         outFILE,
+         "  -fast: [No]\n"
+      );
+   } /*Else: I slow is default method*/
+
    fprintf(
-      outFILE,
-      "  -fast: [FUTURE]\n"
+     outFILE,
+     "    o Use kmers to narrow down possible\n"
    );
 
    fprintf(
      outFILE,
-     "    o This is a future option for an kmer search\n"
+     "      spoligotype locations (faster)\n"
    );
+
+   if(! def_fastSeach_tbSpoligoCheckInput)
+      fprintf(
+         outFILE,
+         "  -slow: [Default]\n"
+      );
+
+   else
+      fprintf(
+         outFILE,
+         "  -slow: [No]\n"
+      );
 
    fprintf(
      outFILE,
-     "    o May never be implemented\n"
-   );
-
-   fprintf(
-      outFILE,
-      "  -slow: [Default]\n"
-   );
-
-   fprintf(
-     outFILE,
-     "    o Uses an Waterman alignment to map spaces\n"
+     "    o Uses an Waterman alignment to map spacers\n"
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-09:
+   * Fun02 Sec04 Sub09:
+   *   - fragment mode options
+   \*****************************************************/
+
+   if(   def_frag_tbSpoligoCheckInput
+      || def_conFrag_tbSpoligoCheckInput
+   ) fprintf(
+         outFILE,
+         "  -frag: [Yes]\n"
+      );
+
+    else 
+      fprintf(
+         outFILE,
+         "  -frag: [No]\n"
+      );
+
+   fprintf(
+     outFILE,
+     "    o search for fragments (not full genomes)\n"
+   );
+
+   if(def_conFrag_tbSpoligoCheckInput)
+      fprintf(
+         outFILE,
+         "  -con-frag: [Yes]\n"
+      );
+
+   else
+      fprintf(
+         outFILE,
+         "  -con-frag: [No]\n"
+      );
+
+   fprintf(
+     outFILE,
+     "    o fragments are in an conensus\n"
+   );
+   
+   if(! def_conFrag_tbSpoligoCheckInput
+      && def_frag_tbSpoligoCheckInput
+   )
+      fprintf(
+         outFILE,
+         "  -read-frag: [Yes]\n"
+      );
+
+   else
+      fprintf(
+         outFILE,
+         "  -read-frag: [No]\n"
+      );
+
+   fprintf(
+     outFILE,
+     "    o fragments are in reads\n"
+   );
+
+   if(! def_frag_tbSpoligoCheckInput
+      && ! def_conFrag_tbSpoligoCheckInput
+   ) fprintf(
+         outFILE,
+         "  -no-frag: [Yes]\n"
+      );
+
+   else
+      fprintf(
+         outFILE,
+         "  -no-frag: [No]\n"
+      );
+
+   fprintf(
+     outFILE,
+     "    o reads/consensus have full direct repeat\n"
+   );
+   
+   /*****************************************************\
+   * Fun02 Sec04 Sub10:
    *   - Print help/verson command
    \*****************************************************/
 
@@ -633,7 +779,7 @@ phelp_tbSpoligo(
    fprintf(outFILE, "  -v: print the version number\n");
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-05:
+   ^ Fun01 Sec05:
    ^   - Print output
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -653,7 +799,7 @@ phelp_tbSpoligo(
    fprintf(outFILE, "\\tSIT\\tcountries\n");
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-06:
+   ^ Fun01 Sec06:
    ^   - Close the output file and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 

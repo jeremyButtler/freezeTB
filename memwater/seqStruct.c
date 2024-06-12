@@ -10,33 +10,33 @@
 '    - Has includes and default variables
 '  o .h st-01: seqStruct
 '    - Holds an single sequence (fasta/fastq)
-'  o .c fun-01 addLineToBuffSeqFun:
+'  o .c fun01 addLineToBuffSeqFun:
 '    - Add characters from file to buffer, if needed 
 '      resize. This will only read in till the end of the
 '      line
-'  o fun-02 readFqSeq:
+'  o fun02 readFqSeq:
 '    - Reads a fastq sequence from a fastq file
-'  o fun-03 readFaSeq:
+'  o fun03 readFaSeq:
 '    - Grabs the next read in the fasta file
-'  o .c fun-04 complementBase:
+'  o .c fun04 complementBase:
 '    - Returns the complement of a base
-'  o fun-05 reverseComplementSeq:
+'  o fun05 reverseComplementSeq:
 '    - Reverse complement a sequence
-'  o .h fun-06 blankSeqST:
+'  o .h fun06 blankSeqST:
 '    - Sets values in seqST to zero
-'  o .h fun-07 initSeqST:
+'  o .h fun07 initSeqST:
 '     - Sets values in seqST to blank values
-'  o fun-08 freeSeqSTStack:
+'  o fun08 freeSeqSTStack:
 '    - Frees variables in an seqStruct (calls blankSeqST)
-'  o fun-09 freeSeqST:
+'  o fun09 freeSeqST:
 '    - Frees an seqST strucuter (calls fredSeqSTStack)
-'  o fun-10: freeSeqAryST
+'  o fun10: freeSeqAryST
 '    - Frees an array of seqStruct's
-'  o fun-11 cpReadIdRPad:
+'  o fun11 cpReadIdRPad:
 '     - Copies read id to a buffer and adds in endIdC to
 '       the end. If needed, this function will add right
 '       padding of spaces to the end.
-'  o fun-12: cpSeqST
+'  o fun12: cpSeqST
 '    - Copies an seqStruct structure
 '  o license:
 '    - licensing for this code (public domain / mit)
@@ -61,7 +61,7 @@
 #include "../generalLib/ulCpStr.h"
 
 /*-------------------------------------------------------\
-| Fun-01: addLineToBuffSeqFun
+| Fun01: addLineToBuffSeqFun
 |  - Read line of characters into the buffer.If needed
 |    this will resize the buffer.
 | Input:
@@ -99,21 +99,21 @@ addLineToBuffSeqFun(
     unsigned long resBuffUL, /*How much to resize buff by*/
     void *inFILE             /*File to grab data from*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-01 TOC: addLineToBuffSeqFun
+   ' Fun01 TOC: addLineToBuffSeqFun
    '  - Read line of characters into the buffer.If needed
    '    this will resize the buffer.
-   '   o fun-01 sec-1:
+   '   o fun01 sec-1:
    '     - variable declerations
-   '   o fun-01 sec-2:
+   '   o fun01 sec-2:
    '     - Check if need to resize the buffer
-   '   o fun-01 sec-3:
+   '   o fun01 sec-3:
    '     - Read in the next line in the buffer
-   '   o fun-01 sec-4:
+   '   o fun01 sec-4:
    '     - If at end of file, update read in lengths
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-01 Sec-1:
+    ^ Fun01 Sec-1:
     ^  - variable declerations
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -121,7 +121,7 @@ addLineToBuffSeqFun(
     unsigned long spareBuffUL = 0;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-01 Sec-2:
+    ^ Fun01 Sec-2:
     ^  - Check if need to resize the buffer
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -155,7 +155,7 @@ addLineToBuffSeqFun(
         spareBuffUL = *lenBuffUL - *curBuffUL;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-01 Sec-3:
+    ^ Fun01 Sec-3:
     ^  - Read in the next line in the buffer
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
     
@@ -207,7 +207,7 @@ addLineToBuffSeqFun(
     } /*While I have lines to read*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-    ^ Fun-01 Sec-4:
+    ^ Fun01 Sec-4:
     ^  - If at end of file, update read in lengths
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -227,7 +227,7 @@ addLineToBuffSeqFun(
 } /*addLineToBuffSeqFun*/
 
 /*-------------------------------------------------------\
-| Fun-02: readRefFqSeq
+| Fun02: readRefFqSeq
 |  - Grabs the next read in the fastq file
 | Input:
 |  - fqFILE:
@@ -255,22 +255,22 @@ readFqSeq(
   void *fqFILE,           /*fastq file with sequence*/
   struct seqStruct *seqST /*Will hold one fastq entry*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-02 TOC: readRefFqSeq
+   ' Fun02 TOC: readRefFqSeq
    '  -  Grabs the next read in the fastq file
-   '  o fun-02 sec-01:
+   '  o fun02 sec-01:
    '    - Variable declarations
-   '  o fun-02 sec-02:
+   '  o fun02 sec-02:
    '    - Check if need to allocate memory for buffer
-   '  o fun-02 sec-03:
+   '  o fun02 sec-03:
    '    - Read in the first data
-   '  o fun-02 sec-04:
+   '  o fun02 sec-04:
    '    - If not at file end, see if have the full entry
-   '  o fun-02 sec-05:
+   '  o fun02 sec-05:
    '    -Read till end of file, check if valid fastq entry
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-02 Sec-01:
+    ^ Fun02 Sec-01:
     ^  - Variable declarations
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -286,7 +286,7 @@ readFqSeq(
     char *oldIterCStr = 0;
 
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-02 Sec-02:
+    ^ Fun02 Sec-02:
     ^  - Read in the header
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -312,7 +312,7 @@ readFqSeq(
     seqST->idStr[seqST->lenIdUL] = '\0';
     
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-02 Sec-03:
+    ^ Fun02 Sec-03:
     ^  - Read in the sequence & spacer
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -376,7 +376,7 @@ readFqSeq(
     ++seqST->lenSeqUL; /*Account for being one base off*/
 
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-02 Sec-04:
+    ^ Fun02 Sec-04:
     ^  - Read in the Q-score entry
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -426,7 +426,7 @@ readFqSeq(
 } /*readFqSeq*/
 
 /*-------------------------------------------------------\
-| Fun-03 TOC: readFaSeq
+| Fun03 TOC: readFaSeq
 |  -  Grabs the next read in the fasta file
 | Input:
 |  - faFILE:
@@ -453,18 +453,18 @@ readFaSeq(
   void *faFILE,           /*Fasta file with sequence*/
   struct seqStruct *seqST /*Will hold one fastq entry*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-03 TOC: readFaSeq
+   ' Fun03 TOC: readFaSeq
    '  -  Grabs the next read in the fasta file
-   '  o fun-03 sec-01:
+   '  o fun03 sec-01:
    '    - Variable declarations
-   '  o fun-03 sec-02:
+   '  o fun03 sec-02:
    '    - Check if need to allocate memory for buffer
-   '  o fun-03 sec-03:
+   '  o fun03 sec-03:
    '    - Read in the sequence
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-03 Sec-01:
+    ^ Fun03 Sec-01:
     ^  - Variable declarations
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -477,7 +477,7 @@ readFaSeq(
     char *oldIterCStr = 0;
 
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-03 Sec-02:
+    ^ Fun03 Sec-02:
     ^  - Read in the header
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -503,7 +503,7 @@ readFaSeq(
     seqST->idStr[seqST->lenIdUL] = '\0';
 
     /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\
-    ^ Fun-03 Sec-03:
+    ^ Fun03 Sec-03:
     ^  - Read in the sequence
     \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
@@ -580,7 +580,7 @@ readFaSeq(
 } /*readFaSeq*/
 
 /*-------------------------------------------------------\
-| Fun-04: complementBase
+| Fun04: complementBase
 |  - Returns the complement of a base
 | Input:
 |  - baseC:
@@ -616,7 +616,7 @@ readFaSeq(
 }) /*complementBase*/
 
 /*-------------------------------------------------------\
-| Fun-05: reverseComplementSeq
+| Fun05: reverseComplementSeq
 |  - Reverse complement a sequence
 | Input:
 |  - seqST:
@@ -671,7 +671,7 @@ reverseComplementSeq(
 } /*reverseComplementSeq*/
 
 /*-------------------------------------------------------\
-| Fun-06: reverseCStr
+| Fun06: reverseCStr
 |  - Reverse a c-string to be backwards
 |    (here for Q-score entries)
 | Input:
@@ -705,7 +705,7 @@ reverseCStr(
 } /*reverseCStr*/
 
 /*-------------------------------------------------------\
-| Fun-08: freeSeqSTStack
+| Fun08: freeSeqSTStack
 |  - Frees the variables in an seqStruct strucuter
 | Input:
 |  - seqSTPtr:
@@ -723,8 +723,6 @@ freeSeqSTStack(
 ){
    if(seqSTPtr)
    { /*If: I have something to free*/
-      blankSeqST(seqSTPtr);
-
       free(seqSTPtr->idStr);
       seqSTPtr->idStr = 0;
 
@@ -733,11 +731,13 @@ freeSeqSTStack(
 
       free(seqSTPtr->qStr);
       seqSTPtr->qStr = 0;
+
+      blankSeqST(seqSTPtr);
    } /*If: I have something to free*/\
 } /*freeSeqSTStack*/
 
 /*-------------------------------------------------------\
-| Fun-09: freeSeqST
+| Fun09: freeSeqST
 |  - Frees the seqST strucuter
 | Input:
 |  - seqSTPtr:
@@ -750,12 +750,12 @@ void
 freeSeqST(
    struct seqStruct *seqSTPtr
 ){
-   freeSeqSTStack(seqSTPtr);
+   freeSeqSTStack(seqSTPtr); /*checks if have null*/
    free(seqSTPtr);
 } /*freeSeqST*/
 
 /*-------------------------------------------------------\
-| Fun-10: freeSeqAryST
+| Fun10: freeSeqAryST
 |  - Frees an array of seqStruct's
 | Input:
 |  - seqSTAryPtr:
@@ -786,7 +786,7 @@ freeSeqAryST(
 } /*freeSeqAryST*/
 
 /*-------------------------------------------------------\
-| Fun-11: cpReadIdRPad
+| Fun11: cpReadIdRPad
 |  - Copies read id to a buffer and adds in endIdC to
 |    the end. If needed, this function will add right
 |    padding of spaces to the end.
@@ -848,7 +848,7 @@ cpReadIdRPad(
 } /*cpReadIdRPad*/
 
 /*-------------------------------------------------------\
-| Fun-12: cpSeqST
+| Fun12: cpSeqST
 |   - Copies an seqStruct structure
 | Input:
 |   - dupSeqST:
@@ -911,8 +911,6 @@ cpSeqST(
    return 0;
 } /*cpSeqST*/
   
-
-
 /*=======================================================\
 : License:
 : 

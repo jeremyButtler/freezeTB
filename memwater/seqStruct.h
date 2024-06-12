@@ -10,33 +10,33 @@
 '    - header guards
 '  o .h st-01: seqStruct
 '    - Holds an single sequence (fasta/fastq)
-'  o .c fun-01 addLineToBuffSeqFun:
+'  o .c fun01 addLineToBuffSeqFun:
 '    - Add characters from file to buffer, if needed 
 '      resize. This will only read in till the end of the
 '      line
-'  o fun-02 readFqSeq:
+'  o fun02 readFqSeq:
 '    - Reads a fastq sequence from a fastq file
-'  o fun-03 readFaSeq:
+'  o fun03 readFaSeq:
 '    - Grabs the next read in the fasta file
-'  o .c fun-04 complementBase:
+'  o .c fun04 complementBase:
 '    - Returns the complement of a base
-'  o fun-05 reverseComplementSeq:
+'  o fun05 reverseComplementSeq:
 '    - Reverse complement a sequence
-'  o .h fun-06 blankSeqST:
+'  o .h fun06 blankSeqST:
 '    - Sets values in seqST to zero
-'  o .h fun-07 initSeqST:
+'  o .h fun07 initSeqST:
 '     - Sets values in seqST to blank values
-'  o fun-08 freeSeqSTStack:
+'  o fun08 freeSeqSTStack:
 '    - Frees variables in an seqStruct (calls blankSeqST)
-'  o fun-09 freeSeqST:
+'  o fun09 freeSeqST:
 '    - Frees an seqST strucuter (calls fredSeqSTStack)
-'  o fun-10: freeSeqAryST
+'  o fun10: freeSeqAryST
 '    - Frees an array of seqStruct's
-'  o fun-11 cpReadIdRPad:
+'  o fun11 cpReadIdRPad:
 '     - Copies read id to a buffer and adds in endIdC to
 '       the end. If needed, this function will add right
 '       padding of spaces to the end.
-'  o fun-12: cpSeqST
+'  o fun12: cpSeqST
 '    - Copies an seqStruct structure
 '  o license:
 '    - Licensing for this code (public domain / mit)
@@ -74,7 +74,7 @@ typedef struct seqStruct
 
 
 /*-------------------------------------------------------\
-| Fun-02: readRefFqSeq
+| Fun02: readRefFqSeq
 |  - Grabs the next read in the fastq file
 | Input:
 |  - fqFILE:
@@ -104,7 +104,7 @@ readFqSeq(
 );
 
 /*-------------------------------------------------------\
-| Fun-03 TOC: readFaSeq
+| Fun03 TOC: readFaSeq
 |  -  Grabs the next read in the fasta file
 | Input:
 |  - faFILE:
@@ -133,7 +133,7 @@ readFaSeq(
 );
 
 /*-------------------------------------------------------\
-| Fun-05: reverseComplementSeq
+| Fun05: reverseComplementSeq
 |  - Reverse complement a sequence
 | Input:
 |  - seqST:
@@ -151,7 +151,7 @@ reverseComplementSeq(
 
 
 /*-------------------------------------------------------\
-| Fun-06: blankSeqST
+| Fun06: blankSeqST
 |  - Sets values in seqST to blank values
 | Input:
 |  - seqSTPtr:
@@ -184,7 +184,7 @@ blankSeqST(seqSTPtr){\
 } /*blankSeqST*/
 
 /*-------------------------------------------------------\
-| Fun-07: initSeqST
+| Fun07: initSeqST
 |  - Sets vlues in seqST to zero
 | Input:
 |  - seqSTPtr:
@@ -208,7 +208,7 @@ initSeqST(seqSTPtr){\
 } /*initSeqST*/
 
 /*-------------------------------------------------------\
-| Fun-08: freeSeqSTStack
+| Fun08: freeSeqSTStack
 |  - Frees the variables in an seqStruct strucuter
 | Input:
 |  - seqSTPtr:
@@ -226,7 +226,7 @@ freeSeqSTStack(
 );
 
 /*-------------------------------------------------------\
-| Fun-09: freeSeqST
+| Fun09: freeSeqST
 |  - Frees the seqST strucuter
 | Input:
 |  - seqSTPtr:
@@ -241,7 +241,7 @@ freeSeqST(
 );
 
 /*-------------------------------------------------------\
-| Fun-10: freeSeqAryST
+| Fun10: freeSeqAryST
 |  - Frees an array of seqStruct's
 | Input:
 |  - seqSTAryPtr:
@@ -260,7 +260,7 @@ freeSeqAryST(
 );
 
 /*-------------------------------------------------------\
-| Fun-11: cpReadIdRPad
+| Fun11: cpReadIdRPad
 |  - Copies read id to a buffer and adds in endIdC to
 |    the end. If needed, this function will add right
 |    padding of spaces to the end.
@@ -293,7 +293,7 @@ cpReadIdRPad(
 );
 
 /*-------------------------------------------------------\
-| Fun-12: cpSeqST
+| Fun12: cpSeqST
 |   - Copies an seqStruct structure
 | Input:
 |   - dupSeqST:

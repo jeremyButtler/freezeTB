@@ -51,7 +51,8 @@ statsFileStr="out-stats.tsv";
 conStatsFileStr="out-con-stats.tsv";
 prefixStr="out";
 pHeadBl=0;
-refStr="";
+refStr="tbdb.fasta";
+varRefStr="consensus-bcftools.fa";
 
 #*********************************************************
 # Sec-01 Sub-02:
@@ -65,6 +66,8 @@ amrStr="";     # for freezeTB's amr file
 spoligoStr=""; # for freezeTB's spoligotype file
 scriptDirStr="$(dirname "$0")";
 
+refStr="$scriptDirStr/$refStr";
+
 #*********************************************************
 # Sec-01 Sub-03:
 #   - Help message
@@ -76,8 +79,9 @@ Use:
 Input:
    -reads reads.fastq: [Required]
      o reads to profile
-   -ref ref.fasta: [Optional]
+   -ref ref.fasta: [$refStr]
      o Compare output consensuses to an reference
+     o Always must be named tbdb.fasta
    -stats out-stats.tsv: [out-stats.tsv]
      o File to save AMR and lneage stats to
    -con-stats out-con-stats.tsv: [out-con-stats.tsv]
@@ -143,7 +147,7 @@ if [[ "$pHeadBl" -eq 1 ]]; then
    {
       printf "fastq\tname\tprogram\treadData\ttime";
       printf "\tuserTime\tsysTime\tmemory\tcpu";
-      printf "\tdrug\tvarId\tvarTyep\tsupport\tidSpoligo";
+      printf "\tdrug\tvarId\tsupport\tvarType\tidSpoligo";
       printf "\toctSpolito\tfamilySpligo\tSITSpoligo";
       printf "\tMIRU-0154\tMIRU-0424\tMIRU-0577";
       printf "\tMIRU-0588\tMIRU-0802\tMIRU-0960";
@@ -156,11 +160,11 @@ if [[ "$pHeadBl" -eq 1 ]]; then
    } > "$statsFileStr";
 
    {
-      printf "fastq\tname\treference\tfragment_id\tstart";
-      printf "\taln_len\tmatch_not_n\tmatch_as_n";
+      printf "fastq\tname\tquery\treference\tfragment_id";
+      printf "\tstart\taln_len\tmatch_not_n\tmatch_as_n";
       printf "\tsnp_not_n\tsnp_as_n\tins_not_n";
       printf "\tins_as_n\tdel\tmask_not_n";
-      printf "\tmask_as_n";
+      printf "\tmask_as_n\n";
    } > "$conStatsFileStr";
 fi # If: I am printing the header
 
@@ -175,6 +179,10 @@ fi # If: I am printing the header
 #     - print the consensus stats
 #   o sec-03 sub-04:
 #     - get MIRU lineage best supported by reads
+#   o sec-03 sub-05:
+#     - Print out the reads stats
+#   o sec-03 sub-06:
+#     - convert consensus to fasta (freezeTB)
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #*********************************************************
@@ -213,18 +221,18 @@ miruStr="$(
         BEGIN{
             FS=OFS="\t";
             siMiru = 0;
-            miruStr = "";
+            miruStr = "NA";
 
-            for(siMiru = 1; siMiru <= 24; ++siMiru)
+            for(siMiru = 2; siMiru <= 24; ++siMiru)
                miruStr = miruStr "\tNA";
 
             getline; # get past header
         }; # BEGIN BLOCK
 
         { # MAIN BLOCK
-           miruStr = "";
+           miruStr = $siMiru;
 
-           for(siMiru = 2; siMiru <= NF; ++siMiru)
+           for(siMiru = 3; siMiru <= NF; ++siMiru)
               miruStr = miruStr "\t" $siMiru;
         }; # MAIN BLOCK
 
@@ -357,6 +365,16 @@ awk \
    < "$prefixStr-read-amrs.tsv" \
  >> "$statsFileStr";
 
+#********************************************************
+# Sec-03 Sub-06:
+#   - convert consensus to fasta (freezeTB)
+#********************************************************
+
+filtsam \
+    -out-fasta \
+    -sam "$prefixStr-consensuses.sam" \
+  > "$prefixStr-frezeTB-con.fa";
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec-04:
 #   - run TBProfiler and get stats
@@ -386,7 +404,7 @@ awk \
 #   o sec-05 sub-01:
 #     - Build the consensus for TBProfiler
 #   o sec-05 sub-02:
-#     - Convert the consensus for freezeTB
+#     - Compare consensuses
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #********************************************************
@@ -401,11 +419,11 @@ if [[ ! -f "$scriptDirStr/tbdb.fasta.fai" ]]; then
 fi # If: I need to index the reference
 
 bcftools consensus \
-    -f "$scriptDirStr/tbdb.fasta" \
+    -f "$scriptDirStr/$varRefStr" \
     -o "$prefixStr-TBProfiler-con.fa" \
     "vcf/$prefixStr.targets.vcf.gz";
 
-samtools depth "bam/$prefix.bam" |
+samtools depth "bam/$prefixStr.bam" |
   awk \
     '
       BEGIN{getline; FS=OFS="\t";};
@@ -444,6 +462,7 @@ samtools depth "bam/$prefix.bam" |
                   startSI,
                   endUI;
          } # If: I need to print out the last region
+       } # END block
     ' > depth.tsv
 
 minimap2 \
@@ -452,7 +471,7 @@ minimap2 \
     "$prefixStr-TBProfiler-con.fa" |
   primMask \
     -sam - \
-    -depth.tsv |
+    -prim depth.tsv |
   filtsam \
     -out-fasta \
   > "$prefixStr-TBProfiler-con-mask.fa";
@@ -460,19 +479,10 @@ minimap2 \
 rm -r results;
 rm -r vcf;
 rm -r bam;
+rm depth.tsv;
 
 #********************************************************
 # Sec-05 Sub-02:
-#   - Convert the consensus for freezeTB
-#********************************************************
-
-filtsam \
-    -out-fasta \
-    "$prefixStr-consensuses.sam" \
-  > "$prefixStr-frezeTB-con.fa";
-
-#********************************************************
-# Sec-05 Sub-03:
 #   - Compare consensuses
 #********************************************************
 
@@ -488,10 +498,15 @@ minimap2 \
       -v fqStr="$readsStr" \
       -v prefStr="$prefixStr" \
       '
-         BEGIN{FS=OFS="\t";};
+         BEGIN{
+            FS=OFS="\t";
+            getline;
+         };
+
          { # MAIN
             print fqStr,
                   prefStr,
+                  "freezeTB", # reference
                   "tbprofiler", # reference
                   $1,    # Fragment name
                   $5,    # start
@@ -538,10 +553,16 @@ if [[ -f "$refStr" ]]; then
          -v prefStr="$prefixStr" \
          -v refStr="$refStr" \
          '
-            BEGIN{FS=OFS="\t";};
+            BEGIN{
+               FS=OFS="\t";
+               getline;
+            };
+
             { # MAIN
+               getline;
                print fqStr,
                      prefStr,
+                     "TBProfiler",
                      refStr, # reference
                      $1,     # Fragment name
                      $5,     # start
@@ -577,10 +598,15 @@ if [[ -f "$refStr" ]]; then
          -v prefStr="$prefixStr" \
          -v refStr="$refStr" \
          '
-            BEGIN{FS=OFS="\t";};
+            BEGIN{
+               FS=OFS="\t";
+               getline;
+            };
+
             { # MAIN
                print fqStr,
                      prefStr,
+                     "freezeTB",
                      refStr, # reference
                      $1,     # Fragment name
                      $5,     # start

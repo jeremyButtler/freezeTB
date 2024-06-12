@@ -9,27 +9,30 @@
 ' SOF: Start Of Functions
 '   o header:
 '     - header guards
-'   o .c fun-01: macroMax
+'   o .c fun01: macroMax
 '     - Find the maximum value (branchless)
-'   o .c fun-02: macroIfMax
+'   o .c fun02: macroIfMax
 '     - Set a value (ret) to a value based on which value
 '       is greater.
-'   o .c fun-03: indexToQry
+'   o .c fun03: indexToQry
 '     - Gets the query coordinates of the query sequence
 '       in an matrix.
-'   o .c fun-04: indexToRef
+'   o .c fun04: indexToRef
 '     - Gets the coordinates of the reference sequence in
 '       in an matrix.
-'   o .c fun-05: indexToCoord
+'   o .c fun05: indexToCoord
 '     - Gets the coordinates of the reference and query
 '       sequence in an matrix.
-'   o .c fun-06: waterMaxScore
+'   o .c fun06: waterMaxScore
 '     - Maximizes the score for a single base pair in an
 '       waterman query reference scan
-'   o .c fun-07: waterMaxEndRowScore
+'   o .c fun07: waterMaxEndRowScore
 '     - Maximizes the score for a single waterman
 '       alignment when at the end of an row
-'   o fun-08 memWater:
+'   o .c fun08: scoreGt0
+'     - Checks to see if the score is greater then zero.
+'       if not, this resets the input values
+'   o fun09 memWater:
 '     - Run a memory efficent Waterman Smith alignment on
 '       input sequences
 '   o license:
@@ -45,7 +48,7 @@
 #define MEMORY_EFFICENT_WATERMAN_H
 
 /*-------------------------------------------------------\
-| Fun-08: memWater
+| Fun08: memWater
 |   - Performs a memory efficent Smith Waterman alignment
 |     on a pair of sequences
 | Input;

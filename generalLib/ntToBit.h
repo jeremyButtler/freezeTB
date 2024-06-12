@@ -10,12 +10,12 @@
 ' SOF: Start Of File
 '   o header:
 '     - guards and defined variables
-'   o tbl-01: ntToFiveBit
+'   o tbl01: ntToFiveBit
 '     - table to convert bases to five bit values, with an
 '       extra sixth bit acting as an error
-'   o tbl-02: ntToFive
+'   o tbl02: ntToFive
 '     - table to convert bases to four bit (a/t/g/c only)
-'   o tbl-03: ntToTwoBit
+'   o tbl03: ntToTwoBit
 '     - table to convert bases to four bit (a/t/g/c only)
 '       values to two bits with the 3rd bit saved for an
 '       error/anonymous base
@@ -40,10 +40,10 @@
 
 #define err_fiveBit 1 << 4 /*For four bit only*/
 
-#define a_twoBit 1
-#define c_twoBit 2
-#define g_twoBit 3
-#define t_twoBit 4
+#define a_twoBit 0
+#define c_twoBit 1
+#define g_twoBit 2
+#define t_twoBit 3
 #define err_threeBit 1 << 2
 
 /*-------------------------------------------------------\

@@ -13,6 +13,7 @@ source=\
    ../memwater/seqStruct.c\
    ../memwater/memwater.c\
    tbSpoligo-memwater-fun.c\
+   kmerFind.c\
    tbSpoligo-readDb.c\
    tbSpoligo-version.c\
    tbSpoligo-checkInput.c\

@@ -12,28 +12,28 @@
 '    - Header guards and defined variables
 '  o .h st-01 alnSet:
 '     o Holds settings for my alignment program
-'  o .h fun-01 setBpScore:
+'  o .h fun01 setBpScore:
 '    - Sets the score for a base pair (reference/query)
-'  o .h fun-02 setIfBpMatch:
+'  o .h fun02 setIfBpMatch:
 '    - Sets if two bases are a match or mismtach
-'  o fun-03 freeAlnSetStack:
+'  o fun03 freeAlnSetStack:
 '    o Frees variables inside alnSet
-'  o fun-04 freeAlnSet:
+'  o fun04 freeAlnSet:
 '    o Frees an alnSet structure (and sets to 0)
-'  o .h fun-05 getBaseScore:
+'  o .h fun05 getBaseScore:
 '    - Get the score for a pair of bases from an alignment
-'  o .h fun-06 matchOrSnp:
+'  o .h fun06 matchOrSnp:
 '    - Check if two bases were a match or mismatch
-'  o fun-07 readInScoreFile
+'  o fun07 readInScoreFile
 '     - Reads in a file of scores for a scoring matrix
-'  o fun-08 readInMatchFile:
+'  o fun08 readInMatchFile:
 '    - Reads in a file of matches
-'  o .h fun-09 seqToLookupIndex:
+'  o .h fun09 seqToLookupIndex:
 '    - Converts a sequence to a look up table index
-'  o .h fun-10 lookupIndexToSeq:
+'  o .h fun10 lookupIndexToSeq:
 '    - Converts a sequence of lookup indexs back into
 '      uppercase characters (a-z)
-'  o fun-11 initAlnSet:
+'  o fun11 initAlnSet:
 '    - Set all values in altSet (alingment settings)
 '      structure to defaults
 '  o license:
@@ -135,7 +135,7 @@ typedef struct alnSet
      /* Size of both non-WORDS matrixies (27 or 26) is due
      ` to wanting a look up table that can handle
      ` anonymous bases.  Most cells will be set to 0. 
-     `  How to get score when not using -DWORDS
+     `  How to get score
      `  score =
      `   scoreMatrixC[(uchar) (base1 & defClearNonAlph)-1]
      `               [(uchar) (base2 & defClearNonAlph)-1]
@@ -144,7 +144,7 @@ typedef struct alnSet
 
 
 /*-------------------------------------------------------\
-| Fun-01: setBpScore
+| Fun01: setBpScore
 |  - Sets the score for a base pair (reference/query)
 | Input:
 |  - qryBase:
@@ -178,7 +178,7 @@ setBpScore(\
 } /*setBpScore, sequences will be lookup indexes*/
 
 /*-------------------------------------------------------\
-| Fun-02: setIfBpMatch
+| Fun02: setIfBpMatch
 |  - Sets if two bases are a match or mismtach
 | Input:
 |  - qryBase:
@@ -215,7 +215,7 @@ setIfBpMatch(\
 
 
 /*-------------------------------------------------------\
-| Fun-03: freeAlnSetStack
+| Fun03: freeAlnSetStack
 |  - Does a stack free of an alnSet structer
 | Input:
 |  - alnSetSTPtr:
@@ -233,7 +233,7 @@ freeAlnSetStack(
 
 
 /*-------------------------------------------------------\
-| Fun-04: freeAlnSet
+| Fun04: freeAlnSet
 |  - Frees and alnSet (alignment settings) structure
 | Input:
 |  - alnSetSTPtr:
@@ -250,7 +250,7 @@ freeAlnSet(
 );
 
 /*-------------------------------------------------------\
-| Fun-05: getBaseScore:
+| Fun05: getBaseScore:
 |  - Get the score for a pair of bases from an alignment
 | Input:
 |  - qryBase:
@@ -279,7 +279,7 @@ getBaseScore(\
 )/*getBasePairScore, with sequence converted to index*/
 
 /*-------------------------------------------------------\
-| Fun-06: matchOrSnp
+| Fun06: matchOrSnp
 |  - Check if two bases were a match or mismatch
 | Input:
 |  - qryBase:
@@ -309,7 +309,7 @@ matchOrSnp(\
 )/*getBasePairMatch, with sequence converted to index*/
 
 /*-------------------------------------------------------\
-| Fun-08: readInMatchFile
+| Fun08: readInMatchFile
 |  - Reads in a file of matches
 | Input:
 |  - alnSetSTPtr:
@@ -333,7 +333,7 @@ readInMatchFile(
 );
 
 /*-------------------------------------------------------\
-| Fun-09: seqToLookupIndex
+| Fun09: seqToLookupIndex
 |  - Converts a sequence to a look up table index
 |    (table is in alnSetStruct.c/h)
 | Input:
@@ -362,7 +362,7 @@ seqToLookupIndex(\
 } /*seqToLookupIndex*/
 
 /*-------------------------------------------------------\
-| Fun-10: lookupIndexToSeq
+| Fun10: lookupIndexToSeq
 |  - Converts a sequence of lookup indexs back into
 |    uppercase characters (a-z)
 | Input:
@@ -391,7 +391,7 @@ lookupIndexToSeq(\
 } /*lookupIndexToSeq*/
 
 /*-------------------------------------------------------\
-| Fun-11: initAlnSet
+| Fun11: initAlnSet
 |  - Set values in altSet (alingment settings) structure
 |    to default values
 | Input:

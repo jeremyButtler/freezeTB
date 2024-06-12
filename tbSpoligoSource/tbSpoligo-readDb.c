@@ -9,33 +9,33 @@
 '     - included libraries
 '   o .h st-01: spoligoST
 '     - Holds an single lineage for an spoligotype
-'   o .h fun-01: blankSpoligoST
+'   o .h fun01: blankSpoligoST
 '     - Blanks all variables in and spoligoST structure
-'   o .h fun-02: initSpoligoST
+'   o .h fun02: initSpoligoST
 '      - Sets all pointers to null and other variables
 '       (none) to defaults in an spoligoST struct
-'   o fun-03: mkSpoligoAryST
+'   o fun03: mkSpoligoAryST
 '     - Makes array of initialized spoligotype structers
-'   o fun-04: freeSpoligoSTStack
+'   o fun04: freeSpoligoSTStack
 '     - Frees an spoligoST struct on the stack
-'   o fun-05: freeSpoligoST
+'   o fun05: freeSpoligoST
 '     - Frees an spoligoST struct (on heap)
-'   o fun-06: freeSpoligoSTAry
+'   o fun06: freeSpoligoSTAry
 '     - Frees an array of spoligoST struct (on heap)
-'   o .h fun-07: swapSpoligos
+'   o .h fun07: swapSpoligos
 '     - Swaps values in two spoligoST structures
-'   o .h fun-08: sortSpoligoSTAry
+'   o .h fun08: sortSpoligoSTAry
 '     - Sorts an array of spoligoST structures by least to
 '       greatest with shell sort
-'   o .h fun-09: findSpoligoBarcode
+'   o .h fun09: findSpoligoBarcode
 '     - Finds an spoligo barcode in an array of spoligoST
 '       structures using an binary search
-'   o fun-10: readSpoligoDb
+'   o fun10: readSpoligoDb
 '     - Reads in an database of spoligotypes and returns
 '       an array of spoligoST structures sorted by barcode
-'   o fun-11: pSpoligoHead
+'   o fun11: pSpoligoHead
 '     - Print out the header for the spoligotype output
-'   o fun-12: pSpoligo
+'   o fun12: pSpoligo
 '     - Print out an spoligotype and matching lineage
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -62,9 +62,10 @@
 #include "../generalLib/dataTypeShortHand.h"
 #include "../generalLib/genMath.h"
 #include "tbSpoligo-errors.h"
+#include "../generalLib/numToStr.h"
 
 /*-------------------------------------------------------\
-| Fun-03: mkSpoligoAryST
+| Fun03: mkSpoligoAryST
 |   - Makes an array of initialized spoligotype structers
 | Input:
 |   - numSpoligosSI:
@@ -93,7 +94,7 @@ mkSpoligoAryST(
 } /*mkSpoligoAryST*/
 
 /*-------------------------------------------------------\
-| Fun-04: freeSpoligoSTStack
+| Fun04: freeSpoligoSTStack
 |   - Frees an spoligoST struct on the stack
 | Input:
 |   - spoligoSTPtr:
@@ -118,7 +119,7 @@ freeSpoligoSTStack(
 } /*freeSpoligoStack*/
 
 /*-------------------------------------------------------\
-| Fun-05: freeSpoligoST
+| Fun05: freeSpoligoST
 |   - Frees an spoligoST struct (on heap)
 | Input:
 |   - spoligoSTPtr:
@@ -136,7 +137,7 @@ freeSpoligoST(
 } /*freeSpoligoST*/
 
 /*-------------------------------------------------------\
-| Fun-06: freeSpoligoSTAry
+| Fun06: freeSpoligoSTAry
 |   - Frees an array of spoligoST struct (on heap)
 | Input:
 |   - spoligoArySTPtr:
@@ -161,7 +162,7 @@ freeSpoligoSTAry(
 } /*freeSpoligoSTAry*/
 
 /*-------------------------------------------------------\
-| Fun-10: readSpoligoDb
+| Fun10: readSpoligoDb
 |   - Reads in an database of spoligotypes and returns
 |     an array of spoligoST structures sorted by barcodes
 | Input:
@@ -191,23 +192,23 @@ readSpoligoDb(
    signed int *numElmSIPtr,
    signed char *errSC
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-10: TOC
-   '   o fun-07 sec-01:
+   ' Fun10: TOC
+   '   o fun07 sec01:
    '     - Variable declerations
-   '   o fun-07 sec-02:
+   '   o fun07 sec02:
    '     - Open the database file
-   '   o fun-07 sec-03:
+   '   o fun07 sec03:
    '     - Find the number of lines (lineages) in database
-   '   o fun-07 sec-04:
+   '   o fun07 sec04:
    '     - Allocate memory for the database
-   '   o fun-07 sec-05:
+   '   o fun07 sec05:
    '     - Read in the database
-   '   o fun-07 sec-06:
+   '   o fun07 sec06:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-01:
+   ^ Fun10 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -227,7 +228,7 @@ readSpoligoDb(
    FILE *dbFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-02:
+   ^ Fun10 Sec02:
    ^   - Open the database file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -237,7 +238,7 @@ readSpoligoDb(
       goto fileErr_fun10_sec06_sub02;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-03:
+   ^ Fun10 Sec03:
    ^   - Find the number of lines (lineages) in database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -295,7 +296,7 @@ readSpoligoDb(
    fseek(dbFILE, 0, SEEK_SET); /*Get back to first line*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-04:
+   ^ Fun10 Sec04:
    ^   - Allocate memory for the database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -315,28 +316,28 @@ readSpoligoDb(
          goto memErr_fun10_sec06_sub02;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-05:
+   ^ Fun10 Sec05:
    ^   - Read in the database
-   ^   o fun-10 sec-05 sub-01:
+   ^   o fun10 sec05 sub01:
    ^     - Get past the header, initialize, and start loop
-   ^   o fun-10 sec-05 sub-02:
+   ^   o fun10 sec05 sub02:
    ^     - Copy the strain id
-   ^   o fun-10 sec-05 sub-03:
+   ^   o fun10 sec05 sub03:
    ^     - Get the barcode (binary number)
-   ^   o fun-10 sec-05 sub-04:
+   ^   o fun10 sec05 sub04:
    ^     - Skip the octal entry
-   ^   o fun-10 sec-05 sub-05:
+   ^   o fun10 sec05 sub05:
    ^     - Get the lineage entry
-   ^   o fun-10 sec-05 sub-06:
+   ^   o fun10 sec05 sub06:
    ^     - Get the SIT entry
-   ^   o fun-10 sec-05 sub-07:
+   ^   o fun10 sec05 sub07:
    ^     - Get the countries seen in entry
-   ^   o fun-10 sec-05 sub-08:
+   ^   o fun10 sec05 sub08:
    ^     - Move to the next lineage entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-10 Sec-05 Sub-01:
+   * Fun10 Sec05 Sub01:
    *   - Get past the header, initialize, and start loop
    \*****************************************************/
 
@@ -353,7 +354,7 @@ readSpoligoDb(
       posUI = 0;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-02:
+      * Fun10 Sec05 Sub02:
       *   - Copy the strain id
       \**************************************************/
 
@@ -386,7 +387,7 @@ readSpoligoDb(
       } /*Loop: Remove white space*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-03:
+      * Fun10 Sec05 Sub03:
       *   - Get the barcode (binary number)
       \**************************************************/
 
@@ -405,7 +406,7 @@ readSpoligoDb(
       ++posUI;
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-04:
+      * Fun10 Sec05 Sub04:
       *   - Skip the octal entry
       \**************************************************/
 
@@ -413,7 +414,7 @@ readSpoligoDb(
       ++posUI; /*Get off the comma*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-05:
+      * Fun10 Sec05 Sub05:
       *   - Get the lineage entry
       \**************************************************/
 
@@ -447,7 +448,7 @@ readSpoligoDb(
       } /*Loop: Remove white space*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-06:
+      * Fun10 Sec05 Sub06:
       *   - Get the SIT entry
       \**************************************************/
 
@@ -480,7 +481,7 @@ readSpoligoDb(
       } /*Loop: Remove white space*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-07:
+      * Fun10 Sec05 Sub07:
       *   - Get the countries seen in entry
       \**************************************************/
 
@@ -519,7 +520,7 @@ readSpoligoDb(
       } /*Loop: Remove white space*/
 
       /**************************************************\
-      * Fun-10 Sec-05 Sub-08:
+      * Fun10 Sec05 Sub08:
       *   - Move to the next lineage entry
       \**************************************************/
 
@@ -527,20 +528,20 @@ readSpoligoDb(
    } /*Loop: Read in the database*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-10 Sec-06:
+   ^ Fun10 Sec06:
    ^   - clean up
-   ^   o fun-10 sec-06 sub-01:
+   ^   o fun10 sec06 sub01:
    ^     - clean up after success
-   ^   o fun-10 sec-06 sub-02:
+   ^   o fun10 sec06 sub02:
    ^     - deal with memory errors
-   ^   o fun-10 sec-06 sub-03:
+   ^   o fun10 sec06 sub03:
    ^     - deal with file errors
-   ^   o fun-10 sec-06 sub-04:
+   ^   o fun10 sec06 sub04:
    ^     - clean up after errors
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-01:
+   * Fun10 Sec06 Sub01:
    *   - clean up after success
    \*****************************************************/
 
@@ -555,7 +556,7 @@ readSpoligoDb(
    return retHeapST;
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-02:
+   * Fun10 Sec06 Sub02:
    *   - deal with memory errors
    \*****************************************************/
 
@@ -566,7 +567,7 @@ readSpoligoDb(
    goto errCleanUp_fun10_sec06_sub02;
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-03:
+   * Fun10 Sec06 Sub03:
    *   - deal with file errors
    \*****************************************************/
 
@@ -577,7 +578,7 @@ readSpoligoDb(
    goto errCleanUp_fun10_sec06_sub02;
 
    /*****************************************************\
-   * Fun-10 Sec-06 Sub-04:
+   * Fun10 Sec06 Sub04:
    *   - clean up after errors
    \*****************************************************/
 
@@ -598,9 +599,14 @@ readSpoligoDb(
 } /*readSpoligoDB*/
 
 /*-------------------------------------------------------\
-| Fun-11: pSpoligoHead
+| Fun11: pSpoligoHead
 |   - Print out the header for the spoligotype output
 | Input:
+|   - fragBl:
+|     o 1: printing out header for sequence fragments
+|          that  not have the entire direct repeat region.
+|     o 0: header for sequences with full DR. An consensus
+|          with fragments will use this header as well.
 |   - outFILE:
 |     o FILE pointer with file to print to
 | Output:
@@ -609,23 +615,63 @@ readSpoligoDb(
 \-------------------------------------------------------*/
 void
 pSpoligoHead(
+   signed char fragBl,
    void *outFILE
 ){
-   fprintf(
-    (FILE *) outFILE,
-    "ref\tstrain\tbarcode\toctal\tlineage\tSIT\tcountries"
-   );
-   fprintf((FILE *) outFILE, "\n");
+
+   if(fragBl)
+   { /*If: I am doing fragment checks on reads*/
+      fprintf(
+       (FILE *) outFILE,
+       "ref\tbarcode\tnumReads"
+      );
+
+      for(
+         fragBl = 0;
+         fragBl < 43;
+         ++fragBl
+      ){ /*Loop: print out counter header*/
+         fprintf(
+            (FILE *) outFILE,
+            "\t%i",
+            fragBl + 1
+         );
+      } /*Loop: print out counter header*/
+
+      fprintf(
+         (FILE *) outFILE,
+         "\n"
+      );
+   } /*If: I am doing fragment checks on reads*/
+
+   else
+   { /*Else: I am using non-fragment mode*/
+      fprintf(
+         (FILE *) outFILE,
+         "ref\tstrain\tbarcode\toctal\tlineage\tSIT"
+      );
+
+      fprintf(
+         (FILE *) outFILE,
+         "\tcountries\n"
+      );
+   } /*Else: I am using non-fragment mode*/
 } /*pSpoligoHead*/
 
 /*-------------------------------------------------------\
-| Fun-12: pSpoligo
+| Fun12: pSpoligo
 |   - Print out an spoligotype and matching lineage
 | Input:
 |   - idStr:
 |     o C-string with id/name of sequence
-|   - codeStr:
-|     o C-string with the spoligotype barcode for idStr
+|   - codeAryUI:
+|     o unsigned int array with the spoligotype counts
+|   - fragmentBl:
+|     o 1: fragment mode, do not find lineages
+|     o 0: complete reads find lineages
+|   - numSupUI:
+|     o unsigned int with the number of reads that had at
+|       least one spacer (for fragment mode)
 |   - spoligoAryST:
 |     o Array of spoligotype lineages to get lineage from
 |   - numSpoligosSI:
@@ -636,23 +682,25 @@ pSpoligoHead(
 void
 pSpoligo(
    signed char *idStr,
-   signed char *codeStr,
+   unsigned int *codeAryUI,
+   signed char fragmentBl,
+   unsigned int numSupUI,
    struct spoligoST *spoligoAryST,
    signed int numSpoligosSI,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-12 TOC:
+   ' Fun12 TOC:
    '   - Print out an spoligotype and matching lineage
-   '   o fun-12 sec-01:
+   '   o fun12 sec01:
    '     - Variable declerations
-   '   o fun-12 sec-02:
+   '   o fun12 sec02:
    '     - Convert barcode to numeric & "octal" formats
-   '   o fun-12 sec-03:
+   '   o fun12 sec03:
    '     - Find the lineage and print out the entry
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-01:
+   ^ Fun12 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -660,20 +708,61 @@ pSpoligo(
    schar tmpC = 0;
 
    /*For getting the "octal" number*/
+   schar codeStr[65];
    schar octalStr[65];
    sint lenOctalSI = 0;
+
+   schar cntStr[4096];
+   sint digInCntStr = 0;
 
    sint indexSI = 0; /*Index of lineage in database*/
 
    ulong codeUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-02:
+   ^ Fun12 Sec02:
    ^   - Convert the barcode to numeric & "octal" formats
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   while(codeStr[siDig] != '\0')
+   if(fragmentBl)
+   { /*If: I am checking fragments*/
+      for(
+         siDig = 0;
+         (sint) codeAryUI[siDig] > -1;
+         ++siDig
+      ){ /*Loop: get the counts and barcode*/
+         codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
+
+         digInCntStr += 
+            numToStr(
+               (char *) &cntStr[digInCntStr],
+               codeAryUI[siDig]
+         );
+
+         cntStr[digInCntStr++] = '\t';
+      } /*Loop: get the counts and barcode*/
+
+      --digInCntStr;
+      cntStr[digInCntStr] = '\0';
+
+      codeStr[siDig] = '\0';
+
+      fprintf(
+         (FILE *) outFILE,
+         "%s\t%s\t%u\t%s\n",
+         idStr,
+         codeStr,
+         numSupUI,
+         cntStr
+      ); /*print out the counts*/
+
+      return;
+   } /*If: I am checking fragments*/
+
+   while((sint) codeAryUI[siDig] > -1)
    { /*Loop: Translate the barcode to number and octal*/
+      codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
+
       codeUL <<= 1;
       codeUL |= (codeStr[siDig] - 48);
 
@@ -681,12 +770,14 @@ pSpoligo(
       
       ++siDig;
 
-      if(codeStr[siDig] == '\0')
+      if((sint) codeAryUI[siDig] < 0)
       { /*If: I have converted the barcode*/
          octalStr[lenOctalSI] += 48;
          ++lenOctalSI;
          break;
       } /*If: I have converted the barcode*/
+
+      codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
 
       codeUL <<= 1;
       codeUL |= (codeStr[siDig] - 48);
@@ -696,13 +787,16 @@ pSpoligo(
 
       ++siDig;
 
-      if(codeStr[siDig] == '\0')
+      if((sint) codeAryUI[siDig] < 0)
       { /*If: I have converted the barcode*/
          octalStr[lenOctalSI] += 48;
          ++lenOctalSI;
          break;
       } /*If: I have converted the barcode*/
 
+      codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
+
+      codeUL <<= 1;
       codeUL <<= 1;
       codeUL |= (codeStr[siDig] - 48);
 
@@ -715,12 +809,13 @@ pSpoligo(
    } /*Loop: Translate the barcode to number and octal*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-12 Sec-03:
+   ^ Fun12 Sec03:
    ^   - Find the lineage and print out the entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*This is here to remove spaces*/
    octalStr[lenOctalSI] = '\0';
+   codeStr[siDig] = '\0';
 
    siDig = 0;
    while(idStr[siDig++] > 32) ;

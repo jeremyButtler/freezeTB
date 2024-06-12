@@ -8,9 +8,9 @@
 ' SOF: Start Of File
 '   o header:
 '     - guards and defined varibles
-'   o fun-01: checkInput_tbSpoligo
+'   o fun01: checkInput_tbSpoligo
 '     - checks the users input & sets to correct variable
-'   o fun-02: phelp_tbSpoligo
+'   o fun02: phelp_tbSpoligo
 '     - prints the help messge for tbSpoligo
 '   o license:
 '     - Licensing for this code (public domain / mit)
@@ -35,8 +35,12 @@
 #define def_samConFile_tbSpoligo 8
 #define def_seqStdin_tbSpoligo def_samFile_tbSpoligo
 
+#define def_fastSeach_tbSpoligoCheckInput 1
+#define def_frag_tbSpoligoCheckInput 0
+#define def_conFrag_tbSpoligoCheckInput 0
+
 /*-------------------------------------------------------\
-| Fun-01: checkInput_tbSpoligo
+| Fun01: checkInput_tbSpoligo
 |   - checks the users input and sets to correct variable
 | Input:
 |   o parmStr:
@@ -62,12 +66,19 @@
 |     - Will hold the start of the DR region
 |   o dirEndSI:
 |     - Will hold the end of the DR region
-|   o minKmersSI:
-|     - int to hold the minimum number of kmer matches to
-|       have to do an waterman alignment (kmer method)
+|   o minKmersPercF:
+|     - pointer to float to hold the minimum percent of
+|       kmers needed to do an waterman alignment on an
+|       window in the fast kmer method
 |   o fastTypingBl:
 |     - Set to 1 if user wants faster kmer method
 |     - Set to 0 if user wants slower method
+|   o fragBl:
+|     - Set to 1 if user is inputing fragments
+|     - Set to 0 if user is inputing direct repeat regions
+|   o conFragBl:
+|     - Set to 1 if user is inputing consensus fragments
+|     - Set to 0 if user not consensus or not fragments
 | Output:
 |   - Modifies:
 |     o All input variables except parmStr and argStr to
@@ -91,19 +102,21 @@ checkInput_tbSpoligo(
    signed char *parmStr,     /*Paramter to check*/
    signed char *argStr,      /*Argument to check*/
    signed char **seqFileStr, /*sequence file name*/
-   signed char *seqTypeFlag,   /*Type of file input*/
+   signed char *seqTypeFlag, /*Type of file input*/
    signed char **refFileStr, /*Spoligotype seq file name*/
    signed char **spoliogDbStr,/*database of lineages*/
    signed char **outFileStr, /*File to save to*/
    float *minPercScoreF,     /*min % score to count hit*/
    signed int *dirStartSI,   /*start of DR region*/
    signed int *dirEndSI,     /*start of DR region*/
-   signed int *minKmersSI,   /*Min number kmers for fast*/
-   signed char *fastTypingBl /*1: Do fast spoligo typing*/
+   float *minKmersPercF,     /*Min number kmers for fast*/
+   signed char *fastTypingBl,/*1: Do fast spoligo typing*/
+   signed char *fragBl,      /*1: fragment checking*/
+   signed char *conFragBl    /*1: non-con fragment mode*/
 );
 
 /*-------------------------------------------------------\
-| Fun-02: phelp_tbSpoligo
+| Fun02: phelp_tbSpoligo
 |   - prints the help messge for tbSpoligo
 | Input:
 |   o outFileStr:

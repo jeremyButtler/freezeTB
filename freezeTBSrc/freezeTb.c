@@ -10,12 +10,12 @@
 '     o Included libraries
 '   o main:
 '     - main function which drives everything
-'   o fun-01: getInput_freezeTb
+'   o fun01: getInput_freezeTb
 '     - Gets the user input from the arguments array for
 '       freezeTb
-'   o fun-02: pHelp_freezeTb
+'   o fun02: pHelp_freezeTb
 '     - Prints the help message for freezeTb
-'   o fun-03: pVersion_freezeTb
+'   o fun03: pVersion_freezeTb
 '     - Prints the version number for freezeTb and its
 '   o note-01:
 '     - Windows enviromental variables
@@ -26,16 +26,16 @@
 /*-------------------------------------------------------\
 | Header:
 |   - Included libraries
-|   o header sec-01:
+|   o header sec01:
 |     - Included libraries
-|   o header sec-02:
+|   o header sec02:
 |     - Defined variables/default settings
-|   o header sec-03:
+|   o header sec03:
 |     - Function headers
 \-------------------------------------------------------*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-^ Header Sec-01:
+^ Header Sec01:
 ^    - Included libraries
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -54,7 +54,7 @@
 #include "../tbAmrSource/checkAmr.h"
 #include "../generalLib/trimSam.h"
 #include "../tbMiruSource/miruTblStruct.h"
-#include "../tbSpoligoSource/tbSpoligo-memwater-fun.h"
+#include "../tbSpoligoSource/kmerFind.h" 
 #include "../primMaskSrc/primMask-fun.h"
 
 /*libraries that are not modules (used by modules)*/
@@ -66,6 +66,7 @@
 #include "../tbSpoligoSource/tbSpoligo-readDb.h"
 #include "../memwater/seqStruct.h"
 #include "../memwater/alnSetStruct.h"
+#include "../tbSpoligoSource/tbSpoligo-memwater-fun.h"
 
 /*No .c files (only a .h file)*/
 #include "../generalLib/base10StrToNum.h"
@@ -98,7 +99,7 @@
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-^ Header Sec-02:
+^ Header Sec02:
 ^    - Defined variables/default settings unique to
 ^      freezeTb
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -145,15 +146,15 @@ char *defMaskPrimStr = "mask.tsv";
 char *def_graphFlag_freezeTb = "tb";
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-^ Header Sec-03:
+^ Header Sec03:
 ^   - Function headers
-^   o fun-01: getInput_freezeTb
-^   o fun-02: pHelp_freezeTb
-^   o fun-03: pVersion_freezeTb
+^   o fun01: getInput_freezeTb
+^   o fun02: pHelp_freezeTb
+^   o fun03: pVersion_freezeTb
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
 /*-------------------------------------------------------\
-| Fun-01: getInput_freezeTb
+| Fun01: getInput_freezeTb
 |   - Gets the user input from the arguments array for
 |     freezeTb
 | Input:
@@ -284,7 +285,7 @@ getInput_freezeTb(
 ); /*getInput_freezeTb*/
 
 /*-------------------------------------------------------\
-| Fun-02: pHelp_freezeTb
+| Fun02: pHelp_freezeTb
 |   - Prints the help message for freezeTb
 | Input:
 |   - outFILE:
@@ -301,7 +302,7 @@ pHelp_freezeTb(
 );
 
 /*-------------------------------------------------------\
-| Fun-03: pVersion_freezeTb
+| Fun03: pVersion_freezeTb
 |   - Prints the version number for freezeTb and its
 |     submodules
 | Input:
@@ -338,55 +339,55 @@ main(
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Main TOC:
    '   - Run freezeTB on user input
-   '   o main sec-01:
+   '   o main sec01:
    '     - Variable declerations
-   '   o main sec-02:
+   '   o main sec02:
    '     -  Set up program default values not assigned
-   '   o main sec-03:
+   '   o main sec03:
    '     - Get and check user input
-   '   o main sec-04:
+   '   o main sec04:
    '     - Check files and set up the output file names
-   '   o main sec-06:
+   '   o main sec06:
    '     - Get reference name and length + get past header
-   '   o main sec-07:
+   '   o main sec07:
    '     - Read in the masking primer coordinates
-   '   o main sec-08:
+   '   o main sec08:
    '     - Do read analysis
-   '   o main sec-09:
+   '   o main sec09:
    '     - Print out the data collected for the reads
-   '   o main sec-10:
+   '   o main sec10:
    '     - Collapse consensus and do consensus analysis
-   '   o main sec-11:
+   '   o main sec11:
    '     - Run R to build graphs
-   '   o main sec-12:
+   '   o main sec12:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-01:
+   ^ Main Sec01:
    ^   - Variable declerations
-   ^   o main sec-01 sub-01:
+   ^   o main sec01 sub01:
    ^     - General IO variables (applies to multple subs)
-   ^   o main sec-01 sub-02:
+   ^   o main sec01 sub02:
    ^     - Temporay and error reporting variables
-   ^   o main sec-01 sub-03:
+   ^   o main sec01 sub03:
    ^     - Filtering and sam file variables
-   ^   o main sec-01 sub-04:
+   ^   o main sec01 sub04:
    ^     - Read depth and coverage stats variables
-   ^   o main sec-01 sub-05:
+   ^   o main sec01 sub05:
    ^     - AMR detection variables
-   ^   o main sec-01 sub-06:
+   ^   o main sec01 sub06:
    ^     - Miru lineage unique variables
-   ^   o main sec-01 sub-07:
+   ^   o main sec01 sub07:
    ^     - Spoligotyping unique variables
-   ^   o main sec-01 sub-08:
+   ^   o main sec01 sub08:
    ^     - Consensus building unique variables
-   ^   o main sec-01 sub-09:
+   ^   o main sec01 sub09:
    ^     - Masking unique variables
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-01 Sub-01:
+   * Main Sec01 Sub01:
    *   - General IO variables (applies to multple subs)
    \*****************************************************/
 
@@ -404,7 +405,7 @@ main(
    FILE *outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-01 Sub-02:
+   * Main Sec01 Sub02:
    *   - Temporay and error reporting variables
    \*****************************************************/
 
@@ -417,7 +418,7 @@ main(
    slong errSL = 0;
 
    /*****************************************************\
-   * Main Sec-01 Sub-03:
+   * Main Sec01 Sub03:
    *   - Filtering and sam file variables
    \*****************************************************/
 
@@ -439,7 +440,7 @@ main(
    float minMeanQF = def_freezeTb_minMeanQ;
 
    /*****************************************************\
-   * Main Sec-01 Sub-04:
+   * Main Sec01 Sub04:
    *   - Read depth and coverage stats variables
    \*****************************************************/
 
@@ -461,7 +462,7 @@ main(
    int umapReadCntI = 0;
 
    /*****************************************************\
-   * Main Sec-01 Sub-05:
+   * Main Sec01 Sub05:
    *   - AMR detection variables
    \*****************************************************/
 
@@ -492,7 +493,7 @@ main(
    int fudgeLenI = def_fudgeLen_miruTblST;
 
    /*****************************************************\
-   * Main Sec-01 Sub-06:
+   * Main Sec01 Sub06:
    *   - Miru lineage unique variables
    \*****************************************************/
 
@@ -503,17 +504,27 @@ main(
    char conMiruStr[256];
 
    /*****************************************************\
-   * Main Sec-01 Sub-07:
+   * Main Sec01 Sub07:
    *   - Spoligotyping unique variables
    \*****************************************************/
 
    char spoligoRefFileStr[256];
    char spoligoDbFileStr[256];
+
    schar checkSpoligoLinBl = 1;
-   char barcodeStr[1024];
+   uint spoligoAryUI[64];
    char outSpoligoFileStr[256];
+   char outReadSpoligoFileStr[256];
+
+   uchar spoligoErrUC = 0;
 
    FILE *spoligoOutFILE = 0;
+
+   /*variables for kmer search*/
+   uchar lenKmerUC = def_lenKmer_kmerFind;
+   float minKmerPercF = def_minKmerPerc_kmerFind;
+   float percShiftF = def_percShift_kmerFind;
+   float percExtraNtInWinF = def_extraNtInWin_kmerFind;
 
    float spoligoPercScoreF =
       def_minPercScore_tbSpoligoWater;
@@ -524,12 +535,15 @@ main(
 
    struct spoligoST *lineageHeapAryST = 0;
    sint numLineagesSI = 0;
+   uint spoligoNumReadsUI;
 
-   struct seqStruct *spoligoHeapAryST = 0;
+   /*kmer finding of spoligotype variables*/
+   struct tblST_kmerFind kmerTblStackST;
+   struct refST_kmerFind *kmerRefAryST = 0;
    sint numSpoligosSI = 0;
 
    /*****************************************************\
-   * Main Sec-01 Sub-08:
+   * Main Sec01 Sub08:
    *   - Consensus building unique variables
    \*****************************************************/
 
@@ -545,7 +559,7 @@ main(
    int iCon = 0; /*Iterator for consensus step*/
 
    /*****************************************************\
-   * Main Sec-01 Sub-09:
+   * Main Sec01 Sub09:
    *   - Masking unique variables
    \*****************************************************/
 
@@ -556,37 +570,45 @@ main(
    uint maskNumPrimUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-02:
+   ^ Main Sec02:
    ^   -  Set up the default values not already set up
-   ^   o main sec-02 sub-01:
+   ^   o main sec02 sub01:
    ^     - Initialize the structures
-   ^   o main sec-02 sub-02:
+   ^   o main sec02 sub02:
    ^     - Set the path to the amr database
-   ^   o main sec-02 sub-03:
+   ^   o main sec02 sub03:
    ^     - Set the path to the MIRU lineages
-   ^   o main sec-02 sub-04:
+   ^   o main sec02 sub04:
    ^     - Set the path to the gene coordinates file
-   ^   o main sec-02 sub-05:
+   ^   o main sec02 sub05:
    ^     - Set the path to the spoligo reference file
-   ^   o main sec-02 sub-06:
+   ^   o main sec02 sub06:
    ^     - Set the path to the spoligo lineages database
-   ^   o main sec-02 sub-07:
+   ^   o main sec02 sub07:
    ^     - Set primer masking file path
+   ^   o main sec02 sub08:
+   ^     - initialize the spoligotyping array
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-02 Sub-01:
+   * Main Sec02 Sub01:
    *   - Initialzie the structures
    \*****************************************************/
 
    initTbConSet(&tbConSettings);
-   initAlnSet(&alnSetStackST);
    refIdStr[0] = '\0';
    primMaskFileStr[0] = '\0';
    initSamEntry(&samStackST);
 
+   initAlnSet(&alnSetStackST);
+
+   init_tblST_kmerFind(
+      &kmerTblStackST,
+      lenKmerUC
+   );
+
    /*****************************************************\
-   * Main Sec-02 Sub-02:
+   * Main Sec02 Sub02:
    *   - Set the path to the amr database
    \*****************************************************/
 
@@ -619,7 +641,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-03:
+   * Main Sec02 Sub03:
    *   - Set the path to the MIRU lineages
    \*****************************************************/
 
@@ -652,7 +674,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-04:
+   * Main Sec02 Sub04:
    *   - Set the path to the gene coordinates file
    \*****************************************************/
 
@@ -685,7 +707,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-05:
+   * Main Sec02 Sub05:
    *   - Set the path to the spoligo reference file
    \*****************************************************/
 
@@ -728,7 +750,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-06:
+   * Main Sec02 Sub06:
    *   - Set the path to the spoligo iinages database
    \*****************************************************/
 
@@ -786,7 +808,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-07:
+   * Main Sec02 Sub07:
    *   - Set primer masking file path
    \*****************************************************/
 
@@ -820,8 +842,21 @@ main(
 
    outFILE = 0;
 
+   /*****************************************************\
+   * Main Sec02 Sub08:
+   *   - initialize the spoligotyping array
+   \*****************************************************/
+
+   for(
+      numLineagesSI = 0;
+      numLineagesSI < 64;
+      ++numLineagesSI
+   ) spoligoAryUI[numLineagesSI] = 0;
+
+   numLineagesSI = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-03:
+   ^ Main Sec03:
    ^   - Get and check user input
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -905,42 +940,45 @@ main(
    } /*If: I had an error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-04:
+   ^ Main Sec04:
    ^   - Check files and set up the output file names
-   ^   o main sec-04 sub-01:
+   ^   o main sec04 sub01:
    ^     - Output file for read stats
-   ^   o main sec-04 sub-02:
+   ^   o main sec04 sub02:
    ^     - Set up the name for tsv consensus output file
-   ^   o main sec-04 sub-03:
+   ^   o main sec04 sub03:
    ^     - output file for the AMRs found in reads
-   ^   o main sec-04 sub-04:
+   ^   o main sec04 sub04:
    ^     - Set up read id AMR hit table
-   ^   o main sec-04 sub-05:
+   ^   o main sec04 sub05:
    ^     - output file for the AMRs found in consensus
-   ^   o main sec-04 sub-06:
+   ^   o main sec04 sub06:
    ^     - output file for MIRU lineages (reads)
-   ^   o main sec-04 sub-07:
+   ^   o main sec04 sub07:
    ^     - output file for MIRU lineages (consensus)
-   ^   o main sec-04 sub-08:
+   ^   o main sec04 sub08:
    ^     - Build spoligotyping output file name
-   ^   o main sec-04 sub-09:
+   ^   o main sec04 sub09:
+   ^     - Build read spoligotyping output file name
+   ^   o main sec04 sub10:
    ^     - Check if the MIRU table exists
-   ^   o main sec-04 sub-10:
+   ^   o main sec04 sub11:
+   ^     - Check if spoligotyping reference sequences
+   ^       exists
+   ^   o main sec04 sub12:
    ^     - Check if spoligotyping lineage database
-   ^   o main sec-04 sub-11:
-   ^     - Check if spoligotyping lineage database
-   ^   o main sec-04 sub-12:
+   ^   o main sec04 sub13:
    ^     - Check if amr table exists
-   ^   o main sec-04 sub-13:
+   ^   o main sec04 sub14:
    ^     - Open the sam file
-   ^   o main sec-04 sub-14:
+   ^   o main sec04 sub15:
    ^     - Set up name for and open consensus output file
-   ^   o main sec-04 sub-15:
+   ^   o main sec04 sub16:
    ^     - Open the paf (gene coordinates) file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-01:
+   * Main Sec04 Sub01:
    *   - Set up the name for the read stats file
    \*****************************************************/
 
@@ -965,7 +1003,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-03:
+   * Main Sec04 Sub03:
    *   - Set up the name for the tsv consensus output file
    \*****************************************************/
 
@@ -992,7 +1030,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-03:
+   * Main Sec04 Sub03:
    *   - Set up the name for the read AMRs table
    \*****************************************************/
 
@@ -1019,7 +1057,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-04:
+   * Main Sec04 Sub04:
    *   - Set up read id AMR hit table
    \*****************************************************/
 
@@ -1047,7 +1085,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-05:
+   * Main Sec04 Sub05:
    *   - Set up the name for the consensus AMRs table
    \*****************************************************/
 
@@ -1074,7 +1112,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-06:
+   * Main Sec04 Sub06:
    *   - Set up the name for the MIRU reads table
    \*****************************************************/
 
@@ -1101,7 +1139,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-07:
+   * Main Sec04 Sub07:
    *   - Set up the name for the MIRU consensus table
    \*****************************************************/
 
@@ -1128,7 +1166,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-08:
+   * Main Sec04 Sub08:
    *   - Build spoligotyping output file name
    \*****************************************************/
 
@@ -1155,7 +1193,34 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-09:
+   * Main Sec04 Sub09:
+   *   - Build read spoligotyping output file name
+   \*****************************************************/
+
+   tmpStr = outReadSpoligoFileStr;
+   tmpStr += ulCpStrDelim(tmpStr, prefixStr, 0, '\0');
+
+   tmpStr +=
+      ulCpStrDelim(tmpStr, "-read-spoligo.tsv", 0, '\0');
+
+   outFILE = fopen(outReadSpoligoFileStr, "w");
+
+   if(! outFILE)
+   { /*If: I could not open the spoligo output file*/
+      fprintf(
+         stderr,
+         "unable to open %s for output\n",
+         outReadSpoligoFileStr
+      );
+
+      goto err_main_sec12_sub02;
+   } /*If: I could not open the spoligo output file*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Main Sec04 Sub10:
    *   - Check if the MIRU table exists
    \*****************************************************/
 
@@ -1176,7 +1241,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-10:
+   * Main Sec04 Sub11:
    *   - Check if spoligotyping reference sequences exists
    \*****************************************************/
 
@@ -1197,7 +1262,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-11:
+   * Main Sec04 Sub12:
    *   - Check if spoligotyping lineage database
    \*****************************************************/
 
@@ -1220,15 +1285,12 @@ main(
    } /*If I could not open the spoligo spacer sequences*/
 
    else
-   { /*Else: have valid spoligotype lineage database*/
-      checkSpoligoLinBl = 0;
-      fclose(outFILE);
-   } /*Else: have valid spoligotype lineage database*/
+      fclose(outFILE); /*valid lineage database*/
 
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-12:
+   * Main Sec04 Sub13:
    *   - Check if amr table exists
    \*****************************************************/
 
@@ -1250,7 +1312,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-04 Sub-13:
+   * Main Sec04 Sub14:
    *   - Open the sam file
    \*****************************************************/
    
@@ -1273,7 +1335,7 @@ main(
    } /*Else: I need to open the sam file*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-14:
+   * Main Sec04 Sub15:
    *   - Set up name for and open consensus output file
    \*****************************************************/
 
@@ -1299,8 +1361,8 @@ main(
    } /*If: I could not open the filtered read stats file*/
 
    /*****************************************************\
-   * Main Sec-04 Sub-15:
-   *   - Open the paf (gene coordinates) file
+   * Main Sec04 Sub16:
+   *   - Open the gene coordinates file
    \*****************************************************/
    
    outFILE = fopen(coordFileStr, "r");
@@ -1326,18 +1388,22 @@ main(
    outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-05:
+   ^ Main Sec05:
    ^   - Read in the supporting files
-   ^   o main sec-05 sub-01:
+   ^   o main sec05 sub01:
    ^     - Read in the gene mapping coodiantes
-   ^   o main sec-05 sub-02:
+   ^   o main sec05 sub02:
    ^     - Read in the amr table
-   ^   o main sec-05 sub-03:
+   ^   o main sec05 sub03:
    ^     - Read in the MIRU lineage table
+   ^   o main sec05 sub04:
+   ^     - Read in spoligotyping spacer sequences
+   ^   o main sec05 sub05:
+   ^     - Read in spoligotyping lineage database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-05 Sub-01:
+   * Main Sec05 Sub01:
    *   - Read in the gene mapping coodiantes
    \*****************************************************/
 
@@ -1356,7 +1422,7 @@ main(
    lenBuffUL = 0;
 
    /*****************************************************\
-   * Main Sec-05 Sub-02:
+   * Main Sec05 Sub02:
    *   - Read in the amr table
    \*****************************************************/
 
@@ -1389,7 +1455,7 @@ main(
    } /*If: I had an error of some kind*/
 
    /*****************************************************\
-   * Main Sec-05 Sub-03:
+   * Main Sec05 Sub03:
    *   - Read in the MIRU lineage table
    \*****************************************************/
  
@@ -1417,21 +1483,106 @@ main(
       goto err_main_sec12_sub02;
    } /*If: I had an error with the MIRU database*/
 
+   /*****************************************************\
+   * Main Sec05 Sub04:
+   *   - Read in spoligotyping spacer sequences
+   \*****************************************************/
+
+   kmerRefAryST =
+      mkAry_refST_kmerFind(
+        (schar *) spoligoRefFileStr,
+        lenKmerUC,
+        &numSpoligosSI,
+        minKmerPercF,
+        &kmerTblStackST,
+        percExtraNtInWinF,
+        percShiftF,
+        &alnSetStackST,
+        (uchar *) &errC
+   );
+
+   if(errC)
+   { /*If: I had an error*/
+     if(errC == fileErr_tbSpoligo)
+     { /*If: I had an file error*/
+        fprintf(
+           stderr,
+           "-spoligo %s is not valid\n",
+           spoligoRefFileStr
+        );
+
+        goto err_main_sec12_sub02;
+     } /*If: I had an file error*/
+
+     else
+     { /*Else: I had an memory error*/
+        fprintf(
+           stderr,
+           "Ran out of memory getting spoligo seqs\n"
+        );
+
+         goto err_main_sec12_sub02;
+     } /*Else: I had an memory error*/
+   } /*If: I had an error*/
+
+   /*****************************************************\
+   * Main Sec05 Sub05:
+   *   - Read in spoligotyping lineage database
+   \*****************************************************/
+
+   if(checkSpoligoLinBl)
+   { /*If: I could open the spoligo lineage database*/
+      lineageHeapAryST =
+         readSpoligoDb(
+            (schar *) spoligoDbFileStr,
+            &numLineagesSI,
+            (schar *) &errC
+      );
+
+      if(errC)
+      { /*If: I had an error*/
+         if(errC == fileErr_tbSpoligo)
+         { /*If: I had an file error*/
+            fprintf(
+               stderr,
+               "Could not open -db-spoligo %s\n",
+               spoligoDbFileStr
+            );
+
+            fprintf(
+               stderr,
+               "Skipping spoligotype checks\n"
+            );
+         } /*If: I had an file error*/
+
+         else
+         { /*Else: I had an memory error*/
+            fprintf(
+               stderr,
+               "Ran out of memory reading -db %s\n",
+               spoligoDbFileStr
+            );
+
+            goto err_main_sec12_sub02;
+         } /*Else: I had an memory error*/
+      } /*If: I had an error*/
+   } /*If: I could open the spoligo lineage database*/
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-06:
+   ^ Main Sec06:
    ^   - Get reference name and length + get past header
-   ^   o main sec-06 sub-01:
+   ^   o main sec06 sub01:
    ^     - Get the reference name/length from header
-   ^   o main sec-06 sub-02:
+   ^   o main sec06 sub02:
    ^     - print tbCon cosensus (same file) settings
-   ^   o main sec-06 sub-03:
+   ^   o main sec06 sub03:
    ^     - print tbCon tsv file settings
-   ^   o main sec-06 sub-04:
+   ^   o main sec06 sub04:
    ^     - Check if I could extract reference name/length
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-06 Sub-01:
+   * Main Sec06 Sub01:
    *   - Get the reference length from the header
    \*****************************************************/
 
@@ -1445,7 +1596,6 @@ main(
 
    while(! errS)
    { /*Loop: read in the header*/
-
       /*Check if I have a comment*/
       if(*samStackST.extraStr != '@') break;
 
@@ -1511,7 +1661,7 @@ main(
    } /*Loop: read in the header*/
 
    /*****************************************************\
-   * Main Sec-06 Sub-02:
+   * Main Sec06 Sub02:
    *   - print tbCon cosensus (same file) settings
    \*****************************************************/
 
@@ -1558,7 +1708,7 @@ main(
    );
 
    /*****************************************************\
-   * Main Sec-06 Sub-03:
+   * Main Sec06 Sub03:
    *   - print tbCon tsv file settings
    \*****************************************************/
 
@@ -1592,7 +1742,7 @@ main(
    );
 
    /*****************************************************\
-   * Main Sec-06 Sub-04:
+   * Main Sec06 Sub04:
    *   - Check if I could extract reference name/length
    \*****************************************************/
 
@@ -1611,7 +1761,7 @@ main(
    } /*If: I could not get the reference name*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-07:
+   ^ Main Sec07:
    ^   - Read in the masking primer coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1666,28 +1816,30 @@ main(
       maskNumPrimUI = 0; /*Just making sure*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-08:
+   ^ Main Sec08:
    ^   - Do read analysis
-   ^   o main sec-06 sub-01:
+   ^   o main sec06 sub01:
    ^     - Allocate memory for the read stats arrays
-   ^   o main sec-06 sub-02:
+   ^   o main sec06 sub02:
    ^     - Filter sam entries
-   ^   o main sec-06 sub-03:
+   ^   o main sec06 sub03:
    ^     - Mask primers in reads
-   ^   o main sec-06 sub-04:
+   ^   o main sec06 sub04:
    ^     - Build the filtered histogram
-   ^   o main sec-06 sub-05:
+   ^   o main sec06 sub05:
    ^     - Build the consensus
-   ^   o main sec-06 sub-06:
+   ^   o main sec06 sub06:
    ^     - Check for AMRs
-   ^   o main sec-06 sub-07:
+   ^   o main sec06 sub07:
    ^     - Check for MIRU lineages
-   ^   o main sec-06 sub-08:
+   ^   o main sec06 sub08:
+   ^     - Check for spoligotypes
+   ^   o main sec06 sub09:
    ^     - Move to the next read
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-08 Sub-01:
+   * Main Sec08 Sub01:
    *   - Allocate memory for the read stats arrays
    \*****************************************************/
 
@@ -1708,7 +1860,7 @@ main(
    } /*If: I had an memory error*/
 
    /*****************************************************\
-   * Main Sec-08 Sub-02:
+   * Main Sec08 Sub02:
    *   - filter the reads
    \*****************************************************/
 
@@ -1758,7 +1910,7 @@ main(
          goto nextSamRead_freezeTb;
 
       /**************************************************\
-      * Main Sec-08 Sub-03:
+      * Main Sec08 Sub03:
       *   - Mask primers in reads
       \**************************************************/
 
@@ -1777,7 +1929,7 @@ main(
       } /*If: We are masking primers*/
 
       /**************************************************\
-      * Main Sec-08 Sub-04:
+      * Main Sec08 Sub04:
       *   - Build the filtered histogram
       \**************************************************/
 
@@ -1792,7 +1944,7 @@ main(
       );
 
       /**************************************************\
-      * Main Sec-08 Sub-05:
+      * Main Sec08 Sub05:
       *   - Build the consensus
       \**************************************************/
 
@@ -1812,7 +1964,7 @@ main(
       } /*If: memory error for consensus*/
 
       /**************************************************\
-      * Main Sec-08 Sub-06:
+      * Main Sec08 Sub06:
       *   - Check for AMRs
       \**************************************************/
 
@@ -1845,7 +1997,7 @@ main(
       } /*If: I had AMRs*/
 
       /**************************************************\
-      * Main Sec-08 Sub-07:
+      * Main Sec08 Sub07:
       *   - Check for MIRU lineages 
       \**************************************************/
 
@@ -1856,7 +2008,31 @@ main(
       );
 
       /**************************************************\
-      * Main Sec-08 Sub-08:
+      * Main Sec08 Sub08:
+      *   - Check for spoligotypes
+      \**************************************************/
+
+      spoligoErrUC =
+         samFindSpoligos_kmerFind(
+            &kmerTblStackST,
+            kmerRefAryST,
+            numSpoligosSI,
+            &samStackST,
+            drStartSI,
+            drEndSI,
+            spoligoPercScoreF,
+            spoligoAryUI,
+            1,             /*always assume fragments*/
+            &alnSetStackST
+         ); /*find spoligotype with kmer search*/
+
+      spoligoNumReadsUI += (!spoligoErrUC);
+
+      if(spoligoErrUC == memErr_tbSpoligo)
+         goto err_main_sec12_sub02;
+
+      /**************************************************\
+      * Main Sec08 Sub09:
       *   - Move to the next read
       \**************************************************/
 
@@ -1891,22 +2067,24 @@ main(
    maskFlagHeapAryUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-09:
+   ^ Main Sec09:
    ^   - Print out the data collected for the reads
-   ^   o main sec-09 sub-01:
+   ^   o main sec09 sub01:
    ^     - Print out the unfiltered read stats
-   ^   o main sec-09 sub-02:
+   ^   o main sec09 sub02:
    ^     - Print out the filtered read stats
-   ^   o main sec-09 sub-03:
+   ^   o main sec09 sub03:
    ^     - Print out the AMR hits for the reads
-   ^   o main sec-09 sub-04:
+   ^   o main sec09 sub04:
    ^     - Print out read MIRU table
-   ^   o main sec-09 sub-05:
+   ^   o main sec09 sub05:
+   ^     - Print read spoligotype entry
+   ^   o main sec09 sub06:
    ^     - Print out the tsv file of variants
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-09 Sub-01:
+   * Main Sec09 Sub01:
    *   - Print out the unfiltered read stats
    \*****************************************************/
 
@@ -1930,7 +2108,7 @@ main(
    readMapIAry = 0;
 
    /*****************************************************\
-   * Main Sec-09 Sub-02:
+   * Main Sec09 Sub02:
    *   - Print out the filtered read stats
    \*****************************************************/
 
@@ -1962,7 +2140,7 @@ main(
    coordsST = 0;
 
    /*****************************************************\
-   * Main Sec-09 Sub-03:
+   * Main Sec09 Sub03:
    *   - Print out the AMR hits for the reads
    \*****************************************************/
 
@@ -1986,7 +2164,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec-09 Sub-04:
+   * Main Sec09 Sub04:
    *   - Print out read MIRU table
    \*****************************************************/
 
@@ -2003,7 +2181,48 @@ main(
    } /*If: I could not open the output file*/
 
    /*****************************************************\
-   * Main Sec-09 Sub-05:
+   * Main Sec09 Sub05:
+   *   - Print out the read spoligotype entry
+   \*****************************************************/
+
+   spoligoOutFILE =
+      fopen(
+         outReadSpoligoFileStr,
+         "w"
+      );
+
+   pSpoligoHead(
+      1,             /*print fragment header*/
+      spoligoOutFILE
+   );
+
+   if(spoligoNumReadsUI > 0)
+   { /*If: I detected spoligotypes*/
+      pSpoligo(
+         (schar *) prefixStr,
+         spoligoAryUI,
+         1,                /*fragment print*/
+         spoligoNumReadsUI,/*reads with 1 or more spacer*/
+         lineageHeapAryST,
+         numLineagesSI,
+         spoligoOutFILE
+      );
+   } /*If: I detected spoligotypes*/
+
+   fclose(spoligoOutFILE);
+   spoligoOutFILE = 0;
+   spoligoErrUC = 0;
+
+   for(
+      lenKmerUC = 0;
+      lenKmerUC < 64;
+      ++lenKmerUC
+   ) spoligoAryUI[lenKmerUC] = 0;
+
+   lenKmerUC = def_lenKmer_kmerFind;
+   
+   /*****************************************************\
+   * Main Sec09 Sub06:
    *   - Print out the tsv file of variants
    \*****************************************************/
 
@@ -2017,23 +2236,23 @@ main(
       ); /*Print out the variants (not a vcf)*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-10:
+   ^ Main Sec10:
    ^   - Collapse consensus and do consensus analysis
-   ^   o main sec-10 sub-01:
+   ^   o main sec10 sub01:
    ^     - Collapse the consensus
-   ^   o main sec-10 sub-02:
-   ^     - Read in spoligotyping spacer sequences
-   ^   o main sec-10 sub-03:
-   ^     - Read in spoligotyping lineage database
-   ^   o main sec-10 sub-04:
+   ^   o main sec10 sub02:
    ^     - print consensus and detect/print AMRs and
    ^       lineages for consensus
-   ^   o main sec-10 sub-05:
+   ^   o main sec10 sub03:
+   ^     - Close output files and free uneeded variables
+   ^   o main sec10 sub04:
    ^     - Print out consensus MIRU lineages
+   ^   o main sec10 sub05:
+   ^     - print detected spoligotype
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-10 Sub-01:
+   * Main Sec10 Sub01:
    *   - Collapse the consensus
    \*****************************************************/
 
@@ -2055,115 +2274,29 @@ main(
       fprintf(stderr, "Could not build consensus\n");
       goto err_main_sec12_sub02;
    } /*If: I could not build the consensus*/
-   
-   /*****************************************************\
-   * Main Sec-10 Sub-02:
-   *   - Read in spoligotyping spacer sequences
-   \*****************************************************/
-
-   if(checkSpoligoLinBl)
-   { /*If: I could open the spoligo lineage database*/
-      spoligoHeapAryST =
-        getSpoligoRefs(
-           (schar *) spoligoRefFileStr,
-           &numSpoligosSI,
-           (schar *) &errC
-        );
-
-      if(errC)
-      { /*If: I had an error*/
-        if(errC == fileErr_tbSpoligo)
-        { /*If: I had an file error*/
-           fprintf(
-              stderr,
-              "-db-spoligo %s is not valid\n",
-              spoligoRefFileStr
-           );
-
-           fprintf(
-              stderr,
-              "Skipping spoligotype lineage detection\n"
-           );
-        } /*If: I had an file error*/
-
-        else
-        { /*Else: I had an memory error*/
-           fprintf(
-              stderr,
-              "Ran out of memory getting spoligo seqs\n"
-           );
-
-            goto err_main_sec12_sub02;
-        } /*Else: I had an memory error*/
-      } /*If: I had an error*/
-   } /*If: I could open the spoligo lineage database*/
 
    /*****************************************************\
-   * Main Sec-10 Sub-03:
-   *   - Read in spoligotyping lineage database
-   \*****************************************************/
-
-   lineageHeapAryST =
-      readSpoligoDb(
-         (schar *) spoligoDbFileStr,
-         &numLineagesSI,
-         (schar *) &errC
-   );
-
-   if(errC)
-   { /*If: I had an error*/
-      if(errC == fileErr_tbSpoligo)
-      { /*If: I had an file error*/
-         fprintf(
-            stderr,
-            "Could not open -db-spoligo %s\n",
-            spoligoDbFileStr
-         );
-
-         fprintf(stderr, "Skipping spoligotype checks\n");
-      } /*If: I had an file error*/
-
-      else
-      { /*Else: I had an memory error*/
-         fprintf(
-            stderr,
-            "Ran out of memory reading -db %s\n",
-            spoligoDbFileStr
-         );
-
-         goto err_main_sec12_sub02;
-      } /*Else: I had an memory error*/
-
-   } /*If: I had an error*/
-
-   /*****************************************************\
-   * Main Sec-10 Sub-04:
+   * Main Sec10 Sub02:
    *   - print consensus and detect/print AMRs and
    *     lineages for consensus
-   *   o main sec-10 sub-04 cat-01:
+   *   o main sec10 sub04 cat01:
    *     - Open files and run consensus fragment loop
-   *   o main sec-10 sub-04 cat-02:
+   *   o main sec10 sub04 cat02:
    *     - Consensus printing
-   *   o main sec-10 sub-04 cat-03:
+   *   o main sec10 sub04 cat03:
    *     - AMR detection and printing
-   *   o main sec-10 sub-04 cat-04:
+   *   o main sec10 sub04 cat04:
    *     - MIRU-VNTR lineage detection and printing
-   *   o main sec-10 sub-04 cat-05:
+   *   o main sec10 sub04 cat05:
    *     - Detect spoligotypes
-   *   o main sec-10 sub-04 cat-06:
-   *     - Close output files and free memory
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec-10 Sub-04 Cat-01:
+   + Main Sec10 Sub04 Cat01:
    +   - Open files and run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    outFILE = fopen(conAmrStr, "w");
-   spoligoOutFILE = fopen(outSpoligoFileStr, "w");
-
-   pSpoligoHead(spoligoOutFILE);
-
    errC = 0;
 
    /*Remove all the read counters*/
@@ -2171,11 +2304,13 @@ main(
 
    pHeadAmrHitList(outFILE);
 
+   spoligoErrUC = noSpoligo_tbSpoligo;
+
    for(iCon = 0; iCon < numFragmentsI; ++iCon)
    { /*Loop: Process each consensus*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec-10 Sub-04 Cat-02:
+     + Main Sec10 Sub04 Cat02:
      +   - Consensus printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2199,7 +2334,7 @@ main(
       );
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec-10 Sub-04 Cat-03:
+     + Main Sec10 Sub04 Cat03:
      +   - AMR detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2229,7 +2364,7 @@ main(
       } /*If: I had AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec-10 Sub-04 Cat-04:
+     + Main Sec10 Sub04 Cat04:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2240,44 +2375,33 @@ main(
       ); /*Get the MIRU lineages in this consensus*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec-10 Sub-04 Cat-05:
+     + Main Sec10 Sub04 Cat05:
      +   - Spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-     errSL =
-        samSpoligoSearch(
-           &samConSTAry[iCon].qryIdStr,
-           spoligoHeapAryST,
-           numSpoligosSI,
-           drStartSI,
-           drEndSI,
-           spoligoPercScoreF,
-           (schar *) barcodeStr,
-           &alnSetStackST
-        ); /*Detect spoligotypes*/
+     spoligoErrUC &=
+         (schar)
+         samFindSpoligos_kmerFind(
+            &kmerTblStackST,
+            kmerRefAryST,
+            numSpoligosSI,
+            &samConSTAry[iCon],
+            drStartSI,
+            drEndSI,
+            spoligoPercScoreF,
+            spoligoAryUI,
+            1,             /*always assume fragments*/
+            &alnSetStackST
+         ); /*find spoligotype with kmer search*/
 
-     if(errSL == memErr_tbSpoligo)
+     if(spoligoErrUC == memErr_tbSpoligo)
         goto err_main_sec12_sub02;
-
-     if(! errSL)
-     { /*If: I could detect spoligotypes*/
-        pSpoligo(
-           (schar *) samConSTAry[iCon].qryIdStr,
-           (schar *) barcodeStr,
-           lineageHeapAryST,
-           numLineagesSI,
-           spoligoOutFILE
-        );
-     } /*If: I could detect spoligotypes*/
    } /*Loop: Process each consensus*/
 
-   /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec-10 Sub-04 Cat-06:
-   +   - Close output files and free memory
-   \++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-   fclose(spoligoOutFILE);
-   spoligoOutFILE = 0;
+   /*****************************************************\
+   * Main Sec10 Sub03:
+   *   - Close output files and free uneeded variables
+   \*****************************************************/
 
    fclose(outFILE);
    outFILE = 0;
@@ -2296,17 +2420,8 @@ main(
    freeAmrStructArray(&amrSTAry, numAmrI);
    free(drugStrAry);
 
-   /*Spoligotyping memory*/
-   freeAlnSetStack(&alnSetStackST);
-
-   freeSpoligoSTAry(lineageHeapAryST, numLineagesSI);
-   lineageHeapAryST = 0;
-
-   freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
-   spoligoHeapAryST = 0;
-
    /*****************************************************\
-   * Main Sec-10 Sub-05:
+   * Main Sec10 Sub04:
    *   - Print out consensus MIRU lineages
    \*****************************************************/
 
@@ -2321,8 +2436,55 @@ main(
 
    freeMiruTbl(&miruST);
 
+   /*****************************************************\
+   * Main Sec10 Sub05:
+   *   - print detected spoligotype
+   \*****************************************************/
+
+   spoligoOutFILE = fopen(outSpoligoFileStr, "w");
+
+   pSpoligoHead(
+      0,             /*print normal header*/
+      spoligoOutFILE
+   );
+
+   if(! spoligoErrUC)
+   { /*If: I could detect spoligotypes*/
+      pSpoligo(
+         (schar *) prefixStr,
+         spoligoAryUI,
+         0,                       /*non-fragment print*/
+         1,                       /*1 supporting read*/
+         lineageHeapAryST,
+         numLineagesSI,
+         spoligoOutFILE
+      );
+   } /*If: I could detect spoligotypes*/
+
+   freeSpoligoSTAry(
+      lineageHeapAryST,
+      numLineagesSI
+   );
+
+   lineageHeapAryST = 0;
+
+   freeStack_tblST_kmerFind(&kmerTblStackST);
+
+   freeHeapAry_refST_kmerFind(
+      kmerRefAryST,
+      numSpoligosSI
+   );
+
+   kmerRefAryST = 0;
+
+   /*Spoligotyping memory*/
+   freeAlnSetStack(&alnSetStackST);
+
+   fclose(spoligoOutFILE);
+   spoligoOutFILE = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-11:
+   ^ Main Sec11:
    ^   - Run R to build graphs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2351,23 +2513,23 @@ main(
    } /*If: The user wanted graphs*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-12:
+   ^ Main Sec12:
    ^   - Clean up
-   ^   o main sec-12 sub-01:
+   ^   o main sec12 sub01:
    ^     - Clean up for no errors
-   ^   o main sec-12 sub-02:
+   ^   o main sec12 sub02:
    ^     - Error clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-12 Sub-01:
+   * Main Sec12 Sub01:
    *   - Clean up for no errors
    \*****************************************************/
 
    exit(0);
 
    /*****************************************************\
-   * Main Sec-12 Sub-02:
+   * Main Sec12 Sub02:
    *   - Error clean up
    \*****************************************************/
 
@@ -2394,8 +2556,14 @@ main(
    freeSpoligoSTAry(lineageHeapAryST, numLineagesSI);
    lineageHeapAryST = 0;
 
-   freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
-   spoligoHeapAryST = 0;
+   freeStack_tblST_kmerFind(&kmerTblStackST);
+
+   freeHeapAry_refST_kmerFind(
+      kmerRefAryST,
+      numSpoligosSI
+   );
+
+   kmerRefAryST = 0;
 
    free(buffHeapStr);
    buffHeapStr = 0;
@@ -2444,7 +2612,7 @@ main(
 } /*main*/
 
 /*-------------------------------------------------------\
-| Fun-01: getInput_freezeTb
+| Fun01: getInput_freezeTb
 |   - Gets the user input from the arguments array for
 |     freezeTb
 | Input:
@@ -2574,18 +2742,18 @@ getInput_freezeTb(
    signed int *drStartSI,
    signed int *drEndSI
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-01 TOC: getInput_freezeTb
+   ' Fun01 TOC: getInput_freezeTb
    '   - Gets the user commandline input for freezeTb
-   '   o fun-01 sec-01:
+   '   o fun01 sec01:
    '     - Variable declerations
-   '   o fun-01 sec-03:
+   '   o fun01 sec03:
    '     - Get user input
-   '   o fun-01 sec-03:
+   '   o fun01 sec03:
    '     - Return success
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-01:
+   ^ Fun01 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2594,34 +2762,34 @@ getInput_freezeTb(
    char *tmpStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-02:
+   ^ Fun01 Sec02:
    ^   - Get user input
-   ^   o fun-01 sec-02 sub-01:
+   ^   o fun01 sec02 sub01:
    ^     - Start loop/check file input
-   ^   o fun-01 sec-02 sub-02:
+   ^   o fun01 sec02 sub02:
    ^     - Consensus options
-   ^   o fun-01 sec-02 sub-03:
+   ^   o fun01 sec02 sub03:
    ^     - Printing settings (for consensus tsv)
-   ^   o fun-01 sec-02 sub-04:
+   ^   o fun01 sec02 sub04:
    ^     - tbAmr settings
-   ^   o fun-01 sec-02 sub-05:
+   ^   o fun01 sec02 sub05:
    ^     - Read filterin
-   ^   o fun-01 sec-02 sub-06:
+   ^   o fun01 sec02 sub06:
    ^     - Lineages and graph output
-   ^   o fun-01 sec-02 sub-07:
+   ^   o fun01 sec02 sub07:
    ^     - Check for help message requests (normal)
-   ^   o fun-01 sec-02 sub-08:
+   ^   o fun01 sec02 sub08:
    ^     - Check for cosensus help message requests
-   ^   o fun-01 sec-02 sub-09:
+   ^   o fun01 sec02 sub09:
    ^     - Check for print help message requests
-   ^   o fun-01 sec-02 sub-10:
+   ^   o fun01 sec02 sub10:
    ^     - Check for version number requets
-   ^   o fun-01 sec-02 sub-11:
+   ^   o fun01 sec02 sub11:
    ^     - Handle invalid argument/move to next parameter
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-01 Sec-02 Sub-01:
+   * Fun01 Sec02 Sub01:
    *   - Start loop/check file input
    \*****************************************************/
 
@@ -2697,18 +2865,18 @@ getInput_freezeTb(
          *prefixStr = argsStrAry[iArg + 1];
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-02:
+      * Fun01 Sec02 Sub02:
       *   - Consensus options
-      *   o fun-01 sec-02 sub-02 cat-01:
+      *   o fun01 sec02 sub02 cat01:
       *     - Consensus Q-score settinngs
-      *   o fun-01 sec-02 sub-02 cat-02:
+      *   o fun01 sec02 sub02 cat02:
       *     - Consensus min depth/length settings
-      *   o fun-01 sec-02 sub-02 cat-03:
+      *   o fun01 sec02 sub02 cat03:
       *     - Consensus min base percent support settings
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-01 Sec-02 Sub-02 Cat-01:
+      + Fun01 Sec02 Sub02 Cat01:
       +    - Consensus Q-score settinngs
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2734,7 +2902,7 @@ getInput_freezeTb(
       } /*If: user provided the minimum inserion Q-score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-01 Sec-02 Sub-02 Cat-02:
+      + Fun01 Sec02 Sub02 Cat02:
       +    - Consensus min depth/length settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2760,7 +2928,7 @@ getInput_freezeTb(
       } /*If: minimum fragment length*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun-01 Sec-02 Sub-02 Cat-03:
+      + Fun01 Sec02 Sub02 Cat03:
       +    - Consensus min base percent support settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2793,7 +2961,7 @@ getInput_freezeTb(
       } /*If: The user provided the minimum % del support*/
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-03:
+      * Fun01 Sec02 Sub03:
       *   - Printing settings (for consensus tsv)
       \**************************************************/
 
@@ -2830,7 +2998,7 @@ getInput_freezeTb(
       } /*If: user provided the minimum % snp support*/
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-04:
+      * Fun01 Sec02 Sub04:
       *   - AMR settings
       \**************************************************/
 
@@ -2850,7 +3018,7 @@ getInput_freezeTb(
       } /*Else if: user did not want frameshift checking*/
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-05:
+      * Fun01 Sec02 Sub05:
       *   - Filterting (mapq/mean/median)
       \**************************************************/
 
@@ -2871,7 +3039,7 @@ getInput_freezeTb(
          *minMeanQF = atof(argsStrAry[iArg + 1]);
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-06:
+      * Fun01 Sec02 Sub06:
       *   - Lineages and graph output
       \**************************************************/
 
@@ -2912,7 +3080,7 @@ getInput_freezeTb(
       } /*Else If: End of direct repeat region*/
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-07:
+      * Fun01 Sec02 Sub07:
       *   - Check for help message requests (normal)
       \**************************************************/
 
@@ -2932,7 +3100,7 @@ getInput_freezeTb(
          return def_pHelp_freezeTb;
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-08:
+      * Fun01 Sec02 Sub08:
       *   - Check for cosensus help message requests
       \**************************************************/
 
@@ -2967,7 +3135,7 @@ getInput_freezeTb(
          return def_pHelp_freezeTb | def_conHelp_freezeTb;
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-09:
+      * Fun01 Sec02 Sub09:
       *   - Check for print help message requests
       \**************************************************/
 
@@ -3012,7 +3180,7 @@ getInput_freezeTb(
             def_pHelp_freezeTb | def_printHelp_freezeTb;
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-10:
+      * Fun01 Sec02 Sub10:
       *   - Check for version number requets
       \**************************************************/
 
@@ -3032,7 +3200,7 @@ getInput_freezeTb(
          return def_pVersion_freezeTb;
 
       /**************************************************\
-      * Fun-01 Sec-02 Sub-11:
+      * Fun01 Sec02 Sub11:
       *   - Handle invalid argument/move to next parameter
       \**************************************************/
 
@@ -3042,7 +3210,7 @@ getInput_freezeTb(
    } /*Loop: Read in the user input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-03:
+   ^ Fun01 Sec03:
    ^   - Return success
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3050,7 +3218,7 @@ getInput_freezeTb(
 } /*getInput_freezeTb*/
 
 /*-------------------------------------------------------\
-| Fun-02: pHelp_freezeTb
+| Fun02: pHelp_freezeTb
 |   - Prints the help message for freezeTb
 | Input:
 |   - outFILE:
@@ -3065,22 +3233,22 @@ pHelp_freezeTb(
    char pPrintBl, /*Print the print (amr/con) settings*/
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   '   o fun-02 sec-01:
+   '   o fun02 sec01:
    '     - Variable declerations
-   '   o fun-02 Sec-02:
+   '   o fun02 Sec02:
    '     - Find default file paths
-   '   o fun-02 sec-03:
+   '   o fun02 sec03:
    '     - Build the usage entry
-   '   o fun-02 sec-04:
+   '   o fun02 sec04:
    '     - Build the input entry
-   '   o fun-02 sec-05:
+   '   o fun02 sec05:
    '     - Build the output entry
-   '   o fun-02 sec-06:
+   '   o fun02 sec06:
    '     - Print the help message
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-01:
+   ^ Fun02 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3108,24 +3276,24 @@ pHelp_freezeTb(
    FILE *testFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-02:
+   ^ Fun02 Sec02:
    ^   - Find default file paths
-   ^   o fun-02 sec-02 sub-01:
+   ^   o fun02 sec02 sub01:
    ^     - Set the path to the amr database
-   ^   o fun-02 sec-02 sub-02:
+   ^   o fun02 sec02 sub02:
    ^     - Set the path to the MIRU lineages
-   ^   o fun-02 sec-02 sub-03:
+   ^   o fun02 sec02 sub03:
    ^     - Set the path to the gene coordinates file
-   ^   o fun-02 sec-02 sub-04:
+   ^   o fun02 sec02 sub04:
    ^     - Set the path to the spoligo reference file
-   ^   o fun-02 sec-02 sub-05:
+   ^   o fun02 sec02 sub05:
    ^     - Set the path to the spoligo lineages database
-   ^   o fun-02 sec-02 sub-06:
+   ^   o fun02 sec02 sub06:
    ^     - Set up primer masking path
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-01:
+   * Fun02 Sec02 Sub01:
    *   - Set the path to the amr database
    \*****************************************************/
 
@@ -3158,7 +3326,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-02:
+   * Fun02 Sec02 Sub02:
    *   - Set the path to the MIRU lineages
    \*****************************************************/
 
@@ -3191,7 +3359,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-03:
+   * Fun02 Sec02 Sub03:
    *   - Set the path to the gene coordinates file
    \*****************************************************/
 
@@ -3224,7 +3392,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-04:
+   * Fun02 Sec02 Sub04:
    *   - Set the path to the spoligo reference file
    \*****************************************************/
 
@@ -3267,7 +3435,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-05:
+   * Fun02 Sec02 Sub05:
    *   - Set the path to the spoligo lineages database
    \*****************************************************/
 
@@ -3328,7 +3496,7 @@ pHelp_freezeTb(
 
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-06:
+   * Fun02 Sec02 Sub06:
    *   - Set up primer masking path
    \*****************************************************/
 
@@ -3388,7 +3556,7 @@ pHelp_freezeTb(
    testFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-03:
+   ^ Fun02 Sec03:
    ^   - Build the usage entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
  
@@ -3407,49 +3575,49 @@ pHelp_freezeTb(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-04:
+   ^ Fun02 Sec04:
    ^   - Build the input entry
-   ^   o fun-02 sec-04 sub-01:
+   ^   o fun02 sec04 sub01:
    ^     - Build the input header/File IO input
-   ^   o fun-02 sec-04 sub-02:
+   ^   o fun02 sec04 sub02:
    ^     - Fitering settings
-   ^   o fun-02 sec-04 sub-03:
+   ^   o fun02 sec04 sub03:
    ^     - Consensus settings
-   ^   o fun-02 sec-04 sub-04:
+   ^   o fun02 sec04 sub04:
    ^     - Print out the print settings
-   ^   o fun-02 sec-04 sub-05:
+   ^   o fun02 sec04 sub05:
    ^     - Print out the graph settings
-   ^   o fun-02 sec-04 sub-06:
+   ^   o fun02 sec04 sub06:
    ^     - Print out the lineage (non-database) settings
-   ^   o fun-02 sec-04 sub-07:
+   ^   o fun02 sec04 sub07:
    ^     - Print out the help message and version numbers
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-01:
+   * Fun02 Sec04 Sub01:
    *   - Build the input header/File IO input
-   *   o fun-02 sec-04 sub-01 cat-01:
+   *   o fun02 sec04 sub01 cat01:
    *     - Build the input header
-   *   o fun-02 sec-04 sub-01 cat-02:
+   *   o fun02 sec04 sub01 cat02:
    *     - Sam file input
-   *   o fun-02 sec-04 sub-01 cat-03:
+   *   o fun02 sec04 sub01 cat03:
    *     - Prefix to name output files
-   *   o fun-02 sec-04 sub-01 cat-04:
+   *   o fun02 sec04 sub01 cat04:
    *     - AMR table input
-   *   o fun-02 sec-04 sub-01 cat-05:
+   *   o fun02 sec04 sub01 cat05:
    *     - Gene coordinates (paf) input
-   *   o fun-02 sec-04 sub-01 cat-06:
+   *   o fun02 sec04 sub01 cat06:
    *     - MIRU table input
-   *   o fun-02 sec-04 sub-01 cat-07:
+   *   o fun02 sec04 sub01 cat07:
    *     - spoligotype spacer sequence input
-   *   o fun-02 sec-04 sub-01 cat-08:
+   *   o fun02 sec04 sub01 cat08:
    *     - spoligotype linage database
-   *   o fun-02 sec-04 sub-01 cat-09:
+   *   o fun02 sec04 sub01 cat09:
    *     - primer masking database
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-01:
+   + Fun02 Sec04 Sub01 Cat01:
    +   - Build the input header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3461,7 +3629,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-02:
+   + Fun02 Sec04 Sub01 Cat02:
    +   - Sam file input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3480,7 +3648,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-03:
+   + Fun02 Sec04 Sub01 Cat03:
    +   - Prefix to name output files
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3512,7 +3680,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-04:
+   + Fun02 Sec04 Sub01 Cat04:
    +   - AMR table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3557,7 +3725,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-05:
+   + Fun02 Sec04 Sub01 Cat05:
    +   - Gene coordinates (paf) input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3602,7 +3770,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-06:
+   + Fun02 Sec04 Sub01 Cat06:
    +   - MIRU table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3654,7 +3822,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-07:
+   + Fun02 Sec04 Sub01 Cat07:
    +   - spoligotype spacer sequence input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3713,7 +3881,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-08:
+   + Fun02 Sec04 Sub01 Cat08:
    +   - spoligotype linage database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3772,7 +3940,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-01 Cat-09:
+   + Fun02 Sec04 Sub01 Cat09:
    +   - primer masking database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3838,22 +4006,22 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-02:
+   * Fun02 Sec04 Sub02:
    *   - Fitering settings
-   *   o fun-02 sec-04 sub-02 cat-01:
+   *   o fun02 sec04 sub02 cat01:
    *     - Print the header
-   *   o fun-02 sec-04 sub-02 cat-02:
+   *   o fun02 sec04 sub02 cat02:
    *     - Print mapping quality filter
-   *   o fun-02 sec-04 sub-02 cat-03:
+   *   o fun02 sec04 sub02 cat03:
    *     - Print out the min length filter
-   *   o fun-02 sec-04 sub-02 cat-04:
+   *   o fun02 sec04 sub02 cat04:
    *     - Print out the mean Q-score filter
-   *   o fun-02 sec-04 sub-02 cat-05:
+   *   o fun02 sec04 sub02 cat05:
    *     - Print out the median Q-score filter
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-02 Cat-01:
+   + Fun02 Sec04 Sub02 Cat01:
    +   - Print the read fitering header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3865,7 +4033,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-02 Cat-02:
+   + Fun02 Sec04 Sub02 Cat02:
    +   - Print mapping quality filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3892,7 +4060,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-02 Cat-03:
+   + Fun02 Sec04 Sub02 Cat03:
    +   - Print out the min length filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3919,7 +4087,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-02 Cat-04:
+   + Fun02 Sec04 Sub02 Cat04:
    +   - Print out the mean Q-score filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3950,7 +4118,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-02 Cat-05:
+   + Fun02 Sec04 Sub02 Cat05:
    +   - Print out the median Q-score filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3981,28 +4149,28 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-03:
+   * Fun02 Sec04 Sub03:
    *   - Consensus settings
-   *   o fun-02 sec-04 sub-03 cat-01:
+   *   o fun02 sec04 sub03 cat01:
    *     - Print out the consensus setting header
-   *   o fun-02 sec-04 sub-03 cat-02:
+   *   o fun02 sec04 sub03 cat02:
    *     - Print out the min depth filter
-   *   o fun-02 sec-04 sub-03 cat-03:
+   *   o fun02 sec04 sub03 cat03:
    *     - Print out the min length to keep a fragment
-   *   o fun-02 sec-04 sub-03 cat-04:
+   *   o fun02 sec04 sub03 cat04:
    *     - Print out the min snp/match Q-score
-   *   o fun-02 sec-04 sub-03 cat-05:
+   *   o fun02 sec04 sub03 cat05:
    *     - Print out the min insertion Q-score
-   *   o fun-02 sec-04 sub-03 cat-06:
+   *   o fun02 sec04 sub03 cat06:
    *     - Print out the min percdent snp/match support
-   *   o fun-02 sec-04 sub-03 cat-07:
+   *   o fun02 sec04 sub03 cat07:
    *     - Print out the min percdent insertion support
-   *   o fun-02 sec-04 sub-03 cat-08:
+   *   o fun02 sec04 sub03 cat08:
    *     - Print out the min percent deletion support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-01:
+   + Fun02 Sec04 Sub03 Cat01:
    +   - Print out the consensus setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4016,7 +4184,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-02:
+   + Fun02 Sec04 Sub03 Cat02:
    +   - Print out the min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4043,7 +4211,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-03:
+   + Fun02 Sec04 Sub03 Cat03:
    +   - Print out the min length to keep a fragment
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4074,7 +4242,7 @@ pHelp_freezeTb(
 
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-04:
+   + Fun02 Sec04 Sub03 Cat04:
    +   - Print out the min snp/match Q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4101,7 +4269,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-05:
+   + Fun02 Sec04 Sub03 Cat05:
    +   - Print out the min insertion Q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4128,7 +4296,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-06:
+   + Fun02 Sec04 Sub03 Cat06:
    +   - Print out the min percdent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4165,7 +4333,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-07:
+   + Fun02 Sec04 Sub03 Cat07:
    +   - Print out the min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4207,7 +4375,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-03 Cat-08:
+   + Fun02 Sec04 Sub03 Cat08:
    +   - Print out the min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4249,24 +4417,24 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-04:
+   * Fun02 Sec04 Sub04:
    *   - Print out the print settings
-   *   o fun-02 sec-04 sub-04 cat-01:
+   *   o fun02 sec04 sub04 cat01:
    *     - Print out the print setting header
-   *   o fun-02 sec-04 sub-04 cat-02:
+   *   o fun02 sec04 sub04 cat02:
    *     - Print out the print min depth filter
-   *   o fun-02 sec-04 sub-04 cat-03:
+   *   o fun02 sec04 sub04 cat03:
    +     - Print out min percent of reads to keep read AMR
-   *   o fun-02 sec-04 sub-04 cat-04:
+   *   o fun02 sec04 sub04 cat04:
    *     - Print out the min perccent snp/match support
-   *   o fun-02 sec-04 sub-04 cat-05:
+   *   o fun02 sec04 sub04 cat05:
    *     - Print out the min percent insertion support
-   *   o fun-02 sec-04 sub-04 cat-06:
+   *   o fun02 sec04 sub04 cat06:
    *     - Print out the min percent deletion support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-04 Cat-01:
+   + Fun02 Sec04 Sub04 Cat01:
    +   - Print out the print setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4282,7 +4450,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-04 Cat-02:
+   + Fun02 Sec04 Sub04 Cat02:
    +   - Print out the print min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4317,7 +4485,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-04 Cat-03:
+   + Fun02 Sec04 Sub04 Cat03:
    +   - Print out min percent of reads to keep read AMR
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4359,7 +4527,7 @@ pHelp_freezeTb(
    ++lenHelpI;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-04 Cat-04:
+   + Fun02 Sec04 Sub04 Cat04:
    +   - Print out the min percent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4408,7 +4576,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-04 Cat-05:
+   + Fun02 Sec04 Sub04 Cat05:
    +   - Print out the min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4450,7 +4618,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-04 Cat-06:
+   + Fun02 Sec04 Sub04 Cat06:
    +   - Print out the min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4492,20 +4660,20 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-05:
+   * Fun02 Sec04 Sub05:
    *   - Print out the final settings
-   *   o fun-02 sec-04 sub-04 cat-01:
+   *   o fun02 sec04 sub04 cat01:
    *     - Graph settings header
-   *   o fun-02 sec-04 sub-04 cat-02:
+   *   o fun02 sec04 sub04 cat02:
    *     - -graph-flag setting
-   *   o fun-02 sec-04 sub-04 cat-03:
+   *   o fun02 sec04 sub04 cat03:
    *     - Make graphs flag
-   *   o fun-02 sec-04 sub-04 cat-04:
+   *   o fun02 sec04 sub04 cat04:
    *     - Graph extension flag
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-05 Cat-01:
+   + Fun02 Sec04 Sub05 Cat01:
    +   - Graph settings header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4519,7 +4687,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-05 Cat-02:
+   + Fun02 Sec04 Sub05 Cat02:
    +   - -graph-flag setting
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4553,7 +4721,7 @@ pHelp_freezeTb(
 
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-05 Cat-03:
+   + Fun02 Sec04 Sub05 Cat03:
    +   - Make graphs flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4595,7 +4763,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-05 Cat-04:
+   + Fun02 Sec04 Sub05 Cat04:
    +   - Graph extension flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4631,22 +4799,22 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-06:
+   * Fun02 Sec04 Sub06:
    *   - Print lineage settings
-   *   o fun-02 sec-04 sub-06 cat-01:
+   *   o fun02 sec04 sub06 cat01:
    *     - Lineage setting block
-   *   o fun-02 sec-04 sub-06 cat-02:
+   *   o fun02 sec04 sub06 cat02:
    *     - MIRU fudge setting
-   *   o fun-02 sec-04 sub-06 cat-03:
+   *   o fun02 sec04 sub06 cat03:
    *     - Spoligtyping min perc score
-   *   o fun-02 sec-04 sub-06 cat-04:
+   *   o fun02 sec04 sub06 cat04:
    *     - Spoligtyping dr-start
-   *   o fun-02 sec-04 sub-06 cat-05:
+   *   o fun02 sec04 sub06 cat05:
    *     - Spoligtyping dr-end
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-01:
+   + Fun02 Sec04 Sub06 Cat01:
    +   - Lineage setting block
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4658,7 +4826,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-02:
+   + Fun02 Sec04 Sub06 Cat02:
    +   - MIRU fudge setting
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4690,7 +4858,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-03:
+   + Fun02 Sec04 Sub06 Cat03:
    +   - Spoligtyping min perc score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4725,7 +4893,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-04:
+   + Fun02 Sec04 Sub06 Cat04:
    +   - Spoligtyping dr-start
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4750,7 +4918,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-05:
+   + Fun02 Sec04 Sub06 Cat05:
    +   - Spoligtyping dr-end
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4775,18 +4943,18 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-04 Sub-06:
+   * Fun02 Sec04 Sub06:
    *   - Print out the help message and version numbers
-   *   o fun-02 sec-04 sub-06 cat-01:
+   *   o fun02 sec04 sub06 cat01:
    *     - Other settings header
-   *   o fun-02 sec-04 sub-06 cat-02:
+   *   o fun02 sec04 sub06 cat02:
    *     - Checking frameshifts
-   *   o fun-02 sec-04 sub-06 cat-03:
+   *   o fun02 sec04 sub06 cat03:
    *     - help messages/version
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-01:
+   + Fun02 Sec04 Sub06 Cat01:
    +   - Other settings header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4798,7 +4966,7 @@ pHelp_freezeTb(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-02:
+   + Fun02 Sec04 Sub06 Cat02:
    +   - Checking frameshifts
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4860,7 +5028,7 @@ pHelp_freezeTb(
    helpStr[lenHelpI++] = '\n';
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun-02 Sec-04 Sub-06 Cat-03:
+   + Fun02 Sec04 Sub06 Cat03:
    +   - help messages/version
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4896,32 +5064,32 @@ pHelp_freezeTb(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-05:
+   ^ Fun02 Sec05:
    ^   - Print the output message
-   ^   o fun-02 sec-05 sub-01:
+   ^   o fun02 sec05 sub01:
    ^     - Print out the output header
-   ^   o fun-02 sec-05 sub-02:
+   ^   o fun02 sec05 sub02:
    ^     - Print out the consensus amrs file
-   ^   o fun-02 sec-05 sub-03:
+   ^   o fun02 sec05 sub03:
    ^     - Print consensus mirufile
-   ^   o fun-02 sec-05 sub-04:
+   ^   o fun02 sec05 sub04:
    ^     - Print out the consensus file
-   ^   o fun-02 sec-05 sub-05:
+   ^   o fun02 sec05 sub05:
    ^     - Print out the variants file
-   ^   o fun-02 sec-05 sub-06:
+   ^   o fun02 sec05 sub06:
    ^     - Print out the reads amr table
-   ^   o fun-02 sec-05 sub-07:
+   ^   o fun02 sec05 sub07:
    ^     - Print out the reads ids of AMR reads
-   ^   o fun-02 sec-05 sub-08:
+   ^   o fun02 sec05 sub08:
    ^     - Print out the reads MIRU table
-   ^   o fun-02 sec-05 sub-09:
+   ^   o fun02 sec05 sub09:
    ^     - Print out the filtered histogram file
-   ^   o fun-02 sec-05 sub-10:
+   ^   o fun02 sec05 sub10:
    ^     - Print out the unfiltered histogram file
    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-01:
+   * Fun02 Sec05 Sub01:
    *   - Print out the output header
    \*****************************************************/
 
@@ -4933,7 +5101,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-02:
+   * Fun02 Sec05 Sub02:
    *   - Print out the consensus amrs file
    \*****************************************************/
 
@@ -4952,7 +5120,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-03:
+   * Fun02 Sec05 Sub03:
    *   - Print consensus mirufile
    \*****************************************************/
 
@@ -4971,7 +5139,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-04:
+   * Fun02 Sec05 Sub04:
    *   - Print out the consensus file
    \*****************************************************/
 
@@ -4990,7 +5158,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-05:
+   * Fun02 Sec05 Sub05:
    *   - Print out the variants file
    \*****************************************************/
 
@@ -5009,7 +5177,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-06:
+   * Fun02 Sec05 Sub06:
    *   - Print out the reads amr table
    \*****************************************************/
 
@@ -5029,7 +5197,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-07:
+   * Fun02 Sec05 Sub07:
    *   - Print out the reads ids of AMR reads
    \*****************************************************/
 
@@ -5049,7 +5217,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-08:
+   * Fun02 Sec05 Sub08:
    *   - Print out the reads MIRU table
    \*****************************************************/
 
@@ -5069,7 +5237,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-09:
+   * Fun02 Sec05 Sub09:
    *   - Print out the filtered histogram file
    \*****************************************************/
 
@@ -5095,7 +5263,7 @@ pHelp_freezeTb(
    );
 
    /*****************************************************\
-   * Fun-02 Sec-05 Sub-10:
+   * Fun02 Sec05 Sub10:
    *   - Print out the unfiltered histogram file
    \*****************************************************/
 
@@ -5121,7 +5289,7 @@ pHelp_freezeTb(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-06:
+   ^ Fun02 Sec06:
    ^   - Print the help message
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5129,7 +5297,7 @@ pHelp_freezeTb(
 } /*pHelp_freezeTb*/
 
 /*-------------------------------------------------------\
-| Fun-03: pVersion_freezeTb
+| Fun03: pVersion_freezeTb
 |   - Prints the version number for freezeTb and its
 |     submodules
 | Input:

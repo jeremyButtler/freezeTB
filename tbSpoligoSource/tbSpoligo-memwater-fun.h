@@ -9,12 +9,12 @@
 ' SOF: Start Of File
 '   o header:
 '     - Guards and definitions
-'   o fun-01: getSpoligoRefs
+'   o fun01: getSpoligoRefs
 '     - Gets the sequence for each spoligotypes
-'   o fun-02: fxSpoligoSearch
+'   o fun02: fxSpoligoSearch
 '     - Searches for spoligotypes in fastx sequences using
 '       the memory efficent waterman
-'   o fun-03: samSpoligoSearch
+'   o fun03: samSpoligoSearch
 '     - Searchs for spoligotypes in sam files
 '   o license:
 '     - Licensing for this code (public domain / mit)
@@ -36,7 +36,7 @@
 #define def_DREnd_tbSpoligo 3123624
 
 /*-------------------------------------------------------\
-| Fun-01: getSpoligoRefs
+| Fun01: getSpoligoRefs
 |   - gets the sequence for each spoligotypes
 | Input:
 |   - spoligoFileStr:
@@ -66,28 +66,30 @@ getSpoligoRefs(
 );
 
 /*-------------------------------------------------------\
-| Fun-02: fxSpoligoSearch
+| Fun02: fxSpoligoSearch
 |   - Searches for spoligotypes in fastx sequences using
 |      the memory efficent waterman
 | Input:
-|   - seqST:
+|   - fx_seqSTPtr:
 |     o Pointer to an seqStruct with the sequence to
 |       search (sequence as characters. This function
 |       converts)
 |   - spoliogAry_SeqSTPtr:
 |     o Pointer to an seqStruct array with the converted
-|       spoloigotype sequences (fun-01: getSpoligoRefs
+|       spoloigotype sequences (fun01: getSpoligoRefs
 |       return)
 |   - minPercScoreF:
 |     o Float with minimum percentage to count an
 |       spoligotype
-|   - codeStr:
-|     o C-string to hold the spoligotype barcode. This
-|       needs to be the length of the number of
-|       spoliogtypes
+|   - codeAryUI:
+|     o unsigned integer array to hold the number of times
+|       each spacer was detected
 |   - pProgressBl:
 |     o 1: Print progress reports to the screen (stderr)
 |     o 0: Do not print progress reports
+|   - fragCheckBl:
+|     o 1: do not blank codeAryUI (checking fragments)
+|     o 0: blank codeAryUI (expect full length reads)
 |   - alnSetSTPtr:
 |     o Pointer to an alnSet structer with alignment
 |       settings
@@ -98,6 +100,7 @@ getSpoligoRefs(
 |     o Status to stderr if user requested
 |   - Returns:
 |     o 0 for success
+|     o noSpoligo_tbSpoligo if no spacers found
 |     o memErr_tbSpoligo for memory errors
 \-------------------------------------------------------*/
 signed char
@@ -106,13 +109,14 @@ fxSpoligoSearch(
    void *spoligoAry_SeqSTPtr,
    signed int numSpoligosSI,
    float minPercScoreF,
-   signed char *codeStr,
+   unsigned int *codeAryUI,
    signed char pProgressBl,
+   signed char fragCheckBl,
    void *alnSetSTPtr
 );
 
 /*-------------------------------------------------------\
-| Fun-03: samSpoligoSearch
+| Fun03: samSpoligoSearch
 |   - Searchs for spoligotypes in sam files
 | Input:
 |   - samSTPtr:
@@ -120,7 +124,7 @@ fxSpoligoSearch(
 |       search for spoligotypes
 |   - spoliogAry_SeqSTPtr:
 |     o Pointer to an seqStruct array with the converted
-|       spoloigotype sequences (fun-01: getSpoligoRefs
+|       spoloigotype sequences (fun01: getSpoligoRefs
 |       return)
 |   - drStartSI:
 |     o Starting position of the direct repeat region on
@@ -131,10 +135,14 @@ fxSpoligoSearch(
 |   - minPercScoreF:
 |     o Float with minimum percentage to count an
 |       spoligotype
-|   - codeStr:
-|     o C-string to hold the spoligotype barcode. This
-|       needs to be the length of the number of
-|       spoliogtypes
+|   - codeAryUI:
+|     o unsigned integer array to hold the number of times
+|       each spacer was detected
+|   - fragCheckBl:
+|     o 1: check direct repeat fragments and do not blank
+|          codeAryUI
+|     o 0: only check full direct repeat regions and blank
+|          codeAryUI
 |   - alnSetSTPtr:
 |     o Pointer to an alnSet structer with alignment
 |       settings
@@ -143,7 +151,7 @@ fxSpoligoSearch(
 |     o codeStr to hold the spoligotype barcode
 |   - Returns:
 |     o 0 for success
-|     o noSpolgio_tbSpoligo
+|     o noSpoligo_tbSpoligo
 |     o memErr_tbSpoligo for memory errors
 \-------------------------------------------------------*/
 signed char
@@ -154,7 +162,8 @@ samSpoligoSearch(
    signed int dirStartSI,
    signed int dirEndSI,
    float minPercScoreF,
-   signed char *codeStr,
+   unsigned int *codeAryUI,
+   signed char fragCheckBl,
    void *alnSetSTPtr
 );
 

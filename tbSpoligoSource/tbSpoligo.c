@@ -7,9 +7,9 @@
 ' SOF: Start Of File
 '   o header:
 '     - included libraries
-'   o fun-01: getInput_tbSpoligo
+'   o fun01: getInput_tbSpoligo
 '     - gets user input
-'   o fun-02: pHelp_tbSpoligo
+'   o fun02: pHelp_tbSpoligo
 '     - prints the help message to an file
 '   o main:
 '     - driver function (runs the spoligotyping)
@@ -38,6 +38,7 @@
 
 #include "tbSpoligo-checkInput.h"
 #include "tbSpoligo-version.h"
+#include "kmerFind.h"
 
 
 /*.h files only*/
@@ -48,10 +49,12 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c #include "../memwater/memwater.h"
+!   o .h #include "../generalLib/gen-shellSort.h"
 !   o .h #include "../memwater/alnSeqDefaults.h"
 !   o .h #include "../generalLib/base10StrToNum.h"
 !   o .h #include "../generalLib/numToStr.h"
 !   o .h #include "../generalLib/genMath.h"
+!   o .h #include "../generalLib/ntToBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -78,28 +81,29 @@ main(
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Main TOC:
    '   -
-   '   o main sec-01:
+   '   o main sec01:
    '     - Variable declerations
-   '   o main sec-02:
+   '   o main sec02:
    '     - Process user input
-   '   o main sec-03:
+   '   o main sec03:
    '     - Read in the spoligotype sequences
-   '   o main sec-04:
+   '   o main sec04:
    '     - Read in the spoligotype database
-   '   o main sec-05:
+   '   o main sec05:
    '     - Check reads for spoligotypes
-   '   o main sec-06:
+   '   o main sec06:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-01:
+   ^ Main Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    sint siArg = 0;
    schar errSC = 0;
-   schar barcodeStr[256]; /*Barcode for spoligo*/
+   uint lenCodeSI = 64;
+   uint codeAryUI[lenCodeSI]; /*Barcode for spoligo*/
 
    schar *seqFileStr = 0;    /*sequences to type*/
    schar *spoligoFileStr = 0;/*spoligotype Sequences*/
@@ -112,9 +116,23 @@ main(
    /*Type of sequence file input*/
    schar seqTypeFlagSC = def_seqStdin_tbSpoligo;
 
+   schar fragCheckBl = def_frag_tbSpoligoCheckInput;
+     /*do fragmentation checks*/
+
+   schar conFragBl = def_conFrag_tbSpoligoCheckInput;
+      /*consensus fragment mode*/
+
+   uint numSupReadsUI = 0; /*number reads with an spacer*/
+   schar *idStr = 0; /*for printing id in fragment mode*/
+
    float minPercScoreF = def_minPercScore_tbSpoligoWater;
-   sint minKmersSI = 1;     /*Not set up yet*/ 
-   schar fastBl = 0;        /*For kmer, not set up yet*/
+
+   /*for kmer checks*/
+   float minKmerPercF = def_minKmerPerc_kmerFind;
+   float percShiftF = def_percShift_kmerFind;
+   float percExtraNtInWinF = def_extraNtInWin_kmerFind;
+   uchar lenKmerUC = def_lenKmer_kmerFind;
+   schar fastBl = def_fastSeach_tbSpoligoCheckInput;
 
    struct seqStruct *spoligoHeapAryST= 0;/*ref sequences*/
    sint numSpoligosSI = 0;
@@ -126,23 +144,34 @@ main(
    schar *buffHeapStr = 0;
    ulong lenBuffUL = 0;
 
-
    /*Varaibles dealng with the spoligo lineage database*/
    struct spoligoST *lineageHeapAryST = 0;
    sint numLineagesSI = 0; /*Number lineages in database*/
+
+   /*kmer finding of spoligotype variables*/
+   struct tblST_kmerFind kmerTblStackST;
+   struct refST_kmerFind *kmerRefAryST = 0;
 
    FILE *inFILE = 0;
    FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-02:
-   ^   - Process user input
-   ^   o main sec-02 sub-01:
+   ^ Main Sec02:
+   ^   - Process user input and intialize variables
+   ^   o main sec02 sub01:
    ^     - Extract the user input
+   ^   o main sec02 sub02:
+   ^     - initialize variables
+   ^   o main sec02 sub03:
+   ^     - Check if I can open spoligotype file
+   ^   o main sec02 sub04:
+   ^     - Check if I can open the output file
+   ^   o main sec02 sub05:
+   ^     - Check if I can open the sequence file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-02 Sub-01:
+   * Main Sec02 Sub01:
    *   - Extract the user input
    \*****************************************************/
 
@@ -162,8 +191,10 @@ main(
             &minPercScoreF,
             &drStartSI,
             &drEndSI,
-            &minKmersSI,
-            &fastBl
+            &minKmerPercF,
+            &fastBl,
+            &fragCheckBl,
+            &conFragBl
          );
 
       if(errSC & (~1))
@@ -206,8 +237,36 @@ main(
       siArg += 1 + (errSC & 1);
    } /*Loop: Check user input*/
 
+
    /*****************************************************\
-   * Main Sec-02 Sub-02:
+   * Main Sec02 Sub02:
+   *   - initialize variables
+   \*****************************************************/
+
+   init_tblST_kmerFind(
+      &kmerTblStackST,
+      lenKmerUC
+   );
+
+   for(
+      siArg = 0;
+      siArg < lenCodeSI;
+      ++siArg
+   ) codeAryUI[siArg] = 0;
+
+   initSeqST(&seqStackST);
+   initAlnSet(&alnSetStackST);
+
+   errSC = (schar) initSamEntry(&samStackST);
+
+   if(errSC)
+   { /*If: I had an memory error*/
+      fprintf(stderr, "Ran out of memory\n");
+      goto errCleanUp_main_sec06_sub02;
+   } /*If: I had an memory error*/
+
+   /*****************************************************\
+   * Main Sec02 Sub03:
    *   - Check if I can open spoligotype file
    \*****************************************************/
 
@@ -228,7 +287,7 @@ main(
    inFILE = 0;
 
    /*****************************************************\
-   * Main Sec-02 Sub-03:
+   * Main Sec02 Sub04:
    *   - Check if I can open the output file
    \*****************************************************/
 
@@ -252,7 +311,7 @@ main(
    } /*Else: An output file was provided*/
 
    /*****************************************************\
-   * Main Sec-02 Sub-04:
+   * Main Sec02 Sub05:
    *   - Check if I can open the sequence file
    \*****************************************************/
 
@@ -288,16 +347,35 @@ main(
    } /*Else: An input file was provided*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-03:
+   ^ Main Sec03:
    ^   - Read in the spoligotype sequences
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   spoligoHeapAryST =
-     getSpoligoRefs(
-        spoligoFileStr,
-        &numSpoligosSI,
-        &errSC
-     );
+   if(fastBl)
+   { /*If: I am doing the kmer method*/
+      kmerRefAryST =
+         mkAry_refST_kmerFind(
+           spoligoFileStr,
+           lenKmerUC,
+           &numSpoligosSI,
+           minKmerPercF,
+           &kmerTblStackST,
+           percExtraNtInWinF,
+           percShiftF,
+           &alnSetStackST,
+           (uchar *) &errSC
+      );
+   } /*If: I am doing the kmer method*/
+
+   else
+   { /*Else: I am doing the waterman method*/
+      spoligoHeapAryST =
+        getSpoligoRefs(
+           spoligoFileStr,
+           &numSpoligosSI,
+           &errSC
+        );
+   } /*Else: I am doing the waterman method*/
 
    if(errSC)
    { /*If: I had an error*/
@@ -322,7 +400,7 @@ main(
    } /*If: I had an error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-04:
+   ^ Main Sec04:
    ^   - Read in the spoligotype database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -360,47 +438,41 @@ main(
    } /*If: An database of lineages was input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-05:
+   ^ Main Sec05:
    ^   - Check reads for spoligotypes
-   ^   o main sec-05 sub-01:
-   ^     - Initialize variables and print header
-   ^   o main sec-05 sub-02:
+   ^   o main sec05 sub01:
+   ^     - print header
+   ^   o main sec05 sub02:
    ^     - fastx file spoligotype detection
-   ^   o main sec-05 sub-03:
+   ^   o main sec05 sub03:
    ^     - sam file spoligotype detection
+   ^   o main sec05 sub04:
+   ^     - print out fragment check results
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-05 Sub-01:
-   *   - Initialize variables and print header
+   * Main Sec05 Sub01:
+   *   - print header
    \*****************************************************/
 
-   initSeqST(&seqStackST);
-   initAlnSet(&alnSetStackST);
-
-   errSC = (schar) initSamEntry(&samStackST);
-
-   if(errSC)
-   { /*If: I had an memory error*/
-      fprintf(stderr, "Ran out of memory\n");
-      goto errCleanUp_main_sec06_sub02;
-   } /*If: I had an memory error*/
-
-   pSpoligoHead(outFILE);
+   pSpoligoHead(
+      (!conFragBl) & fragCheckBl,
+      outFILE
+   );
 
    /*****************************************************\
-   * Main Sec-05 Sub-02:
+   * Main Sec05 Sub02:
    *   - fastx file spoligotype detection
-   *   o main sec-05 sub-02 cat-01:
+   *   o main sec05 sub02 cat01:
    *     - Check if fastx file and read in first entry
-   *   o main sec-05 sub-02 cat-02:
+   *   o main sec05 sub02 cat02:
    *     - Look for spoligotypes for each entry in fastx
-   *   o main sec-05 sub-02 cat-03:
+   *   o main sec05 sub02 cat03:
    *     - Report fastx errors
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec-05 Sub-02 Cat-01:
+   + Main Sec05 Sub02 Cat01:
    +   - Check if fastx file and read in first entry
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -416,36 +488,68 @@ main(
       siArg = 1;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec-05 Sub-02 Cat-02:
+      + Main Sec05 Sub02 Cat02:
       +   - Look for spoligotypes for each entry in fastx
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       while(errSC == 1)
       { /*Loop: Check read for spoligotypes*/
-         errSC =
-            fxSpoligoSearch(
-               &seqStackST,
-               spoligoHeapAryST,
-               numSpoligosSI,
-               minPercScoreF,
-               barcodeStr,
-               1, /*Print progress*/
-               &alnSetStackST
-            ); /*Detect spoligotypes*/
 
-         if(errSC)
+         if(fastBl)
+         { /*If: I am doing the faster kmer method*/
+            errSC =
+               (schar)
+               fxFindSpoligos_kmerFind(
+                  &kmerTblStackST,
+                  kmerRefAryST,
+                  numSpoligosSI,
+                  &seqStackST,
+                  minPercScoreF,
+                  codeAryUI,
+                  fragCheckBl,
+                  &alnSetStackST
+               ); /*find spoligotype with kmer search*/
+         } /*If: I am doing the faster kmer method*/
+
+         else
+         { /*Else: I am doing the slower waterman search*/
+            errSC =
+               fxSpoligoSearch(
+                  &seqStackST,
+                  spoligoHeapAryST,
+                  numSpoligosSI,
+                  minPercScoreF,
+                  codeAryUI,
+                  1, /*Print progress*/
+                  fragCheckBl,
+                  &alnSetStackST
+               ); /*Detect spoligotypes*/
+         } /*Else: I am doing the slower waterman search*/
+
+         if(errSC & memErr_tbSpoligo)
          { /*If: I had an memory error*/
             fprintf(stderr, "Ran out of memory\n");
             goto errCleanUp_main_sec06_sub02;
          } /*If: I had an memory error*/
 
-         pSpoligo(
-            (schar *) seqStackST.idStr,
-            barcodeStr,
-            lineageHeapAryST,
-            numLineagesSI,
-            outFILE
-         );
+         if(! errSC)
+         { /*If: I detected an spoligotype*/
+            if(! fragCheckBl)
+            { /*If: I am not doing fragment checks*/
+               pSpoligo(
+                  (schar *) seqStackST.idStr,
+                  codeAryUI,
+                  (!conFragBl) & fragCheckBl,
+                  numSupReadsUI,
+                  lineageHeapAryST,
+                  numLineagesSI,
+                  outFILE
+               );
+            } /*If: I am not doing fragment checks*/
+
+            /*add read to total sup read count*/
+            ++numSupReadsUI;
+         } /*If: I detected an spoligotype*/
 
          ++siArg;
 
@@ -456,7 +560,7 @@ main(
       } /*Loop: Check read read for spoligotypes*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec-05 Sub-02 Cat-03:
+      + Main Sec05 Sub02 Cat03:
       +   - Report fastx errors
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -487,18 +591,18 @@ main(
    } /*If: I am checking an fastq file*/
 
    /*****************************************************\
-   * Main Sec-05 Sub-03:
+   * Main Sec05 Sub03:
    *   - sam file spoligotype detection
-   *   o main sec-05 sub-03 cat-01:
+   *   o main sec05 sub03 cat01:
    *     - Read in the first sam file entry
-   *   o main sec-05 sub-03 cat-02:
+   *   o main sec05 sub03 cat02:
    *     - Look for spoligotypes for each sam entry
-   *   o main sec-05 sub-03 cat-03:
+   *   o main sec05 sub03 cat03:
    *     - Report sam file errors
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec-05 Sub-03 Cat-01:
+   + Main Sec05 Sub03 Cat01:
    +   - Read in the first sam file entry
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -516,7 +620,7 @@ main(
       siArg = 1;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec-05 Sub-03 Cat-02:
+      + Main Sec05 Sub03 Cat02:
       +   - Look for spoligotypes for each sam entry
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -525,17 +629,39 @@ main(
          if(*samStackST.seqStr == '\0')
             goto nextSamEntry_main_sec04_sub03_cat02;
 
-         errSC =
-            samSpoligoSearch(
-               &samStackST,
-               spoligoHeapAryST,
-               numSpoligosSI,
-               drStartSI,
-               drEndSI,
-               minPercScoreF,
-               barcodeStr,
-               &alnSetStackST
-            ); /*Detect spoligotypes*/
+         if(fastBl)
+         { /*If: I am doing the faster kmer method*/
+            errSC =
+               (schar)
+               samFindSpoligos_kmerFind(
+                  &kmerTblStackST,
+                  kmerRefAryST,
+                  numSpoligosSI,
+                  &samStackST,
+                  drStartSI,
+                  drEndSI,
+                  minPercScoreF,
+                  codeAryUI,
+                  fragCheckBl,
+                  &alnSetStackST
+               ); /*find spoligotype with kmer search*/
+         } /*If: I am doing the faster kmer method*/
+
+         else
+         { /*Else: I am doing the slower waterman*/
+            errSC =
+               samSpoligoSearch(
+                  &samStackST,
+                  spoligoHeapAryST,
+                  numSpoligosSI,
+                  drStartSI,
+                  drEndSI,
+                  minPercScoreF,
+                  codeAryUI,
+                  fragCheckBl,
+                  &alnSetStackST
+               ); /*Detect spoligotypes*/
+         } /*Else: I am doing the slower waterman*/
 
          if(errSC == memErr_tbSpoligo)
          { /*If: I had an memory error*/
@@ -544,13 +670,21 @@ main(
 
          if(! errSC)
          { /*If: I could detect spoligotypes*/
-            pSpoligo(
-               (schar *) samStackST.qryIdStr,
-               barcodeStr,
-               lineageHeapAryST,
-               numLineagesSI,
-               outFILE
-            );
+            if(! fragCheckBl)
+            { /*If: I am not checking for fragments*/
+               pSpoligo(
+                  (schar *) samStackST.qryIdStr,
+                  codeAryUI,
+                  (!conFragBl) & fragCheckBl,
+                  numSupReadsUI,
+                  lineageHeapAryST,
+                  numLineagesSI,
+                  outFILE
+               );
+            } /*If: I am not checking for fragments*/
+
+            /*add read to total sup read count*/
+            ++numSupReadsUI;
          } /*If: I could detect spoligotypes*/
 
          ++siArg;
@@ -568,7 +702,7 @@ main(
       } /*Loop: Check read read for spoligotypes*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec-05 Sub-03 Cat-03:
+      + Main Sec05 Sub03 Cat03:
       +   - Report sam file errors
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -585,22 +719,63 @@ main(
       } /*If: I had an error*/
    } /*Else: I am checking an sam file for spoligotypes*/
 
+   /*****************************************************\
+   * Main Sec05 Sub04:
+   *   - print out fragment check results
+   \*****************************************************/
+
+   if(fragCheckBl && ! conFragBl)
+   { /*If: I am did fragment checks*/
+      pSpoligo(
+         (schar *) seqFileStr,
+         codeAryUI,
+         1,                 /*do not output lineage*/
+         numSupReadsUI,
+         lineageHeapAryST,
+         numLineagesSI,
+         outFILE
+      );
+   } /*If: I am did fragment checks*/
+
+   else if(conFragBl)
+   { /*Else: I am working with consensus fragments*/
+      pSpoligo(
+         (schar *) samStackST.qryIdStr,
+         codeAryUI,
+         0,     /*I want to output the lineage*/
+         numSupReadsUI,
+         lineageHeapAryST,
+         numLineagesSI,
+         outFILE
+      );
+   } /*Else: I am working with consensus fragments*/
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec-06:
+   ^ Main Sec06:
    ^   - Clean up
-   ^   o main sec-06 sub-01:
+   ^   o main sec06 sub01:
    ^     - Clean up after no problems
-   ^   o main sec-06 sub-02:
+   ^   o main sec06 sub02:
    ^     - Clean up after an error
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec-06 Sub-01:
+   * Main Sec06 Sub01:
    *   - Clean up after no problems
    \*****************************************************/
 
-   freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
+   /*check if did an slow waterman or fast kmer*/
+   if(spoligoHeapAryST)
+      freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
+
+   else
+      freeHeapAry_refST_kmerFind(
+         kmerRefAryST,
+         numSpoligosSI
+      );
+
    spoligoHeapAryST = 0;
+   kmerRefAryST = 0;
 
    freeSpoligoSTAry(lineageHeapAryST, numLineagesSI);
    lineageHeapAryST = 0;
@@ -608,6 +783,8 @@ main(
    freeSamEntryStack(&samStackST);
    freeSeqSTStack(&seqStackST);
    freeAlnSetStack(&alnSetStackST);
+
+   freeStack_tblST_kmerFind(&kmerTblStackST);
 
    free(buffHeapStr);
    buffHeapStr = 0;
@@ -625,14 +802,24 @@ main(
    exit(0);
 
    /*****************************************************\
-   * Main Sec-06 Sub-02:
+   * Main Sec06 Sub02:
    *   - Clean up after an error
    \*****************************************************/
 
    errCleanUp_main_sec06_sub02:;
 
-   freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
+   /*check if did an slow waterman or fast kmer*/
+   if(spoligoHeapAryST)
+      freeSeqAryST(spoligoHeapAryST, numSpoligosSI);
+
+   else
+      freeHeapAry_refST_kmerFind(
+         kmerRefAryST,
+         numSpoligosSI
+      );
+
    spoligoHeapAryST = 0;
+   kmerRefAryST = 0;
 
    freeSpoligoSTAry(lineageHeapAryST, numLineagesSI);
    lineageHeapAryST = 0;
@@ -640,6 +827,8 @@ main(
    freeSamEntryStack(&samStackST);
    freeSeqSTStack(&seqStackST);
    freeAlnSetStack(&alnSetStackST);
+
+   freeStack_tblST_kmerFind(&kmerTblStackST);
 
    free(buffHeapStr);
    buffHeapStr = 0;

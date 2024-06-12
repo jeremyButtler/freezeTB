@@ -4,4 +4,4 @@ b freezeTb.c:943
 #r -min-mapq 15 -min-median-q 7 -min-mean-q 7 -min-depth 20 -no-frameshift -fudge 15 -miru-tbl /usr/local/share/freezeTBFiles/miruTbl.tsv -spoligo /usr/local/share/freezeTBFiles/spoligotype-seq.fa -spoligo-min-score 0.9 -dr-start 3119000 -dr-end 3124000 -db-spoligo /usr/local/share/freezeTBFiles/spoligo-lineages.csv -min-q 7 -min-q-ins 7 -min-len 200 -perc-snp-sup 0.5 -perc-ins-sup 0.70 -perc-del-sup 0.70 -p-min-depth 20 -p-perc-snp-sup 0.1 -p-perc-ins-sup 0.1 -p-perc-del-sup 0.1 -graph-ext tiff -gene-coords /usr/local/share/freezeTBFiles/gene-tbl.tsv -sam /home/reason/Downloads/2024-04-30--freezeTb/Hufflepuff-map.sam -prefix /home/reason/Downloads/2024-04-30--freezeTb/Hufflepuff
 #r -graph -sam ~/files/testing/bug.sam
 #r -sam ~/files/testing/BC33.sam -prefix ~/files/testing/remove -no-frameshift
-r -sam ../BC87.sam -prefix ../remove -no-frameshift
+r -sam ~/files/testing/baylor-BC03.sam -prefix ~/files/testing/remove

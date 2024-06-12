@@ -1,0 +1,188 @@
+PMID- 30621750
+OWN - NLM
+STAT- MEDLINE
+DCOM- 20190308
+LR  - 20240525
+IS  - 1474-760X (Electronic)
+IS  - 1474-7596 (Print)
+IS  - 1474-7596 (Linking)
+VI  - 20
+IP  - 1
+DP  - 2019 Jan 8
+TI  - An amplicon-based sequencing framework for accurately measuring intrahost virus 
+      diversity using PrimalSeq and iVar.
+PG  - 8
+LID - 10.1186/s13059-018-1618-7 [doi]
+LID - 8
+AB  - How viruses evolve within hosts can dictate infection outcomes; however, 
+      reconstructing this process is challenging. We evaluate our multiplexed amplicon 
+      approach, PrimalSeq, to demonstrate how virus concentration, sequencing coverage, 
+      primer mismatches, and replicates influence the accuracy of measuring intrahost 
+      virus diversity. We develop an experimental protocol and computational tool, 
+      iVar, for using PrimalSeq to measure virus diversity using Illumina and compare 
+      the results to Oxford Nanopore sequencing. We demonstrate the utility of 
+      PrimalSeq by measuring Zika and West Nile virus diversity from varied sample 
+      types and show that the accumulation of genetic diversity is influenced by 
+      experimental and biological systems.
+FAU - Grubaugh, Nathan D
+AU  - Grubaugh ND
+AD  - Department of Immunology and Microbiology, The Scripps Research Institute, La 
+      Jolla, CA, 92037, USA. nathan.grubaugh@yale.edu.
+AD  - Department of Epidemiology of Microbial Diseases, Yale School of Public Health, 
+      New Haven, CT, 06510, USA. nathan.grubaugh@yale.edu.
+FAU - Gangavarapu, Karthik
+AU  - Gangavarapu K
+AD  - Department of Immunology and Microbiology, The Scripps Research Institute, La 
+      Jolla, CA, 92037, USA. gkarthik@scripps.edu.
+FAU - Quick, Joshua
+AU  - Quick J
+AD  - Institute of Microbiology and Infection, University of Birmingham, Birmingham, 
+      B15 2TT, UK.
+FAU - Matteson, Nathaniel L
+AU  - Matteson NL
+AD  - Department of Immunology and Microbiology, The Scripps Research Institute, La 
+      Jolla, CA, 92037, USA.
+FAU - De Jesus, Jaqueline Goes
+AU  - De Jesus JG
+AD  - Institute of Microbiology and Infection, University of Birmingham, Birmingham, 
+      B15 2TT, UK.
+AD  - Laboratory of Experimental Pathology, Gonçalo Moniz Institute, Oswaldo Cruz 
+      Foundation, Salvador, Bahia, Brazil.
+FAU - Main, Bradley J
+AU  - Main BJ
+AD  - Department of Pathology, Microbiology and Immunology, University of California, 
+      Davis, CA, 95616, USA.
+FAU - Tan, Amanda L
+AU  - Tan AL
+AD  - Department of Biological Sciences, College of Arts and Sciences, Florida Gulf 
+      Coast University, Fort Myers, FL, 33965, USA.
+FAU - Paul, Lauren M
+AU  - Paul LM
+AD  - Department of Biological Sciences, College of Arts and Sciences, Florida Gulf 
+      Coast University, Fort Myers, FL, 33965, USA.
+FAU - Brackney, Doug E
+AU  - Brackney DE
+AD  - Department of Environmental Sciences, The Connecticut Agricultural Experiment 
+      Station, New Haven, CT, 06504, USA.
+FAU - Grewal, Saran
+AU  - Grewal S
+AD  - Department of Environmental Health, San Diego County Vector Control Program, San 
+      Diego, CA, 92123, USA.
+FAU - Gurfield, Nikos
+AU  - Gurfield N
+AD  - Department of Environmental Health, San Diego County Vector Control Program, San 
+      Diego, CA, 92123, USA.
+FAU - Van Rompay, Koen K A
+AU  - Van Rompay KKA
+AD  - California National Primate Research Center and Department of Pathology, 
+      Microbiology and Immunology, University of California, Davis, CA, 95616, USA.
+FAU - Isern, Sharon
+AU  - Isern S
+AD  - Department of Biological Sciences, College of Arts and Sciences, Florida Gulf 
+      Coast University, Fort Myers, FL, 33965, USA.
+FAU - Michael, Scott F
+AU  - Michael SF
+AD  - Department of Biological Sciences, College of Arts and Sciences, Florida Gulf 
+      Coast University, Fort Myers, FL, 33965, USA.
+FAU - Coffey, Lark L
+AU  - Coffey LL
+AD  - Department of Pathology, Microbiology and Immunology, University of California, 
+      Davis, CA, 95616, USA.
+FAU - Loman, Nicholas J
+AU  - Loman NJ
+AD  - Institute of Microbiology and Infection, University of Birmingham, Birmingham, 
+      B15 2TT, UK.
+FAU - Andersen, Kristian G
+AU  - Andersen KG
+AUID- ORCID: 0000-0001-6431-5982
+AD  - Department of Immunology and Microbiology, The Scripps Research Institute, La 
+      Jolla, CA, 92037, USA.
+AD  - Scripps Research Translational Institute, La Jolla, CA, 92037, USA.
+LA  - eng
+GR  - MC_PC_15100/MRC_/Medical Research Council/United Kingdom
+GR  - U01CK000516/ACL/ACL HHS/United States
+GR  - UL1 TR001114/TR/NCATS NIH HHS/United States
+GR  - P51 OD011107/OD/NIH HHS/United States
+GR  - R21AI137690/AI/NIAID NIH HHS/United States
+GR  - MR/L015080/1/MRC_/Medical Research Council/United Kingdom
+GR  - T32 AI007244/AI/NIAID NIH HHS/United States
+GR  - R21 AI129479/AI/NIAID NIH HHS/United States
+GR  - UL1TR002550/TR/NCATS NIH HHS/United States
+GR  - U01 CK000516/CK/NCEZID CDC HHS/United States
+GR  - U19AI135995/AI/NIAID NIH HHS/United States
+GR  - MR/M501621/1/MRC_/Medical Research Council/United Kingdom
+GR  - HHSN272201400048C/AI/NIAID NIH HHS/United States
+GR  - R01 AI099210/AI/NIAID NIH HHS/United States
+GR  - U19 AI135995/AI/NIAID NIH HHS/United States
+GR  - R21 AI137690/AI/NIAID NIH HHS/United States
+GR  - UL1 TR002550/TR/NCATS NIH HHS/United States
+PT  - Evaluation Study
+PT  - Journal Article
+PT  - Research Support, N.I.H., Extramural
+PT  - Research Support, Non-U.S. Gov't
+PT  - Research Support, U.S. Gov't, P.H.S.
+DEP - 20190108
+PL  - England
+TA  - Genome Biol
+JT  - Genome biology
+JID - 100960660
+SB  - IM
+MH  - Genetic Variation
+MH  - Genomics/*methods
+MH  - Sequence Analysis, RNA
+MH  - West Nile virus/*genetics
+MH  - Zika Virus/*genetics
+PMC - PMC6325816
+OTO - NOTNLM
+OT  - Amplicon sequencing
+OT  - Intrahost evolution
+OT  - SNP calling
+OT  - Viral sequencing
+OT  - West Nile
+OT  - Zika
+COIS- ETHICS APPROVAL AND CONSENT TO PARTICIPATE: Research on human subjects was 
+      conducted in compliance with existing regulations relating to the protection of 
+      human subjects and was evaluated and approved (#IRB-15-6664) by the Institutional 
+      Review Board/Ethics Review Committee at The Scripps Research Institute. Clinical 
+      samples were obtained from the Florida Department of Health (DOH) and Antibody 
+      Systems Inc. Samples collected in Florida were collected under a waiver of 
+      consent granted by the Florida DOH Human Research Protection Program. The work 
+      received a non-human subjects research designation (category 4 exemption) by the 
+      Florida DOH since this research was performed with leftover clinical diagnostic 
+      samples involving no more than minimal risk. Hence, written informed consent was 
+      not obtained. All samples were de-identified prior to receipt by the study 
+      investigators. The experimental methods used comply with the Helsinki 
+      Declaration. Research involving Indian origin rhesus macaques was conducted at 
+      the California National Primate Research Center, and experimental infections of 
+      mice upon which Ae. aegypti mosquitoes fed were performed at the University of 
+      California, Davis, School of Veterinary Medicine. Both institutes are fully 
+      accredited by the Association for the Assessment and Accreditation of Laboratory 
+      Animal Care International. Animals were cared for in accordance with the National 
+      Research Council Guide for the Care and Use of Laboratory Animals and the Animal 
+      Welfare Act. Animal experiments were approved by the Institutional Animal Care 
+      and Use Committee of UC Davis (protocols #19211 and #19695 for rhesus macaques, 
+      protocol #19404 for mice). All macaques samples used in this study were from 
+      approved studies [70]; and none were generated specifically for this work. 
+      CONSENT FOR PUBLICATION: Not applicable. COMPETING INTERESTS: NJL has received 
+      travel and accommodation expenses from Oxford Nanopore Technologies to attend 
+      meetings, and an honorarium to speak at an internal company meeting. NJL has 
+      previously received free-of-charge reagents and consumables in support of 
+      research projects from Oxford Nanopore Technologies. The other authors declare 
+      that they have no competing interests. PUBLISHER’S NOTE: Springer Nature remains 
+      neutral with regard to jurisdictional claims in published maps and institutional 
+      affiliations.
+EDAT- 2019/01/10 06:00
+MHDA- 2019/03/09 06:00
+PMCR- 2019/01/08
+CRDT- 2019/01/10 06:00
+PHST- 2018/08/04 00:00 [received]
+PHST- 2018/12/26 00:00 [accepted]
+PHST- 2019/01/10 06:00 [entrez]
+PHST- 2019/01/10 06:00 [pubmed]
+PHST- 2019/03/09 06:00 [medline]
+PHST- 2019/01/08 00:00 [pmc-release]
+AID - 10.1186/s13059-018-1618-7 [pii]
+AID - 1618 [pii]
+AID - 10.1186/s13059-018-1618-7 [doi]
+PST - epublish
+SO  - Genome Biol. 2019 Jan 8;20(1):8. doi: 10.1186/s13059-018-1618-7.

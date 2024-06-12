@@ -10,38 +10,38 @@
 ' SOF: Start Of File
 '   o header:
 '     - Definations
-'   o .h st-01: amrStruct
+'   o .h st01: amrStruct
 '     - Holds the information for a single amr mutation
 '       that was extracted from the WHO catalog
-'   o .h fun-01: blankAmrStruct
+'   o .h fun01: blankAmrStruct
 '     - Sets all non-pointer values in amrStructPtr to 0
-'   o .h fun-02: initAmrStruct
+'   o .h fun02: initAmrStruct
 '     - Sets all values, including pointers in the
 '       amrStruct structure to 0
-'   o fun-03: freeAmrStructStack
+'   o fun03: freeAmrStructStack
 '     - Frees the geneIdStr, refSeqStr, and amrSeqStr
 '       arrays and sets all values to 0 in the input
 '       amrStruct 
-'   o fun-04: freeAmrStruct
+'   o fun04: freeAmrStruct
 '     - Frees an heap allocated amrStruct structure
-'   o fun-05: freeAmrStructArray
+'   o fun05: freeAmrStructArray
 '     - Frees an heap allocated array of amrStruct
 '       structures
-'   o .h fun-06: swapAmrStructs
+'   o .h fun06: swapAmrStructs
 '     - Swaps the values in two amrStruct structures
-'   o fun-07: sortAmrStructArray
+'   o fun07: sortAmrStructArray
 '     - Sort on an amrStruct array structures by reference
 '       coordiante (uses shell sort)
-'   o fun-08: geneIdSortAmrSTAry
+'   o fun08: geneIdSortAmrSTAry
 '     - Sort on an amrStruct array structures by the
 '       gene names (ids) (uses shell short)
-'   o fun-09: findNearestAmr
+'   o fun09: findNearestAmr
 '      - Finds the nearest amr at or after the input query
-'   o fun-10: pAmrDB
+'   o fun10: pAmrDB
 '     - Print out the amr database used
-'   o fun-11: readTbAmrTbl
+'   o fun11: readTbAmrTbl
 '     - Gets data from a tbAmr tsv file output from pAmrDB
-'       (fun-09)
+'       (fun09)
 '   o license:
 '     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -74,6 +74,8 @@
 */
 #define def_amrST_resFlag 1
 #define def_amrST_crossResFlag 2
+#define def_amrST_crossToResShift 1
+   /*for converting cross restence to one bit*/
 #define def_amrST_maxFlags (sizeof(unsigned long) << 3)
 
 /*Error values*/
@@ -156,7 +158,7 @@ typedef struct amrStruct{
 }amrStruct;
 
 /*-------------------------------------------------------\
-| Fun-01: blankAmrStruct
+| Fun01: blankAmrStruct
 |   - Sets all non-pointer values in amrStructPtr to 0
 | Input:
 |   - ampStructPtr:
@@ -203,7 +205,7 @@ typedef struct amrStruct{
 } /*blankAmrStruct*/
 
 /*-------------------------------------------------------\
-| Fun-02: initAmrStruct
+| Fun02: initAmrStruct
 |   - Sets all values, including pointers in amrStructPtr
 |     to 0
 | Input:
@@ -245,7 +247,7 @@ typedef struct amrStruct{
 } /*initAmrStruct*/
 
 /*-------------------------------------------------------\
-| Fun-03: freeAmrStructStack
+| Fun03: freeAmrStructStack
 |   - Frees the geneIdStr, refSeqStr, and amrSeqStr arrays
 |     in amrStructPtr and sets all values to 0
 | Input:
@@ -260,7 +262,7 @@ typedef struct amrStruct{
 void freeAmrStructStack(struct amrStruct *amrStructPtr);
 
 /*-------------------------------------------------------\
-| Fun-04: freeAmrStruct
+| Fun04: freeAmrStruct
 |   - Frees an heap allocated amrStruct structure
 | Input:
 |   - ampStructPtr:
@@ -272,7 +274,7 @@ void freeAmrStructStack(struct amrStruct *amrStructPtr);
 void freeAmrStruct(struct amrStruct **amrStructPtr);
 
 /*-------------------------------------------------------\
-| Fun-05: freeAmrStructArray
+| Fun05: freeAmrStructArray
 |   - Frees an heap allocated array of amrStruct
 |     structures
 | Input:
@@ -289,7 +291,7 @@ void freeAmrStructArray(
 );
 
 /*-------------------------------------------------------\
-| Fun-06: swapAmrStructs
+| Fun06: swapAmrStructs
 |   - Swaps the values in two amrStruct structures
 | Input:
 |   - firstAmrSTPtr:
@@ -516,7 +518,7 @@ void freeAmrStructArray(
 
 
 /*-------------------------------------------------------\
-| Fun-07: sortAmrStructArray
+| Fun07: sortAmrStructArray
 |   - Sort on an amrStruct array structures by reference
 |     coordiante (uses shell sort)
 | Input:
@@ -534,7 +536,7 @@ void sortAmrStructArray(
 );
 
 /*-------------------------------------------------------\
-| Fun-08: geneIdSortAmrSTAry
+| Fun08: geneIdSortAmrSTAry
 |   - Sort on an amrStruct array structures by the gene
 |     names (ids) (uses shell short)
 | Input:
@@ -552,7 +554,7 @@ void geneIdSortAmrSTAry(
 );
 
 /*-------------------------------------------------------\
-| Fun-09: findNearestAmr
+| Fun09: findNearestAmr
 |  - Does a binary search for the nearest amr at or after
 |    to the input query coordiante
 | Input:
@@ -576,7 +578,7 @@ int findNearestAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun-10: pAmrDB
+| Fun10: pAmrDB
 |  - Print out the amr database used
 | Input:
 |  - amrAryST:
@@ -608,9 +610,9 @@ char pAmrDB(
 );
 
 /*-------------------------------------------------------\
-| Fun-11: readTbAmrTbl
+| Fun11: readTbAmrTbl
 |   - Gets data from a tbAmr tsv file output from pAmrDB
-|     (fun-09)
+|     (fun09)
 | Input:
 |   - tbAmrTblStr:
 |     o C-string with path to the AMR database/table

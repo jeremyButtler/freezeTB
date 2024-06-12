@@ -9,12 +9,12 @@
 ' SOF: Start Of File
 '   o header:
 '     - included libraries
-'   o fun-01: getSpoligoRefs
+'   o fun01: getSpoligoRefs
 '     - gets the sequence for each spoligotypes
-'   o fun-02: fxSpoligoSearch
+'   o fun02: fxSpoligoSearch
 '     - Searches for spoligotypes in fastx sequences using
 '       the memory efficent waterman
-'   o fun-03: samSpoligoSearch
+'   o fun03: samSpoligoSearch
 '     - Searchs for spoligotypes in sam files
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -54,7 +54,7 @@
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
-| Fun-01: getSpoligoRefs
+| Fun01: getSpoligoRefs
 |   - gets the sequence for each spoligotypes
 | Input:
 |   - spoligoFileStr:
@@ -82,16 +82,16 @@ getSpoligoRefs(
    signed int *numSpoligosSIPtr,
    signed char *errSCPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-01 TOC:
+   ' Fun01 TOC:
    '   - gets the sequence for each spoligotypes
-   '   o fun-01 sec-01:
+   '   o fun01 sec01:
    '     - variable declerations
-   '   o fun-01 sec-02:
+   '   o fun01 sec02:
    '     - initalize pointers and open spolitotype file
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-01:
+   ^ Fun01 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -110,7 +110,7 @@ getSpoligoRefs(
    FILE *spoligoFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-02:
+   ^ Fun01 Sec02:
    ^   - initalize pointers and open spolitotype file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -123,18 +123,18 @@ getSpoligoRefs(
       goto fileErr_fun01_sec05_sub03;
   
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-03:
+   ^ Fun01 Sec03:
    ^   - Find the number of sequences in the file
-   ^   o fun-01 sec-03 sub-01:
+   ^   o fun01 sec03 sub01:
    ^     - Get the first line of file and start loop
-   ^   o fun-01 sec-03 sub-02:
+   ^   o fun01 sec03 sub02:
    ^     - Start loop & check if have new line in buffer
-   ^   o fun-01 sec-03 sub-03:
+   ^   o fun01 sec03 sub03:
    ^     - If missing newline, get next part of file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-01 Sec-03 Sub-01:
+   * Fun01 Sec03 Sub01:
    *   - Get the first line of file and start loop
    \*****************************************************/
 
@@ -153,7 +153,7 @@ getSpoligoRefs(
    goto checkHead_fun01_sec03_sub02;
 
    /*****************************************************\
-   * Fun-01 Sec-03 Sub-02:
+   * Fun01 Sec03 Sub02:
    *   Start loop & check if have new line in buffer
    \*****************************************************/
 
@@ -196,7 +196,7 @@ getSpoligoRefs(
       } /*If: I found an new line*/
 
       /**************************************************\
-      * Fun-01 Sec-03 Sub-03:
+      * Fun01 Sec03 Sub03:
       *   - If missing newline, get next part of file
       \**************************************************/
 
@@ -216,16 +216,16 @@ getSpoligoRefs(
    } /*Loop: Find the number of sequences*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-04:
+   ^ Fun01 Sec04:
    ^   - Read in the sequences
-   ^   o fun-01 sec-04 sub-01:
+   ^   o fun01 sec04 sub01:
    ^     - Allocate memory for the sequence arrays
-   ^   o fun-01 sec-04 sub-02:
+   ^   o fun01 sec04 sub02:
    ^     - Read in the sequences
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-01 Sec-04 Sub-01:
+   * Fun01 Sec04 Sub01:
    *   - Allocate memory for the sequence arrays
    \*****************************************************/
 
@@ -247,7 +247,7 @@ getSpoligoRefs(
    ) initSeqST(&seqHeapAryST[*numSpoligosSIPtr]);
 
    /*****************************************************\
-   * Fun-01 Sec-04 Sub-02:
+   * Fun01 Sec04 Sub02:
    *   - Read in the sequences
    \*****************************************************/
 
@@ -302,20 +302,20 @@ getSpoligoRefs(
    }  /*Loop: Read in the sequences*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-01 Sec-05:
+   ^ Fun01 Sec05:
    ^   - Clean up
-   ^   o fun-01 sec-03 sub-02:
+   ^   o fun01 sec03 sub02:
    ^     - Clean up when there are no errors
-   ^   o fun-01 sec-03 sub-02:
+   ^   o fun01 sec03 sub02:
    ^     - Clean up when there are memory errors
-   ^   o fun-01 sec-03 sub-03:
+   ^   o fun01 sec03 sub03:
    ^     - Clean up when there are file errors
-   ^   o fun-01 sec-03 sub-04:
+   ^   o fun01 sec03 sub04:
    ^     - Clean up after an error
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-01 Sec-05 Sub-01:
+   * Fun01 Sec05 Sub01:
    *   - Clean up when there are no errors
    \*****************************************************/
 
@@ -325,7 +325,7 @@ getSpoligoRefs(
    return seqHeapAryST;
 
    /*****************************************************\
-   * Fun-01 Sec-05 Sub-02:
+   * Fun01 Sec05 Sub02:
    *   - Clean up when there are memory errors
    \*****************************************************/
 
@@ -336,7 +336,7 @@ getSpoligoRefs(
    goto errCleanUp_fun01_sec05_sub04;
 
    /*****************************************************\
-   * Fun-01 Sec-05 Sub-03:
+   * Fun01 Sec05 Sub03:
    *   - Clean up when there are file errors
    \*****************************************************/
 
@@ -347,7 +347,7 @@ getSpoligoRefs(
    goto errCleanUp_fun01_sec05_sub04;
 
    /*****************************************************\
-   * Fun-01 Sec-05 Sub-04:
+   * Fun01 Sec05 Sub04:
    *   - Clean up after an error
    \*****************************************************/
 
@@ -365,7 +365,7 @@ getSpoligoRefs(
 } /*getSpoligoRefs*/
 
 /*-------------------------------------------------------\
-| Fun-02: fxSpoligoSearch
+| Fun02: fxSpoligoSearch
 |   - Searches for spoligotypes in fastx sequences using
 |      the memory efficent waterman
 | Input:
@@ -375,18 +375,20 @@ getSpoligoRefs(
 |       converts)
 |   - spoliogAry_SeqSTPtr:
 |     o Pointer to an seqStruct array with the converted
-|       spoloigotype sequences (fun-01: getSpoligoRefs
+|       spoloigotype sequences (fun01: getSpoligoRefs
 |       return)
 |   - minPercScoreF:
 |     o Float with minimum percentage to count an
 |       spoligotype
-|   - codeStr:
-|     o C-string to hold the spoligotype barcode. This
-|       needs to be the length of the number of
-|       spoliogtypes
+|   - codeAryUI:
+|     o unsigned integer array to hold the number of times
+|       each spacer was detected
 |   - pProgressBl:
 |     o 1: Print progress reports to the screen (stderr)
 |     o 0: Do not print progress reports
+|   - fragCheckBl:
+|     o 1: do not blank codeAryUI (checking fragments)
+|     o 0: blank codeAryUI (expect full length reads)
 |   - alnSetSTPtr:
 |     o Pointer to an alnSet structer with alignment
 |       settings
@@ -397,6 +399,7 @@ getSpoligoRefs(
 |     o Status to stderr if user requested
 |   - Returns:
 |     o 0 for success
+|     o noSpoligo_tbSpoligo if no spacers found
 |     o memErr_tbSpoligo for memory errors
 \-------------------------------------------------------*/
 signed char
@@ -405,28 +408,30 @@ fxSpoligoSearch(
    void *spoligoAry_SeqSTPtr,
    signed int numSpoligosSI,
    float minPercScoreF,
-   signed char *codeStr,
+   unsigned int *codeAryUI,
    signed char pProgressBl,
+   signed char fragCheckBl,
    void *alnSetSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-02:
-   '   - Searches for spoligotypes in fastx sequences using
-   '      the memory efficent waterman
-   '   o fun-02 sec-01:
+   ' Fun02:
+   '   - Searches for spoligotypes in fastx sequences
+   '     using an memory efficent waterman
+   '   o fun02 sec01:
    '     - Variable declerations
-   '   o fun-02 sec-02:
+   '   o fun02 sec02:
    '     - Check if there are spoligotypes
-   '   o fun-02 sec-03:
+   '   o fun02 sec03:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-01:
+   ^ Fun02 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    sint siSpoligo = 0;
    signed char revBl = 0;    /*Check reverse complement*/
+   signed char noSpoligoBl = noSpoligo_tbSpoligo;
 
    float percScoreF = 0;
    slong maxScoreSL = 0;
@@ -444,19 +449,35 @@ fxSpoligoSearch(
 
    struct alnSet *settings= (struct alnSet *) alnSetSTPtr;
 
-   *codeStr = '\0';
-
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-02:
+   ^ Fun02 Sec02:
    ^   - Check if there are spoligotypes
-   ^   o fun-02 sec-02 sub-01:
+   ^   o fun02 sec02 sub01:
+   ^     - blank barcode array if not fragment mode
+   ^   o fun02 sec02 sub02:
    ^     - Check if an spoligotype is in forward sequence
-   ^   o fun-02 sec-02 sub-02:
+   ^   o fun02 sec02 sub03:
    ^     - Check if spoligotype is in reverse sequence
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun-02 Sec-02 Sub-01:
+   * Fun02 Sec02 Sub01:
+   *   - blank barcode array if not fragment mode
+   \*****************************************************/
+
+   if(! fragCheckBl)
+   { /*If: I am not searching for fragments*/
+      for(
+         siSpoligo = 0;
+         siSpoligo < (numSpoligosSI >> 1);
+         ++siSpoligo
+      ) codeAryUI[siSpoligo] = 0; /*blank for new seq*/
+   } /*If: I am not searching for fragments*/
+
+   codeAryUI[numSpoligosSI >> 1] = -1;
+
+   /*****************************************************\
+   * Fun02 Sec02 Sub02:
    *   - Check if an spoligotype is in forward sequence
    \*****************************************************/
    
@@ -503,14 +524,15 @@ fxSpoligoSearch(
 
        if(percScoreF >= minPercScoreF)
        { /*If: I had an match*/
-          codeStr[siSpoligo >> 1] = '1';
+          codeAryUI[siSpoligo >> 1] += 1;
+          noSpoligoBl = 0;
           continue;
        } /*If: I had an match*/
 
       /*I am ignoring memory errors*/
 
       /**************************************************\
-      * Fun-02 Sec-02 Sub-02:
+      * Fun02 Sec02 Sub03:
       *   - Check if spoligotype is in reverse sequence
       \**************************************************/
 
@@ -550,26 +572,28 @@ fxSpoligoSearch(
 
        if(percScoreF >= minPercScoreF)
        { /*If: I found an hit*/
-          codeStr[siSpoligo >> 1] = '1';
+          codeAryUI[siSpoligo >> 1] += 1;
           revBl = !revBl; /*likely future hits are same*/
+          noSpoligoBl = 0;
        } /*If: I found an hit*/
-
-       else
-          codeStr[siSpoligo >> 1] = '0';
    } /*Loop: Find the matching spoligotypes*/
       
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-02 Sec-03:
+   ^ Fun02 Sec03:
    ^   - Clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   codeStr[siSpoligo >> 1] = '\0';
+   codeAryUI[numSpoligosSI >> 1] = -1;
    lookupIndexToSeq(fxSeqST->seqStr);
+
+   if(noSpoligoBl)
+      return noSpoligo_tbSpoligo;
+
    return 0;
 } /*fxSpoligoSearch*/
 
 /*-------------------------------------------------------\
-| Fun-03: samSpoligoSearch
+| Fun03: samSpoligoSearch
 |   - Searchs for spoligotypes in sam files
 | Input:
 |   - samSTPtr:
@@ -577,7 +601,7 @@ fxSpoligoSearch(
 |       search for spoligotypes
 |   - spoliogAry_SeqSTPtr:
 |     o Pointer to an seqStruct array with the converted
-|       spoloigotype sequences (fun-01: getSpoligoRefs
+|       spoloigotype sequences (fun01: getSpoligoRefs
 |       return)
 |   - drStartSI:
 |     o Starting position of the direct repeat region on
@@ -588,10 +612,14 @@ fxSpoligoSearch(
 |   - minPercScoreF:
 |     o Float with minimum percentage to count an
 |       spoligotype
-|   - codeStr:
-|     o C-string to hold the spoligotype barcode. This
-|       needs to be the length of the number of
-|       spoliogtypes
+|   - codeAryUI:
+|     o unsigned integer array to hold the number of times
+|       each spacer was detected
+|   - fragCheckBl:
+|     o 1: check direct repeat fragments and do not blank
+|          codeAryUI
+|     o 0: only check full direct repeat regions and blank
+|          codeAryUI
 |   - alnSetSTPtr:
 |     o Pointer to an alnSet structer with alignment
 |       settings
@@ -611,21 +639,22 @@ samSpoligoSearch(
    signed int dirStartSI,
    signed int dirEndSI,
    float minPercScoreF,
-   signed char *codeStr,
+   unsigned int *codeAryUI,
+   signed char fragCheckBl,
    void *alnSetSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun-03 TOC:
+   ' Fun03 TOC:
    '   - Searches for spoligotypes in sam files
-   '   o fun-03 sec-01:
+   '   o fun03 sec01:
    '     - Variable declerations
-   '   o fun-03 sec-02:
+   '   o fun03 sec02:
    '     - Find direct repeat (DR) region coordinates
-   '   o fun-03 sec-03:
+   '   o fun03 sec03:
    '     - Run the spoligo checks
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-03 Sec-01:
+   ^ Fun03 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -637,16 +666,28 @@ samSpoligoSearch(
    struct seqStruct seqST;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-03 Sec-02:
+   ^ Fun03 Sec02:
    ^   - Find direct repeat (DR) region coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    /*Check if I have the full DR region*/
-   if(samST->refEndUI < dirEndSI)
-      return noSpoligo_tbSpoligo; /*DR Not present*/
+   /*Check if I have the full DR region*/
+   if(fragCheckBl)
+   { /*If: I am checking fragments*/
+      if(samST->refEndUI < dirStartSI)
+         return noSpoligo_tbSpoligo;
 
-   if(samST->refStartUI > dirStartSI)
-      return noSpoligo_tbSpoligo; /*DR Not present*/
+      if(samST->refStartUI > dirEndSI)
+         return noSpoligo_tbSpoligo;
+   } /*If: I am checking fragments*/
+
+   else
+   { /*Else: I am checking full direct repeat regions*/
+      if(samST->refStartUI > dirStartSI)
+         return noSpoligo_tbSpoligo;
+
+      if(samST->refEndUI < dirEndSI)
+         return noSpoligo_tbSpoligo;
+   } /*Else: I am checking full direct repeat regions*/
 
    initSeqST(&seqST);
 
@@ -680,7 +721,7 @@ samSpoligoSearch(
       seqST.endAlnUL = samST->readLenUI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun-03 Sec-03:
+   ^ Fun03 Sec03:
    ^   - Run the spoligo checks
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -692,8 +733,9 @@ samSpoligoSearch(
          spoligoAry_SeqSTPtr,
          numSpoligosSI,
          minPercScoreF,
-         codeStr,
-         0,
+         codeAryUI,
+         0,           /*do not show progress*/
+         fragCheckBl,
          alnSetSTPtr
       );
 } /*samSpoligoSearch*/

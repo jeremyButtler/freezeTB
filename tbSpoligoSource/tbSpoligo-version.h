@@ -22,8 +22,8 @@
 #define TB_SPOLIGIOTYPE_VERSION_H
 
 #define def_year_tbSpoligo 2024
-#define def_month_tbSpoligo 4
-#define def_day_tbSpoligo 25
+#define def_month_tbSpoligo 6
+#define def_day_tbSpoligo 10
 
 /*-------------------------------------------------------\
 | Fun-01: pVersion_tbSpoligo

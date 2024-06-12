@@ -141,10 +141,10 @@ BEGIN{
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 END{
-   miruStr = "";
+   miruStr = "NA";
 
-   for(siMiru = 1; siMiru <= 24; ++siMiru)
-      miruStr = miruStr "\t" "NA";
+   for(siMiru = 2; siMiru <= 24; ++siMiru)
+      miruStr = miruStr "\tNA";
 
    for(siAmr = 1; siAmr <= numVarSI; ++siAmr)
    { # Loop: Print out the output tsv file
