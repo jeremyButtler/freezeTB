@@ -51,6 +51,8 @@
 ! Hidden libraries:
 !   o .h #include "../memwater/alnSeqDefaults.h"
 !   o .h #include "../generalLib/base10StrToNum.h"
+!   o .h #include "../generalLib/numToStr.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

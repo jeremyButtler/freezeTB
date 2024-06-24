@@ -43,7 +43,7 @@
 !   - .h #include "numToStr.h"
 !   - .h #include "base10StrToNum.h"
 !   - .h #include "genMath.h"
-!   - .h #include "ntToBit.h"
+!   - .h #include "ntToFiveBit.h"
 !     o this is only used in printing sam entry stats,
 !       so it is not used
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/

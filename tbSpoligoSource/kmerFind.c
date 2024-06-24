@@ -119,6 +119,9 @@
 ! Hidden libraries
 !   - .c #include "../memwater/memwater.h"
 !   - .c #include "../generalLib/samEntryStruct.h"
+!   - .h #include "../generalLib/base10StrToNum.h"
+!   - .h #include "../generalLib/numToStr.h"
+!   - .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define def_a_kmerFind 0

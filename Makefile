@@ -36,18 +36,15 @@ SOURCE=\
 all:
 	$(CC) $(CFLAGS) -o freezeTB $(SOURCE);
 	make mac -C adjCoordsSrc;
-	mv adjCoordsSrc/adjCoords ./;
 
 # Just in case the user trys this
 mac:
 	$(CC) $(CFLAGS) -o freezeTB $(SOURCE);
 	make mac -C adjCoordsSrc;
-	mv adjCoordsSrc/adjCoords ./;
 
 static:
 	$(CC) $(staticCFLAGS) -o freezeTB $(SOURCE);
 	make -C adjCoordsSrc;
-	mv adjCoordsSrc/adjCoords ./;
 
 check:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
@@ -60,11 +57,11 @@ macbug:
 	$(CC) $(DEBUGCFLAGS) -o bugFreezeTb $(SOURCE);
 	lldb --source freezeTBSrc/bug-cmds-freezeTb.txt bugFreezeTb
 
-mk: getminimap2 all
+minimap: getminimap2 all
 	make clean -C minimap2;
 	make -C minimap2;
 
-mkneon: getminimap2 all
+minimapneon: getminimap2 all
 	make clean -C minimap2;
 	ls minimap2 && make arm_neon=1 aarch64=1 -C minimap2 || printf "";
 
@@ -76,7 +73,7 @@ install:
 	cp scripts/graphAmpDepth.r $(PREFIX);
 	cp scripts/freezeTBGui.r $(PREFIX);
 	cp freezeTB $(PREFIX);
-	cp adjCoords $(PREFIX);
+	cp adjCoordsSrc/adjCoords "$(PREFIX)"
 	mkdir $(dbPREFIX)/freezeTBFiles || printf "";
 	cp freezeTBFiles/* $(dbPREFIX)/freezeTBFiles/;
 	chmod -R a+x $(dbPREFIX)/freezeTBFiles;
@@ -86,12 +83,89 @@ install:
 	chmod a+rx $(PREFIX)/freezeTBGui.r;
 	chmod a+rx $(PREFIX)/graphAmpDepth.r;
 	Rscript scripts/rDepends.r || printf "R is not on system\n";
-	ls minimap2 1>/dev/null && sudo cp minimap2/minimap2.1 $(MANPREFIX) || printf "";
 	ls minimap2 1>/dev/null && sudo cp minimap2/minimap2 $(PREFIX)/minimap2 || printf "";
 	ls minimap2 1>/dev/null && sudo chmod a+x $(PREFIX)/minimap2 || printf "";
 	ls minimap2 1>/dev/null && make clean -C minimap2 || printf "";
+	ls minimap2 1>/dev/null && sudo cp minimap2/minimap2.1 $(MANPREFIX) || printf "";
 
-# Currently nothing to clean up
+# commands for installing the modules
+
+modules:
+	make mac MACCFLAGS="$(CFLAGS)" -C adjCoordsSrc
+	make mac MACCFLAGS="$(CFLAGS)" -C ampDepthSource
+	make mac MACCFLAGS="$(CFLAGS)" -C cigToEqxCig
+	make mac MACCFLAGS="$(CFLAGS)" -C filtSamSource
+	make mac MACCFLAGS="$(CFLAGS)" -C primMaskSrc
+	make mac MACCFLAGS="$(CFLAGS)" -C tbAmrSource
+	make mac MACCFLAGS="$(CFLAGS)" -C tbAmrSource/swapDbRefSrc
+	make mac MACCFLAGS="$(CFLAGS)" -C tbAmrSource/cnvt_whoToTbAmr_src
+	make mac MACCFLAGS="$(CFLAGS)" -C tbConSource
+	make mac MACCFLAGS="$(CFLAGS)" -C tbMiruSource
+	make mac MACCFLAGS="$(CFLAGS)" -C tbMiruSource/mkMiruTbl
+	make MACCFLAGS="$(CFLAGS)" -C tbSpoligoSource
+
+staticmodules:
+	make CFLAGS="$(staticCFLAGS)" -C adjCoordsSrc
+	make CFLAGS="$(staticCFLAGS)" -C ampDepthSource
+	make CFLAGS="$(staticCFLAGS)" -C cigToEqxCig
+	make CFLAGS="$(staticCFLAGS)" -C filtSamSource
+	make CFLAGS="$(staticCFLAGS)" -C primMaskSrc
+	make CFLAGS="$(staticCFLAGS)" -C tbAmrSource
+	make CFLAGS="$(staticCFLAGS)" -C tbAmrSource/swapDbRefSrc
+	make CFLAGS="$(staticCFLAGS)" -C tbAmrSource/cnvt_whoToTbAmr_src
+	make CFLAGS="$(staticCFLAGS)" -C tbConSource
+	make CFLAGS="$(staticCFLAGS)" -C tbMiruSource
+	make CFLAGS="$(staticCFLAGS)" -C tbMiruSource/mkMiruTbl
+	make static CFLAGS="$(staticCFLAGS)" -C tbSpoligoSource
+
+
+moduleinstall:
+	cp scripts/catPrimers.sh "$(PREFIX)"
+	cp tbMiruSource/getHitMiruTbl.awk "$(PREFIX)"
+	cp tbMiruSource/getPercMiruTbl.awk "$(PREFIX)"
+	cp adjCoordsSrc/adjCoords "$(PREFIX)"
+	cp ampDepthSource/ampDepth "$(PREFIX)"
+	cp cigToEqxCig/cigToEqxCig "$(PREFIX)"
+	cp filtSamSource/filtsam "$(PREFIX)"
+	cp primMaskSrc/primMask "$(PREFIX)"
+	cp tbAmrSource/tbAmr "$(PREFIX)"
+	cp tbAmrSource/swapDbRefSrc/swapDbRef "$(PREFIX)"
+	cp tbAmrSource/cnvt_whoToTbAmr_src/whoToTbAmr "$(PREFIX)"
+	cp tbConSource/tbCon "$(PREFIX)"
+	cp tbMiruSource/tbMiru "$(PREFIX)"
+	cp tbMiruSource/mkMiruTbl/mkMiruTbl "$(PREFIX)"
+	cp tbSpoligoSource/tbSpoligo "$(PREFIX)"
+	chmod a+x "$(PREFIX)/scripts/catPrimers.sh
+	chmod a+x "$(PREFIX)/scripts/getMiruHitTbl.awk
+	chmod a+x "$(PREFIX)/scripts/getPercMiruTbl.awk
+	chmod a+x "$(PREFIX)/adjCoords"
+	chmod a+x "$(PREFIX)/ampDepth"
+	chmod a+x "$(PREFIX)/cigToEqxCig"
+	chmod a+x "$(PREFIX)/filtsam"
+	chmod a+x "$(PREFIX)/primMask"
+	chmod a+x "$(PREFIX)/tbAmr"
+	chmod a+x "$(PREFIX)/swapDbRef"
+	chmod a+x "$(PREFIX)/whoToTbAmr"
+	chmod a+x "$(PREFIX)/tbCon"
+	chmod a+x "$(PREFIX)/tbMiru"
+	chmod a+x "$(PREFIX)/mkMiruTbl"
+	chmod a+x "$(PREFIX)/tbSpoligo"
+
+# clean up all the binarries and minimap2s source files
 clean:
 	rm bugFreezeTb || printf "";
 	rm -r -f minimap2 || printf "";
+	rm freezeTB || printf "";
+	rm adjCoords || printf "";
+	rm adjCoordsSrc/adjCoords || printf "";
+	rm ampDepthSource/ampDepth || printf "";
+	rm cigToEqxCig/cigToEqxCig || printf "";
+	rm filtSamSource/filtsam || printf "";
+	rm primMaskSrc/primMask || printf "";
+	rm tbAmrSource/tbAmr || printf "";
+	rm tbAmrSource/swapDbRefSrc/swapDbRef || printf "";
+	rm tbAmrSource/cnvt_whoToTbAmr_src/whoToTbAmr || printf "";
+	rm tbConSource/tbCon || printf "";
+	rm tbMiruSource/tbMiru || printf "";
+	rm tbMiruSource/mkMiruTbl/mkMiruTbl || printf "";
+	rm tbSpoligoSource/tbSpoligo || printf "";

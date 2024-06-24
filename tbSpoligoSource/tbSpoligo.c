@@ -54,7 +54,7 @@
 !   o .h #include "../generalLib/base10StrToNum.h"
 !   o .h #include "../generalLib/numToStr.h"
 !   o .h #include "../generalLib/genMath.h"
-!   o .h #include "../generalLib/ntToBit.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -123,7 +123,6 @@ main(
       /*consensus fragment mode*/
 
    uint numSupReadsUI = 0; /*number reads with an spacer*/
-   schar *idStr = 0; /*for printing id in fragment mode*/
 
    float minPercScoreF = def_minPercScore_tbSpoligoWater;
 
@@ -556,7 +555,7 @@ main(
          if(seqTypeFlagSC == def_fqFile_tbSpoligo)
             errSC= (schar) readFqSeq(inFILE, &seqStackST);
          else
-            errSC= (schar) readFqSeq(inFILE, &seqStackST);
+            errSC= (schar) readFaSeq(inFILE, &seqStackST);
       } /*Loop: Check read read for spoligotypes*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\

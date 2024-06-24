@@ -75,7 +75,8 @@
 #include "base10StrToNum.h"
 #include "ulCpStr.h"
 #include "numToStr.h"
-#include "ntToBit.h" /*Lookup table for anonymous checks*/
+#include "ntToFiveBit.h"
+   /*look up table to see if have anonymous bases*/
 
 /*-------------------------------------------------------\
 | Fun02: initSamEntry

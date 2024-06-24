@@ -51,6 +51,7 @@
 ! Hidden depenencies
 !   o .h #include "../generalLib/base10StrToNum.h"
 !   o .h #include "../generalLib/numToStr.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

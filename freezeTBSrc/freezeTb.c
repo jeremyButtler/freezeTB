@@ -96,6 +96,7 @@
 !   o .c #include "../memwater/memwater.h"
 !   o .h #include "../memwater/alnSeqDefaults.h"
 !   o .h #include "../generalLib/genMath.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

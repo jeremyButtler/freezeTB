@@ -53,7 +53,7 @@
 !   - .h #include "../../generalLib/base10StrToNum.h"
 !   - .h #include "../../generalLib/ulCpStr.h"
 !   - .h #include "../../generalLib/numToStr.h"
-!   - .h #include "../../generalLib/ntToBit.h"
+!   - .h #include "../../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

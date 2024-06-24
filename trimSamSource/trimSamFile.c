@@ -44,16 +44,15 @@
 
 #include "trimSam-version.h" /*.h file only*/
 
-/*Hidden
-   - with .c files
-     - #include "../generalLib/samEntryStruct.h"
-   - .h files only
-     - #include "../generalLib/ulCpStr.h"
-     - #include "../generalLib/numToStr.h"
-     - #include "../generalLib/base10StrToNum.h"
-     - #include "../generalLib/dataTypeShortHand.h"
-*/
-
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden libraries:
+!   - .c #include "../generalLib/samEntryStruct.h"
+!   - #include "../generalLib/ulCpStr.h"
+!   - #include "../generalLib/numToStr.h"
+!   - #include "../generalLib/base10StrToNum.h"
+!   - #include "../generalLib/dataTypeShortHand.h"
+!   - #include "../generalLib/ntToFiveBit.h"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*---------------------------------------------------------------------\
 | Output: Modifies: Each input variable to hold user input

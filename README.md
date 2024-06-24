@@ -222,6 +222,13 @@ I have made the programs in freezeTb to be modular. This
   to do `make mac` on anything that is not freezeTB. All
   of these programs take sam files as inputs.
 
+You can build all the side programs with `make modules` or
+  for static builds do `make staticmodules`. You can then
+  install the modules with `make moduleinstall`. This will
+  install all the listed modules and other less usefull
+  programs and scripts. You can clean up the binaries
+  afterwards with `make clean`.
+
 List of modules:
 
 - ampDepth: Makes the read depth tsv's that can be

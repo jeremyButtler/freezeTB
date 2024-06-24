@@ -79,7 +79,20 @@ binSearchNumeric(\
    } /*Loop: Search for the querys index*/\
    \
    /*See if the query was found*/\
-   midMacSI |= ( -((long) (midMacSI >= (lenAryUI))) );\
+   if(midMacSI < lenAryUI) \
+   { /*If: the lineage may have been found*/ \
+      midMacSI |= \
+         (signed int) \
+         -( \
+               (qrySI) \
+            != (spoligoSTAryPtr)[midMacSI].codeUL \
+          ); \
+      /*goes to -1 if the codes are not equal*/ \
+   } /*If: the lineage may have been found*/ \
+   \
+   else \
+      midMacSI = -1; /*query not found*/ \
+   \
    midMacSI;\
 }) /*binSearchNumeric*/
 
@@ -125,14 +138,15 @@ binSearchRange(\
         break; /*Found the query*/\
    } /*Loop: Search for the querys index*/\
    \
+   /*See if the query was found*/ \
+   midMacSI |= ( -((long) (midMacSI >= (lenAryUI))) ); \
+   \
    /*Find the nearest value still in the range*/\
    while( \
          midMacSI > 0 \
       && (numAryPtr)[midMacSI - 1] >= (startSI) \
    ) --midMacSI; \
    \
-   /*See if the query was found*/ \
-   midMacSI |= ( -((long) (midMacSI >= (lenAryUI))) ); \
    midMacSI; \
 }) /*binSearchRange*/
 

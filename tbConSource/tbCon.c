@@ -35,6 +35,7 @@
 ! Hidden files
 !   - .h #include "../generalLib/numToStr.h"
 !   - .h #include "../generalLib/genMath.h"
+!   - .h #include "../generalLib/ntToFiveBit.h"
 !   - .h #include "tbCon-version.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -248,7 +249,6 @@ int main(
               outFileStr
           );
 
-          fclose(samFILE);
           exit(-1);
        } /*If: I could not open the out file*/
     } /*Else: The user provided a out file*/
@@ -295,7 +295,7 @@ int main(
                 ); /*Let user know the problem*/
 
                 if(samFILE != stdin) fclose(samFILE);
-                if(outFILE != stdout) fclose(samFILE);
+                if(outFILE != stdout) fclose(outFILE);
 
                 freeSamEntryStack(&samST);
                 free(buffStr);
@@ -365,8 +365,17 @@ int main(
        if(errS & def_tbCon_Memory_Err)
        { /*If: I had a memory error*/
           free(buffStr);
-          fclose(samFILE);
-          fclose(outFILE);
+
+          if(samFILE != stdin)
+             fclose(samFILE);
+
+          samFILE = 0;
+
+          if(outFILE != stdout)
+             fclose(outFILE);
+
+          outFILE = 0;
+
           freeSamEntryStack(&samST);
           freeConBaseAry(&conBaseAryST, lenRefUI);
 
@@ -385,7 +394,11 @@ int main(
    } /*Loop: Read in the sam file/build consensus*/
 
    freeSamEntryStack(&samST);
-   fclose(samFILE);
+
+   if(samFILE != stdin)
+      fclose(samFILE);
+
+   samFILE = 0;
 
    /*****************************************************\
    * Main Sec-04 Sub-02:
@@ -505,8 +518,11 @@ int main(
         fprintf(outFILE, "\n");
    } /*If: the ouput file was stdout*/
 
-   else if(! cStrEql(outFileStr, tsvFileStr, '\0'))
-      fprintf(outFILE, "\n");
+   else if(
+         tsvFileStr
+      &&
+         ! cStrEql(outFileStr, tsvFileStr, '\0')
+   ) fprintf(outFILE, "\n"); /*out and tsv file are same*/
 
    /*Print the consensuses*/
    samSTAry =
@@ -545,7 +561,11 @@ int main(
    lenBuffUL = 0;
 
    free(samSTAry);
-   fclose(outFILE);
+
+   if(outFILE != stdout)
+      fclose(outFILE);
+
+   outFILE = 0;
 
     exit(0);
 } /*main*/

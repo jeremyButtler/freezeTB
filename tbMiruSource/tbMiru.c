@@ -51,12 +51,12 @@
 #include "../generalLib/base10StrToNum.h"
 #include "tbMiru-version.h"
 
-/*Hidden dependencies:
-  - have .c files
-  - no .c files
-    o #include "../generalLib/numToStr.h"
-    o #include "../generalLib/genMath.h"
-*/
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden libraries:
+!   o .h #include "../generalLib/numToStr.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
+!   o .h #include "../generalLib/genMath.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define def_pHelp_tbMiru 1
 #define def_pVersion_tbMiru 2

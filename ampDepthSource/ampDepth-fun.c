@@ -40,7 +40,6 @@
 /*No .c files*/
 #include "../generalLib/genMath.h"
 
-
 /*-------------------------------------------------------\
 | Fun-02: pHeaderAmpDepth
 |   - Prints the header for an ampDepth tsv file

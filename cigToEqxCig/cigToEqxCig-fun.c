@@ -46,7 +46,7 @@
 /*No .c files (.h only)*/
 #include "../generalLib/dataTypeShortHand.h"
 #include "../generalLib/ulCpStr.h"
-#include "../generalLib/ntToBit.h" /*look up tables*/
+#include "../generalLib/ntToFiveBit.h" /*look up tables*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:

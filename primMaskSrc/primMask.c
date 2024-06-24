@@ -41,6 +41,7 @@
 !   o .h #include "../generalLIb/numToStr.h"
 !   o .h #include "../generalLib/gen-shellSort.h"
 !   o .h #include "../generalLib/ulCpStr.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

@@ -61,6 +61,7 @@
 
 #include <stdio.h>
 
+/*.h files only*/
 #include "dataTypeShortHand.h"
 #include "base10StrToNum.h"
 #include "genMath.h"

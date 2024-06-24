@@ -25,6 +25,15 @@
 #define def_month_tbSpoligo 6
 #define def_day_tbSpoligo 10
 
+/*
+` 2024-06-13:
+`   - fixed an database error were unkown entries were
+`     assigned the closet barcode (my binary search did
+`     not check to see if final outputs were misses)
+` 2024-06-10:
+`   - added in the kmerfind search method.
+*/
+
 /*-------------------------------------------------------\
 | Fun-01: pVersion_tbSpoligo
 |   - Prints out the version number

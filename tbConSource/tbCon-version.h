@@ -4,8 +4,14 @@
 ########################################################*/
 
 #define def_tbCon_input_year 2024
-#define def_tbCon_input_month 5
-#define def_tbCon_input_day 14
+#define def_tbCon_input_month 6
+#define def_tbCon_input_day 13
+
+/*
+`  2024-06-13:
+`    Fixed the segfault when using -out file
+`      but not -out-tsv
+*/
 
 /*Not needed, but might as well add the license*/
 /*=======================================================\

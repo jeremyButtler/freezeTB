@@ -80,15 +80,15 @@
 
 /*Only .h files*/
 #include "../generalLib/dataTypeShortHand.h"
-#include "../generalLib/codonTbl.h"
 #include "../generalLib/ulCpStr.h"
+#include "../generalLib/codonTbl.h"
 
-/*Hidden files
-`  - has an .c file
-`  - has .h file only
-`    o #include "../generalLib/numToStr.h"
-`    o #include "../generalLib/base10StrToNum.h"
-*/
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden dependencies
+!   o .h #include "../generalLib/numToStr.h"
+!   o .h #include "../generalLib/base10StrToNum.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
 | Fun-02: freeAmrHit

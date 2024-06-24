@@ -116,10 +116,10 @@
 #include "../generalLib/numToStr.h"
 #include "../generalLib/genMath.h"
 
-/*Hidden libraries
-  - has a .c files
-  - No .c file (.h only)
-*/
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden libraries:
+!   o .h #include "../generalLib/ntToFiveBit.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
 | Fun-04: makeMiruAmp

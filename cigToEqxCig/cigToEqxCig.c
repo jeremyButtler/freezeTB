@@ -46,7 +46,7 @@
 ! Hidden libraries:
 !   o .h #include "../generalLib/base10StrToNum.h"
 !   o .h #include "../generalLib/numToStr.h"
-!   o .h #include "../generalLib/ntToBit.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define def_nAsSnp 0 /*1: treat anoymous bases as snps*/

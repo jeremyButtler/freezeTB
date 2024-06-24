@@ -396,7 +396,20 @@ findSpoligoBarcode(\
    } /*Loop: Search for the query lineage*/\
    \
    /*See if the lineage was found*/\
-   midMacSI |= ( -((long) (midMacSI >= (lenAryUI))) );\
+   if(midMacSI < lenAryUI) \
+   { /*If: the lineage may have been found*/ \
+      midMacSI |= \
+         (signed int) \
+         -( \
+               (codeUL) \
+            != (spoligoSTAryPtr)[midMacSI].codeUL \
+          ); \
+      /*goes to -1 if the codes are not equal*/ \
+   } /*If: the lineage may have been found*/ \
+   \
+   else \
+      midMacSI = -1; /*lineage not found*/ \
+   \
    midMacSI;\
 }) /*findSpoligoBarcode*/
 

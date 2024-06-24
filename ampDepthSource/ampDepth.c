@@ -50,6 +50,8 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden dependencies:
 !   o .h #include "../generalLib/numToStr.h"
+!   o .h #include "../generalLib/ntToFiveBit.h"
+!   o .h #include "../generalLib/numToStr.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define defMinDepth 20
