@@ -257,7 +257,6 @@ When at Select Packages menu for Cygwin install:
     "pending list"
   - change "Skip" to make verison number with dropdown
     menu (choose most recent non-testing version)
-  - do not install gcc (it can not statically link)
 - mingw64-x86_64-gcc-core
 - mingw64-x86_64-zlib
 
@@ -280,7 +279,9 @@ Build minimap2
 Copy minimap2 to your freezeTB install location or into
   your PATH.
 
-`cp minimap2.exe C:/Users/<user name>/Downloads/freezeTB/winBin`
+`copy minimap2.exe C:/Users/<user name>/Downloads/freezeTB/winBin`
+
+If you get an error, then copy minimap2 in a file browser.
 
 
 # Run
