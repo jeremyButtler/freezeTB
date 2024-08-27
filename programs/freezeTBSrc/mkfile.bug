@@ -1,0 +1,123 @@
+LD=cc
+CC=cc
+CFLAGS= -O0 -std=c89 -Wall -Wextra
+NAME=freezeTB
+genLib=../genLib
+genAln=../genAln
+ampDepth=../ampDepthSrc
+maskPrim=../maskPrimSrc
+tbMiru=../tbMiruSrc
+tbCon=../tbConSrc
+tbAmr=../tbAmrSrc
+tbSpol=../tbSpolSrc
+O=.o.bug
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/genMath$O \
+   $(genLib)/shellSort$O \
+   $(genLib)/codonTbl$O \
+   $(genLib)/geneCoord$O \
+   $(genLib)/seqST$O \
+   $(genLib)/samEntry$O \
+   $(genLib)/trimSam$O \
+   $(genAln)/indexToCoord$O \
+   $(genAln)/alnSet$O \
+   $(genAln)/kmerFind$O \
+   $(genAln)/memwater$O \
+   $(ampDepth)/ampDepth$O \
+   $(maskPrim)/maskPrim$O \
+   $(tbMiru)/miruTbl$O \
+   $(tbCon)/tbCon$O \
+   $(tbAmr)/checkAmr$O \
+   $(tbAmr)/amrST$O \
+   $(tbAmr)/drugAry$O \
+   $(tbSpol)/spolST$O \
+   $(tbSpol)/spolFind$O
+
+all: freezeTB$O $(objFiles)
+	$(LD) -o $(NAME) $(CFLAGS) freezeTB$O freezeTBPaths$O $(objFiles)
+
+freezeTB$O: freezeTB.c freezeTBPaths$O $(objFiles)
+	$(CC) -o freezeTB$O -c $(CFLAGS) freezeTB.c
+
+freezeTBPaths$O: freezeTBPaths.c freezeTBPaths.h freezeTBDefs.h $(genLib)/ulCp$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o freezeTBPaths$O -c $(CFLAGS) freezeTBPaths.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/genMath$O: $(genLib)/genMath.c $(genLib)/genMath.h
+	$(CC) -o $(genLib)/genMath$O -c $(CFLAGS) $(genLib)/genMath.c
+
+$(genLib)/shellSort$O: $(genLib)/shellSort.c $(genLib)/shellSort.h
+	$(CC) -o $(genLib)/shellSort$O -c $(CFLAGS) $(genLib)/shellSort.c
+
+$(genLib)/codonTbl$O: $(genLib)/codonTbl.c $(genLib)/codonTbl.h $(genLib)/ntTo2Bit.h $(genLib)/revNtTo2Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/codonTbl$O -c $(CFLAGS) $(genLib)/codonTbl.c
+
+$(genLib)/seqST$O: $(genLib)/seqST.c $(genLib)/seqST.h $(genLib)/ulCp$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/seqST$O -c $(CFLAGS) $(genLib)/seqST.c
+
+$(genLib)/geneCoord$O: $(genLib)/geneCoord.c $(genLib)/geneCoord.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/charCp$O $(genLib)/genMath.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/geneCoord$O -c $(CFLAGS) $(genLib)/geneCoord.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+$(genLib)/trimSam$O: $(genLib)/trimSam.c $(genLib)/trimSam.h $(genLib)/samEntry$O
+	$(CC) -o $(genLib)/trimSam$O -c $(CFLAGS) $(genLib)/trimSam.c
+
+$(genAln)/indexToCoord$O: $(genAln)/indexToCoord.c $(genAln)/indexToCoord.h
+	$(CC) -o $(genAln)/indexToCoord$O -c $(CFLAGS) $(genAln)/indexToCoord.c
+
+$(genAln)/alnSet$O: $(genAln)/alnSet.c $(genAln)/alnSet.h $(genAln)/alnDefs.h $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genAln)/alnSet$O -c $(CFLAGS) $(genAln)/alnSet.c
+
+$(genAln)/memwater$O: $(genAln)/memwater.c $(genAln)/memwater.h $(genAln)/alnSet$O $(genAln)/indexToCoord$O $(genLib)/seqST$O $(genLib)/genMath.h
+	$(CC) -o $(genAln)/memwater$O -c $(CFLAGS) $(genAln)/memwater.c
+
+$(genAln)/kmerFind$O: $(genAln)/kmerFind.c $(genAln)/kmerFind.h $(genAln)/memwater$O $(genLib)/shellSort$O 
+	$(CC) -o $(genAln)/kmerFind$O -c $(CFLAGS) $(genAln)/kmerFind.c
+
+$(ampDepth)/ampDepth$O: $(ampDepth)/ampDepth.c $(ampDepth)/ampDepth.h $(genLib)/samEntry$O $(genLib)/geneCoord$O $(genLib)/genMath.h
+	$(CC) -o $(ampDepth)/ampDepth$O -c $(CFLAGS) $(ampDepth)/ampDepth.c
+
+$(maskPrim)/maskPrim$O: $(maskPrim)/maskPrim.c $(maskPrim)/maskPrim.h $(genLib)/samEntry$O $(genLib)/shellSort$O
+	$(CC) -o $(maskPrim)/maskPrim$O -c $(CFLAGS) $(maskPrim)/maskPrim.c
+
+$(tbMiru)/miruTbl$O: $(tbMiru)/miruTbl.c $(tbMiru)/miruTbl.h $(tbMiru)/tbMiruDefs.h $(genLib)/samEntry$O $(genLib)/charCp$O $(genLib)/genMath$O
+	$(CC) -o $(tbMiru)/miruTbl$O -c $(CFLAGS) $(tbMiru)/miruTbl.c
+
+$(tbCon)/tbCon$O: $(tbCon)/tbCon.c $(tbCon)/tbCon.h $(tbCon)/tbConDefs.h $(genLib)/samEntry$O $(genLib)/genMath$O
+	$(CC) -o $(tbCon)/tbCon$O -c $(CFLAGS) $(tbCon)/tbCon.c
+
+$(tbAmr)/drugAry$O: $(tbAmr)/drugAry.c $(tbAmr)/drugAry.h
+	$(CC) -o $(tbAmr)/drugAry$O -c $(CFLAGS) $(tbAmr)/drugAry.c
+
+$(tbAmr)/amrST$O: $(tbAmr)/amrST.c $(tbAmr)/amrST.h $(tbAmr)/drugAry$O $(genLib)/ulCp$O $(genLib)/charCp$O $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(tbAmr)/amrST$O -c $(CFLAGS) $(tbAmr)/amrST.c
+
+$(tbAmr)/checkAmr$O: $(tbAmr)/checkAmr.c $(tbAmr)/checkAmr.h $(tbAmr)/amrST$O $(genLib)/samEntry$O $(genLib)/codonTbl$O $(genLib)/genMath$O
+	$(CC) -o $(tbAmr)/checkAmr$O -c $(CFLAGS) $(tbAmr)/checkAmr.c
+
+$(tbSpol)/spolFind$O: $(tbSpol)/spolFind.c $(tbSpol)/spolFind.h $(tbSpol)/tbSpolDefs.h $(genLib)/samEntry$O $(genLib)/seqST$O $(genAln)/kmerFind$O
+	$(CC) -o $(tbSpol)/spolFind$O -c $(CFLAGS) $(tbSpol)/spolFind.c
+
+$(tbSpol)/spolST$O: $(tbSpol)/spolST.c $(tbSpol)/spolST.h  $(tbSpol)/tbSpolDefs.h $(genLib)/ulCp$O $(genLib)/charCp$O $(genLib)/numToStr$O $(genLib)/genMath.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(tbSpol)/spolST$O -c $(CFLAGS) $(tbSpol)/spolST.c
+
+clean:
+	rm $(objFiles) freezeTB$O freezeTBPaths$O;

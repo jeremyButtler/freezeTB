@@ -1,0 +1,50 @@
+LD=cc
+CC=cc
+CFLAGS= -O3 -static -std=c89 -Wall -Wextra
+NAME=cigToEqx
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+O=.o.static
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/seqST$O \
+   $(genLib)/samEntry$O
+
+all: cigToEqxMain$O $(objFiles)
+	$(LD) -o $(NAME) $(CFLAGS) cigToEqxMain$O cigToEqx$O $(objFiles)
+
+cigToEqxMain$O: cigToEqxMain.c cigToEqx$O $(genLib)/seqST$O $(genLib)/charCp$O
+	$(CC) -o cigToEqxMain$O -c $(CFLAGS) cigToEqxMain.c
+
+cigToEqx$O: cigToEqx.c cigToEqx.h $(genLib)/ulCp$O $(genLib)/samEntry$O
+	$(CC) -o cigToEqx$O -c $(CFLAGS) cigToEqx.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/seqST$O: $(genLib)/seqST.c $(genLib)/seqST.h $(genLib)/ulCp$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/seqST$O -c $(CFLAGS) $(genLib)/seqST.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+install:
+	mv $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
+clean:
+	rm $(objFiles) cigToEqxMain$O cigToEqx$O;

@@ -1,0 +1,54 @@
+LD=link
+CC=cl
+CFLAGS= /O2 /Ot /Za /Tc
+NAME=swapDbRef
+PREFIX="C:\Program Files\freezeTB"
+genLib=..\genLib
+genAln=..\genAln
+tbAmr=..\tbAmrSrc
+O=.o.win
+
+objFiles=\
+   $(genLib)\base10str$O \
+   $(genLib)\ulCp$O \
+   $(genLib)\charCp$O \
+   $(genLib)\numToStr$O \
+   $(genLib)\samEntry$O \
+   $(tbAmr)\amrST$O \
+   $(tbAmr)\drugAry$O
+
+all: swapDbRef$O $(objFiles)
+	$(LD) /out:$(NAME).exe swapDbRef$O refSwap$O $(objFiles)
+
+swapDbRef$O: swapDbRef.c refSwap$O $(genLib)\charCp$O
+	$(CC) /Fo:swapDbRef$O /c $(CFLAGS) swapDbRef.c
+
+refSwap$O: refSwap.c refSwap.h $(genLib)\samEntry$O $(tbAmr)\amrST$O
+	$(CC) /Fo:refSwap$O /c $(CFLAGS) refSwap.c
+
+$(genLib)\base10str$O: $(genLib)\base10str.c $(genLib)\base10str.h
+	$(CC) /Fo:$(genLib)\base10str$O /c $(CFLAGS) $(genLib)\base10str.c
+
+$(genLib)\charCp$O: $(genLib)\charCp.c $(genLib)\charCp.h
+	$(CC) /Fo:$(genLib)\charCp$O /c $(CFLAGS) $(genLib)\charCp.c
+
+$(genLib)\ulCp$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
+	$(CC) /Fo:$(genLib)\ulCp$O /c $(CFLAGS) $(genLib)\ulCp.c
+
+$(genLib)\numToStr$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
+	$(CC) /Fo:$(genLib)\numToStr$O /c $(CFLAGS) $(genLib)\numToStr.c
+
+$(genLib)\samEntry$O: $(genLib)\samEntry.c $(genLib)\samEntry.h $(genLib)\ulCp$O $(genLib)\base10str$O $(genLib)\numToStr$O $(genLib)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genLib)\samEntry$O /c $(CFLAGS) $(genLib)\samEntry.c
+
+$(tbAmr)\drugAry$O: $(tbAmr)\drugAry.c $(tbAmr)\drugAry.h
+	$(CC) /Fo:$(tbAmr)\drugAry$O /c $(CFLAGS) $(tbAmr)\drugAry.c
+
+$(tbAmr)\amrST$O: $(tbAmr)\amrST.c $(tbAmr)\amrST.h $(tbAmr)\drugAry$O $(genLib)\ulCp$O $(genLib)\charCp$O $(genLib)\base10str$O $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(tbAmr)\amrST$O /c $(CFLAGS) $(tbAmr)\amrST.c
+
+install:
+	move $(NAME).exe $(PREFIX)
+
+clean:
+	del $(objFiles) swapDbRef$O refSwap$O;

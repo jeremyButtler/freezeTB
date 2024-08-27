@@ -1,0 +1,96 @@
+LD=link
+CC=cl
+CFLAGS= /O2 /Ot /Za /Tc
+PREFIX="%PROGRAMFILES%\freezeTB"
+ext=win
+O=.o.$(ext)
+
+all:
+	cd freezeTBSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\adjCoordsSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\alnMemwaterSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\alnwaterSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\ampDepthSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\cigToEqxSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\filtsamSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\maskPrimSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\mkMiruTblSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\samToAlnSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\swapDbRefSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\tbAmrSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\tbConSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\tbMiruSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\tbSpolSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\trimSamSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\whoToAmrSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..
+
+install: install-support
+	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
+	move adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+
+install-modules: install-support
+	move ampDepthSrc\ampDepth.exe $(PREFIX)
+	move maskPrimSrc\maskPrim.exe $(PREFIX)
+	move tbAmrSrc\tbAmr.exe $(PREFIX)
+	move tbConSrc\tbCon.exe $(PREFIX)
+	move tbMiruSrc\tbMiru.exe $(PREFIX)
+	move tbSpolSrc\tbSpol.exe $(PREFIX)
+	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
+	move adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+
+install-all: install-support
+	move alnMemwaterSrc\alnMemwater.exe $(PREFIX)
+	move alnwaterSrc\alnwater.exe $(PREFIX)
+	move cigToEqxSrc\cigToEqx.exe $(PREFIX)
+	move filtsamSrc\filtsam.exe $(PREFIX)
+	move mkMiruTblSrc\mkMiruTbl.exe $(PREFIX)
+	move samToAlnSrc\samToAln.exe $(PREFIX)
+	move swapDbRefSrc\swapDbRef.exe $(PREFIX)
+	move ampDepthSrc\ampDepth.exe $(PREFIX)
+	move maskPrimSrc\maskPrim.exe $(PREFIX)
+	move tbAmrSrc\tbAmr.exe $(PREFIX)
+	move tbConSrc\tbCon.exe $(PREFIX)
+	move tbMiruSrc\tbMiru.exe $(PREFIX)
+	move tbSpolSrc\tbSpol.exe $(PREFIX)
+	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
+	move adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+
+clean:
+	del \
+		adjCoordsSrc\*.o.$(ext) \
+		alnMemwaterSrc\*.o.$(ext) \
+		alnwaterSrc\*.o.$(ext) \
+		ampDepthSrc\*.o.$(ext) \
+		cigToEqxSrc\*.o.$(ext) \
+		filtsamSrc\*.o.$(ext) \
+		freezeTBSrc\*.o.$(ext) \
+		maskPrimSrc\*.o.$(ext) \
+		mkMiruTblSrc\*.o.$(ext) \
+		samToAlnSrc\*.o.$(ext) \
+		swapDbRefSrc\*.o.$(ext) \
+		tbAmrSrc\*.o.$(ext) \
+		tbConSrc\*.o.$(ext) \
+		tbMiruSrc\*.o.$(ext) \
+		tbSpolSrc\*.o.$(ext) \
+		trimSamSrc\*.o.$(ext) \
+		whoToAmrSrc\*.o.$(ext) \
+		genAln\*.o.$(ext) \
+		genLib\*.o.$(ext)

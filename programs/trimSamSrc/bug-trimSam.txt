@@ -1,0 +1,3 @@
+b trimSamMain.c:545
+b trimSam.c:686
+r -sam $HOME/files/testing/baylor-BC01.sam

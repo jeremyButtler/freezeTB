@@ -1,3 +1,0 @@
-b ../generalLib/trimSam.h:138
-b ../generalLib/trimSam.h:246
-r -sam ../generalLib/ontPrimReads-map.sam

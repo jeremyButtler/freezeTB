@@ -1,0 +1,64 @@
+</$objtype/mkfile
+
+CFLAGS= -w -DPLAN9
+NAME=whoToAmr
+PREFIX=
+genLib=../genLib
+tbAmr=../tbAmrSrc
+
+objFiles=\
+   $genLib/base10str$O \
+   $genLib/ulCp$O \
+   $genLib/charCp$O \
+   $genLib/numToStr$O \
+   $genLib/genMath$O \
+   $genLib/codonTbl$O \
+   $genLib/samEntry$O \
+   $tbAmr/drugAry$O \
+   $tbAmr/amrST$O
+
+all: mainWhoToAmr$O $objFiles
+	$LD -o $NAME $CFLAGS mainWhoToAmr$O whoToAmr$O genIndice$O $objFiles
+
+mainWhoToAmr$O: mainWhoToAmr.c whoToAmr$O
+	$CC $CFLAGS mainWhoToAmr.c
+
+whoToAmr$O: whoToAmr.c whoToAmr.h genIndice$O $tbAmr/amrST$O $genLib/codonTbl$O $genLib/genMath$O
+	$CC $CFLAGS whoToAmr.c
+
+genIndice$O: genIndice.c genIndice.h $genLib/charCp$O $genLib/base10str$O $genLib/dataTypeShortHand.h
+	$CC $CFLAGS genIndice.c
+
+$tbAmr/drugAry$O: $tbAmr/drugAry.c $tbAmr/drugAry.h
+	$CC $CFLAGS $tbAmr/drugAry.c
+
+$tbAmr/amrST$O: $tbAmr/amrST.c $tbAmr/amrST.h $tbAmr/drugAry$O $genLib/ulCp$O $genLib/charCp$O $genLib/base10str$O $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $tbAmr/amrST.c
+
+$genLib/base10str$O: $genLib/base10str.c $genLib/base10str.h
+	$CC $CFLAGS $genLib/base10str.c
+
+$genLib/charCp$O: $genLib/charCp.c $genLib/charCp.h
+	$CC $CFLAGS $genLib/charCp.c
+
+$genLib/ulCp$O: $genLib/ulCp.c $genLib/ulCp.h
+	$CC $CFLAGS $genLib/ulCp.c
+
+$genLib/numToStr$O: $genLib/numToStr.c $genLib/numToStr.h
+	$CC $CFLAGS $genLib/numToStr.c
+
+$genLib/genMath$O: $genLib/genMath.c $genLib/genMath.h
+	$CC $CFLAGS $genLib/genMath.c
+
+$genLib/codonTbl$O: $genLib/codonTbl.c $genLib/codonTbl.h $genLib/ntTo2Bit.h $genLib/revNtTo2Bit.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/codonTbl.c
+
+$genLib/samEntry$O: $genLib/samEntry.c $genLib/samEntry.h $genLib/ulCp$O $genLib/base10str$O $genLib/numToStr$O $genLib/ntTo5Bit.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/samEntry.c
+
+install:
+	mv $NAME $PREFIX
+	chmod a+x $PREFIX/$NAME
+
+clean:
+	rm $objFiles mainWhoToAmr$O whoToAmr$O genIndice$O;

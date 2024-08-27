@@ -1,0 +1,2 @@
+valgrind 2>del-grind.txt --tool=memcheck --track-origins=yes --leak-check=full --keep-debuginfo=yes -s ./ampDepth -sam $HOME/BC02.sam -gene-tbl ../../freezeTBFiles/gene-tbl.tsv > del-amp.sam
+

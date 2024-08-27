@@ -11,103 +11,277 @@ freezeTb is a program that detects AMR resistance in
 Currently freezeTb uses an WHO 2023 catalog that has had
   all grade 3, 4, and 5 variants removed.
 
+freezeTB will probably not give as good of results as
+  TBProfiler, but it is designed to be easier to install
+  and be OS portable.
+
+- Some missing items (not all) from freezeTB
+  - the sample
+  - the sequencer
+  - the lab tech
+  - the bioinformatition
+  - the basecaller
+  - a read mapper
+  - ability to cause mayhem and steal every ones left shoe
+
 # License:
 
-This is under an dual license. The first license is public
-  domain, however, not all companies/countries like public
-  domain. In those cases or any other case were public
-  domain is inconvenient this is under the MIT license.
+freezeTB does include databases from other repositories
+  and complied code (minimap2) from other repositories. In
+  those cases the licensing will be under the owners
+  repository.
+
+- Taken from other sources:
+  - files in freezeTBFiles
+    - amrDb.tsv is the who 2023 catalog (converted)
+    - spoligo-lineages from TBProfiler
+    - NC000962.fa and genes-NC000962.fa were from Genbank
+      - also in benchmark as tbdb.fasta
+    - miruTbl.tsv is the modified MIRU-VNTRU table from
+      MIRUReader (github)
+    - spoligo-spacers.fa were from a spoligotyping program
+      on github (can not remember which one)
+    - mask.tsv and coords.tsv is unique to freezeTB
+  - minimap2 (MIT) binaries from
+    [https://github.com/lh3/minimap2](
+     https://github.com/lh3/minimap2)
+  - luaFilters in slidesAndWriting
+    - [https://github.com/pandoc-ext](
+       https://github.com/pandoc-ext)
+       - pretty-urls, pagebreak, and abstract-section
+    - [https://github.com/pandoc/lua-filters](
+       https://github.com/pandoc/lua-filters)
+
+The stuff unique to freezeTB is under an dual license. The
+  primary license is public domain. However, we know that
+  not all companies/countries like or will even respect
+  the public domain. So, in cases were public domain gets
+  in the way, such as being inconvenient, undesired, or
+  not allowed, freezeTB is under the MIT license.
+
+- Unique to freezeTB:
+  - everything in programs
+  - everything in scripts
+  - some of the clip art in diagarms
+    - the rest is from openclipart.org (public domain)
+  - the terrible guides (guides folder)
+    - these really are not that great and untested
+  - the scripts in benchmark
+  - everything in oldCode
+  - the slidshows and write up in slidesAndWriting
+    - except luaFilters and nbib files
 
 # Requirements 
 
 1. A read mapper that outputs a sam file.
    - Your choice for the command line version 
    - For the GUI you will need minimap2, which can be
-     often installed by your package manager
-     - `sudo apt-get install minimap2` for Ubuntu/Debian
-       - or use `aptitude` to find it
-     - brew (you have to install this) for Mac
-     - source [https://github.com/lh3/minimap2](
-               https://github.com/lh3/minimap2)
-2. R and several R libraries. If you have R, then the
-   make file will detect and then try to install missing R
-   libraries when you install freezeTB.
-   - For command line version this is only needed with
-     the `-graph` option.
-     - ggplot2
-     - svgLite (if you request svgs)
-   - For the GUI version you will need
-     - ggplot2
-     - tcltk (often is in base R) or tcltk2 (has tooltips)
-     - svgLite (Only if you want svgs)
-     - fs (Optional)
+     often installed by your package manager (for Mac
+     you can use homebrew)
+2. R + several R libraries; GUI only; unix run rDepends.r
+   - ggplot2
+   - viridisLite (often installed with ggplot2)
+   - tcltk (base R) or tcltk2 (has tooltips)
+     - note I have had some issues with tcltk not being
+       compiled on Macs. It seems the homebrew install of
+       R works better.
+   - svgLite (Optional; svgs output)
+   - fs (Optional; Unix only)
 
 # Install
 
-The freezeTB install will install freezeTB,
-  graphAmpDepth.r, and everything in freezeTBFiles to the
-  install location. freezeTB is the program you can run,
-  graphAmpDepth.r is the R script to make graphs with, and
-  freezeTBFiles are the databases, such as the WHO
-  catalog, that freezeTb uses for the default files.
+The easy way is to copy the pre-complied binaries to your
+  install locations. If you copy the binaries and scripts
+  to /usr/local/bin in Unix, then make sure to use
+  `chmod a+x` on the copied scripts and programs.
 
-Do not worry if you see errors in the `make install`
-  command about minimap2. These are not errors, but extra
-  commands in case you did the minimap2 install command
-  (`make mk` or for Mac/ARM cpus `mkneon`) instead of
-  just `make`.
+If you already have minimap2, then remove minimap2 from
+  the binaries folder. Your version will likely be more
+  up to date.
 
-## Linux or Mac
+After copying the binaraies copy the freezeTBFiles
+   direcgtory (folder) to you documents directory
+   (command line: `cp -r freezeTBFiles $HOME/Documents`).
 
-```
-git clone https://github.com/jeremybuttler/freezeTb
-cd freezeTb
-make
-sudo make install
-make clean
-```
+## Source install (unix)
 
-or for an static build (Non-Mac)
+Make file names:
+  - mkfile.unix: any unix (Mac/Linux/BSD) OS
+  - mkfile.static: static build for (Linux/BSD)
+
+### Source global install (unix)
 
 ```
-
-git clone https://github.com/jeremybuttler/freezeTb
-cd freezeTb
-make static
-sudo make install
-make clean
+make -f mkfile.unix # or static if not Mac
+sudo make -f mkfile.unix install-all
+make -f mkfile.unix clean
+sudo Rscript rDepends.r
 ```
 
-## More advanced
+You can replace install-all, which installs every program
+  that comes with freezeTB with install if you just want
+  freezeTB, adjCoords, the scripts, and databases. Use
+  install-modules if you want the freezeTB programs +
+  the modules (maskPrim, tbAmr, tbCon, tbSpol, and
+  tbMiru), but not the side programs.
 
-This installs freezeTb, freezeTbGui.r, and graphAmpDepth.r
-  into `/usr/local/bin/`. It also installs the
-  freezeTBFiles folder to `/usr/local/share`.
+### Source: local install
 
-If you are having problems installing try doing a local
-  install.
+You can choose were the database are installed with
+  "DB_PREFIX".
+
+You can choose were the programs and scripts are installed
+  with "PREFIX".
+
+Here is an example of a local install of freezeTB into a
+  directory called local in your home directory. It also
+  installs the database into your documents directory.
 
 ```
-make # or make mk or make mkneon
-make PREFIX=~/local/path/ dbPREFIX=~/Documents/ install
+mkdir "$HOME/local"
+make -f mkfile.unix
+make -f mkfile.unix PREFIX="$HOME/local" DB_PREFIX="$HOME/Documents"
+make -f mkfile.unix clean
+Rscript rDepends.r
 ```
 
-- PREFIX changes the were freezeTB, freezeTBGui.r, and
-  graphAmpDepth.r are installed.
-- dbPREFIX changes were the database is installed.
-  - The only supported locations are `/usr/local/share/`
-    and `~/Documents/`.
-  - You can change these by changing defPathStr (global)
-     and (local path) in freezeTb.c
-     - Header Sec-02: lines 112 to 116. The lines beneath
-       it 119 to 121 have the expected file names.
-     - For the gui, change the values in Header
-       Sec-02 Sub-01 and Header Sec-02 Sub-02 in
-       freezeTbGui.r.
+You may have to set up your path to $HOME/local/. To do
+  this add `export PATH="$PATH:$HOME/local` to your
+  .bashrc file. Otherwise your computer will not know to
+  look in $HOME/local.
+
+## Minimap2
+
+I have some precomplided binaries for minimap2. However,
+  if you want a new version or are using an unsupported
+  OS, you will need to compile minimap2 yourself.
+
+Get minimap2
+  with `git clone https://github.com/lh3/minimap2`. Then
+  move into (change) the minimap2 directory `cd minimap2`.
+
+use `make arm_neon=1 aarch64=1` to compile minimap2 for
+  64 bit ARM cpus (Mac/tablets/raspberry PIs).
+
+use `make CFLAGS="-static"` to compile minimap2 for
+  non-Mac unix OS. You do not need to use
+  `CFLAGS="-static"`, but I do that to make sure minimap2
+  is portable across all linux's with AMD 64 bit cpus.
+
+Windows; see windows install instructions.
 
 ## Windows
 
-I have not tried it. I should, but probably never will.
+### Easy method
+
+Use my pre-complied binaries. Well, unless you want a
+  more complicated install.
+
+Make a freezeTB directory in "C:\Program Files". Then
+  copy all the binaries and scripts into
+  "C:\Program Files\freezeTB". After that copy the
+  freezeTBFiles to your Documents folder (or public
+  Documents ["C:\Public\Documents"]).
+
+Make sure R is installed that the
+  ggplot2 (`install.packages("ggplot2")`)
+  and tcltk2 (`install.packages("tcltk2")`) packages
+  are installed. You can install by installing R studio
+  or from Cran (see Windows from source).
+  
+At this copy the "freezeTBGui.r" script from scripts to
+  were you want run freezeTB. Then open the file in R
+  or Rstudio to run freezeTB. You can also set it is
+  that the `.r` extension is always run by Rscript
+  ("C:\Program Files\R\R-version\bin\Rscript"). That way
+  double clicking freezeTBGui.r launches freezeTB.
+
+### Windows from source
+
+## Install R (GUI dependencies):
+
+1. install R
+   - [https://cran.r-project.org/bin/windows/base/](
+      https://cran.r-project.org/bin/windows/base/)
+   - follow instructions on exe.
+2. Download freezeTB from github into Downloads then
+   extract (right click->extract).
+3. Move into freezeTB->scripts and double click
+   rDepends.r
+   - You may have to install these manually
+     - big is ggplot2 (otherwise no graphs)
+     - also install tcltk2 (nicer gui with tooltips)
+   - select more apps->look for another app on this pc->R->R-version->bin->Rscript
+   - at this point Rscript will run and install the GUI dependencies
+       
+## freezeTB:
+
+Get freezeTB from github and extract it. I saved it to
+  Downloads.
+
+you will need to use the mkfile.win to compile the source
+  code.
+
+1. Open a developer terminal with administrator
+   privlages (for install step)
+   - you can do this by installing visual studio
+   - start menu go to visual studio (folder)->developer
+2. `cd C:\Users\<user name>\Downloads\freezeTB`
+   - or to were you put freezeTB
+   - There my be two freezeTB directories
+3. `nmake /F mkfile.win`
+4. `nmake /F mkfile.win install-all`
+5. `nmake /F mkfile.win clean`
+
+![
+  picture showing how to open developer console
+](windows10devConsole.png)
+
+## Minimap2 (from source)
+
+I include a minimap2.exe compiled binary in winBin.
+  So, you do not need this. However, here are the
+  steps if you want a more recent version of minimap2
+  or if you are on an ARM CPU.
+
+First install Cygwin using the setup-x86_64.exe (is a
+  link):
+
+[https://cygwin.com/install.html](
+  https://cygwin.com/install.html)
+
+When at Select Packages menu for Cygwin install:
+
+- Search for "make" then select the package named make.
+  - make sure you are looking at the "full" and not the
+    "pending list"
+  - change "Skip" to make verison number with dropdown
+    menu (choose most recent non-testing version)
+  - do not install gcc (it can not statically link)
+- mingw64-x86_64-gcc-core
+- mingw64-x86_64-zlib
+
+Download minimap2 to your downloads folder
+
+[https://github.com/lh3/minimap2](
+ https://github.com/lh3/minimap2)
+
+Unzip the minimap2-master folder (right click->extract)
+
+Open a Cygwin terminal (run Cygwin). Then move into
+  minimap2's directory 
+  (`cd c:/Users/<user name>/Downloads/minimap2-master/minimap2-master`).
+  - for me `cd c:/Users/Jeremy/Downloads/minimap2-master/minimap2-master`
+
+Build minimap2
+  with `make CC=x86_64-w64-mingw32-gcc CFLAGS=--static`.
+  You will need --static here to avoid needing .dll files.
+
+Copy minimap2 to your freezeTB install location or into
+  your PATH.
+
+`cp minimap2.exe C:/Users/<user name>/Downloads/freezeTB/winBin`
+
 
 # Run
 
@@ -167,172 +341,130 @@ For the gui, just run `freezeTBGui.r`. Then fill in the
   to make an ascii digram with dita.
 ](diagrams/freezeTb-diagram.svg)
 
-1. freezeTB removes:
+1. GUI only: uses minimap2 to map fastq file to reference
+2. freezeTB removes:
    - unmapped reads
    - secondary alignments
    - supplemental alignments
-2. Soft masking is trimmed of the ends of each read
-3. freezeTB adds each read to a histogram of read depths.
+3. Soft masking is trimmed of the ends of each read
+4. freezeTB adds each read to a histogram of read depths.
    This is the unfiltered histogram.
-4. freezeTB then filters the reads, removing any read that
+5. freezeTB then filters the reads, removing any read that
    has:
    - to short by aligned length (number of reference bases
      covered)
    - has a low mapping quality
    - has a low mean Q-score
    - has a low median Q-score
-5. freezeTB then adds the kept reads to a histogram of
+6. freezeTB then adds the kept reads to a histogram of
    filtered reads
-6. freezeTB then masks primer locations in reads by
+7. freezeTB then masks primer locations in reads by
    coordinates (if requested)
-7. freezeTB then checks the read for AMRs
-8. freezeTB then checks for any MIRU-VNTR lineages in an
+8. freezeTB then checks the read for AMRs
+9. freezeTB then checks for any MIRU-VNTR lineages in an
    read (Probably nothing for rapdid kits)
-9. freezeTB then checks for spoligotype spacers present
+10. freezeTB then checks for spoligotype spacers present
    in reads
-10. freezeTB then adds the read to the reference
+11. freezeTB then adds the read to the reference
    - Bases with Q-scores under 7 are removed
-11. After going though all reads; freezeTB then prints
+12. After going though all reads; freezeTB then prints
    out both histogram (unfiltered and filtered)
-12. freezeTB prints out the AMRs that at least 5% of
+13. freezeTB prints out the AMRs that at least 5% of
    mapped reads supported
-13. freezeTB prints out the MIRU-VNTR lineage table
+14. freezeTB prints out the MIRU-VNTR lineage table
     of read counts for the reads
-14. freezeTB prints out the spacers detected with the
+15. freezeTB prints out the spacers detected with the
     the number of reads that supported each spacer
-15. freezeTB then collapses the consensus
+16. freezeTB then collapses the consensus
     - Split into fragments with 20x or greater read depth
-    - Fragments with under 200x read depth are removed
+    - Fragments less than 50x bases long are removed
     - Most supported snp/match/deletion selected
     - Snps/matches with less than 50% support are masked
     - Most supported insertion selected
     - Indels wit less than 70% support are removed
-16. freezeTB finds the AMRs for the consensus
-17. freezeTB finds the MIRU-VNTR lineages for consensus
-18. freezeTB finds spoligotype for consensus
-19. freezeTB then makes the read depth and coverage graphs
-    with R (only if you used -graph or -graph-ext "ext")
+17. freezeTB finds the AMRs for the consensus
+18. freezeTB finds the MIRU-VNTR lineages for consensus
+19. freezeTB finds spoligotype for consensus
+20. GUI only: freezeTB makes read depth and coverage
+    graphs with R
 
 # Programs included with freezeTB
 
 I have made the programs in freezeTb to be modular. This
   means that if you like a particular program, then you
-  can compile it separately. I have set the default build
-  methods to be static for the modules, so you will need
-  to do `make mac` on anything that is not freezeTB. All
-  of these programs take sam files as inputs.
+  can compile it separately.
 
-You can build all the side programs with `make modules` or
-  for static builds do `make staticmodules`. You can then
-  install the modules with `make moduleinstall`. This will
-  install all the listed modules and other less usefull
-  programs and scripts. You can clean up the binaries
-  afterwards with `make clean`.
+You can install freezeTB and the side modules
+  with `make -f mkfile.OS install-modules` or
+  all programs with `make -f mkfile.OS install-all`.
 
-List of modules:
+## freezeTB core:
+
+- freezeTBGui.r: gui built in R using tcltk for freezeTB
+- freezeTB: core program for freezeTB
+- adjCoords: adjust coordinates in sam file using an
+  list of genes (instead of mapping to full TB genome)
+- graphAmpDepth.r: Rscript that makes graphs for freezeTB
+
+## Modules:
 
 - ampDepth: Makes the read depth tsv's that can be
   converted to graphs of mean read depth and coverage
   using scripts/graphAmpDepth.r
-- trimSam: trims off soft masked bases in an sam file
-- primMask: Masks primers in sequences (sam file) using
+- maskPrim: Masks primers in sequences (sam file) using
   coordinates. This can also do some filtering.
   - You can make an basic mask file file using your
     primers and catPrimers.sh
 - tbCon: Builds an consensus (output is sam file)
 - tbAmr: AMR detection
 - tbMiru: detects MIRU-VNTR lineages in reads
-  - This also includes a couple of awk scripts for
-    processing the table made with `-out-tbl miru-tlb.tsv`
-    - awk -f `getPercMiruTbl.awk miru-tbl.tsv` is here to
-      print out the percentage of mapped  reads for each
-      primer
-    - awk -f `getHitMiruTbl.awk miru-tbl.tsv` is here to
-      print out the number of reads supporting each primer
-- tbSpoligo: does spoligotyping
-  - fasta/fastq is slow, sam is somewhat fast.
+  - can run on fastx files (slower)
+  - there are some side awk scripts (not installed) for
+    helping with the read count tables
+    - awk -f `getPercMiruTbl.awk miru-tbl.tsv` prints
+      out only percentage of mapped  reads for each primer
+    - awk -f `getHitMiruTbl.awk miru-tbl.tsv` prints
+      out the number of reads supporting each primer
+- tbSpol: does spoligotyping
+  - can run on fastx files (slower)
 
-Other, less useful programs:
+## Other, less useful programs:
 
-If there is no README.md file, then do `make mac` or
-  `make` to compile the program and then `program -h` to
-  get the help message. Most programs should install with
-  `sudo make install`. If not
-  do `sudo mv program /usr/local/bin`
-  and `sudo chmod a+x /usr/local/bin/program` to install
-  the program.
-
-- filtSam: For filtering trimming softmasked regions, and
-  converting sam files. You would be better off using
-  samtools.
-  - I have used it for finding the number of SNPs,
-    deletions, and, insertions for each read in an sam
-    file.
-    - `filtSam -p-n -out-stats -sam file.sam > stats.tsv`
-  - I have also used it to filter reads by coordinates
-    on an reference `filtsam -sam reads.sam -coords x,y`
-    or `fitsam -sam reads.sam -coords-file filters.tsv`
-  - If you only want trimming, then trimSam might be an
-    better option. Go with the faster version.
-- adjCoords: Adjust coordinates in sam file using an
-  list of genes.
-  - The idea is that you map your amplicons to an list of
-    target genes and then correct the coordinates to the
-    reference with adjCoords.
-  - You can find the commands to make an gene table for
-    adjCoords in `slidesAndWriting/making-gene-table.md`
-  - adjCoords removes any entry it can not adjust (not in
-    the gene table)
-    - This removes unmapped reads or reads mapping to
-      references not found in the gene table
-      - So, you can include the 16sRNA *E. coli* gene
-        in the references, but not include it in the gene
-        table to remove any *E. coli* 16sRNA reads
-- cnvt_woToTbAmr (tbAmrSource/cnvt_whoToTbAmr_src)
-  converts the WHO 2023 catalog to tbAmr format.
-  - This has a separate public repository
-  - Only needed if you want grade 3 variants or the WHO
-    updates the 2023 database
-- swapDbRef (tbArmSource/swapDbRefSrc) is a program to
-  switch out references in the reference database.
-  - The convserion does not check for frameshifts or other
-    problems. It just adjusts the coordinates by the
-    positions on the reference genome.
-- mkMiurTbl (tbMiruSource/mkMiruTbl) is an program that
-  takes in an miru table and adds the reference
+- filtSam: For filtering trimming soft masked regions, and
+  converting sam files (samtools view knock off)
+- trimSam: trims off soft masked bases in an sam file
+  - you can do this with filtsam to
+- whoToAmr: converts the WHO 2023 catalog to tbAmr format
+- swapDbRef: is a program to switch out references in the
+  reference database.
+  - only adjusts coordinates by reference genome, does not
+    check for frame shifts or other problems
+- mkMiurTbl: takes in an miru table and adds the reference
   coordinates for tbMiru into the table header
-  - The pre-miruTbl.txt in tbMiruSource/mkMiruTbl is an
-    blank table ready to have coordinates added in
-  - The MIRU primers are in
-    tbMiruSource/mkMiruTbl/primers.fa
-  - Currently does not use the faster kmerFind used in
-    spoligotyping. I figure you only need to do it once
-- cigToEqxCig: Converts an sam file with an normal cigar
+- cigToEqx: Converts an sam file with an normal cigar
   to an eqx cigar
   - Mainly here to avoid running minimap2 again on
     consensuses from tbCon
   - `cigToEqxCig -sam file.sam -ref ref.fasta > out.sam`
-- scrpits/catPrimers.sh: bash script that uses minimap2
-  and awk to merge amplicons.
-  - It also prints out the amplicon and primer coordaintes
-    needed for primMask.
+- samToAln: converts a reference and sam file to an
+  human readable alignment
+  - not very useful, here to convert tbCon output to human
+- scripts/catPrimers.sh: bash script that uses minimap2
+  and awk to merge amplicons (not installed)
+  - also prints out the amplicon and primer coordinates
+    needed for maskPrim
   - `bash scripts/catPrimers.sh -ref ref.fasta -tsv primers.tsv -prefix prefix`
-- memwater:
-  - This is more of an library. I took it from my alnSeq
-    side project and fixed a few bugs. It is an waterman
-    that operates in linear memory and takes close to as
-    much time as an traditional waterman (slow, at least 
-    10x slower then the complete striped smith waterman
-    library).
-  - It is designed for CPUs with branch prediction and so,
-    uses branchless operations instead of branched.
-  - It only returns the scores and the start and end
-    coordinates of the alignment.
-- oldCode: This has old code I am not quite ready to throw
-  away yet. I may use it later or in another project.
-  Some of it was never finished, other parts of it no
-  longer work do to an change in my coding style.
-
+- alnwater:
+  - kinda traditional waterman alignment, outputs a sam
+    file (use samToAln to get human readable)
+  - 10x slower then the complete striped smith waterman
+- alnMemwater:
+  - waterman that just returns score, starting
+    coordinates, and ending coordinates
+  - low memory usage at the cost of no alignment and
+    sightly more time than water
+- oldCode: old code I am not quite ready to throw
+  away yet
 
 # freezeTB as an bash script
 
@@ -478,7 +610,7 @@ samStr="$samStr-filt";
 
 if [[ "$maskPrimBl" == "TRUE" ]]; then
 # If: primer masking was requested
-   primMask \
+   maskPrim \
       -sam "$samStr" \
       -prim "$dbDirStr/mask.tsv" \
       -out "$samStr-mask.sam";
@@ -532,7 +664,7 @@ tbMiru \
     out-tbl "$prefixStr-read-miru.tsv";
 
 # find the spoligotype
-tbSpoligo \
+tbSpol \
     -read-frag \
     -spoligo "$dbDirStr/spoliogtype-seq.fa" \
     -db "$dbDirStr/spoligo-lineages.csv" \
@@ -558,7 +690,7 @@ tbMiru \
     out-tbl "$prefixStr-con-miru.tsv";
 
 # find the spoligotype
-tbSpoligo \
+tbSpol \
     -con-frag \
     -spoligo "$dbDirStr/spoliogtype-seq.fa" \
     -db "$dbDirStr/spoligo-lineages.csv" \
@@ -570,8 +702,6 @@ tbSpoligo \
 #   - build the read depth and coverage graphs
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# This is done automatically in the gui version, but not
-#   the command line version
 if [[ "$graphBl" == "TRUE" ]]; then
 # If: graphs were wanted
    # For graphing (wait till ampDepth finishes)
@@ -580,6 +710,8 @@ if [[ "$graphBl" == "TRUE" ]]; then
       -who "$dbDirStr/who-2023.tsv" \
       -ext "$graphExtStr" \
       -prefix "$prefixStr";
+
+   # -min-len not used, but controls min amplicon length;
+   # default is 50
 fi # If: graphs were wanted
 ```
-

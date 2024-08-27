@@ -1,5 +1,0 @@
-b tbSpoligo.c:113
-
-#r -fast -fq ~/files/testing/dr.fq -spoligo ../freezeTBFiles/spoligotype-seq.fa -db ../freezeTBFiles/spoligo-lineages.csv
-#r -fast -con-frag -sam ~/files/testing/baylor-BC01-con.sam -spoligo ../freezeTBFiles/spoligotype-seq.fa -db ../freezeTBFiles/spoligo-lineages.csv
-r -fast -con-frag -fa tmp.fa -spoligo ../freezeTBFiles/spoligotype-seq.fa -db ../freezeTBFiles/spoligo-lineages.csv

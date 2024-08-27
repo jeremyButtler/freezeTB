@@ -1,0 +1,100 @@
+<$objtype/mkfile
+
+CFLAGS= -w -DPLAN9
+PREFIX=
+ext=plan9
+
+all:
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C freezeTBSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C adjCoordsSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C alnMemwaterSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C alnwaterSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C ampDepthSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C cigToEqxSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C filtsamSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C maskPrimSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C mkMiruTblSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C samToAlnSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C swapDbRefSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbAmrSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbConSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbMiruSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C trimSamSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C whoToAmrSrc
+
+install:
+	mv freezeTBSrc/freezeTB $(PREFIX)
+	chmod a+x $(PREFIX)/freezeTB
+	mv adjCoordsSrc/adjCoords $(PREFIX)
+	chmod a+x $(PREFIX)/adjCoords
+
+install-modules:
+	mv ampDepthSrc/ampDepth $(PREFIX)
+	chmod a+x $(PREFIX)/ampDepth
+	mv maskPrimSrc/maskPrim $(PREFIX)
+	chmod a+x $(PREFIX)/maskPrim
+	mv tbAmrSrc/tbAmr $(PREFIX)
+	chmod a+x $(PREFIX)/tbAmr
+	mv tbConSrc/tbCon $(PREFIX)
+	chmod a+x $(PREFIX)/tbCon
+	mv tbMiruSrc/tbMiru $(PREFIX)
+	chmod a+x $(PREFIX)/tbMiru
+	mv tbSpolSrc/tbSpol $(PREFIX)
+	chmod a+x $(PREFIX)/tbSpol
+	mv adjCoordsSrc/adjCoords $(PREFIX)
+	chmod a+x $(PREFIX)/adjCoords
+
+install-all:
+	mv alnMemwaterSrc/alnMemwater $(PREFIX)
+	chmod a+x $(PREFIX)/alnMemwater
+	mv alnwaterSrc/alnwater $(PREFIX)
+	chmod a+x $(PREFIX)/alnwater
+	mv cigToEqxSrc/cigToEqx $(PREFIX)
+	chmod a+x $(PREFIX)/cigToEqx
+	mv filtsamSrc/filtsam $(PREFIX)
+	chmod a+x $(PREFIX)/filtsam
+	mv mkMiruTblSrc/mkMiruTbl $(PREFIX)
+	chmod a+x $(PREFIX)/mkMiruTbl
+	mv samToAlnSrc/samToAln $(PREFIX)
+	chmod a+x $(PREFIX)/samToAln
+	mv swapDbRefSrc/swapDbRef $(PREFIX)
+	chmod a+x $(PREFIX)/swapDbRef
+	mv maskPrimSrc/maskPrim $(PREFIX)
+	chmod a+x $(PREFIX)/maskPrim
+	mv ampDepthSrc/ampDepth $(PREFIX)
+	chmod a+x $(PREFIX)/ampDepth
+	mv tbAmrSrc/tbAmr $(PREFIX)
+	chmod a+x $(PREFIX)/tbAmr
+	mv tbConSrc/tbCon $(PREFIX)
+	chmod a+x $(PREFIX)/tbCon
+	mv tbMiruSrc/tbMiru $(PREFIX)
+	chmod a+x $(PREFIX)/tbMiru
+	mv tbSpolSrc/tbSpol $(PREFIX)
+	chmod a+x $(PREFIX)/tbSpol
+	mv adjCoordsSrc/adjCoords $(PREFIX)
+	chmod a+x $(PREFIX)/adjCoords
+	mv freezeTBSrc/freezeTB $(PREFIX)
+	chmod a+x $(PREFIX)/freezeTB
+
+clean:
+	rm \
+		adjCoordsSrc/*$O \
+		alnMemwaterSrc/*$O \
+		alnwaterSrc/*$O \
+		ampDepthSrc/*$O \
+		cigToEqxSrc/*$O \
+		filtsamSrc/*$O \
+		freezeTBSrc/*$O \
+		maskPrimSrc/*$O \
+		mkMiruTblSrc/*$O \
+		samToAlnSrc/*$O \
+		swapDbRefSrc/*$O \
+		tbAmrSrc/*$O \
+		tbConSrc/*$O \
+		tbMiruSrc/*$O \
+		tbSpolSrc/*$O \
+		trimSamSrc/*$O \
+		whoToAmrSrc/*$O \
+		genAln/*$O \
+		genLib/*$O

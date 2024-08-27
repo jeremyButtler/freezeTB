@@ -1,0 +1,41 @@
+b maskPrimMain.c:980
+
+r -filter -fudge 25 -prim mask.tsv -sam ~/BC02.sam
+
+define pflag
+  set $cnt = 0
+  set $startAry = $0
+  set $endAry = $1
+  set $flagAry = $2
+  set $flagEnd = $3
+
+  printf "start\tend\tindex\tdir\n"
+
+  while($cnt < $flagEnd)
+    #printf "%u\t%u\t%u\t%u\n", $startAry[$cnt], $endAry[$cnt], ($flagAry[$cnt] >> 2), ($flagAry[$cnt] & 3)
+    printf "%u\t%u\t%u\t%u\n", $startAry[$cnt], $endAry[$cnt], ($flagAry[$cnt] >> 2), ($flagAry[$cnt] & 3)
+    set $cnt = $cnt + 1
+  end
+end
+
+define preadprim
+set $cnt = 0
+  printf "start\tend\tindex\tdir\tpaired\n"
+
+  while($cnt < numPrimSI)
+    printf "%u\t%u\t%u\t%u\t%u\n", (*startAryUI)[$cnt], (*endAryUI)[$cnt], (*flagAryUI)[$cnt] >> 2, (*flagAryUI)[$cnt] & 1, (((*flagAryUI)[$cnt] & 2) > 0)
+
+    set $cnt = $cnt + 1
+  end
+end
+
+define pswap
+set $cnt = 0
+  printf "start\tend\tindex\tdir\n"
+
+  while($cnt < 48)
+    printf "%u\t%u\t%u\t%u\n", startAry[$cnt], endAry[$cnt], flagAry[$cnt] >> 2, flagAry[$cnt] & 3
+    set $cnt = $cnt + 1
+  end
+end
+

@@ -1,0 +1,4 @@
+b freezeTB.c:3599
+b freezeTB.c:3599
+
+r -sam $HOME/files/testing/BC37.sam -prefix $HOME/files/testing/delete

@@ -498,8 +498,8 @@ for strBarDir in ./"fqPassDirStr/barcode"*; do
        "$strBarDir" \
        "$outStr" |
      tee "$prefixStr-log.tsv";
-     # tee saves the read counts in "$prefixStr-log.tsv" and
-     # prints them to terminal
+     # tee saves the read counts in "$prefixStr-log.tsv
+     #  and prints them to terminal
 done
 ```
 

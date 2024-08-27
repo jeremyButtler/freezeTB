@@ -1,0 +1,57 @@
+LD=link
+CC=cl
+CFLAGS= /O2 /Ot /Za /Tc
+PREFIX="%PROGRAMFILES%\freezeTB"
+DB_PREFIX="%PUBLIC%\Documents";
+R_SCRIPT_PATH="%PROGRAMFILES%\R\R-4.3.3\bin\Rscript.exe"
+ext=win
+O=.o.$(ext)
+
+all:
+	cd programs
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..
+
+install: install-support
+	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
+	move programs\adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+
+install-modules: install-support
+	move programs\ampDepthSrc\ampDepth.exe $(PREFIX)
+	move programs\maskPrimSrc\maskPrim.exe $(PREFIX)
+	move programs\tbAmrSrc\tbAmr.exe $(PREFIX)
+	move programs\tbConSrc\tbCon.exe $(PREFIX)
+	move programs\tbMiruSrc\tbMiru.exe $(PREFIX)
+	move programs\tbSpolSrc\tbSpol.exe $(PREFIX)
+	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
+	move programs\adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+
+install-all: install-support
+	move programs\alnMemwaterSrc\alnMemwater.exe $(PREFIX)
+	move programs\alnwaterSrc\alnwater.exe $(PREFIX)
+	move programs\cigToEqxSrc\cigToEqx.exe $(PREFIX)
+	move programs\filtsamSrc\filtsam.exe $(PREFIX)
+	move programs\mkMiruTblSrc\mkMiruTbl.exe $(PREFIX)
+	move programs\samToAlnSrc\samToAln.exe $(PREFIX)
+	move programs\swapDbRefSrc\swapDbRef.exe $(PREFIX)
+	move programs\ampDepthSrc\ampDepth.exe $(PREFIX)
+	move programs\maskPrimSrc\maskPrim.exe $(PREFIX)
+	move programs\tbAmrSrc\tbAmr.exe $(PREFIX)
+	move programs\tbConSrc\tbCon.exe $(PREFIX)
+	move programs\tbMiruSrc\tbMiru.exe $(PREFIX)
+	move programs\tbSpolSrc\tbSpol.exe $(PREFIX)
+	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
+	move programs\adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+	
+
+install-support:
+	copy scripts\graphAmpDepth.r "$(PREFIX)"
+	copy scripts\freezeTBGui.r "$(PREFIX)"
+
+install-r-depends:
+	Rscript scripts\rDepends.r
+
+clean:
+	cd programs
+	nmake /F mkfile.$(ext) clean
+	cd ..

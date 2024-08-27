@@ -1,0 +1,3 @@
+b mkMiruTbl.c:820
+
+r -ref ../../freezeTBFiles/NC000962.fa -miru-tbl pre-miruTbl.tsv -prim primers.fa

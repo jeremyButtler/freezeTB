@@ -4,7 +4,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SOF: Start Of File
 #   o header:
-#     - Included libraries
+#     - included libraries and general setup
 #   o fun01: getReads
 #     - Gets a fastq file that the user selected
 #   o fun02: getSaveDir
@@ -16,9 +16,9 @@
 #   o fun05: getMiruTbl
 #     - Gets an Miru table (tbMiru format)
 #   o fun06: getSpoligoSeq
-#     - Gets the spoligo space sequences for spoligotyping
+#     - Gets the spol space sequences for spoltyping
 #   o fun07: getSpoligoDB
-#     - Gets the lineage database for spoligotyping
+#     - Gets the lineage database for spoltyping
 #   o fun08: getGeneTbl
 #     - Gets the paf file with the genome coordinates
 #   o fun09: getMaskPrim
@@ -49,20 +49,22 @@
 
 #---------------------------------------------------------
 # Header:
-#   - Included libraries
+#   - included libraries and general setup
 #   o header sec01:
-#     - Libraries
+#     - libraries
 #   o header sec02:
-#     - Default file paths
+#     - default file paths
 #   o header sec03:
-#     - Declaring the gui frames
+#     - find program locations
 #   o header sec04:
+#     - declaring the gui frames
+#   o header sec05:
 #     - tcl global variables
 #---------------------------------------------------------
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Header Sec01:
-#   - Libraries
+#   - libraries
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 if("fs" %in% rownames(installed.packages())){
@@ -82,7 +84,7 @@ if("tcltk2" %in% rownames(installed.packages())){
     TOOL_TIP_BL = 0;
 } # Else I need to use old tcltk (no tooltips)
 
-slashC = .Platform$file.sep;
+slashSC = .Platform$file.sep;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Header Sec02:
@@ -101,64 +103,100 @@ slashC = .Platform$file.sep;
 #*********************************************************
 
 if(.Platform$OS != "windows"){
-   def_filePathStr = "/usr/local/share/freezeTBFiles/";
+   def_pathSplitSC = ':';
+
+   def_rNameStr = "Rscript";
+
+   def_altFilePathStr = "/usr/local/share/freezeTBFiles/";
+
+   if("fs" %in% rownames(installed.packages())){
+      def_filePathStr =
+         fs::path_home("Documents", "freezeTBFiles");
+
+      def_filePathStr =
+         paste(def_filePathStr, slashSC, sep = "");
+   } else{
+      def_filePathStr = "$HOME/Documents/freezeTBFiles/";
+   }
 } else{
-   
+   def_pathSplitSC = ';';
+   def_rNameStr = "Rscript.exe";
+
+   def_altFilePathStr =
+      paste(
+         as.list(
+            strsplit(
+               Sys.getenv("PUBLIC"),
+               def_pathSplitSC
+             )
+         )[[1]][1],
+         "\\Documents\\freezeTBFiles\\",
+         sep = ""
+      );
+
    def_filePathStr =
-       paste(
-          Sys.getenv("PUBLIC"),
-          "\\Documents\\freezeTBFiles\\",
-          sep = ""
-       );
+      paste(
+         as.list(
+            strsplit(
+               Sys.getenv("HOMEPATH"),
+               def_pathSplitSC
+            )
+         )[[1]][1],
+         "\\Documents\\freezeTBFiles\\",
+         sep = ''
+      ); # get local file location
 } # Else: This is windows
-
-if("fs" %in% rownames(installed.packages())){
-   def_altFilePathStr =
-      fs::path_home("Documents", "freezeTBFiles");
-
-   def_altFilePathStr =
-      paste(def_altFilePathStr, slashC, sep = "");
-} else if(.Platform$OS != "windows"){
-   def_altFilePathStr = "~/Documents/freezeTBFiles/";
-} else{
-   def_altFilePathStr = "$HOMEPATH$\\Documents\\freezeTBFiles\\";
-} # Set up alternative file path
 
 #*********************************************************
 # Header Sec02 Sub02:
 #   - Set up default paths to each database
 #*********************************************************
 
+# two types of variables;
+#   - def_ are defaults (never change)
+#   - PathStr change with user input (called in code)
+
+fqFilesStr = ""; # no default, user has to provide
+outPathStr = ""; # default is nothing
+
 def_amrTblStr =
-   paste(def_filePathStr, "who-2023.tsv", sep = "");
+   paste(def_filePathStr, "amrDb.tsv", sep = "");
 
 if(! file.exists(def_amrTblStr)){
    def_amrTblStr =
-      paste(def_altFilePathStr, "who-2023.tsv", sep = "");
+      paste(def_altFilePathStr, "amrDb.tsv", sep = "");
 
    if(! file.exists(def_amrTblStr)){
-      def_amrTblStr = "who-2023.tsv";
+      def_amrTblStr = "amrDb.tsv";
 
       if(! file.exists(def_amrTblStr))
          def_amrTblStr = "";
    } # If: I could not open the alternate path
 } # If: I need to go to my aternate location
 
+def_amrTblStr = normalizePath(def_amrTblStr);
+amrTblPathStr = def_amrTblStr;
+
+
    
 def_coordsStr =
-  paste(def_filePathStr,"gene-tbl.tsv",sep="");
+  paste(def_filePathStr,"coords.tsv",sep="");
 
 if(! file.exists(def_coordsStr)){
    def_coordsStr =
-      paste(def_altFilePathStr, "gene-tbl.tsv", sep = "");
+      paste(def_altFilePathStr, "coords.tsv", sep = "");
 
    if(! file.exists(def_coordsStr)){
-      def_coordsStr = "gene-tbl.tsv";
+      def_coordsStr = "coords.tsv";
 
       if(! file.exists(def_coordsStr))
          def_coordsStr = "";
    } # If: I could not open the altnerate path
 } # If: I need to go to my aternate location
+
+def_coordsStr = normalizePath(def_coordsStr);
+coordsPathStr = def_coordsStr;
+
 
 
 def_miruTblStr =
@@ -175,6 +213,9 @@ if(! file.exists(def_miruTblStr)){
          def_miruTblStr = "";
    } # If: I could not open the alternate path
 } # If: I need to go to my aternate location
+
+def_miruTblStr = normalizePath(def_miruTblStr);
+miruTblPathStr = def_miruTblStr;
 
 
 def_refStr =
@@ -196,66 +237,270 @@ if(! file.exists(def_refStr)){
    } # If: I could not open the alternate path
 } # If: I need to go to my aternate location
 
-def_spoligoRefsStr =
-   paste(def_filePathStr, "spoligotype-seq.fa", sep="");
+def_refStr = normalizePath(def_refStr);
+refPathStr = def_refStr;
 
-if(! file.exists(def_spoligoRefsStr)){
-   def_spoligoRefsStr =
+
+def_spolSpacersStr =
+   paste(def_filePathStr, "spoligo-spacers.fa", sep="");
+
+if(! file.exists(def_spolSpacersStr)){
+   def_spolSpacersStr =
       paste(
          def_altFilePathStr,
-         "spoligotype-seq.fa",
+         "spoligo-spacers.fa",
          sep = ""
       );
 
-   if(! file.exists(def_spoligoRefsStr)){
-      def_spoligoRefsStr = "spoligotype-seq.fa";
+   if(! file.exists(def_spolSpacersStr)){
+      def_spolSpacersStr = "spoligo-spacers.fa";
 
-      if(! file.exists(def_spoligoRefsStr))
-         def_spoligoRefsStr = "";
+      if(! file.exists(def_spolSpacersStr))
+         def_spolSpacersStr = "";
    } # If: I could not open the alternate path
 } # If: I need to go to my aternate location
 
-def_spoligoDbStr =
+def_spolSpacersStr = normalizePath(def_spolSpacersStr);
+spolSpacersPathStr = def_spolSpacersStr;
+
+
+def_spolDbStr =
    paste(def_filePathStr, "spoligo-lineages.csv", sep="");
 
-if(! file.exists(def_spoligoDbStr)){
-   def_spoligoDbStr =
+if(! file.exists(def_spolDbStr)){
+   def_spolDbStr =
       paste(
          def_altFilePathStr,
          "spoligo-lineages.csv",
          sep = ""
       );
 
-   if(! file.exists(def_spoligoDbStr)){
-      def_spoligoDbStr = "spoligo-lineages.csv";
+   if(! file.exists(def_spolDbStr)){
+      def_spolDbStr = "spoligo-lineages.csv";
 
-      if(! file.exists(def_spoligoDbStr))
-         def_spoligoDbStr = "";
+      if(! file.exists(def_spolDbStr))
+         def_spolDbStr = "";
    } # If: I could not open the alternate path
 } # If: I need to go to my aternate location
 
-def_primMaskStr =
+def_spolDbStr = normalizePath(def_spolDbStr);
+spolDbPathStr = def_spolDbStr;
+
+
+def_maskPrimStr =
    paste(def_filePathStr, "mask.tsv", sep="");
 
-if(! file.exists(def_primMaskStr)){
-   def_primMaskStr =
+if(! file.exists(def_maskPrimStr)){
+   def_maskPrimStr =
       paste(
          def_altFilePathStr,
          "mask.tsv",
          sep = ""
       );
 
-   if(! file.exists(def_spoligoDbStr)){
-      def_primMaskStr = "mask.tsv";
+   if(! file.exists(def_spolDbStr)){
+      def_maskPrimStr = "mask.tsv";
 
-      if(! file.exists(def_primMaskStr))
-         def_primMaskStr = "";
+      if(! file.exists(def_maskPrimStr))
+         def_maskPrimStr = "";
    } # If: I could not open the alternate path
 } # If: I need to go to my aternate location
 
+def_maskPrimStr = normalizePath(def_maskPrimStr);
+maskPrimPathStr = def_maskPrimStr;
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Header Sec03:
-#   - Declaring the gui frames
+#   - find program locations
+#   o header sec03 sub01:
+#     - get system path and add separator for program name
+#   o header sec03 sub02:
+#     - set up program names
+#   o header sec03 sub03:
+#     - search path for minimap2
+#   o header sec03 sub04:
+#     - search path for adjCoords
+#   o header sec03 sub05:
+#     - search path for freezeTB
+#   o header sec03 sub06:
+#     - search path for ampDepth graphing script
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#*********************************************************
+# Header Sec03 Sub01:
+#   - get system path and add separator for program name
+#*********************************************************
+
+pathAryStr =
+   as.list(
+      strsplit(
+         Sys.getenv("PATH"),
+         def_pathSplitSC
+      ) # get system path
+   ); # make sure is a list
+
+for(siElm in 1:length(pathAryStr[[1]]))
+{ # Loop: add diretory separator to end of path
+   pathAryStr[[1]][siElm] =
+      paste(
+         pathAryStr[[1]][siElm],
+         slashSC,
+         sep = ''
+      );
+} # Loop: add diretory separator to end of path
+
+#*********************************************************
+# Header Sec03 Sub02:
+#   - set up program names
+#*********************************************************
+
+graphAmpDepthPathStr = "graphAmpDepth.r";
+
+if(.Platform$OS == "windows"){
+   miniMapPathStr = "minimap2.exe";
+   adjCoordsPathStr = "adjCoords.exe";
+   freezeTBPathStr = "freezeTB.exe";
+
+   freezeTBLocalStr =
+      paste(
+         as.list(
+            strsplit(
+               Sys.getenv("PROGRAMFILES"),
+               def_pathSplitSC
+            )
+         )[[1]][1],
+         "\\freezeTB\\",
+         sep = ''
+      ); # set up path to freezeTB in program files
+
+} else{
+   miniMapPathStr = "minimap2";
+   adjCoordsPathStr = "adjCoords";
+   freezeTBPathStr = "freezeTB";
+
+   freezeTBLocalStr =
+      paste(
+         as.list(
+            strsplit(
+               Sys.getenv("HOME"),
+               def_pathSplitSC
+            )
+         )[[1]][1],
+         "/local/bin",
+         sep = ''
+      ); # set up path to freezeTB in program files
+} # set up windows/linux program names
+
+#*********************************************************
+# Header Sec03 Sub03:
+#   - search path for minimap2
+#*********************************************************
+
+for(strCall in c("", freezeTBLocalStr, pathAryStr[[1]]))
+{ # Loop: find minimap2
+   strCall =
+      paste(
+         strCall,
+         miniMapPathStr,
+         sep = ''
+      );
+
+   if(file.exists(strCall)){
+      miniMapPathStr = normalizePath(strCall);
+      break;
+   } # If: found minimap2
+} # Loop: find minimap2
+
+#*********************************************************
+# Header Sec03 Sub04:
+#   - search path for adjCoords
+#*********************************************************
+
+for(strCall in c("", freezeTBLocalStr, pathAryStr[[1]]))
+{ # Loop: find adjCoords
+   strCall =
+      paste(
+         strCall,
+         adjCoordsPathStr,
+         sep = ''
+      );
+
+   if(file.exists(strCall)){
+      adjCoordsPathStr = normalizePath(strCall);
+      break;
+   } # If: found adjCoords
+} # Loop: find adjCoords
+
+#*********************************************************
+# Header Sec03 Sub05:
+#   - search path for freezeTB
+#*********************************************************
+
+for(strCall in c("", freezeTBLocalStr, pathAryStr[[1]]))
+{ # Loop: find freezeTB
+   strCall =
+      paste(
+         strCall,
+         freezeTBPathStr,
+         sep = ''
+      );
+
+   if(file.exists(strCall)){
+      freezeTBPathStr = normalizePath(strCall);
+      break;
+   } # If: found freezeTB
+} # Loop: find freezeTB
+
+#*********************************************************
+# Header Sec03 Sub05:
+#   - search path for graphAmpDepth.r
+#*********************************************************
+
+for(strCall in c("", freezeTBLocalStr, pathAryStr[[1]]))
+{ # Loop: find graphAmpDepth.r
+   strCall =
+      paste(
+         strCall,
+         graphAmpDepthPathStr,
+         sep = ''
+      );
+
+   if(file.exists(strCall)){
+      graphAmpDepthPathStr = normalizePath(strCall);
+      break;
+   } # If: found graphAmpDepth.r
+} # Loop: find graphAmpDepth.r
+
+#*********************************************************
+# Header Sec03 Sub06:
+#   - find Rscript path
+#*********************************************************
+
+def_rPathStr =
+   paste(
+       dirname(commandArgs()[1]),
+       slashSC,
+       sep = ''
+   ); # windows often has R.exe next to Rscript.exe
+
+for(strCall in c("", def_rPathStr, pathAryStr[[1]]))
+{ # Loop: find Rscript path
+   strCall =
+      paste(
+          strCall,
+          def_rNameStr,
+          sep = ''
+      );
+
+   if(file.exists(strCall)){
+      def_rPathStr = normalizePath(strCall);
+      break;
+   } # If: found rScript path
+} # Loop: find Rscript path
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Header Sec04:
+#   - declaring gui frames
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 guiTK = tktoplevel();
@@ -285,7 +530,7 @@ miruVarTK =
       relief = "groove"
    );
 
-spoligoVarTK =
+spolVarTK =
    tkframe(
       lineageInputTK,
       borderwidth = 2,
@@ -316,7 +561,7 @@ conPrintInputTK =
    );
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Header Sec04:
+# Header Sec05:
 #   - tcl global variables
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -374,16 +619,20 @@ GRAPH_EXT_TCL = tclVar("tiff");
 getReads =
 function(
 ){
+   siElm = 1;
+   lenSI = 0;
+
    fileMacStr =
       tk_choose.files(
          default = getwd(), # start of in working dir
          caption = "Select fastq file",
-         multi = FALSE,
+         multi = TRUE,
          filters =
             matrix(
                c(
-                  "fastq", ".fastq",
-                  "fastq", ".fq"
+                  "fastq*", ".fastq",
+                  "fastq*", ".fq",
+                  "fastq*", ".gz" # mac does not like .*.
                 ), # allowed files (filters)
              4, # four rows
              2, # two columns
@@ -391,8 +640,55 @@ function(
          ) # File types allowd to see
       ); # Let the user select an fastq file
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(fqLabelTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+
+      # this is needed to remove the directory that is
+      # added with multi=TRUE file option
+      
+      siElm = 1;
+      lenSI = length(fileMacStr);
+
+      while(siElm <= lenSI)
+      { # Loop: remove directories
+         if(dir.exists(fileMacStr[siElm])){
+            fileMacStr = fileMacStr[- 1];
+            lenSI = lenSI - 1;
+         }else if(! file.exists(fileMacStr[siElm])){
+            fileMacStr = fileMacStr[- 1];
+            lenSI = lenSI - 1;
+         } else{
+            siElm = siElm + 1;
+         } # check if is a directory (not a file)
+
+      } # Loop: remove directories
+
+      if(length(fileMacStr) < 1)
+         return(); # list only had directories
+
+      assign(
+         "fqFilesStr",
+         normalizePath(fileMacStr),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      if(length(fileMacStr) == 1){
+         tkconfigure(
+            fqLabelTK,
+            text = fileMacStr[1]
+          ); # add file name to gui
+      }else{
+         tkconfigure(
+            fqLabelTK,
+            text =
+               paste(
+                  dirname(fileMacStr[1]),
+                  slashSC,
+                  "*.fastq*",
+                  sep = ""
+               )
+          ); # add * to specify multiple files
+      } # Else: have multipe files
+   } # If: have files
 } # getReads
 
 #---------------------------------------------------------
@@ -412,8 +708,18 @@ function(
          caption = "Select directory to save dirs to"
       ); # Let the user select an fastq dir
 
-   if(! is.na(dirMacStr[1]))
-      tkconfigure(dirLabelTK, text = dirMacStr[1]);
+   if(! is.na(dirMacStr[1])){
+      assign(
+         "outPathStr",
+         normalizePath(dirMacStr[1]),
+         envir = .GlobalEnv
+      );
+
+      tkconfigure(
+         dirLabelTK,
+         text = dirMacStr[1]
+       );
+   } # If: output path input
 } # getReads
 
 #---------------------------------------------------------
@@ -442,8 +748,18 @@ function(
          ) # File types allowd to see
       ); # Let the user select an fasta file
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(refLabelTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+      assign(
+         "refPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         refLabelTK,
+         text = fileMacStr[1]
+       ); # update gui reference path
+   } # If: have reference file
 } # getRef
 
 #---------------------------------------------------------
@@ -471,8 +787,18 @@ function(
          ) # File types allowd to see
       ); # Let the user select an AMR table
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(amrDbLabelTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+      assign(
+         "amrTblPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         amrDbLabelTK,
+         text = fileMacStr[1]
+       );
+   } # If: AMR database input
 } # getAmrTbl
 
 #---------------------------------------------------------
@@ -500,13 +826,23 @@ function(
          ) # File types allowd to see
       ); # Let the user select an AMR table
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(miruDb_LabTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+      assign(
+         "miruTblPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         miruDb_LabTK,
+         text = fileMacStr[1]
+      );
+   } # If: miru table input
 } # getMiruTbl
 
 #---------------------------------------------------------
 # Fun06: getSpoligoSeq
-#   - Gets the spoligo space sequences for spoligotyping
+#   - Gets the spol space sequences for spoltyping
 # Input:
 # Output:
 #---------------------------------------------------------
@@ -516,7 +852,7 @@ function(
    fileMacStr =
       tk_choose.files(
          default = getwd(), # start of in working dir
-         caption ="Fasta file with spoligotype sequences",
+         caption ="Fasta file with spoltype sequences",
          multi = FALSE,
          filters =
             matrix(
@@ -530,13 +866,23 @@ function(
          ) # File types allowd to see
       ); # Let the user select an AMR table
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(spoligoSeq_LabTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+      assign(
+         "spolSpacersPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         spolSeq_LabTK,
+         text = fileMacStr[1]
+      );
+   } # If: have spoltype spacer sequences
 } # getSpoliogSeq
 
 #---------------------------------------------------------
 # Fun07: getSpoligoDB
-#   - Gets the lineage database for spoligotyping
+#   - Gets the lineage database for spoltyping
 # Input:
 # Output:
 #---------------------------------------------------------
@@ -546,7 +892,7 @@ function(
    fileMacStr =
       tk_choose.files(
          default = getwd(), # start of in working dir
-         caption ="csv file with spoligotype lineages",
+         caption ="csv file with spoltype lineages",
          multi = FALSE,
          filters =
             matrix(
@@ -559,8 +905,18 @@ function(
          ) # File types allowd to see
       ); # Let the user select an AMR table
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(spoligoDb_LabTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+      assign(
+         "spolDbPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         spolDb_LabTK,
+         text = fileMacStr[1]
+      );
+   } # If: have spoltype lineage database
 } # getSpoligoDb
 
 #---------------------------------------------------------
@@ -588,8 +944,18 @@ function(
          ) # File types allowd to see
       ); # Let the user select an AMR table
 
-   if(! is.na(fileMacStr[1]))
-      tkconfigure(depthGeneTbl_LabTK, text = fileMacStr[1]);
+   if(! is.na(fileMacStr[1])){
+      assign(
+         "coordsPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         depthGeneTbl_LabTK,
+         text = fileMacStr[1]
+      );
+   } # If: have gene coordinates file
 } # getGeneTbl
 
 #---------------------------------------------------------
@@ -619,8 +985,21 @@ function(
 
    if(! is.na(fileMacStr[1]))
    { # If: The user input an textbox
-      tkconfigure(maskPrim_LabTK, text = fileMacStr[1]);
-      tkconfigure(maskPrim_checkboxTK, state = 0); # ??
+      assign(
+         "maskPrimPathStr",
+         normalizePath(fileMacStr[1]),
+         envir = .GlobalEnv
+      ); # set up global variable for user input
+
+      tkconfigure(
+         maskPrim_LabTK,
+         text = fileMacStr[1]
+      );
+
+      tkconfigure(
+         maskPrim_checkboxTK,
+         state = 0
+       ); # wish it worked
    } # If: The user input an textbox
 } # getGeneTbl
 
@@ -882,30 +1261,76 @@ function(
    logFileStr = ""; # version number and commands
    errSI = 0;
 
-   fqFileStr = as.character(tkcget(fqLabelTK, "-text"));
-   refFileStr = as.character(tkcget(refLabelTK, "-text"));
+   # for file paths: i need to normalize path so that
+   #   programs on different drives will not mess up
+   fqFileStr =
+      normalizePath(
+         get(
+            "fqFilesStr",
+            envir = .GlobalEnv
+          )
+       ); # makes into a global path
 
-   maskPrimFileStr =
-      as.character(tkcget(maskPrim_LabTK, "-text"));
+   refFileStr =
+      normalizePath(
+         get(
+             "refPathStr",
+             envir = .GlobalEnv
+          )
+       );
 
    amrFileStr =
-      as.character(tkcget(amrDbLabelTK, "-text"));
+      normalizePath(
+         get(
+            "amrTblPathStr",
+            envir = .GlobalEnv
+          )
+       );
 
    miruFileStr =
-      as.character(tkcget(miruDb_LabTK, "-text"));
+      normalizePath(
+         get(
+            "miruTblPathStr",
+            envir = .GlobalEnv
+         )
+      );
+
+   depthFileStr =
+      normalizePath(
+         get(
+             "coordsPathStr",
+             envir = .GlobalEnv
+         )
+      );
+
+
+   maskPrimFileStr =
+      normalizePath(
+         get(
+            "maskPrimPathStr",
+            envir = .GlobalEnv
+         )
+      );
 
    # Spoligotype settings
-   spoligoSeqFileStr =
-      as.character(tkcget(spoligoSeq_LabTK, "-text"));
+   spolSeqFileStr =
+      normalizePath(
+         get(
+             "spolSpacersPathStr",
+             envir = .GlobalEnv
+          )
+      );
 
-   spoligoDBFileStr =
-      as.character(tkcget(spoligoDb_LabTK, "-text"));
+   spolDBFileStr =
+      normalizePath(
+         get(
+             "spolDbPathStr",
+             envir = .GlobalEnv
+         )
+      );
 
    drStartStr = as.character(tclvalue(DR_START));
    drEndStr = as.character(tclvalue(DR_END));
-
-   depthFileStr =
-      as.character(tkcget(depthGeneTbl_LabTK, "-text"));
 
    samStr = "";
 
@@ -959,7 +1384,7 @@ function(
       paste(
          prefixStr,
          tclvalue(PREFIX_TCL),
-         sep = slashC
+         sep = slashSC
       ); # Paste the prefix for file names together
 
    logFileStr =
@@ -977,7 +1402,7 @@ function(
          "-o",
          samStr,
          refFileStr,
-         fqFileStr,
+         paste(fqFileStr, collapse = ' '),
          sep = " "
       ); # Build the minimap2 command
 
@@ -991,7 +1416,7 @@ function(
    #   o fun18 sec04 sub03:
    #     - Add MIRU lineage commands/check MIRU database
    #   o fun18 sec04 sub04:
-   #     - Add in spoligotype lineage comands
+   #     - Add in spoltype lineage comands
    #   o fun18 sec04 sub05:
    #     - Add in the consensus commands
    #   o fun18 sec04 sub06:
@@ -1035,13 +1460,22 @@ function(
       return();
    } # If: No primer masking file was input
 
-   tbCmdStr =
-      paste(
-        tbCmdStr,
-        "-mask-prim",
-        maskPrimFileStr,
-        sep=" "
-   );
+   if(file.exists(maskPrimFileStr)){
+      tbCmdStr =
+         paste(
+           tbCmdStr,
+           "-mask-prim",
+           maskPrimFileStr,
+           sep=" "
+      );
+   }else{
+      tbCmdStr =
+         paste(
+           tbCmdStr,
+           "-mask-prim -",
+           sep=" "
+      );
+   }
 
    #******************************************************
    # Fun18 Sec04 Sub02:
@@ -1120,7 +1554,7 @@ function(
 
    #******************************************************
    # Fun18 Sec04 Sub04:
-   #   - Add in spoligotype lineage comands
+   #   - Add in spoltype lineage comands
    #******************************************************
 
    if(! grepl("^[0-9][0-9]*$", drStartStr))
@@ -1149,13 +1583,13 @@ function(
       return();
    } # If: I have non-numeric coordinates for DR region
 
-   if(length(spoligoSeqFileStr) == 0 ||
-      ! file.exists(spoligoSeqFileStr)
-   ){ # If: no spoligotype file was input
+   if(length(spolSeqFileStr) == 0 ||
+      ! file.exists(spolSeqFileStr)
+   ){ # If: no spoltype file was input
       tkMessageStr =
          paste(
             "Spoligotype spacer sequence file",
-            spoligoSeqFileStr,
+            spolSeqFileStr,
             "could not be opened"
          );
 
@@ -1167,16 +1601,16 @@ function(
 
       showLineageMenu();
       return();
-   } # If: no spoligotype file was input
+   } # If: no spoltype file was input
 
-   if(length(spoligoDBFileStr) > 0 &&
-      ! file.exists(spoligoDBFileStr)
-   ){ # If: invalid spoligotype lineage file input
+   if(length(spolDBFileStr) > 0 &&
+      ! file.exists(spolDBFileStr)
+   ){ # If: invalid spoltype lineage file input
       tkMessageStr =
          paste(
-            "Could not open input spoligotype lineage",
+            "Could not open input spoltype lineage",
             "database (",
-            spoligoDBFileStr,
+            spolDBFileStr,
             ")",
             sep = ""
          );
@@ -1189,26 +1623,26 @@ function(
 
       showLineageMenu();
       return();
-   } # If: invalid spoligotype lineage file input
+   } # If: invalid spoltype lineage file input
  
    tbCmdStr =
       paste(
          tbCmdStr,
          "-spoligo",
-         spoligoSeqFileStr,
+         spolSeqFileStr,
          "-spoligo-min-score",
          tclvalue(MIN_PERC_SCORE_TCL),
          "-dr-start",
          drStartStr,
          "-dr-end",
          drEndStr
-      ); # Add in the spoligotype commands
+      ); # Add in the spoltype commands
 
-   if(length(spoligoDBFileStr))
-   { # If: I have an spoligotype lineage file
+   if(length(spolDBFileStr))
+   { # If: I have an spoltype lineage file
       tbCmdStr =
-         paste(tbCmdStr, "-db-spoligo", spoligoDBFileStr);
-   } # If: I have an spoligotype lineage file
+         paste(tbCmdStr, "-db-spoligo", spolDBFileStr);
+   } # If: I have an spoltype lineage file
 
    #******************************************************
    # Fun18 Sec04 Sub05:
@@ -1248,8 +1682,6 @@ function(
    tbCmdStr =
       paste(
          tbCmdStr,
-         "-graph-ext",
-         tclvalue(GRAPH_EXT_TCL),
          "-gene-coords",
          depthFileStr,
          sep = " "
@@ -1308,7 +1740,8 @@ function(
 
    errSI =
       system2(
-         command = "minimap2", # Run minimap2
+         command =
+            get("miniMapPathStr", envir = .GlobalEnv),
          args = "--version",
          wait = TRUE,          # Wait for minimap2
          timeout = 1           # error out after 1 second
@@ -1320,12 +1753,15 @@ function(
          message = "Could not find minimap2",
          caption = "ERROR"
       );
+
+      showReqInputMenu();
+
       return(0);
    } # If: I could not run minimap2
 
    versStr = 
       system2(
-         command = "minimap2",
+         command = miniMapPathStr, # minimap2 call
          args = "--version",
          wait = TRUE,
          timeout = 1,
@@ -1343,9 +1779,10 @@ function(
    
    errSI = 
       system2(
-         command = "minimap2",# Minimap2 command
+         command =
+            get("miniMapPathStr", envir = .GlobalEnv),
          args = argsMinimapStr,# arugments for minimap2
-         wait = TRUE,         # wait till minimap finishes
+         wait = TRUE,         # wait till miniMap finishes
          timeout = 0          # Do no time out
       ); # Run minimap2
 
@@ -1359,7 +1796,7 @@ function(
       );
 
       sink();
-      tkdestroy(reportGuiTK);
+      showReqInputMenu();
       return();
    } # If: I could not run minimap2
 
@@ -1377,7 +1814,7 @@ function(
 
       errSI = 
          system2(
-            command = "adjCoords",
+            get("adjCoordsPathStr", envir = .GlobalEnv),
             args = 
                paste(
                   "-coords",
@@ -1404,7 +1841,7 @@ function(
          );
 
          sink();
-         tkdestroy(reportGuiTK);
+         showReqInputMenu();
          return();
       } # If: adjCoords errored out
 
@@ -1418,14 +1855,68 @@ function(
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Fun18 Sec07:
    #   - Run freezeTB
+   #   o fun18 sec07 sub01:
+   #     - get freezeTB version
+   #   o fun18 sec07 sub02:
+   #     - run freezeTB
+   #   o fun18 sec07 sub03:
+   #     - build graphs for freezeTB
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+   #******************************************************
+   # Fun18 Sec07 Sub01:
+   #   - get freezeTB version
+   #******************************************************
+
    tkconfigure(messg_labTK, text = "running freezeTB");
+
+   errStr = 
+      system2(
+         command =
+            get("freezeTBPathStr", envir = .GlobalEnv),
+         args = "--version", # printing version
+         wait = TRUE,        # wait till freezeTB finishes
+         timeout = 1         # Do no time out
+      ); # Run freezeTB
+
+   if(errStr){
+      showReqInputMenu();
+
+      tbCmdStr =
+         paste(
+            "ERROR while running freezeTB",
+            errStr,
+            sep = " "
+         );
+
+      print(tbCmdStr);
+
+      tk_messageBox(
+         type = "ok",
+         message = tbCmdStr,
+         caption = "ERROR"
+      );
+
+      showReqInputMenu();
+
+      sink();
+      return();
+   } # If: I had an error running freezeTb
+
+   print(errStr); # print the version numbers
+
+   #******************************************************
+   # Fun18 Sec07 Sub02:
+   #   - run freezeTB
+   #******************************************************
+
+   # print command given to freezeTB
    print(paste("freezeTB", tbCmdStr, sep = " "));
 
    errStr = 
       system2(
-         command = "freezeTB",# freezeTB command
+         command =
+            get("freezeTBPathStr", envir = .GlobalEnv),
          args = tbCmdStr,# arugments for minimap2
          wait = TRUE,        # wait till freezeTB finishes
          #stderr = TRUE,
@@ -1450,9 +1941,59 @@ function(
          caption = "ERROR"
       );
 
+      showReqInputMenu();
+
       sink();
       return();
    } # If: I had an error running freezeTb
+
+   #******************************************************
+   # Fun18 Sec07 Sub03:
+   #   - build graphs for freezeTB
+   #******************************************************
+
+   if(
+      file.exists(
+         get(
+            "graphAmpDepthPathStr",
+             envir = .GlobalEnv
+         )
+       )
+   ){ # If: can make graphs
+      tbCmdStr =
+         paste(
+            get(
+               "graphAmpDepthPathStr",
+               envir = .GlobalEnv
+            ),
+            "-ext",
+            tclvalue(GRAPH_EXT_TCL),
+            "-prefix",
+            prefixStr,
+            "-who",
+            amrFileStr,
+            "-stats",
+            paste(
+               prefixStr,
+               "-depths.tsv",
+               sep = ''
+            ), # make output stats file name
+            sep = " "
+         ) # rebulid graphing command to print
+
+      system2(
+            command =
+               get(
+                  "def_rPathStr",
+                  envir = .GlobalEnv
+               ),
+         args = tbCmdStr,
+         wait = TRUE,        # wait till freezeTB finishes
+         timeout = 0         # do no time out
+      ); # run graphAmpDepth.r
+
+      showReqInputMenu();
+   } # If: can make graphs
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Fun18 Sec08:
@@ -1530,7 +2071,7 @@ fqButTK =
 if(TOOL_TIP_BL > 0){
    tk2tip(
       fqButTK,
-      "Fastq file with reads to check AMRs/spoligotypes"
+      "Fastq file with reads to check AMRs/spoltypes"
    ); # fastq button tooltip
 } # If: I can add an tooltip
 
@@ -1834,7 +2375,7 @@ if(TOOL_TIP_BL > 0){
 maskPrim_LabTK =
    tklabel(
       parent = filtInputTK,
-      text = def_primMaskStr
+      text = def_maskPrimStr
    );
 
 maskPrim_ButTK =
@@ -1992,21 +2533,21 @@ if(TOOL_TIP_BL > 0){
 #   - Spoligotype lineage detection
 #*********************************************************
 
-spoligoTitle_LabTK =
+spolTitle_LabTK =
    tklabel(
-      spoligoVarTK,
+      spolVarTK,
       text = "Spoligotyping settings"
    );
 
-spoligoSeq_LabTK =
+spolSeq_LabTK =
    tklabel(
-      spoligoVarTK,
-      text = def_spoligoRefsStr
+      spolVarTK,
+      text = def_spolSpacersStr
    );
 
-spoligoSeq_ButTK =
+spolSeq_ButTK =
    tkbutton(
-      spoligoVarTK,
+      spolVarTK,
       text = "Spoligo sequences",
       command = getSpoligoSeq
    );
@@ -2014,20 +2555,20 @@ spoligoSeq_ButTK =
 # There is here so systems without tcltk2 can work
 if(TOOL_TIP_BL > 0){
    tk2tip(
-      spoligoSeq_ButTK,
-      "Fasta file with spoligotype space sequences (DR)"
+      spolSeq_ButTK,
+      "Fasta file with spoltype space sequences (DR)"
    );
 } # If: I can add an tooltip
 
-spoligoDb_LabTK =
+spolDb_LabTK =
    tklabel(
-      spoligoVarTK,
-      text = def_spoligoDbStr
+      spolVarTK,
+      text = def_spolDbStr
    );
 
-spoligoDb_ButTK =
+spolDb_ButTK =
    tkbutton(
-      spoligoVarTK,
+      spolVarTK,
       text = "Spoligo database",
       command = getSpoligoDB
    );
@@ -2035,20 +2576,20 @@ spoligoDb_ButTK =
 # There is here so systems without tcltk2 can work
 if(TOOL_TIP_BL > 0){
    tk2tip(
-      spoligoDb_ButTK,
-      "csv file (data base) with spoligotype lineages"
+      spolDb_ButTK,
+      "csv file (data base) with spoltype lineages"
    );
 } # If: I can add an tooltip
 
-spoligoPerc_LabTK =
+spolPerc_LabTK =
    tklabel(
-      spoligoVarTK,
+      spolVarTK,
       text = "Min % score"
    );
 
-spoligoPerc_SlideTK =
+spolPerc_SlideTK =
    tkscale(
-      spoligoVarTK,
+      spolVarTK,
       from = 0,
       to = 1,
       showvalue = TRUE,
@@ -2059,47 +2600,47 @@ spoligoPerc_SlideTK =
 
 if(TOOL_TIP_BL > 0){
    tk2tip(
-     spoligoPerc_SlideTK,
+     spolPerc_SlideTK,
      "Minimum percent score to count an spacer as mapped"
    );
 } # Add tooltip label
 
-spoligoStart_LabTK =
+spolStart_LabTK =
    tklabel(
-      spoligoVarTK,
+      spolVarTK,
       text = "DR start"
    );
 
-spoligoStart_BoxTK =
+spolStart_BoxTK =
    tkentry(
-      spoligoVarTK,
+      spolVarTK,
       width = 12,
       textvariable = DR_START
    );
 
 if(TOOL_TIP_BL > 0){
    tk2tip(
-     spoligoStart_BoxTK,
+     spolStart_BoxTK,
      "Start of direct repeat (DR) region in reference"
    );
 } # Add tooltip label
 
-spoligoEnd_LabTK =
+spolEnd_LabTK =
    tklabel(
-      spoligoVarTK,
+      spolVarTK,
       text = "DR end"
    );
 
-spoligoEnd_BoxTK =
+spolEnd_BoxTK =
    tkentry(
-      spoligoVarTK,
+      spolVarTK,
       width = 12,
       textvariable = DR_END
    );
 
 if(TOOL_TIP_BL > 0){
    tk2tip(
-     spoligoEnd_BoxTK,
+     spolEnd_BoxTK,
      "End of direct repeat (DR) region in reference"
    );
 } # Add tooltip label
@@ -2635,32 +3176,32 @@ tkgrid.configure(
    sticky = "w"
 );
 
-tkgrid(spoligoTitle_LabTK);
-tkgrid(spoligoSeq_ButTK, spoligoSeq_LabTK);
-tkgrid(spoligoDb_ButTK, spoligoDb_LabTK);
-tkgrid(spoligoPerc_LabTK, spoligoPerc_SlideTK);
-tkgrid(spoligoStart_LabTK, spoligoStart_BoxTK);
-tkgrid(spoligoEnd_LabTK, spoligoEnd_BoxTK);
+tkgrid(spolTitle_LabTK);
+tkgrid(spolSeq_ButTK, spolSeq_LabTK);
+tkgrid(spolDb_ButTK, spolDb_LabTK);
+tkgrid(spolPerc_LabTK, spolPerc_SlideTK);
+tkgrid(spolStart_LabTK, spolStart_BoxTK);
+tkgrid(spolEnd_LabTK, spolEnd_BoxTK);
 
 tkgrid.configure(
-   spoligoTitle_LabTK,
-   spoligoDb_ButTK,
-   spoligoPerc_SlideTK,
-   spoligoPerc_LabTK,
-   spoligoStart_LabTK,
-   spoligoEnd_LabTK,
+   spolTitle_LabTK,
+   spolDb_ButTK,
+   spolPerc_SlideTK,
+   spolPerc_LabTK,
+   spolStart_LabTK,
+   spolEnd_LabTK,
    sticky = "w"
 );
 
 tkgrid.configure(
-   spoligoDb_LabTK,
-   spoligoStart_BoxTK,
-   spoligoEnd_BoxTK,
+   spolDb_LabTK,
+   spolStart_BoxTK,
+   spolEnd_BoxTK,
    sticky = "w"
 );
 
 tkpack(lineageInputTK, miruVarTK, side = "left");
-tkpack(lineageInputTK, spoligoVarTK, side = "left");
+tkpack(lineageInputTK, spolVarTK, side = "left");
 
 #*********************************************************
 # Ingui09 Sub05:
@@ -2834,75 +3375,75 @@ showReqInputMenu();
 while(as.numeric(tkwinfo("exists", guiTK)))
    Sys.sleep(0.2);
 
-q("no");
+#q("no");
 
-/*=======================================================\
-: License:
-: 
-: This code is under the unlicense (public domain).
-:   However, for cases were the public domain is not
-:   suitable, such as countries that do not respect the
-:   public domain or were working with the public domain
-:   is inconveint / not possible, this code is under the
-:   MIT license
-: 
-: Public domain:
-: 
-: This is free and unencumbered software released into the
-:   public domain.
-: 
-: Anyone is free to copy, modify, publish, use, compile,
-:   sell, or distribute this software, either in source
-:   code form or as a compiled binary, for any purpose,
-:   commercial or non-commercial, and by any means.
-: 
-: In jurisdictions that recognize copyright laws, the
-:   author or authors of this software dedicate any and
-:   all copyright interest in the software to the public
-:   domain. We make this dedication for the benefit of the
-:   public at large and to the detriment of our heirs and
-:   successors. We intend this dedication to be an overt
-:   act of relinquishment in perpetuity of all present and
-:   future rights to this software under copyright law.
-: 
-: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
-:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
-:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-:   DEALINGS IN THE SOFTWARE.
-: 
-: For more information, please refer to
-:   <https://unlicense.org>
-: 
-: MIT License:
-: 
-: Copyright (c) 2024 jeremyButtler
-: 
-: Permission is hereby granted, free of charge, to any
-:   person obtaining a copy of this software and
-:   associated documentation files (the "Software"), to
-:   deal in the Software without restriction, including
-:   without limitation the rights to use, copy, modify,
-:   merge, publish, distribute, sublicense, and/or sell
-:   copies of the Software, and to permit persons to whom
-:   the Software is furnished to do so, subject to the
-:   following conditions:
-: 
-: The above copyright notice and this permission notice
-:   shall be included in all copies or substantial
-:   portions of the Software.
-: 
-: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
-:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-:   USE OR OTHER DEALINGS IN THE SOFTWARE.
-\=======================================================*/
+#=========================================================
+# License:
+# 
+# This code is under the unlicense (public domain).
+#   However, for cases were the public domain is not
+#   suitable, such as countries that do not respect the
+#   public domain or were working with the public domain
+#   is inconveint / not possible, this code is under the
+#   MIT license
+# 
+# Public domain:
+# 
+# This is free and unencumbered software released into the
+#   public domain.
+# 
+# Anyone is free to copy, modify, publish, use, compile,
+#   sell, or distribute this software, either in source
+#   code form or as a compiled binary, for any purpose,
+#   commercial or non-commercial, and by any means.
+# 
+# In jurisdictions that recognize copyright laws, the
+#   author or authors of this software dedicate any and
+#   all copyright interest in the software to the public
+#   domain. We make this dedication for the benefit of the
+#   public at large and to the detriment of our heirs and
+#   successors. We intend this dedication to be an overt
+#   act of relinquishment in perpetuity of all present and
+#   future rights to this software under copyright law.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+#   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+#   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+#   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+#   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+#   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+#   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+#   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
+# 
+# For more information, please refer to
+#   <https://unlicense.org>
+# 
+# MIT License:
+# 
+# Copyright (c) 2024 jeremyButtler
+# 
+# Permission is hereby granted, free of charge, to any
+#   person obtaining a copy of this software and
+#   associated documentation files (the "Software"), to
+#   deal in the Software without restriction, including
+#   without limitation the rights to use, copy, modify,
+#   merge, publish, distribute, sublicense, and/or sell
+#   copies of the Software, and to permit persons to whom
+#   the Software is furnished to do so, subject to the
+#   following conditions:
+# 
+# The above copyright notice and this permission notice
+#   shall be included in all copies or substantial
+#   portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+#   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+#   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+#   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+#   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+#   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+#   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+#   USE OR OTHER DEALINGS IN THE SOFTWARE.
+#=========================================================

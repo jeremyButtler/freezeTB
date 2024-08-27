@@ -1,0 +1,47 @@
+LD=cc
+CC=cc
+CFLAGS= -O3 -static -std=c89 -Wall -Wextra
+NAME=filtsam
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+O=.o.static
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/samEntry$O \
+   $(genLib)/trimSam$O
+
+all: filtsam$O $(objFiles)
+	$(LD) -o $(NAME) $(CFLAGS) filtsam$O $(objFiles)
+
+filtsam$O: filtsam.c $(objFiles)
+	$(CC) -o filtsam$O -c $(CFLAGS) filtsam.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+$(genLib)/trimSam$O: $(genLib)/trimSam.c $(genLib)/trimSam.h $(genLib)/samEntry$O
+	$(CC) -o $(genLib)/trimSam$O -c $(CFLAGS) $(genLib)/trimSam.c
+
+install:
+	mv $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
+clean:
+	rm $(objFiles) filtsam$O;

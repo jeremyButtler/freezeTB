@@ -1,0 +1,53 @@
+</$objtype/mkfile
+
+CFLAGS= -w -DPLAN9
+NAME=ampDepth
+PREFIX=
+genLib=../genLib
+genAln=../genAln
+
+objFiles=\
+   $genLib/base10str$O \
+   $genLib/ulCp$O \
+   $genLib/charCp$O \
+   $genLib/numToStr$O \
+   $genLib/geneCoord$O \
+   $genLib/samEntry$O \
+   $genLib/trimSam$O
+
+all: ampDepthMain$O $objFiles
+	$LD -o $NAME $CFLAGS ampDepthMain$O ampDepth$O $objFiles
+
+ampDepthMain$O: ampDepthMain.c ampDepth$O
+	$CC $CFLAGS ampDepthMain.c
+
+ampDepth$O: ampDepth.c ampDepth.h $genLib/geneCoord$O $genLib/samEntry$O
+	$CC $CFLAGS ampDepth.c
+
+$genLib/base10str$O: $genLib/base10str.c $genLib/base10str.h
+	$CC $CFLAGS $genLib/base10str.c
+
+$genLib/charCp$O: $genLib/charCp.c $genLib/charCp.h
+	$CC $CFLAGS $genLib/charCp.c
+
+$genLib/ulCp$O: $genLib/ulCp.c $genLib/ulCp.h
+	$CC $CFLAGS $genLib/ulCp.c
+
+$genLib/numToStr$O: $genLib/numToStr.c $genLib/numToStr.h
+	$CC $CFLAGS $genLib/numToStr.c
+
+$genLib/geneCoord$O: $genLib/geneCoord.c $genLib/geneCoord.h $genLib/ulCp$O $genLib/base10str$O $genLib/charCp$O $genLib/genMath.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/geneCoord.c
+
+$genLib/samEntry$O: $genLib/samEntry.c $genLib/samEntry.h $genLib/ulCp$O $genLib/base10str$O $genLib/numToStr$O $genLib/ntTo5Bit.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/samEntry.c
+
+$genLib/trimSam$O: $genLib/trimSam.c $genLib/trimSam.h $genLib/samEntry$O
+	$CC $CFLAGS $genLib/trimSam.c
+
+install:
+	mv $NAME $PREFIX
+	chmod a+x $PREFIX/$NAME
+
+clean:
+	rm $objFiles ampDepthMain$O ampDepth$O;

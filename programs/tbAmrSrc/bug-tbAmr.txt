@@ -1,0 +1,28 @@
+#b tbAmr.c:1076
+b checkAmr.c:2538
+
+# First kept frameshift case (BC33)
+#b checkAmr.c:1053 if iAmr == 3059
+
+# If I had resistance
+#b checkAmr.c:1391
+
+# Null test
+
+# Actual test
+#r -frameshift -amr-tbl ../freezeTBFiles/who-2023.tsv -sam ~/files/testing/bug.sam
+#r -amr-tbl ../../freezeTBFiles/who-2023.tsv -sam ~/files/testing/null-con.sam
+r -amr-tbl ../../freezeTBFiles/who-2023.tsv -sam-con $HOME/files/testing/null-con.sam
+
+define pcross
+   set $icnt = 0
+   set $tmpAmrST = $0
+   set $lenAmr = $1
+
+   while($icnt < lenAmr)
+      if(tmpAmrST[icnt].crossResFlagsUL)
+         p icnt
+      end
+      set $icnt = $icnt + 1
+   end
+end

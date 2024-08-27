@@ -1,0 +1,74 @@
+LD=cc
+CC=cc
+CFLAGS= -O3 -std=c89 -Wall -Wextra
+NAME=alnwater
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+O=.o.unix
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/shellSort$O \
+   $(genLib)/seqST$O \
+   $(genLib)/kmerCnt$O \
+   $(genLib)/samEntry$O \
+   $(genAln)/indexToCoord$O \
+   $(genAln)/alnSet$O \
+   $(genAln)/dirMatrix$O \
+   $(genAln)/water$O
+
+all: alnwater$O
+	$(LD) -o $(NAME) $(CFLAGS) alnwater$O $(objFiles)
+
+alnwater$O: alnwater.c $(objFiles)
+	$(CC) -o alnwater$O -c $(CFLAGS) alnwater.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/genMath$O: $(genLib)/genMath.c $(genLib)/genMath.h
+	$(CC) -o $(genLib)/genMath$O -c $(CFLAGS) $(genLib)/genMath.c
+
+$(genLib)/shellSort$O: $(genLib)/shellSort.c $(genLib)/shellSort.h
+	$(CC) -o $(genLib)/shellSort$O -c $(CFLAGS) $(genLib)/shellSort.c
+
+$(genLib)/seqST$O: $(genLib)/seqST.c $(genLib)/seqST.h $(genLib)/ulCp$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/seqST$O -c $(CFLAGS) $(genLib)/seqST.c
+
+$(genLib)/kmerCnt$O: $(genLib)/kmerCnt.c $(genLib)/kmerCnt.h $(genLib)/seqST$O $(genLib)/ntTo2Bit.h $(genLib)/genMath.h
+	$(CC) -o $(genLib)/kmerCnt$O -c $(CFLAGS) $(genLib)/kmerCnt.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+$(genAln)/indexToCoord$O: $(genAln)/indexToCoord.c $(genAln)/indexToCoord.h
+	$(CC) -o $(genAln)/indexToCoord$O -c $(CFLAGS) $(genAln)/indexToCoord.c
+
+$(genAln)/alnSet$O: $(genAln)/alnSet.c $(genAln)/alnSet.h $(genAln)/alnDefs.h $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genAln)/alnSet$O -c $(CFLAGS) $(genAln)/alnSet.c
+
+$(genAln)/dirMatrix$O: $(genAln)/dirMatrix.c $(genAln)/dirMatrix.h $(genAln)/alnSet$O $(genLib)/samEntry$O $(genLib)/seqST$O $(genLib)/charCp$O
+	$(CC) -o $(genAln)/dirMatrix$O -c $(CFLAGS) $(genAln)/dirMatrix.c
+
+$(genAln)/water$O: $(genAln)/water.c $(genAln)/water.h $(genAln)/alnSet$O $(genAln)/indexToCoord$O $(genLib)/seqST$O $(genLib)/genMath.h
+	$(CC) -o $(genAln)/water$O -c $(CFLAGS) $(genAln)/water.c
+
+install:
+	mv $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
+clean:
+	rm $(objFiles) alnwater$O;

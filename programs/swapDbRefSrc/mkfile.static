@@ -1,0 +1,55 @@
+LD=cc
+CC=cc
+CFLAGS= -O3 -static -std=c89 -Wall -Wextra
+NAME=swapDbRef
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+tbAmr=../tbAmrSrc
+O=.o.static
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/samEntry$O \
+   $(tbAmr)/amrST$O \
+   $(tbAmr)/drugAry$O
+
+all: swapDbRef$O $(objFiles)
+	$(LD) -o $(NAME) $(CFLAGS) swapDbRef$O refSwap$O $(objFiles)
+
+swapDbRef$O: swapDbRef.c refSwap$O $(genLib)/charCp$O
+	$(CC) -o swapDbRef$O -c $(CFLAGS) swapDbRef.c
+
+refSwap$O: refSwap.c refSwap.h $(genLib)/samEntry$O $(tbAmr)/amrST$O
+	$(CC) -o refSwap$O -c $(CFLAGS) refSwap.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+$(tbAmr)/drugAry$O: $(tbAmr)/drugAry.c $(tbAmr)/drugAry.h
+	$(CC) -o $(tbAmr)/drugAry$O -c $(CFLAGS) $(tbAmr)/drugAry.c
+
+$(tbAmr)/amrST$O: $(tbAmr)/amrST.c $(tbAmr)/amrST.h $(tbAmr)/drugAry$O $(genLib)/ulCp$O $(genLib)/charCp$O $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(tbAmr)/amrST$O -c $(CFLAGS) $(tbAmr)/amrST.c
+
+install:
+	mv $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
+clean:
+	rm $(objFiles) swapDbRef$O refSwap$O;

@@ -1,0 +1,49 @@
+</$objtype/mkfile
+
+CFLAGS= -w -DPLAN9
+NAME=adjCoords
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+
+objFiles=\
+   $genLib/base10str$O \
+   $genLib/ulCp$O \
+   $genLib/charCp$O \
+   $genLib/numToStr$O \
+   $genLib/geneCoord$O \
+   $genLib/samEntry$O
+
+all: adjCoordsMain$O $objFiles
+	$LD -o $NAME $CFLAGS adjCoordsMain$O adjCoords$O $objFiles
+
+adjCoordsMain$O: adjCoordsMain.c adjCoords$O
+	$CC $CFLAGS adjCoordsMain.c
+
+adjCoords$O: adjCoords.c adjCoords.h $genLib/samEntry$O $genLib/geneCoord$O
+	$CC $CFLAGS adjCoords.c
+
+$genLib/base10str$O: $genLib/base10str.c $genLib/base10str.h
+	$CC $CFLAGS $genLib/base10str.c
+
+$genLib/charCp$O: $genLib/charCp.c $genLib/charCp.h
+	$CC $CFLAGS $genLib/charCp.c
+
+$genLib/ulCp$O: $genLib/ulCp.c $genLib/ulCp.h
+	$CC $CFLAGS $genLib/ulCp.c
+
+$genLib/numToStr$O: $genLib/numToStr.c $genLib/numToStr.h
+	$CC $CFLAGS $genLib/numToStr.c
+
+$genLib/geneCoord$O: $genLib/geneCoord.c $genLib/geneCoord.h $genLib/ulCp$O $genLib/base10str$O $genLib/charCp$O $genLib/genMath.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/geneCoord.c
+
+$genLib/samEntry$O: $genLib/samEntry.c $genLib/samEntry.h $genLib/ulCp$O $genLib/base10str$O $genLib/numToStr$O $genLib/ntTo5Bit.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/samEntry.c
+
+install:
+	mv $NAME $PREFIX
+	chmod a+x $PREFIX/$NAME
+
+clean:
+	rm $objFiles adjCoordsMain$O adjCoords$O;

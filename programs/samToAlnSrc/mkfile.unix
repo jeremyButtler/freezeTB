@@ -1,0 +1,55 @@
+LD=cc
+CC=cc
+CFLAGS= -O3 -std=c89 -Wall -Wextra
+NAME=samToAln
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+O=.o.unix
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/seqST$O \
+   $(genLib)/samEntry$O \
+   $(genAln)/alnSet$O \
+   $(genAln)/samToAln$O
+
+all: samToAlnMain$O $(objFiles)
+	$(LD) -o $(NAME) $(CFLAGS) samToAlnMain$O $(objFiles)
+
+samToAlnMain$O: samToAlnMain.c $(genLib)/charCp$O $(genAln)/samToAln$O
+	$(CC) -o samToAlnMain$O -c $(CFLAGS) samToAlnMain.c
+
+$(genAln)/samToAln$O: $(genAln)/samToAln.c $(genAln)/samToAln.h $(genLib)/seqST$O $(genLib)/samEntry$O $(genAln)/alnSet$O
+	$(CC) -o $(genAln)/samToAln$O -c $(CFLAGS) $(genAln)/samToAln.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/seqST$O: $(genLib)/seqST.c $(genLib)/seqST.h $(genLib)/ulCp$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/seqST$O -c $(CFLAGS) $(genLib)/seqST.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+$(genAln)/alnSet$O: $(genAln)/alnSet.c $(genAln)/alnSet.h $(genAln)/alnDefs.h $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genAln)/alnSet$O -c $(CFLAGS) $(genAln)/alnSet.c
+
+install:
+	mv $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
+clean:
+	rm $(objFiles) samToAlnMain$O;

@@ -1,0 +1,49 @@
+</$objtype/mkfile
+
+CFLAGS= -w -DPLAN9
+NAME=maskPrim
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+
+objFiles=\
+   $genLib/base10str$O \
+   $genLib/ulCp$O \
+   $genLib/charCp$O \
+   $genLib/numToStr$O \
+   $genLib/shellSort$O \
+   $genLib/samEntry$O
+
+all: maskPrimMain$O $objFiles
+	$LD -o $NAME $CFLAGS maskPrimMain$O maskPrim$O $objFiles
+
+maskPrimMain$O: maskPrimMain.c maskPrim$O $genLib/charCp$O maskPrimVersion.h
+	$CC $CFLAGS maskPrimMain.c
+
+maskPrim$O: maskPrim.c maskPrim.h $genLib/shellSort$O $genLib/samEntry$O
+	$CC $CFLAGS maskPrim.c
+
+$genLib/base10str$O: $genLib/base10str.c $genLib/base10str.h
+	$CC $CFLAGS $genLib/base10str.c
+
+$genLib/charCp$O: $genLib/charCp.c $genLib/charCp.h
+	$CC $CFLAGS $genLib/charCp.c
+
+$genLib/ulCp$O: $genLib/ulCp.c $genLib/ulCp.h
+	$CC $CFLAGS $genLib/ulCp.c
+
+$genLib/numToStr$O: $genLib/numToStr.c $genLib/numToStr.h
+	$CC $CFLAGS $genLib/numToStr.c
+
+$genLib/shellSort$O: $genLib/shellSort.c $genLib/shellSort.h
+	$CC $CFLAGS $genLib/shellSort.c
+
+$genLib/samEntry$O: $genLib/samEntry.c $genLib/samEntry.h $genLib/ulCp$O $genLib/base10str$O $genLib/numToStr$O $genLib/ntTo5Bit.h $genLib/dataTypeShortHand.h
+	$CC $CFLAGS $genLib/samEntry.c
+
+install:
+	mv $NAME $PREFIX
+	chmod a+x $PREFIX/$NAME
+
+clean:
+	rm $objFiles maskPrimMain$O maskPrim$O;

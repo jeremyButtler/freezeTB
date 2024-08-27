@@ -1,0 +1,63 @@
+LD=cc
+CC=cc
+CFLAGS= -O3 -static -std=c89 -Wall -Wextra
+NAME=tbAmr
+PREFIX=/usr/local/bin
+genLib=../genLib
+genAln=../genAln
+O=.o.static
+
+objFiles=\
+   $(genLib)/base10str$O \
+   $(genLib)/ulCp$O \
+   $(genLib)/charCp$O \
+   $(genLib)/numToStr$O \
+   $(genLib)/genMath$O \
+   $(genLib)/codonTbl$O \
+   $(genLib)/samEntry$O \
+   drugAry$O \
+   amrST$O \
+   checkAmr$O
+
+all: tbAmr$O $(objFiles)
+	$(LD) -o $(NAME) $(CFLAGS) tbAmr$O $(objFiles)
+
+tbAmr$O: tbAmr.c checkAmr$O tbAmrDefs.h
+	$(CC) -o tbAmr$O -c $(CFLAGS) tbAmr.c
+
+checkAmr$O: checkAmr.c checkAmr.h amrST$O $(genLib)/genMath$O $(genLib)/codonTbl$O $(genLib)/samEntry$O
+	$(CC) -o checkAmr$O -c $(CFLAGS) checkAmr.c
+
+drugAry$O: drugAry.c drugAry.h
+	$(CC) -o drugAry$O -c $(CFLAGS) drugAry.c
+
+amrST$O: amrST.c amrST.h drugAry$O $(genLib)/ulCp$O $(genLib)/charCp$O $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o amrST$O -c $(CFLAGS) amrST.c
+
+$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+
+$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+
+$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
+	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/genMath$O: $(genLib)/genMath.c $(genLib)/genMath.h
+	$(CC) -o $(genLib)/genMath$O -c $(CFLAGS) $(genLib)/genMath.c
+
+$(genLib)/codonTbl$O: $(genLib)/codonTbl.c $(genLib)/codonTbl.h $(genLib)/ntTo2Bit.h $(genLib)/revNtTo2Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/codonTbl$O -c $(CFLAGS) $(genLib)/codonTbl.c
+
+$(genLib)/samEntry$O: $(genLib)/samEntry.c $(genLib)/samEntry.h $(genLib)/ulCp$O $(genLib)/base10str$O $(genLib)/numToStr$O $(genLib)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genLib)/samEntry$O -c $(CFLAGS) $(genLib)/samEntry.c
+
+install:
+	mv $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
+clean:
+	rm $(objFiles) tbAmr$O;

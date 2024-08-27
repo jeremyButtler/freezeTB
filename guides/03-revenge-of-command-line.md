@@ -549,6 +549,8 @@ cat \
     "$fqDirStr/"*".fastq.gz" \
   > "$prefixStr.fastq.gz";
   # Notice the "*" is between double quotes
+  # or we could just provide *.fastq.gz to minimap2
+    # found this one out later
 
 # make sam file for freezeTB and then run freezeTB
 minimap2 \

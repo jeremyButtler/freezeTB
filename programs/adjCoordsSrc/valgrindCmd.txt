@@ -1,0 +1,2 @@
+valgrind 2>del-grind.txt --tool=memcheck --track-origins=yes --leak-check=full --keep-debuginfo=yes -s ./adjCoords -sam del-gene.sam -ref ../../freezeTBFiles/NC000962.fa -coords ../../freezeTBFiles/gene-tbl.tsv > del-adj.sam
+

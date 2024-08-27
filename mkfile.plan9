@@ -1,0 +1,31 @@
+</$objtype/mkfile
+
+CFLAGS=-w -DPLAN9
+PREFIX=
+DB_PREFIX=
+ext=plan9
+
+all:
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C programs
+
+install-support:
+	chmod -R a+r  "$DB_PREFIX"/freezeTBFiles
+	chmod a+r  "$DB_PREFIX"/freezeTBFiles/*
+
+install: install-support
+	make PREFIX="$$(echo "$$(echo $$(cd $$(echo  "$PREFIX") && pwd))")" -f mkfile.$ext -C programs install
+	# need the echo "$$(echo $$(cd $$(echo "$PREFIX") && pwd)) 
+   # to convert the relative path to absolute
+
+install-modules: install-support
+	make PREFIX="$$(echo "$$(echo $$(cd $$(echo  "$PREFIX") && pwd))")" -f mkfile.$ext -C programs install-modules
+	# need the echo "$$(echo $$(cd $$(echo "$PREFIX") && pwd)) 
+   # to convert the relative path to absolute
+
+install-all: install-support
+	make PREFIX="$$(echo "$$(echo $$(cd $$(echo  "$PREFIX") && pwd))")" -f mkfile.$ext -C programs install-all
+	# need the echo "$$(echo $$(cd $$(echo "$PREFIX") && pwd)) 
+   # to convert the relative path to absolute
+
+clean:
+	make PREFIX="$PREFIX" -f mkfile.$ext -C programs clean

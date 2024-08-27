@@ -1,0 +1,76 @@
+LD=link
+CC=cl
+CFLAGS= /Od /Z7 /Za /Tc
+NAME=alnMemwater
+genLib=..\genLib
+genAln=..\genAln
+curDir=..\alnMemWaterSrc
+O=.o.win
+ext=.win
+
+objFiles=\
+	$(genLib)\base10str$O \
+	$(genLib)\numToStr$O \
+	$(genLib)\charCp$O \
+	$(genLib)\ulCp$O \
+	$(genLib)\seqST$O \
+	$(genLib)\kmerCnt$O \
+	$(genAln)\indexToCoord$O \
+	$(genAln)\alnSet$O \
+	$(genAln)\memwater$O \
+	alnMemwater$O
+
+sourceFiles=\
+	$(genLib)\dataTypeShortHand.h \
+	$(genLib)\genMath.h \
+	$(genLib)\ntTo2Bit.h \
+	$(genLib)\ntTo5Bit.h \
+	$(genAln)\alnDefs.h \
+	$(genLib)\base10str.c \
+	$(genLib)\base10str.h \
+	$(genLib)\numToStr.c \
+	$(genLib)\numToStr.h \
+	$(genLib)\charCp.c \
+	$(genLib)\charCp.h \
+	$(genLib)\ulCp.c \
+	$(genLib)\ulCp.h \
+	$(genLib)\seqST.c \
+	$(genLib)\seqST.h \
+	$(genLib)\kmerCnt.c \
+	$(genLib)\kmerCnt.h \
+	$(genAln)\indexToCoord.c \
+	$(genAln)\indexToCoord.h \
+	$(genAln)\alnSet.c \
+	$(genAln)\alnSet.h \
+	$(genAln)\dirMatrix.c \
+	$(genAln)\dirMatrix.h
+
+all: alnMemwater$O
+	$(LD) /DEBUG /out:$(NAME).exe $(objFiles)
+	
+libraries: $(sourceFiles)
+	cd $(genLib)
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genLib)\mkfile$(ext) base10str$O
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genLib)\mkfile$(ext) numToStr$O
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genLib)\mkfile$(ext) charCp$O
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genLib)\mkfile$(ext) seqST$O
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genLib)\mkfile$(ext) shellSort$O
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genLib)\mkfile$(ext) kmerCnt$O
+	cd $(genAln)
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genAln)\mkfile$(ext) indexToCoord$O
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genAln)\mkfile$(ext) alnSet$O
+	cd $(curDir)
+
+alnMemwater$O: alnMemwater.c memwater$O libraries
+	$(CC) /Fo:alnMemwater$O /c $(CFLAGS) alnMemwater.c
+
+memwater$O: $(genAln)\memwater.c $(genAln)\memwater.h libraries
+	cd $(genAln)
+	nmake CFLAGS="$(CFLAGS)" CC="$(CC)" /F $(genAln)\mkfile$(ext) memwater$O
+	cd $(curDir)
+
+clean:
+	del *$O
+	cd $(genAln)
+	nmake /F $(genAln)\mkfile$(ext) clean
+	cd $(curDir)

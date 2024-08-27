@@ -1,0 +1,49 @@
+LD=link
+CC=cl
+CFLAGS= /O2 /Ot /Za /Tc
+NAME=adjCoords
+PREFIX="C:\Program Files\freezeTB\"
+genLib=..\genLib
+genAln=..\genAln
+O=.o.win
+
+objFiles=\
+   $(genLib)\base10str$O \
+   $(genLib)\ulCp$O \
+   $(genLib)\charCp$O \
+   $(genLib)\numToStr$O \
+   $(genLib)\geneCoord$O \
+   $(genLib)\samEntry$O
+
+all: adjCoordsMain$O $(objFiles)
+	$(LD) /out:$(NAME).exe adjCoordsMain$O adjCoords$O $(objFiles)
+
+adjCoordsMain$O: adjCoordsMain.c adjCoords$O
+	$(CC) /Fo:adjCoordsMain$O /c $(CFLAGS) adjCoordsMain.c
+
+adjCoords$O: adjCoords.c adjCoords.h $(genLib)\samEntry$O $(genLib)\geneCoord$O
+	$(CC) /Fo:adjCoords$O /c $(CFLAGS) adjCoords.c
+
+$(genLib)\base10str$O: $(genLib)\base10str.c $(genLib)\base10str.h
+	$(CC) /Fo:$(genLib)\base10str$O /c $(CFLAGS) $(genLib)\base10str.c
+
+$(genLib)\charCp$O: $(genLib)\charCp.c $(genLib)\charCp.h
+	$(CC) /Fo:$(genLib)\charCp$O /c $(CFLAGS) $(genLib)\charCp.c
+
+$(genLib)\ulCp$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
+	$(CC) /Fo:$(genLib)\ulCp$O /c $(CFLAGS) $(genLib)\ulCp.c
+
+$(genLib)\numToStr$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
+	$(CC) /Fo:$(genLib)\numToStr$O /c $(CFLAGS) $(genLib)\numToStr.c
+
+$(genLib)\geneCoord$O: $(genLib)\geneCoord.c $(genLib)\geneCoord.h $(genLib)\ulCp$O $(genLib)\base10str$O $(genLib)\charCp$O $(genLib)\genMath.h $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genLib)\geneCoord$O /c $(CFLAGS) $(genLib)\geneCoord.c
+
+$(genLib)\samEntry$O: $(genLib)\samEntry.c $(genLib)\samEntry.h $(genLib)\ulCp$O $(genLib)\base10str$O $(genLib)\numToStr$O $(genLib)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genLib)\samEntry$O /c $(CFLAGS) $(genLib)\samEntry.c
+
+install:
+	move $(NAME).exe $(PREFIX)
+
+clean:
+	del $(objFiles) adjCoordsMain$O adjCoords$O;

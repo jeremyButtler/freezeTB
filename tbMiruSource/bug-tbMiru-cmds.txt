@@ -1,5 +1,0 @@
-b tbMiru.c:93
-b miruTblStruct.c:1057
-
-#r -sam ~/files/testing/MIRU-154.sam -miru-tbl ../freezeTBFiles/miruTbl.tsv -out-tbl del.tsv
-r -sam ~/files/testing/MIRU-4348.sam -miru-tbl ../freezeTBFiles/miruTbl.tsv -out-tbl del.tsv
