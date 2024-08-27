@@ -1,3 +1,29 @@
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# graphAmpDepth.r SOF: Start Of File
+#   - makes graphs for output from ampDepth
+#   o part01:
+#     - included libraries
+#   o fun01: phelp_graphAmpDepth
+#     - help message function
+#   o fun02: findFIle_graphAmpDepth
+#     - checks to see if a freezeTB file exists
+#   o part02:
+#     - script variables, user input, and prep
+#   o part03:
+#     - read depth graph
+#   o part04:
+#     - gene coverage graphs
+#   o part05:
+#     - amplicon coverage graphs
+#   o license:
+#     - Licensing for this code (public domain / mit)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#---------------------------------------------------------
+# Part01:
+#   - included libraries
+#---------------------------------------------------------
+
 #!/usr/bin/env Rscript
 
 library("ggplot2")
@@ -5,7 +31,20 @@ library("viridisLite")
 library("data.table")
 # sudo xbps-install R-cran-data.table
 
-pGraphAmpDepthHelp = function(inStr){
+#---------------------------------------------------------
+# Fun01: phelp_graphAmpDepth
+#   - help message function
+# Input:
+#   - inStr:
+#     o input argument to check for help message
+# Output:
+#   - Prints:
+#     o help mesesage to screen if inStr has help flag
+#   - Returns:
+#     o TRUE if printed help message
+#     o FALSE if inStr is not help flag (no printing)
+#---------------------------------------------------------
+phelp_graphAmpDepth = function(inStr){
  if(inStr == "-h" ||
     inStr == "--h" ||
     inStr == "-help" ||
@@ -42,36 +81,142 @@ pGraphAmpDepthHelp = function(inStr){
    return(FALSE);
 } # pGraphAmpDephtHelp
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# SOF: Start Of File
-#  o sec01:
-#    - Variable declerations
-#  o sec02:
-#    - Get user input
-#  o sec03:
-#    - Set up the gene Names column
-#  o sec04:
-#    - Final preperations and graphing
-#  o sec05:
-#    - Format and save the graph
-#  o sec06:
-#    - graphing (Mapping to genes)
-#  o sec07:
-#    - Format and save the graph (mapping to genes)
-#   o license:
-#     - Licensing for this code (public domain / mit)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---------------------------------------------------------
+# Fun02: findFIle_graphAmpDepth
+#   - checks to see if a freezeTB file exists
+# Input:
+#   - fileStr:
+#     o freezeTB file to hunt for
+# Output:
+#   - Returns:
+#     o path to file if exists
+#     o NULL if file could not be found
+#---------------------------------------------------------
+findFile_graphAmpDepth = function(fileStr){
+
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # Fun02 TOC:
+   # fun02 sec01:
+   #   - variable declarations
+   # fun02 sec02:
+   #   - set up and check if file is in pwd
+   # fun02 sec03:
+   #   - check if file is in home/Documents directory
+   # fun02 sec04:
+   #   - check if file is in global install location
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Fun02 Sec01:
+   #   - variable declarations
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   slashSC = .Platform$file.sep;
+   pathSplitStr = ':';
+   targetStr = "HOME";
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Fun02 Sec02:
+   #   - set up and check if file is in pwd
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   if(.Platform$OS == "windows")
+      pathSplitStr = ';';
+   
+   if(file.exists(fileStr))
+      return(fileStr); # found file location
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Fun02 Sec03:
+   #   - check if file is in home/Documents directory
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   if(.Platform$OS == "windows"){
+      targetStr = "HOMEPATH";
+   } # set up home location variable
+
+   tmpStr =
+      as.list(
+         strsplit(
+            Sys.getenv(targetStr),
+            pathSplitStr
+         )
+      )[[1]][1]; # get local file path
+
+   tmpStr =
+      paste(
+          tmpStr,
+          "Documents",
+          "freezeTBFiles",
+          fileStr,
+          sep = slashSC
+      ); # add database file
+
+   if(file.exists(tmpStr))
+      return(tmpStr); # found file location
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Fun02 Sec04:
+   #   - check if file is in global install location
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   if(.Platform$OS == "windows"){
+      tmpStr =
+         as.list(
+            strsplit(
+               Sys.getenv("PUBLIC"),
+               pathSplitStr
+            )
+         )[[1]][1]; # get local file path
+
+      tmpStr =
+         paste(
+             tmpStr,
+             "Documents",
+             "freezeTBFiles",
+             fileStr,
+             sep = slashSC
+         ); # add database file
+   }else{
+      tmpStr =
+         paste(
+            "/usr/local/share/freezeTBFiles",
+             fileStr,
+             sep = slashSC
+         );
+   } # Else: get global file path for unix
+    
+   if(file.exists(tmpStr))
+      return(tmpStr); # found file location
+
+   return(NULL);
+} # findFile_graphAmpDepth
+
+
+#---------------------------------------------------------
+# Part02:
+#   - script variables, user input, and prep
+#   o part02 sec01:
+#     - variable declarations
+#   o part02 sec02:
+#     - get user input
+#   o part02 sec03:
+#     - prepare data for graphing
+#---------------------------------------------------------
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec01:
-#  - Variable declerations
+# Part02 Sec01:
+#   - variable declarations
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 inputStr = commandArgs(); # Holds the user input
 prefixStr = "Hufflepuff";   # name of output file
-whoCatalogStr = "freezeTBScripts/who-tb-2023-catalog-tbAmr-format.tsv";
+amrFileStr = findFile_graphAmpDepth("amrDb.tsv");
+errBl = FALSE;
 
 dataDF = NULL;
+ampsDF = NULL;   # amplicon position data
+geneDF = NULL;   # for amplicon gene names
 graphObj = NULL; # for holding the graph
 
 # For AMR mappings
@@ -84,98 +229,182 @@ numBarsI = 0;
 extStr = "tiff";
 dataStr = "";
 
+# graph output
+readDepthSuffixStr = "-readDepth";
+geneCoverageSuffixStr = "-geneMap";
+ampCoverageSuffixStr = "-ampMap";
+
+# for building graph legends
+legendAry = NULL;       # actual labels in dataframes
+legendLabelsAry = NULL; # what to rename legends to
+
+# AMR shifting variables
+lenDataSI = 0; # length of dataframe
+lenAmrSI = 0;  # length of AMR datafare
+
+siAmr = 0;  # loop iterator for finding hit AMRs
+siData = 0; # loop iterator for finding hit AMRs
+
+# AMR shifting arrays (for building dataframes)
+amrPosArySI = NULL;
+amrStartArySI = NULL;
+amrMaxArySI = NULL;
+amrMinArySI = NULL;
+amrIdAryStr = NULL;
+geneAryStr = NULL;
+
+dataStartArySI = NULL;
+dataEndArySI = NULL;
+dataIdAryStr = NULL;
+dataFlagAryStr = NULL;
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec02:
-#  - Get user input
+# Part02 Sec02:
+#   - get user input
+#   o part02 sec03 sub01:
+#     - get user input
+#   o part02 sec03 sub02:
+#     - open user input
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-if(length(inputStr) < 6){
-  print("nothing input");
-}else{ # Else: have input
+#*********************************************************
+# Part02 Sec03 Sub01:
+#   - get user input
+#*********************************************************
 
-iArg = 6;
-lenInputI = length(inputStr);
+dataStr = "merge.tsv";
+#if(length(inputStr) < 6){
+#  print("nothing input");
+#  errBl = TRUE
+#}else{ # Else: have input
+#
+#iArg = 6;
+#lenInputI = length(inputStr);
+#
+#while(iArg <= lenInputI)
+#{ # Loop: Process the user input
+#   if(phelp_graphAmpDepth(inputStr[iArg]) == TRUE){
+#      errBl = TRUE;
+#      break;
+#   }
+#
+#   if(inputStr[iArg] == "-stats"){
+#      iArg = iArg + 1;
+#
+#      if(iArg > lenInputI){
+#        print("-stats (from ampDepth) needs an arugment");
+#        errBl = TRUE;
+#        break;
+#      }
+#
+#      if(! file.exists(inputStr[iArg]);
+#         print(
+#            paste(
+#               "could not open -stats",
+#               inputStr[iArg]
+#            )
+#         );
+#
+#      dataStr = inputStr[iArg];
+#   }else if(inputStr[iArg] == "-prefix"){
+#      iArg = iArg + 1;
+#
+#      if(iArg > lenInputI){
+#         print("-prefix (file prefix) needs an arugment");
+#         errBl = TRUE;
+#         break;
+#      }
+#
+#      prefixStr = inputStr[iArg];
+#   }else if(inputStr[iArg] == "-ext"){
+#      iArg = iArg + 1;
+#
+#      if(iArg > lenInputI){
+#         print("-ext (file extension) needs an arugment");
+#         errBl = TRUE;
+#         break;
+#      }
+#
+#      extStr = inputStr[iArg];
+#   } else if(inputStr[iArg] == "-who"){
+#      iArg = iArg + 1;
+#
+#      if(iArg > lenInputI){
+#         print("-who (who catalog) needs an arugment");
+#         errBl = TRUE;
+#         break;
+#      }
+#
+#      if(! file.exists(inputStr[iArg]);
+#         print(
+#            paste(
+#               "could not open -who",
+#               inputStr[iArg]
+#            )
+#         );
+#
+#         errBl = TRUE;
+#         break;
+#      } # If: invalid file
+#
+#      amrFileStr = inputStr[iArg];
+#   } else if(inputStr[iArg] == "-min-len"){
+#      iArg = iArg + 1;
+#      minLenSI = as.numeric(inputStr[iArg]);
+#   } else{
+#      phelp_graphAmpDepth("-h");
+#      print(paste(inputStr[iArg], "is not recongnzied"));
+#      errBl = TRUE;
+#      break;
+#   } # else no arugment was input
+#
+#   iArg = iArg + 1;
+#} # Loop: Process the user input
+#} # Else: have input
+#
+#if(errBl == TRUE){
+#   # does nothing (skips to end)
+#} else{ # have valid input
 
-while(iArg <= lenInputI)
-{ # Loop: Process the user input
-   if(pGraphAmpDepthHelp(inputStr[iArg]) == TRUE) q("no");
+#*********************************************************
+# Part02 Sec03 Sub02:
+#   - open user input
+#*********************************************************
 
-   if(inputStr[iArg] == "-stats"){
-      iArg = iArg + 1;
+dataDF =
+   setDT(
+      read.csv(
+         dataStr,
+         sep="\t",
+         header=TRUE
+       )
+   );
 
-      if(iArg > lenInputI)
-        print("-stats (from ampDepth) needs an arugment");
-
-      dataStr = inputStr[iArg];
-   }else if(inputStr[iArg] == "-prefix"){
-      iArg = iArg + 1;
-
-      if(iArg > lenInputI)
-         print("-prefix (file prefix) needs an arugment");
-
-      prefixStr = inputStr[iArg];
-   }else if(inputStr[iArg] == "-ext"){
-      iArg = iArg + 1;
-
-      if(iArg > lenInputI)
-         print("-ext (file extension) needs an arugment");
-
-      extStr = inputStr[iArg];
-   } else if(inputStr[iArg] == "-who"){
-      iArg = iArg + 1;
-
-      if(iArg > lenInputI)
-         print("-who (who catalog) needs an arugment");
-
-      whoCatalogStr = inputStr[iArg];
-   } else if(inputStr[iArg] == "-min-len"){
-      iArg = iArg + 1;
-      minLenSI = as.numeric(inputStr[iArg]);
-   } else{
-      pGraphAmpDepthHelp("-h");
-      print(paste(inputStr[iArg], "is not recongnzied"));
-      q("no");
-   } # else no arugment was input
-
-   iArg = iArg + 1;
-} # Loop: Process the user input
-
-# For debuging
-#dataStr = "del.tsv";
-#whoCatalogStr = "../freezeTbFiles/who-2023.tsv";
-
-if(file.exists(dataStr)){
-   dataDF=setDT(read.csv(dataStr, sep="\t", header=TRUE));
-}else{
-   print(paste("Could not open -stats ", dataStr));
-   q("no");
-}
-
-if(file.exists(whoCatalogStr)){
+if(! is.null(amrFileStr)){
    amrDF =
       setDT(
          read.csv(
-            whoCatalogStr,
+            amrFileStr,
             sep = "\t",
             header = TRUE
       ));
 } # If: I have a who catalog with amr positions ot map
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec03:
+# Part02 Sec03:
 #  - prepare data for graphing
-#  o sec03 sub01:
+#  o part02 sec03 sub01:
 #    - remove unused rows (offtarget/unmapped)
-#  o sec03 sub02:
+#  o part02 sec03 sub02:
 #    - set up gene Names column
-#  o sec03 sub03:
+#  o part02 sec03 sub03:
 #    - set up legends column
-#  o sec03 sub04:
+#  o part02 sec03 sub04:
 #    - remove short amplicons
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #*********************************************************
-# Sec03 Sub01:
+# Part02 Sec03 Sub01:
 #  - remove unused rows (offtarget/unmapped)
 #*********************************************************
 
@@ -187,7 +416,7 @@ dataDF =
    ]; # Remove items I do not want to graph
 
 #*********************************************************
-# Sec03 Sub02:
+# Part02 Sec03 Sub02:
 #  - set up gene Names column
 #*********************************************************
 
@@ -219,7 +448,7 @@ numFlagsI =
    );
 
 #*********************************************************
-# Sec03 Sub03:
+# Part02 Sec03 Sub03:
 #  - set up legends column
 #*********************************************************
 
@@ -254,7 +483,7 @@ legendLabelsAry =
 dataDF$avgCol = paste(dataDF$flag, "mean"); # For legend
 
 #*********************************************************
-# Sec03 Sub04:
+# Part02 Sec03 Sub04:
 #  - remove short amplicons
 #*********************************************************
 
@@ -266,8 +495,17 @@ dataDF =
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec04:
-#  - graphing (read depth)
+# Part03:
+#   - read depth graph
+#   o part03 sec01:
+#     - graph data and setup read depth markers
+#   o part03 sec02:
+#     - formant and save read depth graph
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part03 Sec01:
+#   - graph data and setup read depth markers
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 dataDF$depth20X = "[ 20x read depth";
@@ -322,11 +560,11 @@ graphObj =
    );
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec05:
-#  - format and save graph (read depth)
+# Part03 Sec02:
+#   - formant and save read depth graph
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# ADd color to the graph
+# add color to the graph
 graphObj =
    graphObj +
    scale_fill_viridis_d(
@@ -354,34 +592,32 @@ graphObj =
    theme(axis.text.x = element_text(angle = 90));
 
 ggsave(
-   paste(prefixStr, "-readDepth.", extStr, sep = ""),
+   paste(
+      prefixStr,
+      readDepthSuffixStr,
+      ".",
+      extStr,
+      sep = ""
+   ),
    device = extStr
 ); # Save the graph
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec06:
-#  - graphing (Mapping to genes)
-#  o sec06 sub01:
-#    - Merge genes in an amplicon into single amplicons
-#  o sec06 sub02:
-#   - Add in the AMR data if provided
-#  o sec06 sub03:
-#   - Graph my data
+# Part04:
+#   - gene coverage graphs
+#   o part04 sec01:
+#     - merge genes in an amplicon into single amplicons
+#   o part04 sec03:
+#     - make gene coverage graph
+#   o part04 sec04:
+#     - format and save the graph (mapping to genes)
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-#*********************************************************
-# Sec06 Sub01:
-#   - Merge genes in an amplicon into single amplicons
-#*********************************************************
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part04 Sec01:
+#   - merge genes in an amplicon into single amplicons
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-dataDF =
-   dataDF[
-      dataDF$geneId != "z-unmapped" &
-      dataDF$geneId != "x-off-target"
-      , 
-   ]; # Remove the umapped and off-target columns
-
-# Z is to force it to be last in the color scheme
 dataDF$ref = "ref";
 
 # 0 is to force it to be first in the color scheme
@@ -401,94 +637,132 @@ dataDF$geneGroup =
       function(x) paste(unique(x), collapse= "-")
    ); # remove duplicate names from the gene groups
 
-#*********************************************************
-# Sec06 Sub02:
-#   - add AMR data if provided
-#*********************************************************
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part04 Sec02:
+#   - get AMR data
+#   o part04 sec02 sub01:
+#     - set up AMR detection variables
+#   o part04 sec02 sub02:
+#     - find AMRs not in genes hit by amplicons
+#   o part04 sec02 sub03:
+#     - remove AMRs not in genes hit by amplicons
+#   o part04 sec02 sub04:
+#     - build AMR dataframe
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# eis has a promoter region outside of the gene range
+#*********************************************************
+# Part04 Sec02 Sub01:
+#   - set up AMR detection variables
+#*********************************************************
 
 if(! is.null(amrDF)){
 # If: have AMR coordinates
    # order my data structers by starting positoin
    amrDF = amrDF[order(amrDF$refPosition),];
-   dataDF = dataDF[order(dataDF$refGeneEnd),];
-   dataDF = dataDF[order(dataDF$refGeneStart),];
+
+   dataDF =
+      dataDF[
+         with(
+            dataDF,
+            order(
+               refGeneEnd,
+               refGeneStart
+             )
+         ),
+      ]; # sort dataframe by start and end
+   #dataDF = dataDF[order(dataDF$refGeneEnd),];
+   #dataDF = dataDF[order(dataDF$refGeneStart),];
 
    # set up my vectors to store my variables
-   amrPosI = amrDF$refPosition;
-   amrStartI = amrDF$geneStart;
+   amrPosArySI = amrDF$refPosition;
+   amrStartArySI = amrDF$geneStart;
    amrEndI = amrDF$geneEnd;
-   amrGeneStr = 0;
-   amrMaxI = 0;
-   amrMinI = 0;
-   amrIdStr = "";
+   geneAryStr = 0;
+   amrMaxArySI = 0;
+   amrMinArySI = 0;
+   amrIdAryStr = "";
 
    dataStartArySI = dataDF$refGeneStart;
-   dataGenEndArySII = dataDF$refGeneEnd;
-   dataIdStr = dataDF$geneId;
+   dataEndArySI = dataDF$refGeneEnd;
+   dataIdAryStr = dataDF$geneId;
    
-   lenDataI = length(dataDF$geneGroup);
-   lenAmrI = length(amrDF$geneStart);
+   lenDataSI = length(dataDF$geneGroup);
+   lenAmrSI = length(amrDF$geneStart);
    
    # My data positions seem to be siz of
    dataStartArySI = dataStartArySI - 6;
-   dataGenEndArySII = dataGenEndArySII + 6;
+   dataEndArySI = dataEndArySI + 6;
    
-   iAmr = 1;
-   iData = 1;
+   siAmr = 1;
+   siData = 1;
 
-   # Filter out amrs that are no tin my amplicons
-   while(iAmr <= lenAmrI){
-      if(iData > lenDataI){
-         while(iAmr <= lenAmrI){
-            amrGeneStr[iAmr] = 'd';
-            amrPosI[iAmr] = -1;
-            amrMaxI[iAmr] = -1;
-            amrMinI[iAmr] = -1;
-            amrStartI[iAmr] = -1;
-            amrIdStr[iAmr] = 'd';
-            iAmr = iAmr + 1;
+   #******************************************************
+   # Part04 Sec02 Sub02:
+   #   - find AMRs not in genes hit by amplicons
+   #******************************************************
+
+   while(siAmr <= lenAmrSI){
+      if(siData > lenDataSI){
+         while(siAmr <= lenAmrSI){
+            geneAryStr[siAmr] = 'd';
+            amrPosArySI[siAmr] = -1;
+            amrMaxArySI[siAmr] = -1;
+            amrMinArySI[siAmr] = -1;
+            amrStartArySI[siAmr] = -1;
+            amrIdAryStr[siAmr] = 'd';
+            siAmr = siAmr + 1;
          }
-      }  else if(amrEndI[iAmr] > dataGenEndArySII[iData]){
-         iData = iData + 1;
-      } else if(amrStartI[iAmr] < dataStartArySI[iData]){
-         amrGeneStr[iAmr] = 'd';
-         amrPosI[iAmr] = -1;
-         amrMaxI[iAmr] = -1;
-         amrMinI[iAmr] = -1;
-         amrStartI[iAmr] = -1;
-         amrIdStr[iAmr] = 'd';
+      }  else if(amrEndI[siAmr] > dataEndArySI[siData]){
+         siData = siData + 1;
+      } else if(
+           amrStartArySI[siAmr] < dataStartArySI[siData]
+        ){
+         geneAryStr[siAmr] = 'd';
+         amrPosArySI[siAmr] = -1;
+         amrMaxArySI[siAmr] = -1;
+         amrMinArySI[siAmr] = -1;
+         amrStartArySI[siAmr] = -1;
+         amrIdAryStr[siAmr] = 'd';
    
-         iAmr = iAmr + 1;
+         siAmr = siAmr + 1;
       } else { # Else: I am keeping this value
-         amrGeneStr[iAmr] = dataStr[iData];
-         amrMaxI[iAmr] = dataGenEndArySII[iData];
-         amrMinI[iAmr] = dataStartArySI[iData];;
-         amrIdStr[iAmr] = dataIdStr[iData];
-         iAmr = iAmr + 1;
+         geneAryStr[siAmr] = dataStr[siData];
+         amrMaxArySI[siAmr] = dataEndArySI[siData];
+         amrMinArySI[siAmr] = dataStartArySI[siData];;
+         amrIdAryStr[siAmr] = dataIdAryStr[siData];
+         siAmr = siAmr + 1;
       } # Else: I am keeping this value
    } # Loop add in gene gropu names
    
+   #******************************************************
+   # Part04 Sec02 Sub03:
+   #   - remove AMRs not in genes hit by amplicons
+   #******************************************************
+
    # remove lazy marked valuesx
-   amrIdStr = amrIdStr[amrIdStr != 'd'];
-   amrGeneStr = amrGeneStr[amrGeneStr != 'd'];
-   amrPosI = amrPosI[amrPosI > -1];
-   amrMinI = amrMinI[amrMinI > -1];
-   amrMaxI = amrMaxI[amrMaxI > -1];
-   amrStartI = amrStartI[amrStartI > -1];
+   amrIdAryStr = amrIdAryStr[amrIdAryStr != 'd'];
+   geneAryStr = geneAryStr[geneAryStr != 'd'];
+   amrPosArySI = amrPosArySI[amrPosArySI > -1];
+   amrMinArySI = amrMinArySI[amrMinArySI > -1];
+   amrMaxArySI = amrMaxArySI[amrMaxArySI > -1];
+   amrStartArySI = amrStartArySI[amrStartArySI > -1];
+
+   #******************************************************
+   # Part04 Sec02 Sub04:
+   #   - build AMR dataframe
+   #******************************************************
 
    # make amr dataframe
    amrPosDF =
       data.frame(
-         amrPosI,
-         amrMinI,
-         amrMaxI,
-         amrStartI,
-         amrGeneStr,
-         amrIdStr,
-         rep("AMR-mutation", length(amrPosI)),
-         rep("ref", length(amrPosI))
+         amrPosArySI,
+         amrMinArySI,
+         amrMaxArySI,
+         amrStartArySI,
+         geneAryStr,
+         amrIdAryStr,
+         rep("AMR-mutation", length(amrPosArySI)),
+         rep("ref", length(amrPosArySI))
        );
    
    names(amrPosDF) =
@@ -504,9 +778,20 @@ if(! is.null(amrDF)){
       );
 } # If: I have mar coordinates to add
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part04 Sec03:
+#   - make gene coverage graph
+#   o part04 sec03 sub01:
+#     - build my legend
+#   o part04 sec03 sub02:
+#     - make graph
+#   o part04 sec03 sub03:
+#     - add in AMRs and gene lengths + facets
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #*********************************************************
-# Sec06 Sub03:
-#   - Graph my data
+# Part04 Sec03 Sub01:
+#   - build my legend
 #*********************************************************
 
 legendAry =
@@ -514,7 +799,7 @@ legendAry =
       unique(dataDF$flag),
       "ref",     # ~ is last ascii character
       "AMR-mutation"
-    ); # Array for legend orginzation
+   );
 
 legendLabelsAry =
    c(
@@ -523,10 +808,10 @@ legendLabelsAry =
       "AMR mutation"
     ); # Array for legend orginzation
 
-graphObj =
-   scale_y_discrete(
-      label = function(x) (gsub("ref", "ref", x))
-   );
+#*********************************************************
+# Part04 Sec03 Sub02:
+#   - make graph
+#*********************************************************
 
 # Graph the main data
 graphObj = ggplot(dataDF);
@@ -543,6 +828,11 @@ graphObj =
          col = flag
       ) # aes
    );
+
+#*********************************************************
+# Part04 Sec03 Sub03:
+#   - add in AMRs and gene lengths + facets
+#*********************************************************
 
 # graph the amrs
 if(! is.null(amrDF)){
@@ -571,16 +861,17 @@ graphObj =
       ) # aes
    );
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part04 Sec04:
+#  - format and save the graph (mapping to genes)
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 graphObj =
    graphObj +
    facet_wrap(vars(geneId), scales = "free_x");
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec07:
-#  - Format and save the graph (mapping to genes)
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# ADd color to the graph
+# add color to the graph
 graphObj =
    graphObj +
    scale_color_viridis_d(
@@ -599,10 +890,342 @@ graphObj =
    theme(axis.text.x = element_text(angle = 90));
 
 ggsave(
-   paste(prefixStr, "-ampMap.", extStr, sep = ""),
+   paste(
+      prefixStr,
+      geneCoverageSuffixStr,
+      ".",
+      extStr,
+      sep = ""
+   ),
    device = extStr
 ); # Save the graph
-} # Else: have input
+
+#---------------------------------------------------------
+# Part05:
+#   - amplicon coverage graphs
+#   o part05 sec01:
+#     - find overlaps + merge overlaps into one range
+#   o part05 sec02:
+#     - find genes in overlaps
+#   o part05 sec03:
+#     - find AMRs in overlaps
+#   o part05 sec04:
+#---------------------------------------------------------
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part05 Sec01:
+#   - find overlaps + merge overlaps into one range
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+# get start and end of first gene in list
+dataDF =
+   dataDF[
+      with(
+         dataDF,
+         order(
+            refStart,
+            refEnd
+         )
+      ),
+   ]; # sort data by start and end
+
+dataStartArySI = dataDF$refStart;
+dataEndArySI = dataDF$refEnd;
+
+amrStartArySI = dataDF$ampStart;
+amrEndArySI = dataDF$ampEnd;
+geneAryStr = dataDF$geneId;
+
+
+dataFlagAryStr = dataDF$flag
+
+siData = 1;
+
+while(siData < length(dataStartArySI) - 1)
+{ # Loop: merge overlapping ranges
+   if(
+      dataStartArySI[siData + 1] <= dataEndArySI[siData]
+   ){
+      dataStartArySI[siData + 1] = dataStartArySI[siData];
+
+      if(dataEndArySI[siData] >= dataEndArySI[siData +1]){
+         dataEndArySI[siData + 1] = dataEndArySI[siData];
+      } else{
+         dataEndArySI[siData] = dataEndArySI[siData + 1];
+      } # find highest start
+   }else if(
+      dataEndArySI[siData + 1] <= dataEndArySI[siData]
+   ){
+      dataStartArySI[siData + 1] = dataStartArySI[siData];
+      dataEndArySI[siData + 1] = dataEndArySI[siData];
+   } # check if have overlap
+
+   siData = siData + 1;
+} # Loop: merge overlapping ranges
+
+ampsDF =
+   data.frame(
+      dataStartArySI,
+      dataEndArySI,
+      amrStartArySI,
+      amrEndArySI,
+      dataFlagAryStr
+   );
+
+names(ampsDF) =
+   c(
+      "start",
+      "end",
+      "ampStart",
+      "ampEnd",
+      "flag"
+   );
+
+ampsDF$ref = "ref";
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part05 Sec02:
+#   - find genes in overlaps
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+dataDF = dataDF[order(refGeneStart), ];
+geneAryStr = unique(dataDF$geneId);
+amrStartArySI = unique(dataDF$refGeneStart);
+amrEndArySI = unique(dataDF$refGeneStart);
+   # for storing starts
+
+lenAmrSI = length(geneAryStr);
+lenDataSI = length(dataStartArySI);
+
+siAmr = 1;
+siData = 1;
+
+while(siAmr <= lenAmrSI)
+{ # Loop: assign AMRs to overlaps
+   if(amrStartArySI[siAmr] >= dataStartArySI[siData] &&
+      amrStartArySI[siAmr] <= dataEndArySI[siData]
+   ){
+      amrEndArySI[siAmr] = amrStartArySI[siAmr];
+      amrStartArySI[siAmr] = dataStartArySI[siData];
+      siAmr = siAmr + 1;
+   }else{
+      if(amrStartArySI[siAmr] > dataEndArySI[siData]){
+         siData = siData + 1;
+      }else{
+         siAmr = siAmr + 1;
+      } # check which value am incurmenting
+   } # check if AMR is in overalp
+} # Loop: assign AMRs to overlaps
+
+# rebuild AMR dataframe
+geneDF =
+   data.frame(
+      amrStartArySI,
+      amrEndArySI,
+      geneAryStr
+   );
+
+names(geneDF) =
+   c(
+      "start",
+      "ampStart",
+      "gene"
+   );
+
+geneDF$yCol = "label";
+geneDF$adjPos = geneDF$ampStart - geneDF$start;
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part05 Sec03:
+#   - find AMRs in overlaps
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+if(! is.null(amrDF)) {
+   amrPosDF = amrPosDF[order(amrPosDF$amrStart) ,]; 
+   amrPosArySI = amrPosDF$amrStart;
+   amrStartArySI = amrPosDF$amrStartArySI;
+   
+   lenAmrSI = length(amrPosArySI);
+   lenDataSI = length(dataStartArySI);
+   
+   siAmr = 1;
+   siData = 1;
+   
+   while(siAmr <= lenAmrSI)
+   { # Loop: assign AMRs to overlaps
+      if(amrPosArySI[siAmr] >= dataStartArySI[siData] &&
+         amrPosArySI[siAmr] <= dataEndArySI[siData]){
+         amrStartArySI[siAmr] = dataStartArySI[siData];
+         siAmr = siAmr + 1;
+      }else{
+         if(amrPosArySI[siAmr] > dataEndArySI[siData]){
+            siData = siData + 1;
+         }else{
+            siAmr = siAmr + 1;
+         } # check which value am incurmenting
+      } # check if AMR is in overalp
+   } # Loop: assign AMRs to overlaps
+   
+   # rebuild AMR dataframe
+   amrPosDF =
+      data.frame(
+         amrStartArySI,
+         amrPosArySI
+      );
+   
+   names(amrPosDF) =
+      c(
+         "start",
+         "position"
+      );
+   
+   amrPosDF$legendFlag = "AMR-mutation";
+   amrPosDF$flag = "ref";
+} # If: have AMRs to graph
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Part05 Sec04:
+#   - make amplicon coverage graph
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#*********************************************************
+# Part05 Sec04 Sub01:
+#   - build legend for graph
+#*********************************************************
+
+legendAry =
+   c(
+      unique(dataDF$flag),
+      "Ref",
+      "AMR-mutation"
+   );
+
+legendLabelsAry =
+   c(
+      unique(dataDF$flag),
+      "Ref",
+      "AMR mutation"
+    ); # Array for legend orginzation
+
+#*********************************************************
+# Part05 Sec04 Sub02:
+#   - build graph
+#*********************************************************
+
+graphObj = ggplot(ampsDF);
+
+# amplicon lines
+graphObj =
+   graphObj +
+   geom_segment(
+      data = ampsDF,
+      aes(
+         x = ampStart - start,   
+         xend = ampEnd - start,
+         y = flag,
+         yend = flag,
+         col = flag
+      )
+   ); # graph amplicon coverage
+
+# reference line
+graphObj =
+   graphObj +
+   geom_segment(
+      aes(
+         x = 0,
+         xend = end - start,
+         y = ref,
+         yend = ref,
+         col = ref
+      )
+    ); # graph reference amplicon
+
+# AMR points
+if(! is.null(amrDF)){
+   graphObj =
+      graphObj +
+      geom_point(
+         data = amrPosDF,
+         aes(
+            x = position - start,   
+            y = flag,
+            col = legendFlag
+         ),
+      ); # graph amplicon coverage
+} # If: have AMRs to graph
+
+# gene ids
+graphObj =
+   graphObj +
+   geom_vline(
+      data = geneDF,
+      aes(
+         xintercept = adjPos
+      ),
+      linetype = 2
+   );
+
+graphObj =
+   graphObj +
+   geom_text(
+      data = geneDF,
+      aes(
+         label = gene,
+         x = adjPos,
+         y = "ref",
+         vjust = -0.5, # negative moves up
+         hjust = -0.25  # negative moves right
+      ),
+      stat 	= "unique",
+      size = 2.9
+   );
+
+
+
+#*********************************************************
+# Part05 Sec04 Sub02:
+#   - format graph
+#*********************************************************
+
+graphObj =
+   graphObj +
+   facet_wrap(
+      vars(start),
+      scales = "free_x"
+   );
+
+# add color to the graph
+graphObj =
+   graphObj +
+   scale_color_viridis_d(
+      name = "Legend",
+      direction=-1,
+      breaks = legendAry,
+      labels = legendLabelsAry
+   );
+
+graphObj = graphObj + xlab("Position in amplicon");
+graphObj = graphObj + ylab("Method");
+graphObj = graphObj + theme_classic();
+graphObj = graphObj + theme(legend.position = "top");
+
+graphObj =
+   graphObj +
+   theme(axis.text.x = element_text(angle = 90));
+
+ggsave(
+   paste(
+      prefixStr,
+      ampCoverageSuffixStr,
+      ".",
+      extStr,
+      sep = ""
+   ),
+   device = extStr
+);
+   
+#} # Else: have valid input
 
 #*=======================================================\
 # License:
