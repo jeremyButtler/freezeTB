@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # graphAmpDepth.r SOF: Start Of File
 #   - makes graphs for output from ampDepth
@@ -23,8 +25,6 @@
 # Part01:
 #   - included libraries
 #---------------------------------------------------------
-
-#!/usr/bin/env Rscript
 
 library("ggplot2")
 library("viridisLite")
@@ -272,99 +272,98 @@ dataFlagAryStr = NULL;
 #   - get user input
 #*********************************************************
 
-dataStr = "merge.tsv";
-#if(length(inputStr) < 6){
-#  print("nothing input");
-#  errBl = TRUE
-#}else{ # Else: have input
-#
-#iArg = 6;
-#lenInputI = length(inputStr);
-#
-#while(iArg <= lenInputI)
-#{ # Loop: Process the user input
-#   if(phelp_graphAmpDepth(inputStr[iArg]) == TRUE){
-#      errBl = TRUE;
-#      break;
-#   }
-#
-#   if(inputStr[iArg] == "-stats"){
-#      iArg = iArg + 1;
-#
-#      if(iArg > lenInputI){
-#        print("-stats (from ampDepth) needs an arugment");
-#        errBl = TRUE;
-#        break;
-#      }
-#
-#      if(! file.exists(inputStr[iArg]);
-#         print(
-#            paste(
-#               "could not open -stats",
-#               inputStr[iArg]
-#            )
-#         );
-#
-#      dataStr = inputStr[iArg];
-#   }else if(inputStr[iArg] == "-prefix"){
-#      iArg = iArg + 1;
-#
-#      if(iArg > lenInputI){
-#         print("-prefix (file prefix) needs an arugment");
-#         errBl = TRUE;
-#         break;
-#      }
-#
-#      prefixStr = inputStr[iArg];
-#   }else if(inputStr[iArg] == "-ext"){
-#      iArg = iArg + 1;
-#
-#      if(iArg > lenInputI){
-#         print("-ext (file extension) needs an arugment");
-#         errBl = TRUE;
-#         break;
-#      }
-#
-#      extStr = inputStr[iArg];
-#   } else if(inputStr[iArg] == "-who"){
-#      iArg = iArg + 1;
-#
-#      if(iArg > lenInputI){
-#         print("-who (who catalog) needs an arugment");
-#         errBl = TRUE;
-#         break;
-#      }
-#
-#      if(! file.exists(inputStr[iArg]);
-#         print(
-#            paste(
-#               "could not open -who",
-#               inputStr[iArg]
-#            )
-#         );
-#
-#         errBl = TRUE;
-#         break;
-#      } # If: invalid file
-#
-#      amrFileStr = inputStr[iArg];
-#   } else if(inputStr[iArg] == "-min-len"){
-#      iArg = iArg + 1;
-#      minLenSI = as.numeric(inputStr[iArg]);
-#   } else{
-#      phelp_graphAmpDepth("-h");
-#      print(paste(inputStr[iArg], "is not recongnzied"));
-#      errBl = TRUE;
-#      break;
-#   } # else no arugment was input
-#
-#   iArg = iArg + 1;
-#} # Loop: Process the user input
-#} # Else: have input
-#
-#if(errBl == TRUE){
-#   # does nothing (skips to end)
-#} else{ # have valid input
+if(length(inputStr) < 6){
+  print("nothing input");
+  errBl = TRUE
+}else{ # Else: have input
+
+iArg = 6;
+lenInputI = length(inputStr);
+
+while(iArg <= lenInputI)
+{ # Loop: Process the user input
+   if(phelp_graphAmpDepth(inputStr[iArg]) == TRUE){
+      errBl = TRUE;
+      break;
+   }
+
+   if(inputStr[iArg] == "-stats"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI){
+        print("-stats (from ampDepth) needs an arugment");
+        errBl = TRUE;
+        break;
+      }
+
+      if(! file.exists(inputStr[iArg]))
+         print(
+            paste(
+               "could not open -stats",
+               inputStr[iArg]
+            )
+         );
+
+      dataStr = inputStr[iArg];
+   }else if(inputStr[iArg] == "-prefix"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI){
+         print("-prefix (file prefix) needs an arugment");
+         errBl = TRUE;
+         break;
+      }
+
+      prefixStr = inputStr[iArg];
+   }else if(inputStr[iArg] == "-ext"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI){
+         print("-ext (file extension) needs an arugment");
+         errBl = TRUE;
+         break;
+      }
+
+      extStr = inputStr[iArg];
+   } else if(inputStr[iArg] == "-who"){
+      iArg = iArg + 1;
+
+      if(iArg > lenInputI){
+         print("-who (who catalog) needs an arugment");
+         errBl = TRUE;
+         break;
+      }
+
+      if(! file.exists(inputStr[iArg])){
+         print(
+            paste(
+               "could not open -who",
+               inputStr[iArg]
+            )
+         );
+
+         errBl = TRUE;
+         break;
+      } # If: invalid file
+
+      amrFileStr = inputStr[iArg];
+   } else if(inputStr[iArg] == "-min-len"){
+      iArg = iArg + 1;
+      minLenSI = as.numeric(inputStr[iArg]);
+   } else{
+      phelp_graphAmpDepth("-h");
+      print(paste(inputStr[iArg], "is not recongnzied"));
+      errBl = TRUE;
+      break;
+   } # else no arugment was input
+
+   iArg = iArg + 1;
+} # Loop: Process the user input
+} # Else: have input
+
+if(errBl == TRUE){
+   # does nothing (skips to end)
+} else{ # have valid input
 
 #*********************************************************
 # Part02 Sec03 Sub02:
@@ -1225,7 +1224,7 @@ ggsave(
    device = extStr
 );
    
-#} # Else: have valid input
+} # Else: have valid input
 
 #*=======================================================\
 # License:
