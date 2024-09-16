@@ -2,5 +2,6 @@ b tbSpol.c:1442
 b tbSpol.c:1832
 # error out on database frees
 
-r -read-frag -sam $HOME/files/testing/BC37.sam -spoligo ../../freezeTBFiles/spoligo-spacers.fa -db ../../freezeTBFiles/spoligo-lineages.csv
+#r -read-frag -sam $HOME/files/testing/BC37.sam -spoligo ../../freezeTBFiles/spoligo-spacers.fa -db ../../freezeTBFiles/spoligo-lineages.csv
 #r -sam $HOME/files/testing/null-con.sam -spoligo ../../freezeTBFiles/spoligo-spacers.fa -db ../../freezeTBFiles/spoligo-lineages.csv
+r -read-frag -sam $HOME/files/testing/spoligoTest/DR-region.sam -spoligo ../../freezeTBFiles/spoligo-spacers.fa -db ../../freezeTBFiles/spoligo-lineages.csv

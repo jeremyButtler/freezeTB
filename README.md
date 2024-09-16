@@ -24,12 +24,17 @@ freezeTB will probably not give as good of results as
   - a read mapper
   - ability to cause mayhem and steal every ones left shoe
 
+PS: thank or blame the CO-PI for the bad jokes. She asked
+  for more Harry Potter jokes.
+
 # License:
 
 freezeTB does include databases from other repositories
   and complied code (minimap2) from other repositories. In
   those cases the licensing will be under the owners
   repository.
+
+Here are the order of merlin winners:
 
 - Taken from other sources:
   - files in freezeTBFiles
@@ -61,11 +66,12 @@ The stuff unique to freezeTB is under an dual license. The
 
 - Unique to freezeTB:
   - everything in programs
+    - This is the reason Norbert, I mean freezeTB can fly
+      on Windows.
   - everything in scripts
   - some of the clip art in diagarms
     - the rest is from openclipart.org (public domain)
   - the terrible guides (guides folder)
-    - these really are not that great and untested
   - the scripts in benchmark
   - everything in oldCode
   - the slidshows and write up in slidesAndWriting
@@ -73,109 +79,154 @@ The stuff unique to freezeTB is under an dual license. The
 
 # Requirements 
 
-1. A read mapper that outputs a sam file.
+1. A read mapper that outputs a sam file
    - Your choice for the command line version 
    - For the GUI you will need minimap2, which can be
      often installed by your package manager (for Mac
      you can use homebrew)
-2. R + several R libraries; GUI only; unix run rDepends.r
+2. R + several R libraries; GUI only
    - ggplot2
    - viridisLite (often installed with ggplot2)
+   - data.table (often installed with ggplot2)
    - tcltk (base R) or tcltk2 (has tooltips)
      - note I have had some issues with tcltk not being
-       compiled on Macs. It seems the homebrew install of
-       R works better.
+       compiled on some Macs. It seems the homebrew
+       install of R works better.
    - svgLite (Optional; svgs output)
    - fs (Optional; Unix only)
 
 # Install
 
-The easy way is to copy the pre-complied binaries to your
-  install locations. If you copy the binaries and scripts
-  to /usr/local/bin in Unix, then make sure to use
-  `chmod a+x` on the copied scripts and programs.
+## Easy way for unix
 
-If you already have minimap2, then remove minimap2 from
-  the binaries folder. Your version will likely be more
-  up to date.
+The easy way is to do a local install, which will only
+  install freezeTB for you (no other user gets). The
+  advanatage about a local install is that you do not need
+  special permissions to install. The downside is that
+  each user on your system needs a copy.
 
-After copying the binaraies copy the freezeTBFiles
-   direcgtory (folder) to you documents directory
-   (command line: `cp -r freezeTBFiles $HOME/Documents`).
+### Local (only you):
 
-## Source install (unix)
-
-Make file names:
-  - mkfile.unix: any unix (Mac/Linux/BSD) OS
-  - mkfile.static: static build for (Linux/BSD)
-
-### Source global install (unix)
+#### Setting up local envrioment
 
 ```
-make -f mkfile.unix # or static if not Mac
-sudo make -f mkfile.unix install-all
-make -f mkfile.unix clean
-sudo Rscript rDepends.r
+# make sure have local install and Downloads directory
+
+if [[ ! -d "$HOME/Downloads" ]]; then
+   mkdir "$HOME/Downloads";
+fi
+
+if [[ ! -d "$HOME/local/bin" ]]; then
+   mkdir -p "$HOME/local/bin";
+fi
+
+# check if have path setup to local (add to path if not)
+
+localBl="$(grep "$HOME/local/bin" <<< "$PATH")"
+
+if [[ "$localBl" == "" ]]; then
+   printf "export \"PATH=$HOME/local/bin:$PATH\"\n" >> $HOME/.bashrc;
+fi
+
+export "PATH=$HOME/local/bin:$PATH"
+
+# you can remove $HOME/local/bin from your path by
+# deleting the "export PATH=/home/<user name>/local/bin:"
+# from your .bashrc file
 ```
 
-You can replace install-all, which installs every program
-  that comes with freezeTB with install if you just want
-  freezeTB, adjCoords, the scripts, and databases. Use
-  install-modules if you want the freezeTB programs +
-  the modules (maskPrim, tbAmr, tbCon, tbSpol, and
-  tbMiru), but not the side programs.
-
-### Source: local install
-
-You can choose were the database are installed with
-  "DB_PREFIX".
-
-You can choose were the programs and scripts are installed
-  with "PREFIX".
-
-Here is an example of a local install of freezeTB into a
-  directory called local in your home directory. It also
-  installs the database into your documents directory.
+#### Installing (locally):
 
 ```
-mkdir "$HOME/local"
+cd $HOME/Downloads
+git clone https://github.com/jeremybuttler/freezeTB
+cd freezeTB
 make -f mkfile.unix
-make -f mkfile.unix PREFIX="$HOME/local" DB_PREFIX="$HOME/Documents"
-make -f mkfile.unix clean
-Rscript rDepends.r
+make -f mkfile.unix install-all PREFIX=$HOME/local/bin DB_PREFIX=$HOME/Documents
+R
+source("rDepends.r")
+q("no")
 ```
 
-You may have to set up your path to $HOME/local/. To do
-  this add `export PATH="$PATH:$HOME/local` to your
-  .bashrc file. Otherwise your computer will not know to
-  look in $HOME/local.
+### Global (everyone)
 
-## Minimap2
+```
+cd $HOME/Downloads
+git clone https://github.com/jeremybuttler/freezeTB
+cd freezeTB
+if [[ ! -d "/usr/local/bin" ]]; then mkdir "/usr/local/bin"; fi
+if [[ ! -d "/usr/local/share" ]]; then mkdir "/usr/local/share"; fi
+make -f mkfile.unix
+sudo make -f mkfile.unix install-all
+sudo Rscript rDepnds.r
+```
 
-I have some precomplided binaries for minimap2. However,
-  if you want a new version or are using an unsupported
-  OS, you will need to compile minimap2 yourself.
+## Minimap2 the next step 
 
-Get minimap2
-  with `git clone https://github.com/lh3/minimap2`. Then
-  move into (change) the minimap2 directory `cd minimap2`.
+After this you will need minimap2 (I am assuming you do
+  not have minimap2). I do have some pre-compiled
+  binaries (programs), but a source install is easy on
+  unix.
 
-use `make arm_neon=1 aarch64=1` to compile minimap2 for
-  64 bit ARM cpus (Mac/tablets/raspberry PIs).
+## Mac minimap2 local install
 
-use `make CFLAGS="-static"` to compile minimap2 for
-  non-Mac unix OS. You do not need to use
-  `CFLAGS="-static"`, but I do that to make sure minimap2
-  is portable across all linux's with AMD 64 bit cpus.
+This is for the M chip series. If you have an old Mac with
+  an intel/AMD CPU; then do the Linux install.
 
-Windows; see windows install instructions.
+### Local:
+
+```
+cd $HOME/Downloads
+git clone https://github.com/lh3/minimap2
+cd minimap2
+make arm_neon=1 aarch64=1
+cp minimap2 $HOME/local/bin
+chmod a+x $HOME/local/bin/minimap2
+```
+
+### Global:
+
+```
+cd $HOME/Downloads
+git clone https://github.com/lh3/minimap2
+cd minimap2
+make arm_neon=1 aarch64=1
+sudo cp minimap2 /usr/local/bin
+sudo chmod a+x /usr/local/bin/minimap2
+```
+
+## Linux minimap2 local install
+
+### Local:
+
+```
+cd $HOME/Downloads
+git clone https://github.com/lh3/minimap2
+cd minimap2
+make
+cp minimap2 $HOME/local/bin
+chmod a+x $HOME/local/bin/minimap2
+```
+
+### Global:
+
+```
+cd $HOME/Downloads
+git clone https://github.com/lh3/minimap2
+cd minimap2
+make
+sudo cp minimap2 /usr/local/bin
+sudo chmod a+x /usr/local/bin/minimap2
+```
 
 ## Windows
 
 ### Easy method
 
-Use my pre-complied binaries. Well, unless you want a
-  more complicated install.
+There is no hope.
+
+Use my pre-complied binaries. Likely out of date, but do
+  work.
 
 Make a freezeTB directory in "C:\Program Files". Then
   copy all the binaries and scripts into
@@ -184,7 +235,10 @@ Make a freezeTB directory in "C:\Program Files". Then
   Documents ["C:\Public\Documents"]).
 
 Make sure R is installed that the
-  ggplot2 (`install.packages("ggplot2")`)
+  ggplot2 (`install.packages("ggplot2")`),
+  viridisLite (`install.packates("viridisLite")`),
+  svtLite (`install.packages("svtLite")`),
+  data.tables (`install.packates("data.table")`),
   and tcltk2 (`install.packages("tcltk2")`) packages
   are installed. You can install by installing R studio
   or from Cran (see Windows from source).
@@ -198,7 +252,9 @@ At this copy the "freezeTBGui.r" script from scripts to
 
 ### Windows from source
 
-## Install R (GUI dependencies):
+This is not the method your are looking for
+
+#### Install R (GUI dependencies):
 
 1. install R
    - [https://cran.r-project.org/bin/windows/base/](
@@ -214,7 +270,7 @@ At this copy the "freezeTBGui.r" script from scripts to
    - select more apps->look for another app on this pc->R->R-version->bin->Rscript
    - at this point Rscript will run and install the GUI dependencies
        
-## freezeTB:
+#### freezeTB:
 
 Get freezeTB from github and extract it. I saved it to
   Downloads.
@@ -250,13 +306,14 @@ First install Cygwin using the setup-x86_64.exe (is a
 [https://cygwin.com/install.html](
   https://cygwin.com/install.html)
 
-When at Select Packages menu for Cygwin install:
+When at "Select Packages" menu for Cygwin install:
 
 - Search for "make" then select the package named make.
   - make sure you are looking at the "full" and not the
     "pending list"
   - change "Skip" to make verison number with dropdown
     menu (choose most recent non-testing version)
+  - do not install gcc (it can not statically link)
 - mingw64-x86_64-gcc-core
 - mingw64-x86_64-zlib
 
@@ -279,14 +336,20 @@ Build minimap2
 Copy minimap2 to your freezeTB install location or into
   your PATH.
 
-`copy minimap2.exe C:/Users/<user name>/Downloads/freezeTB/winBin`
-
-If you get an error, then copy minimap2 in a file browser.
-
+`cp minimap2.exe C:/Users/<user name>/Downloads/freezeTB/winBin`
 
 # Run
 
-## CLI
+## GUI
+
+Open a terminal and type `$HOME/local/bin/freezeTBGui.r`
+ for a local install or `freezeTBGui.r` for a global
+ install (or if it is in your path). Then fill in the
+ values needed. This should be only fastq file if the
+ databases were detected. You can select multiple fastq
+ files at once.
+
+## CLI (command line)
 
 You can print the help message with `freezeTB -h`.
 
@@ -328,12 +391,6 @@ Were `-dr-start` and `-dr-end` are the coordinates for the
 
 You can leave out `-spoligo` if you are changing an
   reference, since it has sequences not coordinates.
-
-## GUI
-
-For the gui, just run `freezeTBGui.r`. Then fill in the
-  values needed. This should be only fastq file if the
-  databases were detected.
 
 # How it works
 
@@ -391,6 +448,8 @@ For the gui, just run `freezeTBGui.r`. Then fill in the
 
 # Programs included with freezeTB
 
+Introduction to the monster book of monsters:
+
 I have made the programs in freezeTb to be modular. This
   means that if you like a particular program, then you
   can compile it separately.
@@ -401,6 +460,8 @@ You can install freezeTB and the side modules
 
 ## freezeTB core:
 
+Chapter one: monsters that consume all hope
+
 - freezeTBGui.r: gui built in R using tcltk for freezeTB
 - freezeTB: core program for freezeTB
 - adjCoords: adjust coordinates in sam file using an
@@ -409,14 +470,8 @@ You can install freezeTB and the side modules
 
 ## Modules:
 
-- ampDepth: Makes the read depth tsv's that can be
-  converted to graphs of mean read depth and coverage
-  using scripts/graphAmpDepth.r
-- maskPrim: Masks primers in sequences (sam file) using
-  coordinates. This can also do some filtering.
-  - You can make an basic mask file file using your
-    primers and catPrimers.sh
-- tbCon: Builds an consensus (output is sam file)
+Chapter two: here be dragons
+
 - tbAmr: AMR detection
 - tbMiru: detects MIRU-VNTR lineages in reads
   - can run on fastx files (slower)
@@ -431,10 +486,8 @@ You can install freezeTB and the side modules
 
 ## Other, less useful programs:
 
-- filtSam: For filtering trimming soft masked regions, and
-  converting sam files (samtools view knock off)
-- trimSam: trims off soft masked bases in an sam file
-  - you can do this with filtsam to
+Chapter three: do not underestimate the pixies
+
 - whoToAmr: converts the WHO 2023 catalog to tbAmr format
 - swapDbRef: is a program to switch out references in the
   reference database.
@@ -442,38 +495,28 @@ You can install freezeTB and the side modules
     check for frame shifts or other problems
 - mkMiurTbl: takes in an miru table and adds the reference
   coordinates for tbMiru into the table header
-- cigToEqx: Converts an sam file with an normal cigar
-  to an eqx cigar
-  - Mainly here to avoid running minimap2 again on
-    consensuses from tbCon
-  - `cigToEqxCig -sam file.sam -ref ref.fasta > out.sam`
-- samToAln: converts a reference and sam file to an
-  human readable alignment
-  - not very useful, here to convert tbCon output to human
 - scripts/catPrimers.sh: bash script that uses minimap2
   and awk to merge amplicons (not installed)
   - also prints out the amplicon and primer coordinates
     needed for maskPrim
   - `bash scripts/catPrimers.sh -ref ref.fasta -tsv primers.tsv -prefix prefix`
-- alnwater:
-  - kinda traditional waterman alignment, outputs a sam
-    file (use samToAln to get human readable)
-  - 10x slower then the complete striped smith waterman
-- alnMemwater:
-  - waterman that just returns score, starting
-    coordinates, and ending coordinates
-  - low memory usage at the cost of no alignment and
-    sightly more time than water
 - oldCode: old code I am not quite ready to throw
   away yet
 
 # freezeTB as an bash script
+
+Chapter four: make your own monster
 
 A better picture of how freezeTB works might be gotten by
   showing how it would look if I used an bash script. This
   is for default settings only, since it is an example and
   I want to keep the script more simple. This has not been
   tested.
+
+You will need some programs from my bioTools repo(
+  [https://github.com/jeremybuttler/bioTools](
+   https://github.com/jeremybuttler/bioTools)). These
+  include ampDepth, filtsam, maskPrim, and tbCon.
 
 ```
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

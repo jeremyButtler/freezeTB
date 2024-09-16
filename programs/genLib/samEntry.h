@@ -7,52 +7,54 @@
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' SOF: Start Of File
-'  o header:
-'    - header guards and definitions
-'  o .h st01 samEntry:
-'    - Holds a single samfile entry
-'  o fun01 blank_samEntry:
-'    - Sets all non-alloacted variables in samEntryST to 0
-'  o fun02 init_samEntry:
-'    - Initalize a samEntry struct to 0's
-'  o fun03: setup_samEntry
-'    - allocates memory for a samEntry structure (call
-'      after init_samEntry (fun02))
-'  o fun04 freeStack_samEntry:
-'    - Frees heap allocations in a stack allocated
-'      samEntry struct
-'  o fun05 freeHeap_samEntry:
-'    - Frees a samEntry structer (and sets to null)
-'  o fun06: makeSamEntry
-'    - Makes an heap allocated samEntry structure
-'  o fun07: qhistToMed_samEntry
-'    - Gets the median q-score for an histogram of
-'       q-scores in a samStruct
-'  o fun08: findQScores_samEntry
-'     - Gets the median and mean q-scores from a samEntry
-'       Structure.
-'  o fun09: cpQEntry_samEntry
-'    - Copies q-scores from a string into a samEntry
-'      structure
-'  o fun10: get_samEntry
-'    - Reads in a single line from a sam file
-'  o fun11: findRefPos_samEntry
-'    - Find an reference coordinate in an sequence in
-'      an sam entry structure
-'  o fun12: p_samEntry
-'    - Prints the sam file entry to a file. This does not
-'      print any extra stats that were found.
-'  o fun13: p_samEntryAsFastq
-'    - Prints the sam entry as a fastq entry to a fastq
-'      file
-'  o fun14: pfa_samEntry
-'    - Prints the sam entry as a fasta entry to a fasta
-'      file
-'  o fun15: pstats_samEntry
-'    - Prints out the stats in a samEntry struct to a file
-'  o .h note01:
-'     - Notes about the sam file format from the sam file
-'       pdf
+'   o header:
+'     - header guards and definitions
+'   o .h st01 samEntry:
+'     - Holds a single samfile entry
+'   o fun01 blank_samEntry:
+'     - Sets all non-alloacted variables in samEntryST to 0
+'   o fun02 init_samEntry:
+'     - Initalize a samEntry struct to 0's
+'   o fun03: setup_samEntry
+'     - allocates memory for a samEntry structure (call
+'       after init_samEntry (fun02))
+'   o fun04 freeStack_samEntry:
+'     - Frees heap allocations in a stack allocated
+'       samEntry struct
+'   o fun05 freeHeap_samEntry:
+'     - Frees a samEntry structer (and sets to null)
+'   o fun06: makeSamEntry
+'     - Makes an heap allocated samEntry structure
+'   o fun07: qhistToMed_samEntry
+'     - Gets the median q-score for an histogram of
+'        q-scores in a samStruct
+'   o fun08: findQScores_samEntry
+'      - Gets the median and mean q-scores from a samEntry
+'        Structure.
+'   o fun09: cpQEntry_samEntry
+'     - Copies q-scores from a string into a samEntry
+'       structure
+'   o fun10: get_samEntry
+'     - Reads in a single line from a sam file
+'   o fun11: findRefPos_samEntry
+'     - Find an reference coordinate in an sequence in
+'       an sam entry structure
+'   o fun12: p_samEntry
+'     - Prints the sam file entry to a file. This does not
+'       print any extra stats that were found.
+'   o fun13: p_samEntryAsFastq
+'     - Prints the sam entry as a fastq entry to a fastq
+'       file
+'   o fun14: pfa_samEntry
+'     - Prints the sam entry as a fasta entry to a fasta
+'       file
+'   o fun15: pstats_samEntry
+'     - Prints out the stats in a samEntry struct to a file
+'   o fun16: revCmp_samEntry
+'      - reverse complements a sam file sequence entry
+'   o .h note01:
+'      - Notes about the sam file format from the sam file
+'        pdf
 '   o license:
 '     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -130,7 +132,7 @@ typedef struct samEntry
     unsigned int numMaskUI; /*number soft masked bases*/
 
     /*These variables are used in finding the q-scores*/
-    unsigned int qHistUI[def_maxQ_samEntry];
+    unsigned int qHistUI[def_maxQ_samEntry + 8];
     unsigned long sumQUL;             /*Total for mean Q*/
 }samEntry;
 
@@ -487,6 +489,21 @@ pstats_samEntry(
    signed char *pHeadBl,
    signed char pNsBl,
    void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun16: revCmp_samEntry
+|   - reverse complements a sam file sequence entry
+| Input:
+|   - samSTPtr:
+|     o pointer to samEntry struct to reverse complement
+| Output:
+|   - Modifies:
+|     o samSTPtr (includes flag) to be reverse complment
+\-------------------------------------------------------*/
+void
+revCmp_samEntry(
+   struct samEntry *samSTPtr
 );
 
 #endif

@@ -71,7 +71,7 @@ Output:
      merged sequences
    - prefix-coordinates.tsv is a tsv file with the primer
      coordiantes \"name\tstart\tend\"
-   - prefix-primers-map.paf a paf file from minimap2
+   - prefix-primers-map.sam a sam file from minimap2
      sorted by the starting position
    - prefix-primers.fa is the tsv file converted to a
      fasta file

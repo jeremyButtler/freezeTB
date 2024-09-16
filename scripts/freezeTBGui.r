@@ -386,7 +386,7 @@ if(.Platform$OS == "windows"){
                def_pathSplitSC
             )
          )[[1]][1],
-         "/local/bin",
+         "/local/",
          sep = ''
       ); # set up path to freezeTB in program files
 } # set up windows/linux program names

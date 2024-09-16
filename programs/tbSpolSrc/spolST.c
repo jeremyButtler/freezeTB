@@ -377,32 +377,32 @@ sortAry_spolST(
                > (spolArySTPtr)[lastUL].codeUL
             ) break; /*Positioned the element*/
 
-            swapStr = spolArySTPtr[onUL].idStr;
-            spolArySTPtr[onUL].idStr =
-               spolArySTPtr[nextUL].idStr;
-            spolArySTPtr[nextUL].idStr = swapStr;
+            swapStr = spolArySTPtr[curUL].idStr;
+            spolArySTPtr[curUL].idStr =
+               spolArySTPtr[lastUL].idStr;
+            spolArySTPtr[lastUL].idStr = swapStr;
 
-            spolArySTPtr[onUL].codeUL ^=
-               spolArySTPtr[nextUL].codeUL;
-            spolArySTPtr[nextUL].codeUL ^=
-               spolArySTPtr[onUL].codeUL;
-            spolArySTPtr[onUL].codeUL ^=
-               spolArySTPtr[nextUL].codeUL;
+            spolArySTPtr[curUL].codeUL ^=
+               spolArySTPtr[lastUL].codeUL;
+            spolArySTPtr[lastUL].codeUL ^=
+               spolArySTPtr[curUL].codeUL;
+            spolArySTPtr[curUL].codeUL ^=
+               spolArySTPtr[lastUL].codeUL;
 
-            swapStr = spolArySTPtr[onUL].lineageStr;
-            spolArySTPtr[onUL].lineageStr =
-               spolArySTPtr[nextUL].lineageStr;
-            spolArySTPtr[nextUL].lineageStr = swapStr;
+            swapStr = spolArySTPtr[curUL].lineageStr;
+            spolArySTPtr[curUL].lineageStr =
+               spolArySTPtr[lastUL].lineageStr;
+            spolArySTPtr[lastUL].lineageStr = swapStr;
 
-            swapStr = spolArySTPtr[onUL].sitStr;
-            spolArySTPtr[onUL].sitStr =
-               spolArySTPtr[nextUL].sitStr;
-            spolArySTPtr[nextUL].sitStr = swapStr;
+            swapStr = spolArySTPtr[curUL].sitStr;
+            spolArySTPtr[curUL].sitStr =
+               spolArySTPtr[lastUL].sitStr;
+            spolArySTPtr[lastUL].sitStr = swapStr;
 
-            swapStr = spolArySTPtr[onUL].countriesStr;
-            spolArySTPtr[onUL].countriesStr =
-               spolArySTPtr[nextUL].countriesStr;
-            spolArySTPtr[nextUL].countriesStr = swapStr;
+            swapStr = spolArySTPtr[curUL].countriesStr;
+            spolArySTPtr[curUL].countriesStr =
+               spolArySTPtr[lastUL].countriesStr;
+            spolArySTPtr[lastUL].countriesStr = swapStr;
 
             curUL = lastUL;
           } /*loop; move swapped element back*/
@@ -701,9 +701,11 @@ readDb_spolST(
       { /*Loop: convert the barcode to long*/
          retHeapST[*numElmSIPtr].codeUL <<= 1;
 
-         if(buffHeapStr[posUI] == 'n')
+         if((buffHeapStr[posUI] & ~32) == ('n' & ~32))
             retHeapST[*numElmSIPtr].codeUL |= 1;
          else if(buffHeapStr[posUI] == '1')
+            retHeapST[*numElmSIPtr].codeUL |= 1;
+         else if((buffHeapStr[posUI] & ~32) ==('i' & ~32))
             retHeapST[*numElmSIPtr].codeUL |= 1;
 
          ++posUI;
@@ -945,11 +947,22 @@ phead_spolST(
    void *outFILE
 ){
 
+   fprintf(
+      (FILE *) outFILE,
+      "input\tstrain\tbarcode\toctal\tlineage\tSIT"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "\tcountries"
+   );
+
    if(fragBl)
    { /*If: I am doing fragment checks on reads*/
+
       fprintf(
-       (FILE *) outFILE,
-       "ref\tbarcode\tnumReads"
+         (FILE *) outFILE,
+         "\tmapped_reads"
       );
 
       for(
@@ -963,25 +976,12 @@ phead_spolST(
             fragBl + 1
          );
       } /*Loop: print out counter header*/
-
-      fprintf(
-         (FILE *) outFILE,
-         "\n"
-      );
    } /*If: I am doing fragment checks on reads*/
 
-   else
-   { /*Else: I am using non-fragment mode*/
-      fprintf(
-         (FILE *) outFILE,
-         "ref\tstrain\tbarcode\toctal\tlineage\tSIT"
-      );
-
-      fprintf(
-         (FILE *) outFILE,
-         "\tcountries\n"
-      );
-   } /*Else: I am using non-fragment mode*/
+   fprintf(
+      (FILE *) outFILE,
+      "\n"
+   );
 } /*phead_spolST*/
 
 /*-------------------------------------------------------\
@@ -1023,6 +1023,8 @@ pspol_spolST(
    '     - Convert barcode to numeric & "octal" formats
    '   o fun11 sec03:
    '     - Find the lineage and print out the entry
+   '   o fun11 sec04:
+   '     - for fragments, print out counts
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1048,88 +1050,91 @@ pspol_spolST(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec02:
    ^   - Convert the barcode to numeric & "octal" formats
+   ^   o fun11 sec02 sub01:
+   ^     - see if first spacer mapped (bit 1 in octal)
+   ^   o fun11 sec02 sub02:
+   ^     - see if second spacer mapped (bit 2 in octal)
+   ^   o fun11 sec02 sub03:
+   ^     - see if third spacer mapped (bit 3 in octal)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(fragmentBl)
-   { /*If: I am checking fragments*/
-      for(
-         siDig = 0;
-         (sint) codeAryUI[siDig] > -1;
-         ++siDig
-      ){ /*Loop: get the counts and barcode*/
-         codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
-
-         digInCntStr += 
-            numToStr(
-               &cntStr[digInCntStr],
-               codeAryUI[siDig]
-         );
-
-         cntStr[digInCntStr++] = '\t';
-      } /*Loop: get the counts and barcode*/
-
-      --digInCntStr;
-      cntStr[digInCntStr] = '\0';
-
-      codeStr[siDig] = '\0';
-
-      fprintf(
-         (FILE *) outFILE,
-         "%s\t%s\t%u\t%s\n",
-         idStr,
-         codeStr,
-         numSupUI,
-         cntStr
-      ); /*print out the counts*/
-
-      return;
-   } /*If: I am checking fragments*/
+   /*****************************************************\
+   * Fun11 Sec02 Sub01:
+   *   - see if first spacer mapped (bit 1 in octal)
+   \*****************************************************/
 
    while((sint) codeAryUI[siDig] > -1)
    { /*Loop: Translate the barcode to number and octal*/
-      codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
-
       codeUL <<= 1;
-      codeUL |= (codeStr[siDig] - 48);
 
-      octalStr[lenOctalSI] = codeStr[siDig] - 48;
-      
-      ++siDig;
+      if(codeAryUI[siDig] > 0)
+      { /*If: spacer mapped*/
+          codeStr[siDig] = 'I';
+          codeUL |= 1;
+          octalStr[lenOctalSI] = 1;
+      } /*If: spacer mapped*/
 
-      if((sint) codeAryUI[siDig] < 0)
-      { /*If: I have converted the barcode*/
-         octalStr[lenOctalSI] += 48;
-         ++lenOctalSI;
-         break;
-      } /*If: I have converted the barcode*/
-
-      codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
-
-      codeUL <<= 1;
-      codeUL |= (codeStr[siDig] - 48);
-
-      octalStr[lenOctalSI] <<= 1;
-      octalStr[lenOctalSI] |= (codeStr[siDig] - 48);
+      else
+      { /*Else: no spacer*/
+          codeStr[siDig] = 'o';
+          octalStr[lenOctalSI] = 0;
+      } /*Else: no spacer*/
 
       ++siDig;
 
       if((sint) codeAryUI[siDig] < 0)
       { /*If: I have converted the barcode*/
-         octalStr[lenOctalSI] += 48;
+         octalStr[lenOctalSI] += 48;/*make octal numeric*/
          ++lenOctalSI;
          break;
       } /*If: I have converted the barcode*/
 
-      codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
+      /**************************************************\
+      * Fun11 Sec02 Sub02:
+      *   - see if second spacer mapped (bit 2 in octal)
+      \**************************************************/
 
       codeUL <<= 1;
-      codeUL <<= 1;
-      codeUL |= (codeStr[siDig] - 48);
-
       octalStr[lenOctalSI] <<= 1;
-      octalStr[lenOctalSI] |= (codeStr[siDig] - 48);
-      octalStr[lenOctalSI] += 48;
 
+      if(codeAryUI[siDig] > 0)
+      { /*If: spacer mapped*/
+          codeStr[siDig] = 'I';
+          codeUL |= 1;
+          octalStr[lenOctalSI] |= 1;
+      } /*If: spacer mapped*/
+
+      else
+          codeStr[siDig] = 'o'; /*no spacer*/
+
+      ++siDig;
+
+      if((sint) codeAryUI[siDig] < 0)
+      { /*If: I have converted the barcode*/
+         octalStr[lenOctalSI] += 48;/*make octal numeric*/
+         ++lenOctalSI;
+         break;
+      } /*If: I have converted the barcode*/
+
+      /**************************************************\
+      * Fun11 Sec02 Sub03:
+      *   - see if third spacer mapped (bit 3 in octal)
+      \**************************************************/
+
+      codeUL <<= 1;
+      octalStr[lenOctalSI] <<= 1;
+
+      if(codeAryUI[siDig] > 0)
+      { /*If: spacer mapped*/
+          codeStr[siDig] = 'I';
+          codeUL |= 1;
+          octalStr[lenOctalSI] |= 1;
+      } /*If: spacer mapped*/
+
+      else
+          codeStr[siDig] = 'o'; /*no spacer*/
+
+      octalStr[lenOctalSI] += 48; /*make octal numeric*/
       ++lenOctalSI;
       ++siDig;
    } /*Loop: Translate the barcode to number and octal*/
@@ -1162,7 +1167,7 @@ pspol_spolST(
 
       fprintf(
          (FILE *) outFILE,
-         "%s\t%s\t%s\t\'%s\t%s\t%s\t%s\n",
+         "%s\t%s\t%s\t\'%s\t%s\t%s\t%s",
          idStr,
          spoligoAryST[indexSI].idStr,
          codeStr,
@@ -1179,12 +1184,53 @@ pspol_spolST(
 
       fprintf(
          (FILE *) outFILE,
-         "%s\tNA\t%s\t\'%s\tNA\tNA\tNA\n",
+         "%s\tNA\t%s\t\'%s\tNA\tNA\tNA",
          idStr,
          codeStr,
          octalStr
       );
    } /*Else: There is no lineage*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun11 Sec04:
+   ^   - for fragments, print out counts
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(fragmentBl)
+   { /*If: I am checking fragments*/
+      for(
+         siDig = 0;
+         (sint) codeAryUI[siDig] > -1;
+         ++siDig
+      ){ /*Loop: get the counts and barcode*/
+         codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
+
+         digInCntStr += 
+            numToStr(
+               &cntStr[digInCntStr],
+               codeAryUI[siDig]
+         );
+
+         cntStr[digInCntStr++] = '\t';
+      } /*Loop: get the counts and barcode*/
+
+      --digInCntStr;
+      cntStr[digInCntStr] = '\0';
+
+      codeStr[siDig] = '\0';
+
+      fprintf(
+         (FILE *) outFILE,
+         "\t%u\t%s",
+         numSupUI,
+         cntStr
+      ); /*print out the counts*/
+   } /*If: I am checking fragments*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "\n"
+   );
 
    idStr[siDig] = tmpC; 
 } /*pspol_spolST*/

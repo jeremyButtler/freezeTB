@@ -7,54 +7,56 @@
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' SOF: Start Of File
-'  o header:
-'    - Included libraries
-'  o .h st01 samEntry:
-'    - Holds a single samfile entry
-'  o fun01 blank_samEntry:
-'    - Sets all non-alloacted variables in samEntryST to 0
-'  o fun02 init_samEntry:
-'    - Initalize a samEntry struct to 0's
-'  o fun03: setup_samEntry
-'    - allocates memory for a samEntry structure (call
-'      after init_samEntry (fun02))
-'  o fun04 freeStack_samEntry:
-'    - Frees heap allocations in a stack allocated
-'      samEntry struct
-'  o fun05 freeHeap_samEntry:
-'    - Frees a samEntry structer (and sets to null)
-'  o fun06: mk_samEntry
-'    - Makes an heap allocated samEntry structure
-'  o fun07: qhistToMed_samEntry
-'    - Gets the median q-score for an histogram of
-'      q-scores in a samStruct
-'  o fun08: findQScores_samEntry
-'     - Gets the median and mean q-scores from a samEntry
-'       Structure.
-'  o fun09: cpQEntry_samEntry
-'    - Copies q-scores from a string into a samEntry
-'      structure
-'  o fun10: get_samEntry
-'    - Reads in a single line from a sam file
-'  o fun11: findRefPos_samEntry
-'    - Find an reference coordinate in an sequence in
-'      an sam entry structure
-'  o fun12: p_samEntry
-'    - Prints the sam file entry to a file. This does not
-'      print any extra stats that were found.
-'  o fun13: pfq_samEntry
-'    - Prints the sam entry as a fastq entry to a fastq
-'      file
-'  o fun14: pfa_samEntry
-'    - Prints the sam entry as a fasta entry to a fasta
-'      file
-'  o fun15: pstats_samEntry
-'    - Prints out the stats in a samEntry struct to a file
-'  o .h note01:
-'     - Notes about the sam file format from the sam file
-'       pdf
-'  o license:
-'    - Licensing for this code (public domain / mit)
+'   o header:
+'     - Included libraries
+'   o .h st01 samEntry:
+'     - Holds a single samfile entry
+'   o fun01 blank_samEntry:
+'     - Sets all non-alloacted variables in samEntryST to 0
+'   o fun02 init_samEntry:
+'     - Initalize a samEntry struct to 0's
+'   o fun03: setup_samEntry
+'     - allocates memory for a samEntry structure (call
+'       after init_samEntry (fun02))
+'   o fun04 freeStack_samEntry:
+'     - Frees heap allocations in a stack allocated
+'       samEntry struct
+'   o fun05 freeHeap_samEntry:
+'     - Frees a samEntry structer (and sets to null)
+'   o fun06: mk_samEntry
+'     - Makes an heap allocated samEntry structure
+'   o fun07: qhistToMed_samEntry
+'     - Gets the median q-score for an histogram of
+'       q-scores in a samStruct
+'   o fun08: findQScores_samEntry
+'      - Gets the median and mean q-scores from a samEntry
+'        Structure.
+'   o fun09: cpQEntry_samEntry
+'     - Copies q-scores from a string into a samEntry
+'       structure
+'   o fun10: get_samEntry
+'     - Reads in a single line from a sam file
+'   o fun11: findRefPos_samEntry
+'     - Find an reference coordinate in an sequence in
+'       an sam entry structure
+'   o fun12: p_samEntry
+'     - Prints the sam file entry to a file. This does not
+'       print any extra stats that were found.
+'   o fun13: pfq_samEntry
+'     - Prints the sam entry as a fastq entry to a fastq
+'       file
+'   o fun14: pfa_samEntry
+'     - Prints the sam entry as a fasta entry to a fasta
+'       file
+'   o fun15: pstats_samEntry
+'     - Prints out the stats in a samEntry struct to a file
+'   o fun16: revCmp_samEntry
+'     - reverse complements a sam file sequence entry
+'   o .h note01:
+'      - Notes about the sam file format from the sam file
+'        pdf
+'   o license:
+'     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -601,7 +603,7 @@ cpQEntry_samEntry(
   ^   - Variable declerations
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-  signed char *tmpStr = 0;
+  uchar *tmpStr = 0;
   uint uiQ = 0;
   uint uiChar = 0;
   ulong qAdjustUL=mkDelim_ulCp((schar) def_adjQ_samEntry);
@@ -631,20 +633,20 @@ cpQEntry_samEntry(
 
   for(
      uiQ = 0;
-     uiQ < ((samSTPtr)->readLenUI >> def_shiftULBy_ulCp);
+     uiQ < (samSTPtr->readLenUI >> def_shiftULBy_ulCp);
      ++uiQ
   ) { /*Loop: Copy the q-score entries*/
      dupPtrUL[uiQ] = cpPtrUL[uiQ];
      qScoreUL = dupPtrUL[uiQ] - qAdjustUL;
-     tmpStr = (schar *) &qScoreUL;
+     tmpStr = (uchar *) &qScoreUL;
      
      for(
         uiChar = 0;
         uiChar < def_charInUL_ulCp;
         ++uiChar
      ) { /*Loop: Get the q-score entries*/
-        ++(samSTPtr)->qHistUI[ (uchar) tmpStr[uiChar] ];
-        (samSTPtr)->sumQUL += (uchar) tmpStr[uiChar];
+        ++samSTPtr->qHistUI[tmpStr[uiChar]];
+        samSTPtr->sumQUL += tmpStr[uiChar];
      } /*Loop: Get the q-score entries*/
   } /*Loop: Copy the q-score entries*/
   
@@ -661,24 +663,24 @@ cpQEntry_samEntry(
      uiQ < (samSTPtr)->readLenUI;
      ++uiQ
   ) { /*Loop: Copy the q-score entries*/
-     (samSTPtr)->qStr[uiQ] = (cpQStr)[uiQ];
-     qScoreUL = (uchar) (cpQStr)[uiQ] - def_adjQ_samEntry;
+     samSTPtr->qStr[uiQ] = cpQStr[uiQ];
+     qScoreUL = (uchar) cpQStr[uiQ] - def_adjQ_samEntry;
 
-     ++(samSTPtr)->qHistUI[qScoreUL];
-     (samSTPtr)->sumQUL += qScoreUL;
+     ++samSTPtr->qHistUI[qScoreUL];
+     samSTPtr->sumQUL += qScoreUL;
   } /*Loop: Copy the q-score entries*/
   
-  (samSTPtr)->qStr[uiQ] = '\0';
+  samSTPtr->qStr[uiQ] = '\0';
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun09 Sec05:
   ^   - Find the median and mean q-scores
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
-  (samSTPtr)->meanQF =
-     (float)(samSTPtr)->sumQUL/(samSTPtr)->readLenUI;
+  samSTPtr->meanQF = (float) samSTPtr->sumQUL;
+  samSTPtr->meanQF /= (float) samSTPtr->readLenUI;
   
-  qhistToMed_samEntry((samSTPtr));
+  qhistToMed_samEntry(samSTPtr);
   return uiQ;
 } /*cpQEntry_samEntry*/
 
@@ -687,16 +689,16 @@ cpQEntry_samEntry(
 |  - Reads in a single line from a sam file
 | Input:
 |  - samSTPtr:
-|    o Pionter to samEntry structure to store the sam file
+|    o pionter to samEntry structure to store the sam file
 |      line in. This structure should be initialized
 |  - buffStr:
-|    o Buffer to read the sam file line temporarly into.
-|      This is resized if needed. You can input NULL to
+|    o buffer to read the sam file line temporarly into.
+|      this is resized if needed. You can input NULL to
 |      create a new buffer.
 |  - lenBuffUL:
-|    o Length of buffStr (updated if buffStr is resized)
+|    o length of buffStr (updated if buffStr is resized)
 |  - samVoidFILE:
-|    o Sam file to read a line from. The void is so that
+|    o sam file to read a line from. The void is so that
 |      I can use samFILE in the function.
 | Output:
 |  - Modifies:
@@ -1149,13 +1151,13 @@ get_samEntry(
       goto noQEntry;
    } /*Else If: There  is no sequence entry*/
 
-   if(samSTPtr->readLenUI > samSTPtr->lenSeqBuffUI)
+   if(samSTPtr->readLenUI + 8 > samSTPtr->lenSeqBuffUI)
    { /*If: I need to resize sequence & q-score buffers*/
       free(samSTPtr->seqStr);
       samSTPtr->seqStr = 0;
 
       samSTPtr->seqStr =
-         malloc((samSTPtr->readLenUI + 1) * sizeof(char));
+         malloc((samSTPtr->readLenUI + 9) * sizeof(char));
 
       if(!samSTPtr->seqStr)
          goto memErr_fun10_sec14;
@@ -1164,7 +1166,7 @@ get_samEntry(
       samSTPtr->qStr = 0;
 
       samSTPtr->qStr =
-         malloc((samSTPtr->readLenUI + 1) * sizeof(char));
+         malloc((samSTPtr->readLenUI + 9) * sizeof(char));
 
       if(!samSTPtr->qStr)
          goto memErr_fun10_sec14;
@@ -1212,27 +1214,57 @@ get_samEntry(
    
    extraEntry:
 
-   /*not sure if char or ul copy better here*/
-   samSTPtr->lenExtraUI = lenStr_ulCp(iterStr, 0, '\0');
+   if(! iterStr || *iterStr == '\0')
+   { /*If: no extra entry*/
+      if(samSTPtr->lenExtraUI > 1)
+      { /*If: I need to resize the buffer*/
+         if(samSTPtr->extraStr)
+            free(samSTPtr->extraStr);
 
-   if(samSTPtr->lenExtraUI > samSTPtr->lenExtraBuffUI)
-   { /*If: I need to resize the buffer*/
-      free(samSTPtr->extraStr);
-      samSTPtr->extraStr = 0;
+         samSTPtr->extraStr = 0;
 
-      samSTPtr->extraStr =
-         malloc((samSTPtr->lenExtraUI +1)* sizeof(char));
-      
-      if(samSTPtr->extraStr == 0)
-         goto memErr_fun10_sec14;
+         samSTPtr->extraStr = malloc(10 * sizeof(schar));
+         
+         if(samSTPtr->extraStr == 0)
+            goto memErr_fun10_sec14;
 
-   } /*If: I need to resize the buffer*/
+         samSTPtr->extraStr[0] = '\0';
 
-   cpLen_ulCp(
-      samSTPtr->extraStr,
-      iterStr,
-      samSTPtr->lenExtraUI
-   ); /*Copy the extra entry*/
+         samSTPtr->lenExtraUI = 0;
+      } /*If: I need to resize the buffer*/
+   } /*If: no extra entry*/
+
+   else
+   { /*Else: have extra entry*/
+      /*not sure if char or ul copy better here*/
+      samSTPtr->lenExtraUI =
+         lenStr_ulCp(
+            iterStr,
+            0,
+            '\0'
+         );
+
+      if(samSTPtr->lenExtraUI > samSTPtr->lenExtraBuffUI)
+      { /*If: I need to resize the buffer*/
+         free(samSTPtr->extraStr);
+         samSTPtr->extraStr = 0;
+
+         samSTPtr->extraStr =
+            calloc(
+               samSTPtr->lenExtraUI + 9,
+               sizeof(schar)
+            );
+         
+         if(samSTPtr->extraStr == 0)
+            goto memErr_fun10_sec14;
+      } /*If: I need to resize the buffer*/
+
+      cpLen_ulCp(
+         samSTPtr->extraStr,
+         iterStr,
+         samSTPtr->lenExtraUI
+      ); /*Copy the extra entry*/
+   } /*Else: have extra entry*/
 
    return 0;
 
@@ -1301,11 +1333,17 @@ findRefPos_samEntry(
   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec01:\
-   ^   - Start loop and check insertions/soft masking\
+   ^ Fun11 Sec01:
+   ^   - Start loop and check insertions/soft masking
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed int lastCigMacSI = *siCig;
+
+   if(samSTPtr->cigTypeStr[*siCig] == 'S')
+      goto softMask_fun11_sec01;
+
+   if(samSTPtr->cigTypeStr[*siCig] == 'H')
+      goto hardMask_fun11_sec03;
 
    /*Check if I did a full cigar entry move*/
    while(*refPosSI < targPosSI)
@@ -1317,6 +1355,7 @@ findRefPos_samEntry(
          case 'S':
          case 'I':
          /*Case: Softmasking or insertions*/
+            softMask_fun11_sec01:;
             *seqPosSI += *cigNtSI;
             ++(*siCig);
             *cigNtSI = 0;
@@ -1325,7 +1364,7 @@ findRefPos_samEntry(
 
          /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
          ^ Fun11 Sec02:
-         ^   - Move position in deletion cases\
+         ^   - Move position in deletion cases
          \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
          case 'D':
@@ -1378,13 +1417,14 @@ findRefPos_samEntry(
 
          default:
          /*Case: hard mask of some kind*/
+            hardMask_fun11_sec03:;
             ++(*siCig);
             *cigNtSI = 0;
          /*Case: hard mask of some kind*/
       } /*Switch: check what the next entry is*/
 
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun11 Sec03:
+      ^ Fun11 Sec04:
       ^   - Move to the next cigar entry
       \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2019,6 +2059,234 @@ pstats_samEntry(
 
    } /*If: This is not a comment*/
 } /*pstats_samEntry*/
+
+/*-------------------------------------------------------\
+| Fun16: revCmp_samEntry
+|   - reverse complements a sam file sequence entry
+| Input:
+|   - samSTPtr:
+|     o pointer to samEntry struct to reverse complement
+| Output:
+|   - Modifies:
+|     o samSTPtr (includes flag) to be reverse complment
+\-------------------------------------------------------*/
+void
+revCmp_samEntry(
+   struct samEntry *samSTPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun16 TOC:
+   '   - reverse complements a sam file sequence entry
+   '   o fun16 sec01:
+   '     - variable declarations
+   '   o fun16 sec02:
+   '     - check if have sequence and qscore entries
+   '   o fun16 sec03:
+   '     - reverse complement sequence and q-scores
+   '   o fun16 sec04:
+   '     - reverse the cigar and flag
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   schar *startStr = 0;
+   schar *endStr = 0;
+
+   schar *qStartStr = 0;
+   schar *qEndStr = 0;
+
+   sint *startSIPtr;
+   sint *endSIPtr;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec02:
+   ^   - check if have sequence and qscore entries
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(
+         ! samSTPtr->seqStr
+      || (
+            samSTPtr->seqStr[0] == '*'
+            && samSTPtr->seqStr[1] < 32
+         )
+   ) ; /*no sequence entry*/
+
+   else
+   { /*Else: have sequence entry*/
+      startStr = samSTPtr->seqStr;
+      endStr = startStr + samSTPtr->readLenUI;
+   } /*Else: have sequence entry*/
+
+   if(
+         ! samSTPtr->qStr
+      || (
+            samSTPtr->qStr[0] == '*'
+            && samSTPtr->qStr[1] < 32
+         )
+   ) ;
+
+   else
+   { /*Else: have q-score entry*/
+      qStartStr = samSTPtr->qStr;
+      qEndStr = qStartStr + samSTPtr->readLenUI;
+   } /*Else: have q-score entry*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec03:
+   ^   - reverse complement sequence and q-scores
+   ^   o fun16 sec03 sub01:
+   ^     - reverse q-score entries + start loop
+   ^   o fun16 sec03 sub02:
+   ^     - reverse complement sequence entry
+   ^   o fun16 sec03 sub03:
+   ^     - make sure last sequence base is complement
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun16 Sec03 Sub01:
+   *   - reverse q-score entries + start loop
+   \*****************************************************/
+
+   while(startStr < endStr)
+   { /*Loop: reverse complement*/
+      if(qStartStr)
+      { /*If: have qscore entry*/
+         *qStartStr ^= *qEndStr;
+         *qEndStr ^= *qStartStr;
+         *qStartStr ^= *qEndStr;
+
+         ++qStartStr;
+         --qEndStr;
+      } /*If: have qscore entry*/
+
+      /**************************************************\
+      * Fun16 Sec03 Sub02:
+      *   - reverse complement sequence entry
+      \**************************************************/
+
+      switch(*startStr & (~32))
+      { /*Switch: complement*/
+          case 'A': *startStr = 'T'; break;
+          case 'C': *startStr = 'G'; break;
+          case 'G': *startStr = 'C'; break;
+          case 'T': *startStr = 'A'; break;
+          case 'U': *startStr = 'A'; break;
+          case 'W': *startStr = 'W'; break;
+          case 'S': *startStr = 'S'; break;
+          case 'M': *startStr = 'K'; break; /*A/C*/
+          case 'K': *startStr = 'M'; break; /*T/G*/
+          case 'R': *startStr = 'Y'; break; /*A/G*/
+          case 'Y': *startStr = 'R'; break; /*T/C*/
+          case 'B': *startStr = 'V'; break; /*C/G/T*/
+          case 'D': *startStr = 'H'; break; /*G/T/A*/
+          case 'H': *startStr = 'D'; break; /*C/A/T*/
+          case 'V': *startStr = 'B'; break; /*A/C/G*/
+          case 'N': *startStr = 'N'; break; /*A/C/G/T*/
+          default: *startStr = 0;
+      } /*Switch: complement*/
+
+      switch(*endStr & (~32))
+      { /*Switch: complement*/
+          case 'A': *endStr = 'T'; break;
+          case 'C': *endStr = 'G'; break;
+          case 'G': *endStr = 'C'; break;
+          case 'T': *endStr = 'A'; break;
+          case 'U': *endStr = 'A'; break;
+          case 'W': *endStr = 'W'; break;
+          case 'S': *endStr = 'S'; break;
+          case 'M': *endStr = 'K'; break; /*A/C*/
+          case 'K': *endStr = 'M'; break; /*T/G*/
+          case 'R': *endStr = 'Y'; break; /*A/G*/
+          case 'Y': *endStr = 'R'; break; /*T/C*/
+          case 'B': *endStr = 'V'; break; /*C/G/T*/
+          case 'D': *endStr = 'H'; break; /*G/T/A*/
+          case 'H': *endStr = 'D'; break; /*C/A/T*/
+          case 'V': *endStr = 'B'; break; /*A/C/G*/
+          case 'N': *endStr = 'N'; break; /*A/C/G/T*/
+          default: *endStr = 0;
+      } /*Switch: complement*/
+
+      *startStr ^= *endStr;
+      *endStr ^= *startStr;
+      *startStr ^= *endStr;
+
+      ++startStr;
+      --endStr;
+   } /*Loop: reverse complement*/
+
+   /*****************************************************\
+   * Fun16 Sec03 Sub03:
+   *   - make sure last sequence base is complement
+   \*****************************************************/
+
+   if(
+         startStr
+      && startStr == endStr
+   ){ /*If: have middle base*/
+      switch(*startStr & (~32))
+      { /*Switch: complement*/
+          case 'A': *startStr = 'T'; break;
+          case 'C': *startStr = 'G'; break;
+          case 'G': *startStr = 'C'; break;
+          case 'T': *startStr = 'A'; break;
+          case 'U': *startStr = 'A'; break;
+          case 'W': *startStr = 'W'; break;
+          case 'S': *startStr = 'S'; break;
+          case 'M': *startStr = 'K'; break; /*A/C*/
+          case 'K': *startStr = 'M'; break; /*T/G*/
+          case 'R': *startStr = 'Y'; break; /*A/G*/
+          case 'Y': *startStr = 'R'; break; /*T/C*/
+          case 'B': *startStr = 'V'; break; /*C/G/T*/
+          case 'D': *startStr = 'H'; break; /*G/T/A*/
+          case 'H': *startStr = 'D'; break; /*C/A/T*/
+          case 'V': *startStr = 'B'; break; /*A/C/G*/
+          case 'N': *startStr = 'N'; break; /*A/C/G/T*/
+          default: *startStr = 0;
+      } /*Switch: complement*/
+   } /*If: have middle base*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec04:
+   ^   - reverse the cigar and flag
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(samSTPtr->flagUS & 4) ;
+      /*unmapped read; do nothing*/
+   else if(samSTPtr->flagUS & 16)
+      samSTPtr->flagUS &= ~16;
+   else
+      samSTPtr->flagUS |= 16;
+
+   if(
+         samSTPtr->cigTypeStr
+      && samSTPtr->cigTypeStr[0] != '*'
+   ){ /*If: have cigar to flip*/
+      startStr = samSTPtr->cigTypeStr;
+      endStr = startStr + samSTPtr->lenCigUI;
+
+      startSIPtr = samSTPtr->cigArySI;
+      endSIPtr = startSIPtr + samSTPtr->lenCigUI;
+
+      while(startStr > endStr)
+      { /*Loop: reverse cigar*/
+         *startStr ^= *endStr;
+         *endStr ^= *startStr;
+         *startStr ^= *endStr;
+
+         ++startStr;
+         --endStr;
+
+         *startSIPtr ^= *endSIPtr;
+         *endSIPtr ^= *startSIPtr;
+         *startSIPtr ^= *endSIPtr;
+
+         ++startSIPtr;
+         --endSIPtr;
+      } /*Loop: reverse cigar*/
+   } /*If: have cigar to flip*/
+} /*revCmp_samEntry*/
 
 /*=======================================================\
 : License:

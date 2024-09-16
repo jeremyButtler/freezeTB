@@ -18,7 +18,7 @@ valgrind \
      --keep-debuginfo=yes \
      -s \
   ./tbSpol \
-     -con-frag \
-     -sam del.sam \
+     -read-frag \
+     -fq del.fq \
      -spoligo ../../freezeTBFiles/spoligo-spacers.fa \
      -db ../../freezeTBFiles/spoligo-lineages.csv

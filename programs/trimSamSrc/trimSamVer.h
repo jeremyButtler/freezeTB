@@ -4,8 +4,8 @@
 ########################################################*/
 
 #define def_year_trimSamVer 2024
-#define def_month_trimSamVer 07
-#define def_day_trimSamVer 23
+#define def_month_trimSamVer 9
+#define def_day_trimSamVer 5
 
 /*=======================================================\
 : License:

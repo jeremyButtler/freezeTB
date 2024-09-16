@@ -68,6 +68,7 @@ phelp_graphAmpDepth = function(inStr){
        print("      coverage gaph");
        print("    o This is not done if the file can");
        print("      not be opened");
+       print("    o use \"-who -\" to disable\"");
        print("Output:");
        print("  - Saves the graphs as file.ext (-ext)");
        print("    o The -readDepth.ext has the read");
@@ -328,25 +329,26 @@ while(iArg <= lenInputI)
    } else if(inputStr[iArg] == "-who"){
       iArg = iArg + 1;
 
-      if(iArg > lenInputI){
+      if(inputStr[iArg] == '-'){
+         amrFileStr = NULL; # disabling input
+      }else if(iArg > lenInputI){
          print("-who (who catalog) needs an arugment");
          errBl = TRUE;
          break;
       }
 
-      if(! file.exists(inputStr[iArg])){
+      else if(! file.exists(inputStr[iArg])){
          print(
             paste(
-               "could not open -who",
+               "could not open -who; not adding AMRs in",
                inputStr[iArg]
             )
          );
 
-         errBl = TRUE;
-         break;
-      } # If: invalid file
-
-      amrFileStr = inputStr[iArg];
+         amrFileStr = NULL;
+      } else{
+         amrFileStr = inputStr[iArg];
+      } # check if valid file
    } else if(inputStr[iArg] == "-min-len"){
       iArg = iArg + 1;
       minLenSI = as.numeric(inputStr[iArg]);

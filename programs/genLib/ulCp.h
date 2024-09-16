@@ -1,12 +1,8 @@
-/*########################################################
-# Name: ulCp
-#   - uses longs to copy contents of a string
-#   - These functions are slower than strcpy and strlen,
-#     but they allow deliminators to be used.
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' ulCp SOF: Start Of File
+'   - uses longs to copy contents of a string
+'   - These functions are slower than strcpy and strlen,
+'     but they allow deliminators to be used.
 '   o header:
 '     - Included libraries, definitions and preprocessor
 '       checks

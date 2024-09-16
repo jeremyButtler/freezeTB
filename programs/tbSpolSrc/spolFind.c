@@ -149,6 +149,10 @@ fx_spolFind(
    /*to keep the old assigned sequence*/
    struct seqST *oldSeqST = 0;
 
+   /*code array for spoligotyping*/
+   uint bitAryUI[def_numSpol_tbSpolDefs + 1];
+   uint *spolAryUIPtr = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
    ^   - check positions and assign sequence to table
@@ -163,14 +167,29 @@ fx_spolFind(
    *   - see if i have an direct repeat region
    \*****************************************************/
 
-   if(! fragCheckBl)
-   { /*If: I am checking full direct repeat regions*/
+   if(fragCheckBl)
+   { /*If: only have direct repeat fragments*/
+      for(
+         uiSpoligo = 0;
+         uiSpoligo < lenRefAryUI;
+         ++uiSpoligo
+      ) bitAryUI[uiSpoligo] = 0; /*blank for new seq*/
+
+      bitAryUI[uiSpoligo] = -1; /*mark end*/
+
+      spolAryUIPtr = bitAryUI;
+   } /*If: only have direct repeat fragments*/
+
+   else
+   { /*Else: read has full direct repeat region*/
       for(
          uiSpoligo = 0;
          uiSpoligo < lenRefAryUI;
          ++uiSpoligo
       ) codeAryUI[uiSpoligo] = 0; /*blank for new seq*/
-   } /*If: I am checking full direct repeat regions*/
+
+      spolAryUIPtr = codeAryUI;
+   } /*Else: read has full direct repeat region*/
 
    codeAryUI[lenRefAryUI] = -1;
 
@@ -222,8 +241,11 @@ fx_spolFind(
                &refEndUL
             );
 
-         codeAryUI[uiSpoligo] += matchBl;
-         retSC &= (!matchBl);
+         if(matchBl)
+         { /*If: have a match*/
+            spolAryUIPtr[uiSpoligo] = 1;
+            retSC = 0;
+         } /*If: have a match*/
       } /*Loop: detect spoligotypes in each chunk*/
    } while(! errSC);
 
@@ -231,6 +253,15 @@ fx_spolFind(
    ^ Fun01 Sec04:
    ^   - clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(fragCheckBl)
+   { /*If: add detected fragments to code array*/
+      for(
+         uiSpoligo = 0;
+         uiSpoligo < lenRefAryUI;
+         ++uiSpoligo
+      ) codeAryUI[uiSpoligo] += bitAryUI[uiSpoligo];
+   } /*If: add detected fragments to code array*/
 
    /*reset table to original sequences*/
    indexToSeq_alnSet(tblSTPtr->seqSTPtr->seqStr);
@@ -337,6 +368,10 @@ sam_spolFind(
    sint refPosSI = 0;
    sint stopPosSI = 0;
 
+   /*code array for spoligotyping*/
+   uint bitAryUI[def_numSpol_tbSpolDefs + 1];
+   uint *spolAryUIPtr = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec02:
    ^   - check positions and assign sequence to table
@@ -358,6 +393,16 @@ sam_spolFind(
 
       if(samSTPtr->refStartUI > (uint) dirEndSI)
          goto noSpoligo_fun02_sec04_sub02;
+
+      for(
+         uiSpoligo = 0;
+         uiSpoligo < lenRefAryUI;
+         ++uiSpoligo
+      ) bitAryUI[uiSpoligo] = 0; /*blank for new seq*/
+
+      bitAryUI[uiSpoligo] = -1; /*mark end*/
+
+      spolAryUIPtr = bitAryUI;
    } /*If: I am checking fragments*/
 
    else
@@ -374,6 +419,8 @@ sam_spolFind(
          uiSpoligo < lenRefAryUI;
          ++uiSpoligo
       ) codeAryUI[uiSpoligo] = 0; /*blank for new seq*/
+
+      spolAryUIPtr = codeAryUI;
    } /*Else: I am checking full direct repeat regions*/
 
    codeAryUI[lenRefAryUI] = -1;
@@ -453,8 +500,11 @@ sam_spolFind(
                &refEndUL
             );
 
-         codeAryUI[uiSpoligo] += matchBl;
-         retSC &= (!matchBl);
+         if(matchBl)
+         { /*If: have a match*/
+            spolAryUIPtr[uiSpoligo] = 1;
+            retSC = 0;
+         } /*If: have a match*/
       } /*Loop: detect spoligotypes in each chunk*/
 
       if(tblSTPtr->seqPosUL >= (ulong) stopPosSI)
@@ -476,6 +526,15 @@ sam_spolFind(
    * Fun02 Sec04 Sub01:
    *   - no error
    \*****************************************************/
+
+   if(fragCheckBl)
+   { /*If: add detected fragments to code array*/
+      for(
+         uiSpoligo = 0;
+         uiSpoligo < lenRefAryUI;
+         ++uiSpoligo
+      ) codeAryUI[uiSpoligo] += bitAryUI[uiSpoligo];
+   } /*If: add detected fragments to code array*/
 
    errSC = retSC;
    goto cleanUp_fun02_sec04_sub04;
@@ -917,6 +976,10 @@ fxwater_spolFind(
    ulong startAlnUL = 0;     /*First aligned base in seq*/
    ulong endAlnUL = 0;       /*Last alignned base in seq*/
 
+   /*code array for spoligotyping*/
+   uint bitAryUI[def_numSpol_tbSpolDefs + 1];
+   uint *spolAryUIPtr = 0;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun04 Sec02:
    ^   - Check if there are spoligotypes
@@ -933,14 +996,29 @@ fxwater_spolFind(
    *   - blank barcode array if not fragment mode
    \*****************************************************/
 
-   if(! fragCheckBl)
-   { /*If: I am not searching for fragments*/
+   if(fragCheckBl)
+   { /*If: only have direct repeat fragments*/
+      for(
+         siSpoligo = 0;
+         siSpoligo < (numSpoligosSI >> 1);
+         ++siSpoligo
+      ) bitAryUI[siSpoligo] = 0; /*blank for new seq*/
+
+      bitAryUI[siSpoligo] = -1; /*mark end*/
+
+      spolAryUIPtr = bitAryUI;
+   } /*If: only have direct repeat fragments*/
+
+   else
+   { /*Else: expect full direct repeat regions*/
       for(
          siSpoligo = 0;
          siSpoligo < (numSpoligosSI >> 1);
          ++siSpoligo
       ) codeAryUI[siSpoligo] = 0; /*blank for new seq*/
-   } /*If: I am not searching for fragments*/
+
+      spolAryUIPtr = codeAryUI;
+   } /*Else: expect full direct repeat regions*/
 
    codeAryUI[numSpoligosSI >> 1] = -1;
 
@@ -993,7 +1071,7 @@ fxwater_spolFind(
 
        if(percScoreF >= minPercScoreF)
        { /*If: I had an match*/
-          codeAryUI[siSpoligo >> 1] += 1;
+          spolAryUIPtr[siSpoligo >> 1] = 1;
           noSpoligoBl = 0;
           continue;
        } /*If: I had an match*/
@@ -1042,7 +1120,7 @@ fxwater_spolFind(
 
        if(percScoreF >= minPercScoreF)
        { /*If: I found an hit*/
-          codeAryUI[siSpoligo >> 1] += 1;
+          spolAryUIPtr[siSpoligo >> 1] = 1;
           revBl = !revBl; /*likely future hits are same*/
           noSpoligoBl = 0;
        } /*If: I found an hit*/
@@ -1052,6 +1130,15 @@ fxwater_spolFind(
    ^ Fun04 Sec03:
    ^   - Clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(fragCheckBl)
+   { /*If: add detected fragments to code array*/
+      for(
+         siSpoligo = 0;
+         siSpoligo < (numSpoligosSI >> 1);
+         ++siSpoligo
+      ) codeAryUI[siSpoligo] += bitAryUI[siSpoligo];
+   } /*If: add detected fragments to code array*/
 
    codeAryUI[numSpoligosSI >> 1] = -1;
    indexToSeq_alnSet(refAryST->seqStr);

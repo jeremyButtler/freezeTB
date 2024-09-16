@@ -1,6 +1,6 @@
 LD=cc
 CC=cc
-CFLAGS= -O0 -std=c89 -Wall -Wextra
+CFLAGS= -O0 -std=c89 -Wall -Wextra -ggdb -g
 NAME=tbSpol
 genLib=../genLib
 genAln=../genAln

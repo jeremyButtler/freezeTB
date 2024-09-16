@@ -3263,7 +3263,7 @@ phit_kmerFind(
          fprintf(
              (FILE *) outFILE,
              "%s\t%s",
-             seqSTPtr->idStr + 1,
+             seqSTPtr->idStr,
              refAryST[siRef].forSeqST->idStr
                 + skip1stCharUC
          ); /*ids*/
@@ -3363,7 +3363,7 @@ phit_kmerFind(
          fprintf(
              (FILE *) outFILE,
              "%s\t%s\tNA\t%c\t%lu\t%lu",
-             seqSTPtr->idStr + 1,
+             seqSTPtr->idStr,
              refAryST[siRef].forSeqST->idStr
                 + skip1stCharUC,
              dirArySC[siRef],

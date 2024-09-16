@@ -15,14 +15,32 @@ chaptersDepth: 1
 chapDelim: ""
 ---
 
+**Notes**
+
+get EPI2ME wf-tb-amr add to benchmarking scripts
+
+**Paper**
+
 # Methods
 
 We compared detected antibiotics, memory usage, and time
   usage for freezeTB version 2024-06-11 
   ([https://github.com/jeremybuttler/freezeTB](
-   https://github.com/jeremybuttler/freezeTB)) and
+   https://github.com/jeremybuttler/freezeTB)), wf-tb-amr
+  ([https://github.com/epi2me-labs/wf-tb-amr](
+    https://github.com/epi2me-labs/wf-tb-amr), and
   TBProfiler version 6.2.0 and database version 82777ea
   [@phelan-2019-pmid-31234910].
+
+For wf-tb-amr, we
+  used `nextflow run epi2me-labs/wf-tb-amr` with
+  `--fastq barcode0x-directory/` to run wf-tb-amr on one
+  barcode and `-profile standard`.
+We automated the steps to run wf-tb-amr using a bash
+  script
+  ([https://github.com/jeremybutter/freezeTB/benchmark/run-wfTbAmr.sh](
+   https://github.com/jeremybutter/freezeTB/benchmark/run-wfTbAmr.sh)).
+
 For TBProfiler, we used Nanopore settings
   (`--platform nanopore`) with bcftools version 1.20
   [@danecek-2021-pmid-33590861] for variant calling
@@ -47,6 +65,8 @@ We mapped the reads to H37Rv using minimap2 version
 We automated these steps with a bash script
   ([https://github.com/jeremybutter/freezeTB/benchmark/run-freezeTB.sh](
    https://github.com/jeremybutter/freezeTB/benchmark/run-freezeTB.sh)).
+
+**add empi2e to this when I get a better idea**
 
 Next, we compared the consensuses, the detected
   antibiotics, and the detected spoligotype for both
@@ -82,7 +102,7 @@ We automated these steps for to run and comparing freezeTB
    https://github.com/jeremybutter/freezeTB/benchmark/TBOneBench.sh)).
 
 In our automated bash scripts, we also compared the time
-  and memory usage of both TBProfiler and freezeTB.
+  and memory usage of wf-tb-amr, TBProfiler, and freezeTB.
 For time and memory comparisons, we used a desktop
   running Ubuntu, with an AMD Ryzen 9 5950X 16 core CPU,
   and DDR4 ram.
@@ -91,11 +111,13 @@ We measured the time using gnutime (`/usr/bin/time`) to
   (actual memory used) (`%M`), and the processor usage
   (`%P`) (`/usr/bin/time -f "%e\t%M\t%P"`).
 We made graphs comparing time, memory usage, AMRs
-  detected, and consensus similarity for freezeTB and
-  TBProfile with R version 3.6.3 [@R] using the ggplot2
-  version 3.2.1 [@ggplot2], data.table version 1.12.8
-  [@dataTbl], and viridisLite 0.3.0 [@viridisLite]
-  packages.
+  detected, and consensus similarity for wf-tb-amr,
+  TBProfiler, and freezeTB with R version 3.6.3 [@R] using
+  the ggplot2 version 3.2.1 [@ggplot2], data.table
+  version 1.12.8 [@dataTbl], and viridisLite 0.3.0
+  [@viridisLite] packages.
+
+**May need to update versions. Things are out of date**
 
 <!--This is to have separate numbering for suplemental
     figures
@@ -121,13 +143,11 @@ FreezeTb is a program detects AMRs, MIRU-VNTR lineages,
   spoligotypes, and builds a consensus using a sam file
   of Nanopore sequence reads mapped to the NC000962.3
   (H32Rv) reference genome.
-The freezeTB reports the detected AMRs, the MIRU-VNTR
+FreezeTB also reports the detected AMRs, the MIRU-VNTR
   lineages, the detected spoligotype, and the mean read
   depth per gene.
-FreezeTb also makes a sam file with the consensus
-  fragments.
-Upon request, freezeTB will also make graphs for the
-  mean gene read depth and gene coverage.
+Also, output from freezeTb is a sam file with the
+  consensus fragments.
 
 #### Read depth and coverage reports
 
@@ -188,7 +208,7 @@ The last step in consensus building is to convert the
   single consensus into fragments with good read depth.
 We fragment the consensus by removing any position that
   has less than 20x read depth.
-Next, we remove any fragment that is under 200 bases long.
+Next, we remove any fragment that is under 50 bases long.
 Finally, we save the consensus fragments in sam file.
 
 #### AMR detection
@@ -212,17 +232,21 @@ By default, freezeTB does not check for frame
 However, though not recommended, freezeTB includes an
   option to allow a simple check for frame shifts and
   loss of function AMRs.
-For loss of function AMRs, we translate the parts of the
-  sequence that cover the target gene.
+For loss of function AMRs, we translate sequence regions
+  that cover the target gene.
 We then look for early stop codons, lost stop codons
   (when possible), and lost start codons (when possible).
-Also, we count the number of indels and check if they
-  are divisible by three (not an LoF).
+Also, we check for frame shifts by subtracting the number
+  of deletions from number of insertions and checking for
+  a remainder after division by
+  three (`(deletions in gene - insertions in gene) mod 3`).
 
-For frame shifts, we look to see if there are any indels in
-  the AMR region.
-We also count the number of neighboring indels and check
-  if they are divisible by three.
+For local frame shifts, we look to see if their are any
+  indels in the AMR region.
+If there is an indel in the expected location we classify
+  it as a frame shift.
+Otherwise, we use the neighboring indels to detected
+ frame shifts using `(deletions - insertions) mod 3`.
 
 #### MIRU-VNTR lineages
 
@@ -243,27 +267,21 @@ To account for differences in length from indel errors, we
 
 For spoligotyping, we use the direct repeat region
   coordinates from the H37Rv reference genome to identify
-  reads that could have a spacer.
+  reads or consensuses that could have a spacer.
 We then count the number of matching 5mers present in a
   spacer and in a 50 nucleotide window in the sequences
   direct repeat region.
 We ignore any window with less than ten 5mers.
 While we align windows with ten or more 5mers to the
   spacer with a Waterman Smith alignment, using the
-  EDANFULL matrix and a gap penalty of -10.
-We discard windows that have an alignment score under 90%
-  of the spacer's maximum score.
-For each spacer, we record the read depth.
+  EDANFULL matrix and a gap penalty of -10 and a
+  gap extension penalty of -0.1.
+We count a spacer as mapped (1) if the alignment score is
+  at least 90% of the spacer's maximum score.
 After mapping, we move the window to the next 25
   nucleotides the direct repeat region.
-We then convert the spacer depths into a barcode by
-  reducing all counts to one.
-For reads, we then print out the barcode, number of reads
-  having at least one spacer, and the number of reads that
-  supported each position in the barcode.
-For consensuses, we then search the lineage database (csv)
-  from TBProfiler for a lineage that matches the
-  consensuses barcode.
+We then find the lineage using the barcode made by mapping
+  spacers and the spoligotyping database from TBProfiler.
 
 # References
 

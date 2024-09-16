@@ -1,3 +1,0 @@
-b ampDepth.c:68
-b ../generalLib/samEntryStruct.h:637
-r -gene-tbl ../freezeTbFiles/gene-tbl.tsv -sam ~/BC33-test.sam

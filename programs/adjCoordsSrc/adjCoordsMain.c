@@ -174,15 +174,26 @@ phelp_adjCoordsMain(
       "    o tsv file with coordiantes of each gene\n"
     );
 
-    fprintf(
-      outFILE,
-      "       - gene_name\\tref_name_ignored\\tdirection"
-    );
+   fprintf(
+      (FILE *) outFILE,
+      "     - example:\n"
+   );
 
-    fprintf(
-      outFILE,
-      "\\tref_start\\tref_end\n"
-    );
+
+   fprintf(
+      (FILE *) outFILE,
+      "       gene\tref\tdirection\tstart\tend\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "       dnaA\tNC000962.3\tF\t1\t1525\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "       pknB\tNC000962.3\tR\t15590\t17470\n"
+   );
 
    /*****************************************************\
    * Fun02 Sec02 Sub03:
@@ -564,11 +575,7 @@ input_adjCoordMain(
 |   - Prints:
 |     o ajdust sam file to stdout
 \-------------------------------------------------------*/
-#ifdef PLAN9
-unsigned long
-#else
 int
-#endif
 main(
    int numArgsSI,
    char *argAryStr[]
@@ -611,6 +618,10 @@ main(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec02:
    ^   - initialize variables and get input
+   ^   o main sec02 sub01:
+   ^     - initialize variables
+   ^   o main sec02 sub02:
+   ^     - get input
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -946,5 +957,5 @@ main(
 
    freeStack_samEntry(&samStackST);
 
-   return errUL;
+   return (int) errUL;
 } /*main*/

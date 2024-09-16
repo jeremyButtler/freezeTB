@@ -544,7 +544,7 @@ getFaSeq_seqST(
     else
     { /*Else: allocate memory*/
        seqSTPtr->seqStr =
-          malloc((extraBuffUS + 1) * sizeof(schar));
+          malloc((extraBuffUS + 9) * sizeof(schar));
 
        seqSTPtr->lenSeqBuffUL = extraBuffUS;
     } /*Else: allocate memory*/
@@ -604,7 +604,7 @@ getFaSeq_seqST(
                  seqSTPtr->seqStr,
                    (
                         seqSTPtr->lenSeqBuffUL
-                      + 1
+                      + 9
                       + extraBuffUS
                    )
                  * sizeof(schar)

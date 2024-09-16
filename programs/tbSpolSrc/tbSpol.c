@@ -1069,11 +1069,7 @@ input_tbSpol(
 |   - Prints:
 |     o spoligotypes to specifed files
 \-------------------------------------------------------*/
-#ifdef PLAN9
-char
-#else
 int
-#endif
 main(
    signed int numArgsSI,
    char *argAryStr[]
@@ -1101,8 +1097,9 @@ main(
 
    sint siArg = 0;
    schar errSC = 0;
-   #define lenCodeSI 64
-   uint codeAryUI[lenCodeSI + 1]; /*barcode for spoligo*/
+   #define def_numSpol_tbSpolDefs 64
+   uint codeAryUI[def_numSpol_tbSpolDefs + 1];
+      /*holds barcode for spoligo*/
 
    schar *seqFileStr = 0;    /*sequences to type*/
    schar *spoligoFileStr = 0;/*spoligotype Sequences*/
@@ -1231,7 +1228,7 @@ main(
 
    for(
       siArg = 0;
-      siArg < lenCodeSI;
+      siArg < def_numSpol_tbSpolDefs;
       ++siArg
    ) codeAryUI[siArg] = 0;
 

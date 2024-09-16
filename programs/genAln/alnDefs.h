@@ -68,7 +68,7 @@
 #define def_gapOpen_alnDefs -1000
    /*Penalty for starting indel*/
 
-#define def_gapExtend_alnDefs -5
+#define def_gapExtend_alnDefs -10
    /*Penalty for extading an indel*/
 
 #define def_scoreAdj_alnDefs 100

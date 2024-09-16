@@ -1,4 +1,0 @@
-b cigToEqxCig.c:674
-b cigToEqxCig.c:571
-
-r -sam ~/files/testing/BC33.sam -ref ../../freezeTBFiles/NC000962.fa

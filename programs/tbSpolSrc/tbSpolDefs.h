@@ -11,6 +11,8 @@
 #define def_month_tbSpolDefs 8
 #define def_day_tbSpolDefs 19
 
+#define def_numSpol_tbSpolDefs 64/*max # spacers allowed*/
+
 #define def_noSpol_tbSpolDefs 1
 #define def_fileErr_tbSpolDefs 2
 #define def_memErr_tbSpolDefs 64

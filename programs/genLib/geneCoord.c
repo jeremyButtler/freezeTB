@@ -836,8 +836,7 @@ getCoords_geneCoord(
          goto memErr_fun11_sec06_sub02;
    } /*If: I need to make an larger buffer*/
 
-   genesHeapST = mk_geneCoord(numLinesSI + 1);
-      /*+ 1 to account for no header*/
+   genesHeapST = mk_geneCoord(numLinesSI);
    
    if(! genesHeapST)
       goto memErr_fun11_sec06_sub02;
@@ -866,6 +865,14 @@ getCoords_geneCoord(
    * Fun11 Sec05 Sub01:
    *   - Start loop and copy gene name
    \*****************************************************/
+
+   cpStr =
+      (schar *)
+      fgets(
+         (char *) buffHeapStr,
+         lenBuffSI,
+         tblFILE
+      ); /*get past header*/
 
    while(fgets((char *) buffHeapStr, lenBuffSI, tblFILE))
    { /*Loop: Get entries from the paf file*/
