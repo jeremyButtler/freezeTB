@@ -3650,6 +3650,8 @@ addCodonPos_whoToAmr(
       posSI = 0;
    } /*Loop: count number of genes*/
 
+   --numGenesSI; /*account for header*/
+
    /*****************************************************\
    * Fun08 Sec02 Sub03:
    *   - allocate memory for gene coordinates
@@ -3702,6 +3704,14 @@ addCodonPos_whoToAmr(
       0,
       SEEK_SET
    );
+
+   dupStr =
+      (schar *)
+      fgets(
+         (char *) buffStr,
+         codonPosBuffUS,
+         tmpFILE
+      ); /*get past header*/
 
    posSI = 0;
 
@@ -4394,8 +4404,11 @@ addCodonPos_whoToAmr(
                   amrSTPtr[siIndex].wholeGeneFlagSC
                && def_geneDel_amrST
             ){ /*If: add in coordinate for gene deletion*/
-               amrSTPtr[siIndex].refPosUI =
-                  amrSTPtr[siIndex - 1].geneFirstRefUI -1;
+
+               if(amrSTPtr[siIndex].refPosUI <= 0)
+                  amrSTPtr[siIndex].refPosUI =
+                     amrSTPtr[siIndex-1].geneFirstRefUI-1;
+                  /*if no AMR position assigned yet*/
 
                   /*want to grab base before the gene*/
             } /*If: add in coordinate for gene deletion*/
@@ -4422,8 +4435,12 @@ addCodonPos_whoToAmr(
                & def_geneDel_amrST
             ){ /*If: Add in coordinate for gene deletion*/
                /*I want to grab the base before the gene*/
-               amrSTPtr[siIndex].refPosUI =
-                  amrSTPtr[siIndex + 1].geneFirstRefUI -1;
+
+               if(amrSTPtr[siIndex].refPosUI <= 0)
+                  amrSTPtr[siIndex].refPosUI =
+                     amrSTPtr[siIndex+1].geneFirstRefUI-1;
+                  /*if no AMR position assigned yet*/
+
             } /*If: Add in coordinate for gene deletion*/
          } /*Else: The AMR is same as the next gene*/
 
@@ -4436,6 +4453,11 @@ addCodonPos_whoToAmr(
             (    amrSTPtr[siIndex].wholeGeneFlagSC
                & def_geneDel_amrST
             )
+         ) continue;
+
+         if(
+               amrSTPtr[siIndex].amrSeqStr[0] != '0'
+            && amrSTPtr[siIndex].refSeqStr[0] != '0'
          ) continue;
 
          /***********************************************\

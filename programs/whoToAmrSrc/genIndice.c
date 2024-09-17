@@ -322,6 +322,8 @@ void sort_genIndice(
   ulong ulIndex = 0;
   ulong ulElm = 0;
   
+  slong resSL = 0;
+
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun08 Sec02:
   ^  - find max search value (number rounds to sort)
@@ -350,14 +352,25 @@ void sort_genIndice(
           ulElm += subUL
       ){ /*Loop: sort a subarray*/
         nextElmUL = ulElm + subUL;
-        
-        if(
-           eql_charCp(
-              genIndiceST[ulElm].varIdStr,
-              genIndiceST[nextElmUL].varIdStr,
-              (schar) '\0'
-           ) > 0
-        ){ /*If I need to swap an element*/
+
+        resSL =
+            eql_charCp(
+               genIndiceST[ulElm].varIdStr,
+               genIndiceST[nextElmUL].varIdStr,
+               (schar) '\0'
+            );
+
+        if( resSL > 0)
+           goto firstSwap_fun08_sec03;
+
+        else if(resSL < 0) ; /*do nothing*/
+      
+        else if(
+             genIndiceST[ulElm].posUI
+           > genIndiceST[nextElmUL].posUI
+        ){ /*Else If: I need to swap an element*/
+          firstSwap_fun08_sec03:;
+
           swap_genIndice(
              genIndiceST,
              ulElm,
@@ -371,13 +384,22 @@ void sort_genIndice(
           { /*loop; move swapped element back*/
             lastElmUL -= subUL;
             
-            if(
-               eql_charCp(
-                  genIndiceST[elmOnUL].varIdStr,
-                  genIndiceST[lastElmUL].varIdStr,
-                  (schar) '\0'
-               ) > 0
-            ) break; /*Positioned the element*/
+             resSL =
+                 eql_charCp(
+                    genIndiceST[elmOnUL].varIdStr,
+                    genIndiceST[lastElmUL].varIdStr,
+                    (schar) '\0'
+                 );
+
+             if( resSL > 0)
+                break;
+
+             else if(resSL < 0) ; /*do nothing*/
+      
+             else if(
+                  genIndiceST[elmOnUL].posUI
+                > genIndiceST[lastElmUL].posUI
+            ) break;
             
             swap_genIndice(
                genIndiceST,
@@ -387,7 +409,7 @@ void sort_genIndice(
             
             elmOnUL = lastElmUL;
           } /*loop; move swapped element back*/
-        } /*If I need to swap elements*/
+        } /*Else If: I need to swap elements*/
       } /*Loop: sort a subarray*/
     } /*Loop: all elements in subarray*/
     

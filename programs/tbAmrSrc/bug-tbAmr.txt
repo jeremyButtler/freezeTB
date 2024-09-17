@@ -1,5 +1,5 @@
 #b tbAmr.c:1076
-b checkAmr.c:2538
+b checkAmr.c:2587
 
 # First kept frameshift case (BC33)
 #b checkAmr.c:1053 if iAmr == 3059
@@ -12,7 +12,8 @@ b checkAmr.c:2538
 # Actual test
 #r -frameshift -amr-tbl ../freezeTBFiles/who-2023.tsv -sam ~/files/testing/bug.sam
 #r -amr-tbl ../../freezeTBFiles/who-2023.tsv -sam ~/files/testing/null-con.sam
-r -amr-tbl ../../freezeTBFiles/who-2023.tsv -sam-con $HOME/files/testing/null-con.sam
+r -amr-tbl ../../freezeTBFiles/amrDb.tsv -sam-con $HOME/files/testing/null-con.sam
+  
 
 define pcross
    set $icnt = 0
