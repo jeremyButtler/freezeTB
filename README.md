@@ -11,9 +11,13 @@ freezeTb is a program that detects AMR resistance in
 Currently freezeTb uses an WHO 2023 catalog that has had
   all grade 3, 4, and 5 variants removed.
 
-freezeTB will probably not give as good of results as
-  TBProfiler, but it is designed to be easier to install
-  and be OS portable.
+Alternatives to freezeTB are TBProfiler
+  [https://github.com/jodyphelan/TBProfiler](
+   https://github.com/jodyphelan/TBProfiler)
+  and ONTs wf-tb-amr (can be installed through epi2me)
+  [https://github.com/epi2me-labs/wf-tb-amr](
+   https://github.com/epi2me-labs/wf-tb-amr). Both are
+  good alternatives.
 
 - Some missing items (not all) from freezeTB
   - the sample
