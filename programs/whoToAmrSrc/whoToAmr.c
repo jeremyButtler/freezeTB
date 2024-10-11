@@ -3992,10 +3992,11 @@ addCodonPos_whoToAmr(
        /*check I the sequence is inside gene bounds*/
        tmpUI =
             amrSTPtr[siIndex].refPosUI
-          + amrSTPtr[siIndex].lenRefSeqUI;
+          + amrSTPtr[siIndex].lenRefSeqUI
+          - 1; /*-1 to convert index 1 to index 0*/
 
        if(
-             tmpUI >= (uint) endGeneHeapArySI[posSI]
+             tmpUI > (uint) endGeneHeapArySI[posSI]
           ||   amrSTPtr[siIndex].refPosUI
              < (uint) startGeneHeapArySI[posSI]
        ){ /*If: sequence outside of selected gene bounds*/

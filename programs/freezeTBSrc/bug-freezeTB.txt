@@ -1,4 +1,3 @@
-b freezeTB.c:3599
-b freezeTB.c:3599
-
-r -sam $HOME/files/testing/BC37.sam -prefix $HOME/files/testing/delete
+b freezeTB.c:4424
+b checkAmr.c:2062 if amrAryST[indexUI].refPosUI == 4408198
+r -sam $HOME/files/testing/bar76_problem/bar76-map.sam -prefix delete

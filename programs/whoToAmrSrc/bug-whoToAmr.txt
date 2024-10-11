@@ -1,7 +1,8 @@
 b mainWhoToAmr.c:816
-b whoToAmr.c:3706
-b whoToAmr.c:3798
-b whoToAmr.c:3983 if amrSTPtr[siIndex].geneIdStr[0] == 'e' && amrSTPtr[siIndex].geneIdStr[1] == 'i'
+#b whoToAmr.c:3706
+#b whoToAmr.c:3798
+#b whoToAmr.c:3983 if amrSTPtr[siIndex].geneIdStr[0] == 'e' && amrSTPtr[siIndex].geneIdStr[1] == 'i'
+b whoToAmr.c:3993 if amrSTPtr[siIndex].refPosUI == 4408199
 
 
 r -master who-tab1.tsv -indice who-tab2.tsv -ref ../../freezeTBFiles/NC000962.fa -coords ../../freezeTBFiles/coords.tsv

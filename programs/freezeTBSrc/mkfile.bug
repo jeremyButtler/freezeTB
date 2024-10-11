@@ -1,6 +1,6 @@
 LD=cc
 CC=cc
-CFLAGS= -O0 -std=c89 -Wall -Wextra -g --ggdb
+CFLAGS= -O0 -std=c89 -Wall -Wextra -g -ggdb
 NAME=freezeTB
 genLib=../genLib
 genAln=../genAln
