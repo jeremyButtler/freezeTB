@@ -5855,7 +5855,7 @@ main(
    } /*Loop: find amrs and lineages for consensuses*/
 
    if(conListHeapST)
-      freeHeap_con_clustST(conListHeapST);
+      freeHeapList_con_clustST(conListHeapST);
    conListHeapST = 0;
    conNodeST = 0;
          
@@ -5991,7 +5991,7 @@ main(
       indexHeapST = 0;
 
       if(conListHeapST)
-         freeHeap_con_clustST(conListHeapST);
+         freeHeapList_con_clustST(conListHeapST);
       conListHeapST = 0;
 
       freeStack_set_clustST(&clustSetStackST);

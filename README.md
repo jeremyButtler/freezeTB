@@ -89,20 +89,15 @@ The stuff unique to freezeTB is under an dual license. The
      often installed by your package manager (for Mac
      you can use homebrew)
 2. R with tcltk (install tcltk2 for tooltips)
-3. If you decide to use the old graping script, then
-     you will need some R libraries
-     - to use rename oldGraphAmpDepth.r to graphAmpDepth.r
-     - ggplot2
-     - viridisLite (often installed with ggplot2)
-     - data.table (often installed with ggplot2)
-     - svgLite (Optional; svgs output)
-     - fs (Optional; Unix only)
-
-- Note: mixed infection detection only works in command
-  line program.
-- Note: Valgrind is reporting a memory leak for mixed
-  infection dection (not in edClust), which I have not
-  been able to track down.
+   - If you want the the old graping script (used ggplot),
+     then you will need to:
+     - rename scripts/oldGraphAmpDepth.r to
+       scripts/graphAmpDepth.r
+     - install ggplot2
+     - install viridisLite (often installed with ggplot2)
+     - install data.table (often installed with ggplot2)
+     - install svgLite (Optional; svgs output)
+     - install fs (Optional; Unix only)
 
 # Install
 
