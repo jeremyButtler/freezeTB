@@ -1502,6 +1502,16 @@ cluster_edClust(
       "\nOverlap Merging:\n"
    );
 
+   if(! retHeapST)
+   { /*If: no consensus detected*/
+      fprintf(
+         (FILE *) logFILE,
+         "\nNo clusters found\n"
+      );
+
+      goto lowReads_fun05_sec07_sub04;
+   } /*If: no consensus detected*/
+
    cmpNodeST = retHeapST; /*first cosensus*/
    lastNodeST = cmpNodeST;
    conNodeST = cmpNodeST->nextST;
@@ -1586,6 +1596,9 @@ cluster_edClust(
                ! conNodeST
             || ! conNodeST->nextST
          ){ /*If: finished one set of comparisons*/
+            if(! cmpNodeST->nextST)
+               break; /*finished*/
+
             cmpNodeST = cmpNodeST->nextST;
             conNodeST = cmpNodeST->nextST;
             lastNodeST = cmpNodeST;
@@ -1801,9 +1814,9 @@ cluster_edClust(
 
       if(logFILE)
          fprintf(
-            logFILE,
-            "to few reads (%lu) after filter to cluster\n",
-            (*indexSTPtr)->keptSL
+           logFILE,
+           "to few reads (%lu) after filter to cluster\n",
+           (*indexSTPtr)->keptSL
          );
 
       goto errCleanup_fun05_sec07_sub05;

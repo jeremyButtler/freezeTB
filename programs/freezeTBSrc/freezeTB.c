@@ -152,6 +152,8 @@
 ^    - defined variables/default settings (freezeTB only)
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+#define def_lenFileName_freezeTB 1024
+
 signed char *def_prefix_freezeTB = (schar *) "Hufflepuff";
    /*this is here to tweak Tara's nose a bit.
    `   She is an Harry Potter Ravenclaw fan. I figure
@@ -243,13 +245,13 @@ phelp_freezeTB(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*for default file locations*/
-   schar amrDbFileStr[256];
-   schar miruTblFileStr[256];
-   schar coordFileStr[256];
+   schar amrDbFileStr[def_lenFileName_freezeTB];
+   schar miruTblFileStr[def_lenFileName_freezeTB];
+   schar coordFileStr[def_lenFileName_freezeTB];
 
-   schar spoligoRefFileStr[256];
-   schar spoligoDbFileStr[256];
-   schar maskPrimFileStr[256];
+   schar spoligoRefFileStr[def_lenFileName_freezeTB];
+   schar spoligoDbFileStr[def_lenFileName_freezeTB];
+   schar maskPrimFileStr[def_lenFileName_freezeTB];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec02:
@@ -3461,7 +3463,7 @@ main(
    schar multiRefBl = 0; /*1: means multiple refs/exit*/
    sint lenRefSI = 0;
    ulong tabUL = mkDelim_ulCp('\t'); /*only used in ref*/
-   schar refIdStr[256];
+   schar refIdStr[def_lenFileName_freezeTB];
 
    /*for filtering reads*/
    float minMedianQF = def_minMedianQ_freezeTBDefs;
@@ -3472,8 +3474,9 @@ main(
    *   - read depth and coverage stats variables
    \*****************************************************/
 
-   schar coordFileStr[256]; /*input*/
-   schar readStatsStr[256]; /*output file name*/
+   schar coordFileStr[def_lenFileName_freezeTB]; /*input*/
+   schar readStatsStr[def_lenFileName_freezeTB];
+      /*output file name*/
 
    /*tsv file output*/
    schar *depthFlagStr = def_depthFlag_freezeTB;
@@ -3494,11 +3497,13 @@ main(
    *   - AMR detection variables
    \*****************************************************/
 
-   schar idFileStr[256]; /*for read id printing*/
-   schar conAmrStr[256];
-   schar amrDbFileStr[256]; 
-   schar readAmrStr[256];
-   schar logFileStr[256];
+   schar idFileStr[def_lenFileName_freezeTB];
+      /*read id printing*/
+
+   schar conAmrStr[def_lenFileName_freezeTB];
+   schar amrDbFileStr[def_lenFileName_freezeTB]; 
+   schar readAmrStr[def_lenFileName_freezeTB];
+   schar logFileStr[def_lenFileName_freezeTB];
 
    FILE *idFILE = 0; /*For read id printing*/
    FILE *logFILE = 0; /*for mixed infection currently*/
@@ -3528,23 +3533,28 @@ main(
    sint fudgeLenSI = def_fudgeLen_tbMiruDefs;
 
    /*Input or output files for MIRU lineages*/
-   schar miruDbFileStr[256]; /*table of lineages*/
-   schar readMiruStr[256];   /*read results output*/
-   schar conMiruStr[256];    /*consensus results output*/
+   schar miruDbFileStr[def_lenFileName_freezeTB];
+      /*table of lineages*/
+
+   schar readMiruStr[def_lenFileName_freezeTB];
+       /*read results output*/
+
+   schar conMiruStr[def_lenFileName_freezeTB];
+      /*consensus results output*/
 
    /*****************************************************\
    * Main Sec01 Sub07:
    *   - Spoligotyping unique variables
    \*****************************************************/
 
-   schar spoligoRefFileStr[256];
-   schar spoligoDbFileStr[256];
+   schar spoligoRefFileStr[def_lenFileName_freezeTB];
+   schar spoligoDbFileStr[def_lenFileName_freezeTB];
 
    schar checkSpoligoLinBl = 1;
    #define def_lenSpolAry_main 128
    uint spoligoAryUI[def_lenSpolAry_main + 1];
-   schar outSpoligoFileStr[256];
-   schar outReadSpoligoFileStr[256];
+   schar outSpoligoFileStr[def_lenFileName_freezeTB];
+   schar outReadSpoligoFileStr[def_lenFileName_freezeTB];
 
    schar spolErrSC = 0;
 
@@ -3576,8 +3586,8 @@ main(
    *   - consensus building/mixed infection variables
    \*****************************************************/
 
-   schar samConStr[256];
-   schar conTsvStr[256];
+   schar samConStr[def_lenFileName_freezeTB];
+   schar conTsvStr[def_lenFileName_freezeTB];
 
    struct set_tbCon tbConSettings;
    struct conNt_tbCon *conNtHeapAryST = 0;
@@ -3598,7 +3608,7 @@ main(
    *   - masking unique variables
    \*****************************************************/
 
-   schar maskPrimFileStr[256];
+   schar maskPrimFileStr[def_lenFileName_freezeTB];
    uint *maskStartHeapAryUI = 0;
    uint *maskEndHeapAryUI = 0;
    uint *maskFlagHeapAryUI = 0;
