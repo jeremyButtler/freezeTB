@@ -33,7 +33,7 @@
 
 #include <stdio.h>
 
-#include "../genLib/samEntry.h"
+#include "../genBio/samEntry.h"
 #include "../tbAmrSrc/amrST.h"
 #include "../genLib/charCp.h"
 
@@ -47,6 +47,7 @@
 !   - .c  #include "../genLib/base10str.h"
 !   - .c  #include "../genLib/numToStr.h"
 !   - .c  #include "../genLib/ulCp.h"
+!   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../tbAmr/drugAry.h"
 !   - .h  #include "../genLib/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/

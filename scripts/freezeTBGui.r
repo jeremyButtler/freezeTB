@@ -5,46 +5,16 @@
 # SOF: Start Of File
 #   o header:
 #     - included libraries and general setup
-#   o fun01: getReads
-#     - Gets a fastq file that the user selected
-#   o fun02: getSaveDir
-#     - Gets the directory to save everything to
-#   o fun03: getRef
-#     - Gets reference sequence fasta file form user
-#   o fun04: getAmrTbl
-#     - Gets an AMR table (tbAmr)
-#   o fun05: getMiruTbl
-#     - Gets an Miru table (tbMiru format)
-#   o fun06: getSpoligoSeq
-#     - Gets the spol space sequences for spoltyping
-#   o fun07: getSpoligoDB
-#     - Gets the lineage database for spoltyping
-#   o fun08: getGeneTbl
-#     - Gets the paf file with the genome coordinates
-#   o fun09: getMaskPrim
-#     - Gets the primer masking tsv file
-#   o fun10: showReqInputMenu
-#     - Shows the required input menu
-#   o fun11: showFiltMenu
-#     - Shows the read filtering input menu
-#   o fun12: showAmrMenu
-#     - Shows the AMR settings menu
-#   o fun13: showLineageMenu
-#     - Shows the MIRU lineage menu
-#   o fun14: showConMenu
-#     - Shows the extra settings for consensus building
-#   o fun15: showDepthMenu
-#     - Shows the depth/coverage graphing menu
-#   o fun16: showStatus
-#     - Shows the status screen of freezeTB gui
-#   o fun17: quitInput
-#     - Quits freezeTb input gui
-#   o fun18: runFreezeTb
-#     - Runs freezeTb
-#   o ingui:
-#     - The code that runs the GUI
+#   o tof01:
+#     - input gui functions (buttons/widgets)
+#   o tof02:
+#     - input gui hide/show menu functions + run
+#   o tof03:
+#     - functions to build input gui
+#   o main:
+#     - drive for freezeTBGui
 #   o license:
-#     - Licensing for this code (public domain / mit)
+#     - licensing for this code (public domain / mit)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---------------------------------------------------------
@@ -319,11 +289,11 @@ maskPrimPathStr = def_maskPrimStr;
 #   o header sec03 sub03:
 #     - search path for minimap2
 #   o header sec03 sub04:
-#     - search path for adjCoords
-#   o header sec03 sub05:
 #     - search path for freezeTB
-#   o header sec03 sub06:
+#   o header sec03 sub05:
 #     - search path for ampDepth graphing script
+#   o header sec03 sub06:
+#     - find Rscript path
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #*********************************************************
@@ -413,26 +383,6 @@ for(strCall in c("", freezeTBLocalStr, pathAryStr[[1]]))
 
 #*********************************************************
 # Header Sec03 Sub04:
-#   - search path for adjCoords
-#*********************************************************
-
-for(strCall in c("", freezeTBLocalStr, pathAryStr[[1]]))
-{ # Loop: find adjCoords
-   strCall =
-      paste(
-         strCall,
-         adjCoordsPathStr,
-         sep = ''
-      );
-
-   if(file.exists(strCall)){
-      adjCoordsPathStr = normalizePath(strCall);
-      break;
-   } # If: found adjCoords
-} # Loop: find adjCoords
-
-#*********************************************************
-# Header Sec03 Sub05:
 #   - search path for freezeTB
 #*********************************************************
 
@@ -514,7 +464,7 @@ statusTK = tkframe(guiTK, borderwidth = 2);
 reqInputTK = tkframe(optionsTK, borderwidth = 2);
 filtInputTK = tkframe(optionsTK, borderwidth = 2);
 amrInputTK = tkframe(optionsTK, borderwidth = 2);
-depthInputTK = tkframe(optionsTK, borderwidth = 2);
+graphInputTK = tkframe(optionsTK, borderwidth = 2);
 
 # relief options (for border) are
    # flat, raised, suken, solid, ridge, groove
@@ -560,6 +510,9 @@ conPrintInputTK =
       borderwidth = 2
    );
 
+# mixed infection detection
+mixedInfectTK = tkframe(optionsTK, borderwidth = 2);
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Header Sec05:
 #   - tcl global variables
@@ -592,8 +545,25 @@ DR_END = tclVar("3123624");
 # Cosensus defaults
 MIN_BASE_Q_TCL = tclVar(7);
 MIN_INS_Q_TCL = tclVar(7);
-MIN_DEPTH_TCL = tclVar(20);
-MIN_LEN_TCL = tclVar(200);
+MIN_DEPTH_TCL = tclVar(10);
+MIN_LEN_TCL = tclVar(50);
+
+# mixed infection defaults
+CLUSTER_BL_TCL = tclVar(0);
+DEPTH_PROFILE_BL_TCL = tclVar(0);
+LENGTH_WEIGHT_CLUST_TCL = tclVar(2);
+MIN_DEPTH_CLUST_TCL = tclVar(10);
+MIN_PERC_DEPTH_CLUST_TCL = tclVar(0.005);
+READ_ERROR_PERC_CLUST_TCL = tclVar(0.046);
+CON_ERROR_PERC_CLUST_TCL = tclVar(0.023);
+MAX_CON_SIMILARITAY_CLUST_TCL = tclVar(0.99);
+ERROR_TO_VARIANT_RATIO_CLUST_TCL = tclVar(50);
+MIN_PERC_OVERLAP_CLUST_TCL = tclVar(0.75);
+WINDOW_LENGTH_CLUST_TCL = tclVar(500);
+WINDOW_ERROR_TO_VAR_CLUST_TCL = tclVar(200);
+MIN_INDEL_LEN_CLUST_TCL = tclVar(10);
+CLUST_MIN_SNP_Q_TCL = tclVar(7);
+MAX_MASK_IN_CON_CLUST_TCL = tclVar(0.05);
 
 MIN_SNP_PERC_SUP_TCL = tclVar(0.5);
 MIN_INS_PERC_SUP_TCL = tclVar(0.7);
@@ -608,8 +578,52 @@ PRINT_DEL_PERC_SUP_TCL = tclVar(0.1);
 # graphing
 GRAPH_EXT_TCL = tclVar("tiff");
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TOF01:
+#   - input gui functions (buttons/widgets)
+#   o tof01 fun01: getReads
+#     - Gets a fastq file that the user selected
+#   o tof01 fun02: getSaveDir
+#     - Gets the directory to save everything to
+#   o tof01 fun03: getRef
+#     - Gets reference sequence fasta file form user
+#   o tof01 fun04: getAmrTbl
+#     - Gets an AMR table (tbAmr)
+#   o tof01 fun05: getMiruTbl
+#     - Gets an Miru table (tbMiru format)
+#   o tof01 fun06: getSpoligoSeq
+#     - Gets the spol space sequences for spoltyping
+#   o tof01 fun07: getSpoligoDB
+#     - Gets the lineage database for spoltyping
+#   o tof01 fun08: getGeneTbl
+#     - Gets the paf file with the genome coordinates
+#   o tof01 fun09: getMaskPrim
+#     - Gets the primer masking tsv file
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# required input gui
+coordsTbl_LabTK = NULL;
+fqLabelTK = NULL;
+refLabelTK = NULL;
+dirLabTK = NULL;
+
+# masking gui
+maskPrimTK = NULL;
+
+# AMRs
+amrDbLabelTK = NULL;
+
+# lineages
+miruDb_LabTK = NULL;
+spolSeq_LabTK = NULL;
+spolDb_LabTK = NULL;
+
+# more global buttons
+maskPrim_checkboxTK = NULL;
+messg_labTK = NULL;
+
 #---------------------------------------------------------
-# Fun01: getReads
+# TOF01 Fun01: getReads
 #   - Gets a fastq file that the user selected
 # Input:
 # Output:
@@ -634,7 +648,7 @@ function(
                   "fastq*", ".fq",
                   "fastq*", ".gz" # mac does not like .*.
                 ), # allowed files (filters)
-             4, # four rows
+             3, # four rows
              2, # two columns
              byrow = TRUE
          ) # File types allowd to see
@@ -692,7 +706,7 @@ function(
 } # getReads
 
 #---------------------------------------------------------
-# Fun02: getSaveDir
+# TOF01 Fun02: getSaveDir
 #   - Gets the directory to save everything to
 # Input:
 # Output:
@@ -723,7 +737,7 @@ function(
 } # getReads
 
 #---------------------------------------------------------
-# Fun03: getRef
+# TOF01 Fun03: getRef
 #   - Gets reference sequence fasta file form user
 # Input:
 # Output:
@@ -763,7 +777,7 @@ function(
 } # getRef
 
 #---------------------------------------------------------
-# Fun04: getAmrTbl
+# TOF01 Fun04: getAmrTbl
 #   - Gets an AMR table (tbAmr)
 # Input:
 # Output:
@@ -802,7 +816,7 @@ function(
 } # getAmrTbl
 
 #---------------------------------------------------------
-# Fun05: getMiruTbl
+# TOF01 Fun05: getMiruTbl
 #   - Gets an Miru table (tbMiru format)
 # Input:
 # Output:
@@ -841,7 +855,7 @@ function(
 } # getMiruTbl
 
 #---------------------------------------------------------
-# Fun06: getSpoligoSeq
+# TOF01 Fun06: getSpoligoSeq
 #   - Gets the spol space sequences for spoltyping
 # Input:
 # Output:
@@ -860,7 +874,7 @@ function(
                   "fasta", ".fa",
                   "fasta", ".fasta"
                 ), # allowed files (filters)
-             1, # one row
+             2, # one row
              2, # two columns
              byrow = TRUE
          ) # File types allowd to see
@@ -881,7 +895,7 @@ function(
 } # getSpoliogSeq
 
 #---------------------------------------------------------
-# Fun07: getSpoligoDB
+# TOF01 Fun07: getSpoligoDB
 #   - Gets the lineage database for spoltyping
 # Input:
 # Output:
@@ -920,7 +934,7 @@ function(
 } # getSpoligoDb
 
 #---------------------------------------------------------
-# Fun08: getGeneTbl
+# TOf01 Fun08: getGeneTbl
 #   - Gets the paf file with the genome coordinates
 # Input:
 # Output:
@@ -952,14 +966,14 @@ function(
       ); # set up global variable for user input
 
       tkconfigure(
-         depthGeneTbl_LabTK,
+         coordsTbl_LabTK,
          text = fileMacStr[1]
       );
    } # If: have gene coordinates file
 } # getGeneTbl
 
 #---------------------------------------------------------
-# Fun09: getMaskPrim
+# TOF01 Fun09: getMaskPrim
 #   - Gets the primer masking tsv file
 # Input:
 # Output:
@@ -996,15 +1010,43 @@ function(
          text = fileMacStr[1]
       );
 
+      if(! as.numeric(tclvalue(MASK_PRIM_BL_TCL)))
+         tktoggle(maskPrim_checkboxTK);
+
       tkconfigure(
          maskPrim_checkboxTK,
-         state = 0
+         state = "normal"
        ); # wish it worked
    } # If: The user input an textbox
 } # getGeneTbl
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TOF02:
+#   - input gui hide/show menu functions + run
+#   o tof02 fun01: showReqInputMenu
+#     - Shows the required input menu
+#   o tof02 fun02: showFiltMenu
+#     - Shows the read filtering input menu
+#   o tof02 fun03: showAmrMenu
+#     - Shows the AMR settings menu
+#   o tof02 fun04: showLineageMenu
+#     - Shows the MIRU lineage menu
+#   o tof02 fun05: showConMenu
+#     - Shows the extra settings for consensus building
+#   o tof02 fun06: showMixedInfectMenu
+#     - Shows settings for mixed infection
+#   o tof02 fun07: showGraphMenu
+#     - Shows the depth/coverage graphing menu
+#   o tof02 fun08: showStatus
+#     - Shows the status screen of freezeTB gui
+#   o tof02 fun09: quitInput
+#     - Quits freezeTb input gui
+#   o tof02 fun10: runFreezeTb
+#     - Runs freezeTb
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #---------------------------------------------------------
-# Fun10: showReqInputMenu
+# TOF02 Fun01: showReqInputMenu
 #   - Shows the required input menu
 # Input:
 # Output:
@@ -1017,7 +1059,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1034,7 +1077,7 @@ function(
 } # showReqInputMenu
 
 #---------------------------------------------------------
-# Fun11: showFiltMenu
+# TOF02 Fun02: showFiltMenu
 #   - Shows the read filtering input menu
 # Input:
 # Output:
@@ -1047,7 +1090,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1064,7 +1108,7 @@ function(
 } # showReqInputMenu
 
 #---------------------------------------------------------
-# Fun12: showAmrMenu
+# TOF02 Fun03: showAmrMenu
 #   - Shows the AMR settings menu
 # Input:
 # Output:
@@ -1077,7 +1121,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1094,7 +1139,7 @@ function(
 } # showFileMenu
 
 #---------------------------------------------------------
-# Fun13: showLineageMenu
+# TOF02 Fun04: showLineageMenu
 #   - Shows the MIRU lineage menu
 # Input:
 # Output:
@@ -1107,7 +1152,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1124,7 +1170,7 @@ function(
 } # showFileMenu
 
 #---------------------------------------------------------
-# Fun14: showConMenu
+# TOF02 Fun05: showConMenu
 #   - Shows the extra settings for consensus building
 # Input:
 # Output:
@@ -1137,7 +1183,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1154,12 +1201,12 @@ function(
 } # showConMenu
 
 #---------------------------------------------------------
-# Fun15: showDepthMenu
-#   - Shows the depth/coverage graphing menu
+# TOF02 Fun06: showMixedInfectMenu
+#   - Shows settings for mixed infection
 # Input:
 # Output:
 #---------------------------------------------------------
-showDepthMenu =
+showMixedInfectMenu =
 function(
 ){
    tkpack.forget(reqInputTK);
@@ -1167,7 +1214,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1177,14 +1225,45 @@ function(
    tkpack.forget(statusTK);
    
    tkpack(runQuitTK, optionsTK, side = "top");
-   tkpack(optionsTK, depthInputTK, side = "bottom");
+   tkpack(optionsTK, mixedInfectTK, side = "bottom");
 
    tkpack(menuTK, optionsTK, side = "bottom");
    tkpack(runQuitTK, side = "bottom");
-} # showDepthMenu
+} # showMixedInfectMenu
 
 #---------------------------------------------------------
-# Fun16: showStatus
+# TOF02 Fun07: showGraphMenu
+#   - Shows the depth/coverage graphing menu
+# Input:
+# Output:
+#---------------------------------------------------------
+showGraphMenu =
+function(
+){
+   tkpack.forget(reqInputTK);
+   tkpack.forget(filtInputTK);
+   tkpack.forget(amrInputTK);
+   tkpack.forget(lineageInputTK);
+   tkpack.forget(conInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
+
+   # I am going to rebuild the gui so everything is in
+   # the correct order
+   tkpack.forget(menuTK);
+   tkpack.forget(optionsTK);
+   tkpack.forget(runQuitTK);
+   tkpack.forget(statusTK);
+   
+   tkpack(runQuitTK, optionsTK, side = "top");
+   tkpack(optionsTK, graphInputTK, side = "bottom");
+
+   tkpack(menuTK, optionsTK, side = "bottom");
+   tkpack(runQuitTK, side = "bottom");
+} # showGraphMenu
+
+#---------------------------------------------------------
+# TOF02 Fun08: showStatus
 #   - Shows the status screen of freezeTB gui
 # Input:
 # Output:
@@ -1197,7 +1276,8 @@ function(
    tkpack.forget(amrInputTK);
    tkpack.forget(lineageInputTK);
    tkpack.forget(conInputTK);
-   tkpack.forget(depthInputTK);
+   tkpack.forget(mixedInfectTK);
+   tkpack.forget(graphInputTK);
 
    # I am going to rebuild the gui so everything is in
    # the correct order
@@ -1210,7 +1290,7 @@ function(
 } # showStatus
 
 #---------------------------------------------------------
-# Fun17: quitInput
+# TOF02 Fun09: quitInput
 #   - Quits freezeTb input gui
 # Input:
 # Output:
@@ -1222,7 +1302,7 @@ function(
 } # quitInput
 
 #---------------------------------------------------------
-# Fun18: runFreezeTb
+# TOF02 Fun10: runFreezeTb
 #   - Runs freezeTb
 # Input:
 # Output:
@@ -1232,28 +1312,28 @@ function(
 runFreezeTb =
 function(
 ){ #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   # Fun18 TOC:
+   # TOF02 Fun10 TOC:
    #   - Runs freezeTb on input files
-   #   o fun18 sec01:
+   #   o tof02 fun10 sec01:
    #     - Variable declerations
-   #   o fun18 sec02:
+   #   o tof02 fun10 sec02:
    #     - Check if user provided an fastq file
-   #   o fun18 sec03:
+   #   o tof02 fun10 sec03:
    #     - Build the prefix and minimap2 command
-   #   o fun18 sec04:
+   #   o tof02 fun10 sec04:
    #     - Build freezeTb command
-   #   o fun18 sec05:
+   #   o tof02 fun10 sec05:
    #     - Get minimap2 version, open log, ann map reads
-   #   o fun18 sec06:
+   #   o tof02 fun10 sec06:
    #     - Run adjCoords (if requested)
-   #   o fun18 sec07:
+   #   o tof02 fun10 sec07:
    #     - Run freezeTb
-   #   o fun18 sec08:
+   #   o tof02 fun10 sec08:
    #     - Return and exit
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec01:
+   # TOF02 Fun10 Sec01:
    #   - Variable declerations
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -1295,7 +1375,7 @@ function(
          )
       );
 
-   depthFileStr =
+   coordsFileStr =
       normalizePath(
          get(
              "coordsPathStr",
@@ -1341,7 +1421,7 @@ function(
    tbCmdStr = ""; # Should be in users path
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec02:
+   # TOF02 Fun10 Sec02:
    #   - Check if user provided an fastq file
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -1374,9 +1454,8 @@ function(
       return();
    } # If: I could not open the reference file
 
-
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec03:
+   # TOF02 Fun10 Sec03:
    #   - Build the prefix and minimap2 command
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -1385,8 +1464,36 @@ function(
          prefixStr,
          tclvalue(PREFIX_TCL),
          sep = slashSC
-      ); # Paste the prefix for file names together
+      ); # Paste new directory name
 
+   if(! dir.exists(prefixStr)){
+      dir.create(prefixStr);
+
+      if(! dir.exists(prefixStr)){
+         tk_messageBox(
+            type = "ok",
+            message =
+               paste(
+                  "Could not make",
+                  prefixStr,
+                  "directory",
+                  sep = " "
+               ),
+            caption = "ERROR: make directory"
+         ); # Message box for reference error
+
+         showReqInputMenu();
+         return();
+      } # If: failed to make new directory
+   } # If: need to make a new directory
+
+   prefixStr =
+      paste(
+         prefixStr,
+         tclvalue(PREFIX_TCL),
+         sep = slashSC
+      ); # Paste prefix to output file names
+   
    logFileStr =
       paste(
          prefixStr,
@@ -1398,35 +1505,47 @@ function(
 
    argsMinimapStr =
       paste(
-         "-a -x map-ont",
-         "-o",
+         ' -a -x map-ont -o "',
          samStr,
+         '" "',
          refFileStr,
-         paste(fqFileStr, collapse = ' '),
-         sep = " "
+         '"',
+         " ",
+         paste(
+            paste(
+               '"',
+               fqFileStr,
+               '"',
+               sep = ""
+            ), # add "'s to guard spaces
+            collapse = ' '
+         ), # combine array into one string
+         sep = ""
       ); # Build the minimap2 command
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec04:
+   # TOF02 Fun10 Sec04:
    #   - Build freezeTb command
-   #   o fun18 sec04 sub01:
+   #   o tof02 fun10 sec04 sub01:
    #     - Build read filtering part of freezeTb command
-   #   o fun18 sec04 sub02:
+   #   o tof02 fun10 sec04 sub02:
    #     - Add AMR settings/check if AMR database exists
-   #   o fun18 sec04 sub03:
+   #   o tof02 fun10 sec04 sub03:
    #     - Add MIRU lineage commands/check MIRU database
-   #   o fun18 sec04 sub04:
+   #   o tof02 fun10 sec04 sub04:
    #     - Add in spoltype lineage comands
-   #   o fun18 sec04 sub05:
+   #   o tof02 fun10 sec04 sub05:
    #     - Add in the consensus commands
-   #   o fun18 sec04 sub06:
+   #   o tof02 fun10 sec04 sub06:
+   #     - mixed infection (clustering) commands
+   #   o tof02 fun10 sec04 sub07:
    #     - Add in the read depth/coverage commands
-   #   o fun18 sec04 sub07:
+   #   o tof02 fun10 sec04 sub08:
    #     - Add in the required input commands
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
    #******************************************************
-   # Fun18 Sec04 Sub01:
+   # TOF02 Fun10 Sec04 Sub01:
    #   - Build the read filtering part of freezeTb command
    #******************************************************
 
@@ -1464,9 +1583,10 @@ function(
       tbCmdStr =
          paste(
            tbCmdStr,
-           "-mask-prim",
+           " -mask-prim \"",
            maskPrimFileStr,
-           sep=" "
+           "\"",
+           sep=""
       );
    }else{
       tbCmdStr =
@@ -1478,7 +1598,7 @@ function(
    }
 
    #******************************************************
-   # Fun18 Sec04 Sub02:
+   # TOF02 Fun10 Sec04 Sub02:
    #   - Add AMR settings/check if AMR database exists
    #******************************************************
 
@@ -1486,11 +1606,12 @@ function(
    tmpCmdStr =
        paste(
          tbCmdStr,
-         "-amr-tbl",
+         " -amr-tbl \"",
          amrFileStr,
-         "-min-amr-map-perc",
+         "\"",
+         " -min-amr-map-perc ",
          tclvalue(MIN_AMR_SUP_TCL),
-         sep = " "
+         sep = ""
       ); # Add in the AMR settings
 
    if(as.numeric(tclvalue(FRAMESHIFT_BL_TCL))){
@@ -1519,18 +1640,19 @@ function(
    }  # If: I could not open the AMR database
 
    #******************************************************
-   # Fun18 Sec04 Sub03:
+   # TOF02 Fun10 Sec04 Sub03:
    #   - Add in MIRU lineage commands/check MIRU database
    #******************************************************
 
    tbCmdStr =
       paste(
          tbCmdStr,
-         "-fudge",
+         " -fudge ",
          tclvalue(FUDGE_TCL),
-         "-miru-tbl",
+         " -miru-tbl \"",
          miruFileStr,
-         sep = " "
+         "\"",
+         sep = ""
       );
 
    if(length(miruFileStr) == 0 ||
@@ -1553,7 +1675,7 @@ function(
    } # If: I could not open the MIRU lineag table
 
    #******************************************************
-   # Fun18 Sec04 Sub04:
+   # TOF02 Fun10 Sec04 Sub04:
    #   - Add in spoltype lineage comands
    #******************************************************
 
@@ -1628,24 +1750,32 @@ function(
    tbCmdStr =
       paste(
          tbCmdStr,
-         "-spoligo",
+         " -spoligo \"",
          spolSeqFileStr,
-         "-spoligo-min-score",
+         "\"",
+         " -spoligo-min-score ",
          tclvalue(MIN_PERC_SCORE_TCL),
-         "-dr-start",
+         " -dr-start ",
          drStartStr,
-         "-dr-end",
-         drEndStr
+         " -dr-end ",
+         drEndStr,
+         sep = ""
       ); # Add in the spoltype commands
 
    if(length(spolDBFileStr))
    { # If: I have an spoltype lineage file
       tbCmdStr =
-         paste(tbCmdStr, "-db-spoligo", spolDBFileStr);
+         paste(
+            tbCmdStr,
+            " -db-spoligo \"",
+            spolDBFileStr,
+            "\"",
+            sep = ""
+         );
    } # If: I have an spoltype lineage file
 
    #******************************************************
-   # Fun18 Sec04 Sub05:
+   # TOF02 Fun10 Sec04 Sub05:
    #   - Add in the consensus commands
    #******************************************************
 
@@ -1671,29 +1801,81 @@ function(
          "-p-perc-ins-sup",
          tclvalue(PRINT_INS_PERC_SUP_TCL),
          "-p-perc-del-sup",
-         tclvalue(PRINT_DEL_PERC_SUP_TCL)
+         tclvalue(PRINT_DEL_PERC_SUP_TCL),
+         sep = " "
       );
 
    #******************************************************
-   # Fun18 Sec04 Sub06:
+   # TOF02 Fun10 Sec04 Sub06:
+   #   - mixed infection (clustering) commands
+   #******************************************************
+
+   if(as.numeric(tclvalue(CLUSTER_BL_TCL))){
+      tbCmdStr = paste(tbCmdStr, "-clust", sep = " ");
+   }else{
+      tbCmdStr = paste(tbCmdStr, "-no-clust", sep = " ");
+   } # check if clustering
+    
+   if(as.numeric(tclvalue(DEPTH_PROFILE_BL_TCL))){
+      tbCmdStr =paste(tbCmdStr, "-depth-prof", sep = " ");
+   }else{
+      tbCmdStr =
+         paste(tbCmdStr, "-no-depth-prof", sep = " ");
+   } # check if doing depth profiling
+
+   tbCmdStr =
+      paste(
+         tbCmdStr,
+         "-len-weight",
+         tclvalue(LENGTH_WEIGHT_CLUST_TCL),
+         "-clust-depth",
+         tclvalue(MIN_DEPTH_CLUST_TCL),
+         "-clust-perc-depth",
+         tclvalue(MIN_PERC_DEPTH_CLUST_TCL),
+         "-read-err",
+         tclvalue(READ_ERROR_PERC_CLUST_TCL),
+         "-con-err",
+         tclvalue(CON_ERROR_PERC_CLUST_TCL),
+         "-con-sim",
+         tclvalue(MAX_CON_SIMILARITAY_CLUST_TCL),
+         "-err-to-var",
+         tclvalue(ERROR_TO_VARIANT_RATIO_CLUST_TCL),
+         "-overlap",
+         tclvalue(MIN_PERC_OVERLAP_CLUST_TCL),
+         "-win-len",
+         tclvalue(WINDOW_LENGTH_CLUST_TCL),
+         "-win-err",
+         tclvalue(WINDOW_ERROR_TO_VAR_CLUST_TCL),
+         "-indel-len",
+         tclvalue(MIN_INDEL_LEN_CLUST_TCL),
+         "-clust-q-snp",
+         tclvalue(CLUST_MIN_SNP_Q_TCL),
+         "-perc-n",
+         tclvalue(MAX_MASK_IN_CON_CLUST_TCL),
+         sep = " "
+      );
+
+   #******************************************************
+   # TOF02 Fun10 Sec04 Sub07:
    #   - Add in the read depth/coverage commands
    #******************************************************
 
    tbCmdStr =
       paste(
          tbCmdStr,
-         "-gene-coords",
-         depthFileStr,
-         sep = " "
+         " -gene-coords \"",
+         coordsFileStr,
+         "\"",
+         sep = ""
       ); # Build the freezeTb command up
 
-   if(length(depthFileStr) == 0 ||
-      ! file.exists(depthFileStr)
+   if(length(coordsFileStr) == 0 ||
+      ! file.exists(coordsFileStr)
    ){ # If: The gene coordinates file does not exist
       tbCmdStr =
          paste(
             "Could not open gene coordinates table",
-             depthFileStr
+             coordsFileStr
          );
             
       tk_messageBox(
@@ -1702,36 +1884,55 @@ function(
          caption = "ERROR"
       );
 
-      showDepthMenu();
+      showGraphMenu();
       return();
    } # If: The gene coordinates file does not exist
 
+   # add in if adjusting coordiantes
+   if(as.numeric(tclvalue(ADJ_COORDS_BL_TCL))){
+      tbCmdStr =
+         paste(
+            tbCmdStr,
+            "-adj-coords",
+            sep = " "
+         );
+   }else{
+      tbCmdStr =
+         paste(
+            tbCmdStr,
+            "-no-adj-coords",
+            sep = " "
+         );
+   }
+
    #******************************************************
-   # Fun18 Sec04 Sub07:
+   # TOF02 Fun10 Sec04 Sub08:
    #   - Add in the required input commands
    #******************************************************
 
    tbCmdStr =
       paste(
          tbCmdStr,
-         "-sam",
+         " -sam \"",
          samStr,
-         "-prefix",
+         "\"",
+         " -prefix \"",
          prefixStr,
-         sep = " "
+         "\"",
+         sep = ""
       ); # finsh off the command
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec05:
+   # TOF02 Fun10 Sec05:
    #   - Get minimap2 version, open log, ann map reads
-   #   o fun18 sec05 Sub01:
+   #   o tof02 fun10 sec05 Sub01:
    #     - Get and save version for minimap2 to log
-   #   o fun18 sec05 Sub02:
+   #   o tof02 fun10 sec05 Sub02:
    #     - Map reads
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
    #******************************************************
-   # Fun18 Sec05 Sub01:
+   # TOF02 Fun10 Sec05 Sub01:
    #   - Get and save version for minimap2 to log
    #******************************************************
 
@@ -1741,7 +1942,7 @@ function(
    errSI =
       system2(
          command =
-            get("miniMapPathStr", envir = .GlobalEnv),
+         get("miniMapPathStr", envir = .GlobalEnv),
          args = "--version",
          wait = TRUE,          # Wait for minimap2
          timeout = 1           # error out after 1 second
@@ -1761,7 +1962,11 @@ function(
 
    versStr = 
       system2(
-         command = miniMapPathStr, # minimap2 call
+         command =
+           get(
+              "miniMapPathStr",
+              envir = .GlobalEnv
+           ), # minimap2 call
          args = "--version",
          wait = TRUE,
          timeout = 1,
@@ -1773,7 +1978,7 @@ function(
    print(paste("minimap2", argsMinimapStr, sep = " "));
 
    #******************************************************
-   # Fun18 Sec05 Sub02:
+   # TOF02 Fun10 Sec05 Sub02:
    #   - Map reads
    #******************************************************
    
@@ -1801,70 +2006,18 @@ function(
    } # If: I could not run minimap2
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec06:
-   #   - Run adjCoords (if requested)
-   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-   if(as.numeric(tclvalue(ADJ_COORDS_BL_TCL)))
-   { # If: I am adjusting gene to reference coordinates
-      tkconfigure(
-         messg_labTK,
-         text = "running adjCoords"
-      );
-
-      errSI = 
-         system2(
-            get("adjCoordsPathStr", envir = .GlobalEnv),
-            args = 
-               paste(
-                  "-coords",
-                  depthFileStr,
-                  "-sam",
-                  samStr,
-                  "-ref",
-                  as.character(ADJ_COORDS_REF_TCL),
-                  "> tmp.sam",
-                  sep = " "
-               ),
-            wait = TRUE,
-            timeout = 0
-         ); # Run adjCoords
-
-      if(errSI)
-      { # If: adjCoords errored out
-         print("Error while running adjCoords");
-
-         tk_messageBox(
-            type = "ok",
-            message = "Could run adjCoords",
-            caption = "ERROR"
-         );
-
-         sink();
-         showReqInputMenu();
-         return();
-      } # If: adjCoords errored out
-
-      # move the adjusted file to the sam file
-      file.rename(
-         "tmp.sam",
-          samStr
-      );
-   } # If: I am adjusting gene to reference coordinates
-
-   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec07:
+   # TOF02 Fun10 Sec07:
    #   - Run freezeTB
-   #   o fun18 sec07 sub01:
+   #   o tof02 fun10 sec07 sub01:
    #     - get freezeTB version
-   #   o fun18 sec07 sub02:
+   #   o tof02 fun10 sec07 sub02:
    #     - run freezeTB
-   #   o fun18 sec07 sub03:
+   #   o tof02 fun10 sec07 sub03:
    #     - build graphs for freezeTB
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
    #******************************************************
-   # Fun18 Sec07 Sub01:
+   # TOF02 Fun10 Sec07 Sub01:
    #   - get freezeTB version
    #******************************************************
 
@@ -1906,7 +2059,7 @@ function(
    print(errStr); # print the version numbers
 
    #******************************************************
-   # Fun18 Sec07 Sub02:
+   # TOF02 Fun10 Sec07 Sub02:
    #   - run freezeTB
    #******************************************************
 
@@ -1948,7 +2101,7 @@ function(
    } # If: I had an error running freezeTb
 
    #******************************************************
-   # Fun18 Sec07 Sub03:
+   # TOF02 Fun10 Sec07 Sub03:
    #   - build graphs for freezeTB
    #******************************************************
 
@@ -1962,23 +2115,28 @@ function(
    ){ # If: can make graphs
       tbCmdStr =
          paste(
+            "\"",
             get(
                "graphAmpDepthPathStr",
                envir = .GlobalEnv
             ),
-            "-ext",
+            "\"",
+            " -ext ",
             tclvalue(GRAPH_EXT_TCL),
-            "-prefix",
+            " -prefix \"",
             prefixStr,
-            "-who",
+            "\"",
+            " -who \"",
             amrFileStr,
-            "-stats",
+            "\"",
+            " -stats ",
             paste(
+               "\"",
                prefixStr,
-               "-depths.tsv",
+               "-depths.tsv\"",
                sep = ''
             ), # make output stats file name
-            sep = " "
+            sep = ""
          ) # rebulid graphing command to print
 
       system2(
@@ -1996,1386 +2154,1996 @@ function(
    } # If: can make graphs
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   # Fun18 Sec08:
+   # TOF02 Fun10 Sec08:
    #   - Return and exit
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
    sink(); # Close the log
 
-   quitInput(); # No longer need freezeTb gui
+   assign(
+      "fqFilesStr",
+      "",
+      envir = .GlobalEnv
+   ); # blank fastq entries
+
+   tkconfigure(
+      fqLabelTK,
+      text = ""
+   ); # remove last run fastq file(s)
+
+   #quitInput(); # No longer need freezeTb gui
+     # just keep running
 } # runFreezeTb
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TOF03:
+#   - input gui hide/show menu functions + run
+#   o tof03 fun01: reqInputSetup_freezeTBGui
+#     - builds required input part of input gui
+#   o tof03 fun02: menuSetup_freezeTBGui
+#     - builds menu part of input gui
+#   o tof03 fun03: exitRunSetup_freezeTBGui
+#     - adds exit and run commands to input gui
+#   o tof03 fun04: filtMenuSetup_freezeTBGui
+#     - builds the filter settings frame
+#   o tof03 fun05: amrMenuSetup_freezeTBGui
+#     - builds the AMR settings frame
+#   o tof03 fun06: lineageMenuSetup_freezeTBGui
+#     - builds the lineage settings frame
+#   o tof03 fun07: conMenuSetup_freezeTBGui
+#     - builds the consensus settings frame
+#   o tof03 fun08: mixefInfectSetup_freezeTBGui
+#     - builds mixed infections settings frame
+#   o tof03 fun09: graphMenuSetup_freezeTBGui
+#     - builds the graph settings frame
+#   o tof03 fun10: launchInGui_freezeTBGui
+#     - launches input gui
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #---------------------------------------------------------
-# Ingui TOC:
-#   - The code that runs the GUI
-#   o ingui01:
-#     - Set up required input commands
-#   o ingui02:
-#     - Set up the hide/display extra options
-#   o ingui03:
-#     - Exit/run buttons
-#   o ingui04:
-#     - Read filtering menu
-#   o ingui05:
-#     - AMR detection settings menu
-#   o ingui06:
-#     - Lineage detection options
-#   o ingui07:
-#     - Set up the consnesus options menu
-#   o ingui08:
-#     - Read depth graphs options
-#   o ingui09:
-#     - Set up the gui
+# TOF03 Fun01: reqInputSetup_freezeTBGui
+#   - builds required input part of input gui
+# Input:
+# Output:
+#   - Modifies:
+#     o reqInputTK frame to have required input
 #---------------------------------------------------------
+reqInputSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun01 TOC:
+   #   - builds required input part of input gui
+   #   o tof03 fun01 sec01:
+   #     - add options to menu
+   #   o tof03 fun01 sec02:
+   #     - build required input menu
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui01:
-#   - Set up required input commands
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun01 Sec01:
+   #   - add options to menu
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-refLabelTK =
-   tklabel(
-      reqInputTK,
-      text = def_refStr
-   ); # Current reference file used
+   assign(
+      "refLabelTK",
+      tklabel(
+         reqInputTK,
+         text = def_refStr
+      ), # Current reference file used
+      envir = .GlobalEnv
+   );
+   
+   refButTK =
+      tkbutton(
+         reqInputTK,
+         text = "Reference        ",
+         command = getRef
+   ); # Add the change reference file button
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         refButTK,
+         "Reference genome to map reads to (NC000962.3)"
+      ); # reference genome button tootip
+   } # If: I can add an tooltip
 
-refButTK =
-   tkbutton(
-      reqInputTK,
-      text = "Reference        ",
-      command = getRef
-); # Add the change reference file button
 
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
+   adjCoords_checkboxTK =
+      tkcheckbutton(
+        parent = reqInputTK,
+        text = "adjust reads by coordinates",
+        variable = ADJ_COORDS_BL_TCL
+      );
+        
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         adjCoords_checkboxTK,
+         paste(
+            "Need to adjust coordinates (input",
+            "reference(s) are not full genome)"
+         )
+      );
+   } # If: I can make an tooltip
+
+   coordsTbl_ButTK =
+      tkbutton(
+         reqInputTK,
+         text = "coordinates",
+         command = getGeneTbl
+   ); # add the change gene coordiantes file button
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         coordsTbl_ButTK,
+         "gene coordinates to adjust reference with"
+      ); # gene table button tootip
+   } # If: I can add an tooltip
+   
+   assign(
+      "coordsTbl_LabTK",
+      tklabel(
+         reqInputTK,
+         text = def_coordsStr
+      ), # Current gene coordiantes table used
+      envir = .GlobalEnv
+   );
+
+   
+   assign(
+      "fqLabelTK",
+      tklabel(
+         reqInputTK,
+         text = ""
+      ), # Holds the selected fastq file
+      envir = .GlobalEnv
+   );
+   
+   fqButTK =
+      tkbutton(
+         reqInputTK,
+         text = "reads (.fastq)",
+         command = getReads
+   ); # add the get fastq file button
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         fqButTK,
+         "Fastq file with reads to check AMRs/spoltypes"
+      ); # fastq button tooltip
+   } # If: I can add an tooltip
+   
+   assign(
+      "dirLabelTK",
+      tklabel(
+         reqInputTK,
+         text = getwd()
+      ), # Holds the output directory
+      envir = .GlobalEnv
+   );
+   
+   dirButTK =
+      tkbutton(
+         reqInputTK,
+         text = "Output directory",
+         command = getSaveDir
+   ); # add the get output directory button
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         dirButTK,
+         "Directory to save output files in"
+      ); # directory button tooltip
+   } # If: I can add an tooltip
+   
+   prefLabelTK =
+      tklabel(
+         reqInputTK,
+         text = "Output Prefix"
+      ); # Holds the prefix box name
+   
+   prefBoxTK =
+      tkentry(
+         reqInputTK,
+         width = 20,
+         textvariable = PREFIX_TCL
+      ); # Set up the prefix name for the output
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         prefBoxTK,
+         "Prefix to add to output file names"
+      ); # Prefix text box tooltip
+   } # If: I can add an tooltip
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun01 Sec02:
+   #   - build required input menu
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   tkgrid(refButTK, refLabelTK);
+
+   tkgrid(adjCoords_checkboxTK);
+
+   tkgrid(
+      coordsTbl_ButTK,
+      coordsTbl_LabTK
+   );
+
+   tkgrid(fqButTK, fqLabelTK);
+   tkgrid(dirButTK, dirLabelTK);
+   tkgrid(prefLabelTK, prefBoxTK);
+   
+   tkgrid.configure(
       refButTK,
-      "Reference genome to map reads to (NC000962.3)"
-   ); # reference genome button tootip
-} # If: I can add an tooltip
-
-fqLabelTK =
-   tklabel(
-      reqInputTK,
-      text = ""
-   ); # Holds the selected fastq file
-
-fqButTK =
-   tkbutton(
-      reqInputTK,
-      text = "reads (.fastq)",
-      command = getReads
-); # add the get fastq file button
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
+      refLabelTK,
+      adjCoords_checkboxTK,
+      coordsTbl_ButTK,
+      coordsTbl_LabTK,
+      fqLabelTK,
       fqButTK,
-      "Fastq file with reads to check AMRs/spoltypes"
-   ); # fastq button tooltip
-} # If: I can add an tooltip
-
-dirLabelTK =
-   tklabel(
-      reqInputTK,
-      text = getwd()
-   ); # Holds the output directory
-
-dirButTK =
-   tkbutton(
-      reqInputTK,
-      text = "Output directory",
-      command = getSaveDir
-); # add the get output directory button
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
+      dirLabelTK,
       dirButTK,
-      "Directory to save output files in"
-   ); # directory button tooltip
-} # If: I can add an tooltip
-
-prefLabelTK =
-   tklabel(
-      reqInputTK,
-      text = "Output Prefix"
-   ); # Holds the prefix box name
-
-prefBoxTK =
-   tkentry(
-      reqInputTK,
-      width = 20,
-      textvariable = PREFIX_TCL
-   ); # Set up the prefix name for the output
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
       prefBoxTK,
-      "Prefix to add to output file names"
-   ); # Prefix text box tooltip
-} # If: I can add an tooltip
+      prefLabelTK,
+      sticky = "w"
+   ); # Configure the left side input buttons/prefix label
+} # reqInpuSetup_freezeTBGui
 
+#---------------------------------------------------------
+# TOF03 Fun02: menuSetup_freezeTBGui
+#   - builds menu part of input gui
+# Input:
+# Output:
+#   - Modifies:
+#     o reqInputTK frame to have menu buttons
+#---------------------------------------------------------
+menuSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun02 TOC:
+   #   - builds menu part of input gui
+   #   o tof03 fun02 sec01:
+   #     - add menu buttons to gui
+   #   o tof03 fun02 sec02:
+   #     - build menu
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui02:
-#   - Set up the hide/display extra options
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun02 Sec01:
+   #   - add menu buttons to gui
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-inputMenu_ButTK =
-   tkbutton(
-      menuTK,
-      text = "Basic Input",
-      command = showReqInputMenu
-   ); # Hide the extra options
+   inputMenu_ButTK =
+      tkbutton(
+         menuTK,
+         text = "Basic Input",
+         command = showReqInputMenu
+      ); # Hide the extra options
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         inputMenu_ButTK,
+         "The required input"
+      ); # input menu button tooltip
+   } # If: I can add an tooltip
+   
+   graphMenu_ButTK =
+      tkbutton(
+         menuTK,
+         text = "Graphing",
+   		command = showGraphMenu
+      ); # Show the graping menu
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         graphMenu_ButTK,
+         "Read depth/converage graph settings"
+      ); # Database button tooltip
+   } # If: I can add an tooltip
+   
+   filtMenu_ButTK =
+      tkbutton(
+         menuTK,
+         text = "Read filtering",
+   		command = showFiltMenu
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         filtMenu_ButTK,
+         "Read filtering settings"
+      ); # Database button tooltip
+   } # If: I can add an tooltip
+   
+   amrMenu_ButTK =
+      tkbutton(
+         menuTK,
+         text = "AMR detection",
+   		command = showAmrMenu
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         amrMenu_ButTK,
+         "AMR detection settings"
+      ); # Database button tooltip
+   } # If: I can add an tooltip
+   
+   miruMenu_ButTK =
+      tkbutton(
+         menuTK,
+         text = "Lineages",
+         command = showLineageMenu
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         miruMenu_ButTK,
+         "Input for MIRU lineages (spologotyping)"
+      );
+   }
+   
+   conMenu_ButTK =
+      tkbutton(
+         menuTK,
+         text = "Consensus settings",
+         command = showConMenu
+      ); # Show the extra consensus options
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         conMenu_ButTK,
+         "Settings for building consensus/variant printing"
+      ); # Consensus settings tooltip
+   } # If: I have tooltips
 
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      inputMenu_ButTK,
-      "The required input"
-   ); # input menu button tooltip
-} # If: I can add an tooltip
+   mixedInfect_ButTK =
+      tkbutton(
+         menuTK,
+         text = "mixed infection",
+         command = showMixedInfectMenu
+      ); # Show the extra consensus options
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         mixedInfect_ButTK,
+         "mixed infection detection settings"
+      ); # mixed infection settings tooltip
+   } # If: I have tooltips
 
-depthMenu_ButTK =
-   tkbutton(
-      menuTK,
-      text = "Graphing",
-		command = showDepthMenu
-   ); # Show the graping menu
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun02 Sec02:
+   #   - build menu
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      depthMenu_ButTK,
-      "Read depth/converage graph settings"
-   ); # Database button tooltip
-} # If: I can add an tooltip
+   tkpack(menuTK, inputMenu_ButTK, side = "left");
+   tkpack(menuTK, filtMenu_ButTK, side = "left");
+   tkpack(menuTK, amrMenu_ButTK, side = "left");
+   tkpack(menuTK, miruMenu_ButTK, side = "left");
+   tkpack(menuTK, conMenu_ButTK, side = "left");
+   tkpack(menuTK, mixedInfect_ButTK, side = "left");
+   tkpack(menuTK, graphMenu_ButTK, side = "left");
+} # menuSetup_freezeTBGui
 
-filtMenu_ButTK =
-   tkbutton(
-      menuTK,
-      text = "Read filtering",
-		command = showFiltMenu
+#---------------------------------------------------------
+# TOF03 Fun03: exitRunSetup_freezeTBGui
+#   - adds exit and run commands to input gui
+# Input:
+# Output:
+#   - Modifies:
+#     o reqInputTK frame to have exit and run buttons
+#---------------------------------------------------------
+exitRunSetup_freezeTBGui = function()
+{
+   runButTK =
+      tkbutton(
+         runQuitTK,
+         text = "run freezeTb",
+         command =
+            runFreezeTb
+      ); # Run freezeTb
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         runButTK,
+         "Run freezeTb on input reads (fastq file)"
+      ); # Run freezeTb button tooltip
+   } # If: I can add an tooltip
+   
+   qButTK =
+      tkbutton(
+         runQuitTK,
+         text="quit",
+         #command = function() tkdestroy(guiTK)
+         command = quitInput
+      ); # Exit freezeTb
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         qButTK,
+         "Exit freezeTb"
+      ); # quit freezeTb button tooltip
+   } # If: I can add an tooltip
+
+   tkpack(runQuitTK, runButTK, side = "left");
+   tkpack(runQuitTK, qButTK, side = "left");
+} # exitRunSetup_freezeTBGui
+
+#---------------------------------------------------------
+# TOF03 Fun04: filtMenuSetup_freezeTBGui
+#   - builds the filter settings frame
+# Input:
+# Output:
+#   - Modifies:
+#     o reqInputTK frame to have exit and run buttons
+#---------------------------------------------------------
+filtMenuSetup_freezeTBGui = function()
+{ #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # TOF03 Fun04 TOC:
+  #   - builds the filter settings frame
+  #   o tof03 fun04 sec01:
+  #     - set up filtering options
+  #   o tof03 fun04 sec02:
+  #     - add filtering options to gui
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  # TOF03 Fun04 Sec01:
+  #   - set up filtering options
+  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   filtTitle_LabTK =
+      tklabel(
+         filtInputTK,
+         text = "Read filtering settings"
+      );
+   
+   filtMinMapq_LabTK =
+      tklabel(
+         filtInputTK,
+         text = "Min mapping quality"
+      );
+   
+   filtMinMapq_SlideTK =
+      tkscale(
+         parent = filtInputTK,
+         from = 0,
+         to = 93,
+         showvalue = TRUE,
+         variable = MIN_MAPQ_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         filtMinMapq_SlideTK,
+         "Min mapping quality to keep an read"
+      );
+   } # If: I can add an tooltip
+   
+   filtMinMedQ_LabTK =
+      tklabel(
+         filtInputTK,
+         text = "Min median Q"
+      );
+   
+   filtMinMedQ_SlideTK =
+      tkscale(
+         parent = filtInputTK,
+         from = 0,
+         to = 93,
+         showvalue = TRUE,
+         variable = MIN_MEDQ_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         filtMinMedQ_SlideTK,
+         "Min median Q-score to keep an read"
+      );
+   } # If: I can add an tooltip
+   
+   filtMinMeanQ_LabTK =
+      tklabel(
+         filtInputTK,
+         text = "Min mean Q"
+      );
+   
+   filtMinMeanQ_SlideTK =
+      tkscale(
+         parent = filtInputTK,
+         from = 0,
+         to = 93,
+         showvalue = TRUE,
+         variable = MIN_MEANQ_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         filtMinMeanQ_SlideTK,
+         "Min mean Q-score to keep an read"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   filtMinDepth_LabTK =
+      tklabel(
+         filtInputTK,
+         text = "Min read depth"
+      );
+   
+   filtMinDepth_SlideTK =
+      tkscale(
+         parent = filtInputTK,
+         from = 1,
+         to = 100,
+         showvalue = TRUE,
+         variable = MIN_DEPTH_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         filtMinDepth_SlideTK,
+         "Min depth for consensus building/AMRs/Graphs"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   
+   assign(
+      "maskPrim_checkboxTK",
+      tkcheckbutton(
+         parent = filtInputTK,
+         text = "Mask primers",
+         variable = MASK_PRIM_BL_TCL
+       ),
+       envir = .GlobalEnv
    );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         maskPrim_checkboxTK,
+         "Mask primers using the mask primer file"
+      );
+   } # If: I can make an tooltip
 
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      filtMenu_ButTK,
-      "Read filtering settings"
-   ); # Database button tooltip
-} # If: I can add an tooltip
-
-amrMenu_ButTK =
-   tkbutton(
-      menuTK,
-      text = "AMR detection",
-		command = showAmrMenu
+   assign(
+      "maskPrim_LabTK",
+      tklabel(
+         parent = filtInputTK,
+         text = def_maskPrimStr
+      ),
+      envir = .GlobalEnv
    );
+   
+   maskPrim_ButTK =
+      tkbutton(
+         parent = filtInputTK,
+         text = "Mask primer file",
+         command = getMaskPrim
+      ); # Run freezeTb
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         maskPrim_ButTK,
+         "Tsv file to mask primer coordinates with"
+      ); # Run freezeTb button tooltip
+   } # If: I can add an tooltip
 
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      amrMenu_ButTK,
-      "AMR detection settings"
-   ); # Database button tooltip
-} # If: I can add an tooltip
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  # TOF03 Fun04 Sec02:
+  #   - add filtering options to gui
+  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-miruMenu_ButTK =
-   tkbutton(
-      menuTK,
-      text = "Lineages",
-      command = showLineageMenu
-   );
+   tkgrid(filtTitle_LabTK);
+   tkgrid(filtMinMapq_LabTK, filtMinMapq_SlideTK);
+   tkgrid(filtMinMedQ_LabTK, filtMinMedQ_SlideTK);
+   tkgrid(filtMinMeanQ_LabTK, filtMinMeanQ_SlideTK);
+   tkgrid(filtMinDepth_LabTK, filtMinDepth_SlideTK);
 
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      miruMenu_ButTK,
-      "Input for MIRU lineages (spologotyping)"
-   );
-}
-
-conMenu_ButTK =
-   tkbutton(
-      menuTK,
-      text = "Consensus settings",
-      command = showConMenu
-   ); # Show the extra consensus options
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      conMenu_ButTK,
-      "Settings for building consensus/variant printing"
-   ); # Consensus settings tooltip
-} # If: I have tooltips
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui03:
-#   - Exit/run buttons
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-runButTK =
-   tkbutton(
-      runQuitTK,
-      text = "run freezeTb",
-      command =
-         runFreezeTb
-   ); # Run freezeTb
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      runButTK,
-      "Run freezeTb on input reads (fastq file)"
-   ); # Run freezeTb button tooltip
-} # If: I can add an tooltip
-
-qButTK =
-   tkbutton(
-      runQuitTK,
-      text="quit",
-      #command = function() tkdestroy(guiTK)
-      command = quitInput
-   ); # Exit freezeTb
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      qButTK,
-      "Exit freezeTb"
-   ); # quit freezeTb button tooltip
-} # If: I can add an tooltip
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui04:
-#   - Read filtering menu
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-filtTitle_LabTK =
-   tklabel(
-      filtInputTK,
-      text = "Read filtering settings"
-   );
-
-filtMinMapq_LabTK =
-   tklabel(
-      filtInputTK,
-      text = "Min mapping quality"
-   );
-
-filtMinMapq_SlideTK =
-   tkscale(
-      parent = filtInputTK,
-      from = 0,
-      to = 93,
-      showvalue = TRUE,
-      variable = MIN_MAPQ_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      filtMinMapq_SlideTK,
-      "Min mapping quality to keep an read"
-   );
-} # If: I can add an tooltip
-
-filtMinMedQ_LabTK =
-   tklabel(
-      filtInputTK,
-      text = "Min median Q"
-   );
-
-filtMinMedQ_SlideTK =
-   tkscale(
-      parent = filtInputTK,
-      from = 0,
-      to = 93,
-      showvalue = TRUE,
-      variable = MIN_MEDQ_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      filtMinMedQ_SlideTK,
-      "Min median Q-score to keep an read"
-   );
-} # If: I can add an tooltip
-
-filtMinMeanQ_LabTK =
-   tklabel(
-      filtInputTK,
-      text = "Min mean Q"
-   );
-
-filtMinMeanQ_SlideTK =
-   tkscale(
-      parent = filtInputTK,
-      from = 0,
-      to = 93,
-      showvalue = TRUE,
-      variable = MIN_MEANQ_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      filtMinMeanQ_SlideTK,
-      "Min mean Q-score to keep an read"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-filtMinDepth_LabTK =
-   tklabel(
-      filtInputTK,
-      text = "Min read depth"
-   );
-
-filtMinDepth_SlideTK =
-   tkscale(
-      parent = filtInputTK,
-      from = 1,
-      to = 100,
-      showvalue = TRUE,
-      variable = MIN_DEPTH_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      filtMinDepth_SlideTK,
-      "Min depth for consensus building/AMRs/Graphs"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-
-maskPrim_checkboxTK =
-   tkcheckbutton(
-      parent = filtInputTK,
-      text = "Mask primers",
-      variable = MASK_PRIM_BL_TCL
-    );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
+   tkgrid(
       maskPrim_checkboxTK,
-      "Mask primers using the mask primer file"
-   );
-} # If: I can make an tooltip
-maskPrim_LabTK =
-   tklabel(
-      parent = filtInputTK,
-      text = def_maskPrimStr
-   );
-
-maskPrim_ButTK =
-   tkbutton(
-      parent = filtInputTK,
-      text = "Mask primer file",
-      command = getMaskPrim
-   ); # Run freezeTb
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
       maskPrim_ButTK,
-      "Tsv file to mask primer coordinates with"
-   ); # Run freezeTb button tooltip
-} # If: I can add an tooltip
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui05:
-#   - AMR detection settings menu
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-amrTitle_LabTK =
-   tklabel(
-      amrInputTK,
-      text = "AMR detection settings"
-);
-
-minAmrSup_LabTK =
-   tklabel(
-      amrInputTK,
-      text = "Min % support for AMR"
+      maskPrim_LabTK
+   );
+   
+   tkgrid.configure(
+      filtTitle_LabTK,
+      filtMinMapq_LabTK,
+      filtMinMedQ_LabTK,
+      filtMinMeanQ_LabTK,
+      filtMinDepth_LabTK,
+      maskPrim_checkboxTK,
+      sticky = "w"
+   );
+   
+   tkgrid.configure(
+      filtMinMapq_SlideTK,
+      filtMinMedQ_SlideTK,
+      filtMinMeanQ_SlideTK,
+      filtMinDepth_SlideTK,
+      maskPrim_ButTK,
+      maskPrim_LabTK,
+      sticky = "w"
    );
 
-minAmrSup_SlideTK =
-   tkscale(
-      parent = amrInputTK,
-      from = .01,
-      to = 1,
-      showvalue = TRUE,
-      variable = MIN_AMR_SUP_TCL,
-      resolution = .01,
-      orient = "horiz"
+} # filtMenuSetup_freezeTBGui
+
+#---------------------------------------------------------
+# TOF03 Fun05: amrMenuSetup_freezeTBGui
+#   - builds AMR settings frame
+# Input:
+# Output:
+#   - Modifies:
+#     o amrInputTK frame to have amr settings
+#---------------------------------------------------------
+amrMenuSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun05 TOC:
+   #   - builds AMR settings frame
+   #   o tof03 fun05 sec01:
+   #    - setup AMR settinngs
+   #   o tof03 fun05 sec02:
+   #    - add AMR settinngs to gui
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun05 Sec01:
+   #   - setup AMR settinngs
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   amrTitle_LabTK =
+      tklabel(
+         amrInputTK,
+         text = "AMR detection settings"
    );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minAmrSup_SlideTK,
-      "Min % of reads supporting an AMR"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-frameshiftBl_checkboxTK =
-   tkcheckbutton(
-      amrInputTK,
-      text = "Frameshift (not recommended)",
-      variable = FRAMESHIFT_BL_TCL
-    );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      frameshiftBl_checkboxTK,
-      "Check consensuses for frameshift AMRs (avoid)"
+   
+   minAmrSup_LabTK =
+      tklabel(
+         amrInputTK,
+         text = "Min % support for AMR"
+      );
+   
+   minAmrSup_SlideTK =
+      tkscale(
+         parent = amrInputTK,
+         from = .01,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_AMR_SUP_TCL,
+         resolution = .01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minAmrSup_SlideTK,
+         "Min % of reads supporting an AMR"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   frameshiftBl_checkboxTK =
+      tkcheckbutton(
+         amrInputTK,
+         text = "Frameshift (not recommended)",
+         variable = FRAMESHIFT_BL_TCL
+       );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         frameshiftBl_checkboxTK,
+         "Check consensuses for frameshift AMRs (avoid)"
+      );
+   } # If: I can make an tooltip
+   
+   assign(
+      "amrDbLabelTK",
+      tklabel(
+         amrInputTK,
+         text = def_amrTblStr
+      ),
+      envir = .GlobalEnv
    );
-} # If: I can make an tooltip
+   
+   amrDbButTK =
+      tkbutton(
+         amrInputTK,
+         text = "AMR table        ",
+         command = getAmrTbl
+   ); # add the get AMR table button
+   
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun05 Sec02:
+   #   - add AMR settinngs to gui
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-amrDbLabelTK =
-   tklabel(
-      amrInputTK,
-      text = def_amrTblStr
-   );
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         amrDbButTK,
+         "Who 2023 catalog in tbAMR format"
+      ); # amr table button tootip
+   } # If: I can add an tooltip
 
-amrDbButTK =
-   tkbutton(
-      amrInputTK,
-      text = "AMR table        ",
-      command = getAmrTbl
-); # add the get AMR table button
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
+   tkgrid(amrTitle_LabTK);
+   tkgrid(amrDbButTK, amrDbLabelTK);
+   tkgrid(minAmrSup_LabTK, minAmrSup_SlideTK);
+   tkgrid(frameshiftBl_checkboxTK);
+   
+   tkgrid.configure(
+      amrTitle_LabTK,
       amrDbButTK,
-      "Who 2023 catalog in tbAMR format"
-   ); # amr table button tootip
-} # If: I can add an tooltip
+      minAmrSup_LabTK,
+      frameshiftBl_checkboxTK,
+      sticky = "w"
+   ); # Configure the right side labels/prefix input
+   
+   tkgrid.configure(
+      amrDbLabelTK,
+      minAmrSup_SlideTK,
+      sticky = "w"
+   ); # Configure the right side labels/prefix input
+} # amrMenuSetup_freezeTBGui
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui06:
-#   - Lineages detection options
-#   o ingui06 sub01:
-#     - Miru lineage detection
-#   o ingui06 sub02:
-#     - Spoligotype lineage detection
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#---------------------------------------------------------
+# TOF03 Fun06: lineageMenuSetup_freezeTBGui
+#   - builds the lineage settings frame
+# Input:
+# Output:
+#   - Modifies:
+#     o input gui to have lineage settings
+#---------------------------------------------------------
+lineageMenuSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun06 TOC:
+   #   - builds the lineage settings frame
+   #   o tof03 fun06 sec01:
+   #     - miru lineage detection
+   #   o tof03 fun06 sec02:
+   #     - spoligotype lineage detection
+   #   o tof03 fun06 sec03:
+   #     - add lineage options to gui
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#*********************************************************
-# Ingui06 Sub01:
-#   - Miru lineage detection
-#*********************************************************
-
-miruTitle_LabTK =
-   tklabel(
-      miruVarTK,
-      text = "MIRU lineage settings"
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun06 Sec01:
+   #   - miru lineage detection
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   
+   miruTitle_LabTK =
+      tklabel(
+         miruVarTK,
+         text = "MIRU lineage settings"
+      );
+   
+   assign(
+      "miruDb_LabTK",
+      tklabel(
+         miruVarTK,
+         text = def_miruTblStr
+      ), # Current MIRU lineage table used
+      envir = .GlobalEnv
    );
-
-miruDb_LabTK =
-   tklabel(
-      miruVarTK,
-      text = def_miruTblStr
-   ); # Current MIRU lineage table used
-
-miruDb_ButTK =
-   tkbutton(
-      miruVarTK,
-      text = "MIRU table",
-      command = getMiruTbl
-   ); # add the get miru table button
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      miruDb_ButTK,
-      "Table with spologotypes (MIRU lineages)"
-   ); # miru lineage button tootip
-} # If: I can add an tooltip
-
-miruFudge_LabTK =
-   tklabel(
-      miruVarTK,
-      text = "Fudge factor"
-   );
-
-miruFudge_SlideTK =
-   tkscale(
-      miruVarTK,
-      from = 0,
-      to = 50,
-      showvalue = TRUE,
-      variable = FUDGE_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
+   
+   miruDb_ButTK =
+      tkbutton(
+         miruVarTK,
+         text = "MIRU table",
+         command = getMiruTbl
+      ); # add the get miru table button
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         miruDb_ButTK,
+         "Table with spologotypes (MIRU lineages)"
+      ); # miru lineage button tootip
+   } # If: I can add an tooltip
+   
+   miruFudge_LabTK =
+      tklabel(
+         miruVarTK,
+         text = "Fudge factor"
+      );
+   
+   miruFudge_SlideTK =
+      tkscale(
+         miruVarTK,
+         from = 0,
+         to = 50,
+         showvalue = TRUE,
+         variable = FUDGE_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+    tk2tip(
      miruFudge_SlideTK,
      "Range for MIRU lengths; how much to fudge length by"
-   );
-} # Add tooltip label
-
-#*********************************************************
-# Ingui06 Sub02:
-#   - Spoligotype lineage detection
-#*********************************************************
-
-spolTitle_LabTK =
-   tklabel(
-      spolVarTK,
-      text = "Spoligotyping settings"
-   );
-
-spolSeq_LabTK =
-   tklabel(
-      spolVarTK,
-      text = def_spolSpacersStr
-   );
-
-spolSeq_ButTK =
-   tkbutton(
-      spolVarTK,
-      text = "Spoligo sequences",
-      command = getSpoligoSeq
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      spolSeq_ButTK,
-      "Fasta file with spoltype space sequences (DR)"
-   );
-} # If: I can add an tooltip
-
-spolDb_LabTK =
-   tklabel(
-      spolVarTK,
-      text = def_spolDbStr
-   );
-
-spolDb_ButTK =
-   tkbutton(
-      spolVarTK,
-      text = "Spoligo database",
-      command = getSpoligoDB
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      spolDb_ButTK,
-      "csv file (data base) with spoltype lineages"
-   );
-} # If: I can add an tooltip
-
-spolPerc_LabTK =
-   tklabel(
-      spolVarTK,
-      text = "Min % score"
-   );
-
-spolPerc_SlideTK =
-   tkscale(
-      spolVarTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = MIN_PERC_SCORE_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-     spolPerc_SlideTK,
-     "Minimum percent score to count an spacer as mapped"
-   );
-} # Add tooltip label
-
-spolStart_LabTK =
-   tklabel(
-      spolVarTK,
-      text = "DR start"
-   );
-
-spolStart_BoxTK =
-   tkentry(
-      spolVarTK,
-      width = 12,
-      textvariable = DR_START
-   );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-     spolStart_BoxTK,
-     "Start of direct repeat (DR) region in reference"
-   );
-} # Add tooltip label
-
-spolEnd_LabTK =
-   tklabel(
-      spolVarTK,
-      text = "DR end"
-   );
-
-spolEnd_BoxTK =
-   tkentry(
-      spolVarTK,
-      width = 12,
-      textvariable = DR_END
-   );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-     spolEnd_BoxTK,
-     "End of direct repeat (DR) region in reference"
-   );
-} # Add tooltip label
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui07:
-#   - Set up the consnesus options menu
-#   o ingui07 frame-01:
-#     - Consensus global (bulding) options
-#   o ingui07 frame-02:
-#     - Consensus collapsing (bulding) options
-#   o ingui07 frame-03:
-#     - Variant printing options for consensus
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#*********************************************************
-# Ingui07 Frame-01:
-#   - Consensus global (bulding) options
-#*********************************************************
-
-conGlobTitle_LabTK =
-   tklabel(
-      conGlobalInputTK,
-      text = "Cosensus building/variant printing settings"
-);
-
-minBaseQ_LabTK =
-   tklabel(
-      conGlobalInputTK,
-      text = "Min Q-score (Base)"
-   );
-
-minBaseQ_SlideTK =
-   tkscale(
-      parent = conGlobalInputTK,
-      from = 0,
-      to = 93,
-      showvalue = TRUE,
-      variable = MIN_BASE_Q_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minBaseQ_SlideTK,
-      "Mininmum Q-scrore to keep an base (consensus step)"
-   ); # Minimum q-score button
-} # If: I can add an tooltip
-
-minInsQ_LabTK =
-   tklabel(
-      conGlobalInputTK,
-      text = "Min Q-score (Insertion)"
-   );
-
-minInsQ_SlideTK =
-   tkscale(
-      parent = conGlobalInputTK,
-      from = 0,
-      to = 93,
-      showvalue = TRUE,
-      variable = MIN_INS_Q_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minInsQ_SlideTK,
-      "Mininmum Q-scrore to keep an insertion (consensus)"
-   ); # Minimum q-score button
-} # If: I can add an tooltip
-
-#*********************************************************
-# Ingui07 Frame-02:
-#   - Consensus collapsing (bulding) options
-#*********************************************************
-
-conBuildTitle_LabTK =
-   tklabel(
-      conBuildInputTK,
-      text = "Cosensus building only settings"
-);
-
-
-minLen_LabTK =
-   tklabel(
-      conBuildInputTK,
-      text = "Min length"
-   );
-
-minLen_SlideTK =
-   tkscale(
-      parent = conBuildInputTK,
-      from = 0,
-      to = 1000,
-      showvalue = TRUE,
-      variable = MIN_LEN_TCL,
-      resolution = 10,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minLen_SlideTK,
-      "Min cosensus fragement length to keep a fragment"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-minSnpSup_LabTK =
-   tklabel(
-      conBuildInputTK,
-      text = "Min % snp support"
-   );
-
-minSnpSup_SlideTK =
-   tkscale(
-      parent = conBuildInputTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = MIN_SNP_PERC_SUP_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minSnpSup_SlideTK,
-      "Min percent support to not mask an snp/match"
-   );
-} # If: I can add an tooltip
-
-minInsSup_LabTK =
-   tklabel(
-      conBuildInputTK,
-      text = "Min % ins support"
-   );
-
-minInsSup_SlideTK =
-   tkscale(
-      parent = conBuildInputTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = MIN_INS_PERC_SUP_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minInsSup_SlideTK,
-      "Min percent support to not remove an insertion"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-minDelSup_LabTK =
-   tklabel(
-      conBuildInputTK,
-      text = "Min % del support"
-   );
-
-minDelSup_SlideTK =
-   tkscale(
-      parent = conBuildInputTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = MIN_DEL_PERC_SUP_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      minDelSup_SlideTK,
-      "Min percent support to not remove an deletion"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-#*********************************************************
-# Ingui07 Frame-03:
-#   - Variant printing options for consensus
-#*********************************************************
-
-conPrintTitle_LabTK =
-   tklabel(
-      conPrintInputTK,
-      text = "Variant printing only settings"
-);
-
-pDepth_LabTK =
-   tklabel(
-      parent = conPrintInputTK,
-      text = "Min read depth"
-   );
-
-pDepth_SlideTK =
-   tkscale(
-      parent = conPrintInputTK,
-      from = 1,
-      to = 100,
-      showvalue = TRUE,
-      variable = PRINT_DEPTH_TCL,
-      resolution = 1,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      pDepth_SlideTK,
-      "Min read depth to conPrint alternative variant/AMR"
-   );
-} # If: I can add an tooltip
-
-pSnpSup_LabTK =
-   tklabel(
-      conPrintInputTK,
-      text = "Min % snp support"
-   );
-
-pSnpSup_SlideTK =
-   tkscale(
-      parent = conPrintInputTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = PRINT_SNP_PERC_SUP_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      pSnpSup_SlideTK,
-      "Min percent support to conPrint an match/snp variant"
-   );
-} # If: I can add an tooltip
-
-pInsSup_LabTK =
-   tklabel(
-      conPrintInputTK,
-      text = "Min % ins support"
-   );
-
-pInsSup_SlideTK =
-   tkscale(
-      parent = conPrintInputTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = PRINT_INS_PERC_SUP_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      pInsSup_SlideTK,
-      "Min percent support to conPrint an insertion variant"
-   ); # Minimum read depth tooltip
-} # If: I can add an tooltip
-
-pDelSup_LabTK =
-   tklabel(
-      conPrintInputTK,
-      text = "Min % del support"
-   );
-
-pDelSup_SlideTK =
-   tkscale(
-      parent = conPrintInputTK,
-      from = 0,
-      to = 1,
-      showvalue = TRUE,
-      variable = PRINT_DEL_PERC_SUP_TCL,
-      resolution = 0.01,
-      orient = "horiz"
-   );
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      pDelSup_SlideTK,
-      "Min percent support to conPrint an deletion variant"
-   );
-} # If: I can add an tooltip
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui08:
-#   - Read depth graphs options
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-depthTitle_LabTK =
-   tklabel(
-      depthInputTK,
-      text = "Graphing; read depth and coverage settings"
-   );
-
-depthGeneTbl_LabTK =
-   tklabel(
-      depthInputTK,
-      text = def_coordsStr
-   ); # Current gene coordiantes table used
-
-depthGeneTbl_ButTK =
-   tkbutton(
-      depthInputTK,
-      text = "Gene coordinates",
-      command = getGeneTbl
-); # add the change gene coordiantes file button
-
-# There is here so systems without tcltk2 can work
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      depthGeneTbl_ButTK,
-      "table with coordinates for all genes in reference"
-   ); # gene table button tootip
-} # If: I can add an tooltip
-
-adjCoords_checkboxTK =
-   tkcheckbutton(
-     parent = depthInputTK,
-     text = "Reference is genes (not full genome)",
-     variable = ADJ_COORDS_BL_TCL
-   );
-     
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      adjCoords_checkboxTK,
-      "The reference fasta is a set of separate genes"
-   );
-} # If: I can make an tooltip
-
-adjCoords_entryTK =
-   tkentry(
-      parent = depthInputTK,
-      width = 12,
-      textvariable = ADJ_COORDS_REF_TCL
     );
-
-if(TOOL_TIP_BL > 0){
-   tk2tip(
-      adjCoords_entryTK,
-      "Name of reference to adjust gene coordinates to"
+   } # Add tooltip label
+   
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun06 Sec02:
+   #   - spoligotype lineage detection
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   
+   spolTitle_LabTK =
+      tklabel(
+         spolVarTK,
+         text = "Spoligotyping settings"
+      );
+   
+   assign(
+      "spolSeq_LabTK",
+      tklabel(
+         spolVarTK,
+         text = def_spolSpacersStr
+      ),
+      envir = .GlobalEnv
    );
-} # If: I can make an tooltip
+   
+   spolSeq_ButTK =
+      tkbutton(
+         spolVarTK,
+         text = "Spoligo sequences",
+         command = getSpoligoSeq
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         spolSeq_ButTK,
+         "Fasta file with spoltype space sequences (DR)"
+      );
+   } # If: I can add an tooltip
+   
+   assign(
+      "spolDb_LabTK",
+      tklabel(
+         spolVarTK,
+         text = def_spolDbStr
+      ),
+      envir = .GlobalEnv
+   );
+   
+   spolDb_ButTK =
+      tkbutton(
+         spolVarTK,
+         text = "Spoligo database",
+         command = getSpoligoDB
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         spolDb_ButTK,
+         "csv file (data base) with spoltype lineages"
+      );
+   } # If: I can add an tooltip
+   
+   spolPerc_LabTK =
+      tklabel(
+         spolVarTK,
+         text = "Min % score"
+      );
+   
+   spolPerc_SlideTK =
+      tkscale(
+         spolVarTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_PERC_SCORE_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+     tk2tip(
+      spolPerc_SlideTK,
+      "Minimum percent score to count an spacer as mapped"
+     );
+   } # Add tooltip label
+   
+   spolStart_LabTK =
+      tklabel(
+         spolVarTK,
+         text = "DR start"
+      );
+   
+   spolStart_BoxTK =
+      tkentry(
+         spolVarTK,
+         width = 12,
+         textvariable = DR_START
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+        spolStart_BoxTK,
+        "Start of direct repeat (DR) region in reference"
+      );
+   } # Add tooltip label
+   
+   spolEnd_LabTK =
+      tklabel(
+         spolVarTK,
+         text = "DR end"
+      );
+   
+   spolEnd_BoxTK =
+      tkentry(
+         spolVarTK,
+         width = 12,
+         textvariable = DR_END
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+        spolEnd_BoxTK,
+        "End of direct repeat (DR) region in reference"
+      );
+   } # Add tooltip label
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun06 Sec03:
+   #   - add lineage options to gui
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   tkgrid(miruTitle_LabTK);
+   tkgrid(miruDb_ButTK, miruDb_LabTK);
+   tkgrid(miruFudge_LabTK, miruFudge_SlideTK);
+   
+   tkgrid.configure(
+      miruTitle_LabTK,
+      miruDb_ButTK,
+      miruFudge_SlideTK,
+      miruFudge_LabTK,
+      sticky = "w"
+   );
+   
+   tkgrid.configure(
+      miruDb_LabTK,
+      sticky = "w"
+   );
+   
+   tkgrid(spolTitle_LabTK);
+   tkgrid(spolSeq_ButTK, spolSeq_LabTK);
+   tkgrid(spolDb_ButTK, spolDb_LabTK);
+   tkgrid(spolPerc_LabTK, spolPerc_SlideTK);
+   tkgrid(spolStart_LabTK, spolStart_BoxTK);
+   tkgrid(spolEnd_LabTK, spolEnd_BoxTK);
+   
+   tkgrid.configure(
+      spolTitle_LabTK,
+      spolDb_ButTK,
+      spolPerc_SlideTK,
+      spolPerc_LabTK,
+      spolStart_LabTK,
+      spolEnd_LabTK,
+      sticky = "w"
+   );
+   
+   tkgrid.configure(
+      spolDb_LabTK,
+      spolStart_BoxTK,
+      spolEnd_BoxTK,
+      sticky = "w"
+   );
+   
+   tkpack(lineageInputTK, miruVarTK, side = "left");
+   tkpack(lineageInputTK, spolVarTK, side = "left");
+} # lineageMenuSetup_freezeTBGui
+
+#---------------------------------------------------------
+# TOF03 Fun07: conMenuSetup_freezeTBGui
+#   - builds the consensus settings frame
+# Input:
+# Output:
+#   - Modifies:
+#     o input gui to have consensus settings
+#---------------------------------------------------------
+conMenuSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun07 TOC:
+   #   - builds the consensus settings frame
+   #   o tof03 fun07 sec01:
+   #     - Consensus global (bulding) options
+   #   o tof03 fun07 sec02:
+   #     - Consensus collapsing (bulding) options
+   #   o tof03 fun07 sec03:
+   #     - Variant printing options for consensus
+   #   o tof03 fun07 sec04:
+   #     - add consensus menu to gui
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun07 Sec01:
+   #   - Consensus global (bulding) options
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   
+   conGlobTitle_LabTK =
+      tklabel(
+         conGlobalInputTK,
+         text = "Consensus build/variant print settings"
+   );
+   
+   minBaseQ_LabTK =
+      tklabel(
+         conGlobalInputTK,
+         text = "Min Q-score (Base)"
+      );
+   
+   minBaseQ_SlideTK =
+      tkscale(
+         parent = conGlobalInputTK,
+         from = 0,
+         to = 93,
+         showvalue = TRUE,
+         variable = MIN_BASE_Q_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minBaseQ_SlideTK,
+         "Min Q-scrore to keep a base (consensus step)"
+      ); # Minimum q-score button
+   } # If: I can add an tooltip
+   
+   minInsQ_LabTK =
+      tklabel(
+         conGlobalInputTK,
+         text = "Min Q-score (Insertion)"
+      );
+   
+   minInsQ_SlideTK =
+      tkscale(
+         parent = conGlobalInputTK,
+         from = 0,
+         to = 93,
+         showvalue = TRUE,
+         variable = MIN_INS_Q_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minInsQ_SlideTK,
+         "Min Q-scrore to keep a insertion (consensus)"
+      ); # Minimum q-score button
+   } # If: I can add an tooltip
+   
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun07 Sec02:
+   #   - Consensus collapsing (bulding) options
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   
+   conBuildTitle_LabTK =
+      tklabel(
+         conBuildInputTK,
+         text = "Cosensus building only settings"
+   );
+   
+   
+   minLen_LabTK =
+      tklabel(
+         conBuildInputTK,
+         text = "Min length"
+      );
+   
+   minLen_SlideTK =
+      tkscale(
+         parent = conBuildInputTK,
+         from = 0,
+         to = 1000,
+         showvalue = TRUE,
+         variable = MIN_LEN_TCL,
+         resolution = 10,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+        minLen_SlideTK,
+        "Min cosensus fragement length to keep a fragment"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   minSnpSup_LabTK =
+      tklabel(
+         conBuildInputTK,
+         text = "Min % snp support"
+      );
+   
+   minSnpSup_SlideTK =
+      tkscale(
+         parent = conBuildInputTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_SNP_PERC_SUP_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minSnpSup_SlideTK,
+         "Min percent support to not mask an snp/match"
+      );
+   } # If: I can add an tooltip
+   
+   minInsSup_LabTK =
+      tklabel(
+         conBuildInputTK,
+         text = "Min % ins support"
+      );
+   
+   minInsSup_SlideTK =
+      tkscale(
+         parent = conBuildInputTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_INS_PERC_SUP_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minInsSup_SlideTK,
+         "Min percent support to not remove an insertion"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   minDelSup_LabTK =
+      tklabel(
+         conBuildInputTK,
+         text = "Min % del support"
+      );
+   
+   minDelSup_SlideTK =
+      tkscale(
+         parent = conBuildInputTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_DEL_PERC_SUP_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minDelSup_SlideTK,
+         "Min percent support to not remove an deletion"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun07 Sec03:
+   #   - Variant printing options for consensus
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   
+   conPrintTitle_LabTK =
+      tklabel(
+         conPrintInputTK,
+         text = "Variant printing only settings"
+   );
+   
+   pDepth_LabTK =
+      tklabel(
+         parent = conPrintInputTK,
+         text = "Min read depth"
+      );
+   
+   pDepth_SlideTK =
+      tkscale(
+         parent = conPrintInputTK,
+         from = 1,
+         to = 100,
+         showvalue = TRUE,
+         variable = PRINT_DEPTH_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         pDepth_SlideTK,
+         "Min read depth to print alternative variant/AMR"
+      );
+   } # If: I can add an tooltip
+   
+   pSnpSup_LabTK =
+      tklabel(
+         conPrintInputTK,
+         text = "Min % snp support"
+      );
+   
+   pSnpSup_SlideTK =
+      tkscale(
+         parent = conPrintInputTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = PRINT_SNP_PERC_SUP_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+        pSnpSup_SlideTK,
+        "Min percent support to print a match/snp variant"
+      );
+   } # If: I can add an tooltip
+   
+   pInsSup_LabTK =
+      tklabel(
+         conPrintInputTK,
+         text = "Min % ins support"
+      );
+   
+   pInsSup_SlideTK =
+      tkscale(
+         parent = conPrintInputTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = PRINT_INS_PERC_SUP_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+        pInsSup_SlideTK,
+        "Min percent support to print a insertion variant"
+      ); # Minimum read depth tooltip
+   } # If: I can add an tooltip
+   
+   pDelSup_LabTK =
+      tklabel(
+         conPrintInputTK,
+         text = "Min % del support"
+      );
+   
+   pDelSup_SlideTK =
+      tkscale(
+         parent = conPrintInputTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = PRINT_DEL_PERC_SUP_TCL,
+         resolution = 0.01,
+         orient = "horiz"
+      );
+   
+   # There is here so systems without tcltk2 can work
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         pDelSup_SlideTK,
+         "Min percent support to print a deletion variant"
+      );
+   } # If: I can add an tooltip
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun07 Sec04:
+   #   - add consensus menu to gui
+   #   o tof03 fun07 sec04 sub01:
+   #     - set up the global consensus options frame
+   #   o tof03 fun07 sec04 sub02:
+   #     - set up the collapse consensus options frame
+   #   o tof03 fun07 sec04 sub03:
+   #     - set up print variants consensus options frame
+   #   o tof03 fun07 sec04 sub04:
+   #     - add consensus menu optoins to gui
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #******************************************************
+   # TOF03 Fun07 Sec04 Sub01
+   #   - set up the global consensus options frame
+   #******************************************************
+   
+   tkgrid(conGlobTitle_LabTK);
+   tkgrid(minBaseQ_LabTK, minBaseQ_SlideTK);
+   tkgrid(minInsQ_LabTK, minInsQ_SlideTK);
+   
+   tkgrid.configure(
+      conGlobTitle_LabTK,
+      minBaseQ_LabTK,
+      minInsQ_LabTK,
+      sticky = "w"
+   ); # set up the slider labels locations
+   
+   tkgrid.configure(
+      minBaseQ_SlideTK,
+      minInsQ_SlideTK,
+      sticky = "w"
+   ); # Set up the sliders locations
+
+   #******************************************************
+   # TOF03 Fun07 Sec04 Sub02:
+   #   - set up the collapse consensus options frame
+   #******************************************************
+
+   tkgrid(conBuildTitle_LabTK);
+   tkgrid(minLen_LabTK, minLen_SlideTK);
+   tkgrid(minSnpSup_LabTK, minSnpSup_SlideTK);
+   tkgrid(minInsSup_LabTK, minInsSup_SlideTK);
+   tkgrid(minDelSup_LabTK, minDelSup_SlideTK);
+   
+   tkgrid.configure(
+      conBuildTitle_LabTK,
+      minLen_LabTK,
+      minSnpSup_LabTK,
+      minInsSup_LabTK,
+      minDelSup_LabTK,
+      sticky = "w"
+   ); # set up the slider labels locations
+   
+   tkgrid.configure(
+      minLen_SlideTK,
+      minSnpSup_SlideTK,
+      minInsSup_SlideTK,
+      minDelSup_SlideTK,
+      sticky = "w"
+   ); # Set up the sliders locations
+
+   #******************************************************
+   # TOF03 Fun07 Sec04 Sub03:
+   #   - set up the print variants consensus options frame
+   #******************************************************
+
+   tkgrid(conPrintTitle_LabTK);
+   tkgrid(pDepth_LabTK, pDepth_SlideTK);
+   tkgrid(pSnpSup_LabTK, pSnpSup_SlideTK);
+   tkgrid(pInsSup_LabTK, pInsSup_SlideTK);
+   tkgrid(pDelSup_LabTK, pDelSup_SlideTK);
+   
+   tkgrid.configure(
+      conPrintTitle_LabTK,
+      pDepth_LabTK,
+      pSnpSup_LabTK,
+      pInsSup_LabTK,
+      pDelSup_LabTK,
+      sticky = "w"
+   ); # set up the slider labels locations
+   
+   tkgrid.configure(
+      pDepth_SlideTK,
+      pSnpSup_SlideTK,
+      pInsSup_SlideTK,
+      pDelSup_SlideTK,
+      sticky = "w"
+   ); # Set up the sliders locations
+
+   #******************************************************
+   # TOF03 Fun07 Sec04 Sub04:
+   #   - add consensus menu optoins to gui
+   #******************************************************
+
+   tkpack(conInputTK, conGlobalInputTK, side = "top");
+   tkpack(conInputTK, conBuildInputTK, side = "left");
+   tkpack(conInputTK, conPrintInputTK, side = "right");
+} # conMenuSetup_freezeTBGui
+
+#---------------------------------------------------------
+# TOF03 Fun08: mixefInfectSetup_freezeTBGui
+#   - builds mixed infections settings frame
+# Input:
+# Output:
+#   - Modifies:
+#     o input gui to have mixed infections settings
+#---------------------------------------------------------
+mixedInfectSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun08 TOC:
+   #   - builds mixed infections settings frame
+   #   o tof03 fun08 sec0x:
+   #     - add mixed infections settings to gui
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   clust_checkboxTK =
+      tkcheckbutton(
+         parent = mixedInfectTK,
+         text = "mixed infection",
+         variable = CLUSTER_BL_TCL
+       );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         clust_checkboxTK,
+         "attempt to detect mixed infections in sample"
+      );
+   } # If: I can make an tooltip
 
 
-ext_LabTK =
-   tklabel(
-      parent = depthInputTK,
-      text = "Select the file type to save graphs as"
+
+   profile_checkboxTK =
+      tkcheckbutton(
+         parent = mixedInfectTK,
+         text = "depth profile",
+         variable = DEPTH_PROFILE_BL_TCL
+       );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         profile_checkboxTK,
+         "only keep variants with min read depth"
+      );
+   } # If: I can make an tooltip
+   
+
+   lenWeight_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Length weight"
+      );
+   
+   lenWeight_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 10,
+         showvalue = TRUE,
+         variable = LENGTH_WEIGHT_CLUST_TCL,
+         resolution = 0.1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+       lenWeight_SlideTK,
+       "score = median Q + (floor(log2(length)) * weight)"
+      );
+   } # If: I can add an tooltip
+
+
+   minDepthClust_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Min depth"
+      );
+   
+   minDepthClust_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 1,
+         to = 100,
+         showvalue = TRUE,
+         variable = MIN_DEPTH_CLUST_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minDepthClust_SlideTK,
+         "minimum read depth to keep a cluster"
+      );
+   } # If: I can add an tooltip
+
+
+   minPercDepthClust_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Min % depth"
+      );
+   
+   minPercDepthClust_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_PERC_DEPTH_CLUST_TCL,
+         resolution = 0.001,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         minPercDepthClust_SlideTK,
+         "minimum percent read depth to keep a cluster"
+      );
+   } # If: I can add an tooltip
+
+
+   readErrPerc_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "read error rate"
+      );
+   
+   readErrPerc_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 0.25,
+         showvalue = TRUE,
+         variable = READ_ERROR_PERC_CLUST_TCL,
+         resolution = 0.001,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         readErrPerc_SlideTK,
+         paste(
+           "percent error rate expected for read to read",
+           "mapping"
+         )
+      );
+   } # If: I can add an tooltip
+
+
+   conErrPerc_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "consensus error rate"
+      );
+   
+   conErrPerc_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 0.25,
+         showvalue = TRUE,
+         variable = CON_ERROR_PERC_CLUST_TCL,
+         resolution = 0.001,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         conErrPerc_SlideTK,
+         paste(
+            "percent error rate expected for consensus",
+            "to read mapping"
+         )
+      );
+   } # If: I can add an tooltip
+
+
+   maxSim_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Max % similarity"
+      );
+   
+   maxSim_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0.75,
+         to = 1,
+         showvalue = TRUE,
+         variable = MAX_CON_SIMILARITAY_CLUST_TCL,
+         resolution = 0.001,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         maxSim_SlideTK,
+         paste(
+           "maximum percent similarity between consensus",
+           "before merging"
+         )
+      );
+   } # If: I can add an tooltip
+
+
+   errToVar_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "min variant:error"
+      );
+   
+   errToVar_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 500,
+         showvalue = TRUE,
+         variable = ERROR_TO_VARIANT_RATIO_CLUST_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         errToVar_SlideTK,
+         "100 * (variants) / (length * error rate)"
+      );
+   }
+
+
+   overlap_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Min % overlap"
+      );
+   
+   overlap_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0.5,
+         to = 1,
+         showvalue = TRUE,
+         variable = MIN_PERC_OVERLAP_CLUST_TCL,
+         resolution = 0.001,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         overlap_SlideTK,
+         "minimum percent ovlerap to compare consensuses"
+      );
+   } # If: I can add an tooltip
+
+
+   winLen_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Window length"
+      );
+   
+   winLen_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 10000,
+         showvalue = TRUE,
+         variable = WINDOW_LENGTH_CLUST_TCL,
+         resolution = 10,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         winLen_SlideTK,
+         "length of one window (for max window distance)"
+      );
+   } # If: I can add an tooltip
+
+
+   winErr_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "Window variant:error"
+      );
+   
+   winErr_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 500,
+         showvalue = TRUE,
+         variable = WINDOW_ERROR_TO_VAR_CLUST_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         winErr_SlideTK,
+         paste(
+            "maximum variant to error ratio to in max",
+            "to consider two reads/consensuses differnt"
+         )
+      );
+   } # If: I can add an tooltip
+
+
+   indelLen_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "min indel length"
+      );
+   
+   indelLen_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 1,
+         to = 30,
+         showvalue = TRUE,
+         variable = MIN_INDEL_LEN_CLUST_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         indelLen_SlideTK,
+         "minimum length to count indel in edit distance"
+      );
+   } # If: I can add an tooltip
+
+
+   clustMinQ_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "min snp q-score"
+      );
+   
+   clustMinQ_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 100,
+         showvalue = TRUE,
+         variable = CLUST_MIN_SNP_Q_TCL,
+         resolution = 1,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         clustMinQ_SlideTK,
+         "minimum q-score to count SNP in edit distance"
+      );
+   } # If: I can add an tooltip
+
+
+   maxMask_LabTK =
+      tklabel(
+         parent = mixedInfectTK,
+         text = "max % N's in consensus"
+      );
+   
+   maxMask_SlideTK =
+      tkscale(
+         parent = mixedInfectTK,
+         from = 0,
+         to = 1,
+         showvalue = TRUE,
+         variable = MAX_MASK_IN_CON_CLUST_TCL,
+         resolution = 0.001,
+         orient = "horiz"
+      );
+   
+   if(TOOL_TIP_BL > 0){
+      tk2tip(
+         maxMask_SlideTK,
+         "maximum percent masking (N's) in consensus"
+      );
+   } # If: I can add an tooltip
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun08 Sec0x:
+   #   - add mixed infections settings to gui
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   tkgrid(clust_checkboxTK);
+   tkgrid(profile_checkboxTK);
+   tkgrid(lenWeight_LabTK, lenWeight_SlideTK);
+   tkgrid(minDepthClust_LabTK, minDepthClust_SlideTK);
+
+   tkgrid(
+      minPercDepthClust_LabTK,
+      minPercDepthClust_SlideTK
    );
 
-svgExt_radioTK =
-   tkradiobutton(
-      parent = depthInputTK,
-      text = "svg",
-      variable = GRAPH_EXT_TCL,
-      value = "svg" 
+   tkgrid(readErrPerc_LabTK, readErrPerc_SlideTK);
+   tkgrid(conErrPerc_LabTK, conErrPerc_SlideTK);
+   tkgrid(maxSim_LabTK, maxSim_SlideTK);
+   tkgrid(errToVar_LabTK, errToVar_SlideTK);
+   tkgrid(overlap_LabTK, overlap_SlideTK);
+   tkgrid(winLen_LabTK, winLen_SlideTK);
+   tkgrid(winErr_LabTK, winErr_SlideTK);
+   tkgrid(indelLen_LabTK, indelLen_SlideTK);
+   tkgrid(clustMinQ_LabTK, clustMinQ_SlideTK);
+   tkgrid(maxMask_LabTK, maxMask_SlideTK);
+
+   tkgrid.configure(
+      clust_checkboxTK,
+      profile_checkboxTK,
+      lenWeight_LabTK,
+      lenWeight_SlideTK,
+      minDepthClust_LabTK,
+      minDepthClust_SlideTK,
+      minPercDepthClust_LabTK,
+      minPercDepthClust_SlideTK,
+      readErrPerc_LabTK,
+      readErrPerc_SlideTK,
+      conErrPerc_LabTK,
+      conErrPerc_SlideTK,
+      maxSim_LabTK,
+      maxSim_SlideTK,
+      errToVar_LabTK,
+      errToVar_SlideTK,
+      overlap_LabTK,
+      overlap_SlideTK,
+      winLen_LabTK,
+      winLen_SlideTK,
+      winErr_LabTK,
+      winErr_SlideTK,
+      indelLen_LabTK,
+      indelLen_SlideTK,
+      clustMinQ_LabTK,
+      clustMinQ_SlideTK,
+      maxMask_LabTK,
+      maxMask_SlideTK,
+      sticky = "w"
+   ); # set up the slider labels locations
+
+} # mixedInfectSetup_freezeTBGui
+
+#---------------------------------------------------------
+# TOF03 Fun09: graphMenuSetup_freezeTBGui
+#   - builds the graph settings frame
+# Input:
+# Output:
+#   - Modifies:
+#     o input gui to have graph settings
+#---------------------------------------------------------
+graphMenuSetup_freezeTBGui = function()
+{  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # TOF03 Fun09 TOC:
+   #   - builds the graph settings frame
+   #   o tof03 fun09 sec01:
+   #     - setup graphing options
+   #   o tof03 fun09 sec02:
+   #     - add graphing menu options to gui
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun09 Sec01:
+   #   - setup graphing options
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   ext_LabTK =
+      tklabel(
+         parent = graphInputTK,
+         text = "Select the file type to save graphs as"
+      );
+
+   
+   svgExt_radioTK =
+      tkradiobutton(
+         parent = graphInputTK,
+         text = "svg",
+         variable = GRAPH_EXT_TCL,
+         value = "svg" 
+      );
+   
+   tiffExt_radioTK =
+      tkradiobutton(
+         parent = graphInputTK,
+         text = "tiff",
+         variable = GRAPH_EXT_TCL,
+         value =  "tiff"
+      );
+   
+   pngExt_radioTK =
+      tkradiobutton(
+         parent = graphInputTK,
+         text = "png",
+         variable = GRAPH_EXT_TCL,
+         value =  "png"
+      );
+   
+   pdfExt_radioTK =
+      tkradiobutton(
+         parent = graphInputTK,
+         text = "pdf",
+         variable = GRAPH_EXT_TCL,
+         value =  "pdf"
+      );
+   
+   jpegExt_radioTK =
+      tkradiobutton(
+         parent = graphInputTK,
+         text = "jpeg",
+         variable = GRAPH_EXT_TCL,
+         value =  "jpeg"
+      );
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # TOF03 Fun09 Sec02:
+   #   - add graphing menu options to gui
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   tkgrid(ext_LabTK);
+   tkgrid(svgExt_radioTK);
+   tkgrid(tiffExt_radioTK);
+   tkgrid(pngExt_radioTK);
+   tkgrid(pdfExt_radioTK);
+   tkgrid(jpegExt_radioTK);
+   
+   tkgrid.configure(
+      ext_LabTK,
+      svgExt_radioTK,
+      tiffExt_radioTK,
+      pngExt_radioTK,
+      pdfExt_radioTK,
+      jpegExt_radioTK,
+      sticky = "w"
+   );
+} # graphMenuSetup_freezeTBGui
+
+#---------------------------------------------------------
+# Fun10: launchInGui_freezeTBGui
+#   - launches input gui
+# Input:
+# Output:
+#   - runs freezeTB
+#---------------------------------------------------------
+launchInGui_freezeTBGui = function(){
+   reqInputSetup_freezeTBGui();
+   menuSetup_freezeTBGui();
+   exitRunSetup_freezeTBGui();
+   filtMenuSetup_freezeTBGui();
+   amrMenuSetup_freezeTBGui();
+   lineageMenuSetup_freezeTBGui();
+   conMenuSetup_freezeTBGui();
+   mixedInfectSetup_freezeTBGui();
+   graphMenuSetup_freezeTBGui();
+
+   # Not in correct place, but is just a place holder
+   assign(
+      "messg_labTK",
+      tklabel(
+         statusTK,
+         text = "status"
+      ),
+      envir = .GlobalEnv
    );
 
-tiffExt_radioTK =
-   tkradiobutton(
-      parent = depthInputTK,
-      text = "tiff",
-      variable = GRAPH_EXT_TCL,
-      value =  "tiff"
-   );
+   tkpack(statusTK, messg_labTK, side = "left");
+   
+   
+   showReqInputMenu();
 
-pngExt_radioTK =
-   tkradiobutton(
-      parent = depthInputTK,
-      text = "png",
-      variable = GRAPH_EXT_TCL,
-      value =  "png"
-   );
+   # This provides a way to check if the user finished the
+   #   input and avoids Rscript making and then rushing to
+   #   finish the script before the user input anything.
+   while(as.numeric(tkwinfo("exists", guiTK)))
+      Sys.sleep(0.2);
+} # launchInGui_freezeTBGui
 
-pdfExt_radioTK =
-   tkradiobutton(
-      parent = depthInputTK,
-      text = "pdf",
-      variable = GRAPH_EXT_TCL,
-      value =  "pdf"
-   );
+#---------------------------------------------------------
+# Main:
+#   - drive for freezeTBGui
+#---------------------------------------------------------
 
-jpegExt_radioTK =
-   tkradiobutton(
-      parent = depthInputTK,
-      text = "jpeg",
-      variable = GRAPH_EXT_TCL,
-      value =  "jpeg"
-   );
-
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Ingui09:
-#   - Set up the gui
-#   o ingui09 sub01:
-#     - Set up the required input frame
-#   o ingui09 sub02:
-#     - Set up the filtering menu frame
-#   o ingui09 sub03:
-#     - Set up the AMR menu frame
-#   o ingui09 sub04:
-#     - Set up the MIRU menu frame
-#   o ingui09 sub05:
-#     - Set up the consensus input frame
-#   o ingui09 sub06:
-#     - Set up the read depth graphing frame
-#   o ingui09 sub07:
-#     - Set up the menu buttons
-#   o ingui09 sub08:
-#     - Set up the run and quit buton frame
-#   o ingui09 sub09:
-#     - Pack all the frames together and run idle loop
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#*********************************************************
-# Ingui09 Sub01:
-#   - Set up the required input frame
-#*********************************************************
-
-tkgrid(refButTK, refLabelTK);
-tkgrid(fqButTK, fqLabelTK);
-tkgrid(dirButTK, dirLabelTK);
-tkgrid(prefLabelTK, prefBoxTK);
-
-tkgrid.configure(
-   refButTK,
-   fqLabelTK,
-   dirLabelTK,
-   prefBoxTK,
-   sticky = "w"
-); # Configure the right side labels/prefix input
-
-tkgrid.configure(
-   refLabelTK,
-   fqButTK,
-   dirButTK,
-   prefLabelTK,
-   sticky = "w"
-); # Configure the left side input buttons/prefix label
-
-#*********************************************************
-# Ingui09 Sub02:
-#   - Set up the filtering menu frame
-#*********************************************************
-
-tkgrid(filtTitle_LabTK);
-tkgrid(filtMinMapq_LabTK, filtMinMapq_SlideTK);
-tkgrid(filtMinMedQ_LabTK, filtMinMedQ_SlideTK);
-tkgrid(filtMinMeanQ_LabTK, filtMinMeanQ_SlideTK);
-tkgrid(filtMinDepth_LabTK, filtMinDepth_SlideTK);
-tkgrid(maskPrim_checkboxTK,maskPrim_ButTK,maskPrim_LabTK);
-
-tkgrid.configure(
-   filtTitle_LabTK,
-   filtMinMapq_LabTK,
-   filtMinMedQ_LabTK,
-   filtMinMeanQ_LabTK,
-   filtMinDepth_LabTK,
-   maskPrim_checkboxTK,
-   sticky = "w"
-);
-
-tkgrid.configure(
-   filtMinMapq_SlideTK,
-   filtMinMedQ_SlideTK,
-   filtMinMeanQ_SlideTK,
-   filtMinDepth_SlideTK,
-   maskPrim_ButTK,
-   maskPrim_LabTK,
-   sticky = "w"
-);
-
-#*********************************************************
-# Ingui09 Sub03:
-#   - Set up the AMR menu frame
-#*********************************************************
-
-tkgrid(amrTitle_LabTK);
-tkgrid(amrDbButTK, amrDbLabelTK);
-tkgrid(minAmrSup_LabTK, minAmrSup_SlideTK);
-tkgrid(frameshiftBl_checkboxTK);
-
-tkgrid.configure(
-   amrTitle_LabTK,
-   amrDbButTK,
-   minAmrSup_LabTK,
-   frameshiftBl_checkboxTK,
-   sticky = "w"
-); # Configure the right side labels/prefix input
-
-tkgrid.configure(
-   amrDbLabelTK,
-   minAmrSup_SlideTK,
-   sticky = "w"
-); # Configure the right side labels/prefix input
-
-
-#*********************************************************
-# Ingui09 Sub04:
-#   - Set up the lineages menu frame
-#*********************************************************
-
-tkgrid(miruTitle_LabTK);
-tkgrid(miruDb_ButTK, miruDb_LabTK);
-tkgrid(miruFudge_LabTK, miruFudge_SlideTK);
-
-tkgrid.configure(
-   miruTitle_LabTK,
-   miruDb_ButTK,
-   miruFudge_SlideTK,
-   miruFudge_LabTK,
-   sticky = "w"
-);
-
-tkgrid.configure(
-   miruDb_LabTK,
-   sticky = "w"
-);
-
-tkgrid(spolTitle_LabTK);
-tkgrid(spolSeq_ButTK, spolSeq_LabTK);
-tkgrid(spolDb_ButTK, spolDb_LabTK);
-tkgrid(spolPerc_LabTK, spolPerc_SlideTK);
-tkgrid(spolStart_LabTK, spolStart_BoxTK);
-tkgrid(spolEnd_LabTK, spolEnd_BoxTK);
-
-tkgrid.configure(
-   spolTitle_LabTK,
-   spolDb_ButTK,
-   spolPerc_SlideTK,
-   spolPerc_LabTK,
-   spolStart_LabTK,
-   spolEnd_LabTK,
-   sticky = "w"
-);
-
-tkgrid.configure(
-   spolDb_LabTK,
-   spolStart_BoxTK,
-   spolEnd_BoxTK,
-   sticky = "w"
-);
-
-tkpack(lineageInputTK, miruVarTK, side = "left");
-tkpack(lineageInputTK, spolVarTK, side = "left");
-
-#*********************************************************
-# Ingui09 Sub05:
-#   - Set up the consensus input frame
-#   o ingui09 sub05 cat-01:
-#     - Set up the global consensus options frame
-#   o ingui09 sub05 cat-02:
-#     - Set up the collapse consensus options frame
-#*********************************************************
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Ingui09 Sub05 Cat-01:
-#   - Set up the global consensus options frame
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tkgrid(conGlobTitle_LabTK);
-tkgrid(minBaseQ_LabTK, minBaseQ_SlideTK);
-tkgrid(minInsQ_LabTK, minInsQ_SlideTK);
-
-tkgrid.configure(
-   conGlobTitle_LabTK,
-   minBaseQ_LabTK,
-   minInsQ_LabTK,
-   sticky = "w"
-); # set up the slider labels locations
-
-tkgrid.configure(
-   minBaseQ_SlideTK,
-   minInsQ_SlideTK,
-   sticky = "w"
-); # Set up the sliders locations
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Ingui09 Sub05 Cat-02:
-#   - Set up the collapse consensus options frame
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tkgrid(conBuildTitle_LabTK);
-tkgrid(minLen_LabTK, minLen_SlideTK);
-tkgrid(minSnpSup_LabTK, minSnpSup_SlideTK);
-tkgrid(minInsSup_LabTK, minInsSup_SlideTK);
-tkgrid(minDelSup_LabTK, minDelSup_SlideTK);
-
-tkgrid.configure(
-   conBuildTitle_LabTK,
-   minLen_LabTK,
-   minSnpSup_LabTK,
-   minInsSup_LabTK,
-   minDelSup_LabTK,
-   sticky = "w"
-); # set up the slider labels locations
-
-tkgrid.configure(
-   minLen_SlideTK,
-   minSnpSup_SlideTK,
-   minInsSup_SlideTK,
-   minDelSup_SlideTK,
-   sticky = "w"
-); # Set up the sliders locations
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Ingui09 Sub05 Cat-03:
-#   - Set up the print variants consensus options frame
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tkgrid(conPrintTitle_LabTK);
-tkgrid(pDepth_LabTK, pDepth_SlideTK);
-tkgrid(pSnpSup_LabTK, pSnpSup_SlideTK);
-tkgrid(pInsSup_LabTK, pInsSup_SlideTK);
-tkgrid(pDelSup_LabTK, pDelSup_SlideTK);
-
-tkgrid.configure(
-   conPrintTitle_LabTK,
-   pDepth_LabTK,
-   pSnpSup_LabTK,
-   pInsSup_LabTK,
-   pDelSup_LabTK,
-   sticky = "w"
-); # set up the slider labels locations
-
-tkgrid.configure(
-   pDepth_SlideTK,
-   pSnpSup_SlideTK,
-   pInsSup_SlideTK,
-   pDelSup_SlideTK,
-   sticky = "w"
-); # Set up the sliders locations
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Ingui09 Sub05 Cat-03:
-#   - Build the consensus options frames
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tkpack(conInputTK, conGlobalInputTK, side = "top");
-tkpack(conInputTK, conBuildInputTK, side = "left");
-tkpack(conInputTK, conPrintInputTK, side = "right");
-
-#*********************************************************
-# Ingui09 Sub06:
-#   - Set up the read depth graphing frame
-#*********************************************************
-
-tkgrid(depthTitle_LabTK);
-tkgrid(depthGeneTbl_ButTK, depthGeneTbl_LabTK);
-tkgrid(adjCoords_checkboxTK, adjCoords_entryTK);
-tkgrid(ext_LabTK);
-tkgrid(svgExt_radioTK);
-tkgrid(tiffExt_radioTK);
-tkgrid(pngExt_radioTK);
-tkgrid(pdfExt_radioTK);
-tkgrid(jpegExt_radioTK);
-
-tkgrid.configure(
-   depthTitle_LabTK,
-   depthGeneTbl_ButTK,
-   adjCoords_checkboxTK,
-   adjCoords_entryTK,
-   ext_LabTK,
-   svgExt_radioTK,
-   tiffExt_radioTK,
-   pngExt_radioTK,
-   pdfExt_radioTK,
-   jpegExt_radioTK,
-   sticky = "w"
-);
-
-tkgrid.configure(
-   depthGeneTbl_LabTK,
-   sticky = "w"
-);
-
-#*********************************************************
-# Ingui09 Sub07:
-#   - Set up the menu buttons
-#*********************************************************
-
-tkpack(menuTK, inputMenu_ButTK, side = "left");
-tkpack(menuTK, filtMenu_ButTK, side = "left");
-tkpack(menuTK, amrMenu_ButTK, side = "left");
-tkpack(menuTK, miruMenu_ButTK, side = "left");
-tkpack(menuTK, conMenu_ButTK, side = "left");
-tkpack(menuTK, depthMenu_ButTK, side = "left");
-
-#*********************************************************
-# Ingui09 Sub08:
-#   - Set up the run and quit buton frame
-#*********************************************************
-
-tkpack(runQuitTK, runButTK, side = "left");
-tkpack(runQuitTK, qButTK, side = "left");
-
-#*********************************************************
-# Ingui09 Sub09:
-#   - Pack all the frames together and run idle loop
-#*********************************************************
-
-# Not in correct place, but is just a place holder
-messg_labTK =
-   tklabel(
-      statusTK,
-      text = "status"
-   );
-tkpack(statusTK, messg_labTK, side = "left");
-
-
-showReqInputMenu();
-
-# This provides a way to check if the user finished the
-#   input and avoids Rscript making and then rushing to
-#   finish the script before the user input anything.
-while(as.numeric(tkwinfo("exists", guiTK)))
-   Sys.sleep(0.2);
-
-#q("no");
+launchInGui_freezeTBGui();
 
 #=========================================================
 # License:

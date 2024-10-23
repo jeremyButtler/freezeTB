@@ -28,7 +28,7 @@
 #endif
 
 #include "../genLib/charCp.h"
-#include "../genLib/seqST.h"
+#include "../genBio/seqST.h"
 
 #include "../genAln/alnSet.h"
 #include "../genAln/kmerFind.h"
@@ -47,7 +47,8 @@
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/charCp.h"
 !   - .c  #include "../genLib/shellSort.h"
-!   - .c  #include "../genLib/samEntry.h"
+!   - .c  #include "../genLib/strAry.h"
+!   - .c  #include "../genBio/samEntry.h"
 !   - .c  #include "../genAln/indexToCoord.h"
 !   - .c  #include "../genAln/memwater.h"
 !   - .h  #include "../genLib/genMath.h"

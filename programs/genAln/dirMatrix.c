@@ -1,11 +1,7 @@
-/*########################################################
-# Name: dirMatrix
-#  - holds functions for dealing with the dirMatrix
-#    returned by water and needle
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' dirMatrix SOF: Start Of File
+'   - holds functions for dealing with the dirMatrix
+'     returned by water and needle
 '   o header:
 '     - included libraries
 '   o .h st01: alnMatrixStruct
@@ -24,6 +20,8 @@
 '   o fun05: getAln_dirMatrix
 '     - gets a sam file entry (alignment) from a direction
 '       matrix (inside the dirMatrix structure)
+'   o fun06: getCig_dirMatrix
+'     - gets a cigar for an alignment
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -40,13 +38,15 @@
    #include <stdlib.h>
 #endif
 
-#include "../genLib/samEntry.h"
-#include "../genLib/seqST.h"
+#include "dirMatrix.h"
+
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
 #include "../genLib/numToStr.h"
 
-#include "dirMatrix.h"
+#include "../genBio/samEntry.h"
+#include "../genBio/seqST.h"
+
 #include "alnSet.h"
 #include "indexToCoord.h"
 
@@ -58,7 +58,8 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../genLib/base10str.h"
-!   o .h  #include "../genLib/ntTo5Bit.h"
+!   o .c  #include "../genLib/strAry.h"
+!   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -87,6 +88,8 @@ blank_dirMatrix(
    dirMatrixSTPtr->lenQryUL = 0;
    dirMatrixSTPtr->qryOffsetUL = 0;
    dirMatrixSTPtr->qryEndUL = 0;
+
+   dirMatrixSTPtr->errSC = 0;
 } /*blank_dirMatrixSC*/
 
 /*-------------------------------------------------------\
@@ -860,6 +863,538 @@ getAln_dirMatrix(
 
    return 1;
 } /*getAln_dirMatrix*/
+
+/*-------------------------------------------------------\
+| Fun06: getCig_dirMatrix
+|   - gets a cigar for an alignment
+| Input:
+|   - matrixSTPtr
+|     o pointer to a dirMatrix structure to get alignment
+|       from
+|   - indexUL:
+|     o index of last base in the alignment
+|     o 0 to use index from matirxSTPtr
+|   - revBl:
+|     o 1: reverse alignment (sam flag is 16)
+|       - this means I had to reverse complement the
+|         reference sequence
+|     o 0: foward alignment (sam flag is 0)
+|   - qrySTPtr:
+|     o pointer to a seqST with the query sequence
+|   - refSTPtr:
+|     o pointer to a seqST with the reference sequence
+|   - cigTypeStr:
+|     o pointer to c-string with cigar entry type array
+|   - cigArySI:
+|     o pointer to signed int array with the length of
+|       each cibar entry
+|   - cigPosUI:
+|     o position at in cigar
+|   - lenCigUI:
+|     o pointer to unsigned int with length of the cigar
+|       buffer
+|   - refStartUI:
+|     o unsigned int pointer to point to first reference
+|       base in cigar
+|   - numAnonUI:
+|     o pointer to unsigned in to hold the number of
+|       anonymous bases (matches only)
+|   - numMaskUI:
+|     o pointer to unsigned long to hold number of
+|       maksed bases
+|   - delAtEndBl:
+|     o 1: add deltions if reference is short at end
+|     o 0: ignore
+|   - alnSetSTPtr:
+|     o pointer to alnSet structure with the match matrix
+| Output:
+|   - Modifies:
+|     o cigTypeStr to have the cigar entry types
+|     o cigArySI to have the length of each cigar entry
+|     o lenCigUI if cigTypeStr and cigArySI needed to be
+|       resized
+|     o refStartUI to have first reference base in cigar
+|     o numAnonUI to have number of matching anonymous
+|       bases
+|     o numMaskUI to have number of masked bases
+|   - Returns:
+|     o new position in cigar
+|     o -1 for memory error (only error possible)
+\-------------------------------------------------------*/
+signed long
+getCig_dirMatrix(
+   struct dirMatrix *matrixSTPtr,
+   unsigned long indexUL,
+   signed char revBl,
+   struct seqST *qrySTPtr,
+   struct seqST *refSTPtr,
+   signed char **cigTypeStr,
+   signed int **cigArySI,
+   unsigned int cigPosUI,
+   unsigned int *lenCigUI,
+   unsigned int *refStartUI,
+   unsigned int *numAnonUI,
+   unsigned int *numMaskUI,
+   signed char delAtEndBl,
+   struct alnSet *alnSetSTPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun06 TOC:
+   '   - gets an alignment from a dirMatrix structure
+   '   o fun06 sec01:
+   '     - variable declerations
+   '   o fun06 sec02:
+   '     - find start and ending positions
+   '   o fun06 sec03:
+   '     - allocate memroy and copy query
+   '   o fun06 sec04:
+   '     - get alignment form matrix
+   '   o fun06 sec05:
+   '     - add starting softmasked bases and invert cigar
+   '   o fun06 sec06:
+   '     - add tags (NM, AS, nn)
+   '   o fun06 sec07:
+   '     - return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec01:
+   ^   - variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   uint qryPosUI = 0;
+   uint refPosUI = 0;
+   uint lenRefUI = matrixSTPtr->lenRefUL;
+   uint startUI = cigPosUI;
+
+   schar *qrySeqStr = (schar *) qrySTPtr->seqStr;
+   schar *refSeqStr = (schar *) refSTPtr->seqStr;
+ 
+   schar *tmpStr = 0;
+   schar matchBl = 0; /*check if had match or snp*/
+
+   schar *dirMatrixSC = matrixSTPtr->dirMatrixSC;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec02:
+   ^   - find sequence start and ending positions
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   *numAnonUI = 0;
+
+   if(! indexUL)
+      indexUL = matrixSTPtr->indexUL; /*no index input*/
+
+   qryPosUI =
+      (uint)
+      qryCoord_indexToCoord(
+         (ulong) lenRefUI,
+         indexUL
+      );
+
+   refPosUI =
+      (uint)
+      refCoord_indexToCoord(
+         (ulong) lenRefUI,
+         indexUL
+      );
+
+   /*bases not aligned by user*/
+   refSeqStr += matrixSTPtr->refOffsetUL;
+   qrySeqStr += matrixSTPtr->qryOffsetUL;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec03:
+   ^   - allocate memroy and copy query
+   ^   o fun06 sec03 sub01:
+   ^     - set up memory for cigar entry and blank entry
+   ^   o fun06 sec03 sub02:
+   ^     - add ending soft masked bases to cigar
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun06 Sec03 Sub01:
+   *   - set up memory for cigar entry
+   \*****************************************************/
+
+   /*is inefficent, but works*/
+   if(*lenCigUI < matrixSTPtr->qryEndUL)
+   { /*If: want more cigar memory*/
+      tmpStr =
+         realloc(
+            *cigTypeStr,
+             (matrixSTPtr->qryEndUL + 1) * sizeof(schar)
+         );
+
+      if(! tmpStr)
+         goto memErr_fun06_sec07;
+
+      *cigTypeStr = tmpStr;
+
+      tmpStr =
+         (schar *)
+         realloc(
+            *cigArySI,
+            matrixSTPtr->qryEndUL * sizeof(sint)
+         );
+
+      if(! tmpStr)
+         goto memErr_fun06_sec07;
+
+      *cigArySI = (sint *) tmpStr;
+
+      *lenCigUI = matrixSTPtr->qryEndUL;
+   } /*If: want more cigar memory*/
+
+   /*****************************************************\
+   * Fun06 Sec03 Sub02:
+   *   - add ending soft masked bases to cigar
+   \*****************************************************/
+
+   if(
+         ! revBl
+      && (*cigTypeStr)[cigPosUI] > 0
+   ){ /*If: cigar entry already here*/
+       ++cigPosUI;
+       ++startUI;
+       /*forward sequence mean backwards cigars*/
+   } /*If: cigar entry already here*/
+
+   if(refPosUI < matrixSTPtr->refEndUL)
+   { /*If: missing bases at end*/
+      if(revBl)
+      { /*If: reverse complement sequence*/
+         /*find start offset*/
+         *refStartUI = matrixSTPtr->refEndUL - refPosUI;
+         *refStartUI += matrixSTPtr->refOffsetUL;
+      } /*If: reverse complement sequence*/
+
+      else if(delAtEndBl)
+      { /*Else: foward sequence (deletions at end)*/
+         if((*cigTypeStr)[cigPosUI] > 32)
+            ++cigPosUI;
+
+         (*cigTypeStr)[cigPosUI] = 'D';
+
+         (*cigArySI)[cigPosUI] =
+            matrixSTPtr->refEndUL
+               - matrixSTPtr->refOffsetUL
+               - refPosUI;
+      } /*Else: foward sequence (deletions at end)*/
+   } /*If: missing bases at end*/
+
+   if(qryPosUI + 1 < matrixSTPtr->lenQryUL)
+   { /*If: need to add ending softmasked bases*/
+      if((*cigTypeStr)[cigPosUI] > 32)
+         ++cigPosUI;
+
+      (*cigTypeStr)[cigPosUI] = 'S';
+      (*cigArySI)[cigPosUI] =
+         matrixSTPtr->lenQryUL - qryPosUI;
+
+      *numMaskUI += matrixSTPtr->lenQryUL - qryPosUI;
+   } /*If: need to add ending softmasked bases*/
+
+   /*else is set to null*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec04:
+   ^   - get alignment form matrix
+   ^   o fun06 sec04 sub01:
+   ^     - find alignment end and start loop
+   ^   o fun06 sec04 sub02:
+   ^     - insertion cases
+   ^   o fun06 sec04 sub03:
+   ^     - snp or match cases
+   ^   o fun06 sec04 sub04:
+   ^     - deletion cases
+   ^   o fun06 sec04 sub05:
+   ^     - move to first base
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun06 Sec04 Sub01:
+   *   - find alignment end and start loop
+   \*****************************************************/
+
+   dirMatrixSC += indexUL;
+
+   while(*dirMatrixSC != def_mvStop_alnDefs)
+   { /*Loop: trace alignment path*/
+
+      switch(*dirMatrixSC)
+      { /*Switch: find direction (snp/del/ins)*/
+         case def_mvStop_alnDefs:
+            break;
+
+         /***********************************************\
+         * Fun06 Sec04 Sub02:
+         *   - insertion cases
+         \***********************************************/
+
+         case def_mvIns_alnDefs:
+         /*Case: is a insertion*/
+            if( (*cigTypeStr)[cigPosUI] != 'I' )
+            { /*If: need to make new cigar entry*/
+
+               if( (*cigTypeStr)[cigPosUI] )
+                  ++cigPosUI; /*if not null*/
+
+               (*cigTypeStr)[cigPosUI] = 'I';
+               (*cigArySI)[cigPosUI] = 1;
+            } /*If: need to make new cigar entry*/
+
+            else
+               ++(*cigArySI)[cigPosUI];
+
+            --qryPosUI;
+            dirMatrixSC -= (lenRefUI + 1);
+            break;
+         /*Case: is a insertion*/
+
+         /***********************************************\
+         * Fun06 Sec04 Sub03:
+         *   - snp or match cases
+         \***********************************************/
+
+         case def_mvSnp_alnDefs:
+         /*Case: is a snp or match*/
+            matchBl =
+               getMatch_alnSet(
+                  qrySeqStr[qryPosUI],
+                  refSeqStr[refPosUI],
+                  alnSetSTPtr
+               ); /*find if had a match*/
+
+            if(matchBl & def_ntEql_alnDefs)
+            { /*If: had a match*/
+               /*count number of anonymous matches*/
+               *numAnonUI +=
+                  !!(matchBl & def_anonymous_alnDefs);
+
+               matchBl = '='; /*match*/
+            } /*If: had a match*/
+
+            else
+               matchBl = 'X'; /*mismatch*/
+
+            if( (*cigTypeStr)[cigPosUI] != matchBl )
+            { /*If: need to make new cigar entry*/
+               if( (*cigTypeStr)[cigPosUI] )
+                  ++cigPosUI; /*if not null*/
+
+               (*cigTypeStr)[cigPosUI] = matchBl;
+               (*cigArySI)[cigPosUI] = 1;
+            } /*If: need to make new cigar entry*/
+
+            else
+               ++(*cigArySI)[cigPosUI];
+
+            --refPosUI;
+            --qryPosUI;
+
+            dirMatrixSC -= (lenRefUI + 2);
+            break;
+         /*Case: is a snp or match*/
+
+         /***********************************************\
+         * Fun06 Sec04 Sub04:
+         *   - deletion cases
+         \***********************************************/
+
+         case def_mvDel_alnDefs:
+         /*Case: is a deletion*/
+            if( (*cigTypeStr)[cigPosUI] != 'D' )
+            { /*If: need to make new cigar entry*/
+               if( (*cigTypeStr)[cigPosUI])
+                  ++cigPosUI; /*if not null*/
+
+               (*cigTypeStr)[cigPosUI] = 'D';
+               (*cigArySI)[cigPosUI] = 1;
+            } /*If: need to make new cigar entry*/
+
+            else
+               ++(*cigArySI)[cigPosUI];
+
+            --refPosUI;
+            --dirMatrixSC;
+            break;
+         /*Case: is a deletion*/
+      } /*Switch: find direction (snp/del/ins)*/
+   } /*Loop: trace alignment path*/
+
+   /*****************************************************\
+   * Fun06 Sec04 Sub05:
+   *   - move to first base
+   \*****************************************************/
+
+   /*account for ending on one index behind*/
+   ++refPosUI;
+   ++qryPosUI;
+
+   if(! revBl)
+      *refStartUI = refPosUI; /*index 0*/
+
+   if(
+         revBl
+      && refPosUI < matrixSTPtr->refEndUL
+      && delAtEndBl
+   ){ /*If: deletions at end*/
+      
+      if((*cigTypeStr)[cigPosUI] > 32)
+         ++cigPosUI;
+
+      (*cigTypeStr)[cigPosUI] = 'D';
+      (*cigArySI)[cigPosUI] = refPosUI;
+   } /*If: deletions at end*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec05:
+   ^   - add starting softmasked bases and invert cigar
+   ^   o fun06 sec05 sub01:
+   ^     - add starting softmasked bases to cigar
+   ^   o fun06 sec05 sub02:
+   ^     - if forward sequence invert cigar; is backwards
+   ^   o fun06 sec05 sub04:
+   ^     - set return to index 0 and add null at end
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun06 Sec05 Sub01:
+   *   - add starting softmasked bases to cigar
+   \*****************************************************/
+
+   if(qryPosUI > 0)
+   { /*If: need to add starting softmasked bases*/
+      ++cigPosUI;
+      (*cigTypeStr)[cigPosUI] = 'S';
+
+      (*cigArySI)[cigPosUI] = qryPosUI;
+      *numMaskUI += qryPosUI;
+   } /*If: need to add starting softmasked bases*/
+
+   /*****************************************************\
+   * Fun06 Sec05 Sub02:
+   *   - if forward sequence invert cigar; is backwards
+   \*****************************************************/
+
+   if(! revBl)
+   { /*If: need to reverse (invert) cigar*/
+      qryPosUI = startUI;
+      refPosUI = cigPosUI;
+
+      while(qryPosUI < refPosUI)
+      { /*Loop: invert the cigar to forward direction*/
+         /*swap was from standfords bithacking guide*/
+
+         (*cigTypeStr)[qryPosUI]^=(*cigTypeStr)[refPosUI];
+         (*cigTypeStr)[refPosUI]^=(*cigTypeStr)[qryPosUI];
+         (*cigTypeStr)[qryPosUI]^=(*cigTypeStr)[refPosUI];
+
+         (*cigArySI)[qryPosUI] ^= (*cigArySI)[refPosUI];
+         (*cigArySI)[refPosUI] ^= (*cigArySI)[qryPosUI];
+         (*cigArySI)[qryPosUI] ^= (*cigArySI)[refPosUI];
+
+         ++qryPosUI;
+         --refPosUI;
+      } /*Loop: invert the cigar to forward direction*/
+
+      /*null/0 or softmask at start flipped to end*/
+   } /*If: need to reverse (invert) cigar*/
+
+   if(startUI > 0)
+   { /*If: have pervious entries*/
+      qryPosUI = startUI - 1;
+      refPosUI = startUI;
+
+      while(refPosUI <= cigPosUI)
+      { /*Loop: move entries back*/
+         if(
+            (*cigTypeStr)[qryPosUI]
+               == (*cigTypeStr)[refPosUI]
+         ) (*cigArySI)[qryPosUI] += (*cigArySI)[refPosUI];
+           /*same entry*/
+
+         else if(
+               (*cigTypeStr)[qryPosUI] == 'S'
+            && (*cigTypeStr)[refPosUI] == 'D'
+         ) (*cigArySI)[qryPosUI] += (*cigArySI)[refPosUI];
+           /*merge deletion into softmask*/
+
+         else if(
+               (*cigTypeStr)[qryPosUI] == 'D'
+            && (*cigTypeStr)[refPosUI] == 'S'
+         ){ /*Else If: deletion next to softmasked*/
+            (*cigTypeStr)[qryPosUI] = 'S';
+            (*cigArySI)[qryPosUI] +=(*cigArySI)[refPosUI];
+         } /*Else If: deletion next to softmasked*/
+
+         else if(
+               (*cigTypeStr)[qryPosUI] == 'S'
+            && (*cigTypeStr)[refPosUI] == 'I'
+         ) (*cigArySI)[qryPosUI] += (*cigArySI)[refPosUI];
+           /*merge insertion into softmask*/
+
+         else if(
+               (*cigTypeStr)[qryPosUI] == 'I'
+            && (*cigTypeStr)[refPosUI] == 'S'
+         ){ /*If: softmask next to insertion*/
+            (*cigTypeStr)[qryPosUI] = 'S';
+            (*cigArySI)[qryPosUI] +=(*cigArySI)[refPosUI];
+         } /*If: softmask next to insertion*/
+
+         else if(
+               (*cigTypeStr)[qryPosUI] == 'S'
+            && (*cigTypeStr)[refPosUI] == 'X'
+         ) (*cigArySI)[qryPosUI] += (*cigArySI)[refPosUI];
+           /*merge snp into softmask*/
+
+         else if(
+               (*cigTypeStr)[qryPosUI] == 'X'
+            && (*cigTypeStr)[refPosUI] == 'S'
+         ){ /*If: softmask next to snp*/
+            (*cigTypeStr)[qryPosUI] = 'S';
+            (*cigArySI)[qryPosUI] +=(*cigArySI)[refPosUI];
+         } /*If: softmask next to snp*/
+
+         else
+         { /*Else: no issues*/
+            ++qryPosUI;
+
+            (*cigTypeStr)[qryPosUI] =
+               (*cigTypeStr)[refPosUI];
+
+            (*cigArySI)[qryPosUI] = (*cigArySI)[refPosUI];
+         } /*Else: no issues*/
+
+         ++refPosUI;
+      } /*Loop: move entries back*/
+
+      (*cigTypeStr)[qryPosUI + 1] = '\0';
+      cigPosUI = qryPosUI;
+   } /*If: have pervious entries*/
+
+   /*****************************************************\
+   * Fun06 Sec05 Sub03:
+   *   - set return to index 0 and add null at end
+   \*****************************************************/
+
+   if( (*cigTypeStr)[cigPosUI] != '\0' )
+      (*cigTypeStr)[cigPosUI + 1] = '\0';
+
+   else
+      --cigPosUI; /*is index 1*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec07:
+   ^   - return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   return cigPosUI;
+
+   memErr_fun06_sec07:;
+
+   return -1;
+} /*getCig_dirMatrix*/
 
 /*=======================================================\
 : License:

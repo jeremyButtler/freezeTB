@@ -56,8 +56,8 @@
 
 #include "spolST.h"
 
-#include "../genLib/ulCp.h"
 #include "../genLib/numToStr.h"
+#include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
 
 /*.h files only*/

@@ -1,11 +1,7 @@
-/*#######################################################\
-# Name: samToAln
-#   - has functions to convert a sam entry and the
-#     reference sequence to an alignment
-\#######################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' samToAln SOF: Start Of File
+'   - has functions to convert a sam entry and the
+'     reference sequence to an alignment
 '   o header:
 '     - included libraries
 '   o fun01: psamPg_samToAln
@@ -34,10 +30,11 @@
 
 #include <stdio.h>
 
-#include "../genLib/samEntry.h"
-#include "../genLib/seqST.h"
 #include "../genLib/numToStr.h"
 #include "../genLib/base10str.h"
+
+#include "../genBio/samEntry.h"
+#include "../genBio/seqST.h"
 
 #include "alnSet.h"
 
@@ -48,7 +45,7 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../generalLib/ulCp.h"
-!   o .h  #include "../generalLib/ntTo5Bit.h"
+!   o .h  #include "../generalBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define def_maxDig_samToAln 9
@@ -438,8 +435,8 @@ startLine_samToAln(
 
    unsigned short numDigUS = 0;
    unsigned short digOnUS = 0;
-   signed char refDigStr[def_maxDig_samToAln << 2];
-   signed char qryDigStr[def_maxDig_samToAln << 2];
+   signed char refDigStr[8 + (def_maxDig_samToAln << 2)];
+   signed char qryDigStr[8 + (def_maxDig_samToAln << 2)];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -651,19 +648,31 @@ paln_samToAln(
    else
       lenBuffUL= samSTPtr->readLenUI + refSTPtr->lenSeqUL;
 
-   qryHeapStr = malloc((lenBuffUL + 1) * sizeof(schar));
+   qryHeapStr =
+      calloc(
+         lenBuffUL + 9,
+         sizeof(schar)
+      );
 
    if(! qryHeapStr)
       goto memErr_fun04_sec07;
 
 
-   refHeapStr = malloc((lenBuffUL + 1) * sizeof(schar));
+   refHeapStr =
+      calloc(
+         lenBuffUL + 9,
+         sizeof(schar)
+      );
 
    if(! refHeapStr)
       goto memErr_fun04_sec07;
 
 
-   cigHeapStr = malloc((lenBuffUL + 1) * sizeof(schar));
+   cigHeapStr =
+      calloc(
+         lenBuffUL + 9,
+         sizeof(schar)
+      );
 
    if(! cigHeapStr)
       goto memErr_fun04_sec07;
@@ -739,7 +748,7 @@ paln_samToAln(
       refSTPtr->idStr,
       scoreSL,
       numAnonSL,
-      outFILE
+      (FILE *) outFILE
    ); /*print out header for aligment*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1165,6 +1174,7 @@ paln_samToAln(
       cigHeapStr[ulNt] = 'S';
       ++ulQry;
       ++ulNt;
+      --diffUL;
       buffBl = 1;
 
       if(ulNt >= lenBuffUL)

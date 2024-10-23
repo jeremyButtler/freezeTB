@@ -33,10 +33,10 @@
 
 #include <stdio.h>
 
-#include "../genLib/charCp.h"
 #include "../genLib/base10str.h"
-#include "../genLib/seqST.h"
-#include "../genLib/samEntry.h"
+#include "../genLib/charCp.h"
+#include "../genBio/seqST.h"
+#include "../genBio/samEntry.h"
 
 #include "../genAln/alnSet.h"
 #include "../genAln/kmerFind.h"
@@ -53,11 +53,12 @@
 !   - .c  #include "../genlLib/numToStr.h"
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/shellSort.h"
+!   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genAln/memwater.h"
 !   - .c  #include "../genAln/indexToCoord.h"
 !   - .h  #include "../genAln/alnDefs.h"
-!   - .h  #include "../genLib/ntTo5Bit.h"
 !   - .h  #include "../genLib/genMath.h" .h max macros
+!   - .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

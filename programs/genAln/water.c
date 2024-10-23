@@ -6,7 +6,8 @@
 ########################################################*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of Functions
+' water SOF: Start Of Functions
+'   - has function to do Smith Waterman pairwise alignment
 '   o header:
 '     - included libraries
 '   o .c fun01: scoreIndel_water
@@ -32,7 +33,7 @@
 
 #include "water.h"
 
-#include "../genLib/seqST.h"
+#include "../genBio/seqST.h"
 
 #include "alnSet.h"
 #include "dirMatrix.h"
@@ -50,8 +51,9 @@
 !   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/charCp.h"
 !   o .c  #include "../genLib/numToStr.h"
-!   o .c  #include "../genLib/samEntry.h"
-!   o .h  #include "../genLib/ntTo5Bit.h"
+!   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genBio/samEntry.h"
+!   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -72,12 +74,13 @@
 |     o pointer to alnSet with alignment settings
 | Output:
 |  - Modifies:
+|    o errSC in matrixSTPtr to def_memErr_water for
+|      memory errors
 |    o allocates memory for dirMatrixSC and scoreAryUL
 |      if they are to small
 |    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
 |      or scoreAryUL are resized
 |  - Returns:
-|    o 0 for memory error
 |    o score for alignment
 \-------------------------------------------------------*/
 signed long
@@ -459,7 +462,9 @@ water(
    \*****************************************************/
 
    memErr_fun01_sec05:;
+   matrixSTPtr->errSC = def_memErr_water;
    goto errCleanUp_fun01_sec05;
+
    errCleanUp_fun01_sec05:;
 
    return 0;

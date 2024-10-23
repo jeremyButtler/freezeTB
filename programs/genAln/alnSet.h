@@ -1,13 +1,7 @@
-/*########################################################
-# Name alnSetStruct
-# Use:
-#  o Holds the settings structures and supporting
-#    functions for setting structures for alnSeq's
-#    pairwise aligners.
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' alnSet SOF: Start Of File
+'  - holds settings structures and supporting functions
+'    for my pairwise aligners
 '  o header:
 '    - Header guards and defined variables
 '  o .h st01 alnSet:
@@ -35,10 +29,12 @@
 '      uppercase characters (a-z)
 '  o fun11: changeGap_alnSet
 '    - changes the gap penalties in an alnSet structure
-'  o fun12 init_alnSet:
+'  o fun13 init_alnSet:
 '    - Set all values in altSet (alingment settings)
 '      structure to defaults
-'  o fun13: pDefMatchMatrix_alnSet
+'  o fun12: maxScore_alnSet
+'    - finds maximum score possible for a sequence
+'  o fun14: pDefMatchMatrix_alnSet
 '    - print out the default match matrix
 '  o license:
 '    - Licensing for this code (public domain / mit)
@@ -226,8 +222,11 @@ freeHeap_alnSet(
 |      matrix
 | Output:
 |  - Returns:
-|    o defBaseMatch if the bases matched (same)
-|    o defBaseSnp if bases were not a match (different)
+|    o def_ntEql_alnDefs if the bases matched (same)
+|    o def_ntNotEql_alnDefs if bases were not a match
+|    o def_anonymous_alnDefs for anonymous bases
+|    o def_anonymous_alnDefs | def_ntEql_alnDefs for
+|      anonymous matches (anoymous base could be same)
 |  - default
 |    o This assumes that the sequences are converted to
 |      indexes
@@ -343,7 +342,34 @@ changeGap_alnSet(
 );
 
 /*-------------------------------------------------------\
-| Fun12: init_alnSet
+| Fun12: maxScore_alnSet
+|  - finds maximum score possible for a sequence
+| Input:
+|  - seqStr:
+|    o c-string with sequence to find max score for
+|    o needs to be converted to index with
+|      indexToSeq_alnSet (prepared for alignment)
+|  - startUL:
+|    o index of first base to check (index 0)
+|  - lenSeqUL:
+|    o length of the sequence to check
+|  - alnSetPtr:
+|    o pointer to an alnSet (settings) structure to
+|      initialize
+| Output:
+|  o Returns:
+|    - maximum possible score for alignment
+\-------------------------------------------------------*/
+signed long
+maxScore_alnSet(
+   signed char *seqStr,
+   unsigned long startUL,
+   unsigned long lenSeqUL,
+   struct alnSet *alnSetPtr
+);
+
+/*-------------------------------------------------------\
+| Fun13: init_alnSet
 |  - Set values in altSet (alingment settings) structure
 |    to default values
 | Input:
@@ -360,7 +386,7 @@ init_alnSet(
 );
 
 /*-------------------------------------------------------\
-| Fun13: pDefMatchMatrix_alnSet
+| Fun14: pDefMatchMatrix_alnSet
 |   - print out the default match matrix
 | Input:
 |   - outFILE:

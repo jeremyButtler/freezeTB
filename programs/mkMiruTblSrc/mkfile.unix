@@ -3,53 +3,52 @@ CC=cc
 CFLAGS= -O3 -std=c89 -Wall -Wextra
 NAME=mkMiruTbl
 PREFIX=/usr/local/bin
-genLib=../genLib
+O=o.unix
+
 genAln=../genAln
-O=.o.unix
+genLib=../genLib
+genBio=../genBio
 
-objFiles=\
-   $(genLib)/base10str$O \
-   $(genLib)/ulCp$O \
-   $(genLib)/charCp$O \
-   $(genLib)/numToStr$O \
-   $(genLib)/seqST$O \
-   $(genAln)/indexToCoord$O \
-   $(genAln)/alnSet$O \
-   $(genAln)/memwater$O
+objFiles= \
+   $(genAln)/memwater.$O \
+   $(genAln)/alnSet.$O \
+   $(genLib)/base10str.$O \
+   $(genAln)/indexToCoord.$O \
+   $(genBio)/seqST.$O \
+   $(genLib)/ulCp.$O \
+   $(genLib)/charCp.$O \
+   mkMiruTbl.$O
 
-all: mkMiruTbl$O $(objFiles)
-	$(LD) -o $(NAME) $(CFLAGS) mkMiruTbl$O $(objFiles)
+all: mkMiruTbl.$O
+	$(LD) -o $(NAME) $(CFLAGS) $(objFiles)
 
-mkMiruTbl$O: mkMiruTbl.c $(genAln)/memwater$O $(objFiles)
-	$(CC) -o mkMiruTbl$O -c $(CFLAGS) mkMiruTbl.c
+mkMiruTbl.$O: mkMiruTbl.c $(genAln)/memwater.$O $(genLib)/charCp.$O
+	$(CC) -o mkMiruTbl.$O -c $(CFLAGS) mkMiruTbl.c
 
-$(genLib)/base10str$O: $(genLib)/base10str.c $(genLib)/base10str.h
-	$(CC) -o $(genLib)/base10str$O -c $(CFLAGS) $(genLib)/base10str.c
+$(genAln)/memwater.$O: $(genAln)/memwater.c $(genAln)/alnSet.$O $(genAln)/indexToCoord.$O $(genBio)/seqST.$O $(genLib)/genMath.h
+	$(CC) -o $(genAln)/memwater.$O -c $(CFLAGS) $(genAln)/memwater.c
 
-$(genLib)/charCp$O: $(genLib)/charCp.c $(genLib)/charCp.h
-	$(CC) -o $(genLib)/charCp$O -c $(CFLAGS) $(genLib)/charCp.c
+$(genAln)/alnSet.$O: $(genAln)/alnSet.c $(genAln)/alnDefs.h $(genLib)/base10str.$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genAln)/alnSet.$O -c $(CFLAGS) $(genAln)/alnSet.c
 
-$(genLib)/ulCp$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
-	$(CC) -o $(genLib)/ulCp$O -c $(CFLAGS) $(genLib)/ulCp.c
+$(genLib)/base10str.$O: $(genLib)/base10str.c $(genLib)/base10str.h
+	$(CC) -o $(genLib)/base10str.$O -c $(CFLAGS) $(genLib)/base10str.c
 
-$(genLib)/numToStr$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
-	$(CC) -o $(genLib)/numToStr$O -c $(CFLAGS) $(genLib)/numToStr.c
+$(genAln)/indexToCoord.$O: $(genAln)/indexToCoord.c
+	$(CC) -o $(genAln)/indexToCoord.$O -c $(CFLAGS) $(genAln)/indexToCoord.c
 
-$(genLib)/seqST$O: $(genLib)/seqST.c $(genLib)/seqST.h $(genLib)/ulCp$O $(genLib)/dataTypeShortHand.h
-	$(CC) -o $(genLib)/seqST$O -c $(CFLAGS) $(genLib)/seqST.c
+$(genBio)/seqST.$O: $(genBio)/seqST.c $(genBio)/seqST.h $(genLib)/ulCp.$O $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genBio)/seqST.$O -c $(CFLAGS) $(genBio)/seqST.c
 
-$(genAln)/indexToCoord$O: $(genAln)/indexToCoord.c $(genAln)/indexToCoord.h
-	$(CC) -o $(genAln)/indexToCoord$O -c $(CFLAGS) $(genAln)/indexToCoord.c
+$(genLib)/ulCp.$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) -o $(genLib)/ulCp.$O -c $(CFLAGS) $(genLib)/ulCp.c
 
-$(genAln)/alnSet$O: $(genAln)/alnSet.c $(genAln)/alnSet.h $(genAln)/alnDefs.h $(genLib)/base10str$O $(genLib)/dataTypeShortHand.h
-	$(CC) -o $(genAln)/alnSet$O -c $(CFLAGS) $(genAln)/alnSet.c
-
-$(genAln)/memwater$O: $(genAln)/memwater.c $(genAln)/memwater.h $(genAln)/alnSet$O $(genAln)/indexToCoord$O $(genLib)/seqST$O $(genLib)/genMath.h
-	$(CC) -o $(genAln)/memwater$O -c $(CFLAGS) $(genAln)/memwater.c
+$(genLib)/charCp.$O: $(genLib)/charCp.c $(genLib)/charCp.h
+	$(CC) -o $(genLib)/charCp.$O -c $(CFLAGS) $(genLib)/charCp.c
 
 install:
-	mv $(NAME) $(PREFIX)
+	cp $(NAME) $(PREFIX)
 	chmod a+x $(PREFIX)/$(NAME)
 
 clean:
-	rm $(objFiles) mkMiruTbl$O;
+	rm $(objFiles)

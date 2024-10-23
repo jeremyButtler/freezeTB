@@ -33,8 +33,23 @@
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Header Sec01:
-^    - included libraries
+^   - included libraries
+^   o header sec01 sub01:
+^     - standard libraries
+^   o header sec01 sub02:
+^     - general libraries (lib/bio/aln)
+^   o header sec01 sub03:
+^     - libraries unique to tb analysis
+^   o header sec01 sub04:
+^     - libraries without .c files
+^   o header sec01 sub05:
+^     - hidden libraries
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+/********************************************************\
+* Header Sec01 Sub01:
+*   - standard libraries
+\********************************************************/
 
 #ifdef plan9
    #include <u.h>
@@ -45,60 +60,90 @@
 
 #include <stdio.h>
 
-/*libraries that are modules*/
-#include "../ampDepthSrc/ampDepth.h"
-#include "../tbConSrc/tbCon.h"
-#include "../tbAmrSrc/checkAmr.h"
-#include "../genLib/trimSam.h"
-#include "../tbMiruSrc/miruTbl.h"
-#include "../tbSpolSrc/spolFind.h" 
-#include "../maskPrimSrc/maskPrim.h"
+/********************************************************\
+* Header Sec01 Sub02:
+*   - general libraries (lib/bio/aln)
+\********************************************************/
 
-/*libraries that are not modules (used by modules)*/
-#include "../genLib/samEntry.h"
-#include "../genLib/geneCoord.h"
-#include "../tbAmrSrc/amrST.h"
-
-/*.c libraries for tbSpoligo*/
-#include "../tbSpolSrc/spolST.h"
-#include "../genLib/seqST.h"
-#include "../genAln/alnSet.h"
-#include "../genAln/kmerFind.h"
-
-/*used by multiple programs*/
+/*non-biology c libraries*/
 #include "../genLib/base10str.h"
 #include "../genLib/numToStr.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
 
+/*general biology c libraries*/
+#include "../genBio/seqST.h"
+#include "../genBio/samEntry.h"
+#include "../genBio/geneCoord.h"
+#include "../genBio/trimSam.h"
+#include "../genBio/maskPrim.h"
+#include "../genBio/ampDepth.h"
+#include "../genBio/adjCoords.h"
+#include "../genBio/tbCon.h"
+
+/*for clustering (mixed infection detection)*/
+#include "../genClust/clustST.h"
+#include "../genClust/edClust.h"
+
+#include "../genAln/alnSet.h"
+#include "../genAln/kmerFind.h"
+
+/********************************************************\
+* Header Sec01 Sub03:
+*   - libraries unique to tb analysis
+\********************************************************/
+
+#include "../genLib/genMath.h"
+
+/*libraries that are modules*/
+#include "../tbMiruSrc/miruTbl.h"
+
+#include "../tbSpolSrc/spolFind.h" 
+#include "../tbSpolSrc/spolST.h"
+
+#include "../tbAmrSrc/checkAmr.h"
+#include "../tbAmrSrc/amrST.h"
+
+/*freezeTB core*/
 #include "freezeTBPaths.h" /*getting default file paths*/
 
-/*No .c files (only a .h file)*/
-#include "../genLib/dataTypeShortHand.h"
+/********************************************************\
+* Header Sec01 Sub04:
+*   - libraries without .c files
+\********************************************************/
 
-/*version numbers and default settings (no .c)*/
+#include "../genLib/dataTypeShortHand.h"
+#include "../genBio/tbConDefs.h" /*settings/error values*/
+
+/*default settings*/
 #include "freezeTBDefs.h"
 #include "../tbAmrSrc/tbAmrDefs.h"
-#include "../tbConSrc/tbConDefs.h"
-#include "../trimSamSrc/trimSamVer.h"
-#include "../ampDepthSrc/ampDepthDefs.h"
 #include "../tbMiruSrc/tbMiruDefs.h"
 #include "../tbSpolSrc/tbSpolDefs.h"/*includes defaults*/
-#include "../maskPrimSrc/maskPrimVersion.h"
+
+/********************************************************\
+* Header Sec01 Sub05:
+*   - libraries without .c files
+\********************************************************/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
-! Hidden libraries
+! Header Sec01 Sub05:
+!   - hidden libraries
 !   o std #include <string.h>
-!   o .c  #include "../genLib/shellSort.h"
+!
 !   o .c  #include "../genLib/genMath.h"
-!   o .c  #include "../genLib/codonTbl.h"
-!   o .c  #include "../genLib/seqST.h"
+!   o .c  #include "../genLib/shellSort.h"
+!   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genBio/codonTbl.h"
+!   o .c  #include "../genBio/seqST.h"
+!   o .c  #include "../genBio/edDist.h"
 !   o .c  #include "../genAln/indexToCoord.h"
 !   o .c  #include "../genAln/memwater.h"
-!   o .c  #include "tbAmrSrc/drugAry.h"
-!   o .h  #include "../genLib/ntTo2bit.h" 
-!   o .h  #include "../genLib/revNtTo2bit.h" 
-!   o .h  #include "../genLib/ntTo5bit.h" 
+!   o .c  #include "../tbAmrSrc/drugAry.h"
+!
+!   o .h  #include "../genBio/ntTo2bit.h" 
+!   o .h  #include "../genBio/revNtTo2bit.h" 
+!   o .h  #include "../genBio/ntTo5bit.h" 
 !   o .h  #include "../genAln/alnDefs.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -138,76 +183,30 @@ pversion_freezeTB(
        def_month_freezeTBDefs,
        def_day_freezeTBDefs
    ); /*Version of freezeTB*/
-
-   fprintf(
-       (FILE *) outFILE,
-       "   compliled with tbAmr Version: %i-%02i-%02i\n",
-       def_year_tbAmrDefs,
-       def_month_tbAmrDefs,
-       def_day_tbAmrDefs
-   );
-
-   fprintf(
-       (FILE *) outFILE,
-       "   compliled with tbMiru Version: %i-%02i-%02i\n",
-       def_year_tbMiruDefs,
-       def_month_tbMiruDefs,
-       def_day_tbMiruDefs
-   );
-
-   fprintf(
-       (FILE *) outFILE,
-       "   complied with tbCon version: %i-%02i-%02i\n",
-       def_year_tbConDefs,
-       def_month_tbConDefs,
-       def_day_tbConDefs
-   );
-
-
-   fprintf(
-      (FILE *) outFILE,
-      "   compiled with ampDepth version: %i-%02i-%02i\n",
-      def_year_ampDepthDefs,
-      def_month_ampDepthDefs,
-      def_day_ampDepthDefs
-   );
-
-   fprintf(
-       (FILE *) outFILE,
-       "   complied with trimSam version: %i-%02i-%02i\n",
-       def_year_trimSamVer,
-       def_month_trimSamVer,
-       def_day_trimSamVer
-   );
-
-   fprintf(
-     (FILE *) outFILE,
-     "   complied with tbSpoligo version: %i-%02i-%02i\n",
-     def_year_tbSpolDefs,
-     def_month_tbSpolDefs,
-     def_day_tbSpolDefs
-   );
-
-   fprintf(
-     (FILE *) outFILE,
-     "   complied with maskPrim version: %i-%02i-%02i\n",
-     def_year_maskPrimVersion,
-     def_month_maskPrimVersion,
-     def_day_maskPrimVersion
-   );
 } /*pversion_freezeTB*/
-
 
 /*-------------------------------------------------------\
 | Fun02: phelp_freezeTB
 |   - prints help message for freezeTB
 | Input:
+|   - pFiltBl:
+|     - 1: print read filtering settings
+|     - 0: do not print read flitering settings
 |   - pConBl:
 |     - 1: print settings for consensus building
 |     - 0: do not print settings for consensus building
 |   - pPrintBl:
 |     - 1: print settings for variant/amr id printing
 |     - 0: do not print variant/amr id print settings
+|   - pClustBl:
+|     - 1: print settings for clustering
+|     - 0: do not print settings for clustering
+|   - pLinBl:
+|     - 1: print lineage settings
+|     - 0: do not print lineage settings
+|   - pOtherBl:
+|     - 1: print other settings
+|     - 0: do not print other settings
 |   - outFILE:
 |     o file to print help message to
 | Ouput:
@@ -216,10 +215,16 @@ pversion_freezeTB(
 \-------------------------------------------------------*/
 void
 phelp_freezeTB(
+   signed char pFiltBl,  /*print read filtering settigs*/
    signed char pConBl,   /*consensus unqiue settings*/
    signed char pPrintBl, /*print (amr/con) settings*/
+   signed char pClustBl, /*print cluster settings*/
+   signed char pLinBl,   /*print lineage settings*/
+   signed char pOtherBl,  /*print cluster settings*/
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun02 TOC:
+   '   - print help message
    '   o fun02 sec01:
    '     - variable declerations
    '   o fun02 sec02:
@@ -294,12 +299,14 @@ phelp_freezeTB(
    ^   o fun02 sec04 sub03:
    ^     - consensus settings
    ^   o fun02 sec04 sub04:
-   ^     - variant/read AMR printing settings
+   ^     - clustering settings
    ^   o fun02 sec04 sub05:
-   ^     - depth settings
+   ^     - variant/read AMR printing settings
    ^   o fun02 sec04 sub06:
-   ^     - lineage (non-database) settings
+   ^     - depth settings
    ^   o fun02 sec04 sub07:
+   ^     - lineage (non-database) settings
+   ^   o fun02 sec04 sub08:
    ^     - other settings and help message/version number
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -567,6 +574,9 @@ phelp_freezeTB(
    +   - fitering header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+   if(! pFiltBl)
+      goto skipReadFilt_fun02_sec04_sub03;
+
    fprintf(
       (FILE *) outFILE,
       "  Read Filtering:\n"
@@ -640,6 +650,37 @@ phelp_freezeTB(
       "      o minimum median q-score to keep a read\n"
    );
 
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub02 Cat06:
+   +   - adjust coordinates
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(def_adjCoord_freezeTBDefs)
+      fprintf(
+         (FILE *) outFILE,
+         "    -adj-coords: [Optional; Yes]\n"
+      );
+   else
+      fprintf(
+         (FILE *) outFILE,
+         "    -adj-coords: [Optional; No]\n"
+      );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o adjust reads to reference coordinates in\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        \"-gene-coords coords.tsv\"\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o use \"-no-adj-coords\" to disable\n"
+   );
+
    /*****************************************************\
    * Fun02 Sec04 Sub03:
    *   - consensus settings
@@ -666,8 +707,10 @@ phelp_freezeTB(
    +   - consensus setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+   skipReadFilt_fun02_sec04_sub03:;
+
    if(! pConBl)
-       goto printSettings_fun02_sec04_sub04_cat01;
+       goto skipConSet_fun02_sec04_sub04_cat01;
 
    fprintf(
       (FILE *) outFILE,
@@ -801,30 +844,435 @@ phelp_freezeTB(
 
    /*****************************************************\
    * Fun02 Sec04 Sub04:
-   *   - variant/read AMR printing settings
+   *   - clustering settings
    *   o fun02 sec04 sub04 cat01:
-   *     - variant/readAMR print setting header
+   *     - print clustering setting header
    *   o fun02 sec04 sub04 cat02:
-   *     - min depth filter
+   *     - read scoring settings
    *   o fun02 sec04 sub04 cat03:
-   +     - min percent of reads to keep read AMR
+   *     - minimum cluster depth
    *   o fun02 sec04 sub04 cat04:
-   *     - min perccent snp/match support
+   *     - minimum cluster percent depth
    *   o fun02 sec04 sub04 cat05:
-   *     - min percent insertion support
+   *     - minimum percent difference between reads
    *   o fun02 sec04 sub04 cat06:
-   *     - min percent deletion support
+   *     - minimum consensus to read percent difference
+   *   o fun02 sec04 sub04 cat07:
+   *     - maximum percent similarity between consensuses
+   *   o fun02 sec04 sub04 cat08:
+   *     - minimum percent overlap between consensuses
+   *   o fun02 sec04 sub04 cat09:
+   *     - maximum percent maksing in consensus
+   *   o fun02 sec04 sub04 cat10:
+   *     - depth profiling (edit distance setting start)
+   *   o fun02 sec04 sub04 cat11:
+   *     - minimum depth profile depth (edDist)
+   *   o fun02 sec04 sub04 cat12:
+   *     - minimum error:variant ratio to be different
+   *   o fun02 sec04 sub04 cat13:
+   *     - length of window (edDist)
+   *   o fun02 sec04 sub04 cat14:
+   *     - window variant:error ratio (for difference)
+   *   o fun02 sec04 sub04 cat15:
+   *     - minimum indel length to keep indel in edDist
+   *   o fun02 sec04 sub04 cat16:
+   *     - minimum q-score to count snp as different
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun02 Sec04 Sub04 Cat01:
+   +   - print clustering setting header
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   skipConSet_fun02_sec04_sub04_cat01:;
+
+   if(! pClustBl)
+      goto skipClustSet_fun02_sec04_sub05_cat01;
+
+   fprintf(
+      (FILE *) outFILE,
+      "  Clustering Settings:\n"
+   );
+
+   if(def_mixedInfect_freezeTBDefs)
+      fprintf(
+         (FILE *) outFILE,
+         "    -clust: [Optional; Yes]\n"
+      );
+   else
+      fprintf(
+         (FILE *) outFILE,
+         "    -clust: [Optional; No]\n"
+      );
+ 
+   fprintf(
+      (FILE *) outFILE,
+      "      o detect mixed infections; no stdin input\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o disable with \"-no-clust\"\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat02:
+   +   - read scoring settings
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    Read Scoring:\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -len-weight %0.2f: [Optional; %0.2f]\n",
+      def_lenWeight_clustST,
+      def_lenWeight_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o how much to increase lengths impact on\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          read scoring\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          o log_length = floor[log10(length)]\n"
+   );
+
+   fprintf(
+    (FILE *) outFILE,
+    "        o length_score= floor[weigth * log_length]\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o score = length_score + floor[median Q]\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat03:
+   +   - minimum cluster depth
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    General Clustering:\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -clust-depth %i: [Optional; %i]\n",
+      def_minDepth_clustST,
+      def_minDepth_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o min cluster read depth to keep cluster\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat04:
+   +   - minimum cluster percent depth
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+     (FILE *) outFILE,
+     "      -clust-perc-depth %.04f: [Optional; %.04f]\n",
+     def_minPercDepth_clustST,
+     def_minPercDepth_clustST
+   );
+
+   fprintf(
+     (FILE *) outFILE,
+     "        o minimum percent read depth need to keep\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          a cluster\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat05:
+   +   - minimum percent difference between reads
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -read-err %0.3f: [Optional; %0.3f]\n",
+      def_readErrRate_clustST,
+      def_readErrRate_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o error rate for read to read mapping\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat06:
+   +   - minimum consensus to read percent difference
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -con-err %0.3f: [Optional; %0.3f]\n",
+      def_conErrRate_clustST,
+      def_conErrRate_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o consensus to read mapping error rate\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat07:
+   +   - maximum percent similarity between consensuses
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -con-sim %0.4f: [Optional; %0.4f]\n",
+      def_maxConSim_clustST,
+      def_maxConSim_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o maximum simularity between consensuses\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          to not merge clusters\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat08:
+   +   - minimum percent overlap between consensuses
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -overlap %0.2f: [Optional; %0.2f]\n",
+      def_percOverlap_clustST,
+      def_percOverlap_clustST
+   );
+
+   fprintf(
+     (FILE *) outFILE,
+     "        o minimum percentage of overlap needed to\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "       merge clusters (start comparision)\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o used in final consensus comparison\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat09:
+   +   - maximum percent maksing in consensus
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -perc-n %0.4f: [Optional; %0.4f]\n",
+      def_maxNPerc_clustST,
+      def_maxNPerc_clustST
+    );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o maximum percent masked consnesus bases\n"
+   ); /*both consensus and edit distance*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat10:
+   +   - depth profiling (edit distance setting start)
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    Edit Distance:\n"
+   );
+
+   if(def_depthProfile_clustST)
+      fprintf(
+         (FILE *) outFILE,
+         "      -depth-prof: [Optional; Yes]\n"
+      );
+   else
+      fprintf(
+         (FILE *) outFILE,
+         "      -depth-prof: [Optional; No]\n"
+      );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat11:
+   +   - minimum depth profile depth (edDist)
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o -clust-depth to remove low read depth\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          variants from edit distance\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o disable with \"no-depth-prof\"\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat12:
+   +   - minimum error:variant ratio to be different
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -err-to-var %i: [Optional; %i]\n",
+      def_maxVarErrRatio_clustST,
+      def_maxVarErrRatio_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o maximum variant to error ratio to add\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          read to a cluster (whole number)\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o 100*(# variants)/(error rate * length)\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat13:
+   +   - length of window (edDist)
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -win-len %i: [Optional; %i]\n",
+      def_window_clustST,
+      def_window_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o size of window for window scanning\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o idea is to detect regions of high\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "          difference in very long reads\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat14:
+   +   - window variant:error ratio (for difference)
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -win-err %i: [Optional; %i]\n",
+      def_windowError_clustST,
+      def_windowError_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o maximum window variant to error ratio\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat15:
+   +   - minimum indel length to keep indel in edDist
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -indel-len %i: [Optional; %i]\n",
+      def_indelLen_clustST,
+      def_indelLen_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o min indel length to count as different\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat16:
+   +   - minimum q-score to count snp as different
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -clust-q-snp %i: [Optional; %i]\n",
+      def_minSnpQ_clustST,
+      def_minSnpQ_clustST
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "        o minimum q-score to keep snp; edit dist\n"
+   ); /*edit distance min snp q-score*/
+
+   /*****************************************************\
+   * Fun02 Sec04 Sub05:
+   *   - variant/read AMR printing settings
+   *   o fun02 sec04 sub05 cat01:
+   *     - variant/readAMR print setting header
+   *   o fun02 sec04 sub05 cat02:
+   *     - min depth filter
+   *   o fun02 sec04 sub05 cat03:
+   +     - min percent of reads to keep read AMR
+   *   o fun02 sec04 sub05 cat04:
+   *     - min perccent snp/match support
+   *   o fun02 sec04 sub05 cat05:
+   *     - min percent insertion support
+   *   o fun02 sec04 sub05 cat06:
+   *     - min percent deletion support
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub05 Cat01:
    +   - variant/readAMR print setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   printSettings_fun02_sec04_sub04_cat01:;
+   skipClustSet_fun02_sec04_sub05_cat01:;
 
    if(! pPrintBl)
-      goto depthSettings_fun02_sec04_sub05_cat01;
+      goto skipPrintSet_fun02_sec04_sub06_cat01;
 
    fprintf(
       (FILE *) outFILE,
@@ -832,7 +1280,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat02:
+   + Fun02 Sec04 Sub05 Cat02:
    +   - print min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -845,7 +1293,7 @@ phelp_freezeTB(
 
    fprintf(
       (FILE *) outFILE,
-      "      o for variant tsv; mininum read depth to"
+      "      o for variant tsv; mininum read depth to\n"
    );
 
    fprintf(
@@ -854,7 +1302,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat03:
+   + Fun02 Sec04 Sub05 Cat03:
    +   - min percent of reads to keep read AMR
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -876,7 +1324,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat04:
+   + Fun02 Sec04 Sub05 Cat04:
    +   - min percent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -898,7 +1346,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat05:
+   + Fun02 Sec04 Sub05 Cat05:
    +   - min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -915,7 +1363,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat06:
+   + Fun02 Sec04 Sub05 Cat06:
    +   - min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -932,53 +1380,34 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun02 Sec04 Sub05:
+   * Fun02 Sec04 Sub06:
    *   - depth settings
    \*****************************************************/
 
-   depthSettings_fun02_sec04_sub05_cat01:;
-
-   fprintf(
-      (FILE *) outFILE,
-      "  Read depth tsv:\n"
-   );
-
-   fprintf(
-      (FILE *) outFILE,
-      "    -depth-flag %s: [Optional; %s]\n",
-      def_depthFlag_freezeTB,
-      def_depthFlag_freezeTB
-   );
-
-   fprintf(
-      (FILE *) outFILE,
-      "      o label for experiment in depth tsv/graphs\n"
-   );
-
-   fprintf(
-      (FILE *) outFILE,
-      "      o do not use spaces or tabs\n"
-   );
+   skipPrintSet_fun02_sec04_sub06_cat01:;
 
    /*****************************************************\
-   * Fun02 Sec04 Sub06:
+   * Fun02 Sec04 Sub07:
    *   - lineage settings
-   *   o fun02 sec04 sub06 cat01:
+   *   o fun02 sec04 sub07 cat01:
    *     - lineage setting block
-   *   o fun02 sec04 sub06 cat02:
+   *   o fun02 sec04 sub07 cat02:
    *     - MIRU fudge setting
-   *   o fun02 sec04 sub06 cat03:
+   *   o fun02 sec04 sub07 cat03:
    *     - spoligtyping min perc score
-   *   o fun02 sec04 sub06 cat04:
+   *   o fun02 sec04 sub07 cat04:
    *     - spoligtyping dr-start
-   *   o fun02 sec04 sub06 cat05:
+   *   o fun02 sec04 sub07 cat05:
    *     - spoligtyping dr-end
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat01:
+   + Fun02 Sec04 Sub07 Cat01:
    +   - lineage setting block
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(! pLinBl)
+      goto skipLineageSet_fun02_sec04_sub08;
 
    fprintf(
       (FILE *) outFILE,
@@ -986,13 +1415,13 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat02:
+   + Fun02 Sec04 Sub07 Cat02:
    +   - MIRU fudge setting
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    fprintf(
       (FILE *) outFILE,
-      "    -fudge %i: [Optional; %i]",
+      "    -fudge %i: [Optional; %i]\n",
       def_fudgeLen_tbMiruDefs,
       def_fudgeLen_tbMiruDefs
    );
@@ -1008,7 +1437,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat03:
+   + Fun02 Sec04 Sub07 Cat03:
    +   - spoligtyping min perc score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1030,7 +1459,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat04:
+   + Fun02 Sec04 Sub07 Cat04:
    +   - spoligtyping dr-start
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1047,7 +1476,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat05:
+   + Fun02 Sec04 Sub07 Cat05:
    +   - spoligtyping dr-end
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1064,24 +1493,28 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun02 Sec04 Sub06:
+   * Fun02 Sec04 Sub08:
    *   - other settings and help message/version number
-   *   o fun02 sec04 sub06 cat01:
+   *   o fun02 sec04 sub08 cat01:
    *     - other settings header
-   *   o fun02 sec04 sub06 cat02:
+   *   o fun02 sec04 sub08 cat02:
+   *     - flag for graph
+   *   o fun02 sec04 sub08 cat03:
    *     - checking frameshifts
-   *   o fun02 sec04 sub06 cat03:
+   *   o fun02 sec04 sub08 cat04:
    *     - default help message
-   *   o fun02 sec04 sub06 cat04:
+   *   o fun02 sec04 sub08 cat05:
    *     - addons for help message
-   *   o fun02 sec04 sub06 cat05:
+   *   o fun02 sec04 sub08 cat06:
    *     - version number
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat01:
+   + Fun02 Sec04 Sub08 Cat01:
    +   - Other settings header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   skipLineageSet_fun02_sec04_sub08:;
 
    fprintf(
       (FILE *) outFILE,
@@ -1089,19 +1522,44 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat02:
+   + Fun02 Sec04 Sub08 Cat02:
+   +   - flag for graph
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(! pOtherBl)
+      goto skipOtherSet_fun02_sec04_sub08_cat04;
+   
+   fprintf(
+      (FILE *) outFILE,
+      "    -depth-flag %s: [Optional; %s]\n",
+      def_depthFlag_freezeTB,
+      def_depthFlag_freezeTB
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o label for experiment in depth tsv/graphs\n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o do not use spaces or tabs\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub08 Cat03:
    +   - Checking frameshifts
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(def_checkFramshift_tbAmrDefs)
       fprintf(
          (FILE *) outFILE,
-         "    -frameshift: [Optional; Yes]"
+         "    -frameshift: [Optional; Yes]\n"
          );
    else
       fprintf(
          (FILE *) outFILE,
-         "    -frameshift: [Optional; No]"
+         "    -frameshift: [Optional; No]\n"
          );
 
    fprintf(
@@ -1120,13 +1578,19 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat03:
+   + Fun02 Sec04 Sub08 Cat04:
    +   - default help message
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+   skipOtherSet_fun02_sec04_sub08_cat04:;
+
    if(
-         pConBl
+         pFiltBl
+      || pConBl
       || pPrintBl
+      || pClustBl
+      || pLinBl
+      || pOtherBl
    ){ /*If: not default help message*/
       fprintf(
          (FILE *) outFILE,
@@ -1143,28 +1607,85 @@ phelp_freezeTB(
    } /*Else: not default help message*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat04:
+   + Fun02 Sec04 Sub08 Cat05:
    +   - addons for help message
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fprintf(
-      (FILE *) outFILE,
-      "    -h-con: add consensus settings to -h\n"
-   );
+   if(! pFiltBl)
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-filt: add consensus settings to -h\n"
+      );
+   else
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-filt: print this help message and exit\n"
+      );
 
-   fprintf(
-      (FILE *) outFILE,
-      "    -h-print: add print settings to -h\n"
-   );
+   if(pConBl)
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-con: add consensus settings to -h\n"
+      );
+   else
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-con: print this help message and exit\n"
+      );
+
+   if(pLinBl)
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-lin: add lineage settings to -h\n"
+      );
+   else
+      fprintf(
+        (FILE *) outFILE,
+        "    -h-lin: print this help message and exit\n"
+      );
+
+
+   if(pPrintBl)
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-print: add print settings to -h\n"
+      );
+   else
+      fprintf(
+        (FILE *) outFILE,
+        "    -h-print: print this help message and exit\n"
+      );
+
+   if(pClustBl)
+      fprintf(
+         (FILE *) outFILE,
+         "    -h-clust: add cluster settings to -h\n"
+      );
+   else
+      fprintf(
+        (FILE *) outFILE,
+        "    -h-clust: print this help message and exit\n"
+      );
+
+   if(pOtherBl)
+      fprintf(
+        (FILE *) outFILE,
+        "    -h-other: add uncatogorized settings to -h\n"
+      );
+   else
+      fprintf(
+        (FILE *) outFILE,
+        "    -h-other: print this help message and exit\n"
+      );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub06 Cat05:
+   + Fun02 Sec04 Sub08 Cat06:
    +   - version number
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    fprintf(
-      (FILE *) outFILE,
-      "    -v: Version number of freezeTB/submodules\n"
+     (FILE *) outFILE,
+     "    -v: print version number of freezeTB and exit\n"
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1190,6 +1711,10 @@ phelp_freezeTB(
    ^     - filtered histogram file
    ^   o fun02 sec05 sub10:
    ^     - unfiltered histogram file
+   ^   o fun02 sec05 sub11:
+   ^     - clusters with reads
+   ^   o fun02 sec05 sub12:
+   ^     - log (for mixed infect)
    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -1347,6 +1872,36 @@ phelp_freezeTB(
       (FILE *) outFILE,
       "      before read filtering step\n"
    );
+
+   /*****************************************************\
+   * Fun02 Sec05 Sub11:
+   *   - clusters with reads
+   \*****************************************************/
+
+   fprintf(
+      (FILE *) outFILE,
+      "  - prefix-reference-number.sam \n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "    o sam file with clusters (mixed infect)\n"
+   );
+
+   /*****************************************************\
+   * Fun02 Sec05 Sub12:
+   *   - log (for mixed infect)
+   \*****************************************************/
+
+   fprintf(
+      (FILE *) outFILE,
+      "  - prefix-log.txt \n"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "    o log for mixed infection detection step\n"
+   );
 } /*phelp_freezeTB*/
 
 /*-------------------------------------------------------\
@@ -1397,6 +1952,13 @@ phelp_freezeTB(
 |     - graphFileTypeStr:
 |       o pointer to c-string to point to graph file
 |         extension
+|   Clustering:
+|     - clustBlPtr:
+|       o pointer to signed char
+|       o set to 1: if clustering
+|       o set to 0: if not clustering
+|     - clustSetSTPtr:
+|       o holds settings for the clustering step
 |   Misc:
 |     - frameshiftBl:
 |       o 1: users wants frame shift checking on consensus
@@ -1443,9 +2005,14 @@ input_freezeTB(
    float *minMeanQF,
    float *minPercMapF,
    struct set_tbCon *settings,
+   signed char *adjCoordBlPtr,
 
    /*graphing*/
    signed char **depthFlagStr,
+
+   /*clustering*/
+   signed char *clustBlPtr,
+   struct set_clustST *clustSetSTPtr,
 
    /*misc*/
    signed char *frameshiftBl,
@@ -1476,8 +2043,13 @@ input_freezeTB(
    schar errSC = 0;
    schar helpBl = 0; /*print help message at end*/
 
+   /*booleans for extra help message entries*/
+   schar pFiltHelpBl = 0;
    schar pConHelpBl = 0;
    schar pPrintHelpBl = 0;
+   schar pClustHelpBl = 0;
+   schar pLinHelpBl = 0;
+   schar pOtherHelpBl = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -1489,8 +2061,12 @@ input_freezeTB(
       phelp_fun03_sec02:;
 
       phelp_freezeTB(
+         pFiltHelpBl,
          pConHelpBl,
          pPrintHelpBl,
+         pClustHelpBl,
+         pLinHelpBl,
+         pOtherHelpBl,
          stdout
       );
 
@@ -1509,17 +2085,17 @@ input_freezeTB(
    ^   o fun03 sec03 sub04:
    ^     - tbAmr settings
    ^   o fun03 sec03 sub05:
-   ^     - read filtering
+   ^     - read filtering + adjust coordinates
    ^   o fun03 sec03 sub06:
    ^     - lineages and graph output
    ^   o fun03 sec03 sub07:
-   ^     - check for help message requests (normal)
+   ^     - cluster settings
    ^   o fun03 sec03 sub08:
-   ^     - check for consensus help message requests
+   ^     - check for help message requests (normal)
    ^   o fun03 sec03 sub09:
-   ^     - check for print help message requests
+   ^     - check for add on help message requests
    ^   o fun03 sec03 sub10:
-   ^     - check for version number requets
+   ^     - check for version number requests
    ^   o fun03 sec03 sub11:
    ^     - invalid input
    ^   o fun03 sec03 sub12:
@@ -1955,7 +2531,7 @@ input_freezeTB(
 
       /**************************************************\
       * Fun03 Sec03 Sub05:
-      *   - filterting (mapq/mean/median)
+      *   - read filterting + adjust coordinates
       \**************************************************/
 
       else if(
@@ -2011,6 +2587,23 @@ input_freezeTB(
          ++siArg;
          *minMeanQF = atof(argAryStr[siArg]);
       } /*Else If: min mean q-score*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-adj-coords",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ) *adjCoordBlPtr = 1;
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-no-adj-coords",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ) *adjCoordBlPtr = 0;
+
 
       /**************************************************\
       * Fun03 Sec03 Sub06:
@@ -2135,6 +2728,411 @@ input_freezeTB(
 
       /**************************************************\
       * Fun03 Sec03 Sub07:
+      *   - clustering settings
+      *   o fun03 sec03 sub07 cat01:
+      *     - user requested clustering?
+      *   o fun03 sec03 sub07 cat02:
+      *     - minimum length weight for read scoring
+      *   o fun03 sec03 sub07 cat03:
+      *     - depth profiling
+      *   o fun03 sec03 sub07 cat04:
+      *     - minium cluster depth
+      *   o fun03 sec03 sub07 cat05:
+      *     - minium cluster percent depth
+      *   o fun03 sec03 sub07 cat06:
+      *     - minium read:read percent distance
+      *   o fun03 sec03 sub07 cat07:
+      *     - minium consensus:read percent distance
+      *   o fun03 sec03 sub07 cat08:
+      *     - maximum consensus similarity (before merge)
+      *   o fun03 sec03 sub07 cat09:
+      *     - maximum error to variant percent (edDist)
+      *   o fun03 sec03 sub07 cat10:
+      *     - minimum overlap between consensuses
+      *   o fun03 sec03 sub07 cat11:
+      *     - window size for window scan
+      *   o fun03 sec03 sub07 cat12:
+      *     - window variant:error ratio
+      *   o fun03 sec03 sub07 cat13:
+      *     - mimimum indel length to count as difference
+      *   o fun03 sec03 sub07 cat14:
+      *     - mimimum q-score to keep snp
+      *   o fun03 sec03 sub07 cat15:
+      *     - maximum percent of consensus maksed
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat01:
+      +   - user requested clustering
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-clust",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ) *clustBlPtr = 1;
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-no-clust",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ) *clustBlPtr = 0;
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat02:
+      +   - minimum length weight for read scoring
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-len-weight",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: how much length influces score*/
+         ++siArg;
+         clustSetSTPtr->lenWeightF=atof(argAryStr[siArg]);
+      } /*Else If: how much length influces score*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat03:
+      +   - depth profiling
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-depth-prof",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ) clustSetSTPtr->depthProfBl = 1;
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-no-depth-prof",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ) clustSetSTPtr->depthProfBl = 0;
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat04:
+      +   - minium cluster depth
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-clust-depth",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: min cluster read depth*/
+         ++siArg;
+         tmpStr = (schar *) argAryStr[siArg];
+
+         tmpStr +=
+            strToUI_base10str(
+                tmpStr,
+                &clustSetSTPtr->minDepthUI
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: invalid input*/
+            fprintf(
+               stderr,
+               "-clust-depth %s; non-numeric/to large\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: min cluster read depth*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat05:
+      +   - minium cluster percent depth
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-clust-perc-depth",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: cluster min percent read depth*/
+         ++siArg;
+
+         clustSetSTPtr->minPercDepthF =
+            atof(argAryStr[siArg]);
+      } /*Else If: cluster min percent read depth*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat06:
+      +   - minium read:read percent distance
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-read-err",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: error rate for read to read map*/
+         ++siArg;
+
+         clustSetSTPtr->readErrRateF =
+            atof(argAryStr[siArg]);
+      } /*Else If: error rate for read to read map*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat07:
+      +   - minium consensus:read percent distance
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-con-err",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+        )
+     ){ /*Else If: error rate for con to read map*/
+        ++siArg;
+        clustSetSTPtr->conErrRateF=atof(argAryStr[siArg]);
+     } /*Else If: error rate for con to read map*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat08:
+      +   - maximum consensus similarity (before merge)
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-con-sim",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: maximum similarity between cons*/
+         ++siArg;
+
+         clustSetSTPtr->maxConSimF=atof(argAryStr[siArg]);
+      } /*Else If: maximum similarity between cons*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat09:
+      +   - maximum error to variant percent (edDist)
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-err-to-var",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: maximum error to variant ratio*/
+         ++siArg;
+         tmpStr = (schar *) argAryStr[siArg];
+
+         tmpStr +=
+            strToUI_base10str(
+                tmpStr,
+                &clustSetSTPtr->varToErrUI
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: invalid input*/
+            fprintf(
+               stderr,
+               "-err-to-var %s; non-numeric / to large\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: maximum error to variant ratio*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat10:
+      +   - minimum overlap between consensuses
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-overlap",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: minimum overlap*/
+         ++siArg;
+
+         clustSetSTPtr->percOverlapF =
+            atof(argAryStr[siArg]);
+
+         if(clustSetSTPtr->percOverlapF == 0)
+         { /*If: invalid input*/
+            fprintf(
+               stderr,
+               "-overlap %s goes to 0; invalid input\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: minimum overlap*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat11:
+      +   - window size for window scan
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-win-len",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: window length for window scanning*/
+         ++siArg;
+         tmpStr = (schar *) argAryStr[siArg];
+
+         tmpStr +=
+            strToUI_base10str(
+                tmpStr,
+                &clustSetSTPtr->winSizeUI
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: invalid input*/
+            fprintf(
+               stderr,
+               "-win-len %s; non-numeric / to large\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: window length for window scanning*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat12:
+      +   - window variant:error ratio
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-win-err",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: window error to varaint ratio*/
+         ++siArg;
+         tmpStr = (schar *) argAryStr[siArg];
+
+         tmpStr +=
+            strToUI_base10str(
+                tmpStr,
+                &clustSetSTPtr->winErrUI
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: invalid input*/
+            fprintf(
+               stderr,
+               "-win-err %s; non-numeric / to large\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: window error to varaint ratio*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat13:
+      +   - mimimum indel length to count as difference
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-indel-len",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: min indel length*/
+         ++siArg;
+         tmpStr = (schar *) argAryStr[siArg];
+
+         tmpStr +=
+            strToUI_base10str(
+                tmpStr,
+                &clustSetSTPtr->indelLenUI
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: invalid input*/
+            fprintf(
+               stderr,
+               "-indel-len %s; non-numeric / to large\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: min indel length*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat14:
+      +   - mimimum q-score to keep snp
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-clust-q-snp",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: min snp q-score*/
+         ++siArg;
+         tmpStr = (schar *) argAryStr[siArg];
+
+         tmpStr +=
+            strToUC_base10str(
+                tmpStr,
+                &clustSetSTPtr->minSnpQUC
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: invalid input*/
+            fprintf(
+             stderr,
+             "-clust-q-snp %s; non-numeric or to large\n",
+             argAryStr[siArg]
+            );
+
+           goto err_fun03_sec04;
+         } /*If: invalid input*/
+      } /*Else If: min snp q-score*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat15:
+      +   - maximum percent of consensus maksed
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-perc-n",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: maximum % masking*/
+        ++siArg;
+        clustSetSTPtr->maxNPercF = atof(argAryStr[siArg]);
+      } /*Else If: maximum % masking*/
+
+      /**************************************************\
+      * Fun03 Sec03 Sub08:
       *   - check for help message requests (normal)
       \**************************************************/
 
@@ -2179,9 +3177,20 @@ input_freezeTB(
       ) helpBl = 1;
 
       /**************************************************\
-      * Fun03 Sec03 Sub08:
-      *   - check for consensus help message requests
+      * Fun03 Sec03 Sub09:
+      *   - check for extra entry help messages
       \**************************************************/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-h-filt",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: add filtering settings to help*/
+         helpBl = 1;
+         pFiltHelpBl = 1;
+      } /*Else If: add filtering settings to help*/
 
       else if(
          ! eql_charCp(
@@ -2196,162 +3205,14 @@ input_freezeTB(
 
       else if(
          ! eql_charCp(
-            (schar *) "--h-con",
+            (schar *) "-h-lin",
             (schar *) argAryStr[siArg],
             (schar) '\0'
          )
-      ){ /*Else If: add consensus settings to help*/
+      ){ /*Else If: add lineage settings to help*/
          helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "-help-con",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "--help-con",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "help-con",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "-h-consensus",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "--h-consensus",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "-help-consensus",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "--help-consensus",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "help-consensus",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add consensus settings to help*/
-         helpBl = 1;
-         pConHelpBl = 1;
-      } /*Else If: add consensus settings to help*/
-
-      /**************************************************\
-      * Fun03 Sec03 Sub09:
-      *   - check for print help message requests
-      \**************************************************/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "-h-p",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "--h-p",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "-help-p",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "--help-p",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "help-p",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
+         pLinHelpBl = 1;
+      } /*Else If: add lineage settings to help*/
 
       else if(
          ! eql_charCp(
@@ -2366,47 +3227,25 @@ input_freezeTB(
 
       else if(
          ! eql_charCp(
-            (schar *) "--h-print",
+            (schar *) "-h-clust",
             (schar *) argAryStr[siArg],
             (schar) '\0'
          )
-      ){ /*Else If: add print settings to help*/
+      ){ /*Else If: add cluster settings to help*/
          helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
+         pClustHelpBl = 1;
+      } /*Else If: add cluster settings to help*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-help-print",
+            (schar *) "-h-other",
             (schar *) argAryStr[siArg],
             (schar) '\0'
          )
-      ){ /*Else If: add print settings to help*/
+      ){ /*Else If: add other settings to help*/
          helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "--help-print",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
-
-      else if(
-         ! eql_charCp(
-            (schar *) "help-print",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
-         )
-      ){ /*Else If: add print settings to help*/
-         helpBl = 1;
-         pPrintHelpBl = 1;
-      } /*Else If: add print settings to help*/
+         pOtherHelpBl = 1;
+      } /*Else If: add other settings to help*/
 
       /**************************************************\
       * Fun03 Sec03 Sub10:
@@ -2510,18 +3349,16 @@ input_freezeTB(
 
    phelp_fun03_sec04:;
    pversion_fun03_sec04:;
-   errSC = 1;
-   goto ret_fun04_sec04;
+      errSC = 1;
+      goto ret_fun04_sec04;
 
    err_fun03_sec04:;
-   errSC = 2;
-   goto ret_fun04_sec04;
+      errSC = 2;
+      goto ret_fun04_sec04;
 
    ret_fun04_sec04:;
-   return errSC;
+      return errSC;
 } /*input_freezeTB*/
-
-
 
 /*-------------------------------------------------------\
 | Main:
@@ -2560,6 +3397,8 @@ main(
    '   o main sec09:
    '     - collapse consensus and consensus analysis
    '   o main sec10:
+   '     - run mixed infection detection (if requested)
+   '   o main sec11:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -2571,7 +3410,7 @@ main(
    ^   o main sec01 sub02:
    ^     - temporay and error reporting variables
    ^   o main sec01 sub03:
-   ^     - filtering and sam file variables
+   ^     - filtering and sam file variables (adjust coord)
    ^   o main sec01 sub04:
    ^     - read depth and coverage stats variables
    ^   o main sec01 sub05:
@@ -2581,7 +3420,7 @@ main(
    ^   o main sec01 sub07:
    ^     - spoligotyping unique variables
    ^   o main sec01 sub08:
-   ^     - consensus building unique variables
+   ^     - consensus building/mixed infection variables
    ^   o main sec01 sub09:
    ^     - masking unique variables
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -2607,10 +3446,11 @@ main(
 
    /*****************************************************\
    * Main Sec01 Sub03:
-   *   - filtering and sam file variables
+   *   - filtering and sam file variables (adjust coord)
    \*****************************************************/
 
    schar *samFileStr = 0;
+   schar adjCoordBl = def_adjCoord_freezeTBDefs;
 
    /*for sam file processing*/
    struct samEntry samStackST;
@@ -2640,6 +3480,8 @@ main(
 
    struct geneCoord *coordsHeapST = 0;
    sint numCoordsSI = 0;
+   uint lastBaseUI = 0;
+   uint firstBaseUI = 0;
 
    sint *readMapArySI = 0;
    sint *filt_readMapArySI = 0;
@@ -2656,8 +3498,11 @@ main(
    schar conAmrStr[256];
    schar amrDbFileStr[256]; 
    schar readAmrStr[256];
+   schar logFileStr[256];
 
    FILE *idFILE = 0; /*For read id printing*/
+   FILE *logFILE = 0; /*for mixed infection currently*/
+
    schar frameshiftBl = def_checkFramshift_tbAmrDefs;
    struct amrST *amrHeapAryST = 0;
    struct amrHit_checkAmr *amrHitHeapSTList = 0;
@@ -2696,8 +3541,8 @@ main(
    schar spoligoDbFileStr[256];
 
    schar checkSpoligoLinBl = 1;
-   #define lenSpolgioAry 128
-   uint spoligoAryUI[lenSpolgioAry + 1];
+   #define def_lenSpolAry_main 128
+   uint spoligoAryUI[def_lenSpolAry_main + 1];
    schar outSpoligoFileStr[256];
    schar outReadSpoligoFileStr[256];
 
@@ -2728,7 +3573,7 @@ main(
 
    /*****************************************************\
    * Main Sec01 Sub08:
-   *   - consensus building unique variables
+   *   - consensus building/mixed infection variables
    \*****************************************************/
 
    schar samConStr[256];
@@ -2741,6 +3586,12 @@ main(
    struct samEntry *samConSTAry = 0;
    sint numFragSI = 0;
    sint siCon = 0; /*iterator for consensus step*/
+
+   schar mixedInfectBl = def_mixedInfect_freezeTBDefs;
+   struct index_clustST *indexHeapST = 0;
+   struct con_clustST *conListHeapST = 0;
+   struct con_clustST *conNodeST = 0;
+   struct set_clustST clustSetStackST;
 
    /*****************************************************\
    * Main Sec01 Sub09:
@@ -2789,13 +3640,14 @@ main(
    init_set_tbCon(&tbConSettings);
    init_samEntry(&samStackST);
    init_alnSet(&alnSetStackST);
+   init_set_clustST(&clustSetStackST);
 
    init_tblST_kmerFind(&kmerTblStackST);
 
    /*initialize spoligotyping array*/
    for(
       numLineagesSI = 0;
-      numLineagesSI < lenSpolgioAry;
+      numLineagesSI < def_lenSpolAry_main;
       ++numLineagesSI
    ) spoligoAryUI[numLineagesSI] = 0;
 
@@ -2824,7 +3676,10 @@ main(
          &minMeanQF,       /*mean Q-score to filter with*/
          &minPercMapF,     /*pitch AMRs beneath; tbAMR*/
          &tbConSettings,   /*consensus/variants settings*/
+         &adjCoordBl,      /*do coordinate adjusting?*/
          &depthFlagStr,    /*ampDepth column 1*/
+         &mixedInfectBl,   /*tells if mixed infct detect*/
+         &clustSetStackST, /*settings for mixed infect*/
          &frameshiftBl,    /*AMR frame shift checking*/
          &fudgeLenSI,      /*fudge size for MIRU tables*/
          &spoligoPercScoreF, /*% score to count map*/
@@ -2835,7 +3690,7 @@ main(
    if(errSC)
    { /*If: error*/
       --errSC; /*convert help/version print to no error*/
-      goto cleanUp_main_sec10_sub03;
+      goto cleanUp_main_sec11_sub03;
    } /*If: error*/
 
    /*****************************************************\
@@ -2852,7 +3707,7 @@ main(
          "memory error setting up samEntry struct\n"
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: memory error*/
 
 
@@ -2869,7 +3724,7 @@ main(
          "memory error setting up tblST_kmerFind struct\n"
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: memory error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2908,7 +3763,7 @@ main(
          miruDbFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: I could not open the MIRU table*/
 
    fclose(outFILE);
@@ -2933,7 +3788,7 @@ main(
          spoligoRefFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open spoligo spacer sequences*/
 
    fclose(outFILE);
@@ -2991,7 +3846,7 @@ main(
          amrDbFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open the filtered read stats file*/
 
    fclose(outFILE);
@@ -3023,7 +3878,7 @@ main(
             samFileStr 
          );
 
-         goto err_main_sec10_sub02;
+         goto err_main_sec11_sub02;
       } /*If: could not open the sam file*/
    } /*Else: need to open sam file*/
 
@@ -3046,7 +3901,7 @@ main(
          samFileStr 
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open gene coordinates file*/
 
    fclose(outFILE);
@@ -3097,7 +3952,7 @@ main(
          readStatsStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
  
    /*****************************************************\
@@ -3120,7 +3975,7 @@ main(
          conTsvStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3143,7 +3998,7 @@ main(
          readAmrStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3166,7 +4021,7 @@ main(
          idFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3189,7 +4044,7 @@ main(
          conAmrStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3212,7 +4067,7 @@ main(
          readMiruStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3235,7 +4090,7 @@ main(
          conMiruStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3258,7 +4113,7 @@ main(
          outSpoligoFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3281,7 +4136,7 @@ main(
          outReadSpoligoFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
@@ -3304,7 +4159,7 @@ main(
          outReadSpoligoFileStr
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: could not open file*/
 
    samConFILE =
@@ -3359,10 +4214,19 @@ main(
             coordFileStr
          );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error*/
 
    lenBuffUL = 0;
+
+   firstBaseUI = coordsHeapST->startAryUI[0];
+   lastBaseUI = coordsHeapST->endAryUI[numCoordsSI];
+
+   sortName_geneCoord(
+      coordsHeapST,
+      0,
+      numCoordsSI
+   );
 
    /*****************************************************\
    * Main Sec05 Sub02:
@@ -3394,7 +4258,7 @@ main(
            "memory error; when processing variant id's\n"
          );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
@@ -3424,7 +4288,7 @@ main(
             miruDbFileStr
          );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
@@ -3455,7 +4319,7 @@ main(
             spoligoRefFileStr
          );
  
-         goto err_main_sec10_sub02;
+         goto err_main_sec11_sub02;
       } /*If: file error*/
  
       else
@@ -3465,7 +4329,7 @@ main(
             "Ran out of memory getting spoligo seqs\n"
          );
  
-          goto err_main_sec10_sub02;
+          goto err_main_sec11_sub02;
       } /*Else: memory error*/
    } /*If: error*/
 
@@ -3507,7 +4371,7 @@ main(
                spoligoDbFileStr
             );
 
-            goto err_main_sec10_sub02;
+            goto err_main_sec11_sub02;
          } /*Else: memory error*/
       } /*If: error*/
    } /*If: have lineage database*/
@@ -3563,7 +4427,7 @@ main(
             );
          } /*Else: memory error*/
 
-         goto err_main_sec10_sub02;
+         goto err_main_sec11_sub02;
       } /*If: error*/
    } /*If: primer masking file was input*/
 
@@ -3598,6 +4462,12 @@ main(
    +   - get first sam file entry + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+   if(adjCoordBl)
+   { /*If: adjusting coordinates*/
+      lenRefSI = (sint) lastBaseUI;
+      ++lenRefSI; /*convert to index 1*/
+   } /*If: adjusting coordinates*/
+
    errSC =
       get_samEntry(
          &samStackST,
@@ -3616,6 +4486,17 @@ main(
 
       if(*samStackST.extraStr != '@')
          break; /*off header*/
+
+      if(
+            adjCoordBl
+         &&
+            ! eql_charCp(
+               (schar *) "@SQ\t",
+               samStackST.extraStr,
+               '\t'
+            )
+      ) goto nextHeader_main_sec06_sub01_cat04;
+        /*do not print sequence entries for header*/
 
       fprintf(
          samConFILE,
@@ -3643,7 +4524,7 @@ main(
                samFileStr
             ); 
 
-            goto err_main_sec10_sub02;
+            goto err_main_sec11_sub02;
          } /*If: sam file has multiple references*/
 
          multiRefBl = 1;
@@ -3728,7 +4609,7 @@ main(
             samFileStr
          );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error reading sam file header*/
 
    /*****************************************************\
@@ -3745,89 +4626,95 @@ main(
    +   - tbCon cosensus settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fprintf(
-      samConFILE,
-      "@PG\tID:tbCon\tPN:tbCon"
-   );
+   if(! mixedInfectBl)
+   { /*If: not doing mixed infection step*/
+      fprintf(
+         samConFILE,
+         "@PG\tID:tbCon\tPN:tbCon"
+      );
 
-   fprintf(
-      samConFILE,
-      "\tVN:%i-%02i-%02i\tCL:tbCon",
-      def_year_tbConDefs,
-      def_month_tbConDefs,
-      def_day_tbConDefs
-   );
+      fprintf(
+         samConFILE,
+         "\tVN:%i-%02i-%02i\tCL:tbCon",
+         def_year_tbConDefs,
+         def_month_tbConDefs,
+         def_day_tbConDefs
+      );
 
-   /*Check if getting sam file from stdin*/
-   if(! samFileStr || *samFileStr == '-')
-     fprintf(
-        samConFILE,
-        " -sam -"
-     );
+      /*Check if getting sam file from stdin*/
+      if(! samFileStr || *samFileStr == '-')
+        fprintf(
+           samConFILE,
+           " -sam -"
+        );
 
-   else
-     fprintf(
-        samConFILE,
-           " -sam %s",
-           samFileStr
-     );
+      else
+        fprintf(
+           samConFILE,
+              " -sam %s",
+              samFileStr
+        );
 
-   fprintf(
-      samConFILE,
-      " -min-mapq %i -min-q %i -min-q-ins %i",
-      tbConSettings.minMapqUC,
-      tbConSettings.minQSI,
-      tbConSettings.minInsQSI
-   );
+      fprintf(
+         samConFILE,
+         " -min-mapq %i -min-q %i -min-q-ins %i",
+         tbConSettings.minMapqUC,
+         tbConSettings.minQSI,
+         tbConSettings.minInsQSI
+      );
 
-   fprintf(
-      samConFILE,
-      " -min-len %i -min-depth %i -perc-snp-sup %.2f",
-      tbConSettings.minLenSI,
-      tbConSettings.minDepthSI,
-      tbConSettings.minPercSnpF
-   );
+      fprintf(
+         samConFILE,
+         " -min-len %i -min-depth %i -perc-snp-sup %.2f",
+         tbConSettings.minLenSI,
+         tbConSettings.minDepthSI,
+         tbConSettings.minPercSnpF
+      );
 
-   fprintf(
-      samConFILE,
-      " -perc-ins-sup %.2f -min-del-sup %.2f",
-      tbConSettings.minPercInsF,
-      tbConSettings.minPercDelF
-   );
+      fprintf(
+         samConFILE,
+         " -perc-ins-sup %.2f -min-del-sup %.2f",
+         tbConSettings.minPercInsF,
+         tbConSettings.minPercDelF
+      );
 
-   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec06 Sub02 Cat02:
-   +   - tbCon variant print (tsv file) settings
-   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Main Sec06 Sub02 Cat02:
+      +   - tbCon variant print (tsv file) settings
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fprintf(
-      samConFILE,
-      " -min-mapq %i -min-q %i -min-q-ins %i",
-      tbConSettings.minMapqUC,
-      tbConSettings.minQSI,
-      tbConSettings.minInsQSI
-   );
+      fprintf(
+         samConFILE,
+         " -min-mapq %i -min-q %i -min-q-ins %i",
+         tbConSettings.minMapqUC,
+         tbConSettings.minQSI,
+         tbConSettings.minInsQSI
+      );
 
-   fprintf(
-      samConFILE,
-      " -p-min-depth %i -p-perc-snp-sup %.2f",
-      tbConSettings.minPrintDepthSI,
-      tbConSettings.printMinSupSnpF
-   );
+      fprintf(
+         samConFILE,
+         " -p-min-depth %i -p-perc-snp-sup %.2f",
+         tbConSettings.minPrintDepthSI,
+         tbConSettings.printMinSupSnpF
+      );
 
-   fprintf(
-      samConFILE,
-      " -p-perc-ins-sup %.2f -p-min-del-sup %.2f",
-      tbConSettings.printMinSupInsF,
-      tbConSettings.printMinSupDelF
-   );
+      fprintf(
+         samConFILE,
+         " -p-perc-ins-sup %.2f -p-min-del-sup %.2f",
+         tbConSettings.printMinSupInsF,
+         tbConSettings.printMinSupDelF
+      );
 
-   fprintf(
-      samConFILE,
-       " -out-tsv %s -out %s\n",
-       conTsvStr,
-       samConStr
-   );
+      fprintf(
+         samConFILE,
+          " -out-tsv %s -out %s\n",
+          conTsvStr,
+          samConStr
+      );
+   } /*If: not doing mixed infection step*/
+
+   fclose(samConFILE);
+   samConFILE = 0;
 
    /*****************************************************\
    * Main Sec06 Sub03:
@@ -3891,7 +4778,7 @@ main(
          "memory error (read histogram allocation)\n"
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: memory error*/
 
    filt_readMapArySI =
@@ -3907,7 +4794,7 @@ main(
          "memory error (read histogram allocation)\n"
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: memory error*/
 
    /*****************************************************\
@@ -3932,6 +4819,22 @@ main(
          goto nextRead_main_sec07_sub09;
       } /*If:umapped 4, secondary 256, or suplemtal 2048*/
 
+      if(adjCoordBl)
+      { /*If: need to adjust coordinates*/
+         errSC =
+            adjCoords(
+               &samStackST,
+               coordsHeapST,
+               numCoordsSI
+            );
+               
+         if(errSC)
+         { /*If: read is not in coordinates list*/
+            ++offTargReadsSI;
+            goto nextRead_main_sec07_sub09;
+         } /*If: read is not in coordinates list*/
+      } /*If: need to adjust coordinates*/
+
       /*remove soft masked bases*/
       trimSeq_trimSam(&samStackST);
          /*already removed reads that could cause errors*/
@@ -3940,14 +4843,16 @@ main(
 
       addRead_ampDepth(
          &samStackST,
-         coordsHeapST,
-         numCoordsSI,
+         firstBaseUI,
+         lastBaseUI,
          readMapArySI,
          &offTargReadsSI
       ); /*build up histogram of stats*/
 
+      /*limits full genome, really on gene coord adjust
       if(oldOffTargSI < offTargReadsSI)
-         goto nextRead_main_sec07_sub09; /*off target*/
+         goto nextRead_main_sec07_sub09;
+      */ /*off target*/
 
       if(samStackST.medianQF < minMedianQF)
          goto nextRead_main_sec07_sub09;
@@ -3994,8 +4899,8 @@ main(
 
       addRead_ampDepth(
          &samStackST,
-         coordsHeapST,
-         numCoordsSI,
+         firstBaseUI,
+         lastBaseUI,
          filt_readMapArySI,
          &oldOffTargSI         /*never used*/
       );
@@ -4005,24 +4910,27 @@ main(
       *   - build consensus
       \**************************************************/
 
-      errSC =
-         addRead_tbCon(
-            &samStackST,
-            &conNtHeapAryST,
-            (uint *) &lenRefSI,
-            &tbConSettings
-         ); /*add read to consnesus*/
-            
-      if(errSC & def_memErr_tbConDefs)
-      { /*If: memory error*/
-         fprintf(
-             stderr,
-             "memory error add read %u to consensus\n",
-             totalReadsUI
-         );
+      if(! mixedInfectBl)
+      { /*If: not doing mixed infection detection*/
+         errSC =
+            addRead_tbCon(
+               &samStackST,
+               &conNtHeapAryST,
+               (uint *) &lenRefSI,
+               &tbConSettings
+            ); /*add read to consnesus*/
+               
+         if(errSC & def_memErr_tbConDefs)
+         { /*If: memory error*/
+            fprintf(
+                stderr,
+                "memory error add read %u to consensus\n",
+                totalReadsUI
+            );
 
-         goto err_main_sec10_sub02;
-      } /*If: memory error*/
+            goto err_main_sec11_sub02;
+         } /*If: memory error*/
+      } /*If: not doing mixed infection detection*/
 
       /**************************************************\
       * Main Sec07 Sub06:
@@ -4047,7 +4955,7 @@ main(
              totalReadsUI
          );
 
-         goto err_main_sec10_sub02;
+         goto err_main_sec11_sub02;
       } /*If: memory error*/
 
       if(amrHitHeapSTList)
@@ -4102,7 +5010,7 @@ main(
              totalReadsUI
          );
 
-         goto err_main_sec10_sub02;
+         goto err_main_sec11_sub02;
       } /*If: memory error*/
 
       /**************************************************\
@@ -4126,12 +5034,15 @@ main(
    *   - minor clean up (variables unique to sec07)
    \*****************************************************/
 
-   freeStack_samEntry(&samStackST);
+   if(! mixedInfectBl)
+   { /*If: not doing mixed infection detection*/
+      freeStack_samEntry(&samStackST);
 
-   if(samFILE != stdin)
-      fclose(samFILE);
+      if(samFILE != stdin)
+         fclose(samFILE);
 
-   samFILE = 0;
+      samFILE = 0;
+   } /*If: not doing mixed infection detection*/
 
    fclose(idFILE);
    idFILE = 0;
@@ -4167,6 +5078,12 @@ main(
    * Main Sec08 Sub01:
    *   - print unfiltered read stats
    \*****************************************************/
+
+   sort_geneCoord(
+      coordsHeapST,
+      0,
+      (uint) numCoordsSI
+   );
 
    outFILE =
       fopen(
@@ -4317,7 +5234,7 @@ main(
 
    for(
       lenKmerUC = 0;
-      lenKmerUC < lenSpolgioAry;
+      lenKmerUC < def_lenSpolAry_main;
       ++lenKmerUC
    ) spoligoAryUI[lenKmerUC] = 0;
 
@@ -4331,14 +5248,15 @@ main(
    \*****************************************************/
 
    /*Build the tsv of variants table*/
-   errSC =
-      pvar_tbCon(
-         conNtHeapAryST,
-         lenRefSI,
-         refIdStr,
-         &tbConSettings,
-         conTsvStr
-      ); /*print variants (not a vcf)*/
+   if(! mixedInfectBl)
+      errSC =
+         pvar_tbCon(
+            conNtHeapAryST,
+            lenRefSI,
+            refIdStr,
+            &tbConSettings,
+            conTsvStr
+         ); /*print variants (not a vcf)*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec09:
@@ -4359,6 +5277,9 @@ main(
    * Main Sec09 Sub01:
    *   - collapse consensus
    \*****************************************************/
+
+   if(mixedInfectBl)
+      goto mixedInfect_main_sec11;
 
    samConSTAry =
       collapse_tbCon(
@@ -4385,7 +5306,7 @@ main(
          "could not collapse consensus\n"
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
@@ -4407,6 +5328,12 @@ main(
    + Main Sec09 Sub04 Cat01:
    +   - open files + run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   samConFILE =
+      fopen(
+         (char *) samConStr,
+          "a"
+      ); /*open consensus output file*/
 
    outFILE =
       fopen(
@@ -4552,7 +5479,7 @@ main(
          "error during consensus analyisis step\n"
       );
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
@@ -4577,7 +5504,7 @@ main(
          conMiruStr
       ); 
 
-      goto err_main_sec10_sub02;
+      goto err_main_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
@@ -4630,170 +5557,539 @@ main(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
+   goto ret_main_sec11;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec10:
-   ^   - clean up
+   ^   - run mixed infection detection (if requested)
    ^   o main sec10 sub01:
-   ^     - no error clean up
+   ^     - check if can open log files
    ^   o main sec10 sub02:
-   ^     - error clean up
+   ^     - run mixed infection detection
    ^   o main sec10 sub03:
+   ^     - print clusters for mixed infection
+   ^   o main sec10 sub04:
+   ^     - amr/miru/spoligotype detection on clusters
+   ^   o main sec10 sub05:
+   ^     - print consensus MIRU lineages
+   ^   o main sec10 sub06:
+   ^     - print detected spoligotype
+   \*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Main Sec10 Sub01:
+   *   - check if can open log files
+   \*****************************************************/
+
+   mixedInfect_main_sec11:;
+
+   if(samFILE == stdin)
+   { /*If: piping file to mixed infection detect*/
+      fprintf(
+         stderr,
+         "-sam is stdin; not allowed for mixed infection"
+      );
+
+      fprintf(
+         stderr,
+         " mode\n"
+      );
+
+      goto err_main_sec11_sub02;
+   } /*If: piping file to mixed infection detect*/
+
+   errSC =
+      outputPath_freezeTBPaths(
+         prefixStr,
+         (schar *) "-mixed-infect-log.txt",
+         logFileStr
+      );
+
+   if(errSC)
+      logFILE = stderr;
+   else
+      logFILE =
+         fopen(
+            (char *) logFileStr,
+            "w"
+         );
+
+   if(! logFILE)
+   { /*If: could not open log flie*/
+      fprintf(
+         stderr,
+         "could not open log file %s\n",
+         logFileStr
+      );
+
+      goto err_main_sec11_sub02;
+   } /*If: could not open log flie*/
+
+   /*****************************************************\
+   * Main Sec10 Sub02:
+   *   - run mixed infection detection
+   \*****************************************************/
+
+   fseek(
+      samFILE,
+      0,
+      SEEK_SET
+   );
+
+   conListHeapST =
+      cluster_edClust(
+         &indexHeapST,
+         &clustSetStackST,
+			&tbConSettings,
+         &samStackST,
+         &buffHeapStr,
+         &lenBuffUL,
+         samFILE,
+         logFILE, /*log file (re-using)*/
+         &errSC
+      );
+
+   if(errSC)
+   { /*If: error*/
+      if(errSC == def_memErr_edClust)
+         fprintf(
+            stderr,
+            "memory error during mixed infection step\n"
+         );
+
+      else if(errSC == def_fileErr_edClust)
+         fprintf(
+            stderr,
+            "file error during mixed infection step\n"
+         );
+
+      else
+         fprintf(
+            stderr,
+            "no reads for mixed infection step\n"
+         );
+
+      goto err_main_sec11_sub02;
+   } /*If: error*/
+
+   if(logFILE != stderr)
+      fclose(logFILE);
+   logFILE = 0;
+
+   /*****************************************************\
+   * Main Sec10 Sub03:
+   *   - print clusters for mixed infection
+   \*****************************************************/
+
+   samConFILE =
+      fopen(
+         (char *) samConStr,
+          "a"
+      ); /*open consensus output file*/
+
+   errSC =
+      plist_con_clustST(
+         conListHeapST,
+         0,
+         0,
+         &buffHeapStr,
+         &lenBuffUL,
+         samConFILE
+      ); /*print consensus for clusters*/
+
+   fclose(samConFILE);
+   samConFILE = 0;
+
+   if(errSC)
+   { /*If: had error*/
+      fprintf(
+         stderr,
+         "memory error printing cluster consensuses\n"
+      );
+
+      goto err_main_sec11_sub02;
+   } /*If: had error*/
+
+   errSC =
+      pbins_clustST(
+         prefixStr,
+         clustSetStackST.clustSI,
+         indexHeapST,
+         0,            /*currently no program header*/
+         &samStackST,
+         &buffHeapStr,
+         &lenBuffUL,
+         samFILE       /*has reads*/
+      ); /*print consensus for clusters*/
+
+   if(errSC)
+   { /*If: had error*/
+      if(errSC == def_memErr_clustST)
+         fprintf(
+            stderr,
+            "memory error printing clusters\n"
+         );
+      else
+         fprintf(
+            stderr,
+            "file error printing clusters\n"
+         );
+
+      goto err_main_sec11_sub02;
+   } /*If: had error*/
+
+   fclose(samFILE);
+   samFILE = 0;
+
+   if(indexHeapST)
+      freeHeap_index_clustST(indexHeapST);
+   indexHeapST = 0;
+
+   /*****************************************************\
+   * Main Sec10 Sub04:
+   *   - amr/miru/spoligotype detection on clusters
+   *   o main sec10 sub04 cat01:
+   *     - amr detection + start loop
+   *   o main sec10 sub04 cat02:
+   *     - MIRU-VNTR lineage detection and printing
+   *   o main sec10 sub04 cat03:
+   *     - spoligotype detection and printing
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Main Sec10 Sub04 Cat01:
+   +   - amr detection + start loop
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   conNodeST = conListHeapST;
+
+   outFILE =
+      fopen(
+         (char *) conAmrStr,
+         "w"
+      ); /*file to print AMR results to*/
+
+   pConHead_checkAmr(outFILE);
+
+   errSC = 0;
+
+   /*remove all the read counters*/
+   resetCnt_miruTbl(miruHeapST);
+   spolErrSC = def_noSpol_tbSpolDefs;
+
+
+   while(conNodeST)
+   { /*Loop: find amrs and lineages for consensuses*/
+      amrHitHeapSTList =
+         checkAmr(
+            conNodeST->samSTPtr,
+            amrHeapAryST,
+            numAmrSI,
+            &numHitsSI,
+            frameshiftBl,
+            &errSC
+         ); /*check if fragments has AMRs*/
+
+      if(errSC)
+         continue; /*just ignore all other errors*/
+
+      if(amrHitHeapSTList)
+      { /*If: have AMRs*/
+         pCon_checkAmr(
+            conNodeST->samSTPtr->qryIdStr,
+            amrHitHeapSTList,
+            drugHeapAryStr,
+            outFILE
+         ); /*print detected AMRs*/
+
+         freeHeapList_amrHit_checkAmr(amrHitHeapSTList);
+         amrHitHeapSTList = 0;
+      } /*If: have AMRs*/
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec10 Sub04 Cat02:
+     +   - MIRU-VNTR lineage detection and printing
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      incLineage_miruTbl(
+         conNodeST->samSTPtr,
+         fudgeLenSI,
+         miruHeapST
+      ); /*find MIRU lineages in consensus fragment*/
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec10 Sub04 Cat03:
+     +   - spoligotype detection and printing
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+     spolErrSC &=
+         sam_spolFind(
+            &kmerTblStackST,
+            kmerRefAryST,
+            numSpoligosSI,
+            conNodeST->samSTPtr,
+            drStartSI,
+            drEndSI,
+            spoligoPercScoreF,
+            spoligoAryUI,
+            1,             /*always assume fragments*/
+            &alnSetStackST
+         ); /*find spoligotype with kmer search*/
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Main Sec10 Sub04 Cat04:
+     +   - move to next cluster
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+     conNodeST = conNodeST->nextST;
+   } /*Loop: find amrs and lineages for consensuses*/
+
+   if(conListHeapST)
+      freeHeap_con_clustST(conListHeapST);
+   conListHeapST = 0;
+   conNodeST = 0;
+         
+   /*****************************************************\
+   * Main Se109 Sub05:
+   *   - print consensus MIRU lineages
+   \*****************************************************/
+
+   errSC =
+      plineages_miruTbl(
+         miruHeapST,
+         conMiruStr
+      );
+
+   freeHeap_miruTbl(miruHeapST);
+   miruHeapST = 0;
+
+   if(errSC)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "could not write consensuses MIRU lineages %s\n",
+         conMiruStr
+      ); 
+
+      goto err_main_sec11_sub02;
+   } /*If: error*/
+
+   /*****************************************************\
+   * Main Sec10 Sub06:
+   *   - print detected spoligotype
+   \*****************************************************/
+
+   spoligoOutFILE =
+      fopen(
+         (char *) outSpoligoFileStr,
+         "w"
+      );
+
+   phead_spolST(
+      0,             /*print normal header*/
+      spoligoOutFILE
+   );
+
+   if(! spolErrSC)
+   { /*If: detected spoligotype*/
+      pspol_spolST(
+         prefixStr,
+         spoligoAryUI,
+         0,                       /*non-fragment print*/
+         1,                       /*1 supporting read*/
+         lineageHeapAryST,
+         numLineagesSI,
+         spoligoOutFILE
+      );
+   } /*If: detected spoligotype*/
+
+   fclose(spoligoOutFILE);
+   spoligoOutFILE = 0;
+
+   goto ret_main_sec11;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec11:
+   ^   - clean up
+   ^   o main sec11 sub01:
+   ^     - no error clean up
+   ^   o main sec11 sub02:
+   ^     - error clean up
+   ^   o main sec11 sub03:
    ^     - general clean up (everything calls)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec10 Sub01:
+   * Main Sec11 Sub01:
    *   - no error clean up
    \*****************************************************/
 
-   errSC = 0;
-   goto cleanUp_main_sec10_sub03;
+   ret_main_sec11:;
+      errSC = 0;
+      goto cleanUp_main_sec11_sub03;
 
    /*****************************************************\
-   * Main Sec10 Sub02:
+   * Main Sec11 Sub02:
    *   - error clean up
    \*****************************************************/
 
-   err_main_sec10_sub02:;
-   errSC = 1;
-   goto cleanUp_main_sec10_sub03;
+   err_main_sec11_sub02:;
+      errSC = 1;
+      goto cleanUp_main_sec11_sub03;
 
    /*****************************************************\
-   * Main Sec10 Sub03:
+   * Main Sec11 Sub03:
    *   - general clean up (everything calls)
    \*****************************************************/
 
-   cleanUp_main_sec10_sub03:;
+   cleanUp_main_sec11_sub03:;
+      freeStack_samEntry(&samStackST);
 
-   freeStack_samEntry(&samStackST);
+      if(coordsHeapST)
+         freeHeap_geneCoord(coordsHeapST);
 
-   if(coordsHeapST)
-      freeHeap_geneCoord(coordsHeapST);
+      coordsHeapST = 0;
 
-   coordsHeapST = 0;
+      if(amrHeapAryST)
+         freeHeapAry_amrST(
+            amrHeapAryST,
+            numAmrSI
+         );
 
-   if(amrHeapAryST)
-      freeHeapAry_amrST(
-         amrHeapAryST,
-         numAmrSI
-      );
+      amrHeapAryST = 0;
 
-   amrHeapAryST = 0;
+      if(amrHitHeapSTList)
+         freeHeapList_amrHit_checkAmr(amrHitHeapSTList);
 
-   if(amrHitHeapSTList)
-      freeHeapList_amrHit_checkAmr(amrHitHeapSTList);
+      amrHitHeapSTList = 0;
 
-   amrHitHeapSTList = 0;
+      if(miruHeapST)
+         freeHeap_miruTbl(miruHeapST);
 
-   if(miruHeapST)
-      freeHeap_miruTbl(miruHeapST);
+      miruHeapST = 0;
 
-   miruHeapST = 0;
+      if(conNtHeapAryST)
+         freeHeapAry_conNt_tbCon(
+            conNtHeapAryST,
+            lenRefSI
+         );
 
-   if(conNtHeapAryST)
-      freeHeapAry_conNt_tbCon(
-         conNtHeapAryST,
-         lenRefSI
-      );
+      conNtHeapAryST = 0;
 
-   conNtHeapAryST = 0;
+      if(indexHeapST)
+         freeHeap_index_clustST(indexHeapST);
+      indexHeapST = 0;
 
-   freeStack_alnSet(&alnSetStackST);
+      if(conListHeapST)
+         freeHeap_con_clustST(conListHeapST);
+      conListHeapST = 0;
 
-   if(lineageHeapAryST)
-      freeHeapAry_spolST(
-         lineageHeapAryST,
-         numLineagesSI
-      );
+      freeStack_set_clustST(&clustSetStackST);
+      freeStack_alnSet(&alnSetStackST);
 
-   lineageHeapAryST = 0;
+      if(lineageHeapAryST)
+         freeHeapAry_spolST(
+            lineageHeapAryST,
+            numLineagesSI
+         );
 
-   freeStack_tblST_kmerFind(&kmerTblStackST);
+      lineageHeapAryST = 0;
 
-   if(kmerRefAryST)
-      freeHeapAry_refST_kmerFind(
-         kmerRefAryST,
-         numSpoligosSI
-      );
+      freeStack_tblST_kmerFind(&kmerTblStackST);
 
-   kmerRefAryST = 0;
+      if(kmerRefAryST)
+         freeHeapAry_refST_kmerFind(
+            kmerRefAryST,
+            numSpoligosSI
+         );
 
-   if(buffHeapStr)
-      free(buffHeapStr);
+      kmerRefAryST = 0;
 
-   buffHeapStr = 0;
+      if(buffHeapStr)
+         free(buffHeapStr);
 
-   if(readMapArySI)
-      free(readMapArySI);
+      buffHeapStr = 0;
 
-   readMapArySI = 0;
+      if(readMapArySI)
+         free(readMapArySI);
 
-   if(filt_readMapArySI)
-      free(filt_readMapArySI);
+      readMapArySI = 0;
 
-   filt_readMapArySI = 0;
+      if(filt_readMapArySI)
+         free(filt_readMapArySI);
 
-   if(drugHeapAryStr)
-      free(drugHeapAryStr);
+      filt_readMapArySI = 0;
 
-   drugHeapAryStr = 0;
+      if(drugHeapAryStr)
+         free(drugHeapAryStr);
 
-   if(maskStartHeapAryUI)
-      free(maskStartHeapAryUI);
+      drugHeapAryStr = 0;
 
-   maskStartHeapAryUI = 0;
+      if(maskStartHeapAryUI)
+         free(maskStartHeapAryUI);
 
-   if(maskEndHeapAryUI)
-      free(maskEndHeapAryUI);
+      maskStartHeapAryUI = 0;
 
-   maskEndHeapAryUI = 0;
+      if(maskEndHeapAryUI)
+         free(maskEndHeapAryUI);
 
-   if(maskFlagHeapAryUI)
-      free(maskFlagHeapAryUI);
+      maskEndHeapAryUI = 0;
 
-   maskFlagHeapAryUI = 0;
+      if(maskFlagHeapAryUI)
+         free(maskFlagHeapAryUI);
 
-   if(
-         samFILE
-      && samFILE != stdin
-      && samFILE != stdout
-   ) fclose(samFILE);
+      maskFlagHeapAryUI = 0;
 
-   samFILE = 0;
+      if(
+            samFILE
+         && samFILE != stdin
+         && samFILE != stdout
+      ) fclose(samFILE);
 
-   if(
-         outFILE
-      && outFILE != stdin
-      && outFILE != stdout
-   ) fclose(outFILE);
+      samFILE = 0;
 
-   outFILE = 0;
+      if(
+            outFILE
+         && outFILE != stdin
+         && outFILE != stdout
+      ) fclose(outFILE);
 
-   if(
-         samConFILE
-      && samConFILE != stdin
-      && samConFILE != stdout
-   ) fclose(samConFILE);
+      outFILE = 0;
 
-   samConFILE = 0;
+      if(
+            samConFILE
+         && samConFILE != stdin
+         && samConFILE != stdout
+      ) fclose(samConFILE);
 
-   if(
-         idFILE
-      && idFILE != stdin
-      && idFILE != stdout
-   ) fclose(idFILE);
+      samConFILE = 0;
 
-   idFILE = 0;
+      if(
+            idFILE
+         && idFILE != stdin
+         && idFILE != stdout
+      ) fclose(idFILE);
 
-   if(
-         spoligoOutFILE
-      && spoligoOutFILE != stdin
-      && spoligoOutFILE != stdout
-   ) fclose(spoligoOutFILE);
+      idFILE = 0;
 
-   spoligoOutFILE = 0;
+      if(
+            spoligoOutFILE
+         && spoligoOutFILE != stdin
+         && spoligoOutFILE != stdout
+      ) fclose(spoligoOutFILE);
 
-   return errSC;
+      spoligoOutFILE = 0;
+
+      if(
+            logFILE
+         && logFILE != stdin
+         && logFILE != stdout
+         && logFILE != stderr
+      ) fclose(logFILE);
+
+      logFILE = 0;
+
+      return errSC;
 } /*main*/
 
 /* Note01:

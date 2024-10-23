@@ -53,11 +53,11 @@
 
 #include <stdio.h>
 
-#include "../genLib/genMath.h"
 #include "../genLib/base10str.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
-#include "../genLib/codonTbl.h"
+#include "../genLib/genMath.h"
+#include "../genBio/codonTbl.h"
 
 #include "../tbAmrSrc/drugAry.h"
 #include "../tbAmrSrc/amrST.h"
@@ -65,8 +65,8 @@
 
 /*Are just .h files*/
 #include "../genLib/dataTypeShortHand.h"
-#include "../genLib/ntTo2Bit.h"
-#include "../genLib/revNtTo2Bit.h"
+#include "../genBio/ntTo2Bit.h"
+#include "../genBio/revNtTo2Bit.h"
 
 /*-------------------------------------------------------\
 | Fun01: amrIsRes_whoToAmr

@@ -1,47 +1,39 @@
 <$objtype/mkfile
 
-CFLAGS= -w -DPLAN9
-PREFIX=
+CFLAGS= -DPLAN9
+PREFIX=$home/bin
 ext=plan9
 
 all:
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C freezeTBSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C adjCoordsSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C mkMiruTblSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbAmrSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbMiruSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C whoToAmrSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C swapDbRefSrc
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C freezeTBSrc
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C tbAmrSrc
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C tbMiruSrc
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C tbSpolSrc
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C whoToAmrSrc
+	make CC="$CC" LD="$LD" CFLAGS="$CFLAGS" -f mkfile.$ext -C swapDbRefSrc
 
 install:
-	mv freezeTBSrc/freezeTB $(PREFIX)
-	chmod a+x $(PREFIX)/freezeTB
-	mv adjCoordsSrc/adjCoords $(PREFIX)
-	chmod a+x $(PREFIX)/adjCoords
-
-install-modules:
-	mv tbAmrSrc/tbAmr $(PREFIX)
-	chmod a+x $(PREFIX)/tbAmr
-	mv tbMiruSrc/tbMiru $(PREFIX)
-	chmod a+x $(PREFIX)/tbMiru
-	mv tbSpolSrc/tbSpol $(PREFIX)
-	chmod a+x $(PREFIX)/tbSpol
-	mv adjCoordsSrc/adjCoords $(PREFIX)
-	chmod a+x $(PREFIX)/adjCoords
+	mv freezeTBSrc/freezeTB $PREFIX
+	chmod a+x $PREFIX/freezeTB
+	mv tbAmrSrc/tbAmr $PREFIX
+	chmod a+x $PREFIX/tbAmr
+	mv tbMiruSrc/tbMiru $PREFIX
+	chmod a+x $PREFIX/tbMiru
+	mv tbSpolSrc/tbSpol $PREFIX
+	chmod a+x $PREFIX/tbSpol
+	mv whoToAmrSrc/whoToAmr $PREFIX
+	chmod a+x $PREFIX/whoToAmr
+	mv swapDbRefSrc/swapDbRef $PREFIX
+	chmod a+x $PREFIX/swapDbRef
 
 clean:
 	rm \
-		adjCoordsSrc/*$O \
-		ampDepthSrc/*$O \
-		freezeTBSrc/*$O \
-		maskPrimSrc/*$O \
-		mkMiruTblSrc/*$O \
-		swapDbRefSrc/*$O \
-		tbAmrSrc/*$O \
-		tbConSrc/*$O \
-		tbMiruSrc/*$O \
-		tbSpolSrc/*$O \
-		whoToAmrSrc/*$O \
-		genAln/*$O \
-		genLib/*$O
+		freezeTBSrc/*.o.$ext \
+		tbAmrSrc/*.o.$ext \
+		tbMiruSrc/*.o.$ext \
+		tbSpolSrc/*.o.$ext \
+		whoToAmrSrc/*.o.$ext \
+		swapDbRefSrc/*.o.$ext \
+		genLib/*.o.$ext \
+		genBio/*.o.$ext \
+		genAln/*.o.$ext

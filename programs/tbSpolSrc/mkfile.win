@@ -1,72 +1,77 @@
 LD=link
 CC=cl
-CFLAGS= /O2 /Ot /Za /Tc
-NAME=tbSpol
-PREFIX="C:/Program Files/freezeTB"
+CFLAGS= \O2 \Ot \Za \Tc
+NAME=tbSpol.exe
+PREFIX=$$appData$$
 genLib=..\genLib
+genBio=..\genBio
 genAln=..\genAln
-O=.o.win
+O=o.win
 
 objFiles=\
-   $(genLib)\base10str$O \
-   $(genLib)\ulCp$O \
-   $(genLib)\charCp$O \
-   $(genLib)\numToStr$O \
-   $(genLib)\shellSort$O \
-   $(genLib)\seqST$O \
-   $(genLib)\samEntry$O \
-   $(genAln)\indexToCoord$O \
-   $(genAln)\alnSet$O \
-   $(genAln)\kmerFind$O \
-   $(genAln)\memwater$O
+   $(genLib)\numToStr.$O \
+   $(genLib)\base10str.$O \
+   $(genLib)\ulCp.$O \
+   $(genLib)\charCp.$O \
+   $(genLib)\shellSort.$O \
+   $(genLib)\strAry.$O \
+   $(genBio)\seqST.$O \
+   $(genBio)\samEntry.$O \
+   $(genAln)\indexToCoord.$O \
+   $(genAln)\alnSet.$O \
+   $(genAln)\kmerFind.$O \
+   $(genAln)\memwater.$O
 
-all: tbSpol$O $(objFiles)
-	$(LD) /out:$(NAME).exe $(CFLAGS) tbSpol$O spolFind$O spolST$O $(objFiles)
+all: tbSpol.$O $(objFiles)
+	$(LD) /out:$(NAME) $(CFLAGS) tbSpol.$O spolFind.$O spolST.$O $(objFiles)
 
-tbSpol$O: tbSpol.c spolFind$O spolST$O $(objFiles)
-	$(CC) /Fo:tbSpol$O /c $(CFLAGS) tbSpol.c
+tbSpol.$O: tbSpol.c spolFind.$O spolST.$O $(objFiles)
+	$(CC) /Fo:tbSpol.$O /c $(CFLAGS) tbSpol.c
 
-spolFind$O: spolFind.c spolFind.h tbSpolDefs.h $(genLib)\samEntry$O $(genLib)\seqST$O $(genAln)\kmerFind$O
-	$(CC) /Fo:spolFind$O /c $(CFLAGS) spolFind.c
+spolFind.$O: spolFind.c spolFind.h tbSpolDefs.h $(genBio)\samEntry.$O $(genBio)\seqST.$O $(genAln)\kmerFind.$O
+	$(CC) /Fo:spolFind.$O /c $(CFLAGS) spolFind.c
 
-spolST$O: spolST.c spolST.h  tbSpolDefs.h $(genLib)\ulCp$O $(genLib)\charCp$O $(genLib)\numToStr$O $(genLib)\genMath.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:spolST$O /c $(CFLAGS) spolST.c
+spolST.$O: spolST.c spolST.h  tbSpolDefs.h $(genLib)\ulCp.$O $(genLib)\charCp.$O $(genLib)\numToStr.$O $(genLib)\genMath.h $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:spolST.$O /c $(CFLAGS) spolST.c
 
-$(genLib)\base10str$O: $(genLib)\base10str.c $(genLib)\base10str.h
-	$(CC) /Fo:$(genLib)\base10str$O /c $(CFLAGS) $(genLib)\base10str.c
+$(genLib)\base10str.$O: $(genLib)\base10str.c $(genLib)\base10str.h
+	$(CC) /Fo:$(genLib)\base10str.$O /c $(CFLAGS) $(genLib)\base10str.c
 
-$(genLib)\charCp$O: $(genLib)\charCp.c $(genLib)\charCp.h
-	$(CC) /Fo:$(genLib)\charCp$O /c $(CFLAGS) $(genLib)\charCp.c
+$(genLib)\charCp.$O: $(genLib)\charCp.c $(genLib)\charCp.h
+	$(CC) /Fo:$(genLib)\charCp.$O /c $(CFLAGS) $(genLib)\charCp.c
 
-$(genLib)\ulCp$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
-	$(CC) /Fo:$(genLib)\ulCp$O /c $(CFLAGS) $(genLib)\ulCp.c
+$(genLib)\ulCp.$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
+	$(CC) /Fo:$(genLib)\ulCp.$O /c $(CFLAGS) $(genLib)\ulCp.c
 
-$(genLib)\numToStr$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
-	$(CC) /Fo:$(genLib)\numToStr$O /c $(CFLAGS) $(genLib)\numToStr.c
+$(genLib)\numToStr.$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
+	$(CC) /Fo:$(genLib)\numToStr.$O /c $(CFLAGS) $(genLib)\numToStr.c
 
-$(genLib)\shellSort$O: $(genLib)\shellSort.c $(genLib)\shellSort.h
-	$(CC) /Fo:$(genLib)\shellSort$O /c $(CFLAGS) $(genLib)\shellSort.c
+$(genLib)\shellSort.$O: $(genLib)\shellSort.c $(genLib)\shellSort.h
+	$(CC) /Fo:$(genLib)\shellSort.$O /c $(CFLAGS) $(genLib)\shellSort.c
 
-$(genLib)\seqST$O: $(genLib)\seqST.c $(genLib)\seqST.h $(genLib)\ulCp$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genLib)\seqST$O /c $(CFLAGS) $(genLib)\seqST.c
+$(genLib)\strAry.$O: $(genLib)\strAry.c $(genLib)\strAry.h $(genLib)\ulCp.$O
+	$(CC) /Fo:$(genLib)\strAry.$O /c $(CFLAGS) $(genLib)\strAry.c
 
-$(genLib)\samEntry$O: $(genLib)\samEntry.c $(genLib)\samEntry.h $(genLib)\ulCp$O $(genLib)\base10str$O $(genLib)\numToStr$O $(genLib)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genLib)\samEntry$O /c $(CFLAGS) $(genLib)\samEntry.c
+$(genBio)\seqST.$O: $(genBio)\seqST.c $(genBio)\seqST.h $(genLib)\ulCp.$O $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genBio)\seqST.$O /c $(CFLAGS) $(genBio)\seqST.c
 
-$(genAln)\indexToCoord$O: $(genAln)\indexToCoord.c $(genAln)\indexToCoord.h
-	$(CC) /Fo:$(genAln)\indexToCoord$O /c $(CFLAGS) $(genAln)\indexToCoord.c
+$(genBio)\samEntry.$O: $(genBio)\samEntry.c $(genBio)\samEntry.h $(genLib)\strAry.$O $(genLib)\ulCp.$O $(genLib)\base10str.$O $(genLib)\numToStr.$O $(genBio)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genBio)\samEntry.$O /c $(CFLAGS) $(genBio)\samEntry.c
 
-$(genAln)\alnSet$O: $(genAln)\alnSet.c $(genAln)\alnSet.h $(genAln)\alnDefs.h $(genLib)\base10str$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genAln)\alnSet$O /c $(CFLAGS) $(genAln)\alnSet.c
+$(genAln)\indexToCoord.$O: $(genAln)\indexToCoord.c $(genAln)\indexToCoord.h
+	$(CC) /Fo:$(genAln)\indexToCoord.$O /c $(CFLAGS) $(genAln)\indexToCoord.c
 
-$(genAln)\memwater$O: $(genAln)\memwater.c $(genAln)\memwater.h $(genAln)\alnSet$O $(genAln)\indexToCoord$O $(genLib)\seqST$O $(genLib)\genMath.h
-	$(CC) /Fo:$(genAln)\memwater$O /c $(CFLAGS) $(genAln)\memwater.c
+$(genAln)\alnSet.$O: $(genAln)\alnSet.c $(genAln)\alnSet.h $(genAln)\alnDefs.h $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genAln)\alnSet.$O /c $(CFLAGS) $(genAln)\alnSet.c
 
-$(genAln)\kmerFind$O: $(genAln)\kmerFind.c $(genAln)\kmerFind.h $(genAln)\memwater$O $(genLib)\shellSort$O 
-	$(CC) /Fo:$(genAln)\kmerFind$O /c $(CFLAGS) $(genAln)\kmerFind.c
+$(genAln)\memwater.$O: $(genAln)\memwater.c $(genAln)\memwater.h $(genAln)\alnSet.$O $(genAln)\indexToCoord.$O $(genBio)\seqST.$O $(genLib)\genMath.h
+	$(CC) /Fo:$(genAln)\memwater.$O /c $(CFLAGS) $(genAln)\memwater.c
+
+$(genAln)\kmerFind.$O: $(genAln)\kmerFind.c $(genAln)\kmerFind.h $(genAln)\memwater.$O $(genLib)\shellSort.$O 
+	$(CC) /Fo:$(genAln)\kmerFind.$O /c $(CFLAGS) $(genAln)\kmerFind.c
 
 install:
-	move $(NAME).exe $(PREFIX)
+	copy $(NAME) $(PREFIX)
 
 clean:
-	del $(objFiles) tbSpol$O spolFind$O spolST$O;
+	del $(objFiles) tbSpol.$O spolFind.$O spolST.$O;

@@ -28,8 +28,8 @@
 
 #include <stdio.h>
 
-#include "../genLib/charCp.h"
 #include "../genLib/base10str.h"
+#include "../genLib/charCp.h"
 
 #include "checkAmr.h"
 #include "amrST.h"
@@ -40,14 +40,14 @@
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden
-!   o .c  #include "../genLib/ulCp.h"
-!   o .c  #include "../genLib/samEntry.h"
-!   o .c  #include "../genLib/codonTbl.h"
 !   o .c  #include "../genLib/numToStr.h"
+!   o .c  #include "../genLib/ulCp.h"
+!   o .c  #include "../genBio/codonTbl.h"
+!   o .c  #include "../genBio/samEntry.h"
 !   o .c  #include "drugAry.h"
-!   o .h  #include "../genLib/ntTo2Bit.h"
-!   o .h  #include "../genLib/revNtTo2Bit.h"
-!   o .h  #include "../genLib/ntTo5Bit.h"
+!   o .h  #include "../genBio/ntTo2Bit.h"
+!   o .h  #include "../genBio/revNtTo2Bit.h"
+!   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

@@ -53,8 +53,8 @@
 
 #include <stdio.h>
 
-#include "../genLib/charCp.h"
 #include "../genLib/base10str.h"
+#include "../genLib/charCp.h"
 
 /*no .c files*/
 #include "../genLib/dataTypeShortHand.h"

@@ -53,9 +53,9 @@
 
 #include "amrST.h"
 
+#include "../genLib/base10str.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
-#include "../genLib/base10str.h"
 #include "drugAry.h"
 
 /*Only .h files*/

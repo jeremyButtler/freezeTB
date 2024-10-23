@@ -1,13 +1,7 @@
-/*########################################################
-# Name alnSetStruct
-# Use:
-#  o Holds the settings structures and supporting
-#    functions for setting structures for alnSeq's
-#    pairwise aligners.
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' alnSet SOF: Start Of File
+'  - holds settings structures and supporting functions
+'    for my pairwise aligners
 '  o header:
 '    - included libraries
 '  o .h st01 alnSet:
@@ -35,10 +29,12 @@
 '      uppercase characters (a-z)
 '  o fun11: changeGap_alnSet
 '    - changes the gap penalties in an alnSet structure
-'  o fun12 init_alnSet:
+'  o fun12: maxScore_alnSet
+'    - finds maximum score possible for a sequence
+'  o fun13 init_alnSet:
 '    - Set all values in altSet (alingment settings)
 '      structure to defaults
-'  o fun13: pDefMatchMatrix_alnSet
+'  o fun14: pDefMatchMatrix_alnSet
 '    - print out the default match matrix
 '  o license:
 '    - Licensing for this code (public domain / mit)
@@ -60,11 +56,11 @@
 
 #include <stdio.h>
 
-#include "alnDefs.h"
 #include "../genLib/base10str.h"
 
 /*no .c files*/
 #include "../genLib/dataTypeShortHand.h"
+#include "alnDefs.h"
 
 /*-------------------------------------------------------\
 | Fun03: freeStack_alnSet
@@ -144,16 +140,16 @@ readScoreFile_alnSet(
    ^  - Variable declerations and set up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   #define lenBuffUS 1024
-   schar buffStr[lenBuffUS];
+   #define def_lenBuff_fun07 1024
+   schar buffStr[def_lenBuff_fun07];
    schar *tmpStr = 0;
    sshort scoreSS = 0;
 
    uchar colUC = 0;
    uchar rowUC = 0;
 
-   buffStr[lenBuffUS - 1] = '\0';
-   buffStr[lenBuffUS - 2] = '\0';
+   buffStr[def_lenBuff_fun07 - 1] = '\0';
+   buffStr[def_lenBuff_fun07 - 2] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec02:
@@ -177,10 +173,10 @@ readScoreFile_alnSet(
        if(buffStr[0] == '/' && buffStr[1] == '/')
        { /*On a comment, move onto the next line*/
            while(
-               buffStr[lenBuffUS - 2] != '\0' &&
-               buffStr[lenBuffUS - 2] != '\n'
+               buffStr[def_lenBuff_fun07 - 2] != '\0' &&
+               buffStr[def_lenBuff_fun07 - 2] != '\n'
            ){ /*Loop: read in more buffer*/
-               buffStr[lenBuffUS - 2] = '\0';
+               buffStr[def_lenBuff_fun07 - 2] = '\0';
 
                tmpStr =
                   (schar *)
@@ -192,7 +188,7 @@ readScoreFile_alnSet(
            } /*Loop: read in more buffer*/
 
            /*Reset the buffer*/
-           buffStr[lenBuffUS - 2] = '\0';
+           buffStr[def_lenBuff_fun07 - 2] = '\0';
 
            continue;
        } /*On a comment, move onto the next line*/
@@ -225,10 +221,10 @@ readScoreFile_alnSet(
            return ftell(scoreFILE);         /*No score*/
 
        while(
-           buffStr[lenBuffUS - 2] != '\0' &&
-           buffStr[lenBuffUS - 2] != '\n'
+           buffStr[def_lenBuff_fun07 - 2] != '\0' &&
+           buffStr[def_lenBuff_fun07 - 2] != '\n'
        ){ /*While have more buffer to read in*/
-           buffStr[lenBuffUS - 2] = '\0';
+           buffStr[def_lenBuff_fun07 - 2] = '\0';
 
            tmpStr =
               (schar *)
@@ -240,7 +236,7 @@ readScoreFile_alnSet(
        } /*While have more buffer to read in*/
 
        /*Reset the buffer*/
-       buffStr[lenBuffUS - 2] = '\0';
+       buffStr[def_lenBuff_fun07 - 2] = '\0';
    } /*While I have scores to read in*/
 
    return 0;
@@ -285,14 +281,14 @@ readMatchFile_alnSet(
    ^  - Variable declerations and set up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   #define lenBuffUS 1024
-   schar buffStr[lenBuffUS];
+   #define def_lenBuff_fun08 1024
+   schar buffStr[def_lenBuff_fun08];
 
    uchar colUC = 0;
    uchar rowUC = 0;
 
-   buffStr[lenBuffUS - 1] = '\0';
-   buffStr[lenBuffUS - 2] = '\0';
+   buffStr[def_lenBuff_fun08 - 1] = '\0';
+   buffStr[def_lenBuff_fun08 - 2] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun08 Sec02:
@@ -317,10 +313,10 @@ readMatchFile_alnSet(
        if(buffStr[0] == '/' && buffStr[1] == '/')
        { /*On a comment, move onto the next line*/
            while(
-               buffStr[lenBuffUS - 2] != '\0' &&
-               buffStr[lenBuffUS - 2] != '\n'
+               buffStr[def_lenBuff_fun08 - 2] != '\0' &&
+               buffStr[def_lenBuff_fun08 - 2] != '\n'
            ) { /*While have more buffer to read in*/
-               buffStr[lenBuffUS - 2] = '\0';
+               buffStr[def_lenBuff_fun08 - 2] = '\0';
 
                fgets(
                   (char *) buffStr,
@@ -330,7 +326,7 @@ readMatchFile_alnSet(
            } /*While have more buffer to read in*/
 
            /*Reset the buffer*/
-           buffStr[lenBuffUS - 2] = '\0';
+           buffStr[def_lenBuff_fun08 - 2] = '\0';
 
            continue;
        } /*On a comment, move onto the next line*/
@@ -355,10 +351,10 @@ readMatchFile_alnSet(
        ); /*Add the match to the matrix*/
 
        while(
-           buffStr[lenBuffUS - 2] != '\0' &&
-           buffStr[lenBuffUS - 2] != '\n'
+           buffStr[def_lenBuff_fun08 - 2] != '\0' &&
+           buffStr[def_lenBuff_fun08 - 2] != '\n'
        ){ /*While have more buffer to read in*/
-           buffStr[lenBuffUS - 2] = '\0';
+           buffStr[def_lenBuff_fun08 - 2] = '\0';
 
            fgets(
               (char *) buffStr,
@@ -368,7 +364,7 @@ readMatchFile_alnSet(
        } /*While have more buffer to read in*/
 
        /*Reset the buffer*/
-       buffStr[lenBuffUS - 2] = '\0';
+       buffStr[def_lenBuff_fun08 - 2] = '\0';
    } /*While I have matchs to read in*/
 
    return 0;
@@ -460,9 +456,51 @@ changeGap_alnSet(
    alnSetSTPtr->insArySS[def_mvSnp_alnDefs] = gapSS;
 } /*changeGap_alnSet*/
 
+/*-------------------------------------------------------\
+| Fun12: maxScore_alnSet
+|  - finds maximum score possible for a sequence
+| Input:
+|  - seqStr:
+|    o c-string with sequence to find max score for
+|    o needs to be converted to index with
+|      indexToSeq_alnSet (prepared for alignment)
+|  - startUL:
+|    o index of first base to check (index 0)
+|  - lenSeqUL:
+|    o length of the sequence to check
+|  - alnSetPtr:
+|    o pointer to an alnSet (settings) structure to
+|      initialize
+| Output:
+|  o Returns:
+|    - maximum possible score for alignment
+\-------------------------------------------------------*/
+signed long
+maxScore_alnSet(
+   signed char *seqStr,
+   unsigned long startUL,
+   unsigned long lenSeqUL,
+   struct alnSet *alnSetPtr
+){
+   slong scoreSL = 0;
+
+   while(startUL < lenSeqUL)
+   { /*Loop: align sequences*/
+      scoreSL +=
+         getScore_alnSet(
+            seqStr[startUL],
+            seqStr[startUL],
+            alnSetPtr
+         );
+
+      ++startUL;
+   } /*Loop: align sequences*/
+
+   return scoreSL;
+} /*maxScore_alnSet*/
 
 /*-------------------------------------------------------\
-| Fun12: init_alnSet
+| Fun13: init_alnSet
 |  - Set values in altSet (alingment settings) structure
 |    to default values
 | Input:
@@ -477,23 +515,23 @@ void
 init_alnSet(
     struct alnSet *alnSetST /*Has settings to initialize*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun12 TOC: init_alnSet
+   ' Fun13 TOC: init_alnSet
    '  - Set values in altSet (alingment settings)
    '    structure to defaults
-   '  o fun12 sec01:
+   '  o fun13 sec01:
    '    - Set non-matrix variables
-   '  o fun12 sec02:
+   '  o fun13 sec02:
    '    - Initialize scoring matrix
-   '  o fun12 sec03:
+   '  o fun13 sec03:
    '    - Initialize match matrix
-   '  o fun12 sec04:
+   '  o fun13 sec04:
    '    - set up scoring matrix for nucleotides
-   '  o fun12 sec05:
+   '  o fun13 sec05:
    '    - set up matching matrix for nucleotides
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec01:
+   ^ Fun13 Sec01:
    ^  - Set non-matrix variables
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -509,7 +547,7 @@ init_alnSet(
    ); /*add in gap scoring*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec02:
+   ^ Fun13 Sec02:
    ^  - Initialize scoring matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -522,7 +560,7 @@ init_alnSet(
    } /*loop for all columns in the comparison matrix*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec03:
+   ^ Fun13 Sec03:
    ^  - Initialize match matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -543,46 +581,46 @@ init_alnSet(
     } /*Loop: fill in comparison matrix*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec04:
+   ^ Fun13 Sec04:
    ^   - set up scoring matrix for nucleotides
-   ^   o fun12 sec04 sub01:
+   ^   o fun13 sec04 sub01:
    ^     - a as first base
-   ^   o fun12 sec04 sub02:
+   ^   o fun13 sec04 sub02:
    ^     - t as first base
-   ^   o fun12 sec04 sub03:
+   ^   o fun13 sec04 sub03:
    ^     - u (t) as first base
-   ^   o fun12 sec04 sub04:
+   ^   o fun13 sec04 sub04:
    ^     - g as first base
-   ^   o fun12 sec04 sub05:
+   ^   o fun13 sec04 sub05:
    ^     - c as first base
-   ^   o fun12 sec04 sub06:
+   ^   o fun13 sec04 sub06:
    ^     - w (anonymous) as first base
-   ^   o fun12 sec04 sub07:
+   ^   o fun13 sec04 sub07:
    ^     - s (anonymous) as first base
-   ^   o fun12 sec04 sub08:
+   ^   o fun13 sec04 sub08:
    ^     - m (anonymous) as first base
-   ^   o fun12 sec04 sub09:
+   ^   o fun13 sec04 sub09:
    ^     - k (anonymous) as first base
-   ^   o fun12 sec04 sub10:
+   ^   o fun13 sec04 sub10:
    ^     - r (anonymous) as first base
-   ^   o fun12 sec04 sub11:
+   ^   o fun13 sec04 sub11:
    ^     - y (anonymous) as first base
-   ^   o fun12 sec04 sub12:
+   ^   o fun13 sec04 sub12:
    ^     - b (anonymous) as first base
-   ^   o fun12 sec04 sub13:
+   ^   o fun13 sec04 sub13:
    ^     - d (anonymous) as first base
-   ^   o fun12 sec04 sub14:
+   ^   o fun13 sec04 sub14:
    ^     - h (anonymous) as first base
-   ^   o fun12 sec04 sub15:
+   ^   o fun13 sec04 sub15:
    ^     - v (anonymous) as first base
-   ^   o fun12 sec04 sub16:
+   ^   o fun13 sec04 sub16:
    ^     - n (anonymous) as first base
-   ^   o fun12 sec04 sub17:
+   ^   o fun13 sec04 sub17:
    ^     - x (anonymous) as first base (technically aa)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub01:
+   * Fun13 Sec04 Sub01:
    *   - a as first base
    \*****************************************************/
 
@@ -607,7 +645,7 @@ init_alnSet(
    setScore_alnSet('a','x',def_AToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub02:
+   * Fun13 Sec04 Sub02:
    *   - t as first base
    \*****************************************************/
 
@@ -632,7 +670,7 @@ init_alnSet(
    setScore_alnSet('t','x',def_TToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub03:
+   * Fun13 Sec04 Sub03:
    *   - u (t) as first base
    \*****************************************************/
 
@@ -657,7 +695,7 @@ init_alnSet(
    setScore_alnSet('u','x',def_UToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub04:
+   * Fun13 Sec04 Sub04:
    *   - g as first base
    \*****************************************************/
 
@@ -682,7 +720,7 @@ init_alnSet(
    setScore_alnSet('g','x',def_GToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub05:
+   * Fun13 Sec04 Sub05:
    *   - c as first base
    \*****************************************************/
 
@@ -707,7 +745,7 @@ init_alnSet(
    setScore_alnSet('c','x',def_CToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub06:
+   * Fun13 Sec04 Sub06:
    *   - w (anonymous) as first base
    \*****************************************************/
 
@@ -731,7 +769,7 @@ init_alnSet(
    setScore_alnSet('w','x',def_WToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub07:
+   * Fun13 Sec04 Sub07:
    *   - s (anonymous) as first base
    \*****************************************************/
 
@@ -755,7 +793,7 @@ init_alnSet(
    setScore_alnSet('s','x',def_SToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub08:
+   * Fun13 Sec04 Sub08:
    *   - m (anonymous) as first base
    \*****************************************************/
 
@@ -779,7 +817,7 @@ init_alnSet(
    setScore_alnSet('m','x',def_MToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub09:
+   * Fun13 Sec04 Sub09:
    *   - k (anonymous) as first base
    \*****************************************************/
 
@@ -803,7 +841,7 @@ init_alnSet(
    setScore_alnSet('k','x',def_KToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub10:
+   * Fun13 Sec04 Sub10:
    *   - r (anonymous) as first base
    \*****************************************************/
 
@@ -827,7 +865,7 @@ init_alnSet(
    setScore_alnSet('r','x',def_RToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub11:
+   * Fun13 Sec04 Sub11:
    *   - y (anonymous) as first base
    \*****************************************************/
 
@@ -851,7 +889,7 @@ init_alnSet(
    setScore_alnSet('y','x',def_YToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub12:
+   * Fun13 Sec04 Sub12:
    *   - b (anonymous) as first base
    \*****************************************************/
 
@@ -875,7 +913,7 @@ init_alnSet(
    setScore_alnSet('b','x',def_BToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub13:
+   * Fun13 Sec04 Sub13:
    *   - d (anonymous) as first base
    \*****************************************************/
 
@@ -899,7 +937,7 @@ init_alnSet(
    setScore_alnSet('d','x',def_DToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub14:
+   * Fun13 Sec04 Sub14:
    *   - h (anonymous) as first base
    \*****************************************************/
 
@@ -923,7 +961,7 @@ init_alnSet(
    setScore_alnSet('h','x',def_HToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub15:
+   * Fun13 Sec04 Sub15:
    *   - v (anonymous) as first base
    \*****************************************************/
 
@@ -947,7 +985,7 @@ init_alnSet(
    setScore_alnSet('v','x',def_VToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub16:
+   * Fun13 Sec04 Sub16:
    *   - n (anonymous) as first base
    \*****************************************************/
 
@@ -971,7 +1009,7 @@ init_alnSet(
    setScore_alnSet('n','x',def_NToX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec04 Sub17:
+   * Fun13 Sec04 Sub17:
    *   - x (anonymous) as first base (technically aa)
    \*****************************************************/
 
@@ -995,46 +1033,46 @@ init_alnSet(
    setScore_alnSet('x','x',def_XToX_alnDefs,alnSetST);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec05:
+   ^ Fun13 Sec05:
    ^  - set up matching matrix for nucleotides
-   ^  o fun12 sec05 sub01:
+   ^  o fun13 sec05 sub01:
    ^    - a as first base
-   ^  o fun12 sec05 sub02:
+   ^  o fun13 sec05 sub02:
    ^    - t as first base
-   ^  o fun12 sec05 sub03:
+   ^  o fun13 sec05 sub03:
    ^    - u (t) as first base
-   ^  o fun12 sec05 sub04:
+   ^  o fun13 sec05 sub04:
    ^    - g as first base
-   ^  o fun12 sec05 sub05:
+   ^  o fun13 sec05 sub05:
    ^    - c as first base
-   ^  o fun12 sec05 sub06:
+   ^  o fun13 sec05 sub06:
    ^    - w (anonymous) as first base
-   ^  o fun12 sec05 sub07:
+   ^  o fun13 sec05 sub07:
    ^    - s (anonymous) as first base
-   ^  o fun12 sec05 sub08:
+   ^  o fun13 sec05 sub08:
    ^    - m (anonymous) as first base
-   ^  o fun12 sec05 sub09:
+   ^  o fun13 sec05 sub09:
    ^    - k (anonymous) as first base
-   ^  o fun12 sec05 sub10:
+   ^  o fun13 sec05 sub10:
    ^    - r (anonymous) as first base
-   ^  o fun12 sec05 sub11:
+   ^  o fun13 sec05 sub11:
    ^    - y (anonymous) as first base
-   ^  o fun12 sec05 sub12:
+   ^  o fun13 sec05 sub12:
    ^    - b (anonymous) as first base
-   ^  o fun12 sec05 sub13:
+   ^  o fun13 sec05 sub13:
    ^    - d (anonymous) as first base
-   ^  o fun12 sec05 sub14:
+   ^  o fun13 sec05 sub14:
    ^    - h (anonymous) as first base
-   ^  o fun12 sec05 sub15:
+   ^  o fun13 sec05 sub15:
    ^    - v (anonymous) as first base
-   ^  o fun12 sec05 sub16:
+   ^  o fun13 sec05 sub16:
    ^    - n (anonymous) as first base
-   ^  o fun12 sec05 sub17:
+   ^  o fun13 sec05 sub17:
    ^    - x (anonymous) as first base (technically aa)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun12 Sec05 Sub01:
+   * Fun13 Sec05 Sub01:
    *   - a as first base
    \*****************************************************/
 
@@ -1059,7 +1097,7 @@ init_alnSet(
    setMatch_alnSet('a','x',def_AEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub02:
+   * Fun13 Sec05 Sub02:
    *   - t as first base
    \*****************************************************/
 
@@ -1084,7 +1122,7 @@ init_alnSet(
    setMatch_alnSet('t','x',def_TEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub03:
+   * Fun13 Sec05 Sub03:
    *   - u (t) as first base
    \*****************************************************/
 
@@ -1109,7 +1147,7 @@ init_alnSet(
    setMatch_alnSet('u','x',def_UEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub04:
+   * Fun13 Sec05 Sub04:
    *   - g as first base
    \*****************************************************/
 
@@ -1134,7 +1172,7 @@ init_alnSet(
    setMatch_alnSet('g','x',def_GEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub05:
+   * Fun13 Sec05 Sub05:
    *   - c as first base
    \*****************************************************/
 
@@ -1159,7 +1197,7 @@ init_alnSet(
    setMatch_alnSet('c','x',def_CEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub06:
+   * Fun13 Sec05 Sub06:
    *   - w (anonymous) as first base
    \*****************************************************/
 
@@ -1183,7 +1221,7 @@ init_alnSet(
    setMatch_alnSet('w','x',def_WEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub07:
+   * Fun13 Sec05 Sub07:
    *   - s (anonymous) as first base
    \*****************************************************/
 
@@ -1207,7 +1245,7 @@ init_alnSet(
    setMatch_alnSet('s','x',def_SEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub08:
+   * Fun13 Sec05 Sub08:
    *   - m (anonymous) as first base
    \*****************************************************/
 
@@ -1231,7 +1269,7 @@ init_alnSet(
    setMatch_alnSet('m','x',def_MEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub09:
+   * Fun13 Sec05 Sub09:
    *   - k (anonymous) as first base
    \*****************************************************/
 
@@ -1255,7 +1293,7 @@ init_alnSet(
    setMatch_alnSet('k','x',def_KEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub10:
+   * Fun13 Sec05 Sub10:
    *   - r (anonymous) as first base
    \*****************************************************/
 
@@ -1279,7 +1317,7 @@ init_alnSet(
    setMatch_alnSet('r','x',def_REqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub11:
+   * Fun13 Sec05 Sub11:
    *   - y (anonymous) as first base
    \*****************************************************/
 
@@ -1303,7 +1341,7 @@ init_alnSet(
    setMatch_alnSet('y','x',def_YEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub12:
+   * Fun13 Sec05 Sub12:
    *   - b (anonymous) as first base
    \*****************************************************/
 
@@ -1327,7 +1365,7 @@ init_alnSet(
    setMatch_alnSet('b','x',def_BEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub13:
+   * Fun13 Sec05 Sub13:
    *   - d (anonymous) as first base
    \*****************************************************/
 
@@ -1351,7 +1389,7 @@ init_alnSet(
    setMatch_alnSet('d','x',def_DEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub14:
+   * Fun13 Sec05 Sub14:
    *   - h (anonymous) as first base
    \*****************************************************/
 
@@ -1375,7 +1413,7 @@ init_alnSet(
    setMatch_alnSet('h','x',def_HEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub15:
+   * Fun13 Sec05 Sub15:
    *   - v (anonymous) as first base
    \*****************************************************/
 
@@ -1399,7 +1437,7 @@ init_alnSet(
    setMatch_alnSet('v','x',def_VEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub16:
+   * Fun13 Sec05 Sub16:
    *   - n (anonymous) as first base
    \*****************************************************/
 
@@ -1423,7 +1461,7 @@ init_alnSet(
    setMatch_alnSet('n','x',def_NEqlX_alnDefs,alnSetST);
 
    /*****************************************************\
-   * Fun12 Sec05 Sub17:
+   * Fun13 Sec05 Sub17:
    *   - x (anonymous) as first base (technically aa)
    \*****************************************************/
 
@@ -1450,7 +1488,7 @@ init_alnSet(
 } /*init_alnSet*/
 
 /*-------------------------------------------------------\
-| Fun13: pDefMatchMatrix_alnSet
+| Fun14: pDefMatchMatrix_alnSet
 |   - print out the default match matrix
 | Input:
 |   - outFILE:
@@ -1463,16 +1501,16 @@ void
 pDefMatchMatrix_alnSet(
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun13 TOC:
+   ' Fun14 TOC:
    '   - print out the default match matrix
-   '   o fun13 sec01:
+   '   o fun14 sec01:
    '     - print out header
-   '   o fun13 sec02:
+   '   o fun14 sec02:
    '     - print out match matrix
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun13 Sec01:
+   ^ Fun14 Sec01:
    ^  - print out header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
    
@@ -1511,46 +1549,46 @@ pDefMatchMatrix_alnSet(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun13 Sec02:
+   ^ Fun14 Sec02:
    ^  - print out match matrix
-   ^  o fun13 sec02 sub01:
+   ^  o fun14 sec02 sub01:
    ^    - a as first base
-   ^  o fun13 sec02 sub02:
+   ^  o fun14 sec02 sub02:
    ^    - t as first base
-   ^  o fun13 sec02 sub03:
+   ^  o fun14 sec02 sub03:
    ^    - u (t) as first base
-   ^  o fun13 sec02 sub04:
+   ^  o fun14 sec02 sub04:
    ^    - g as first base
-   ^  o fun13 sec02 sub05:
+   ^  o fun14 sec02 sub05:
    ^    - c as first base
-   ^  o fun13 sec02 sub06:
+   ^  o fun14 sec02 sub06:
    ^    - w (anonymous) as first base
-   ^  o fun13 sec02 sub07:
+   ^  o fun14 sec02 sub07:
    ^    - s (anonymous) as first base
-   ^  o fun13 sec02 sub08:
+   ^  o fun14 sec02 sub08:
    ^    - m (anonymous) as first base
-   ^  o fun13 sec02 sub09:
+   ^  o fun14 sec02 sub09:
    ^    - k (anonymous) as first base
-   ^  o fun13 sec02 sub10:
+   ^  o fun14 sec02 sub10:
    ^    - r (anonymous) as first base
-   ^  o fun13 sec02 sub11:
+   ^  o fun14 sec02 sub11:
    ^    - y (anonymous) as first base
-   ^  o fun13 sec02 sub12:
+   ^  o fun14 sec02 sub12:
    ^    - b (anonymous) as first base
-   ^  o fun13 sec02 sub13:
+   ^  o fun14 sec02 sub13:
    ^    - d (anonymous) as first base
-   ^  o fun13 sec02 sub14:
+   ^  o fun14 sec02 sub14:
    ^    - h (anonymous) as first base
-   ^  o fun13 sec02 sub15:
+   ^  o fun14 sec02 sub15:
    ^    - v (anonymous) as first base
-   ^  o fun13 sec02 sub16:
+   ^  o fun14 sec02 sub16:
    ^    - n (anonymous) as first base
-   ^  o fun13 sec02 sub17:
+   ^  o fun14 sec02 sub17:
    ^    - x (anonymous) as first base (technically aa)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun13 Sec02 Sub01:
+   * Fun14 Sec02 Sub01:
    *   - a as first base
    \*****************************************************/
 
@@ -1575,7 +1613,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"a x %i\n",def_AEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub02:
+   * Fun14 Sec02 Sub02:
    *   - t as first base
    \*****************************************************/
 
@@ -1600,7 +1638,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"t x %i\n",def_TEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub03:
+   * Fun14 Sec02 Sub03:
    *   - u (t) as first base
    \*****************************************************/
 
@@ -1625,7 +1663,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"u x %i\n",def_UEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub04:
+   * Fun14 Sec02 Sub04:
    *   - g as first base
    \*****************************************************/
 
@@ -1650,7 +1688,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"g x %i\n",def_GEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub05:
+   * Fun14 Sec02 Sub05:
    *   - c as first base
    \*****************************************************/
 
@@ -1675,7 +1713,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"c x %i\n",def_CEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub06:
+   * Fun14 Sec02 Sub06:
    *   - w (anonymous) as first base
    \*****************************************************/
 
@@ -1699,7 +1737,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"w x %i\n",def_WEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub07:
+   * Fun14 Sec02 Sub07:
    *   - s (anonymous) as first base
    \*****************************************************/
 
@@ -1723,7 +1761,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"s x %i\n",def_SEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub08:
+   * Fun14 Sec02 Sub08:
    *   - m (anonymous) as first base
    \*****************************************************/
 
@@ -1747,7 +1785,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"m x %i\n",def_MEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub09:
+   * Fun14 Sec02 Sub09:
    *   - k (anonymous) as first base
    \*****************************************************/
 
@@ -1771,7 +1809,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"k x %i\n",def_KEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub10:
+   * Fun14 Sec02 Sub10:
    *   - r (anonymous) as first base
    \*****************************************************/
 
@@ -1795,7 +1833,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"r x %i\n",def_REqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub11:
+   * Fun14 Sec02 Sub11:
    *   - y (anonymous) as first base
    \*****************************************************/
 
@@ -1819,7 +1857,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"y x %i\n",def_YEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub12:
+   * Fun14 Sec02 Sub12:
    *   - b (anonymous) as first base
    \*****************************************************/
 
@@ -1843,7 +1881,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"b x %i\n",def_BEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub13:
+   * Fun14 Sec02 Sub13:
    *   - d (anonymous) as first base
    \*****************************************************/
 
@@ -1867,7 +1905,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"d x %i\n",def_DEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub14:
+   * Fun14 Sec02 Sub14:
    *   - h (anonymous) as first base
    \*****************************************************/
 
@@ -1891,7 +1929,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"h x %i\n",def_HEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub15:
+   * Fun14 Sec02 Sub15:
    *   - v (anonymous) as first base
    \*****************************************************/
 
@@ -1915,7 +1953,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"v x %i\n",def_VEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub16:
+   * Fun14 Sec02 Sub16:
    *   - n (anonymous) as first base
    \*****************************************************/
 
@@ -1939,7 +1977,7 @@ pDefMatchMatrix_alnSet(
    fprintf((FILE *) outFILE,"n x %i\n",def_NEqlX_alnDefs);
 
    /*****************************************************\
-   * Fun13 Sec02 Sub17:
+   * Fun14 Sec02 Sub17:
    *   - x (anonymous) as first base (technically aa)
    \*****************************************************/
 

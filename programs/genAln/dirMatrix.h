@@ -1,11 +1,7 @@
-/*########################################################
-# Name: dirMatrix
-#  - holds functions for dealing with the dirMatrix
-#    returned by water and needle
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' dirMatrix SOF: Start Of File
+'   - holds functions for dealing with the dirMatrix
+'     returned by water and needle
 '   o header:
 '     - forward declerations and guards
 '   o .h st01: alnMatrixStruct
@@ -24,6 +20,8 @@
 '   o fun05: getAln_dirMatrix
 '     - gets a sam file entry (alignment) from a direction
 '       matrix (inside the dirMatrix structure)
+'   o fun06: getCig_dirMatrix
+'     - gets a cigar for an alignment
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -63,6 +61,8 @@ typedef struct dirMatrix
   unsigned long lenQryUL;    /*length of query*/
   unsigned long qryOffsetUL; /*first query base to align*/
   unsigned long qryEndUL;    /*last query base to align*/
+
+  signed char errSC;         /*holds any errors*/
 }dirMatrix;
 
 /*-------------------------------------------------------\
@@ -172,6 +172,81 @@ getAln_dirMatrix(
    struct seqST *refSTPtr,
    struct samEntry *samSTPtr,
    unsigned int *numAnonUI,
+   struct alnSet *alnSetSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun06: getCig_dirMatrix
+|   - gets a cigar for an alignment
+| Input:
+|   - matrixSTPtr
+|     o pointer to a dirMatrix structure to get alignment
+|       from
+|   - indexUL:
+|     o index of last base in the alignment
+|     o 0 to use index from matirxSTPtr
+|   - revBl:
+|     o 1: reverse alignment (sam flag is 16)
+|       - this means I had to reverse complement the
+|         reference sequence
+|     o 0: foward alignment (sam flag is 0)
+|   - qrySTPtr:
+|     o pointer to a seqST with the query sequence
+|   - refSTPtr:
+|     o pointer to a seqST with the reference sequence
+|   - cigTypeStr:
+|     o pointer to c-string with cigar entry type array
+|   - cigArySI:
+|     o pointer to signed int array with the length of
+|       each cibar entry
+|   - cigPosUI:
+|     o position at in cigar
+|   - lenCigUI:
+|     o pointer to unsigned int with length of the cigar
+|       buffer
+|   - refStartUI:
+|     o unsigned int pointer to point to first reference
+|       base in cigar
+|   - numAnonUI:
+|     o pointer to unsigned in to hold the number of
+|       anonymous bases (matches only)
+|   - numMaskUI:
+|     o pointer to unsigned long to hold number of
+|       maksed bases
+|   - delAtEndBl:
+|     o 1: add deltions if reference is short at end
+|     o 0: ignore
+|   - alnSetSTPtr:
+|     o pointer to alnSet structure with the match matrix
+| Output:
+|   - Modifies:
+|     o cigTypeStr to have the cigar entry types
+|     o cigArySI to have the length of each cigar entry
+|     o lenCigUI if cigTypeStr and cigArySI needed to be
+|       resized
+|     o refStartUI to have first reference base in cigar
+|     o numAnonUI to have number of matching anonymous
+|       bases
+|     o numMaskUI to have number of masked bases
+|   - Returns:
+|     o new position in cigar
+|     o -1 for memory error (only error possible)
+\-------------------------------------------------------*/
+signed long
+getCig_dirMatrix(
+   struct dirMatrix *matrixSTPtr,
+   unsigned long indexUL,
+   signed char revBl,
+   struct seqST *qrySTPtr,
+   struct seqST *refSTPtr,
+   signed char **cigTypeStr,
+   signed int **cigArySI,
+   unsigned int cigPosUI,
+   unsigned int *lenCigUI,
+   unsigned int *refStartUI,
+   unsigned int *numAnonUI,
+   unsigned int *numMaskUI,
+   signed char delAtEndBl,
    struct alnSet *alnSetSTPtr
 );
 

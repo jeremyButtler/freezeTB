@@ -1,12 +1,6 @@
-/*########################################################
-# Name memwater
-# Use:
-#  o Holds functions doing a memory efficent Smith
-#    Waterman pairwise alignments.
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of Functions
+' memwater SOF: Start Of Functions
+'   - has memory efficent Waterman Smith alignment
 '   o header:
 '     - Included libraries
 '   o fun01 memwater:
@@ -30,7 +24,7 @@
 
 #include "memwater.h"
 
-#include "../genLib/seqST.h"
+#include "../genBio/seqST.h"
 
 #include "alnSet.h"
 #include "indexToCoord.h"
@@ -81,8 +75,8 @@
 |    o qryStartUL to have first query base in alignment
 |    o qryEndUL to have last query base in alignment
 |  - Returns:
-|    o Score for aligment
-|    o 0 for memory errors
+|    o score for aligment
+|    o negative number for memory errors
 \-------------------------------------------------------*/
 signed long
 memwater(
@@ -489,7 +483,7 @@ memwater(
    \*****************************************************/
 
    memErr_fun01_sec05_sub03:;
-   scoreSL = 0;
+   scoreSL = -1;
    goto cleanUp_fun01_sec05_sub04;
 
    /*****************************************************\

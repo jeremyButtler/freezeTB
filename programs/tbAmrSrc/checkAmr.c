@@ -64,22 +64,23 @@
 #include "amrST.h"
 #include "drugAry.h"
 
-#include "../genLib/genMath.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
-#include "../genLib/codonTbl.h"
-#include "../genLib/samEntry.h"
+#include "../genLib/genMath.h"
+#include "../genBio/codonTbl.h"
+#include "../genBio/samEntry.h"
 
 /*Only .h files*/
 #include "../genLib/dataTypeShortHand.h"
-#include "../genLib/ntTo2Bit.h"
-#include "../genLib/revNtTo2Bit.h"
+#include "../genBio/ntTo2Bit.h"
+#include "../genBio/revNtTo2Bit.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
-!   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genLib/base10StrToNum.h"
-!   o .h  #include "../genLib/ntTo5Bit.h"
+!   o .c  #include "../genLib/numToStr.h"
+!   o .c  #include "../genLib/strAry.h"
+!   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

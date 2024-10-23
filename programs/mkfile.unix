@@ -7,7 +7,6 @@ O=.o.$(ext)
 
 all:
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C freezeTBSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C adjCoordsSrc
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbAmrSrc
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbMiruSrc
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
@@ -17,31 +16,25 @@ all:
 install:
 	mv freezeTBSrc/freezeTB $(PREFIX)
 	chmod a+x $(PREFIX)/freezeTB
-	mv adjCoordsSrc/adjCoords $(PREFIX)
-	chmod a+x $(PREFIX)/adjCoords
-
-install-modules:
 	mv tbAmrSrc/tbAmr $(PREFIX)
 	chmod a+x $(PREFIX)/tbAmr
 	mv tbMiruSrc/tbMiru $(PREFIX)
 	chmod a+x $(PREFIX)/tbMiru
 	mv tbSpolSrc/tbSpol $(PREFIX)
 	chmod a+x $(PREFIX)/tbSpol
-	mv adjCoordsSrc/adjCoords $(PREFIX)
-	chmod a+x $(PREFIX)/adjCoords
+	mv whoToAmrSrc/whoToAmr $(PREFIX)
+	chmod a+x $(PREFIX)/whoToAmr
+	mv swapDbRefSrc/swapDbRef $(PREFIX)
+	chmod a+x $(PREFIX)/swapDbRef
 
 clean:
 	rm \
-		adjCoordsSrc/*.o.$(ext) \
-		ampDepthSrc/*.o.$(ext) \
 		freezeTBSrc/*.o.$(ext) \
-		maskPrimSrc/*.o.$(ext) \
-		mkMiruTblSrc/*.o.$(ext) \
-		swapDbRefSrc/*.o.$(ext) \
 		tbAmrSrc/*.o.$(ext) \
-		tbConSrc/*.o.$(ext) \
 		tbMiruSrc/*.o.$(ext) \
 		tbSpolSrc/*.o.$(ext) \
 		whoToAmrSrc/*.o.$(ext) \
-		genAln/*.o.$(ext) \
-		genLib/*.o.$(ext)
+		swapDbRefSrc/*.o.$(ext) \
+		genLib/*.o.$(ext) \
+		genBio/*.o.$(ext) \
+		genAln/*.o.$(ext)

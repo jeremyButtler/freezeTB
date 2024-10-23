@@ -95,7 +95,7 @@
 #include "../genLib/numToStr.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
-#include "../genLib/samEntry.h"
+#include "../genBio/samEntry.h"
 
 /*only .h files used*/
 #include "../genLib/dataTypeShortHand.h"
@@ -104,7 +104,8 @@
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
-!   o .h #include "../genLib/ntTo5Bit.h"
+!   o .c   #include "../genLib/strAry.h"
+!   o .h   #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

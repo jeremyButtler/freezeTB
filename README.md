@@ -88,16 +88,21 @@ The stuff unique to freezeTB is under an dual license. The
    - For the GUI you will need minimap2, which can be
      often installed by your package manager (for Mac
      you can use homebrew)
-2. R + several R libraries; GUI only
-   - ggplot2
-   - viridisLite (often installed with ggplot2)
-   - data.table (often installed with ggplot2)
-   - tcltk (base R) or tcltk2 (has tooltips)
-     - note I have had some issues with tcltk not being
-       compiled on some Macs. It seems the homebrew
-       install of R works better.
-   - svgLite (Optional; svgs output)
-   - fs (Optional; Unix only)
+2. R with tcltk (install tcltk2 for tooltips)
+3. If you decide to use the old graping script, then
+     you will need some R libraries
+     - to use rename oldGraphAmpDepth.r to graphAmpDepth.r
+     - ggplot2
+     - viridisLite (often installed with ggplot2)
+     - data.table (often installed with ggplot2)
+     - svgLite (Optional; svgs output)
+     - fs (Optional; Unix only)
+
+- Note: mixed infection detection only works in command
+  line program.
+- Note: Valgrind is reporting a memory leak for mixed
+  infection dection (not in edClust), which I have not
+  been able to track down.
 
 # Install
 
@@ -437,7 +442,8 @@ You can leave out `-spoligo` if you are changing an
     of read counts for the reads
 15. freezeTB prints out the spacers detected with the
     the number of reads that supported each spacer
-16. freezeTB then collapses the consensus
+16. freezeTB then collapses the consensus (non-mixed
+    infection)
     - Split into fragments with 20x or greater read depth
     - Fragments less than 50x bases long are removed
     - Most supported snp/match/deletion selected
@@ -447,7 +453,9 @@ You can leave out `-spoligo` if you are changing an
 17. freezeTB finds the AMRs for the consensus
 18. freezeTB finds the MIRU-VNTR lineages for consensus
 19. freezeTB finds spoligotype for consensus
-20. GUI only: freezeTB makes read depth and coverage
+20. for mixied infection uses edClust, which uses tbCon
+    with fragments
+21. GUI only: freezeTB makes read depth and coverage
     graphs with R
 
 # Programs included with freezeTB
@@ -471,6 +479,7 @@ Chapter one: monsters that consume all hope
 - adjCoords: adjust coordinates in sam file using an
   list of genes (instead of mapping to full TB genome)
 - graphAmpDepth.r: Rscript that makes graphs for freezeTB
+  - oldGraphAmpDepth.r is older version that used ggplot2
 
 ## Modules:
 
@@ -504,6 +513,20 @@ Chapter three: do not underestimate the pixies
   - also prints out the amplicon and primer coordinates
     needed for maskPrim
   - `bash scripts/catPrimers.sh -ref ref.fasta -tsv primers.tsv -prefix prefix`
+- scripts/primToSeq.sh:
+  - needs primFind from my bioTools repository
+  - extracts amplicons using primer sequences
+    - creates: amp_coords.tsv
+      - coordiates adjustent step (adjCoords)
+      - amplicon read depth/coverage tsv (ampDepth)
+    - creates: amp_mask.tsv
+      - for masking primer sitesj (maskPrim)
+    - creates: amp_seq.fa
+      - ampicon sequencees (map reads to with miniamp2)
+- scripts/getSeqByCoord.sh:
+  - extracts amplicon sequences by coordinate
+  - creates: amp_seq.fa
+    - ampicon sequencees (map reads to with miniamp2)
 - oldCode: old code I am not quite ready to throw
   away yet
 
@@ -520,7 +543,7 @@ A better picture of how freezeTB works might be gotten by
 You will need some programs from my bioTools repo(
   [https://github.com/jeremybuttler/bioTools](
    https://github.com/jeremybuttler/bioTools)). These
-  include ampDepth, filtsam, maskPrim, and tbCon.
+  include ampDepth, filtsam, maskPrim, edClust, and tbCon.
 
 ```
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -693,10 +716,16 @@ ampDepth \
   >> "$prefixStr-stats.tsv";
 
 # build the consensuses
-tbCon \
-    -sam "$samStr" \
-    -out-tsv "$prefixStr-consnesuses.tsv" \
-    -out "$prefixStr-consensuses.sam";
+if [[ "$mixedInfectBl" -lt 1 ]]; then
+   tbCon \
+       -sam "$samStr" \
+       -out-tsv "$prefixStr-consnesuses.tsv" \
+       -out "$prefixStr-cons.sam";
+else
+   edClust \
+       -sam "$samStr" \
+       -prefix "$prefixStr" \
+fi
 
 # find AMRs
 tbAmr \
@@ -728,13 +757,13 @@ tbSpol \
 # find the AMRs
 tbAmr \
    -amr-tbl freezeTBFiles/who-2023.tsv \
-    -sam "$prefixStr-consensuses.sam" \
+    -sam "$prefixStr-cons.sam" \
     -out "$prefixStr-con-amrs.tsv";
 
 # find the MIRU-VNTR lineage
 tbMiru \
     -miru-tbl "$dbDirStr/miruTbl.tsv" \
-    -sam "$prefixStr-consensuses.sam" \
+    -sam "$prefixStr-cons.sam" \
     out-tbl "$prefixStr-con-miru.tsv";
 
 # find the spoligotype
@@ -742,7 +771,7 @@ tbSpol \
     -con-frag \
     -spoligo "$dbDirStr/spoliogtype-seq.fa" \
     -db "$dbDirStr/spoligo-lineages.csv" \
-    -sam "$prefixStr-consensuses.sam" \
+    -sam "$prefixStr-cons.sam" \
     -out "$prefixStr-con-spoligo.tsv";
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -760,6 +789,6 @@ if [[ "$graphBl" == "TRUE" ]]; then
       -prefix "$prefixStr";
 
    # -min-len not used, but controls min amplicon length;
-   # default is 50
+   # default is 50 (think no longer used)
 fi # If: graphs were wanted
 ```

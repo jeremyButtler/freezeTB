@@ -1,14 +1,19 @@
 /*########################################################
-# Name: freezeTb-version
+# Name: freezeTBDefs
 #   - version number and defaults for freezeTb
 ########################################################*/
 
 #define def_year_freezeTBDefs 2024
-#define def_month_freezeTBDefs 8
-#define def_day_freezeTBDefs 21
+#define def_month_freezeTBDefs 10
+#define def_day_freezeTBDefs 23
 
 #define def_minMedianQ_freezeTBDefs 7
 #define def_minMeanQ_freezeTBDefs 7
+
+#define def_adjCoord_freezeTBDefs 0
+ /*1: adjust coordinates from amplicon/gene to reference*/
+#define def_mixedInfect_freezeTBDefs 0
+ /*1: run mixed infection detection*/
 
 /*=======================================================\
 : License:

@@ -41,8 +41,8 @@
 #include "../genLib/base10str.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
-#include "../genLib/seqST.h"
-#include "../genLib/samEntry.h"
+#include "../genBio/seqST.h"
+#include "../genBio/samEntry.h"
 
 #include "../genAln/alnSet.h"
 #include "../genAln/kmerFind.h"
@@ -58,7 +58,8 @@
 ! Hidden libraries:
 !   o .c  #include "../genLib/numToStr.h"
 !   o .h  #include "../genLib/genMath.h" .h max macro only
-!   o .h  #include "../genLib/ntTo5Bit.h"
+!   o .h  #include "../genLib/strAry.h"
+!   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define def_phelp_tbMiru 1

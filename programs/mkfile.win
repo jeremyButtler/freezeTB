@@ -26,28 +26,20 @@ all:
 
 install: install-support
 	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
-	move adjCoordsSrc\adjCoords.exe "$(PREFIX)"
-
-install-modules: install-support
 	move tbAmrSrc\tbAmr.exe $(PREFIX)
 	move tbMiruSrc\tbMiru.exe $(PREFIX)
 	move tbSpolSrc\tbSpol.exe $(PREFIX)
-	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
-	move adjCoordsSrc\adjCoords.exe "$(PREFIX)"
+	move whoToAmrSrc\whoToAmr.exe $(PREFIX)
+	move swapDbRefSrc\swapDbRef.exe $(PREFIX)
 
 clean:
 	del \
-		adjCoordsSrc\*.o.$(ext) \
-		ampDepthSrc\*.o.$(ext) \
 		freezeTBSrc\*.o.$(ext) \
-		maskPrimSrc\*.o.$(ext) \
-		mkMiruTblSrc\*.o.$(ext) \
-		swapDbRefSrc\*.o.$(ext) \
 		tbAmrSrc\*.o.$(ext) \
-		tbConSrc\*.o.$(ext) \
 		tbMiruSrc\*.o.$(ext) \
 		tbSpolSrc\*.o.$(ext) \
-		trimSamSrc\*.o.$(ext) \
 		whoToAmrSrc\*.o.$(ext) \
-		genAln\*.o.$(ext) \
-		genLib\*.o.$(ext)
+		swapDbRefSrc\*.o.$(ext) \
+		genLib\*.o.$(ext) \
+		genBio\*.o.$(ext) \
+		genAln\*.o.$(ext)

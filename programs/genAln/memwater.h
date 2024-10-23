@@ -1,12 +1,6 @@
-/*########################################################
-# Name memwater
-# Use:
-#  o Holds functions doing a memory efficent Smith
-#    Waterman pairwise alignments.
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of Functions
+' memwater SOF: Start Of Functions
+'   - has memory efficent Waterman Smith alignment
 '   o header:
 '     - forward declartions and guards
 '   o fun01 memwater:
@@ -62,8 +56,8 @@ typedef struct alnSet alnSet;
 |    o qryStartUL to have first query base in alignment
 |    o qryEndUL to have last query base in alignment
 |  - Returns:
-|    o Score for aligment
-|    o 0 for memory errors
+|    o score for aligment
+|    o negative number for memory errors
 \-------------------------------------------------------*/
 signed long
 memwater(

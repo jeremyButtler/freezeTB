@@ -35,7 +35,7 @@
 
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
-#include "../genLib/seqST.h"
+#include "../genBio/seqST.h"
 #include "../genAln/memwater.h"
 #include "../genAln/alnSet.h"
 

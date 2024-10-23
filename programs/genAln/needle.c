@@ -5,9 +5,8 @@
 '     - included libraries
 '   o .c fun01: scoreIndel_water
 '     - gets the indel score for a water alignment
-'   o fun01 water:
-'     - run a memory efficent Waterman Smith alignment on
-'       input sequences
+'   o fun01 needle:
+'     - run a Needleman Wunsch alignment on two sequences
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -24,9 +23,9 @@
    #include <stdlib.h>
 #endif
 
-#include "water.h"
+#include "needle.h"
 
-#include "../genLib/seqST.h"
+#include "../genBio/seqST.h"
 
 #include "alnSet.h"
 #include "dirMatrix.h"
@@ -44,8 +43,9 @@
 !   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/charCp.h"
 !   o .c  #include "../genLib/numToStr.h"
-!   o .c  #include "../genLib/samEntry.h"
-!   o .h  #include "../genLib/ntTo5Bit.h"
+!   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genBio/samEntry.h"
+!   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -66,12 +66,13 @@
 |     o pointer to alnSet with alignment settings
 | Output:
 |  - Modifies:
+|    o errSC in matrixSTPtr to def_memErr_needle for
+|      memory errors
 |    o allocates memory for dirMatrixSC and scoreAryUL
 |      if they are to small
 |    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
 |      or scoreAryUL are resized
 |  - Returns:
-|    o 0 for memory error
 |    o score for alignment
 \-------------------------------------------------------*/
 signed long
@@ -273,6 +274,8 @@ needle(
    /*set up pointers*/
    insDir = dirMatrixSC;
 
+   nextSnpScoreSL = scoreArySL[0];
+
    /*set up scores*/
    #ifdef NOEXTEND
       delScoreSL = scoreArySL[0] + settings->gapSS;
@@ -280,7 +283,6 @@ needle(
       delScoreSL = scoreArySL[0] + settings->extendSS;
    #endif
 
-   nextSnpScoreSL = scoreindexUL[0];
    dirMatrixSC[indexUL] = def_mvIns_alnDefs;
 
    /*move to first base*/
@@ -390,14 +392,14 @@ needle(
       *   - set up for scoring next row
       \**************************************************/
 
+      nextSnpScoreSL = scoreArySL[0];
+
       /*set up scores*/
       #ifdef NOEXTEND
          delScoreSL = scoreArySL[0] + settings->gapSS;
       #else
          delScoreSL = scoreArySL[0] + settings->extendSS;
       #endif
-
-      nextSnpScoreSL = scoreindexUL[0];
 
       dirMatrixSC[indexUL] = def_mvIns_alnDefs;
 
@@ -426,7 +428,7 @@ needle(
    --indexUL; /*get off last -1*/
    dirMatrixSC[indexUL] = def_mvStop_alnDefs;
 
-   matrixSTPtr->scoreSL = scoreindexUL[lenRefUL];
+   matrixSTPtr->scoreSL = scoreArySL[lenRefUL];
    matrixSTPtr->indexUL = indexUL - 1;
 
    return matrixSTPtr->scoreSL; /*best score*/
@@ -437,7 +439,9 @@ needle(
    \*****************************************************/
 
    memErr_fun01_sec05:;
+   matrixSTPtr->errSC = def_memErr_needle;
    goto errCleanUp_fun01_sec05;
+
    errCleanUp_fun01_sec05:;
 
    return 0;

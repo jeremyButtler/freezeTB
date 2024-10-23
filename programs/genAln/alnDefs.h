@@ -1,11 +1,7 @@
-/*########################################################
-# Name: alnDefs
-#   o Holds the default settings and global definitions for
-#     find alignSeq
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' alnDefs SOF: Start Of File
+'   - holds default settings and global definitions for
+'     sequence alignment
 '   o header:
 '     - guards
 '   o sec02:
@@ -68,7 +64,7 @@
 #define def_gapOpen_alnDefs -1000
    /*Penalty for starting indel*/
 
-#define def_gapExtend_alnDefs -10
+#define def_gapExtend_alnDefs -100
    /*Penalty for extading an indel*/
 
 #define def_scoreAdj_alnDefs 100

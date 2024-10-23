@@ -30,6 +30,8 @@ typedef struct seqST seqST;
 typedef struct alnSet alnSet;
 typedef struct dirMatrix dirMatrix;
 
+#define def_memErr_water 1
+
 /*-------------------------------------------------------\
 | Fun01: water
 |   - run a Waterman Smith alignment on input sequences
@@ -48,12 +50,13 @@ typedef struct dirMatrix dirMatrix;
 |     o pointer to alnSet with alignment settings
 | Output:
 |  - Modifies:
+|    o errSC in matrixSTPtr to def_memErr_water for
+|      memory errors
 |    o allocates memory for dirMatrixSC and scoreAryUL
 |      if they are to small
 |    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
 |      or scoreAryUL are resized
 |  - Returns:
-|    o 0 for memory error
 |    o score for alignment
 \-------------------------------------------------------*/
 signed long

@@ -43,8 +43,8 @@
 #include <stdio.h>
 
 #include "../genLib/ulCp.h"
-#include "../genLib/seqST.h"
-#include "../genLib/samEntry.h"
+#include "../genBio/seqST.h"
+#include "../genBio/samEntry.h"
 
 #include "../genAln/alnSet.h"
 #include "../genAln/memwater.h"
@@ -60,9 +60,9 @@
 !   - .c  #include "../genLib/base10str.h"
 !   - .c  #include "../genLib/numToStr.h"
 !   - .c  #include "../genLib/shellSort.h"
-!   - .c  #include "../genLib/samEntry.h"
+!   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genAln/indexToCoord.h"
-!   - .h  #include "../genLib/ntTo5Bit.h"
+!   - .h  #include "../genBio/ntTo5Bit.h"
 !   - .h  #include "../genLib/genMath.h" .h macro only
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
