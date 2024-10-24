@@ -621,36 +621,43 @@ dataDF$boxPlot =
    );
 
 barplot(
-   height = dataDF[dataDF$indexUI == 1 ,]$avgDepth, # y
-   names = 
-      paste(
-         dataDF[dataDF$indexUI == 1 ,]$geneId,
-         dataDF[dataDF$indexUI == 1 ,]$repUI
-      ),
-   col = colPalAry[1],
+   height =
+      rep(
+         0,
+         length(unique(dataDF$geneId,))
+      ), # make y-axis at 0
+   names = unique(dataDF$geneId), # only keep unique names
+   col = "WHITE",
    xlab = "",                    # x-axis title
    ylab = "mean read depth",     # y-axis title
    las = 2,                      # x-axis at 90 degrees
-   #cex.axis = 0.75,             # y-axis ticks
-   #cex.names = 0.75             # x-axis names
    cex.axis = 1,                 # y-axis ticks
-   cex.names = 1                 # x-axis names
-);
+   cex.names = 1,                # x-axis names
+   ylim = c(0, max(c(dataDF$avgDepth, 100)))
+); # setup x-axis
+
+
+barplot(
+   height = dataDF[dataDF$indexUI == 1 ,]$avgDepth, # y
+   names = dataDF[dataDF$indexUI == 1 ,]$geneId,
+   col = colPalAry[1],
+   las = 2,                      # x-axis at 90 degrees
+   cex.axis = 1,                 # y-axis ticks
+   cex.names = 1,                # x-axis names
+   add = TRUE                    # building up graph
+); # plot unfiltered data
 
 if(numFlagsUI >= 1){ 
    barplot(
       height = dataDF[dataDF$indexUI == 2 ,]$avgDepth, # y
    names = 
-         paste(
             dataDF[dataDF$indexUI == 2 ,]$geneId,
-            dataDF[dataDF$indexUI == 2 ,]$repUI
-         ),
+         #paste(
+         #   dataDF[dataDF$indexUI == 2 ,]$geneId,
+         #   dataDF[dataDF$indexUI == 2 ,]$repUI
+         #),
       col = colPalAry[10],
-      xlab = "",                    # x-axis title
-      ylab = "mean read depth",     # y-axis title
       las = 2,                      # x-axis at 90 degrees
-      #cex.axis = 0.75,             # y-axis ticks
-      #cex.names = 0.75,            # x-axis names
       cex.axis = 1,                 # y-axis ticks
       cex.names = 1,                # x-axis names
       add = TRUE                    # building up graph
@@ -661,43 +668,55 @@ numBarsUI =
    length(dataDF[dataDF$indexUI == 2,]$avgDepth) *
    1.2; # need 20% offset to account for length
 
-segments(
-   x0 =
-      seq(
-         from = 0,
-         to = numBarsUI - 1,
-         by = 1
-      ), # add in x-axis starts (/5 to get missing bars)
-   x1 =
-      seq(
-         from = 1,
-         to = numBarsUI,
-         by = 1
-      ), # add in x-axis ends (/5 to get missing bars)
-   y0 = 10, # y-axis start
-   y1 = 10, # y-axis end
-   lwd = 1.5, # line width
-   col = colPalAry[12] # color (yellow)
-); # 10x read depth line
+#segments(
+#   x0 =
+#      seq(
+#         from = 0,
+#         to = numBarsUI - 1,
+#         by = 1
+#      ), # add in x-axis starts (/5 to get missing bars)
+#   x1 =
+#      seq(
+#         from = 1,
+#         to = numBarsUI,
+#         by = 1
+#      ), # add in x-axis ends (/5 to get missing bars)
+#   y0 = 10, # y-axis start
+#   y1 = 10, # y-axis end
+#   lwd = 1.5, # line width
+#   col = colPalAry[12] # color (yellow)
+#); # 10x read depth line
+#
+#segments(
+#   x0 =
+#      seq(
+#         from = 0,
+#         to = numBarsUI - 1,
+#         by = 1
+#      ), # add in x-axis starts (/5 to get missing bars)
+#   x1 =
+#      seq(
+#         from = 1,
+#         to = numBarsUI,
+#         by = 1
+#      ), # add in x-axis ends (/5 to get missing bars)
+#   y0 = 100, # y-axis start
+#   y1 = 100, # y-axis end
+#   lwd = 1.5, # line width
+#   col = colPalAry[5] # color (yellow)
+#); # 100x read depth line
 
-segments(
-   x0 =
-      seq(
-         from = 0,
-         to = numBarsUI - 1,
-         by = 1
-      ), # add in x-axis starts (/5 to get missing bars)
-   x1 =
-      seq(
-         from = 1,
-         to = numBarsUI,
-         by = 1
-      ), # add in x-axis ends (/5 to get missing bars)
-   y0 = 100, # y-axis start
-   y1 = 100, # y-axis end
-   lwd = 1.5, # line width
-   col = colPalAry[5] # color (yellow)
-); # 100x read depth line
+abline(
+   h = 100,
+   col = colPalAry[5],
+   lwd = 2
+); # 100x read depth
+
+abline(
+   h = 10,
+   col = colPalAry[12],
+   lwd = 2
+); # 10x read depth
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Part03 Sec02:
@@ -1310,8 +1329,11 @@ mtext(
    line = -0.25, # margin line to draw on
    outer = TRUE, # use outer margins (multi plot is edges)
    col = colPalAry[12],
+   bg = colPalAry[1],   # does not work
    cex = 1    # text size
 ); # add AMR entry for legend
+
+#20de, 228f, 25a0 (filled square), 26f6 (crosshair square)
 
 mtext(
    text = "-- Gene Start",
