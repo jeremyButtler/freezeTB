@@ -473,6 +473,7 @@ if(errBl == TRUE){
 #*********************************************************
 
 # FOR DEBUGGING
+#if("debug" == "debug"){ # input gaurd disabled
 #dataStr = "test.tsv";
 #amrFileStr = "/usr/local/share/freezeTBFiles/amrDb.tsv";
 #prefixStr = "delete"
@@ -575,6 +576,9 @@ while(siGene <= numGenesSI - 1)
 #  - assign colors to flags (+ get number bars)
 #*********************************************************
 
+if(numFlagsUI < 1)
+   stop("nothing to graph");
+
 colAryStr =
    c(
       colPalAry[1],
@@ -602,7 +606,18 @@ dataDF$color = colAryStr[dataDF$indexUI];
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Part03 Sec01:
 #   - build mean read depth graph
+#   o part03 sec01 sub01:
+#     - save graph
+#   o part03 sec01 sub02:
+#     - get and graph first flag values
+#   o part03 sec01 sub03:
+#     - get and graph second flag values
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#*********************************************************
+# Part03 Sec01 Sub01:
+#   - save graph
+#*********************************************************
 
 save_graphAmpDepth(
    paste(
@@ -613,49 +628,87 @@ save_graphAmpDepth(
     extStr
 );
 
-dataDF$boxPlot =
-   seq(
-      from = 1,
-      to = length(dataDF$geneFlag),
-      by = 1
+#*********************************************************
+# Part03 Sec01 Sub02:
+#   - get and graph first flag values
+#*********************************************************
+
+idAryStr = unique(dataDF$geneId);
+depthAryUI =
+   rep(
+      0,
+      length(unique(dataDF$geneId))
    );
 
-barplot(
-   height =
-      rep(
-         0,
-         length(unique(dataDF$geneId,))
-      ), # make y-axis at 0
-   names = unique(dataDF$geneId), # only keep unique names
-   col = "WHITE",
-   xlab = "",                    # x-axis title
-   ylab = "mean read depth",     # y-axis title
-   las = 2,                      # x-axis at 90 degrees
-   cex.axis = 1,                 # y-axis ticks
-   cex.names = 1,                # x-axis names
-   ylim = c(0, max(c(dataDF$avgDepth, 100)))
-); # setup x-axis
+ampGeneAryStr = dataDF[dataDF$indexUI == 1,]$geneId;
+ampDepthAryUI = dataDF[dataDF$indexUI == 1,]$avgDepth;
 
+siGene = 1;
+idUI = 1;
+lenAmpUI = length(ampGeneAryStr);
 
-barplot(
-   height = dataDF[dataDF$indexUI == 1 ,]$avgDepth, # y
-   names = dataDF[dataDF$indexUI == 1 ,]$geneId,
-   col = colPalAry[1],
-   las = 2,                      # x-axis at 90 degrees
-   cex.axis = 1,                 # y-axis ticks
-   cex.names = 1,                # x-axis names
-   add = TRUE                    # building up graph
-); # plot unfiltered data
+while(siGene <= lenAmpUI)
+{ # Loop: build graph vectors
+   if(idAryStr[idUI] != ampGeneAryStr[siGene]){
+      idUI = idUI + 1;
+   }else{
+      depthAryUI[idUI] =
+         max(depthAryUI[idUI], ampDepthAryUI[siGene]);
+
+      siGene = siGene + 1;
+   } # check if is missing ampGene for set
+} # Loop: build graph vectors
+
+posDF =
+   barplot(
+      height = depthAryUI,
+      names = idAryStr,
+      col = colPalAry[1],
+      xlab = "",                    # x-axis title
+      ylab = "mean read depth",     # y-axis title
+      las = 2,                      # x-axis at 90 degrees
+      cex.axis = 1,                 # y-axis ticks
+      cex.names = 1,                # x-axis names
+      ylim = c(0, max(c(dataDF$avgDepth, 100)))
+   ); # setup x-axis
+
+#*********************************************************
+# Part03 Sec01 Sub03:
+#   - get and graph second flag values
+#*********************************************************
 
 if(numFlagsUI >= 1){ 
+   idAryStr = unique(dataDF$geneId);
+   depthAryUI =
+      rep(
+         0,
+         length(unique(dataDF$geneId))
+      );
+   
+   ampGeneAryStr = dataDF[dataDF$indexUI == 2,]$geneId;
+   ampDepthAryUI = dataDF[dataDF$indexUI == 2,]$avgDepth;
+   
+   siGene = 1;
+   idUI = 1;
+   lenAmpUI = length(ampGeneAryStr);
+   
+   while(siGene <= lenAmpUI)
+   { # Loop: build graph vectors
+      if(idAryStr[idUI] != ampGeneAryStr[siGene]){
+         idUI = idUI + 1;
+      }else{
+         depthAryUI[idUI] =
+            max(depthAryUI[idUI], ampDepthAryUI[siGene]);
+   
+         siGene = siGene + 1;
+      } # check if is missing ampGene for set
+   } # Loop: build graph vectors
+
    barplot(
-      height = dataDF[dataDF$indexUI == 2 ,]$avgDepth, # y
-   names = 
-            dataDF[dataDF$indexUI == 2 ,]$geneId,
-         #paste(
-         #   dataDF[dataDF$indexUI == 2 ,]$geneId,
-         #   dataDF[dataDF$indexUI == 2 ,]$repUI
-         #),
+      #height = dataDF[dataDF$indexUI == 2 ,]$avgDepth, # y
+      #names = dataDF[dataDF$indexUI == 2 ,]$geneId,
+      height = depthAryUI,
+      names = idAryStr,
       col = colPalAry[10],
       las = 2,                      # x-axis at 90 degrees
       cex.axis = 1,                 # y-axis ticks
@@ -664,59 +717,28 @@ if(numFlagsUI >= 1){
    );
 } # If: comparing two values
 
-numBarsUI =
-   length(dataDF[dataDF$indexUI == 2,]$avgDepth) *
-   1.2; # need 20% offset to account for length
+#*********************************************************
+# Part03 Sec01 Sub03:
+#   - get and graph second flag values
+#*********************************************************
 
-#segments(
-#   x0 =
-#      seq(
-#         from = 0,
-#         to = numBarsUI - 1,
-#         by = 1
-#      ), # add in x-axis starts (/5 to get missing bars)
-#   x1 =
-#      seq(
-#         from = 1,
-#         to = numBarsUI,
-#         by = 1
-#      ), # add in x-axis ends (/5 to get missing bars)
-#   y0 = 10, # y-axis start
-#   y1 = 10, # y-axis end
-#   lwd = 1.5, # line width
-#   col = colPalAry[12] # color (yellow)
-#); # 10x read depth line
-#
-#segments(
-#   x0 =
-#      seq(
-#         from = 0,
-#         to = numBarsUI - 1,
-#         by = 1
-#      ), # add in x-axis starts (/5 to get missing bars)
-#   x1 =
-#      seq(
-#         from = 1,
-#         to = numBarsUI,
-#         by = 1
-#      ), # add in x-axis ends (/5 to get missing bars)
-#   y0 = 100, # y-axis start
-#   y1 = 100, # y-axis end
-#   lwd = 1.5, # line width
-#   col = colPalAry[5] # color (yellow)
-#); # 100x read depth line
+segments(
+   x0 = posDF[,1] - 0.5, # has bar center coordiantes
+   x1 = posDF[,1] + 0.5,
+   y0 = 10, # y-axis start
+   y1 = 10, # y-axis end
+   lwd = 3, # line width
+   col = colPalAry[12] # color (yellow)
+); # 10x read depth line
 
-abline(
-   h = 100,
-   col = colPalAry[5],
-   lwd = 2
-); # 100x read depth
-
-abline(
-   h = 10,
-   col = colPalAry[12],
-   lwd = 2
-); # 10x read depth
+segments(
+   x0 = posDF[,1] - 0.5,
+   x1 = posDF[,1] + 0.5,
+   y0 = 100, # y-axis start
+   y1 = 100, # y-axis end
+   lwd = 3, # line width
+   col = colPalAry[5]
+); # 100x read depth line
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Part03 Sec02:
@@ -1350,7 +1372,7 @@ mtext(
 #   - close graph
 #*********************************************************
 
-#dev.off() # since last graph, let R close graphing
+dev.off() # since last graph, let R close graphing
 } # Else: have valid input
 
 #*=======================================================\
