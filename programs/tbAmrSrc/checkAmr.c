@@ -1642,7 +1642,7 @@ pConHead_checkAmr(
    void *outFILE
 ){
    fprintf((FILE *) outFILE, "Id\tgene\tdrug");
-   fprintf((FILE *) outFILE, "\tcross_resitance");
+   fprintf((FILE *) outFILE, "\tcross_resistance");
    fprintf((FILE *) outFILE, "\tvariant_id\ttype\tgrade");
    fprintf((FILE *) outFILE, "\tref_pos\tseq_pos");
    fprintf((FILE *) outFILE, "\tresitance_level");
