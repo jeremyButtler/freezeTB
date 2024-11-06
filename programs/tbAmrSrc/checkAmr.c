@@ -1970,7 +1970,7 @@ void
 pReadHead_checkAmr(
    void *outFILE
 ){
-   fprintf((FILE *) outFILE,"gene\tDrug");
+   fprintf((FILE *) outFILE,"gene\tdrug");
    fprintf((FILE *) outFILE,"\tcross_resistance");
    fprintf((FILE *) outFILE,"\tvariant_id\ttype\tgrade");
    fprintf((FILE *) outFILE,"\tref_pos");
