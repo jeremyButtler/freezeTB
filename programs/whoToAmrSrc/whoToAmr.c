@@ -2502,17 +2502,19 @@ WHO2023Catalog_whoToAmr(
           uiPos = amrHeapST[*numAmrUL].lenVarIdUI;
           tmpStr = amrHeapST[*numAmrUL].varIdStr;
 
-          if(
+          /*removing, since varaint ID has information*/
+          /*if(
                  (tmpStr[uiPos - 3] & (~32)) == 'L'
              && (tmpStr[uiPos - 2] & (~32)) == 'O'
              && (tmpStr[uiPos - 1] & (~32)) == 'F'
-          ){ /*If: loss of function mutation*/
+          ){*/ /*If: loss of function mutation*/
+          /*
              amrHeapST[*numAmrUL].mutTypeStr[0] = 'l';
              amrHeapST[*numAmrUL].mutTypeStr[1] = 'o';
              amrHeapST[*numAmrUL].mutTypeStr[2] = 'f';
-          } /*If: loss of function mutation*/
+          }*/ /*If: loss of function mutation*/
 
-          else if(
+          if(
                amrHeapST[*numAmrUL].lenRefSeqUI
              > amrHeapST[*numAmrUL].lenAmrSeqUI
           ){ /*Else If: deletion*/
