@@ -1,2 +1,0 @@
-Id	gene	drug	cross_resitance	variant_id	type	grade	ref_pos	seq_pos	resitance_level	resistance_additive	needs_gene	effect	who_comment	whole_gene
-2288662-2289249	pncA	pyrazinamide	NA	pncA_p.Asp12Ala	snp	1	2289205	543	NA	NA	NA	missense_variant	NA	False
