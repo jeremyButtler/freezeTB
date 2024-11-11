@@ -8,16 +8,15 @@ freezeTb is a program that detects AMR resistance in
   genes that need to be functional for resistance, nor
   does it output a nice report.
 
-Currently freezeTb uses an WHO 2023 catalog that has had
-  all grade 3, 4, and 5 variants removed.
+Currently freezeTb uses a older WHO 2023 catalog that has
+  had all grade 3, 4, and 5 variants removed.
 
-Alternatives to freezeTB are TBProfiler
-  [https://github.com/jodyphelan/TBProfiler](
+- Good Alternatives to freezeTB are
+- TBProfiler [https://github.com/jodyphelan/TBProfiler](
    https://github.com/jodyphelan/TBProfiler)
-  and ONTs wf-tb-amr (can be installed through epi2me)
+- ONTs wf-tb-amr (can be installed through epi2me)
   [https://github.com/epi2me-labs/wf-tb-amr](
-   https://github.com/epi2me-labs/wf-tb-amr). Both are
-  good alternatives.
+   https://github.com/epi2me-labs/wf-tb-amr)
 
 - Some missing items (not all) from freezeTB
   - the sample
@@ -43,15 +42,14 @@ Here are the order of merlin winners:
 - Taken from other sources:
   - files in freezeTBFiles
     - amrDb.tsv is the who 2023 catalog (converted)
-    - spoligo-lineages from TBProfiler
+    - spoligo-lineages.csv from TBProfiler
     - NC000962.fa and genes-NC000962.fa were from Genbank
       - also in benchmark as tbdb.fasta
     - miruTbl.tsv is the modified MIRU-VNTRU table from
       MIRUReader (github)
     - spoligo-spacers.fa were from a spoligotyping program
       on github (can not remember which one)
-    - mask.tsv and coords.tsv is unique to freezeTB
-  - minimap2 (MIT) binaries from
+  - minimap2 (MIT) window binarie compiled from
     [https://github.com/lh3/minimap2](
      https://github.com/lh3/minimap2)
   - luaFilters in slidesAndWriting
@@ -62,11 +60,11 @@ Here are the order of merlin winners:
        https://github.com/pandoc/lua-filters)
 
 The stuff unique to freezeTB is under an dual license. The
-  primary license is public domain. However, we know that
-  not all companies/countries like or will even respect
-  the public domain. So, in cases were public domain gets
-  in the way, such as being inconvenient, undesired, or
-  not allowed, freezeTB is under the MIT license.
+  primary license is unlicense. However, not all
+  companies/countries like or will even respect the
+  unlicense. So, in those cases or cases were the
+  unlicense is not wanted/allowed, freezeTB is under the
+  MIT license.
 
 - Unique to freezeTB:
   - everything in programs
@@ -87,19 +85,27 @@ The stuff unique to freezeTB is under an dual license. The
    - Your choice for the command line version 
    - For the GUI you will need minimap2, which can be
      often installed by your package manager (for Mac
-     you can use homebrew)
+     install and use homebrew)
 2. R with tcltk (install tcltk2 for tooltips)
-   - If you want the the old graping script (used ggplot),
-     then you will need to:
-     - rename scripts/oldGraphAmpDepth.r to
-       scripts/graphAmpDepth.r
-     - install ggplot2
-     - install viridisLite (often installed with ggplot2)
-     - install data.table (often installed with ggplot2)
-     - install svgLite (Optional; svgs output)
-     - install fs (Optional; Unix only)
 
 # Install
+
+- The installation menence, your start to the dark side
+  - step one: anger; why are there so many requirments
+  - step two: hatred; why will it not install on OS X
+  - step three: fear; must I use Ubuntu instead of X
+  - step four: chaos; repeat steps one to four for the
+    next program
+  - step five: disaster; install Ubuntu
+
+- The light side
+  - step one: peace; do I really need this program
+  - step two: knowledge; maybe there is an alternative
+  - step three: serenity; the alternative will install
+  - step four: harmony; nope, but I really did not need
+    that program
+  - step five: disaster; I did need it, repeat steps
+    one through four
 
 ## Easy way for unix
 
@@ -110,8 +116,6 @@ The easy way is to do a local install, which will only
   each user on your system needs a copy.
 
 ### Local (only you):
-
-#### Setting up local envrioment
 
 ```
 # make sure have local install and Downloads directory
@@ -137,19 +141,11 @@ export "PATH=$HOME/local/bin:$PATH"
 # you can remove $HOME/local/bin from your path by
 # deleting the "export PATH=/home/<user name>/local/bin:"
 # from your .bashrc file
-```
-
-#### Installing (locally):
-
-```
 cd $HOME/Downloads
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
 make -f mkfile.unix
-make -f mkfile.unix install-all PREFIX=$HOME/local/bin DB_PREFIX=$HOME/Documents
-R
-source("rDepends.r")
-q("no")
+make -f mkfile.unix install PREFIX=$HOME/local/bin DB_PREFIX=$HOME/Documents
 ```
 
 ### Global (everyone)
@@ -158,21 +154,57 @@ q("no")
 cd $HOME/Downloads
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
-if [[ ! -d "/usr/local/bin" ]]; then mkdir "/usr/local/bin"; fi
-if [[ ! -d "/usr/local/share" ]]; then mkdir "/usr/local/share"; fi
+
+if [[ ! -d "/usr/local/bin" ]]; then
+   sudo mkdir -p "/usr/local/bin";
+fi
+
+if [[ ! -d "/usr/local/share" ]]; then
+   sudo mkdir -p "/usr/local/share";
+fi
+
 make -f mkfile.unix
-sudo make -f mkfile.unix install-all
-sudo Rscript rDepnds.r
+sudo make -f mkfile.unix install
 ```
 
 ## Minimap2 the next step 
 
 After this you will need minimap2 (I am assuming you do
-  not have minimap2). I do have some pre-compiled
-  binaries (programs), but a source install is easy on
-  unix.
+  not have minimap2). The easy way is with a package
+  manager.
 
-## Mac minimap2 local install
+
+## Linux minimap2 local install
+
+The easy way is `sudo apt-get install minimap2`.
+
+### Local:
+
+```
+cd $HOME/Downloads
+git clone https://github.com/lh3/minimap2
+cd minimap2
+make
+cp minimap2 $HOME/local/bin
+chmod a+x $HOME/local/bin/minimap2
+```
+
+### Global:
+
+```
+cd $HOME/Downloads
+git clone https://github.com/lh3/minimap2
+cd minimap2
+make
+sudo cp minimap2 /usr/local/bin
+sudo chmod a+x /usr/local/bin/minimap2
+```
+
+### Mac minimap2
+
+The easy way is `brew install minimap2`.
+
+## Mac minimap2 easy
 
 This is for the M chip series. If you have an old Mac with
   an intel/AMD CPU; then do the Linux install.
@@ -199,99 +231,42 @@ sudo cp minimap2 /usr/local/bin
 sudo chmod a+x /usr/local/bin/minimap2
 ```
 
-## Linux minimap2 local install
-
-### Local:
-
-```
-cd $HOME/Downloads
-git clone https://github.com/lh3/minimap2
-cd minimap2
-make
-cp minimap2 $HOME/local/bin
-chmod a+x $HOME/local/bin/minimap2
-```
-
-### Global:
-
-```
-cd $HOME/Downloads
-git clone https://github.com/lh3/minimap2
-cd minimap2
-make
-sudo cp minimap2 /usr/local/bin
-sudo chmod a+x /usr/local/bin/minimap2
-```
-
 ## Windows
 
 ### Easy method
 
-There is no hope.
+Use Unix, there is no hope. Well, there would be if I had
+  precompiled binaries.
 
-Use my pre-complied binaries. Likely out of date, but do
-  work.
-
-Make a freezeTB directory in "C:\Program Files". Then
-  copy all the binaries and scripts into
-  "C:\Program Files\freezeTB". After that copy the
-  freezeTBFiles to your Documents folder (or public
-  Documents ["C:\Public\Documents"]).
-
-Make sure R is installed that the
-  ggplot2 (`install.packages("ggplot2")`),
-  viridisLite (`install.packates("viridisLite")`),
-  svtLite (`install.packages("svtLite")`),
-  data.tables (`install.packates("data.table")`),
-  and tcltk2 (`install.packages("tcltk2")`) packages
-  are installed. You can install by installing R studio
-  or from Cran (see Windows from source).
-  
-At this copy the "freezeTBGui.r" script from scripts to
-  were you want run freezeTB. Then open the file in R
-  or Rstudio to run freezeTB. You can also set it is
-  that the `.r` extension is always run by Rscript
-  ("C:\Program Files\R\R-version\bin\Rscript"). That way
-  double clicking freezeTBGui.r launches freezeTB.
-
-### Windows from source
+### Actuall method (source)
 
 This is not the method your are looking for
 
-#### Install R (GUI dependencies):
-
-1. install R
-   - [https://cran.r-project.org/bin/windows/base/](
-      https://cran.r-project.org/bin/windows/base/)
-   - follow instructions on exe.
-2. Download freezeTB from github into Downloads then
-   extract (right click->extract).
-3. Move into freezeTB->scripts and double click
-   rDepends.r
-   - You may have to install these manually
-     - big is ggplot2 (otherwise no graphs)
-     - also install tcltk2 (nicer gui with tooltips)
-   - select more apps->look for another app on this pc->R->R-version->bin->Rscript
-   - at this point Rscript will run and install the GUI dependencies
-       
-#### freezeTB:
-
-Get freezeTB from github and extract it. I saved it to
-  Downloads.
-
-you will need to use the mkfile.win to compile the source
-  code.
-
-1. Open a developer terminal with administrator
-   privlages (for install step)
-   - you can do this by installing visual studio
-   - start menu go to visual studio (folder)->developer
-2. `cd C:\Users\<user name>\Downloads\freezeTB`
-   - or to were you put freezeTB
-   - There my be two freezeTB directories
-3. `nmake /F mkfile.win`
-4. `nmake /F mkfile.win install-all`
-5. `nmake /F mkfile.win clean`
+1. Install visual studio or at least the developer console
+   from visual studio
+2. Make a freezeTB directory in "C:\Program Files"
+3. Download freezeTB from git hub and unzip in Downloads
+4. Copy the freezeTBFiles directory to Documents (or public
+   Documents ["C:\Public\Documents"])
+5. open the developer console
+   (visual studio->view->developer console) and
+   do `cd $HOME$/Downloads/freezeTB`.
+6. compile freezeTB with `nmake /F mkfile.win`, then close
+   the developer console
+7. in the freezeTB folder copy the freezeTB.exe in
+   "programs->freezeTBSrc" to the freezeTB folder in
+    "C:\Program Files"
+9. copy the minimap2.exe (minimap2) file minimap2Windows
+   to your freezeTB folder in "C:\Program fIles"
+   - or compile minimap2 and copy the .exe file
+10. copy the freezeTBGui.Rscript (freezeTBGui) file in
+   scripts to your desktop or were you want it.
+11. Make sure R is installed or if not install R or Rstudio
+   [https://cran.r-project.org/bin/windows/base/](
+    https://cran.r-project.org/bin/windows/base/)
+12. right click freezeTBGui and select "open with", then
+   "more programs", then "R", "R <version number>",
+   "bin", "Rscript"
 
 ![
   picture showing how to open developer console
@@ -346,14 +321,25 @@ Copy minimap2 to your freezeTB install location or into
 
 ## GUI
 
-Open a terminal and type `$HOME/local/bin/freezeTBGui.r`
- for a local install or `freezeTBGui.r` for a global
- install (or if it is in your path). Then fill in the
- values needed. This should be only fastq file if the
- databases were detected. You can select multiple fastq
- files at once.
+### Unix:
+
+Open a terminal and
+ type `$HOME/local/bin/freezeTBGui.Rscript` for a local
+ install or `freezeTBGui.Rscript` for a global install (or
+ if it is in your path). Then fill in the values needed.
+
+### Windows:
+
+You should be able to double click the "freezeTBGui" file
+  to launch. If not, then get open "freezeTBGui" with
+  "R studio" and hit run (the green arrow).
 
 ## CLI (command line)
+
+Technically this can work on windows, but it is not in the
+  system path. So, would require you to
+  enter `"C:\\Program Files\\freezeTB\program"' every
+  time.
 
 You can print the help message with `freezeTB -h`.
 
@@ -430,28 +416,30 @@ You can leave out `-spoligo` if you are changing an
 11. freezeTB then adds the read to the reference
    - Bases with Q-scores under 7 are removed
 12. After going though all reads; freezeTB then prints
-   out both histogram (unfiltered and filtered)
-13. freezeTB prints out the AMRs that at least 5% of
+    out both histogram (unfiltered and filtered)
+13. mixed infection with edClust if requested, replaces
+    tbCon consensus building
+14. freezeTB prints out the AMRs that at least 5% of
    mapped reads supported
-14. freezeTB prints out the MIRU-VNTR lineage table
+15. freezeTB prints out the MIRU-VNTR lineage table
     of read counts for the reads
-15. freezeTB prints out the spacers detected with the
+16. freezeTB prints out the spacers detected with the
     the number of reads that supported each spacer
-16. freezeTB then collapses the consensus (non-mixed
-    infection)
+17. freezeTB then collapses the consensus (if not doing
+    mixed infection detection)
     - Split into fragments with 20x or greater read depth
     - Fragments less than 50x bases long are removed
     - Most supported snp/match/deletion selected
     - Snps/matches with less than 50% support are masked
     - Most supported insertion selected
     - Indels wit less than 70% support are removed
-17. freezeTB finds the AMRs for the consensus
-18. freezeTB finds the MIRU-VNTR lineages for consensus
-19. freezeTB finds spoligotype for consensus
-20. for mixied infection uses edClust, which uses tbCon
-    with fragments
+18. freezeTB finds the AMRs for the consensus
+19. freezeTB finds the MIRU-VNTR lineages for consensus
+20. freezeTB finds spoligotype for consensus
 21. GUI only: freezeTB makes read depth and coverage
-    graphs with R
+    graphs with R and calls the output GUI
+    - you can do this separately with `outputGui.Rscript`
+      or for just graphs (larger) `graphAmpDepth.r`
 
 # Programs included with freezeTB
 
@@ -461,20 +449,21 @@ I have made the programs in freezeTb to be modular. This
   means that if you like a particular program, then you
   can compile it separately.
 
-You can install freezeTB and the side modules
-  with `make -f mkfile.OS install-modules` or
-  all programs with `make -f mkfile.OS install-all`.
+For unix the programs are all installed in the install
+  step, however for windows you will have to copy each
+  one.
 
 ## freezeTB core:
 
 Chapter one: monsters that consume all hope
 
-- freezeTBGui.r: gui built in R using tcltk for freezeTB
+- freezeTBGui.Rscript: gui built in R using tcltk for
+  freezeTB
 - freezeTB: core program for freezeTB
-- adjCoords: adjust coordinates in sam file using an
-  list of genes (instead of mapping to full TB genome)
 - graphAmpDepth.r: Rscript that makes graphs for freezeTB
   - oldGraphAmpDepth.r is older version that used ggplot2
+- outputGui.Rscript runs the output menu for freezeTB
+  separately
 
 ## Modules:
 

@@ -14,17 +14,7 @@ all:
 
 install:
 	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
-	move programs\tbAmrSrc\tbAmr.exe $(PREFIX)
-	move programs\tbMiruSrc\tbMiru.exe $(PREFIX)
-	move programs\tbSpolSrc\tbSpol.exe $(PREFIX)
-	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
-	move programs\swapDbRefSrc\whoToAmr.exe $(PREFIX)
-	move programs\swapDbRefSrc\swapDbRef.exe $(PREFIX)
-	copy scripts\graphAmpDepth.r "$(PREFIX)"
-	copy scripts\freezeTBGui.r "$(PREFIX)"
-
-install-r-depends:
-	Rscript scripts\rDepends.r
+	copy scripts\freezeTBGui.Rscript "$(PREFIX)"
 
 clean:
 	cd programs
