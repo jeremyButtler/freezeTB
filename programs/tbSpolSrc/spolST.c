@@ -558,11 +558,11 @@ readDb_spolST(
 
     while(bytesUL)
     { /*Loop: Find the number of lines in the file*/
-        tmpUI = endLine_ulCp(&buffHeapStr[posUI]);
+        tmpUI = endLineUnix_ulCp(&buffHeapStr[posUI]);
         posUI += tmpUI;
         lenLineUI += tmpUI;
 
-        if(buffHeapStr[posUI] == '\n')
+        if( buffHeapStr[posUI] == '\n' )
         { /*If: I have an new line*/
            ++numLinesSI;
 

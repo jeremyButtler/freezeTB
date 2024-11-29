@@ -7,4 +7,4 @@ b edClust.c:1783
 #r -sam $HOME/../shared/edClustTests/BC33.sam -prefix delete
 #r -sam del.sam -prefix delete -adj-coords
 #r -clust -sam $HOME/../shared/edClustTests/BC33.sam -prefix delete
-r -sam test.sam -clust -err-to-var 50 -prefix delete
+r -sam test.sam -err-to-var 50 -prefix delete

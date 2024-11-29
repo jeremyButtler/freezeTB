@@ -1,11 +1,7 @@
-/*#######################################################\
-# Name: freezeTBPaths
-#   - holds functions for ting default file paths for
-#     freezeTB
-\#######################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' freezeTBPaths SOF: Start Of File
+'   - holds functions for ting default file paths for
+'     freezeTB
 '   o header:
 '     - guards
 '   o .c fun01: getSharePath_freezeTBPaths
@@ -24,7 +20,9 @@
 '     - finds default spoligotype lineage path (freezeTB)
 '   o fun08: maskPath_freezeTBPaths
 '     - finds primer masking path
-'   o fun09: outputPath_freezeTBPaths
+'   o fun09: refPath_freezeTBPaths
+'     - finds default reference fasta path (guifreezeTB)
+'   o fun10: outputPath_freezeTBPaths
 '     - sets up an ouput file name & opens "w", the closes
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -134,7 +132,23 @@ maskPath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun09: outputPath_freezeTBPaths
+| Fun09: refPath_freezeTBPaths
+|   - finds default reference fasta path (guifreezeTB)
+| Input:
+|   - refPathStr:
+|     o c-string to copy default reference path to
+| Output:
+|   - Modifies:
+|     o reference to have the default path or '\0' if
+|       could not find file
+\-------------------------------------------------------*/
+void
+refPath_freezeTBPaths(
+   signed char *refPathStr
+);
+
+/*-------------------------------------------------------\
+| Fun10: outputPath_freezeTBPaths
 |   - sets up an ouput file name and opens "w", the closes
 | Input:
 |   - prefixStr:

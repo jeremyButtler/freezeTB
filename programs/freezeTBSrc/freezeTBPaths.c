@@ -1,11 +1,7 @@
-/*#######################################################\
-# Name: freezeTBPaths
-#   - holds functions for ting default file paths for
-#     freezeTB
-\#######################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' freezeTBPaths SOF: Start Of File
+'   - holds functions for ting default file paths for
+'     freezeTB
 '   o header:
 '     - included libraries and defined variables
 '   o .c fun01: getSharePath_freezeTBPaths
@@ -24,7 +20,9 @@
 '     - finds default spoligotype lineage path (freezeTB)
 '   o fun08: maskPath_freezeTBPaths
 '     - finds primer masking path
-'   o fun09: outputPath_freezeTBPaths
+'   o fun09: refPath_freezeTBPaths
+'     - finds default reference fasta path (guifreezeTB)
+'   o fun10: outputPath_freezeTBPaths
 '     - sets up an ouput file name & opens "w", the closes
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -91,6 +89,10 @@ signed char
 signed char
    *def_mask_freezeTBPaths =
       (schar *) "mask.tsv";
+
+signed char
+   *def_ref_freezeTBPaths =
+      (schar *) "NC000962.fa";
 
 /*-------------------------------------------------------\
 | Fun01: getSharePath_freezeTBPaths
@@ -1042,7 +1044,159 @@ maskPath_freezeTBPaths(
 } /*maskPath_freezeTBPaths*/
 
 /*-------------------------------------------------------\
-| Fun09: outputPath_freezeTBPaths
+| Fun09: refPath_freezeTBPaths
+|   - finds default reference fasta path (guifreezeTB)
+| Input:
+|   - refPathStr:
+|     o c-string to copy default reference path to
+| Output:
+|   - Modifies:
+|     o reference to have the default path or '\0' if
+|       could not find file
+\-------------------------------------------------------*/
+void
+refPath_freezeTBPaths(
+   signed char *refPathStr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   '   o fun09 sec01:
+   '     - variable declarations
+   '   o fun09 sec02:
+   '     - see if database in working directory
+   '   o fun09 sec03:
+   '     - if not, check local documents folder
+   '   o fun09 sec04:
+   '     - if not, check global share/documents
+   '   o fun09 sec05:
+   '     - clean up
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   schar *tmpStr = 0;
+   schar *sharePathStr = getSharePath_freezeTBPaths();
+   schar *homePathStr = getHomePath_freezeTBPaths();
+
+   FILE *testFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec02:
+   ^   - see if database in working directory
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   tmpStr = refPathStr;
+
+   cpDelim_ulCp(
+      tmpStr,
+      def_ref_freezeTBPaths,
+      0,
+      '\0'
+   );
+
+   testFILE =
+      fopen(
+         (char *) tmpStr,
+         "r"
+      );
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec03:
+   ^   - if not, check local documents folder
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(! testFILE)
+   { /*If: database not in current directory*/
+      tmpStr = refPathStr;
+
+      tmpStr +=
+         cpDelim_ulCp(
+           tmpStr,
+           homePathStr,
+           0,
+           '\0'
+         );
+
+      tmpStr +=
+         cpDelim_ulCp(
+            tmpStr,
+            def_path_freezeTBPaths,
+            0,
+            '\0'
+         );
+
+      tmpStr +=
+         cpDelim_ulCp(
+            tmpStr,
+            def_ref_freezeTBPaths,
+            0,
+            '\0'
+         );
+
+      testFILE =
+         fopen(
+            (char *) refPathStr,
+            "r"
+         );
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun09 Sec04:
+      ^   - if not, check global share/documents
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+      if(! testFILE)
+      { /*If: database not in $HOME/documents*/
+         tmpStr = refPathStr;
+
+         tmpStr +=
+            cpDelim_ulCp(
+              tmpStr,
+              sharePathStr,
+              0,
+              '\0'
+            );
+
+         tmpStr +=
+            cpDelim_ulCp(
+               tmpStr,
+               def_altPath_freezeTBPaths,
+               0,
+               '\0'
+            );
+
+         tmpStr +=
+            cpDelim_ulCp(
+               tmpStr,
+               def_ref_freezeTBPaths,
+               0,
+               '\0'
+            );
+
+         testFILE =
+            fopen(
+               (char *) refPathStr,
+               "r"
+            );
+
+         if(! testFILE)
+            refPathStr[0] = '\0'; /*no idea*/
+      } /*If: database not in $HOME/documents*/
+   } /*If: database not in current directory*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec05:
+   ^   - clean up
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(testFILE)
+      fclose(testFILE);
+
+   testFILE = 0;
+} /*refPath_freezeTBPaths*/
+
+/*-------------------------------------------------------\
+| Fun10: outputPath_freezeTBPaths
 |   - sets up an ouput file name and opens "w", the closes
 | Input:
 |   - prefixStr:

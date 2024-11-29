@@ -1,25 +1,21 @@
-/*########################################################
-# Name: freezeTB
-#   - Process input reads for AMR(s) and MIRU lineages.
-#     This also builds a cosenssu and prints out depths
-########################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
-'   - header:
+' freezeTB SOF: Start Of File
+'   - Process input reads for AMR(s) and MIRU lineages.
+'     This also builds a cosenssu and prints out depths
+'   o header:
 '     o Included libraries
-'   o fun01: pversion_freezeTB
+'   o .c fun01: pversion_freezeTB
 '     - prints version number for freezeTB and |submodules
-'   o fun02: phelp_freezeTB
+'   o .c fun02: phelp_freezeTB
 '     - prints help message for freezeTB
-'   o fun03: input_freezeTB
+'   o .c fun03: input_freezeTB
 '     - gets user input
-'   o main:
-'     - main function which drives everything
-'   o note01:
+'   o fun04: run_freezeTB:
+'     - drives everything, but not fun04 (for tcltk)
+'   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public domain / mit)
+'     - licensing for this code (public dofun04 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -866,18 +862,20 @@ phelp_freezeTB(
    *   o fun02 sec04 sub04 cat09:
    *     - maximum percent maksing in consensus
    *   o fun02 sec04 sub04 cat10:
-   *     - depth profiling (edit distance setting start)
+   *     - number of consensus rebuilds
    *   o fun02 sec04 sub04 cat11:
-   *     - minimum depth profile depth (edDist)
+   *     - depth profiling (edit distance setting start)
    *   o fun02 sec04 sub04 cat12:
-   *     - minimum error:variant ratio to be different
+   *     - minimum depth profile depth (edDist)
    *   o fun02 sec04 sub04 cat13:
-   *     - length of window (edDist)
+   *     - minimum error:variant ratio to be different
    *   o fun02 sec04 sub04 cat14:
-   *     - window variant:error ratio (for difference)
+   *     - length of window (edDist)
    *   o fun02 sec04 sub04 cat15:
-   *     - minimum indel length to keep indel in edDist
+   *     - window variant:error ratio (for difference)
    *   o fun02 sec04 sub04 cat16:
+   *     - minimum indel length to keep indel in edDist
+   *   o fun02 sec04 sub04 cat17:
    *     - minimum q-score to count snp as different
    \*****************************************************/
 
@@ -1105,6 +1103,23 @@ phelp_freezeTB(
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun02 Sec04 Sub04 Cat10:
+   +   - number of consensus rebuilds
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "      -con-iter %i: [Optional; %i]\n",
+      def_conRebuild_clustST,
+      def_conRebuild_clustST
+    );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o number times to rebuild cluster (con)\n"
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub04 Cat11:
    +   - depth profiling (edit distance setting start)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1125,7 +1140,7 @@ phelp_freezeTB(
       );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat11:
+   + Fun02 Sec04 Sub04 Cat12:
    +   - minimum depth profile depth (edDist)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1145,7 +1160,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat12:
+   + Fun02 Sec04 Sub04 Cat13:
    +   - minimum error:variant ratio to be different
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1172,7 +1187,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat13:
+   + Fun02 Sec04 Sub04 Cat14:
    +   - length of window (edDist)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1199,7 +1214,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat14:
+   + Fun02 Sec04 Sub04 Cat15:
    +   - window variant:error ratio (for difference)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1216,7 +1231,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat15:
+   + Fun02 Sec04 Sub04 Cat16:
    +   - minimum indel length to keep indel in edDist
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1233,7 +1248,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec04 Sub04 Cat16:
+   + Fun02 Sec04 Sub04 Cat17:
    +   - minimum q-score to count snp as different
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1990,7 +2005,7 @@ phelp_freezeTB(
 int
 input_freezeTB(
    int numArgsSI,
-   char *argAryStr[],
+   const char *argAryStr[],
 
    /*file input*/
    signed char **samFileStr,
@@ -2280,6 +2295,22 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: had an error*/
+
+         if(
+               settings->minQSI > 93
+            || settings->minQSI < 0
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-q %s; not between 0 and 93\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum q-score input*/
 
 
@@ -2312,6 +2343,22 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(
+               settings->minInsQSI > 93
+            || settings->minInsQSI < 0
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-q-ins %s; not between 0 and 93\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum insertion q-score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2348,6 +2395,19 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(settings->minDepthSI < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-depth; must be greater than 0\n"
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum depth*/
 
 
@@ -2380,6 +2440,19 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(settings->minLenSI < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-len; must be greater than 0\n"
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum fragment length*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2398,6 +2471,22 @@ input_freezeTB(
       { /*If: minimum % snp support*/
          ++siArg;
          settings->minPercSnpF = atof(argAryStr[siArg]);
+
+         if(
+               settings->minPercSnpF < 0
+            || settings->minPercSnpF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-snp-sup %s; not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*If: minimum % snp support*/
 
       else if(
@@ -2409,6 +2498,22 @@ input_freezeTB(
       ){ /*Else If: minimum % ins support*/
          ++siArg;
          settings->minPercInsF = atof(argAryStr[siArg]);
+
+         if(
+               settings->minPercInsF < 0
+            || settings->minPercInsF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-ins-sup %s; not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum % ins support*/
 
       else if(
@@ -2420,6 +2525,22 @@ input_freezeTB(
       ){ /*Else If: minimum % del support*/
          ++siArg;
          settings->minPercDelF = atof(argAryStr[siArg]);
+
+         if(
+               settings->minPercDelF < 0
+            || settings->minPercDelF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-del-sup %s; not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum % del support*/
 
       /**************************************************\
@@ -2457,6 +2578,20 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(settings->minPrintDepthSI < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-p-min-depth %s; must be at least 0\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: print minimum depth*/
 
       /*print percentage depths*/
@@ -2471,6 +2606,22 @@ input_freezeTB(
 
          settings->printMinSupSnpF =
             atof(argAryStr[siArg]);
+
+         if(
+               settings->printMinSupSnpF < 0
+            || settings->printMinSupSnpF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+              stderr,
+              "-p-perc-snp-sup %s; not between 0 and 1\n",
+              argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: print minimum % snp support*/
 
       else if(
@@ -2484,6 +2635,22 @@ input_freezeTB(
 
          settings->printMinSupInsF =
             atof(argAryStr[siArg]);
+
+         if(
+               settings->printMinSupInsF < 0
+            || settings->printMinSupInsF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+              stderr,
+              "-p-perc-ins-sup %s; not between 0 and 1\n",
+              argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: print minimum % ins support*/
 
       else if(
@@ -2497,6 +2664,22 @@ input_freezeTB(
 
          settings->printMinSupDelF =
             atof(argAryStr[siArg]);
+
+         if(
+               settings->printMinSupDelF < 0
+            || settings->printMinSupDelF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+              stderr,
+              "-p-perc-del-sup %s; not between 0 and 1\n",
+              argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: print minimum % snp support*/
 
       /**************************************************\
@@ -2513,6 +2696,22 @@ input_freezeTB(
       ){ /*Else If: AMR min percent mapped reads*/
          ++siArg;
          *minPercMapF= atof(argAryStr[siArg]);
+
+         if(
+               *minPercMapF < 0
+            || *minPercMapF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+             stderr,
+             "-min-amr-map-per %s; not between 0 and 1\n",
+             argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: AMR min percent mapped reads*/
 
       else if(
@@ -2566,6 +2765,20 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(settings->minMapqUC > 93)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-mapq %s; not between 0 and 93\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum mapping quality*/
 
       else if(
@@ -2577,6 +2790,22 @@ input_freezeTB(
       ){ /*Else If: min median q-score*/
          ++siArg;
          *minMedianQF = atof(argAryStr[siArg]);
+
+         if(
+               *minMedianQF < 0
+            || *minMedianQF > 93
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-median-q %s; not between 0 and 93\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: min median q-score*/
 
       else if(
@@ -2588,6 +2817,22 @@ input_freezeTB(
       ){ /*Else If: min mean q-score*/
          ++siArg;
          *minMeanQF = atof(argAryStr[siArg]);
+
+         if(
+               *minMeanQF < 0
+            || *minMeanQF > 93
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-min-mean-q %s; not between 0 and 93\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: min mean q-score*/
 
       else if(
@@ -2639,7 +2884,6 @@ input_freezeTB(
                fudgeLenSI
             );
    
-
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
@@ -2653,6 +2897,22 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(
+               *fudgeLenSI < 0
+            || *fudgeLenSI > 100
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-fudge %s; must be between 0 and 100\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: fudge length (MIRU VNTR)*/
 
       else if(
@@ -2664,6 +2924,22 @@ input_freezeTB(
       ){ /*Else If: min % score for spacer to map*/
          ++siArg;
          *spoligoPercScoreF = atof(argAryStr[siArg]);
+
+         if(
+               *spoligoPercScoreF < 0
+            || *spoligoPercScoreF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+            stderr,
+            "-spoligo-min-score %s not between 0 and 1\n",
+            argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: min % score for spacer to map*/
 
       else if(
@@ -2695,6 +2971,20 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(*drStartSI < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-dr-start %s must be at least 0\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: Start of direct repeat region*/
 
       else if(
@@ -2726,6 +3016,20 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: error*/
+
+         if(*drEndSI <= 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-dr-end %s must be greater than 0\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: end of direct repeat region*/
 
       /**************************************************\
@@ -2761,6 +3065,8 @@ input_freezeTB(
       *     - mimimum q-score to keep snp
       *   o fun03 sec03 sub07 cat15:
       *     - maximum percent of consensus maksed
+      *   o fun03 sec03 sub07 cat16:
+      *     - number of times to rebuild consensus
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2798,6 +3104,20 @@ input_freezeTB(
       ){ /*Else If: how much length influces score*/
          ++siArg;
          clustSetSTPtr->lenWeightF=atof(argAryStr[siArg]);
+
+         if(clustSetSTPtr->lenWeightF < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-len-weigth %s must be at least 0\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: how much length influces score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2852,6 +3172,20 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: invalid input*/
+
+         if(clustSetSTPtr->minDepthUI <= 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-clust-depth %s must be at least 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: min cluster read depth*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2870,6 +3204,22 @@ input_freezeTB(
 
          clustSetSTPtr->minPercDepthF =
             atof(argAryStr[siArg]);
+
+         if(
+               clustSetSTPtr->minPercDepthF < 0
+            || clustSetSTPtr->minPercDepthF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+             stderr,
+             "-clust-perc-depth %s not between 0 and 1\n",
+             argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: cluster min percent read depth*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2888,6 +3238,22 @@ input_freezeTB(
 
          clustSetSTPtr->readErrRateF =
             atof(argAryStr[siArg]);
+
+         if(
+               clustSetSTPtr->readErrRateF < 0
+            || clustSetSTPtr->readErrRateF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-read-err %s not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: error rate for read to read map*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2904,6 +3270,22 @@ input_freezeTB(
      ){ /*Else If: error rate for con to read map*/
         ++siArg;
         clustSetSTPtr->conErrRateF=atof(argAryStr[siArg]);
+
+         if(
+               clustSetSTPtr->conErrRateF < 0
+            || clustSetSTPtr->conErrRateF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-con-err %s not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
      } /*Else If: error rate for con to read map*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2921,6 +3303,22 @@ input_freezeTB(
          ++siArg;
 
          clustSetSTPtr->maxConSimF=atof(argAryStr[siArg]);
+
+         if(
+               clustSetSTPtr->maxConSimF < 0
+            || clustSetSTPtr->maxConSimF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-con-sim %s not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: maximum similarity between cons*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2983,6 +3381,22 @@ input_freezeTB(
 
             goto err_fun03_sec04;
          } /*If: invalid input*/
+
+         if(
+               clustSetSTPtr->percOverlapF < 0
+            || clustSetSTPtr->percOverlapF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-overlap %s not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: minimum overlap*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -3115,6 +3529,20 @@ input_freezeTB(
 
            goto err_fun03_sec04;
          } /*If: invalid input*/
+
+         if(clustSetSTPtr->minSnpQUC > 93)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-clust-q-snp %s not between 0 to 93\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: min snp q-score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -3131,7 +3559,60 @@ input_freezeTB(
       ){ /*Else If: maximum % masking*/
         ++siArg;
         clustSetSTPtr->maxNPercF = atof(argAryStr[siArg]);
+
+         if(
+               clustSetSTPtr->maxNPercF < 0
+            || clustSetSTPtr->maxNPercF > 1
+         ){ /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-perc-n %s not between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: value out of range*/
       } /*Else If: maximum % masking*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub07 Cat16:
+      +   - number times to rebuild consensus
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (schar *) "-con-iter",
+            (schar *) argAryStr[siArg],
+            (schar) '\0'
+         )
+      ){ /*Else If: number of cosensus rebuilds*/
+        ++siArg;
+        tmpStr = (schar *) argAryStr[siArg];
+
+        tmpStr +=
+           strToUC_base10str(
+              tmpStr,
+              &clustSetSTPtr->conRebuildUC
+           );
+
+         if(*tmpStr != '\0')
+         { /*If: had error*/
+            if(helpBl)
+               goto phelp_fun03_sec02;
+
+            fprintf(
+               stderr,
+               "-con-iter %s; not numeric or to large\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         } /*If: had error*/
+      } /*Else If: number of cosensus rebuilds*/
+
 
       /**************************************************\
       * Fun03 Sec03 Sub08:
@@ -3363,7 +3844,7 @@ input_freezeTB(
 } /*input_freezeTB*/
 
 /*-------------------------------------------------------\
-| Main:
+| Fun04: run_freezeTB
 |    - Analyze ONT sequenced TB reads
 | Input:
 |    - numArgsSI:
@@ -3371,64 +3852,70 @@ input_freezeTB(
 |    - argAryStr:
 |      o C-string array with the input arguments
 | Output:
-|    - 
+|    - Prints:
+|      o all files for freezeTB command line program
+|      o errors to stderr
+|      o clustering progress to stderr
+|    - Returns:
+|      o 0 for no errors
+|      o 1 for no errors
 \-------------------------------------------------------*/
 int
-main(
+run_freezeTB(
    int numArgsSI,
-   char *argAryStr[]
+   const char *argAryStr[]
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Main TOC:
+   ' Fun04 TOC:
    '   - Run freezeTB on user input
-   '   o main sec01:
+   '   o fun04 sec01:
    '     - Variable declerations
-   '   o main sec02:
+   '   o fun04 sec02:
    '     - initialize, get input, and set up memory
-   '   o main sec03:
+   '   o fun04 sec03:
    '     - check user input database (if can open)
-   '   o main sec04:
+   '   o fun04 sec04:
    '     - check output files (can I open?)
-   '   o main sec05:
+   '   o fun04 sec05:
    '     - read in databases
-   '   o main sec06:
+   '   o fun04 sec06:
    '     - get reference stats and print consensus header
-   '   o main sec07:
+   '   o fun04 sec07:
    '     - Do read analysis
-   '   o main sec08:
+   '   o fun04 sec08:
    '     - print read data
-   '   o main sec09:
+   '   o fun04 sec09:
    '     - collapse consensus and consensus analysis
-   '   o main sec10:
+   '   o fun04 sec10:
    '     - run mixed infection detection (if requested)
-   '   o main sec11:
+   '   o fun04 sec11:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec01:
+   ^ Fun04 Sec01:
    ^   - Variable declerations
-   ^   o main sec01 sub01:
+   ^   o fun04 sec01 sub01:
    ^     - general IO variables (applies to multple subs)
-   ^   o main sec01 sub02:
+   ^   o fun04 sec01 sub02:
    ^     - temporay and error reporting variables
-   ^   o main sec01 sub03:
+   ^   o fun04 sec01 sub03:
    ^     - filtering and sam file variables (adjust coord)
-   ^   o main sec01 sub04:
+   ^   o fun04 sec01 sub04:
    ^     - read depth and coverage stats variables
-   ^   o main sec01 sub05:
+   ^   o fun04 sec01 sub05:
    ^     - AMR detection variables
-   ^   o main sec01 sub06:
+   ^   o fun04 sec01 sub06:
    ^     - miru lineage unique variables
-   ^   o main sec01 sub07:
+   ^   o fun04 sec01 sub07:
    ^     - spoligotyping unique variables
-   ^   o main sec01 sub08:
+   ^   o fun04 sec01 sub08:
    ^     - consensus building/mixed infection variables
-   ^   o main sec01 sub09:
+   ^   o fun04 sec01 sub09:
    ^     - masking unique variables
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec01 Sub01:
+   * Fun04 Sec01 Sub01:
    *   - general IO variables (applies to multple subs)
    \*****************************************************/
 
@@ -3436,7 +3923,7 @@ main(
    FILE *outFILE = 0;
 
    /*****************************************************\
-   * Main Sec01 Sub02:
+   * Fun04 Sec01 Sub02:
    *   - Temporay and error reporting variables
    \*****************************************************/
 
@@ -3447,7 +3934,7 @@ main(
    slong errSL = 0;
 
    /*****************************************************\
-   * Main Sec01 Sub03:
+   * Fun04 Sec01 Sub03:
    *   - filtering and sam file variables (adjust coord)
    \*****************************************************/
 
@@ -3470,7 +3957,7 @@ main(
    float minMeanQF = def_minMeanQ_freezeTBDefs;
 
    /*****************************************************\
-   * Main Sec01 Sub04:
+   * Fun04 Sec01 Sub04:
    *   - read depth and coverage stats variables
    \*****************************************************/
 
@@ -3493,7 +3980,7 @@ main(
    sint noMapReadSI = 0;
 
    /*****************************************************\
-   * Main Sec01 Sub05:
+   * Fun04 Sec01 Sub05:
    *   - AMR detection variables
    \*****************************************************/
 
@@ -3525,7 +4012,7 @@ main(
        */
 
    /*****************************************************\
-   * Main Sec01 Sub06:
+   * Fun04 Sec01 Sub06:
    *   - miru lineage unique variables
    \*****************************************************/
 
@@ -3543,7 +4030,7 @@ main(
       /*consensus results output*/
 
    /*****************************************************\
-   * Main Sec01 Sub07:
+   * Fun04 Sec01 Sub07:
    *   - Spoligotyping unique variables
    \*****************************************************/
 
@@ -3551,8 +4038,8 @@ main(
    schar spoligoDbFileStr[def_lenFileName_freezeTB];
 
    schar checkSpoligoLinBl = 1;
-   #define def_lenSpolAry_main 128
-   uint spoligoAryUI[def_lenSpolAry_main + 1];
+   #define def_lenSpolAry_fun04 128
+   uint spoligoAryUI[def_lenSpolAry_fun04 + 1];
    schar outSpoligoFileStr[def_lenFileName_freezeTB];
    schar outReadSpoligoFileStr[def_lenFileName_freezeTB];
 
@@ -3582,7 +4069,7 @@ main(
    sint numSpoligosSI = 0;
 
    /*****************************************************\
-   * Main Sec01 Sub08:
+   * Fun04 Sec01 Sub08:
    *   - consensus building/mixed infection variables
    \*****************************************************/
 
@@ -3604,7 +4091,7 @@ main(
    struct set_clustST clustSetStackST;
 
    /*****************************************************\
-   * Main Sec01 Sub09:
+   * Fun04 Sec01 Sub09:
    *   - masking unique variables
    \*****************************************************/
 
@@ -3615,20 +4102,20 @@ main(
    uint maskNumPrimUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec02:
+   ^ Fun04 Sec02:
    ^   - initialize, get input, and set up memory
-   ^   o main sec02 sub01:
+   ^   o fun04 sec02 sub01:
    ^     - set up default file paths
-   ^   o main sec02 sub02:
+   ^   o fun04 sec02 sub02:
    ^     - initialize variables
-   ^   o main sec02 sub03:
+   ^   o fun04 sec02 sub03:
    ^     - get input
-   ^   o main sec02 sub04:
+   ^   o fun04 sec02 sub04:
    ^     - set up memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec02 Sub01:
+   * Fun04 Sec02 Sub01:
    *   - set up default file paths
    \*****************************************************/
 
@@ -3640,7 +4127,7 @@ main(
    maskPath_freezeTBPaths(maskPrimFileStr);
 
    /*****************************************************\
-   * Main Sec02 Sub02:
+   * Fun04 Sec02 Sub02:
    *   - initialize variables
    \*****************************************************/
 
@@ -3657,7 +4144,7 @@ main(
    /*initialize spoligotyping array*/
    for(
       numLineagesSI = 0;
-      numLineagesSI < def_lenSpolAry_main;
+      numLineagesSI < def_lenSpolAry_fun04;
       ++numLineagesSI
    ) spoligoAryUI[numLineagesSI] = 0;
 
@@ -3666,7 +4153,7 @@ main(
    numLineagesSI = 0;
 
    /*****************************************************\
-   * Main Sec02 Sub03:
+   * Fun04 Sec02 Sub03:
    *   - get input
    \*****************************************************/
 
@@ -3700,11 +4187,11 @@ main(
    if(errSC)
    { /*If: error*/
       --errSC; /*convert help/version print to no error*/
-      goto cleanUp_main_sec11_sub03;
+      goto cleanUp_fun04_sec11_sub03;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec02 Sub04:
+   * Fun04 Sec02 Sub04:
    *   - set up memory
    \*****************************************************/
 
@@ -3717,7 +4204,7 @@ main(
          "memory error setting up samEntry struct\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: memory error*/
 
 
@@ -3734,28 +4221,28 @@ main(
          "memory error setting up tblST_kmerFind struct\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: memory error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec03:
+   ^ Fun04 Sec03:
    ^   - check user input database (if can open)
-   ^   o main sec03 sub01:
+   ^   o fun04 sec03 sub01:
    ^     - check if MIRU table exists
-   ^   o main sec03 sub02:
+   ^   o fun04 sec03 sub02:
    ^     - check if spoligotyping spacer sequences exists
-   ^   o main sec03 sub03:
+   ^   o fun04 sec03 sub03:
    ^     - check if spoligotyping lineage database
-   ^   o main sec03 sub04:
+   ^   o fun04 sec03 sub04:
    ^     - check if amr table exists
-   ^   o main sec03 sub05:
+   ^   o fun04 sec03 sub05:
    ^     - open the sam file
-   ^   o main sec03 sub06:
+   ^   o fun04 sec03 sub06:
    ^     - check if gene coordinates file exits
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec03 Sub01:
+   * Fun04 Sec03 Sub01:
    *   - check if MIRU table exists
    \*****************************************************/
 
@@ -3773,14 +4260,14 @@ main(
          miruDbFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: I could not open the MIRU table*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec03 Sub02:
+   * Fun04 Sec03 Sub02:
    *   - check if spoligotyping spacer sequences exists
    \*****************************************************/
 
@@ -3798,14 +4285,14 @@ main(
          spoligoRefFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open spoligo spacer sequences*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec03 Sub03:
+   * Fun04 Sec03 Sub03:
    *   - check if spoligotyping lineage database
    \*****************************************************/
 
@@ -3837,7 +4324,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec03 Sub04:
+   * Fun04 Sec03 Sub04:
    *   - check if amr table exists
    \*****************************************************/
 
@@ -3856,14 +4343,14 @@ main(
          amrDbFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open the filtered read stats file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec03 Sub05:
+   * Fun04 Sec03 Sub05:
    *   - open sam file
    \*****************************************************/
    
@@ -3888,12 +4375,12 @@ main(
             samFileStr 
          );
 
-         goto err_main_sec11_sub02;
+         goto err_fun04_sec11_sub02;
       } /*If: could not open the sam file*/
    } /*Else: need to open sam file*/
 
    /*****************************************************\
-   * Main Sec03 Sub06:
+   * Fun04 Sec03 Sub06:
    *   - open gene coordinates file
    \*****************************************************/
    
@@ -3911,39 +4398,39 @@ main(
          samFileStr 
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open gene coordinates file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec04:
+   ^ Fun04 Sec04:
    ^   - check output files (can I open?)
-   ^   o main sec04 sub01:
+   ^   o fun04 sec04 sub01:
    ^     - output file for read stats
-   ^   o main sec04 sub02:
+   ^   o fun04 sec04 sub02:
    ^     - set up cosensus fragments output file
-   ^   o main sec04 sub03:
+   ^   o fun04 sec04 sub03:
    ^     - set up read AMRs table outp file name
-   ^   o main sec04 sub04:
+   ^   o fun04 sec04 sub04:
    ^     - set up read id AMR hit table
-   ^   o main sec04 sub05:
+   ^   o fun04 sec04 sub05:
    ^     - output file for the AMRs found in consensus
-   ^   o main sec04 sub06:
+   ^   o fun04 sec04 sub06:
    ^     - set up MIRU reads table output name
-   ^   o main sec04 sub07:
+   ^   o fun04 sec04 sub07:
    ^     - set up MIRU consensus table output name
-   ^   o main sec04 sub08:
+   ^   o fun04 sec04 sub08:
    ^     - set up consensus spoligotyping output file
-   ^   o main sec04 sub09:
+   ^   o fun04 sec04 sub09:
    ^     - set up read spoligotyping output file name
-   ^   o main sec04 sub10:
+   ^   o fun04 sec04 sub10:
    ^     - set up open consensus output file name
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec04 Sub01:
+   * Fun04 Sec04 Sub01:
    *   - set up read stats file name
    \*****************************************************/
 
@@ -3962,11 +4449,11 @@ main(
          readStatsStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
  
    /*****************************************************\
-   * Main Sec04 Sub02:
+   * Fun04 Sec04 Sub02:
    *   - set up cosensus fragments output file
    \*****************************************************/
 
@@ -3985,11 +4472,11 @@ main(
          conTsvStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub03:
+   * Fun04 Sec04 Sub03:
    *   - set up read AMRs table outp file name
    \*****************************************************/
 
@@ -4008,11 +4495,11 @@ main(
          readAmrStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub04:
+   * Fun04 Sec04 Sub04:
    *   - set up read id AMR hit table
    \*****************************************************/
 
@@ -4031,11 +4518,11 @@ main(
          idFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub05:
+   * Fun04 Sec04 Sub05:
    *   - Set up the name for the consensus AMRs table
    \*****************************************************/
 
@@ -4054,11 +4541,11 @@ main(
          conAmrStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub06:
+   * Fun04 Sec04 Sub06:
    *   - set up MIRU reads table output name
    \*****************************************************/
 
@@ -4077,11 +4564,11 @@ main(
          readMiruStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub07:
+   * Fun04 Sec04 Sub07:
    *   - set up MIRU consensus table output name
    \*****************************************************/
 
@@ -4100,11 +4587,11 @@ main(
          conMiruStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub08:
+   * Fun04 Sec04 Sub08:
    *   - set up consensus spoligotyping output file
    \*****************************************************/
 
@@ -4123,11 +4610,11 @@ main(
          outSpoligoFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub09:
+   * Fun04 Sec04 Sub09:
    *   - set up read spoligotyping output file name
    \*****************************************************/
 
@@ -4146,11 +4633,11 @@ main(
          outReadSpoligoFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Main Sec04 Sub10:
+   * Fun04 Sec04 Sub10:
    *   - set up open consensus output file name
    \*****************************************************/
 
@@ -4169,7 +4656,7 @@ main(
          outReadSpoligoFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open file*/
 
    samConFILE =
@@ -4179,24 +4666,24 @@ main(
       ); /*already checked if could open*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec05:
+   ^ Fun04 Sec05:
    ^   - read in databases
-   ^   o main sec05 sub01:
+   ^   o fun04 sec05 sub01:
    ^     - get gene mapping coodiantes
-   ^   o main sec05 sub02:
+   ^   o fun04 sec05 sub02:
    ^     - get amr table
-   ^   o main sec05 sub03:
+   ^   o fun04 sec05 sub03:
    ^     - get MIRU lineage table
-   ^   o main sec05 sub04:
+   ^   o fun04 sec05 sub04:
    ^     - get spoligotyping spacer sequences
-   ^   o main sec05 sub05:
+   ^   o fun04 sec05 sub05:
    ^     - get spoligotyping lineages
-   ^   o main sec05 sub06:
+   ^   o fun04 sec05 sub06:
    ^     - get masking primer coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec05 Sub01:
+   * Fun04 Sec05 Sub01:
    *   - get gene mapping coodiantes
    \*****************************************************/
 
@@ -4224,7 +4711,7 @@ main(
             coordFileStr
          );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    lenBuffUL = 0;
@@ -4239,7 +4726,7 @@ main(
    );
 
    /*****************************************************\
-   * Main Sec05 Sub02:
+   * Fun04 Sec05 Sub02:
    *   - get amr table
    \*****************************************************/
 
@@ -4268,11 +4755,11 @@ main(
            "memory error; when processing variant id's\n"
          );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec05 Sub03:
+   * Fun04 Sec05 Sub03:
    *   - get MIRU lineage table
    \*****************************************************/
  
@@ -4298,11 +4785,11 @@ main(
             miruDbFileStr
          );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec05 Sub04:
+   * Fun04 Sec05 Sub04:
    *   - get spoligotyping spacer sequences
    \*****************************************************/
 
@@ -4329,7 +4816,7 @@ main(
             spoligoRefFileStr
          );
  
-         goto err_main_sec11_sub02;
+         goto err_fun04_sec11_sub02;
       } /*If: file error*/
  
       else
@@ -4339,12 +4826,12 @@ main(
             "Ran out of memory getting spoligo seqs\n"
          );
  
-          goto err_main_sec11_sub02;
+          goto err_fun04_sec11_sub02;
       } /*Else: memory error*/
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec05 Sub05:
+   * Fun04 Sec05 Sub05:
    *   - get spoligotyping lineage database
    \*****************************************************/
 
@@ -4381,13 +4868,13 @@ main(
                spoligoDbFileStr
             );
 
-            goto err_main_sec11_sub02;
+            goto err_fun04_sec11_sub02;
          } /*Else: memory error*/
       } /*If: error*/
    } /*If: have lineage database*/
 
    /*****************************************************\
-   * Main Sec05 Sub06:
+   * Fun04 Sec05 Sub06:
    *   - get masking primer coordinates
    \*****************************************************/
 
@@ -4437,38 +4924,38 @@ main(
             );
          } /*Else: memory error*/
 
-         goto err_main_sec11_sub02;
+         goto err_fun04_sec11_sub02;
       } /*If: error*/
    } /*If: primer masking file was input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec06:
+   ^ Fun04 Sec06:
    ^   - get reference stats and print consensus header
-   ^   o main sec06 sub01:
+   ^   o fun04 sec06 sub01:
    ^     - get reference name/length from header
-   ^   o main sec06 sub02:
+   ^   o fun04 sec06 sub02:
    ^     - print tbCon header for sam file
-   ^   o main sec06 sub03:
+   ^   o fun04 sec06 sub03:
    ^     - check if have reference name/length
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec06 Sub01:
+   * Fun04 Sec06 Sub01:
    *   - get reference length from header
-   *   o main sec06 sub01 cat01:
+   *   o fun04 sec06 sub01 cat01:
    *     - get first sam file entry + start loop
-   *   o main sec06 sub01 cat02:
+   *   o fun04 sec06 sub01 cat02:
    *     - print comment entry (end loop if not comment)
-   *   o main sec06 sub01 cat03:
+   *   o fun04 sec06 sub01 cat03:
    *     - if sequence entry; get id and length
-   *   o main sec06 sub01 cat04:
+   *   o fun04 sec06 sub01 cat04:
    *     - move to next entry
-   *   o main sec06 sub01 cat05:
+   *   o fun04 sec06 sub01 cat05:
    *     - check for errors
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec06 Sub01 Cat01:
+   + Fun04 Sec06 Sub01 Cat01:
    +   - get first sam file entry + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4490,7 +4977,7 @@ main(
    { /*Loop: read in header*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec06 Sub01 Cat02:
+      + Fun04 Sec06 Sub01 Cat02:
       +   - print comment entry (end loop if not comment)
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4505,7 +4992,7 @@ main(
                samStackST.extraStr,
                '\t'
             )
-      ) goto nextHeader_main_sec06_sub01_cat04;
+      ) goto nextHeader_fun04_sec06_sub01_cat04;
         /*do not print sequence entries for header*/
 
       fprintf(
@@ -4515,7 +5002,7 @@ main(
       );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec06 Sub01 Cat03:
+      + Fun04 Sec06 Sub01 Cat03:
       +   - if sequence entry; get id and length
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4534,7 +5021,7 @@ main(
                samFileStr
             ); 
 
-            goto err_main_sec11_sub02;
+            goto err_fun04_sec11_sub02;
          } /*If: sam file has multiple references*/
 
          multiRefBl = 1;
@@ -4547,7 +5034,7 @@ main(
                break;
 
          if(*(tmpStr - 1) != ':')
-            goto nextHeader_main_sec06_sub01_cat04;
+            goto nextHeader_fun04_sec06_sub01_cat04;
 
          tmpStr +=
             cpDelim_ulCp(
@@ -4560,7 +5047,7 @@ main(
          ++tmpStr;
         
          if(*tmpStr < 31 )
-            goto nextHeader_main_sec06_sub01_cat04;
+            goto nextHeader_fun04_sec06_sub01_cat04;
 
          /*move past LN: flag*/
          while(*tmpStr++ != ':')
@@ -4568,7 +5055,7 @@ main(
                break;
 
          if(*(tmpStr - 1) != ':')
-            goto nextHeader_main_sec06_sub01_cat04;
+            goto nextHeader_fun04_sec06_sub01_cat04;
 
          /*get reference length*/
          tmpStr +=
@@ -4583,11 +5070,11 @@ main(
       } /*If: sequence entry*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec06 Sub01 Cat04:
+      + Fun04 Sec06 Sub01 Cat04:
       +   - move to next entry
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      nextHeader_main_sec06_sub01_cat04:;
+      nextHeader_fun04_sec06_sub01_cat04:;
 
       errSC =
          get_samEntry(
@@ -4599,7 +5086,7 @@ main(
    } /*Loop: read in header*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec06 Sub01 Cat05:
+   + Fun04 Sec06 Sub01 Cat05:
    +   - check for errors
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4619,20 +5106,20 @@ main(
             samFileStr
          );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error reading sam file header*/
 
    /*****************************************************\
-   * Main Sec06 Sub02:
+   * Fun04 Sec06 Sub02:
    *   - print tbCon header for sam file
-   *   o main sec06 sub02 cat01:
+   *   o fun04 sec06 sub02 cat01:
    *     - tbCon cosensus settings
-   *   o main sec06 sub02 cat02:
+   *   o fun04 sec06 sub02 cat02:
    *     - tbCon variant print (tsv file) settings
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec06 Sub02 Cat01:
+   + Fun04 Sec06 Sub02 Cat01:
    +   - tbCon cosensus settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4689,7 +5176,7 @@ main(
       );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Main Sec06 Sub02 Cat02:
+      + Fun04 Sec06 Sub02 Cat02:
       +   - tbCon variant print (tsv file) settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4727,7 +5214,7 @@ main(
    samConFILE = 0;
 
    /*****************************************************\
-   * Main Sec06 Sub03:
+   * Fun04 Sec06 Sub03:
    *   - check if have reference name/length
    \*****************************************************/
 
@@ -4746,32 +5233,32 @@ main(
    } /*If: reference name is missing*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec07:
+   ^ Fun04 Sec07:
    ^   - read analysis
-   ^   o main sec06 sub01:
+   ^   o fun04 sec06 sub01:
    ^     - allocate memory for the read stats arrays
-   ^   o main sec06 sub02:
+   ^   o fun04 sec06 sub02:
    ^     - filter reads (sam entries)
-   ^   o main sec06 sub03:
+   ^   o fun04 sec06 sub03:
    ^     - mask primers in reads
-   ^   o main sec06 sub04:
+   ^   o fun04 sec06 sub04:
    ^     - build filtered histogram
-   ^   o main sec06 sub05:
+   ^   o fun04 sec06 sub05:
    ^     - build consensus
-   ^   o main sec06 sub06:
+   ^   o fun04 sec06 sub06:
    ^     - check for AMRs
-   ^   o main sec06 sub07:
+   ^   o fun04 sec06 sub07:
    ^     - check for MIRU lineages
-   ^   o main sec06 sub08:
+   ^   o fun04 sec06 sub08:
    ^     - check for spoligotypes
-   ^   o main sec06 sub09:
+   ^   o fun04 sec06 sub09:
    ^     - move to next read
-   ^   o main sec06 sub10:
+   ^   o fun04 sec06 sub10:
    ^     - minor clean up (variables unique to sec07)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec07 Sub01:
+   * Fun04 Sec07 Sub01:
    *   - allocate memory for the read stats arrays
    \*****************************************************/
 
@@ -4788,7 +5275,7 @@ main(
          "memory error (read histogram allocation)\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: memory error*/
 
    filt_readMapArySI =
@@ -4804,11 +5291,11 @@ main(
          "memory error (read histogram allocation)\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: memory error*/
 
    /*****************************************************\
-   * Main Sec07 Sub02:
+   * Fun04 Sec07 Sub02:
    *   - filter reads (sam entries)
    \*****************************************************/
 
@@ -4826,7 +5313,7 @@ main(
          if(samStackST.flagUS & 4)
             ++noMapReadSI;
 
-         goto nextRead_main_sec07_sub09;
+         goto nextRead_fun04_sec07_sub09;
       } /*If:umapped 4, secondary 256, or suplemtal 2048*/
 
       if(adjCoordBl)
@@ -4841,7 +5328,7 @@ main(
          if(errSC)
          { /*If: read is not in coordinates list*/
             ++offTargReadsSI;
-            goto nextRead_main_sec07_sub09;
+            goto nextRead_fun04_sec07_sub09;
          } /*If: read is not in coordinates list*/
       } /*If: need to adjust coordinates*/
 
@@ -4861,28 +5348,28 @@ main(
 
       /*limits full genome, really on gene coord adjust
       if(oldOffTargSI < offTargReadsSI)
-         goto nextRead_main_sec07_sub09;
+         goto nextRead_fun04_sec07_sub09;
       */ /*off target*/
 
       if(samStackST.medianQF < minMedianQF)
-         goto nextRead_main_sec07_sub09;
+         goto nextRead_fun04_sec07_sub09;
          /*low mean q-score*/
 
       if(samStackST.medianQF < minMedianQF)
-         goto nextRead_main_sec07_sub09;
+         goto nextRead_fun04_sec07_sub09;
          /*low median q-score*/
 
       if(samStackST.mapqUC < tbConSettings.minMapqUC)
-         goto nextRead_main_sec07_sub09;
+         goto nextRead_fun04_sec07_sub09;
          /*low mapping quality*/
 
       if(
            samStackST.alnReadLenUI
          < (uint) tbConSettings.minLenSI
-      ) goto nextRead_main_sec07_sub09; /*short read*/
+      ) goto nextRead_fun04_sec07_sub09; /*short read*/
 
       /**************************************************\
-      * Main Sec07 Sub03:
+      * Fun04 Sec07 Sub03:
       *   - mask primers in reads
       \**************************************************/
 
@@ -4901,7 +5388,7 @@ main(
       } /*If: masking primers*/
 
       /**************************************************\
-      * Main Sec07 Sub04:
+      * Fun04 Sec07 Sub04:
       *   - build filtered histogram
       \**************************************************/
 
@@ -4916,7 +5403,7 @@ main(
       );
 
       /**************************************************\
-      * Main Sec07 Sub05:
+      * Fun04 Sec07 Sub05:
       *   - build consensus
       \**************************************************/
 
@@ -4938,12 +5425,12 @@ main(
                 totalReadsUI
             );
 
-            goto err_main_sec11_sub02;
+            goto err_fun04_sec11_sub02;
          } /*If: memory error*/
       } /*If: not doing mixed infection detection*/
 
       /**************************************************\
-      * Main Sec07 Sub06:
+      * Fun04 Sec07 Sub06:
       *   - check for AMRs
       \**************************************************/
 
@@ -4965,7 +5452,7 @@ main(
              totalReadsUI
          );
 
-         goto err_main_sec11_sub02;
+         goto err_fun04_sec11_sub02;
       } /*If: memory error*/
 
       if(amrHitHeapSTList)
@@ -4981,7 +5468,7 @@ main(
       } /*If: read had AMR(s)*/
 
       /**************************************************\
-      * Main Sec07 Sub07:
+      * Fun04 Sec07 Sub07:
       *   - check for MIRU lineages 
       \**************************************************/
 
@@ -4992,7 +5479,7 @@ main(
       );
 
       /**************************************************\
-      * Main Sec07 Sub08:
+      * Fun04 Sec07 Sub08:
       *   - Check for spoligotypes
       \**************************************************/
 
@@ -5020,15 +5507,15 @@ main(
              totalReadsUI
          );
 
-         goto err_main_sec11_sub02;
+         goto err_fun04_sec11_sub02;
       } /*If: memory error*/
 
       /**************************************************\
-      * Main Sec07 Sub09:
+      * Fun04 Sec07 Sub09:
       *   - move to next read
       \**************************************************/
 
-      nextRead_main_sec07_sub09:;
+      nextRead_fun04_sec07_sub09:;
 
       errSC =
          get_samEntry(
@@ -5040,7 +5527,7 @@ main(
    } /*Loop: read anaylsis*/
 
    /*****************************************************\
-   * Main Sec07 Sub10:
+   * Fun04 Sec07 Sub10:
    *   - minor clean up (variables unique to sec07)
    \*****************************************************/
 
@@ -5068,24 +5555,24 @@ main(
    maskFlagHeapAryUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec08:
+   ^ Fun04 Sec08:
    ^   - print read data
-   ^   o main sec08 sub01:
+   ^   o fun04 sec08 sub01:
    ^     - print unfiltered read stats
-   ^   o main sec08 sub02:
+   ^   o fun04 sec08 sub02:
    ^     - print filtered read stats
-   ^   o main sec08 sub03:
+   ^   o fun04 sec08 sub03:
    ^     - print AMR hits for reads
-   ^   o main sec08 sub04:
+   ^   o fun04 sec08 sub04:
    ^     - print read MIRU table
-   ^   o main sec08 sub05:
+   ^   o fun04 sec08 sub05:
    ^     - print read spoligotype entry
-   ^   o main sec08 sub06:
+   ^   o fun04 sec08 sub06:
    ^     - print tsv file of variants
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec08 Sub01:
+   * Fun04 Sec08 Sub01:
    *   - print unfiltered read stats
    \*****************************************************/
 
@@ -5118,7 +5605,7 @@ main(
    readMapArySI = 0;
 
    /*****************************************************\
-   * Main Sec08 Sub02:
+   * Fun04 Sec08 Sub02:
    *   - print filtered read stats
    \*****************************************************/
 
@@ -5163,7 +5650,7 @@ main(
    coordsHeapST = 0;
 
    /*****************************************************\
-   * Main Sec08 Sub03:
+   * Fun04 Sec08 Sub03:
    *   - print AMR hits for reads
    \*****************************************************/
 
@@ -5190,7 +5677,7 @@ main(
    outFILE = 0;
 
    /*****************************************************\
-   * Main Sec08 Sub04:
+   * Fun04 Sec08 Sub04:
    *   - print read MIRU table
    \*****************************************************/
 
@@ -5210,7 +5697,7 @@ main(
    } /*If: impossible case*/
 
    /*****************************************************\
-   * Main Sec08 Sub05:
+   * Fun04 Sec08 Sub05:
    *   - print read spoligotype entry
    \*****************************************************/
 
@@ -5244,7 +5731,7 @@ main(
 
    for(
       lenKmerUC = 0;
-      lenKmerUC < def_lenSpolAry_main;
+      lenKmerUC < def_lenSpolAry_fun04;
       ++lenKmerUC
    ) spoligoAryUI[lenKmerUC] = 0;
 
@@ -5253,7 +5740,7 @@ main(
    lenKmerUC = def_lenKmer_kmerFind;
    
    /*****************************************************\
-   * Main Sec08 Sub06:
+   * Fun04 Sec08 Sub06:
    *   - print tsv file of variants
    \*****************************************************/
 
@@ -5269,27 +5756,27 @@ main(
          ); /*print variants (not a vcf)*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec09:
+   ^ Fun04 Sec09:
    ^   - collapse consensus and consensus analysis
-   ^   o main sec09 sub01:
+   ^   o fun04 sec09 sub01:
    ^     - collapse consensus
-   ^   o main sec09 sub02:
+   ^   o fun04 sec09 sub02:
    ^     - print consensus and do ananlysis
-   ^   o main sec09 sub03:
+   ^   o fun04 sec09 sub03:
    ^     - close output files and free uneeded variables
-   ^   o main sec09 sub04:
+   ^   o fun04 sec09 sub04:
    ^     - print consensus MIRU lineages
-   ^   o main sec09 sub05:
+   ^   o fun04 sec09 sub05:
    ^     - print detected spoligotype (consensus)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec09 Sub01:
+   * Fun04 Sec09 Sub01:
    *   - collapse consensus
    \*****************************************************/
 
    if(mixedInfectBl)
-      goto mixedInfect_main_sec11;
+      goto mixedInfect_fun04_sec11;
 
    samConSTAry =
       collapse_tbCon(
@@ -5316,26 +5803,26 @@ main(
          "could not collapse consensus\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec09 Sub02:
+   * Fun04 Sec09 Sub02:
    *   - print consensus and do ananlysis
-   *   o main sec09 sub04 cat01:
+   *   o fun04 sec09 sub04 cat01:
    *     - open files + run consensus fragment loop
-   *   o main sec09 sub04 cat02:
+   *   o fun04 sec09 sub04 cat02:
    *     - print consensus fragments
-   *   o main sec09 sub04 cat03:
+   *   o fun04 sec09 sub04 cat03:
    *     - AMR detection and printing
-   *   o main sec09 sub04 cat04:
+   *   o fun04 sec09 sub04 cat04:
    *     - MIRU-VNTR lineage detection and printing
-   *   o main sec09 sub04 cat05:
+   *   o fun04 sec09 sub04 cat05:
    *     - detect spoligotypes
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec09 Sub04 Cat01:
+   + Fun04 Sec09 Sub04 Cat01:
    +   - open files + run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5367,7 +5854,7 @@ main(
    ){ /*Loop: print and analyize consensuses*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec09 Sub04 Cat02:
+     + Fun04 Sec09 Sub04 Cat02:
      +   - print consensus fragments
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5392,7 +5879,7 @@ main(
       ); /*print fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec09 Sub04 Cat03:
+     + Fun04 Sec09 Sub04 Cat03:
      +   - AMR detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5423,7 +5910,7 @@ main(
       } /*If: have AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec09 Sub04 Cat04:
+     + Fun04 Sec09 Sub04 Cat04:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5434,7 +5921,7 @@ main(
       ); /*find MIRU lineages in consensus fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec09 Sub04 Cat05:
+     + Fun04 Sec09 Sub04 Cat05:
      +   - spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5454,7 +5941,7 @@ main(
    } /*Loop: print and analyize consensuse*/
 
    /*****************************************************\
-   * Main Sec09 Sub03:
+   * Fun04 Sec09 Sub03:
    *   - close output files and free uneeded variables
    \*****************************************************/
 
@@ -5489,11 +5976,11 @@ main(
          "error during consensus analyisis step\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec09 Sub04:
+   * Fun04 Sec09 Sub04:
    *   - print consensus MIRU lineages
    \*****************************************************/
 
@@ -5514,11 +6001,11 @@ main(
          conMiruStr
       ); 
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec09 Sub05:
+   * Fun04 Sec09 Sub05:
    *   - print detected spoligotype
    \*****************************************************/
 
@@ -5567,31 +6054,31 @@ main(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
-   goto ret_main_sec11;
+   goto ret_fun04_sec11;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec10:
+   ^ Fun04 Sec10:
    ^   - run mixed infection detection (if requested)
-   ^   o main sec10 sub01:
+   ^   o fun04 sec10 sub01:
    ^     - check if can open log files
-   ^   o main sec10 sub02:
+   ^   o fun04 sec10 sub02:
    ^     - run mixed infection detection
-   ^   o main sec10 sub03:
+   ^   o fun04 sec10 sub03:
    ^     - print clusters for mixed infection
-   ^   o main sec10 sub04:
+   ^   o fun04 sec10 sub04:
    ^     - amr/miru/spoligotype detection on clusters
-   ^   o main sec10 sub05:
+   ^   o fun04 sec10 sub05:
    ^     - print consensus MIRU lineages
-   ^   o main sec10 sub06:
+   ^   o fun04 sec10 sub06:
    ^     - print detected spoligotype
    \*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec10 Sub01:
+   * Fun04 Sec10 Sub01:
    *   - check if can open log files
    \*****************************************************/
 
-   mixedInfect_main_sec11:;
+   mixedInfect_fun04_sec11:;
 
    if(samFILE == stdin)
    { /*If: piping file to mixed infection detect*/
@@ -5605,7 +6092,7 @@ main(
          " mode\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: piping file to mixed infection detect*/
 
    errSC =
@@ -5632,11 +6119,11 @@ main(
          logFileStr
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: could not open log flie*/
 
    /*****************************************************\
-   * Main Sec10 Sub02:
+   * Fun04 Sec10 Sub02:
    *   - run mixed infection detection
    \*****************************************************/
 
@@ -5679,7 +6166,7 @@ main(
             "no reads for mixed infection step\n"
          );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    if(logFILE != stderr)
@@ -5687,7 +6174,7 @@ main(
    logFILE = 0;
 
    /*****************************************************\
-   * Main Sec10 Sub03:
+   * Fun04 Sec10 Sub03:
    *   - print clusters for mixed infection
    \*****************************************************/
 
@@ -5717,7 +6204,7 @@ main(
          "memory error printing cluster consensuses\n"
       );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: had error*/
 
    errSC =
@@ -5745,7 +6232,7 @@ main(
             "file error printing clusters\n"
          );
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: had error*/
 
    fclose(samFILE);
@@ -5756,18 +6243,18 @@ main(
    indexHeapST = 0;
 
    /*****************************************************\
-   * Main Sec10 Sub04:
+   * Fun04 Sec10 Sub04:
    *   - amr/miru/spoligotype detection on clusters
-   *   o main sec10 sub04 cat01:
+   *   o fun04 sec10 sub04 cat01:
    *     - amr detection + start loop
-   *   o main sec10 sub04 cat02:
+   *   o fun04 sec10 sub04 cat02:
    *     - MIRU-VNTR lineage detection and printing
-   *   o main sec10 sub04 cat03:
+   *   o fun04 sec10 sub04 cat03:
    *     - spoligotype detection and printing
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Main Sec10 Sub04 Cat01:
+   + Fun04 Sec10 Sub04 Cat01:
    +   - amr detection + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5817,7 +6304,7 @@ main(
       } /*If: have AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec10 Sub04 Cat02:
+     + Fun04 Sec10 Sub04 Cat02:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5828,7 +6315,7 @@ main(
       ); /*find MIRU lineages in consensus fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec10 Sub04 Cat03:
+     + Fun04 Sec10 Sub04 Cat03:
      +   - spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5847,7 +6334,7 @@ main(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Main Sec10 Sub04 Cat04:
+     + Fun04 Sec10 Sub04 Cat04:
      +   - move to next cluster
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5860,7 +6347,7 @@ main(
    conNodeST = 0;
          
    /*****************************************************\
-   * Main Se109 Sub05:
+   * Fun04 Se109 Sub05:
    *   - print consensus MIRU lineages
    \*****************************************************/
 
@@ -5881,11 +6368,11 @@ main(
          conMiruStr
       ); 
 
-      goto err_main_sec11_sub02;
+      goto err_fun04_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Main Sec10 Sub06:
+   * Fun04 Sec10 Sub06:
    *   - print detected spoligotype
    \*****************************************************/
 
@@ -5916,43 +6403,43 @@ main(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
-   goto ret_main_sec11;
+   goto ret_fun04_sec11;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec11:
+   ^ Fun04 Sec11:
    ^   - clean up
-   ^   o main sec11 sub01:
+   ^   o fun04 sec11 sub01:
    ^     - no error clean up
-   ^   o main sec11 sub02:
+   ^   o fun04 sec11 sub02:
    ^     - error clean up
-   ^   o main sec11 sub03:
+   ^   o fun04 sec11 sub03:
    ^     - general clean up (everything calls)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Main Sec11 Sub01:
+   * Fun04 Sec11 Sub01:
    *   - no error clean up
    \*****************************************************/
 
-   ret_main_sec11:;
+   ret_fun04_sec11:;
       errSC = 0;
-      goto cleanUp_main_sec11_sub03;
+      goto cleanUp_fun04_sec11_sub03;
 
    /*****************************************************\
-   * Main Sec11 Sub02:
+   * Fun04 Sec11 Sub02:
    *   - error clean up
    \*****************************************************/
 
-   err_main_sec11_sub02:;
+   err_fun04_sec11_sub02:;
       errSC = 1;
-      goto cleanUp_main_sec11_sub03;
+      goto cleanUp_fun04_sec11_sub03;
 
    /*****************************************************\
-   * Main Sec11 Sub03:
+   * Fun04 Sec11 Sub03:
    *   - general clean up (everything calls)
    \*****************************************************/
 
-   cleanUp_main_sec11_sub03:;
+   cleanUp_fun04_sec11_sub03:;
       freeStack_samEntry(&samStackST);
 
       if(coordsHeapST)
@@ -6100,55 +6587,7 @@ main(
       logFILE = 0;
 
       return errSC;
-} /*main*/
-
-/* Note01:
-     - Windows enviromental variables
-` From: https://pureinfotech.com/list-environment-variables-windows-10/
-`  %ALLUSERSPROFILE%           C:\ProgramData
-`  %APPDATA%                   C:\Users\{username}\AppData\Roaming
-`  %COMMONPROGRAMFILES%        C:\Program Files\Common Files
-`  %COMMONPROGRAMFILES(x86)%   C:\Program Files (x86)\Common Files
-`  %CommonProgramW6432%        C:\Program Files\Common Files
-`  %COMSPEC%                   C:\Windows\System32\cmd.exe
-`  %HOMEDRIVE%                 C:\
-`  %HOMEPATH%                  C:\Users\{username}
-`  %LOCALAPPDATA%              C:\Users\{username}\AppData\Local
-`  %LOGONSERVER%               \\{domain_logon_server}
-`  %PATH%                      C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-`  %PathExt%                   .com;.exe;.bat;.cmd;.vbs;.vbe;.js;.jse;.wsf;.wsh;.msc
-`  %PROGRAMDATA%               C:\ProgramData
-`  %PROGRAMFILES%              C:\Program Files
-`  %ProgramW6432%              C:\Program Files
-`  %PROGRAMFILES(X86)%         C:\Program Files (x86)
-`  %PROMPT%                    $P$G
-`  %SystemDrive%               C:
-`  %SystemRoot%                C:\Windows
-`  %TEMP%                      C:\Users\{username}\AppData\Local\Temp
-`  %TMP%                       C:\Users\{username}\AppData\Local\Temp
-`  %USERDOMAIN%                Userdomain associated with current user.
-`  %USERDOMAIN_ROAMINGPROFILE% Userdomain associated with roaming profile.
-`  %USERNAME%                  {username}
-`  %USERPROFILE%               C:\Users\{username}
-`  %WINDIR%                    C:\Windows
-`  %PUBLIC%                    C:\Users\Public
-`  %PSModulePath%              %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\
-`  %OneDrive%                  C:\Users\{username}\OneDrive
-`  %DriverData%                C:\Windows\System32\Drivers\DriverData
-`  %CD%                        Outputs current directory path. (Command Prompt.)
-`  %CMDCMDLINE%                Outputs command line used to launch current Command Prompt session. (Command Prompt.)
-`  %CMDEXTVERSION%             Outputs the number of current command processor extensions. (Command Prompt.)
-`  %COMPUTERNAME%              Outputs the system name.
-`  %DATE%                      Outputs current date. (Command Prompt.)
-`  %TIME%                      Outputs time. (Command Prompt.)
-`  %ERRORLEVEL%                Outputs the number of defining exit status of previous command. (Command Prompt.)
-`  %PROCESSOR_IDENTIFIER%      Outputs processor identifier.
-`  %PROCESSOR_LEVEL%           Outputs processor level.
-`  %PROCESSOR_REVISION%        Outputs processor revision.
-`  %NUMBER_OF_PROCESSORS%      Outputs the number of physical and virtual cores.
-`  %RANDOM%                    Outputs random number from 0 through 32767.
-`  %OS%                        Windows_NT
-*/
+} /*run_freezeTB*/
 
 /*=======================================================\
 : License:

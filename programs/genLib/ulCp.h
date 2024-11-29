@@ -21,21 +21,32 @@
 '   o fun05: lenStrNull_ulCp
 '     - finds the length of a string using unsigned longs
 '       but also stops at null '\0'
-'   o fun06: endLine_ulCp
-'     - finds the end of a c-string. This assumes that
-'       the line ends in an '\0' or an '\n'
-'   o fun07: cpLine_ulCp
-'     - copies string until end of line
-'   o fun08: cpWhite_ulCp
+'   o fun06: ifEndLine_ulCp
+'     - checks if input long is end of line
+'   o fun07: endLine_ulCp
+'     - finds the end of a c-string (all OS's; looks for
+'       '\0', '\n', and '\r')
+'     - ingores unused ascii characters (> 32, not '\t')
+'   o fun08: endStr_ulCp
+'     - finds the end of a c-string ('\0')
+'   o fun09: cpLine_ulCp
+'     - copies string until end of line (\0, \r, \n)
+'     - ingores unused ascii characters (> 32, not '\t')
+'   o fun10: cpWhite_ulCp
 '     - copies string until white space
-'   o fun09: rmWhite_ulCp
+'   o fun11: rmWhite_ulCp
 '     - removes white space from c-string
-'   o fun10: swapDelim_ulCp
+'   o fun12: swapDelim_ulCp
 '     - swaps two strings until deliminator is found
-'   o fun11: cmpDelim_ulCp
+'   o fun13: cmpDelim_ulCp
 '     - compares two strings until deliminator is found
-'   o fun12: eqlNull_ulCp
+'   o fun14: eqlNull_ulCp
 '     - compares two strings until null is found
+'   o fun15: endLineUnix_ulCp
+'     - finds the end of a c-string. This assumes that the
+'       line ends in an '\0' or an '\n'
+'   o fun16: cpLineUnix_ulCp
+'     - copies string until end of line (\0, \n)
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -56,6 +67,9 @@
 #define def_one_ulCp (unsigned long) 0x0101010101010101
 #define def_tab_ulCp (unsigned long) 0x0909090909090909
 #define def_highBit_ulCp (unsigned long)0x8080808080808080
+
+#define def_four_ulCp (unsigned long) 0x0404040404040404
+#define def_eight_ulCp (unsigned long) 0x0808080808080808
 
 /*for white space checks*/
 #define def_31_ulCp (unsigned long) 0x0f0f0f0f0f0f0f0f
@@ -208,7 +222,55 @@ lenStrNull_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun06: endLine_ulCp
+| Fun06: ifEndLine_ulCp
+|   - checks if input long is end of line
+| Input:
+|   - strUL:
+|     o unsigned long to check for end of line
+| Output:
+|   - Returns:
+|     o > 0 if have end of line
+|     o 0 if no '\0', '\n', '\r'
+| Note:
+|   - asccii table values 1 to 8, 11, 12, 14, and 15 will
+|     also be set to > 0, however, these asccii charaters
+|     are not used in text files, so should not appear
+\-------------------------------------------------------*/
+#define ifEndLine_ulCp(strUL) ( (( ((strUL) & ~(def_eight_ulCp | def_four_ulCp)) + def_one_ulCp) - def_four_ulCp) & def_highBit_ulCp )
+
+/*```````````````````````````````````````````````````````\
+` Fun06 Logic:
+`   - rmShared: strUL & ~(0x08... | 0x04...)
+`     o removes variables making new line and \r unique
+`       - only care about tab, \n, \r, \0 and values >= 32
+`         (assuming all other values are never input)
+`     o \0 (0) stays 0
+`     o \n (8 + 2) goes to 2
+`     o \r (8 + 4 + 1) goes to 1
+`     o \t (8 + 2 + 1) goes to 2 + 1
+`   - addOne: rmShared + 0x01...:
+`     o converts tab to 4, but new line to 3
+`     o \0 (0) goes to 1
+`     o \n (2) goes to 2 + 1
+`     o \r (1) goes to 2
+`     o \t (2 + 1) goes to 4
+`   - subFour: addOne - 0x04...
+`     o converts \n, \r, and \0 to negative number
+`     o \0 (1) goes to -3
+`     o \n (2 + 1) goes to -1
+`     o \r (2) goes to -2
+`     o \t (4) goes to 1
+`   - subFour & 0x80...:
+`     o converts clears everthing except negative bit
+`     o \0 (-3) goes to 0x80
+`     o \n (-1) goes to 0x80
+`     o \n (-2) goes to 0x80
+`     o \t goes to 0
+`     o 16 or higher goest to 0
+\```````````````````````````````````````````````````````*/
+
+/*-------------------------------------------------------\
+| Fun07: endLine_ulCp
 |   - finds the end of a c-string. This assumes that the
 |     line ends in an '\0' or an '\n'
 | Input:
@@ -224,7 +286,22 @@ endLine_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun07: cpLine_ulCp
+| Fun08: endStr_ulCp
+|   - finds the end of a c-string ('\0')
+| Input:
+|   - inStr:
+|     o c-string or string to look for end in
+| Output:
+|   - Returns:
+|     o number of characters in the string
+\-------------------------------------------------------*/
+unsigned int
+endStr_ulCp(
+   signed char *inStr
+);
+
+/*-------------------------------------------------------\
+| Fun09: cpLine_ulCp
 |   - copies string until end of line
 | Input:
 |   - dupStr:
@@ -245,7 +322,7 @@ cpLine_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun08: cpWhite_ulCp
+| Fun10: cpWhite_ulCp
 |   - copies string until white space
 | Input:
 |   - dupStr:
@@ -266,7 +343,7 @@ cpWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun09: rmWhite_ulCp
+| Fun11: rmWhite_ulCp
 |   - removes white space from c-string
 | Input:
 |   - inStr:
@@ -283,7 +360,7 @@ rmWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun10: swapDelim_ulCp
+| Fun12: swapDelim_ulCp
 |   - swaps two strings until deliminator is found
 | Input:
 |   - firstStr:
@@ -312,7 +389,7 @@ swapDelim_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun11: cmpDelim_ulCp
+| Fun13: cmpDelim_ulCp
 |   - compares two strings until deliminator is found
 | Input:
 |   - qryStr:
@@ -342,7 +419,7 @@ eql_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun12: eqlNull_ulCp
+| Fun14: eqlNull_ulCp
 |   - compares two strings until null is found
 | Input:
 |   - qryStr:
@@ -362,6 +439,43 @@ signed long
 eqlNull_ulCp(
    signed char *qryStr,
    signed char *refStr
+);
+
+/*-------------------------------------------------------\
+| Fun15: endLineUnix_ulCp
+|   - finds the end of a c-string. This assumes that the
+|     line ends in an '\0' or an '\n'
+| Input:
+|   - inStr:
+|     o c-string or string to look for end in
+| Output:
+|   - Returns:
+|     o number of characters in the string
+\-------------------------------------------------------*/
+unsigned int
+endLineUnix_ulCp(
+   signed char *inStr
+);
+
+/*-------------------------------------------------------\
+| Fun16: cpLineUnix_ulCp
+|   - copies string until end of line
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+| Output:
+|   - Modifies:
+|     o  dupStr to hold the characters from cpStr
+| Note:
+|   - This will likely not be very good at copying short
+|     strings.
+\-------------------------------------------------------*/
+unsigned int
+cpLineUnix_ulCp(
+   signed char *dupStr,
+   signed char *cpStr
 );
 
 #endif

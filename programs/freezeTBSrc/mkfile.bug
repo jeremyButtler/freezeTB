@@ -43,8 +43,11 @@ objFiles=\
    $(tbSpol)/spolST.$O \
    $(tbSpol)/spolFind.$O
 
-all: freezeTB.$O $(objFiles)
-	$(LD) -o $(NAME) $(CFLAGS) freezeTB.$O freezeTBPaths.$O $(objFiles)
+all: mainFreezeTB.$O
+	$(LD) -o $(NAME) $(CFLAGS) mainFreezeTB.$O freezeTB.$O freezeTBPaths.$O $(objFiles)
+
+mainFreezeTB.$O: mainFreezeTB.c freezeTB.$O
+	$(CC) -o mainFreezeTB.$O -c $(CFLAGS) mainFreezeTB.c
 
 freezeTB.$O: freezeTB.c freezeTBPaths.$O $(objFiles)
 	$(CC) -o freezeTB.$O -c $(CFLAGS) freezeTB.c
@@ -140,4 +143,4 @@ $(tbSpol)/spolST.$O: $(tbSpol)/spolST.c $(tbSpol)/spolST.h  $(tbSpol)/tbSpolDefs
 	$(CC) -o $(tbSpol)/spolST.$O -c $(CFLAGS) $(tbSpol)/spolST.c
 
 clean:
-	rm $(objFiles) freezeTB.$O freezeTBPaths.$O;
+	rm $(objFiles) mainFreezeTB.$O freezeTB.$O freezeTBPaths.$O;
