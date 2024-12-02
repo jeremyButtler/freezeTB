@@ -5,7 +5,7 @@
 CC=cc
 LD=cc
 
-NAME = test
+NAME = guiFreezeTB
 
 C_FLAGS = \
    -O0 \
@@ -22,10 +22,19 @@ C_INCLUDE_PATH = \
 LIBRARY_PATH = \
    "-L/usr/lib:-L/usr/local/lib:-L/sofware/x11r5_dev/lib"
 
+tclLib=$(shell find /*/lib* -name libtcl*.so 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort | uniq)
+tkLib=$(shell find /*/lib* -name libtk*.so 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort | uniq)
+
+tclPath=$(shell find /*/lib* -name libtcl*.so 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/\(.*\)\/libtcl.*/-L\1:/;' | sort -V | uniq | tr '\n' '@' | sed 's/@//g;')
+tkPath=$(shell find /*/lib* -name libtk*.so 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/\(.*\)\/libtk.*/-L\1:/;' | sort -V | uniq | tr '\n' '@' | sed 's/@//g;')
+
+LIBRARY_PATH = \
+   "$(tclPath)$(tkPath)-L/usr/lib:-L/usr/local/lib:-L/sofware/x11r5_dev/lib"
+
 LD_FLAGS = \
    -lc \
-   -ltcl8.6 \
-   -ltk8.6 \
+	-l$(tclLib) \
+	-l$(tkLib) \
    -lX11 \
    -lm \
    -ldl
@@ -47,7 +56,7 @@ objFiles = \
    $(genBuild)rmBlocks.$O \
    $(freezeTB)freezeTBPaths.$O \
    $(freezeTB)freezeTB.$O \
-   test.$O
+   guiFreezeTB.c.$O
 
 freezeTBObjs =\
    $(genLib)base10str.$O \
@@ -80,11 +89,11 @@ freezeTBObjs =\
    $(tbSpol)spolST.$O \
    $(tbSpol)spolFind.$O \
 
-all: test.$O
+all: guiFreezeTB.c.$O
 	$(LD) -o $(NAME) $(LIBRARY_PATH) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
 
-test.$O: test.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
-	$(CC) -o test.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) test.c
+guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
+	$(CC) -o guiFreezeTB.c.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
 $(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.$O
 	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
