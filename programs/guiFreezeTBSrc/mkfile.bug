@@ -19,9 +19,7 @@ C_FLAGS = \
 C_INCLUDE_PATH = \
    "-I/usr/include:-I/usr/local/include"
 
-LIBRARY_PATH = \
-   "-L/usr/lib:-L/usr/local/lib:-L/sofware/x11r5_dev/lib"
-
+# these shell commands track down libtcl and libtk
 tclLib=$(shell find /*/lib* -name libtcl*.so 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort | uniq)
 tkLib=$(shell find /*/lib* -name libtk*.so 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort | uniq)
 
