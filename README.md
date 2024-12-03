@@ -49,9 +49,10 @@ Here are the order of merlin winners:
       MIRUReader (github)
     - spoligo-spacers.fa were from a spoligotyping program
       on github (can not remember which one)
-  - minimap2 (MIT) window binarie compiled from
+  - minimap2 (MIT) window binaries compiled from
     [https://github.com/lh3/minimap2](
      https://github.com/lh3/minimap2)
+  - tcltk (might need compiled version for windows)
   - luaFilters in slidesAndWriting
     - [https://github.com/pandoc-ext](
        https://github.com/pandoc-ext)
@@ -81,12 +82,14 @@ The stuff unique to freezeTB is under an dual license. The
 
 # Requirements 
 
-1. A read mapper that outputs a sam file
-   - Your choice for the command line version 
-   - For the GUI you will need minimap2, which can be
-     often installed by your package manager (for Mac
-     install and use homebrew)
-2. R with tcltk (install tcltk2 for tooltips)
+1. minimap2 (use homebrew for mac; apt for debian)
+   - for command line version you only need a sam file,
+     so minimap2 can be replaced.
+2. R (for graphs)
+   - R with tcltk needed if using guiFreezeTB.r
+3. tcltk if using guiFreezeTB (program)
+   - unix (Linux and Mac) should already have an older
+     tcltk, which will work
 
 # Install
 
@@ -237,6 +240,9 @@ sudo chmod a+x /usr/local/bin/minimap2
 
 Use Unix, there is no hope. Well, there would be if I had
   precompiled binaries.
+
+Rscript gui works, but primrary GUI needs the Rscript
+  detection step (so non-working).
 
 ### Actuall method (source)
 
@@ -457,13 +463,10 @@ For unix the programs are all installed in the install
 
 Chapter one: monsters that consume all hope
 
-- freezeTBGui.Rscript: gui built in R using tcltk for
-  freezeTB
 - freezeTB: core program for freezeTB
+- guiFreezeTB: primrary gui
 - graphAmpDepth.r: Rscript that makes graphs for freezeTB
-  - oldGraphAmpDepth.r is older version that used ggplot2
-- outputGui.Rscript runs the output menu for freezeTB
-  separately
+  - only needed for guiFreezeTB, Rscript has built in
 
 ## Modules:
 
@@ -511,12 +514,25 @@ Chapter three: do not underestimate the pixies
   - extracts amplicon sequences by coordinate
   - creates: amp_seq.fa
     - ampicon sequencees (map reads to with miniamp2)
+
+## Older progams (some functional):
+
+Chapter four: the undead awaken
+
+- freezeTBGui.Rscript: gui built in R using tcltk, was
+  replaced with guiFreezeTB, but still works
+- outputGui.Rscript: runs the output menu for freezeTB
+  separately (older, but works)
+- gui-run.tcl: script used to build guiFreezeTB gui
+  - will run if use wish from tcltk
+- oldGraphAmpDepth.r is older version of graphAmpDepth
+  that used ggplot2
 - oldCode: old code I am not quite ready to throw
-  away yet
+  away yet (or am to lazy to clean)
 
 # freezeTB as an bash script
 
-Chapter four: make your own monster
+Chapter five: make your own monster
 
 A better picture of how freezeTB works might be gotten by
   showing how it would look if I used an bash script. This

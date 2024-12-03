@@ -144,7 +144,8 @@ $(tbSpol)/spolST.$O: $(tbSpol)/spolST.c $(tbSpol)/spolST.h  $(tbSpol)/tbSpolDefs
 	$(CC) -o $(tbSpol)/spolST.$O -c $(CFLAGS) $(tbSpol)/spolST.c
 
 install:
-	cp $(NAME) $(PREFIX);
-	chmod a+x $(PREFIX)/$(NAME);
+	cp $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
 clean:
 	rm $(objFiles) mainFreezeTB.$O freezeTB.$O freezeTBPaths.$O;

@@ -12,6 +12,7 @@ all:
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C whoToAmrSrc
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C swapDbRefSrc
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C guiFreezeTBSrc
 
 install:
 	mv freezeTBSrc/freezeTB $(PREFIX)
@@ -26,9 +27,12 @@ install:
 	chmod a+x $(PREFIX)/whoToAmr
 	mv swapDbRefSrc/swapDbRef $(PREFIX)
 	chmod a+x $(PREFIX)/swapDbRef
+	mv guiFreezeTBSrc/guiFreezeTB $(PREFIX)
+	chmod a+x $(PREFIX)/guiFreezeTB
 
 clean:
 	rm \
+		guiFreezeTBSrc/*.o.$(ext) \
 		freezeTBSrc/*.o.$(ext) \
 		tbAmrSrc/*.o.$(ext) \
 		tbMiruSrc/*.o.$(ext) \

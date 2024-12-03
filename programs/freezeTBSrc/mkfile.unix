@@ -44,8 +44,11 @@ objFiles=\
    $(tbSpol)/spolST.$O \
    $(tbSpol)/spolFind.$O
 
-all: freezeTB.$O $(objFiles)
-	$(LD) -o $(NAME) $(CFLAGS) freezeTB.$O freezeTBPaths.$O $(objFiles)
+all: mainFreezeTB.$O
+	$(LD) -o $(NAME) $(CFLAGS) mainFreezeTB.$O freezeTB.$O freezeTBPaths.$O $(objFiles)
+
+mainFreezeTB.$O: mainFreezeTB.c freezeTB.$O
+	$(CC) -o mainFreezeTB.$O -c $(CFLAGS) mainFreezeTB.c
 
 freezeTB.$O: freezeTB.c freezeTBPaths.$O $(objFiles)
 	$(CC) -o freezeTB.$O -c $(CFLAGS) freezeTB.c
@@ -145,4 +148,4 @@ install:
 	chmod a+x $(PREFIX)/$(NAME)
 
 clean:
-	rm $(objFiles) freezeTB.$O freezeTBPaths.$O;
+	rm $(objFiles) mainFreezeTB.$O freezeTB.$O freezeTBPaths.$O;

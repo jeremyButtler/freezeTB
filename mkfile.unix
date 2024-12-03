@@ -13,8 +13,10 @@ install:
 	make PREFIX="$$(echo "$$(echo $$(cd $$(echo  "$(PREFIX)") && pwd))")" -f mkfile.$(ext) -C programs install
 	  # need the echo "$$(echo $$(cd $$(echo "$(PREFIX)") && pwd)) 
      # to convert the relative path to absolute
+	cp scripts/graphAmpDepth.r $(PREFIX)
+	chmod a+x $(PREFIX)/graphAmpDepth.r
 	cp scripts/freezeTBGui.Rscript $(PREFIX)
-	chmod a+x $(PREFIX)/freezeTBGui.Rscript $(PREFIX)
+	chmod a+x $(PREFIX)/freezeTBGui.Rscript
 
 clean:
 	make PREFIX="$(PREFIX)" -f mkfile.$(ext) -C programs clean
