@@ -42,10 +42,12 @@
 '     - compares two strings until deliminator is found
 '   o fun14: eqlNull_ulCp
 '     - compares two strings until null is found
-'   o fun15: endLineUnix_ulCp
+'   o fun15: eqlWhite_ulCp
+'     - compares two strings until white space is found
+'   o fun16: endLineUnix_ulCp
 '     - finds the end of a c-string. This assumes that the
 '       line ends in an '\0' or an '\n'
-'   o fun16: cpLineUnix_ulCp
+'   o fun17: cpLineUnix_ulCp
 '     - copies string until end of line (\0, \n)
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -442,7 +444,30 @@ eqlNull_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun15: endLineUnix_ulCp
+| Fun15: eqlWhite_ulCp
+|   - compares two strings until white space is found
+| Input:
+|   - qryStr:
+|     o Pointer to query string
+|   - refStr:
+|     o Pointer to reference strin
+| Output:
+|   - Returns:
+|     o 0 if strings are equal
+|     o > 0 if query > reference
+|     o < 0 if query < reference
+| Note:
+|   - this will likely not be very good at comparing
+|     short strings.
+\-------------------------------------------------------*/
+signed long
+eqlWhite_ulCp(
+   signed char *qryStr,
+   signed char *refStr
+);
+
+/*-------------------------------------------------------\
+| Fun16: endLineUnix_ulCp
 |   - finds the end of a c-string. This assumes that the
 |     line ends in an '\0' or an '\n'
 | Input:
@@ -458,7 +483,7 @@ endLineUnix_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun16: cpLineUnix_ulCp
+| Fun17: cpLineUnix_ulCp
 |   - copies string until end of line
 | Input:
 |   - dupStr:

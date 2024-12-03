@@ -4,18 +4,10 @@
 
 CC=cc
 LD=cc
-
 NAME = guiFreezeTB
+PREFIX = /usr/local/bin
 
-C_FLAGS = \
-   -O0 \
-   -static \
-   -DBUG \
-   -Wall \
-   -Wextra \
-   -ggdb \
-   -g
-
+C_FLAGS = -O3 -Wall -Wextra
 C_INCLUDE_PATH = \
    "-I/usr/include:-I/usr/local/include"
 
@@ -48,7 +40,7 @@ tbCon = ..$(slash)tbConSrc$(slash)
 tbAmr = ..$(slash)tbAmrSrc$(slash)
 tbSpol = ..$(slash)tbSpolSrc$(slash)
 freezeTB = ..$(slash)freezeTBSrc$(slash)
-O = o.bug
+O = o.unix
 
 objFiles = \
    $(genBuild)rmBlocks.$O \
@@ -188,6 +180,10 @@ $(tbSpol)spolFind.$O: $(tbSpol)spolFind.c $(tbSpol)spolFind.h $(tbSpol)tbSpolDef
 
 $(tbSpol)spolST.$O: $(tbSpol)spolST.c $(tbSpol)spolST.h  $(tbSpol)tbSpolDefs.h $(genLib)ulCp.$O $(genLib)charCp.$O $(genLib)numToStr.$O $(genLib)genMath.h $(genLib)dataTypeShortHand.h
 	$(CC) -o $(tbSpol)spolST.$O -c $(C_FLAGS) $(tbSpol)spolST.c
+
+install:
+	mv $(NAME) $(PREFIX);
+	chmod a+x $(PREFIX)/$(NAME);
 
 clean:
 	rm $(objFiles) $(freezeTBObjs);

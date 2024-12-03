@@ -199,8 +199,8 @@ phelp_graphAmpDepth = function(){
 #---------------------------------------------------------
 save_graphAmpDepth = function(nameStr, extStr = "png"){
    extStr = tolower(extStr); # ignore case
-   heightInt = 1000;
-   widthInt = 1000;
+   heightInt = 700;
+   widthInt = 700;
 
    nameStr =
       paste(

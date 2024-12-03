@@ -19,7 +19,29 @@
    #--------------------------------------------------
    # Header:
    #   - global variables
+   #   o header sec01:
+   #     - global variables (not modified by C)
+   #   o header sec02:
+   #     - program paths
+   #   o header sec03:
+   #     - global variables modified by C (remove)
+   #   o header sec04:
+   #     - file type lists
+   #   o header sec05:
+   #     - find freezeTB location (remove for C)
    #--------------------------------------------------
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Header Sec01:
+   #   - global variables (not modified by C)
+   #   o header sec01 sub01:
+   #     - variables to store values
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #***************************************************
+   # Header Sec01 Sub01:
+   #   - variables to store values
+   #***************************************************
 
    # required input
    variable glob_fqIn "" ;
@@ -34,24 +56,292 @@
    # amr setting
    variable glob_frameshift 0 ; # AMR frameshift scan
 
-   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   # Remove thes global variables; defaults should be
-   #   set by C
-   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   # clustering
+   variable glob_clustBl 0 ;
+   variable glob_depthProfBl 0 ;
 
-   variable glob_refFa "../../freezeTBFiles/NC000962.fa" ;
-   variable glob_coordsTsv "../../freezeTBFiles/coords.tsv" ;
-   variable glob_amrDb "../../freezeTBFiles/amrDb.tsv" ;
-   variable glob_maskCoords "../../freezeTBFiles/mask.tsv" ;
-   variable glob_miruDb "../../freezeTBFiles/miruTbl.tsv" ;
-   variable glob_spacer "../../freezeTBFiles/spoligo-spacers.tsv" ;
-   variable glob_spolDb "../../freezeTBFiles/spoligo-lineages.csv" ;
+   # output settings
+   variable glob_outPref "" ; # report user is getting
+   variable glob_outCur "" ;  # current shown report
+   variable glob_outSnpSup 0.1 ;
+   variable glob_outIndelSup 0.4 ;
+   variable glob_mkGraphBl 1 ;
+
+   variable glob_depthImg [image create photo -file ""] ;
+   variable glob_coverImg [image create photo -file ""] ;
+
+   variable 
+
+   #***************************************************
+   # Header Sec01 Sub02:
+   #   - amr list
+   #***************************************************
+
+   # color pallete is from viridis
+   set glob_noAmrCol "#440154" ; # viridis purple
+   set glob_amrTextCol "#21908C" ; # light green
+   set glob_amrCol "#FDE725" ; # viridis yellow
+
+   # keep this list lower case
+   set glob_amrList [list "amikacin" "bedaquiline" "capreomycin" "clofazimine" "delamanid" "ethambutol" "ethionamide" "fluoroquine" "isoniazid" "kanamycin" "levofloxacin" "linezolid" "moxifloxacin" "penicillin-myceial-dreg" "pyrazinamide" "rifampicin" "streptomycin" ] ;
+
+   set glob_amrShort [list "Amk"  "Bdq"  "Cap"  "Cfz"  "Dlm"  "Emb"  "Eto"  "Flq"  "Inz"  "Kan"  "Lfx"  "Lzd"  "Mfx"  "Pmd"  "Pza"  "Rif"  "Str"  ] ;
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Header Sec02:
+   #   - program paths
+   #   o header sec02 sub01:
+   #     - windows program detection
+   #   o header sec02 sub02:
+   #     - unix program detection
+   #   o header sec02 sub03:
+   #     - check/get Rscript version
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #***************************************************
+   # Header Sec02 Sub01:
+   #   - windows program detection
+   #   o header sec02 sub01 cat01:
+   #     - windows general setup 
+   #   o header sec02 sub01 cat02:
+   #     - windows detect minimap2
+   #   o header sec02 sub01 cat03:
+   #     - windows detect Rscript
+   #   o header sec02 sub01 cat04:
+   #     - windows detect graphing script
+   #***************************************************
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Header Sec02 Sub01 Cat01:
+   #   - windows general setup 
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   variable mapPath "" ; # minimap2 path
+   variable rPath "" ;   # Rscript path
+
+   if { [lindex $tcl_platform(os) 0] eq "Windows" } {
+      # this is windows
+
+      package require registry ;
+         # registry is a base tcl package for windows
+         # registry manipulations
+
+      set programFiles $::env(PROGRAMFILES) ;
+
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+      # Header Sec02 Sub01 Cat02:
+      #   - windows detect minimap2
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+
+      set mapPath "minimap2.exe" ;
+
+      set status [catch {exec minimap2.exe --version} mapVersion ]  ; # get minimap2 version
+
+      if { $status eq 0 } {
+         # got minimap2 version, nothing else to do
+      } else {
+         set mapPath  [file join $programFiles "freezeTB" "minimap2.exe" ] ; # build alternate minimap2 path
+
+         set status [catch {exec $mapPath --version} mapVersion ]  ; # get minimap2 version
+
+         if { $status eq 0 } {
+            # found minmap2; nothing else to do
+         } else {
+            tk_messageBox -message "Could not find minimap2.exe" -title "ERROR" ;
+         } ; # If: check if could not find minimap2
+      } ; # find minimap2 path
+
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+      # Header Sec02 Sub01 Cat03:
+      #   - windows detect Rscript
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+
+      # find path to 
+      # the keys came from https://stackoverflow.com/questions/62427584/find-rscript-exe-on-windows
+
+      # NEED to try this on a windows machine
+      registry get "HKCU\Software\Classes\RWorkspace\Shell\Open\Command" "Rscript.exe" ; # see if can find Rscript.exe in .RData
+
+      registry get  "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" "Rscript.exe" ; # see if can find Rscript.exe in Uninstall
+
+      # last resort; try to find Rscript.exe in its
+      # expected location
+      set rPath [file join $programFiles "R" "*" "bin" "Rscript.exe" ]  ;
+
+      if { [llength $rPath] eq 0 } {
+         set $::glob_mkGraphBl 0 ;
+
+         tk_messageBox -message "Rscript.exe not found" -title "ERROR" ;
+
+         return false ;
+      } else {
+         set rPath [lindex $rPath 0] ;
+         # make sure have only one Rscript.exe
+      } ; # See if Rscript was finally found
+
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+      # Header Sec02 Sub01 Cat04:
+      #   - windows detect graphing script
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+      
+      set graphScript "graphAmpDepth.r" ;
+
+      if { [file exists $graphScript] eq 0 } {
+         set graphScript [file join $programFiles "freezeTB" $graphScript ] ;
+         if { [file exists $graphScript] eq 0 } {
+            set $::glob_mkGraphBl 0 ;
+
+            tk_messageBox -message "graphAmpDepth.r not found" -title "no graphing script" ;
+
+            set graphScript "" ;
+         } ; # If: could not find graphing script
+      } ; # If: did not find graphing script
+
+   #***************************************************
+   # Header Sec02 Sub02:
+   #   - unix program detection
+   #   o header sec02 sub02 cat01:
+   #     - unix; find minimap2 version (check if have)
+   #   o header sec02 sub02 cat02:
+   #     - unix find graphing script
+   #***************************************************
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Header Sec02 Sub02 Cat01:
+   #   - unix; find minimap2 version (check if have)
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   } else {
+      set mapPath "minimap2" ;
+      set rPath "Rscript" ; # linux should be in path
+
+      set status [catch {exec $mapPath --version} mapVersion ]  ; # seeing if minimap2 exists
+
+      if { $status ne 0 } {
+         set mapPath "./minimap2" ;
+
+         set status [catch {exec $mapPath --version} mapVersion ]  ; # seeing if local minimap2 exists
+
+         if { $status eq 0 } {
+            tk_messageBox -message "minimap2 not found" -title "ERROR" ;
+
+            return false ;
+         } ; # If: minimap2 could not be found
+      } ; # If: minimiap2 not in path or on system
+
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+      # Header Sec02 Sub02 Cat02:
+      #   - unix find graphing script
+      #++++++++++++++++++++++++++++++++++++++++++++++++
+      
+      set graphScript "graphAmpDepth.r" ;
+
+      if { [file exists $graphScript] eq 0 } {
+         set graphScript [file join "/usr/local/bin" $graphScript] ;
+
+         if { [file exists $graphScript] eq 0 } {
+            set $::glob_mkGraphBl 0 ;
+
+            tk_messageBox -message "graphAmpDepth.r not found" -title "no graphing script" ;
+
+            set graphScript "" ;
+         } ; # If: could not find graphing script
+      } ; # If: did not find graphing script
+   } ; # check if windows or linux
+
+   #***************************************************
+   # Header Sec02 Sub03:
+   #   - check/get Rscript version
+   #***************************************************
+
+   set status [catch {exec $rPath --version} rVersion] ;
+
+   if { $status eq 0 } {
+   } else {
+      set $::glob_mkGraphBl 0 ;
+
+      tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
+
+      return false;
+   }
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Header Sec03:
+   #   - global variables modified by C (remove)
+   #   o header sec03 sub01:
+   #     - set up default database finder function
+   #   o header sec03 sub02:
+   #     - database global variable set up
+   #   o header sec03 sub03:
+   #     - non-database default settings
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #***************************************************
+   # Header Sec03 Sub01:
+   #   - set up default database finder function
+   #***************************************************
+
+   proc getPath { fileStr } {
+      
+     set dbPath $fileStr ;
+
+     if { [file exists $dbPath ] eq 0 } {
+        set dbPath $::env(HOME) ;
+        set dbPath [ file join $dbPath "Documents" ] ;
+        set dbPath [ file join $dbPath "freezeTBFiles" ] ;
+        set dbPath [ file join $dbPath $fileStr ] ;
+
+        if { [file exists $dbPath ] eq 0 } {
+           set osStr [lindex $::tcl_platform(os) 0] ;
+
+           if { osStr eq "Windows" } {
+              set dbPath [file join $::env(PUBLIC) "Documents" "freezeTBFiles" $fileStr ] ;
+
+              if { [file exists $dbPath ] eq 0 } {
+                 set dbPath "" ;
+                 tk_messageBox -message [concat $fileStr "not found"] -title "missing database" ;
+              } ; # If: database not in global location
+
+           } else {
+             set dbPath "/usr/local/share/freezeTBFiles" ;
+              set dbPath [file join $dbPath $fileStr] ;
+
+              if { [file exists $dbPath ] eq 0 } {
+                 set dbPath "" ;
+                 tk_messageBox -message [concat $fileStr "not found"] -title "missing database" ;
+              } ; # If: database not in global location
+           } ; # check if windows or unix
+         } ; # If: database not in HOME/Documents
+      } ; # If: database not in directory
+
+      return $dbPath ;
+   } ; # getPath
+
+   #>>>script<<<#
+
+   #***************************************************
+   # Header Sec03 Sub02:
+   #   - database global variable set up
+   #***************************************************
+
+   variable glob_refFa [getPath "NC000962.fa"] ;
+   variable glob_coordsTsv [getPath "coords.tsv"] ;
+   variable glob_amrDb [getPath "amrDb.tsv"] ;
+   variable glob_maskCoords [getPath "mask.tsv"] ;
+   variable glob_miruDb [getPath "miruTbl.tsv"] ;
+   variable glob_spacer [getPath "spoligo-spacers.fa"] ;
+   variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
+
+   #***************************************************
+   # Header Sec03 Sub03:
+   #   - non-database default settings
+   #***************************************************
 
    # read filtering settings
    variable glob_mapq 15 ;
    variable glob_medQ 7 ;
    variable glob_meanQ 7 ;
-   variable glob_depth 10 ;
+   variable glob_minLen 50 ;
 
    # amr settings
    variable glob_amrPercSup 0.1 ;
@@ -63,9 +353,9 @@
    variable glob_drEnd 3123624 ;
 
    # consensus settings
+   variable glob_depth 10 ;
    variable glob_snpq 3 ;
    variable glob_insq 3 ;
-   variable glob_minLen 50 ;
    variable glob_basePerc 0.4 ;
    variable glob_insPerc 0.7 ;
    variable glob_delPerc 0.7 ;
@@ -77,9 +367,6 @@
    variable glob_delVarPerc 0.2 ;
 
    # cluster settings
-   variable glob_clustBl 0 ;
-   variable glob_depthProfBl 0 ;
-
    variable glob_minClustDepth 10 ;
    variable glob_minClustPercDepth 0.01 ;
    variable glob_minClustSnpQ 3 ;
@@ -96,6 +383,13 @@
    variable glob_minClustOverlap 0.75 ;
    variable glob_maxClustMask 0.05 ;
    variable glob_numRebuilds 1 ;
+
+   #>>>script<<<#
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Header Sec04:
+   #   - file type lists
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
    # file types
 
@@ -118,7 +412,94 @@
    set csv_types {
       { {csv} {.csv} }
    } ; # fastq file exentions
-   
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Header Sec05:
+   #   - freezeTB command
+   #   o header sec05 sub01:
+   #     - windows find freezeTB + function declaration
+   #   o header sec05 sub02:
+   #     - unix find freezeTB
+   #   o header sec05 sub03:
+   #     - run freezeTB
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #>>>script<<<#
+
+   #****************************************************
+   # Header Sec05 Sub01:
+   #   - windows find freezeTB + function declaration
+   #***************************************************
+
+   proc freezeTBProc { argsList } {
+
+     if { [lindex $::tcl_platform(os) 0] eq "Windows" } {
+         # this is windows
+         set programFiles $::env(PROGRAMFILES) ;
+
+         set freezeTBPath "freezeTB.exe" ;
+
+         set status [catch {exec $freezeTBPath --version} freezeTBVer ]  ;
+
+         if { $status eq 0 } {
+            # found freezeTB
+         } else {
+            set freezeTBPath  [file join $programFiles "freezeTB" "minimap2.exe" ] ; # build alternate freezeTB path
+
+            set status [catch {exec $freezeTBPath --version} freezeTBVer ]  ;
+
+            if { $status eq 0 } {
+               # found freezeTB
+            } else {
+               tk_messageBox -message "no freezeTB.exe detected" -title "ERROR" ;
+
+               return 1 ;
+            } ;
+         } ; # find freezeTB path
+
+      #************************************************
+      # Header Sec05 Sub02:
+      #   - unix find freezeTB
+      #************************************************
+
+      } else {
+         set freezeTBPath "freezeTB" ;
+
+         set status [catch {exec $freezeTBPath --version} freezeTBVer ]  ;
+
+         if { $status ne 0 } {
+            set freezeTBPath "./freezeTB" ;
+
+            set status [catch {exec $freezeTBPath --version} freezeTBVer ]  ;
+
+            if { $status eq 0 } {
+               tk_messageBox -message "freezeTB not found" -title "ERROR" ;
+
+               return 1 ;
+            } ; # If: local freezeTB could not be found
+         } ; # If: freezeTB not in path
+      } ; # check if windows or linux
+
+      #***************************************************
+      # Header Sec05 Sub03:
+      #   - set up freezeTB command
+      #***************************************************
+
+      set status [catch { eval exec $freezeTBPath $argsList } result ] ; # run freezeTB
+
+      if { [ string equal $::errorCode NONE ] } {
+         return 0 ;
+      } else {
+         tk_messageBox -message $result -title "ERROR running freezeTB" ;
+
+         return 1 ;
+      } ; # check for errors
+
+      return 0 ;
+   } ; # freezeTB
+
+   #>>>script<<<#
+
    #--------------------------------------------------
    # Tcl01: tcl_isInt_gui
    #   - checks if input key is numeric and if string
@@ -324,10 +705,65 @@
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui02 Sec05:
    #   - set up run and exit button
+   #   o gui02 sec05 sub01:
+   #     - set up frame for run and exit button
+   #   o gui02 sec05 sub02:
+   #     - run button
+   #   o gui02 sec05 sub03:
+   #     - exit button and pack (run/exit)
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #***************************************************
+   # Gui02 Sec05 Sub01:
+   #   - set up frame for run and exit button
+   #***************************************************
 
    tk::frame .main.reqIn.runexit ;
    pack .main.reqIn.runexit -anchor w -side top ;
+
+   #***************************************************
+   # Gui02 Sec05 Sub02:
+   #   - run button
+   #   o gui02 sec05 sub02 cat01:
+   #     - setup + fastq file and prefix checks
+   #   o gui02 sec05 sub02 cat02:
+   #     - set up minimap2 output file name
+   #   o gui02 sec05 sub02 cat03:
+   #     - run minimap2
+   #   o gui02 sec05 sub02 cat04:
+   #     - add freezeTB databases
+   #   o gui02 sec05 sub02 cat05:
+   #     - add freezeTB filtering settings
+   #   o gui02 sec05 sub02 cat06:
+   #     - add freezeTB lineage settings
+   #   o gui02 sec05 sub02 cat07:
+   #     - add freezeTB tbCon consensus settings
+   #   o gui02 sec05 sub02 cat08:
+   #     - add freezeTB tbCon and AMR print settings
+   #   o gui02 sec05 sub02 cat09:
+   #     - add freezeTB clustering settings
+   #   o gui02 sec05 sub02 cat10:
+   #     - run freezeTB
+   #   o gui02 sec05 sub02 cat11:
+   #     - run output part of gui
+   #***************************************************
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui02 Sec05 Sub02 Cat01:
+   #   - setup + fastq file and prefix checks
+   #+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   proc setMapStatus {} {
+         .main.reqIn.runexit.statuslab configure  -text "running minimap2" ;
+
+         wm title . "running minimap2 (freezeTB)" ;
+   } ; # sets running minimap2 status
+
+   proc setFreezeTBStatus {} {
+         .main.reqIn.runexit.statuslab configure  -text "running freezeTB" ;
+
+         wm title . "running freezeTB" ;
+   } ; # sets running freezeTB stats
 
    tk::button .main.reqIn.runexit.runbut -text "run" -command { 
          if { $glob_fqIn eq "" } {
@@ -345,6 +781,11 @@
             return false;
          } ; #  no prefix (was deleted)
 
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat02:
+         #   - set up minimap2 output file name
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
          set prefix [ file join $glob_dirOut $glob_prefix ] ; # build output file path*/
 
          file mkdir $prefix ;
@@ -356,23 +797,229 @@
          } ; # failed to make output directory
 
          set prefix [file join $prefix $glob_prefix] ;
-         set samFile ">";
-         append samFile $prefix "-map.sam" ;
+
+         set samFile $prefix ;
+         append samFile "-map.sam" ;
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat03:
+         #   - run minimap2
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         setMapStatus ; # dispaly running minimap2
+
+         .main.reqIn.runexit.statuslab configure  -text "running minimap2" ;
+
+         wm title . "running minimap2 (freezeTB)" ;
 
          # run minimap2 command
-         set status [catch { exec minimap2 -a -x $glob_srCheck $glob_refFa $glob_fqIn $samFile } result  ]  ;
+         set status [catch { eval  exec $mapPath -a -x $glob_srCheck  $glob_refFa  $glob_fqIn ">" $samFile  } result  ]  ;
 
-         if { [string equal $::errorCode NONE] } {
-
+         if { [ string equal $::errorCode NONE ] } {
+            # using errorCode here because minimap2
+            # outputs to stderr
          } else {
             tk_messageBox -message [concat "Error runing minimap2\n" $result ] -title "ERROR" ;
+
+            return false ;
+            # probably need 
          } ; # Else had error
            
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat04:
+         #   - add freezeTB databases
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         # set up databases
+
+         set tbCmd [list "-sam" $samFile] ;
+         lappend tbCmd "-prefix" $prefix ;
+         lappend tbCmd "-amr-tbl" $glob_amrDb ;
+         lappend tbCmd "-gene-coords" ;
+         lappend tbCmd $glob_coordsTsv ;
+         lappend tbCmd "-miru-tbl" $glob_miruDb ;
+         lappend tbCmd "-spoligo" $glob_spacer ;
+         lappend tbCmd "-db-spoligo" $glob_spolDb ;
+
+         if { $glob_mask ne 0 } {
+            lappend tbCmd "-mask-prim" $glob_spolDb ;
+         } else {
+            lappend tbCmd "-mask-prim" "-" ;
+         } ; # check if masking primers
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat05:
+         #   - add freezeTB filtering settings
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         lappend tbCmd "-min-mapq" $glob_mapq ;
+         lappend tbCmd "-min-median-q" $glob_medQ ;
+         lappend tbCmd "-min-mean-q" $glob_meanQ ;
+         lappend tbCmd "-min-len" $glob_minLen ;
+            # put in consensus gui, but help is filter
+
+         if { $glob_adjust ne 0 } {
+            lappend tbCmd "-adj-coords" ;
+         } else {
+            lappend tbCmd "-no-adj-coords" ;
+         } ; # check if coordinate adjusting
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat06:
+         #   - add freezeTB lineage settings
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         lappend tbCmd "-fudge" $glob_miruFudge ;
+         lappend tbCmd "-dr-start" $glob_drStart ;
+         lappend tbCmd "-dr-end" $glob_drEnd ;
+
+         lappend tbCmd "-spoligo-min-score" ;
+         lappend tbCmd $glob_spolSim ;
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat07:
+         #   - add freezeTB tbCon consensus settings
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         lappend tbCmd "-min-depth" $glob_depth ;
+         lappend tbCmd "-min-q" $glob_snpq ;
+         lappend tbCmd "-min-q-ins" $glob_insq ;
+         lappend tbCmd "-perc-snp-sup" ;
+         lappend tbCmd $glob_basePerc ;
+         lappend tbCmd "-perc-ins-sup" $glob_insPerc ;
+         lappend tbCmd "-perc-del-sup" $glob_delPerc ;
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat08:
+         #   - add freezeTB tbCon & AMR print settings
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         lappend tbCmd "-min-amr-map-perc" ;
+         lappend tbCmd $glob_amrPercSup ;
+
+         if { $glob_frameshift ne 0 } {
+            lappend tbCmd "-frameshift" ;
+         } else {
+            lappend tbCmd "-no-frameshift" ;
+         } ; # check if doing frameshift checking
+ 
+         lappend tbCmd "-p-min-depth" ;
+         lappend tbCmd $glob_minVarDepth ;
+
+         lappend tbCmd "-p-perc-snp-sup" ;
+         lappend tbCmd glob_baseVarPerc ;
+
+         lappend tbCmd "-p-perc-ins-sup" ;
+         lappend tbCmd $glob_insVarPerc ;
+
+         lappend tbCmd "-p-perc-del-sup" ;
+         lappend tbCmd $glob_delVarPerc ;
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat09:
+         #   - add freezeTB clustering settings
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         if { $glob_clustBl ne 0 } {
+            lappend tbCmd "-clust" ;
+
+            lappend tbCmd "-len-weigth" ;
+            lappend tbCmd $glob_lenWeight ;
+           
+            lappend tbCmd "-clust-depth" ;
+            lappend tbCmd $glob_minClustDepth ;
+
+            lappend tbCmd "-clust-perc-depth" ;
+            lappend tbCmd $glob_minClustPercDepth ;
+
+            lappend tbCmd "-read-err" ;
+            lappend tbCmd $glob_clustReadErr ;
+
+            lappend tbCmd "-con-err" ;
+            lappend tbCmd $glob_clustConErr ;
+
+            lappend tbCmd "-con-sim" ;
+            lappend tbCmd $glob_maxClustSim ;
+
+            lappend tbCmd "-overlap" ;
+            lappend tbCmd $glob_minClustOverlap ;
+
+            lappend tbCmd "-perc-n" ;
+            lappend tbCmd $glob_maxClustMask ;
+
+            if { $glob_depthProfBl ne 0 } {
+               lappend tbCmd "-depth-prof" ;
+            } else {
+               lappend tbCmd "-no-depth-prof" ;
+            } ; # check if doing depth profiling
+
+            lappend tbCmd "-err-to-var" ;
+            lappend tbCmd $glob_clustErrRatio ;
+
+            lappend tbCmd "-win-len" ;
+            lappend tbCmd $glob_clustWinLen ;
+
+            lappend tbCmd "-win-err" ;
+            lappend tbCmd $glob_clustWinErrRatio ;
+
+            lappend tbCmd "-indel-len" ;
+            lappend tbCmd $glob_minClustIndelLen ;
+
+            lappend tbCmd "-clust-q-snp" ;
+            lappend tbCmd $glob_minClustSnpQ ;
+
+            lappend tbCmd "-con-iter" ;
+            lappend tbCmd $glob_numRebuilds ;
+         } else {
+            lappend tbCmd "-no-clust" ;
+         } ; # check if clustering
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat10:
+         #   - run freezeTB
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         setFreezeTBStatus ;
+
+         #>>>script<<<#
+         if { [ freezeTBProc $tbCmd ] } {
+         
+         #>>>script<<<#
+            tk_messageBox -message "freezeTB error" -title "ERROR" ; # catching stderr would be tricky
+            # this stack overflow has a solution
+            # https://stackoverflow.com/questions/64547745/capture-stdout-within-a-tcl-catch-command
+
+            return false;
+         } ; # If had error
+
+         #+++++++++++++++++++++++++++++++++++++++++++++
+         # Gui02 Sec05 Sub02 Cat11:
+         #   - run output part of freezeTB
+         #+++++++++++++++++++++++++++++++++++++++++++++
+
+         wm title . "Required freezeTB" ;
+
+         .main.reqIn.runexit.statuslab configure  -text "" ;
+
+         upvar 0 glob_outCur curPrefix ;
+         upvar 0 glob_outPref newPrefix ;
+         set newPrefix $prefix ;
+         set curPrefix $prefix ;
+
+         .main.menu.outBut invoke ;
+         .main.out.set.run.but invoke ;
       } ; # run freezeTB button
+
+   #***************************************************
+   # Gui02 Sec05 Sub03:
+   #   - exit button and pack (run/exit)
+   #***************************************************
 
    tk::button .main.reqIn.runexit.exitbut -text "exit" -command {exit}  ;
 
-   pack .main.reqIn.runexit.runbut .main.reqIn.runexit.exitbut -anchor w -side left ;
+   tk::label .main.reqIn.runexit.statuslab -text "" ;
+
+   pack .main.reqIn.runexit.runbut .main.reqIn.runexit.exitbut .main.reqIn.runexit.statuslab -anchor w -side left ;
    
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    # Gui03 TOC:
@@ -389,6 +1036,8 @@
    #     - set up lineage menu button
    #   o gui03 sec06:
    #     - set up consensus menu button
+   #   o gui03 sec07:
+   #     - set up output settings menu
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -411,6 +1060,7 @@
          pack forget .main.lin ;
          pack forget .main.con ;
          pack forget .main.menu ;
+         pack forget .main.out ;
    
          pack .main.reqIn -anchor w -side top ;
          pack .main.menu -anchor w -side top ;
@@ -420,12 +1070,14 @@
          .main.menu.amrBut configure -relief raised ;
          .main.menu.linBut configure -relief raised ;
          .main.menu.conBut configure -relief raised ;
+         .main.menu.outBut configure -relief raised ;
 
          .main.menu.reqBut configure -state disabled ;
          .main.menu.filtBut configure -state normal ;
          .main.menu.amrBut configure -state normal ;
          .main.menu.linBut configure -state normal ;
          .main.menu.conBut configure -state normal ;
+         .main.menu.outBut configure -state normal ;
 
          wm title . "Required freezeTB" ;
    } ; # command button fires
@@ -444,6 +1096,7 @@
          pack forget .main.lin ;
          pack forget .main.con ;
          pack forget .main.menu ;
+         pack forget .main.out ;
    
          pack .main.filt -anchor w -side top ;
          pack .main.menu -anchor w -side top ;
@@ -453,12 +1106,14 @@
          .main.menu.amrBut configure -relief raised ;
          .main.menu.linBut configure -relief raised ;
          .main.menu.conBut configure -relief raised ;
+         .main.menu.outBut configure -relief raised ;
 
          .main.menu.reqBut configure -state normal ;
          .main.menu.filtBut configure -state disabled ;
          .main.menu.amrBut configure -state normal ;
          .main.menu.linBut configure -state normal ;
          .main.menu.conBut configure -state normal ;
+         .main.menu.outBut configure -state normal ;
 
          wm title . "Filtering freezeTB" ;
    } ; # command button fires
@@ -485,6 +1140,7 @@
          .main.menu.filtBut configure -relief raised ;
          .main.menu.amrBut configure -relief sunken ;
          .main.menu.conBut configure -relief raised ;
+         .main.menu.outBut configure -relief raised ;
 
          .main.menu.reqBut configure -state normal ;
          .main.menu.filtBut configure -state normal ;
@@ -509,6 +1165,7 @@
          pack forget .main.lin ;
          pack forget .main.con ;
          pack forget .main.menu ;
+         pack forget .main.out ;
    
          pack .main.lin -anchor w -side top ;
          pack .main.menu -anchor w -side top ;
@@ -518,12 +1175,14 @@
          .main.menu.amrBut configure -relief raised ;
          .main.menu.linBut configure -relief sunken ;
          .main.menu.conBut configure -relief raised ;
+         .main.menu.outBut configure -relief raised ;
 
          .main.menu.reqBut configure -state normal ;
          .main.menu.filtBut configure -state normal ;
          .main.menu.amrBut configure -state normal ;
          .main.menu.linBut configure -state disabled ;
          .main.menu.conBut configure -state normal ;
+         .main.menu.outBut configure -state normal ;
 
          wm title . "Lineage freezeTB" ;
    } ; # command button fires
@@ -542,6 +1201,7 @@
          pack forget .main.lin ;
          pack forget .main.con ;
          pack forget .main.menu ;
+         pack forget .main.out ;
    
          pack .main.con -anchor w -side top ;
          pack .main.menu -anchor w -side top ;
@@ -566,18 +1226,78 @@
          .main.menu.amrBut configure -relief raised ;
          .main.menu.linBut configure -relief raised ;
          .main.menu.conBut configure -relief sunken ;
+         .main.menu.outBut configure -relief raised ;
 
          .main.menu.reqBut configure -state normal ;
          .main.menu.filtBut configure -state normal ;
          .main.menu.amrBut configure -state normal ;
          .main.menu.linBut configure -state normal ;
          .main.menu.conBut configure -state disabled ;
+         .main.menu.outBut configure -state normal ;
 
    } ; # command button fires
 
    pack .main.menu.conBut -anchor w -side left
 
-   
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui03 Sec07:
+   #   - set up output settings menu
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   tk::button .main.menu.outBut -text "output" -relief raised -state normal -command { 
+
+         pack forget .main.reqIn ;
+         pack forget .main.filt ;
+         pack forget .main.amr ;
+         pack forget .main.lin ;
+         pack forget .main.con ;
+         pack forget .main.menu ;
+         pack forget .main.out ;
+
+         .main.menu.reqBut configure -relief raised ;
+         .main.menu.filtBut configure -relief raised ;
+         .main.menu.amrBut configure -relief raised ;
+         .main.menu.linBut configure -relief raised ;
+         .main.menu.conBut configure -relief raised ;
+         .main.menu.outBut configure -relief raised ;
+
+         .main.menu.reqBut configure -state normal ;
+         .main.menu.filtBut configure -state normal ;
+         .main.menu.amrBut configure -state normal ;
+         .main.menu.linBut configure -state normal ;
+         .main.menu.conBut configure -state normal ;
+         .main.menu.outBut configure -state normal ;
+
+         pack .main.out ;
+         .main.out.menu.setBut invoke ;
+      } ; # output settings button
+
+   pack .main.menu.outBut -anchor w -side left ;
+
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # Gui04 TOC:
+   #   - read filtering menu
+   #   o gui04 sec01:
+   #     - make read filtering frame
+   #   o gui04 sec02:
+   #     - reference genome input
+   #   o gui04 sec03:
+   #     - coordinates file input
+   #   o gui04 sec04:
+   #     - mapq entry input
+   #   o gui04 sec05:
+   #     - medain q-score
+   #   o gui04 sec06:
+   #     - mean q-score
+   #   o gui04 sec07:
+   #     - minimum read/consensus length
+   #   o gui04 sec08:
+   #     - masking check box + button
+   #   o gui04 sec09:
+   #     - adjust coordinates text box
+   #   o gui04 sec10:
+   #     - short read mapping check box
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui04 Sec01:
@@ -684,17 +1404,17 @@
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui04 Sec07:
-   #   - minimum read depth
+   #   - minimum read/consensus length
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-   tk::frame .main.filt.depth
-   pack .main.filt.depth -anchor w -side top
+   tk::frame .main.filt.len
+   pack .main.filt.len -anchor w -side top
 
-   tk::label .main.filt.depth.lab -text "min read depth (> 0)"  ; # medain q-score entry leabe
+   tk::label .main.filt.len.lab -text "min length (> 0)"  ; # medain q-score entry leabe
 
-   tk::entry .main.filt.depth.entry -textvariable glob_depth -validate key -vcmd { tcl_isInt_gui %P %i 1 2000000000 }  ; # get minimum read depth
+   tk::entry .main.filt.len.entry -textvariable glob_minLen -validate key -vcmd { tcl_isInt_gui %P %i 1 2000000000 }  ; # get minimum read length
 
-   pack .main.filt.depth.lab .main.filt.depth.entry -anchor w -side left 
+   pack .main.filt.len.lab .main.filt.len.entry -anchor w -side left 
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui04 Sec08:
@@ -752,7 +1472,18 @@
 
    pack .main.filt.sr.check -anchor w -side left ;
 
-   
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # Gui05 TOC:
+   #   - amr settings
+   #   o gui05 sec01:
+   #     - set up AMR frame
+   #   o gui05 sec02:
+   #     - get amr database
+   #   o gui05 sec03:
+   #     - min read AMR percent support
+   #   o gui05 sec05:
+   #     - frameshift check box
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui05 Sec01:
@@ -812,7 +1543,18 @@
 
    pack .main.amr.frameshift.check -anchor w -side left  ;
 
-   
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # Gui06 TOC:
+   #   - lineage settings
+   #   o gui06 sec01:
+   #     - set up lineage frame
+   #   o gui06 sec02:
+   #     - databases (MIRU and spoligo)
+   #   o gui06 sec03:
+   #     - MIRU-VNTR lineages
+   #   o gui06 sec04:
+   #     - spoligotyping lineages
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui06 Sec01:
@@ -1159,17 +1901,17 @@
 
    #***************************************************
    # Gui07 Sec02 Sub03:
-   #   - min length
+   #   - min read depth
    #***************************************************
 
-   tk::frame .main.con.tb.len ;
-   pack .main.con.tb.len -anchor w -side top ;
+   tk::frame .main.con.tb.depth ;
+   pack .main.con.tb.depth -anchor w -side top ;
 
-   tk::label .main.con.tb.len.lab -text "Min length (> 0)" ;
+   tk::label .main.con.tb.depth.lab -text "Min read depth (> 0)" ;
 
-   tk::entry .main.con.tb.len.entry -textvariable glob_minLen -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ; # min snp q-score entry
+   tk::entry .main.con.tb.depth.entry -textvariable glob_depth -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ;
 
-   pack .main.con.tb.len.lab .main.con.tb.len.entry -anchor w -side left ;
+   pack .main.con.tb.depth.lab .main.con.tb.depth.entry -anchor w -side left ;
 
    #***************************************************
    # Gui07 Sec02 Sub04:
@@ -1566,17 +2308,1481 @@
 
    pack .main.con.clust.con.numbuild.lab .main.con.clust.con.numbuild.entry -anchor w -side left 
 
-   
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   # Gui08 TOC:
+   #   - set up output settings/input frame
+   #   o gui08 sec01:
+   #     - set up output gui frame
+   #   o gui08 sec02:
+   #     - function setup; report file
+   #   o gui08 sec03:
+   #     - set up settings output gui frame
+   #   o gui08 sec04:
+   #     - set up output gui menu
+   #   o gui08 sec05:
+   #     - set up report gui
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Gui08 Sec01:
-   #   - 
+   #   - set up output gui frame
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-   
+   tk::frame .main.out ;
 
-   
+   tk::frame .main.out.set ;
+   pack .main.out.set -anchor w -side top ;
 
-   
+   tk::frame .main.out.report ;
+   tk::frame .main.out.depth ;
+   tk::frame .main.out.cover ;
+   tk::frame .main.out.amr ;
 
-   
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui08 Sec02:
+   #   - set up report file parsing functions
+   #   o gui08 sec02 sub01:
+   #     - functioun consensus AMR report
+   #   o gui08 sec02 sub02:
+   #     - function read AMR report
+   #   o gui08 sec02 sub03:
+   #     - function; consensus spoligotype
+   #   o gui08 sec02 sub04:
+   #     - function; read spoligotype
+   #   o gui08 sec02 sub05:
+   #     - function consensus MIRU-VNTR
+   #   o gui08 sec02 sub06:
+   #     - function; read depth graph
+   #   o gui08 sec02 sub07:
+   #     - function; coverage graph
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #**************************************************
+   # Gui08 Sec02 Sub01:
+   #   - function; consensus AMR report
+   #**************************************************
+
+   proc conAmrRep {prefixStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-con-amrs.tsv" ;
+
+      set openFILE [open $fileStr] ;
+      gets $openFILE line ; # get header line
+      set amrList "" ;
+
+      while {[gets $openFILE line] > -1} {
+         set line [split $line "\t"] ;
+         set tmpStr [lindex $line 2] ;
+         set amrList [concat $amrList $tmpStr] ;
+
+         if { [lindex $line 3] ne "NA" } {
+            set tmpStr [split [lindex $line 3] "_"] ;
+            set amrList [concat $amrList $tmpStr] ;
+         } ; # If: have cross resistance
+
+         # remove duplicates
+         set amrList [lsort -unique $amrList] ;
+      } ; # Loop: read file by line
+
+      # make sure always lower case
+      close $openFILE ;
+      set amrList [string tolower $amrList] ;
+
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr }  {
+         set tmpStr [lindex $::glob_amrList $siAmr] ;
+         set tmpStr [string tolower $tmpStr] ;
+ 
+         set labStr [lindex $::glob_amrShort $siAmr] ;
+         set labStr [string tolower $labStr] ;
+         append labStr "lab" ;
+
+         if { [lsearch $amrList $tmpStr] ne -1 } {
+            .main.out.report.conAmr.$labStr configure -background $::glob_amrCol ;
+         } else {
+            .main.out.report.conAmr.$labStr configure -background $::glob_noAmrCol ;
+         } ; # check if have AMR
+      } ; # Loop: build amr labels
+   } ; # conAmrRep
+
+   #**************************************************
+   # Gui08 Sec02 Sub02:
+   #   - function read AMR report
+   #**************************************************
+
+   proc readAmrRep {prefixStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-read-amrs.tsv" ;
+
+      set openFILE [open $fileStr] ;
+      gets $openFILE line ; # get header line
+      set amrList "" ;
+
+      while {[gets $openFILE line] > -1} {
+         set line [split $line "\t"] ;
+         set tmpStr [lindex $line 4] ;
+
+         # get percent report and reduce to decimal
+         set tmpF [lindex $line 8] ;
+         set tmpF [expr $tmpF / 100] ;
+
+         if {$tmpStr eq "snp"} {
+            if {$tmpF < $::glob_outSnpSup} {
+                continue ;
+            } ; # If: support is to low
+         } else {
+            if {$tmpF < $::glob_outIndelSup} {
+                continue ;
+            } ; # If: support is to low
+         } ; # check if snp or indel
+
+         set tmpStr [lindex $line 1] ;
+         set amrList [concat $amrList $tmpStr] ;
+
+         if { [lindex $line 2] ne "NA" } {
+            set tmpStr [split [lindex $line 2] "_"] ;
+            set amrList [concat $amrList $tmpStr] ;
+         } ; # If: have cross resistance
+
+         # remove duplicates
+         set amrList [lsort -unique $amrList] ;
+      } ; # Loop: read file by line
+
+      # make sure always lower case
+      close $openFILE ;
+      set amrList [string tolower $amrList] ;
+
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr }  {
+         set tmpStr [lindex $::glob_amrList $siAmr] ;
+         set tmpStr [string tolower $tmpStr] ;
+ 
+         set labStr [lindex $::glob_amrShort $siAmr] ;
+         set labStr [string tolower $labStr] ;
+         append labStr "lab" ;
+
+         if { [lsearch $amrList $tmpStr] ne -1 } {
+            .main.out.report.readAmr.$labStr configure -background $::glob_amrCol ;
+         } else {
+            .main.out.report.readAmr.$labStr configure -background $::glob_noAmrCol ;
+         } ; # check if have AMR
+      } ; # Loop: build amr labels
+   } ; # readAmrRep
+
+   #**************************************************
+   # Gui08 Sec02 Sub03:
+   #   - function; consensus spoligotype
+   #**************************************************
+
+   proc conSpol {prefixStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-con-spoligo.tsv" ;
+      set openFILE [open $fileStr] ;
+
+      gets $openFILE lineStr ; # get header line
+      set statusBl [gets $openFILE lineStr ] ;
+      close $openFILE ;
+
+      if {$statusBl < 0} {
+         .main.out.report.conspol.octal.reslab configure -text "NA" ;
+
+         .main.out.report.conspol.sit.reslab configure -text "NA" ;
+
+         .main.out.report.conspol.strain.reslab configure -text "NA" ;
+
+         .main.out.report.conspol.orig.reslab configure -text "NA" ;
+
+         return false ;
+      } ; # If: no spoligotype entry
+
+      set lineStr [split $lineStr "\t"] ;
+
+      # each value is either NA or has actual value
+
+      .main.out.report.conspol.octal.reslab configure -text [lindex $lineStr 3] ;
+
+      .main.out.report.conspol.sit.reslab configure -text [lindex $lineStr 5] ;
+
+      .main.out.report.conspol.strain.reslab configure -text [lindex $lineStr 1] ;
+
+      .main.out.report.conspol.orig.reslab configure -text [lindex $lineStr 6] ;
+   } ; # conSpol
+
+   #**************************************************
+   # Gui08 Sec02 Sub04:
+   #   - function; read spoligotype
+   #**************************************************
+
+   proc readSpol {prefixStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-read-spoligo.tsv" ;
+      set openFILE [open $fileStr] ;
+
+      gets $openFILE lineStr ; # get header line
+      set statusBl [gets $openFILE lineStr ] ;
+      close $openFILE ;
+
+      if {$statusBl < 0} {
+         .main.out.report.readspol.octal.reslab configure -text "NA" ;
+
+         .main.out.report.readspol.sit.reslab configure -text "NA" ;
+
+         .main.out.report.readspol.strain.reslab configure -text "NA" ;
+
+         .main.out.report.readspol.orig.reslab configure -text "NA" ;
+
+         return false ;
+      } ; # If: no spoligotype entry
+
+      set lineStr [split $lineStr "\t"] ;
+
+      # each value is either NA or has actual value
+
+      .main.out.report.readspol.octal.reslab configure -text [lindex $lineStr 3] ;
+
+      .main.out.report.readspol.sit.reslab configure -text [lindex $lineStr 5] ;
+
+      .main.out.report.readspol.strain.reslab configure -text [lindex $lineStr 1] ;
+
+      .main.out.report.readspol.orig.reslab configure -text [lindex $lineStr 6] ;
+   } ; # readSpol
+
+   #**************************************************
+   # Gui08 Sec02 Sub05:
+   #   - function consensus MIRU-VNTR
+   #**************************************************
+
+   proc conMiru {prefixStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-con-miru.tsv" ;
+      set openFILE [open $fileStr] ;
+      
+      gets $openFILE lineStr ; # get header
+      set status [gets $openFILE lineStr] ;
+      close $openFILE ;
+
+      if {$status < 0} {
+         .main.out.report.miru.reslab configure -text "NA" ;
+         return false ;
+      } ; # If: no entry
+
+      set lineStr [split $lineStr "\t"] ;
+
+      # need to remove lineage index
+      set lineStr [lreplace $lineStr 0 0];
+
+      set tmpStr [lsort -unique $lineStr ] ;
+
+      if {[llength $tmpStr] < 2} {
+         if {[lindex $tmpStr 0] eq "NA"} {
+            .main.out.report.miru.reslab configure -text "NA" ;
+            return false ;
+         } ; # If: no lineage detected
+      } ; # If: have many duplicates
+
+      .main.out.report.miru.reslab configure -text $lineStr ;
+
+      return true ;
+   } ; # conMiru
+
+   #**************************************************
+   # Gui08 Sec02 Sub06:
+   #   - function; read depth graph display
+   #**************************************************
+
+   proc depthGraph {prefixStr} {
+      # delete old graphs
+      if {! [image inuse $::glob_depthImg] } {
+            image delete $::glob_depthImg ;
+      } ; # If: image exists
+
+      if {$::glob_mkGraphBl ne 0 } {
+         
+         set tmpStr $prefixStr ;
+         append tmpStr "-depths.tsv" ;
+
+         set tmpPathStr $prefixStr ;
+         append tmpPathStr "-readDepth.png" ;
+
+         if { [file exists $tmpPathStr] eq 1 } {
+            set ::glob_depthImg [image create photo -file $tmpPathStr] ;
+
+            .main.out.depth.graph configure -image $::glob_depthImg ;
+
+         } else {
+            set status [catch {exec $::rPath $::graphScript -stats $tmpStr -who $::glob_amrDb -prefix $prefixStr } ] ; # run R to build graphs
+
+            if { $status ne 0 } {
+               tk_messageBox -message "failed to build depth graph" -title "ERROR" ;
+
+               # turn off graphing
+               .main.out.set.graph.check toggle ;
+            } else {
+               set ::glob_depthImg [image create photo -file $tmpPathStr ] ;
+
+               .main.out.depth.graph configure -image $::glob_depthImg ;
+            } ; # Else: add image
+         } ; # check if need to build graphs
+       } ; # check if users wants graphs displayed
+   } ; # depthGraph
+
+   #**************************************************
+   # Gui08 Sec02 Sub07:
+   #   - function; coverage graph dispaly
+   #**************************************************
+
+   proc coverageGraph {prefixStr} {
+      # delete old graphs
+      if {! [image inuse $::glob_coverImg] } {
+            image delete $::glob_coverImg ;
+      } ; # If: image exists
+
+      if {$::glob_mkGraphBl ne 0 } {
+         set tmpStr $prefixStr ;
+         append tmpStr "-covers.tsv" ;
+
+         set tmpPathStr $prefixStr ;
+         append tmpPathStr "-coverage.png" ;
+
+         if { [file exists $tmpPathStr] eq 1 } {
+            set ::glob_coverImg [image create photo -file $tmpPathStr] ;
+
+            .main.out.cover.graph configure -image $::glob_coverImg ;
+
+         } else {
+            set status [catch {exec $::rPath $::graphScript -stats $tmpStr -who $::glob_amrDb -prefix $prefixStr } ] ; # run R to build graphs
+
+            if { $status ne 0 } {
+               tk_messageBox -message "failed to build cover graph" -title "ERROR" ;
+
+               # turn off graphing
+               .main.out.set.graph.check toggle ;
+            } else {
+               set ::glob_coverImg [image create photo -file $tmpPathStr ] ;
+
+               .main.out.cover.graph configure -image $::glob_coverImg ;
+            } ; # Else: add image
+         } ; # check if need to build graphs
+       } ; # check if users wants graphs displayed
+   } ; # coverageGraph
+
+   #**************************************************
+   # Gui08 Sec02 Sub08:
+   #   - function; consnesus AMR table
+   #   o gui08 sec02 sub08 cat01:
+   #     - open file and get header lenghts
+   #   o gui08 sec02 sub08 cat02:
+   #     - get gene name length + start length loop
+   #   o gui08 sec02 sub08 cat03:
+   #     - get AMR (short name) length
+   #   o gui08 sec02 sub08 cat04:
+   #     - get AMR cross resistance column length
+   #   o gui08 sec02 sub08 cat05:
+   #     - find length of mutation column
+   #   o gui08 sec02 sub08 cat06:
+   #     - print no AMR case
+   #   o gui08 sec02 sub08 cat07:
+   #     - print header
+   #   o gui08 sec02 sub08 cat08:
+   #     - get gene ids + start print loop
+   #   o gui08 sec02 sub08 cat09:
+   #     - get primrary resistant drug (3 letter)
+   #   o gui08 sec02 sub08 cat10:
+   #     - get cross resistant drugs (3 letter)
+   #   o gui08 sec02 sub08 cat11:
+   #     - get mutation column
+   #   o gui08 sec02 sub08 cat12:
+   #     - add text to consensus AMR table + return
+   #**************************************************
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub08 Cat01:
+   #   - open file and get header lenghts
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   proc conAmrTbl {prefixStr indentStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-con-amrs.tsv" ;
+      set openFILE [open $fileStr] ;
+
+      set pad1 [string length "gene"] ;
+      set pad2 [string length "drug"] ;
+      set pad3 [string length "cross-res"] ;
+      set pad5 [string length "mutant"];
+
+      if {[gets $openFILE lineStr] < 0} {
+         .main.out.amr.read.tbl.lab configure -text "NA" ;
+
+         return false ;
+      } ; # If; nothing in file
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub08 Cat02:
+      #   - get gene name length + start length loop
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      while {[gets $openFILE lineStr] > -1} {
+         set lineStr [split $lineStr "\t"] ;
+
+         # gene name length
+         set tmpStr [lindex $lineStr 1] ;
+         set lenUI [string length $tmpStr] ;
+         if {$pad1 < $lenUI} { set pad1 $lenUI ; } ;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub08 Cat03:
+         #   - get AMR (short name) length
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 2] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # loop converts drug name to short hand
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+
+         set lenUI [string length $tmpStr] ;
+         if {$pad2 < $lenUI} { set pad2 $lenUI ; } ;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub08 Cat04:
+         #   - get AMR cross resistance column length
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         # cross resistance length
+         set tmpStr [lindex $lineStr 3] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # loop converts drug names to three letters
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+
+         set lenUI [string length $tmpStr] ;
+         if {$pad3 < $lenUI} { set pad3 $lenUI ; } ;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub08 Cat05:
+         #   - find length of mutation column
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 5] ;
+         set lenUI [string length $tmpStr] ;
+         if {$pad5 < $lenUI} { set pad5 $lenUI ; } ;
+      } ; # Loop: find longest entries per column
+
+      close $openFILE ;
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub08 Cat06:
+      #   - print no AMR case
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      if {$pad1 eq 0} {
+         .main.out.amr.con.tbl.lab configure -text "NA" ;
+
+         return false ;
+      } ; # If; nothing in file
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub08 Cat07:
+      #   - print header
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      set tmpStr [format "%-*s" $pad1 "gene"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad2 "drug"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad3 "cross-res"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad5 "mutant"] ;
+      append tblStr $tmpStr $indentStr;
+
+      append tblStr "\n";
+
+      set openFILE [open $fileStr] ;
+      gets $openFILE lineStr ;
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub08 Cat08:
+      #   - get gene ids + start print loop
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      while {[gets $openFILE lineStr] > -1} {
+         set lineStr [split $lineStr "\t"] ;
+
+         set tmpStr [lindex $lineStr 1] ; # gene id
+         set tmpStr [format "%-*s" $pad1 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub08 Cat09:
+         #   - get primrary resistant drug (3 letter)
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 2] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # loop converts to three letter code
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+         set tmpStr [format "%-*s" $pad2 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub08 Cat10:
+         #   - get cross resistant drugs (3 letter)
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         # cross resistance AMRs
+         set tmpStr [lindex $lineStr 3] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # loop converts drug to three letter codes
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+
+         set tmpStr [format "%-*s" $pad3 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub08 Cat11:
+         #   - get mutation column
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 5] ; # mut type
+         set tmpStr [format "%-*s" $pad5 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         append tblStr "\n" ; # next row
+      } ; # Loop: get AMRs
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub08 Cat12:
+      #   - add text to consensus AMR table + return
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      .main.out.amr.con.tbl.lab configure -text $tblStr ;
+
+      close $openFILE ;
+      return true ;
+   } ; # conAmrTbl
+
+   #**************************************************
+   # Gui08 Sec02 Sub09:
+   #   - function; read AMR table
+   #   o gui08 sec02 sub09 cat01:
+   #     - open file and get header lengths
+   #   o gui08 sec02 sub09 cat02:
+   #     - find gene id length + start length loop
+   #   o gui08 sec02 sub09 cat03:
+   #     - find primrary drug length
+   #   o gui08 sec02 sub09 cat04:
+   #     - find cross resitance drugs length
+   #   o gui08 sec02 sub09 cat05:
+   #     - find mutation and % support lengths
+   #   o gui08 sec02 sub09 cat06:
+   #     - print NA for nothing in file case
+   #   o gui08 sec02 sub09 cat07:
+   #     - build header for table
+   #   o gui08 sec02 sub09 cat08:
+   #     - add gene id to header + start table loop
+   #   o gui08 sec02 sub09 cat09:
+   #     - add primrary drug to header
+   #   o gui08 sec02 sub09 cat10:
+   #     - add cross-resistance drugs to header
+   #   o gui08 sec02 sub09 cat11:
+   #     - add mutation and % support to table
+   #   o gui08 sec02 sub09 cat12:
+   #     - put table into AMR read table label
+   #**************************************************
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub09 Cat01:
+   #   - open file and get header lengths
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   proc readAmrTbl {prefixStr indentStr} {
+      set fileStr $prefixStr ;
+      append fileStr "-read-amrs.tsv" ;
+      set openFILE [open $fileStr] ;
+
+      set pad0 [string length "gene"] ;
+      set pad1 [string length "drug"] ;
+      set pad2 [string length "cross-res"] ;
+      set pad4 [string length "mutant"];
+      set pad8 [string length "%sup"];
+
+      if {[gets $openFILE lineStr] < 0} {
+         .main.out.amr.read.tbl.lab configure -text "NA" ;
+
+         return false ;
+      } ; # If; nothing in file
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub09 Cat02:
+      #   - find gene id length + start length loop
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      while {[gets $openFILE lineStr] > -1} {
+         set lineStr [split $lineStr "\t"] ;
+
+         # gene name length
+         set tmpStr [lindex $lineStr 0] ;
+         set lenUI [string length $tmpStr] ;
+         if {$pad0 < $lenUI} { set pad0 $lenUI ; } ;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub09 Cat03:
+         #   - find primrary drug length
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 1] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # reducing to three letter code if possible
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+
+         set lenUI [string length $tmpStr] ;
+         if {$pad1 < $lenUI} { set pad1 $lenUI ; } ;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub09 Cat04:
+         #   - find cross resitance drugs length
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         # cross resistance length
+         set tmpStr [lindex $lineStr 2] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # reducing to three letter code if possible
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+
+         set lenUI [string length $tmpStr] ;
+         if {$pad2 < $lenUI} { set pad2 $lenUI ; } ;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub09 Cat05:
+         #   - find mutation and % support lengths
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         # mutation length
+         set tmpStr [lindex $lineStr 4] ;
+         set lenUI [string length $tmpStr] ;
+         if {$pad4 < $lenUI} { set pad4 $lenUI ; } ;
+
+         # percent support length
+         set tmpStr [lindex $lineStr 8] ;
+         set lenUI [string length $tmpStr] ;
+         if {$pad8 < $lenUI} { set pad8 $lenUI ; } ;
+      } ; # Loop: find longest entries per column
+
+      close $openFILE ;
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub09 Cat06:
+      #   - print NA for nothing in file case
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      if {$pad0 eq 0} {
+         .main.out.amr.read.tbl.lab configure -text "NA" ;
+
+         return false ;
+      } ; # If; nothing in file
+
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub09 Cat07:
+      #   - build header for table
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      set tmpStr [format "%-*s" $pad0 "gene"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad1 "drug"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad2 "cross-res"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad4 "mutant"] ;
+      append tblStr $tmpStr $indentStr;
+
+      set tmpStr [format "%-*s" $pad8 "%sup"] ;
+      append tblStr $tmpStr $indentStr;
+
+      append tblStr "\n";
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub09 Cat08:
+      #   - add gene id to table + start table loop
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      set openFILE [open $fileStr] ;
+      gets $openFILE lineStr ;
+
+      while {[gets $openFILE lineStr] > -1} {
+         set lineStr [split $lineStr "\t"] ;
+
+         set tmpStr [lindex $lineStr 0] ; # gene id
+         set tmpStr [format "%-*s" $pad0 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub09 Cat09:
+         #   - add primrary drug to table
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 1] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # try to reduce drug to three letter code
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+         set tmpStr [format "%-*s" $pad1 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub09 Cat10:
+         #   - add cross-resistance drugs to table
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         set tmpStr [lindex $lineStr 2] ;
+         set tmpStr [string tolower $tmpStr] ;
+
+         # try to reduce drug to three letter code
+         for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+            set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrShort $siAmr] ] ;
+         } ; # Loop: convert AMR ids to short hand
+
+         set tmpStr [format "%-*s" $pad2 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         #++++++++++++++++++++++++++++++++++++++++++++
+         # Gui08 Sec02 Sub09 Cat11:
+         #   - add mutation and % support to table
+         #++++++++++++++++++++++++++++++++++++++++++++
+
+         # mutation type
+         set tmpStr [lindex $lineStr 4] ;
+         set tmpStr [format "%-*s" $pad4 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         # percent of reads supporting
+         set tmpStr [lindex $lineStr 8] ;
+         set tmpStr [format "%-*s" $pad8 $tmpStr] ;
+         append tblStr $tmpStr $indentStr;
+
+         append tblStr "\n" ; # next row
+      } ; # Loop: get AMRs
+
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui08 Sec02 Sub09 Cat12:
+      #   - put table into AMR read table label
+      #+++++++++++++++++++++++++++++++++++++++++++++++
+
+      .main.out.amr.read.tbl.lab configure -text $tblStr ;
+
+      close $openFILE ;
+      return true ;
+   } ; # readAmrTbl
+
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui08 Sec03:
+   #   - set up settings output gui frame
+   #   o gui08 sec03 sub01:
+   #     - set up file prefix finder
+   #   o gui08 sec03 sub02:
+   #     - AMR snp percent entry
+   #   o gui08 sec03 sub03:
+   #     - AMR indel percent entry
+   #   o gui08 sec03 sub04:
+   #     - graphing check button
+   #   o gui08 sec03 sub05:
+   #     - get report button
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #**************************************************
+   # Gui08 Sec03 Sub01:
+   #   - set up file prefix finder
+   #**************************************************
+
+   tk::frame .main.out.set.prefix ;
+   pack .main.out.set.prefix -anchor w -side top ;
+   tk::label .main.out.set.prefix.lab -text "" ;
+
+   tk::button .main.out.set.prefix.but -text "get prefix" -command { 
+         set fileStr [
+            tk_getOpenFile -title "select freezeTB output" 
+         ] ;
+
+         if { $fileStr eq "" } {
+
+         } else {
+            # set up global variable
+            upvar 0 glob_outPref outPrefStr ;
+
+            # get path and file name
+            set dirStr [file dirname $fileStr] ;
+            set prefStr [file tail $fileStr] ;
+
+            # remove all possible extension types
+
+            set prefStr [regsub con.* $prefStr ""] ;
+            set prefStr [regsub map.* $prefStr ""] ;
+            set prefStr [regsub read.* $prefStr ""] ;
+            set prefStr [regsub tsv.* $prefStr ""] ;
+            set prefStr [regsub id.* $prefStr ""] ;
+            set prefStr [regsub dept.* $prefStr ""] ;
+            set prefStr [regsub grap.* $prefStr ""] ;
+            set prefStr [regsub coverage.* $prefStr ""] ;
+
+            set prefStr [string range $prefStr 0 end-1] ; # remove dash regsub could not remove
+
+
+            # save prefix and update label
+
+            set outPrefStr [file join $dirStr $prefStr] ;
+
+           .main.out.set.prefix.lab configure -text $outPrefStr ;
+         } ; # check if anything was input
+      } ; # get file prefix
+
+   pack .main.out.set.prefix.but .main.out.set.prefix.lab -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec03 Sub02:
+   #   - AMR snp percent entry
+   #**************************************************
+
+   tk::frame .main.out.set.snp ;
+   pack .main.out.set.snp -anchor w -side top ;
+
+   tk::label .main.out.set.snp.lab -text "min AMR SNP % support" ;
+
+   tk::entry .main.out.set.snp.entry -textvariable glob_outSnpSup -vcmd { tcl_isFloat_gui %P %i 0 1 } ;
+
+   pack .main.out.set.snp.lab .main.out.set.snp.entry -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec03 Sub03:
+   #   - AMR indel percent entry
+   #**************************************************
+
+   tk::frame .main.out.set.indel ;
+   pack .main.out.set.indel -anchor w -side top ;
+
+   tk::label .main.out.set.indel.lab -text "min AMR Indel % support" ;
+
+   tk::entry .main.out.set.indel.entry -textvariable glob_outIndelSup -vcmd { tcl_isFloat_gui %P %i 0 1 } ;
+
+   pack .main.out.set.indel.lab .main.out.set.indel.entry -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec03 Sub04:
+   #   - graphing check button
+   #**************************************************
+
+   tk::frame .main.out.set.graph ;
+   pack .main.out.set.graph -anchor w -side top ;
+
+   tk::checkbutton .main.out.set.graph.check -text "build graphs" -variable glob_mkGraphBl ;
+
+   pack .main.out.set.graph.check -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec03 Sub05:
+   #   - get report button
+   #**************************************************
+
+   tk::frame .main.out.set.run ;
+   pack .main.out.set.run -anchor w -side top ;
+
+   tk::button .main.out.set.run.but -text "get report" -command { 
+         upvar 0 glob_outCur curPrefix ;
+         upvar 0 glob_outPref newPrefix ;
+         set curPrefix $newPrefix ;
+
+         conAmrRep $curPrefix ;
+         readAmrRep $curPrefix ;
+         depthGraph $curPrefix ;
+         coverageGraph $curPrefix ;
+         conSpol $curPrefix ;
+         readSpol $curPrefix ;
+         conMiru $curPrefix ;
+         conAmrTbl $curPrefix "   " ;
+         readAmrTbl $curPrefix "   " ;
+
+         .main.out.menu.reportBut invoke ;
+         .main.out.set.prefix.lab configure -text "" ;
+         set $newPrefix "" ;
+      } ; # build the report
+
+   pack .main.out.set.run.but -anchor w -side left ;
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui08 Sec04:
+   #   - set up output gui menu
+   #   o gui08 sec04 sub01:
+   #     - set up menu frame
+   #   o gui08 sec04 sub02:
+   #     - add settings button
+   #   o gui08 sec04 sub03:
+   #     - add report button
+   #   o gui08 sec04 sub04:
+   #     - add mean read depth graph button
+   #   o gui08 sec04 sub05:
+   #     - add coverage graph button
+   #   o gui08 sec04 sub06:
+   #     - add AMR table button
+   #   o gui08 sec04 sub07:
+   #     - add input button
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #**************************************************
+   # Gui08 Sec04 Sub01:
+   #   - set up menu frame
+   #**************************************************
+
+   tk::frame .main.out.menu ;
+   pack .main.out.menu -anchor w -side top ;
+
+   #**************************************************
+   # Gui08 Sec04 Sub02:
+   #   - add settings button
+   #**************************************************
+
+   tk::button .main.out.menu.setBut -text "out" -command { 
+         pack forget .main.out.set ;
+         pack forget .main.out.report ;
+         pack forget .main.out.depth ;
+         pack forget .main.out.cover ;
+         pack forget .main.out.amr ;
+         pack forget .main.out.menu ;
+
+         pack .main.out.set ;
+         pack .main.out.menu ;
+         wm title . "output select freezeTB" ;
+
+         .main.out.menu.setBut configure -relief sunken -state disabled ;
+
+         .main.out.menu.reportBut configure -relief raised -state normal ;
+
+         .main.out.menu.depthBut configure -relief raised -state normal ;
+
+         .main.out.menu.coverBut configure -relief raised -state normal ;
+
+         .main.out.menu.amrBut configure -relief raised -state normal ;
+      } ; # set up output setting button
+
+   pack .main.out.menu.setBut -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec04 Sub03:
+   #   - add report button
+   #**************************************************
+
+   tk::button .main.out.menu.reportBut -text "report" -command { 
+         pack forget .main.out.set ;
+         pack forget .main.out.report ;
+         pack forget .main.out.depth ;
+         pack forget .main.out.cover ;
+         pack forget .main.out.amr ;
+         pack forget .main.out.menu ;
+
+         pack .main.out.report ;
+         pack .main.out.menu ;
+
+         wm title . [concat [file tail $glob_outCur] "report freezeTB" ] ;
+
+         .main.out.menu.setBut configure -relief raised -state normal ;
+
+         .main.out.menu.reportBut configure -relief sunken -state disabled ;
+
+         .main.out.menu.depthBut configure -relief raised -state normal ;
+
+         .main.out.menu.coverBut configure -relief raised -state normal ;
+
+         .main.out.menu.amrBut configure -relief raised -state normal ;
+      } ;
+
+   pack .main.out.menu.reportBut -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec04 Sub04:
+   #   - add mean read depth graph button
+   #**************************************************
+
+   tk::button .main.out.menu.depthBut -text "read depth" -command { 
+         pack forget .main.out.set ;
+         pack forget .main.out.report ;
+         pack forget .main.out.depth ;
+         pack forget .main.out.cover ;
+         pack forget .main.out.amr ;
+         pack forget .main.out.menu ;
+
+         pack .main.out.depth ;
+         pack .main.out.menu ;
+
+         wm title . [concat [file tail $glob_outCur] "read depth freezeTB" ] ;
+
+         .main.out.menu.setBut configure -relief raised -state normal ;
+
+         .main.out.menu.reportBut configure -relief raised -state normal ;
+
+         .main.out.menu.depthBut configure -relief sunken -state disabled ;
+
+         .main.out.menu.coverBut configure -relief raised -state normal ;
+
+         .main.out.menu.amrBut configure -relief raised -state normal ;
+      } ;
+
+   pack .main.out.menu.depthBut -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec04 Sub05:
+   #   - add coverage graph button
+   #**************************************************
+
+   tk::button .main.out.menu.coverBut -text "coverage" -command { 
+         pack forget .main.out.set ;
+         pack forget .main.out.report ;
+         pack forget .main.out.depth ;
+         pack forget .main.out.cover ;
+         pack forget .main.out.amr ;
+         pack forget .main.out.menu ;
+
+         pack .main.out.cover ;
+         pack .main.out.menu ;
+
+         wm title . [concat [file tail $glob_outCur] "coverage freezeTB" ] ;
+
+         .main.out.menu.setBut configure -relief raised -state normal ;
+
+         .main.out.menu.reportBut configure -relief raised -state normal ;
+
+         .main.out.menu.depthBut configure -relief raised -state normal ;
+
+         .main.out.menu.coverBut configure -relief sunken -state disabled ;
+
+         .main.out.menu.amrBut configure -relief raised -state normal ;
+      } ;
+
+   pack .main.out.menu.coverBut -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec04 Sub06:
+   #   - add AMR table button
+   #**************************************************
+
+   tk::button .main.out.menu.amrBut -text "AMR table" -command { 
+         pack forget .main.out.set ;
+         pack forget .main.out.report ;
+         pack forget .main.out.depth ;
+         pack forget .main.out.cover ;
+         pack forget .main.out.amr ;
+         pack forget .main.out.menu ;
+
+         pack .main.out.amr ;
+         pack .main.out.menu ;
+
+         wm title . [concat [file tail $glob_outCur] "AMR table freezeTB" ] ;
+
+         .main.out.menu.setBut configure -relief raised -state normal ;
+
+         .main.out.menu.reportBut configure -relief raised -state normal ;
+
+         .main.out.menu.depthBut configure -relief raised -state normal ;
+
+         .main.out.menu.coverBut configure -relief raised -state normal ;
+
+         .main.out.menu.amrBut configure -relief sunken -state disabled ;
+      } ;
+
+   pack .main.out.menu.amrBut -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec04 Sub07:
+   #   - add input button
+   #**************************************************
+
+   tk::button .main.out.menu.inBut -text "input" -command { 
+         pack forget .main.out.set ;
+         pack forget .main.out.report ;
+         pack forget .main.out.depth ;
+         pack forget .main.out.cover ;
+         pack forget .main.out.amr ;
+         pack forget .main.out.menu ;
+
+         .main.menu.reqBut invoke ;
+
+         .main.out.menu.setBut configure -relief raised -state normal ;
+
+         .main.out.menu.reportBut configure -relief raised -state normal ;
+
+         .main.out.menu.depthBut configure -relief raised -state normal ;
+
+         .main.out.menu.coverBut configure -relief raised -state normal ;
+
+         .main.out.menu.amrBut configure -relief raised -state normal ;
+      } ;
+
+   pack .main.out.menu.inBut -anchor w -side left ;
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui08 Sec05:
+   #   - set up report gui
+   #   o gui08 sec05 sub01:
+   #     - build reference AMR labels
+   #   o gui08 sec05 sub02:
+   #     - build read AMR labels
+   #   o gui08 sec05 sub03:
+   #     - consensus spoligotype
+   #   o gui08 sec05 sub04:
+   #     - read spoligotype
+   #   o gui08 sec05 sub05:
+   #     - MIRU lineage
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #**************************************************
+   # Gui08 Sec05 Sub01:
+   #   - build reference AMR labels
+   #**************************************************
+
+   tk::frame .main.out.report.conAmr ;
+   pack .main.out.report.conAmr -anchor w -side top ;
+
+   tk::label .main.out.report.conAmr.lab -text "con  AMRs:"  ;
+
+   pack .main.out.report.conAmr.lab -anchor w -side left ;
+
+   foreach amr $glob_amrShort {
+      set tmpStr [string tolower $amr] ;
+      append tmpStr "lab" ;
+
+      tk::label .main.out.report.conAmr.$tmpStr -text $amr -background $glob_noAmrCol -fg $glob_amrTextCol ;
+
+      pack .main.out.report.conAmr.$tmpStr -anchor w -side left ;
+
+      # add a space between the labels
+      set tmpStr [string tolower $amr] ;
+      append tmpStr "space" ;
+
+      tk::label .main.out.report.conAmr.$tmpStr -text "" ;
+
+      pack .main.out.report.conAmr.$tmpStr -anchor w -side left ;
+   } ; # Loop: build amr labels
+
+   #**************************************************
+   # Gui08 Sec05 Sub02:
+   #   - build read AMR labels
+   #**************************************************
+
+   # need to add some space; otherwise have overlap
+   tk::frame .main.out.report.space ;
+   tk::frame .main.out.report.readAmr ;
+
+   pack .main.out.report.space .main.out.report.readAmr -anchor w -side top ;
+
+   tk::label .main.out.report.readAmr.lab -text "read AMRs:"  ;
+
+   pack .main.out.report.readAmr.lab -anchor w -side left ;
+
+   foreach amr $glob_amrShort {
+      set tmpStr [string tolower $amr] ;
+      append tmpStr "lab" ;
+
+      tk::label .main.out.report.readAmr.$tmpStr -text $amr -background $glob_noAmrCol -fg $glob_amrTextCol ;
+
+      pack .main.out.report.readAmr.$tmpStr -anchor w -side left ;
+
+      # add a space between the labels
+      set tmpStr [string tolower $amr] ;
+      append tmpStr "space" ;
+
+      tk::label .main.out.report.readAmr.$tmpStr -text "" ;
+
+      pack .main.out.report.readAmr.$tmpStr -anchor w -side left ;
+   } ; # Loop: build amr labels
+
+   #**************************************************
+   # Gui08 Sec05 Sub03:
+   #   - consensus spoligotype
+   #   o gui08 sec05 sub03 cat01:
+   #     - consensus spoligotype label
+   #   o gui08 sec05 sub03 cat02:
+   #     - octal for consensus spoligotype
+   #   o gui08 sec05 sub03 cat03:
+   #     - SIT for consensus spoligotype
+   #   o gui08 sec05 sub03 cat03:
+   #     - strain for consensus spoligotype
+   #   o gui08 sec05 sub03 cat0::
+   #     - countries dectected in (use orig for short)
+   #**************************************************
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub03 Cat01:
+   #   - consensus spoligotype label
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   # add space so does not overlap with amr labels
+   tk::frame .main.out.report.space2 ;
+   pack .main.out.report.space2 -anchor w -side top ;
+
+   tk::frame .main.out.report.conspol ;
+   pack .main.out.report.conspol -anchor w -side top ;
+
+   tk::frame .main.out.report.conspol.head ;
+   pack .main.out.report.conspol.head -anchor w -side top ;
+
+   tk::label  .main.out.report.conspol.head.lab -text "Consensus spoligotype:" ;
+
+   pack .main.out.report.conspol.head.lab -anchor w -side top ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub03 Cat02:
+   #   - octal for consensus spoligotype
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.conspol.octal ;
+   pack .main.out.report.conspol.octal -anchor w -side top ;
+
+   pack .main.out.report.conspol.octal -anchor w -side top ;
+
+   tk::label  .main.out.report.conspol.octal.headlab -text "     Octal: " ;
+
+   tk::label  .main.out.report.conspol.octal.reslab -text "NA" ;
+
+   pack .main.out.report.conspol.octal.headlab .main.out.report.conspol.octal.reslab -anchor w -side left ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub03 Cat03:
+   #   - SIT for consensus spoligotype
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.conspol.sit ;
+   pack .main.out.report.conspol.sit -anchor w -side top ;
+
+   pack .main.out.report.conspol.sit -anchor w -side top ;
+
+   tk::label  .main.out.report.conspol.sit.headlab -text "     SIT: " ;
+
+   tk::label  .main.out.report.conspol.sit.reslab -text "NA" ;
+
+   pack .main.out.report.conspol.sit.headlab .main.out.report.conspol.sit.reslab -anchor w -side left ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub03 Cat03:
+   #   - strain for consensus spoligotype
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.conspol.strain ;
+   pack .main.out.report.conspol.strain -anchor w -side top ;
+
+   pack .main.out.report.conspol.strain -anchor w -side top ;
+
+   tk::label  .main.out.report.conspol.strain.headlab -text "     Strain: " ;
+
+   tk::label  .main.out.report.conspol.strain.reslab -text "NA" ;
+
+   pack .main.out.report.conspol.strain.headlab .main.out.report.conspol.strain.reslab -anchor w -side left ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub03 Cat04:
+   #   - countries dectected in (use orig for short)
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.conspol.orig ;
+   pack .main.out.report.conspol.orig -anchor w -side top ;
+
+   pack .main.out.report.conspol.orig -anchor w -side top ;
+
+   tk::label  .main.out.report.conspol.orig.headlab -text "     Countries: " ;
+
+   tk::label  .main.out.report.conspol.orig.reslab -text "NA" ;
+
+   pack .main.out.report.conspol.orig.headlab .main.out.report.conspol.orig.reslab -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec05 Sub04:
+   #   - read spoligotype
+   #   o gui08 sec05 sub04 cat01:
+   #     - read spoligotype label
+   #   o gui08 sec05 sub04 cat02:
+   #     - octal for read spoligotype
+   #   o gui08 sec05 sub04 cat03:
+   #     - SIT for read spoligotype
+   #   o gui08 sec05 sub04 cat03:
+   #     - strain for read spoligotype
+   #   o gui08 sec05 sub04 cat0::
+   #     - countries dectected in (use orig for short)
+   #**************************************************
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub04 Cat01:
+   #   - read spoligotype label
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   # add space so does not overlap with amr labels
+   tk::frame .main.out.report.space3 ;
+   pack .main.out.report.space3 -anchor w -side top ;
+
+   tk::frame .main.out.report.readspol ;
+   pack .main.out.report.readspol -anchor w -side top ;
+
+   tk::frame .main.out.report.readspol.head ;
+   pack .main.out.report.readspol.head -anchor w -side top ;
+
+   tk::label  .main.out.report.readspol.head.lab -text "Read spoligotype:" ;
+
+   pack .main.out.report.readspol.head.lab -anchor w -side top ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub04 Cat02:
+   #   - octal for read spoligotype
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.readspol.octal ;
+   pack .main.out.report.readspol.octal -anchor w -side top ;
+
+   pack .main.out.report.readspol.octal -anchor w -side top ;
+
+   tk::label  .main.out.report.readspol.octal.headlab -text "     Octal: " ;
+
+   tk::label  .main.out.report.readspol.octal.reslab -text "NA" ;
+
+   pack .main.out.report.readspol.octal.headlab .main.out.report.readspol.octal.reslab -anchor w -side left ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub04 Cat03:
+   #   - SIT for read spoligotype
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.readspol.sit ;
+   pack .main.out.report.readspol.sit -anchor w -side top ;
+
+   pack .main.out.report.readspol.sit -anchor w -side top ;
+
+   tk::label  .main.out.report.readspol.sit.headlab -text "     SIT: " ;
+
+   tk::label  .main.out.report.readspol.sit.reslab -text "NA" ;
+
+   pack .main.out.report.readspol.sit.headlab .main.out.report.readspol.sit.reslab -anchor w -side left ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub04 Cat03:
+   #   - strain for read spoligotype
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.readspol.strain ;
+   pack .main.out.report.readspol.strain -anchor w -side top ;
+
+   pack .main.out.report.readspol.strain -anchor w -side top ;
+
+   tk::label  .main.out.report.readspol.strain.headlab -text "     Strain: " ;
+
+   tk::label  .main.out.report.readspol.strain.reslab -text "NA" ;
+
+   pack .main.out.report.readspol.strain.headlab .main.out.report.readspol.strain.reslab -anchor w -side left ;
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec05 Sub04 Cat04:
+   #   - countries dectected in (use orig for short)
+   #++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   tk::frame .main.out.report.readspol.orig ;
+   pack .main.out.report.readspol.orig -anchor w -side top ;
+
+   pack .main.out.report.readspol.orig -anchor w -side top ;
+
+   tk::label  .main.out.report.readspol.orig.headlab -text "     Countries: " ;
+
+   tk::label  .main.out.report.readspol.orig.reslab -text "NA" ;
+
+   pack .main.out.report.readspol.orig.headlab .main.out.report.readspol.orig.reslab -anchor w -side left ;
+
+   #**************************************************
+   # Gui08 Sec05 Sub05:
+   #   - MIRU lineage
+   #**************************************************
+
+   # add space to keep theme
+   tk::frame .main.out.report.space4 ;
+   pack .main.out.report.space4 -anchor w -side top ;
+
+   tk::frame .main.out.report.miru ;
+   pack .main.out.report.miru -anchor w -side top ;
+
+   tk::label .main.out.report.miru.headlab -text "MIRU-VNTR: " ;
+
+   tk::label .main.out.report.miru.reslab -text "NA" ;
+
+   pack .main.out.report.miru.headlab .main.out.report.miru.reslab -anchor w -side left ;
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui08 Sec06:
+   #   - set up graphs
+   #   o gui08 sec05 sub01:
+   #     - build reference AMR labels
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   tk::label .main.out.depth.graph ;
+   pack .main.out.depth.graph -anchor w -side left ;
+
+   tk::label .main.out.cover.graph ;
+   pack .main.out.cover.graph -anchor w -side left ;
+
+   #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   # Gui08 Sec07:
+   #   - set up amr table
+   #   o gui08 sec07 sub01:
+   #     - set up consensus AMR table
+   #   o gui08 sec07 sub02:
+   #     - set up read AMR table
+   #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+   #**************************************************
+   # Gui08 Sec07 Sub01:
+   #   - set up consensus AMR table
+   #**************************************************
+
+   tk::frame .main.out.amr.con ;
+   pack .main.out.amr.con -anchor nw -side left ;
+
+   tk::frame .main.out.amr.con.head ;
+   pack .main.out.amr.con.head -anchor w -side top ;
+
+   tk::frame .main.out.amr.con.tbl ;
+   pack .main.out.amr.con.tbl -anchor w -side top ;
+
+   tk::label .main.out.amr.con.head.lab -font "Courier" -text "Consensus ARMs:" ;
+   tk::label .main.out.amr.con.tbl.lab -font "Courier" -text "NA" ;
+   pack .main.out.amr.con.head.lab .main.out.amr.con.tbl.lab -anchor nw -side left ;
+
+   #**************************************************
+   # Gui08 Sec07 Sub02:
+   #   - set up read AMR table
+   #**************************************************
+
+   tk::frame .main.out.amr.read ;
+   pack .main.out.amr.read -anchor nw -side right ;
+
+   tk::frame .main.out.amr.read.head ;
+   pack .main.out.amr.read.head -anchor w -side top ;
+
+   tk::frame .main.out.amr.read.tbl ;
+   pack .main.out.amr.read.tbl -anchor w -side top ;
+
+   tk::label .main.out.amr.read.head.lab -font "Courier" -text "Read AMRs:" ;
+   tk::label .main.out.amr.read.tbl.lab -font "Courier" -text "NA" ;
+   pack .main.out.amr.read.head.lab .main.out.amr.read.tbl.lab -anchor nw -side left ;

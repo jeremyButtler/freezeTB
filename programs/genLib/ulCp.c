@@ -41,10 +41,12 @@
 '     - compares two strings until deliminator is found
 '   o fun14: eqlNull_ulCp
 '     - compares two strings until null is found
-'   o fun15: endLineUnix_ulCp
+'   o fun15: eqlWhite_ulCp
+'     - compares two strings until white space is found
+'   o fun16: endLineUnix_ulCp
 '     - finds the end of a c-string. This assumes that the
 '       line ends in an '\0' or an '\n'
-'   o fun16: cpLineUnix_ulCp
+'   o fun17: cpLineUnix_ulCp
 '     - copies string until end of line
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -469,7 +471,6 @@ cpWhite_ulCp(
    unsigned int uiChar = 0;
    unsigned long checkUL = 0;
 
-   /*see note01 ifDelim_cpUL for logic)*/
    checkUL = *cpUL + def_31_ulCp;
    checkUL &= def_gt63_ulCp;
    checkUL |= (checkUL << 1);
@@ -875,7 +876,88 @@ eqlNull_ulCp(
 } /*eqlNull_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun15: endLineUnix_ulCp
+| Fun15: eqlWhite_ulCp
+|   - compares two strings until white space is found
+| Input:
+|   - qryStr:
+|     o Pointer to query string
+|   - refStr:
+|     o Pointer to reference strin
+| Output:
+|   - Returns:
+|     o 0 if strings are equal
+|     o > 0 if query > reference
+|     o < 0 if query < reference
+| Note:
+|   - this will likely not be very good at comparing
+|     short strings.
+\-------------------------------------------------------*/
+signed long
+eqlWhite_ulCp(
+   signed char *qryStr,
+   signed char *refStr
+){
+   unsigned long *qryUL = (unsigned long *) qryStr;
+   unsigned long *refUL = (unsigned long *) refStr;
+
+   unsigned long checkUL = 0;
+
+   checkUL = *qryUL + def_31_ulCp;
+   checkUL &= def_gt63_ulCp;
+   checkUL |= (checkUL << 1);
+   checkUL &= def_highBit_ulCp;
+   checkUL ^= def_highBit_ulCp;
+
+   /* Logic:
+   `   - checkUL = cpUL + def_31_ulCp
+   `     o converts 33 or above to 64 or >
+   `       - shifts non-space one bit
+   `     o 64 goes to 128 or greater (8th bit)
+   `   - checkUL &= def_gt63_ulCp:
+   `     o everything beneath 63 goes to 0
+   `   - checkUL |= (checkUL << 1):
+   `     o moves 7th bit (64) to 8th bit (128)
+   `   - checkUL &= def_highBit_ulCp:
+   `     o clears all bits but 8th bith (128)
+   `     o at this point have only 0x80 or 0x00
+   `   - checkUL ^= def_highBit_ulCp:
+   `     o sets everything to zero
+   */
+
+   while(! checkUL)
+   { /*Loop: Copy cpStr to dupStr*/
+      if(*qryUL != *refUL)
+         return *(qryUL - 1) - *(refUL - 1);
+
+      ++qryUL;
+      ++refUL;
+
+      checkUL = *qryUL + def_31_ulCp;
+      checkUL &= def_gt63_ulCp;
+      checkUL |= (checkUL << 1);
+      checkUL &= def_highBit_ulCp;
+      checkUL ^= def_highBit_ulCp;
+   } /*Loop: Copy cpStr to dupStr*/
+
+   qryStr = (signed char *) qryUL;
+   refStr = (signed char *) refUL;
+
+   while(*qryStr > 32)
+   { /*Loop: find difference*/
+      if(*qryStr != *refStr)
+         break;
+
+      ++qryStr;
+      ++refStr;
+   } /*Loop: find difference*/
+
+   if(*refStr > 32)
+      return *qryStr - *refStr;
+   return 0;
+} /*eqlWhite_ulCp*/
+
+/*-------------------------------------------------------\
+| Fun16: endLineUnix_ulCp
 |   - finds the end of a c-string. This assumes that the
 |     line ends in an '\0' or an '\n'
 | Input:
@@ -911,7 +993,7 @@ endLineUnix_ulCp(
 } /*endLineUnix_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun16: cpLineUnix_ulCp
+| Fun17: cpLineUnix_ulCp
 |   - copies string until end of line (\0, \n)
 | Input:
 |   - dupStr:
