@@ -525,8 +525,8 @@
    set fq_types {
       { {fastq}    {.fastq}    }
       { {fastq}    {.fq}       }
-      { {fastq.gz} {.fastq.gz} }
-      { {fastq.gz} {.fq.gz}    }
+      { {fastq.gz} {.gz} }
+      { {fastq.gz} {.gz}    }
    } ; # fastq file exentions
    
    set fa_types {
@@ -821,7 +821,6 @@
        -command {
    ---
            set fqTitle "select fastq files" ;
-           upvar 0 glob_fqIn fqIn ; # make global var
    
            set fqFiles [
                  ---tk_getOpenFile
@@ -839,14 +838,14 @@
                  -text $fqFiles ;
               ---
    
-             set fqIn $fqFiles ; # update list
+             set ::glob_fqIn $fqFiles ; # update list
            } else {
              ---.main.reqIn.fq.lab
               configure
               -text [file dirname [lindex $fqFiles 1] ]
              ---;
    
-             set fqIn $fqFiles ; # update list
+             set ::glob_fqIn $fqFiles ; # update list
            } ; # set up fastq label for input
    } ; # command button fires
    
@@ -871,8 +870,6 @@
          -text "output directory"
          -command {
    ---
-            upvar 0 glob_dirOut dirOut ;
-
             set outDir [
                ---tk_chooseDirectory
                   -title "select output directory"
@@ -883,7 +880,7 @@
                   configure -text $outDir ;
                ---
 
-               set dirOut $outDir ;
+               set ::glob_dirOut $outDir ;
             } ; # If: have output directory
       } ; # output directory button
    
@@ -983,7 +980,7 @@
       -text "run"
       -command {
    ---
-         if { $glob_fqIn eq "" } {
+         if { $::glob_fqIn eq "" } {
             .main.menu.reqBut invoke ;
 
             ---tk_messageBox
@@ -994,7 +991,7 @@
             return false ; # no fastq files
          } ; # no fastq file input
 
-         if { $glob_prefix eq "" } {
+         if { $::glob_prefix eq "" } {
             .main.menu.reqBut invoke ;
 
             ---tk_messageBox
@@ -1011,7 +1008,7 @@
 
          ---set
             prefix
-            [ file join $glob_dirOut $glob_prefix ]
+            [ file join $::glob_dirOut $::glob_prefix ]
          ---; # build output file path*/
 
          file mkdir $prefix ;
@@ -1027,7 +1024,7 @@
 
          ---set
             prefix
-            [file join $prefix $glob_prefix]
+            [file join $prefix $::glob_prefix]
          ---;
 
          set samFile $prefix ;
@@ -1057,9 +1054,9 @@
                   $mapPath
                   -a
                   -x
-                  \$glob_srCheck # \ escapes eval
-                  \$glob_refFa   # \ escapes eval
-                  $glob_fqIn
+                  \$::glob_srCheck # \ escapes eval
+                  \$::glob_refFa   # \ escapes eval
+                  $::glob_fqIn
                   ">"
                   \$samFile      # \ escapes eval
                }
@@ -1093,15 +1090,15 @@
 
          set tbCmd [list "-sam" $samFile] ;
          lappend tbCmd "-prefix" $prefix ;
-         lappend tbCmd "-amr-tbl" $glob_amrDb ;
+         lappend tbCmd "-amr-tbl" $::glob_amrDb ;
          lappend tbCmd "-gene-coords" ;
-         lappend tbCmd $glob_coordsTsv ;
-         lappend tbCmd "-miru-tbl" $glob_miruDb ;
-         lappend tbCmd "-spoligo" $glob_spacer ;
-         lappend tbCmd "-db-spoligo" $glob_spolDb ;
+         lappend tbCmd $::glob_coordsTsv ;
+         lappend tbCmd "-miru-tbl" $::glob_miruDb ;
+         lappend tbCmd "-spoligo" $::glob_spacer ;
+         lappend tbCmd "-db-spoligo" $::glob_spolDb ;
 
-         if { $glob_mask ne 0 } {
-            lappend tbCmd "-mask-prim" $glob_spolDb ;
+         if { $::glob_mask ne 0 } {
+           lappend tbCmd "-mask-prim" $::glob_maskCoords ;
          } else {
             lappend tbCmd "-mask-prim" "-" ;
          } ; # check if masking primers
@@ -1111,13 +1108,13 @@
          #   - add freezeTB filtering settings
          #+++++++++++++++++++++++++++++++++++++++++++++
 
-         lappend tbCmd "-min-mapq" $glob_mapq ;
-         lappend tbCmd "-min-median-q" $glob_medQ ;
-         lappend tbCmd "-min-mean-q" $glob_meanQ ;
-         lappend tbCmd "-min-len" $glob_minLen ;
+         lappend tbCmd "-min-mapq" $::glob_mapq ;
+         lappend tbCmd "-min-median-q" $::glob_medQ ;
+         lappend tbCmd "-min-mean-q" $::glob_meanQ ;
+         lappend tbCmd "-min-len" $::glob_minLen ;
             # put in consensus gui, but help is filter
 
-         if { $glob_adjust ne 0 } {
+         if { $::glob_adjust ne 0 } {
             lappend tbCmd "-adj-coords" ;
          } else {
             lappend tbCmd "-no-adj-coords" ;
@@ -1128,25 +1125,25 @@
          #   - add freezeTB lineage settings
          #+++++++++++++++++++++++++++++++++++++++++++++
 
-         lappend tbCmd "-fudge" $glob_miruFudge ;
-         lappend tbCmd "-dr-start" $glob_drStart ;
-         lappend tbCmd "-dr-end" $glob_drEnd ;
+         lappend tbCmd "-fudge" $::glob_miruFudge ;
+         lappend tbCmd "-dr-start" $::glob_drStart ;
+         lappend tbCmd "-dr-end" $::glob_drEnd ;
 
          lappend tbCmd "-spoligo-min-score" ;
-         lappend tbCmd $glob_spolSim ;
+         lappend tbCmd $::glob_spolSim ;
 
          #+++++++++++++++++++++++++++++++++++++++++++++
          # Gui02 Sec05 Sub02 Cat07:
          #   - add freezeTB tbCon consensus settings
          #+++++++++++++++++++++++++++++++++++++++++++++
 
-         lappend tbCmd "-min-depth" $glob_depth ;
-         lappend tbCmd "-min-q" $glob_snpq ;
-         lappend tbCmd "-min-q-ins" $glob_insq ;
+         lappend tbCmd "-min-depth" $::glob_depth ;
+         lappend tbCmd "-min-q" $::glob_snpq ;
+         lappend tbCmd "-min-q-ins" $::glob_insq ;
          lappend tbCmd "-perc-snp-sup" ;
-         lappend tbCmd $glob_basePerc ;
-         lappend tbCmd "-perc-ins-sup" $glob_insPerc ;
-         lappend tbCmd "-perc-del-sup" $glob_delPerc ;
+         lappend tbCmd $::glob_basePerc ;
+         lappend tbCmd "-perc-ins-sup" $::glob_insPerc ;
+         lappend tbCmd "-perc-del-sup" $::glob_delPerc ;
 
          #+++++++++++++++++++++++++++++++++++++++++++++
          # Gui02 Sec05 Sub02 Cat08:
@@ -1154,81 +1151,81 @@
          #+++++++++++++++++++++++++++++++++++++++++++++
 
          lappend tbCmd "-min-amr-map-perc" ;
-         lappend tbCmd $glob_amrPercSup ;
+         lappend tbCmd $::glob_amrPercSup ;
 
-         if { $glob_frameshift ne 0 } {
+         if { $::glob_frameshift ne 0 } {
             lappend tbCmd "-frameshift" ;
          } else {
             lappend tbCmd "-no-frameshift" ;
          } ; # check if doing frameshift checking
  
          lappend tbCmd "-p-min-depth" ;
-         lappend tbCmd $glob_minVarDepth ;
+         lappend tbCmd $::glob_minVarDepth ;
 
          lappend tbCmd "-p-perc-snp-sup" ;
          lappend tbCmd glob_baseVarPerc ;
 
          lappend tbCmd "-p-perc-ins-sup" ;
-         lappend tbCmd $glob_insVarPerc ;
+         lappend tbCmd $::glob_insVarPerc ;
 
          lappend tbCmd "-p-perc-del-sup" ;
-         lappend tbCmd $glob_delVarPerc ;
+         lappend tbCmd $::glob_delVarPerc ;
 
          #+++++++++++++++++++++++++++++++++++++++++++++
          # Gui02 Sec05 Sub02 Cat09:
          #   - add freezeTB clustering settings
          #+++++++++++++++++++++++++++++++++++++++++++++
 
-         if { $glob_clustBl ne 0 } {
+         if { $::glob_clustBl ne 0 } {
             lappend tbCmd "-clust" ;
 
             lappend tbCmd "-len-weigth" ;
-            lappend tbCmd $glob_lenWeight ;
+            lappend tbCmd $::glob_lenWeight ;
            
             lappend tbCmd "-clust-depth" ;
-            lappend tbCmd $glob_minClustDepth ;
+            lappend tbCmd $::glob_minClustDepth ;
 
             lappend tbCmd "-clust-perc-depth" ;
-            lappend tbCmd $glob_minClustPercDepth ;
+            lappend tbCmd $::glob_minClustPercDepth ;
 
             lappend tbCmd "-read-err" ;
-            lappend tbCmd $glob_clustReadErr ;
+            lappend tbCmd $::glob_clustReadErr ;
 
             lappend tbCmd "-con-err" ;
-            lappend tbCmd $glob_clustConErr ;
+            lappend tbCmd $::glob_clustConErr ;
 
             lappend tbCmd "-con-sim" ;
-            lappend tbCmd $glob_maxClustSim ;
+            lappend tbCmd $::glob_maxClustSim ;
 
             lappend tbCmd "-overlap" ;
-            lappend tbCmd $glob_minClustOverlap ;
+            lappend tbCmd $::glob_minClustOverlap ;
 
             lappend tbCmd "-perc-n" ;
-            lappend tbCmd $glob_maxClustMask ;
+            lappend tbCmd $::glob_maxClustMask ;
 
-            if { $glob_depthProfBl ne 0 } {
+            if { $::glob_depthProfBl ne 0 } {
                lappend tbCmd "-depth-prof" ;
             } else {
                lappend tbCmd "-no-depth-prof" ;
             } ; # check if doing depth profiling
 
             lappend tbCmd "-err-to-var" ;
-            lappend tbCmd $glob_clustErrRatio ;
+            lappend tbCmd $::glob_clustErrRatio ;
 
             lappend tbCmd "-win-len" ;
-            lappend tbCmd $glob_clustWinLen ;
+            lappend tbCmd $::glob_clustWinLen ;
 
             lappend tbCmd "-win-err" ;
-            lappend tbCmd $glob_clustWinErrRatio ;
+            lappend tbCmd $::glob_clustWinErrRatio ;
 
             lappend tbCmd "-indel-len" ;
-            lappend tbCmd $glob_minClustIndelLen ;
+            lappend tbCmd $::glob_minClustIndelLen ;
 
             lappend tbCmd "-clust-q-snp" ;
-            lappend tbCmd $glob_minClustSnpQ ;
+            lappend tbCmd $::glob_minClustSnpQ ;
 
             lappend tbCmd "-con-iter" ;
-            lappend tbCmd $glob_numRebuilds ;
+            lappend tbCmd $::glob_numRebuilds ;
          } else {
             lappend tbCmd "-no-clust" ;
          } ; # check if clustering
@@ -1271,10 +1268,8 @@
             -text ""
          ---;
 
-         upvar 0 glob_outCur curPrefix ;
-         upvar 0 glob_outPref newPrefix ;
-         set newPrefix $prefix ;
-         set curPrefix $prefix ;
+         set ::glob_outCur $prefix ;
+         set ::glob_outPref $prefix ;
 
          .main.menu.outBut invoke ;
          .main.out.set.run.but invoke ;
@@ -1644,15 +1639,13 @@
    tk::frame .main.filt.ref ;
    pack .main.filt.ref -anchor w -side top ;
 
-   tk::label .main.filt.ref.lab -text $glob_refFa ;
+   tk::label .main.filt.ref.lab -text $::glob_refFa ;
 
    ---tk::button
        .main.filt.ref.but
        -text "reference"
        -command {
    ---
-           upvar 0 glob_refFa refFa ;
-
            set faFile [
               --- tk_getOpenFile
                  -title "select reference (as fasta)"
@@ -1667,7 +1660,7 @@
                  -text $faFile ; # update label
               ---
    
-             set refFa $faFile ; # update list
+             set ::glob_refFa $faFile ; # update list
            } ; # Else: fasta selected
    } ; # select reference button
 
@@ -1688,7 +1681,7 @@
 
    ---tk::label
       .main.filt.coords.lab
-      -text $glob_coordsTsv
+      -text $::glob_coordsTsv
    --- ;
 
    ---tk::button
@@ -1696,8 +1689,6 @@
        -text "coordinates file"
        -command {
    ---
-           upvar 0 glob_coordsTsv coordsTsv ;
-
            set tsvFile [
               ---tk_getOpenFile
                  -title "select gene coordinate file"
@@ -1712,7 +1703,7 @@
                  -text $tsvFile # update label
               ---;
 
-             set coordsTsv $tsvFile ;
+             set ::glob_coordsTsv $tsvFile ;
            } ; # Else: file selected
    } ; # select reference button
 
@@ -1847,7 +1838,7 @@
 
    ---tk::label
       .main.filt.mask.lab
-      -text $glob_maskCoords
+      -text $::glob_maskCoords
    --- ; # label for masking file
 
    ---tk::button
@@ -1855,8 +1846,6 @@
       -text "masking coordinates"
       -command {
    ---
-         upvar 0 glob_maskCoords maskCoords ;
-
          set maskFile [
             ---tk_getOpenFile
                -title "maksing coordinates"
@@ -1871,7 +1860,7 @@
                configure
                -text $maskFile ;
             ---
-            set maskCoords $maskFile ;
+            set ::glob_maskCoords $maskFile ;
 
             # turn on the check button
             .main.filt.mask.check select ;
@@ -1948,15 +1937,13 @@
    tk::frame .main.amr.db ;
    pack .main.amr.db -anchor w -side top ;
 
-   tk::label .main.amr.db.lab -text $glob_amrDb
+   tk::label .main.amr.db.lab -text $::glob_amrDb
 
    ---tk::button
       .main.amr.db.but
       -text "AMR database"
       -command {
    ---
-         upvar 0 glob_amrDb amrDb ;
-
          set tsvFile [
             ---tk_getOpenFile
                -title "select AMR database"
@@ -1966,7 +1953,7 @@
 
           } else {
             .main.amr.db.lab configure -text $tsvFile ;
-            set amrDb $tsvFile ;
+            set ::glob_amrDb $tsvFile ;
           } ; # Else: AMR database input
      } ; # amr database button
 
@@ -2073,15 +2060,13 @@
    tk::frame .main.lin.db.miru ;
    pack .main.lin.db.miru -anchor w -side top ;
 
-   tk::label .main.lin.db.miru.lab -text $glob_miruDb ;
+   tk::label .main.lin.db.miru.lab -text $::glob_miruDb ;
 
    ---tk::button
       .main.lin.db.miru.but
       -text "MIRU-VNTR database"
       -command {
    ---
-         upvar glob_miruDb miruDb ;
-
          set tsvFile [
             ---tk_getOpenFile
                -title "select MIRU-VNTR database"
@@ -2095,7 +2080,7 @@
                configure
                -text $tsvFile
              ---;
-             set miruDb $tsvFile ;
+             set ::glob_miruDb $tsvFile ;
          } ; # Else: miru database selected
    } ; # -command get MIRU database
 
@@ -2117,7 +2102,7 @@
    ---tk::label
       .main.lin.db.spacer.lab
       -text
-      $glob_spacer
+      $::glob_spacer
    --- ; # holds spacer database location
 
    ---tk::button
@@ -2125,8 +2110,6 @@
       -text "spoligotype spacers"
       -command {
    ---
-         upvar 0 glob_spacer spacer ;
-
          set spacerFa [
             ---tk_getOpenFile
                -title "spoligotype spacer sequences"
@@ -2140,7 +2123,7 @@
                configure
                -text $spacerFa
             ---;
-            set spacer $spacerFa ;
+            set ::glob_spacer $spacerFa ;
          } ; # Else: user input fasta
    } ; # button for spacers database
 
@@ -2162,7 +2145,7 @@
    ---tk::label
       .main.lin.db.spol.lab
       -text
-      $glob_spolDb
+      $::glob_spolDb
    --- ; # holds spol database location
 
    ---tk::button
@@ -2170,8 +2153,6 @@
       -text "spoligotype database"
       -command {
    ---
-         upvar 0 glob_spolDb spolDb ;
-
          set spolTsv [
             ---tk_getOpenFile
                -title "spoligotype lineage database"
@@ -2185,7 +2166,7 @@
                configure
                -text $spolTsv
             ---;
-            set spolDb $spolTsv ;
+            set ::glob_spolDb $spolTsv ;
          } ; # Else: user input csv
    } ; # button for spols database
 
@@ -4435,9 +4416,6 @@
          if { $fileStr eq "" } {
 
          } else {
-            # set up global variable
-            upvar 0 glob_outPref outPrefStr ;
-
             # get path and file name
             set dirStr [file dirname $fileStr] ;
             set prefStr [file tail $fileStr] ;
@@ -4462,13 +4440,13 @@
             # save prefix and update label
 
             ---set
-               outPrefStr
+               ::glob_outPref
                [file join $dirStr $prefStr]
             ---;
 
            ---.main.out.set.prefix.lab
               configure
-              -text $outPrefStr
+              -text $::glob_outPref
            ---;
          } ; # check if anything was input
       } ; # get file prefix
@@ -4565,23 +4543,19 @@
       -text "get report"
       -command {
    ---
-         upvar 0 glob_outCur curPrefix ;
-         upvar 0 glob_outPref newPrefix ;
-         set curPrefix $newPrefix ;
-
-         conAmrRep $curPrefix ;
-         readAmrRep $curPrefix ;
-         depthGraph $curPrefix ;
-         coverageGraph $curPrefix ;
-         conSpol $curPrefix ;
-         readSpol $curPrefix ;
-         conMiru $curPrefix ;
-         conAmrTbl $curPrefix "   " ;
-         readAmrTbl $curPrefix "   " ;
+         conAmrRep $::glob_outPref ;
+         readAmrRep $::glob_outPref ;
+         depthGraph $::glob_outPref ;
+         coverageGraph $::glob_outPref ;
+         conSpol $::glob_outPref ;
+         readSpol $::glob_outPref ;
+         conMiru $::glob_outPref ;
+         conAmrTbl $::glob_outPref "   " ;
+         readAmrTbl $::glob_outPref "   " ;
 
          .main.out.menu.reportBut invoke ;
          .main.out.set.prefix.lab configure -text "" ;
-         set $newPrefix "" ;
+         set ::glob_outCur "" ;
       } ; # build the report
 
    pack .main.out.set.run.but -anchor w -side left ;
@@ -4691,7 +4665,7 @@
             title
             .
             [concat
-               [file tail $glob_outCur]
+               [file tail $::glob_outCur]
                "report freezeTB"
             ]
         ---;
@@ -4753,7 +4727,7 @@
             title
             .
             [concat
-               [file tail $glob_outCur]
+               [file tail $::glob_outCur]
                "read depth freezeTB"
             ]
         ---;
@@ -4815,7 +4789,7 @@
             title
             .
             [concat
-               [file tail $glob_outCur]
+               [file tail $::glob_outCur]
                "coverage freezeTB"
             ]
         ---;
@@ -4877,7 +4851,7 @@
             title
             .
             [concat
-               [file tail $glob_outCur]
+               [file tail $::glob_outCur]
                "AMR table freezeTB"
             ]
         ---;
@@ -5001,15 +4975,15 @@
       -side left
    ---;
 
-   foreach amr $glob_amrShort {
+   foreach amr $::glob_amrShort {
       set tmpStr [string tolower $amr] ;
       append tmpStr "lab" ;
 
       ---tk::label
          .main.out.report.conAmr.$tmpStr
          -text $amr
-         -background $glob_noAmrCol
-         -fg $glob_amrTextCol
+         -background $::glob_noAmrCol
+         -fg $::glob_amrTextCol
       ---;
 
       ---pack
@@ -5061,15 +5035,15 @@
       -side left
    ---;
 
-   foreach amr $glob_amrShort {
+   foreach amr $::glob_amrShort {
       set tmpStr [string tolower $amr] ;
       append tmpStr "lab" ;
 
       ---tk::label
          .main.out.report.readAmr.$tmpStr
          -text $amr
-         -background $glob_noAmrCol
-         -fg $glob_amrTextCol
+         -background $::glob_noAmrCol
+         -fg $::glob_amrTextCol
       ---;
 
       ---pack

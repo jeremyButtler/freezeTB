@@ -1,119 +1,62 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' genMath SOF: Start Of File
-'   - has math functions I use (most branchless)
-'   - Most of the branchless code is from or modified:
-'     https://graphics.stanford.edu/~seander/bithacks.html
+' rmBlocks SOF: Start Of File
+'   - has functions to remove blocks (start ---, end ---)
+'     from file and merge block contents onto a line
+'   - also removes all comments
+'     - formats: #.*\n; #---.*---#; or #---.*---#
 '   o header:
-'     - included libraries
-'   o fun01: hibit2_genMath
-'     - Does a branchles method to find the higest bit in
-'       the element (integer log base 2)
-'   o fun02: ab_genMath
-'     - Does a branchless absolute value
-'   o fun03: abSL_genMath
-'     - does a branchless absolute value for signed long
-'   o .h fun04: max_genMath
-'     - Find the maximum value (branchless)
-'   o .h fun05: ifmax_genMath
-'     - Set a value (ret) to a value based on which value
-'       is greater.
-'   o .h fun06: min_genMath
-'     - Find the Minimum value (branchless)
-'   o .h fun07: ifMin_genMath
-'     - Set a value (ret) to a value based on which value
-'       is less than.
+'     - guards
+'   o fun01: str_rmBlocks
+'     - converts blocks in string (---) to single lines
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
 | Header:
-|   - included libraries
+|   - gaurds
 \-------------------------------------------------------*/
 
-#ifdef PLAN9
-   #include <u.h>
-   #include <libc.h>
+#ifndef REMOVE_BLOCKS_AND_COMMENTS_H
+#define REMOVE_BLOCKS_AND_COMMENTS_H
+
+/*-------------------------------------------------------\
+| Fun01: str_rmBlocks
+|   - converts blocks in string (---) to single lines
+| Input:
+|   - textStr:
+|     o c-string with blocks to convert to lines
+|   - lenUL:
+|     o has length of textStr
+|     o 0 if modifying original string
+|   - retLenULPtr:
+|     o pointer to unsigned long with new string length
+|     o can set equal to lenUL
+|     o if length not waned, use null
+|   - keepCommentBl:
+|     o 1: keep all non-block comments
+|     o 0: remove all comments
+| Output:
+|   - Modifies:
+|     o retLenULPtr to have length of modified string
+|     0 textStr to have not blocks if lenUL is 0
+|   - Returns:
+|     o modified c-string with textStr with all blocks
+|       (start and end with ---) symbols removed and
+|       block entries converted to a single line
+|       - is new pointer if lenUL is not 0
+|       - pointer to textStr if lenUL is 0
+|     o 0 for memory errors
+\-------------------------------------------------------*/
+signed char *
+str_rmBlocks(
+   signed char *textStr,
+   unsigned long lenUL,
+   unsigned long *retLenULPtr,
+   signed char keepCommentBl
+);
+
 #endif
-
-#include "genMath.h"
-
-/*-------------------------------------------------------\
-| Fun01: hibit2_genMath
-|   - Does a branchles method to find the higest bit in
-|     the element (integer log base 2)
-| Input:
-|   - numI:
-|     o Integer (non-long) number to get the highest bit
-|       for
-| Output:
-|   - Returns:
-|     o the position of the highest bit
-\-------------------------------------------------------*/
-unsigned int
-hibit2_genMath(
-   unsigned int numUI
-){
-   unsigned int retUI = 0;
-   unsigned int shiftUI = 0;
-
-   retUI = (numUI > 0xFFFF) << 4;
-   numUI >>= retUI;
-
-   shiftUI = (numUI > 0xFF) << 3;
-   numUI >>= shiftUI;
-   retUI |= shiftUI;
-
-   shiftUI = (numUI > 0xF) << 2;
-   numUI >>= shiftUI;
-   retUI |= shiftUI;
-
-   shiftUI = (numUI > 0x3) << 1;
-   numUI >>= shiftUI;
-   retUI |= shiftUI;
-
-   return retUI | (numUI >> 1);
-} /*hibit2_genMath*/
-
-/*-------------------------------------------------------\
-| Fun02: ab_genMath
-|   - does a branchless absolute value
-| Input:
-|   - numI:
-|     o integer (non-long) to get the absolute value to
-| Output:
-|   - Returns:
-|     o absolute value of numI
-\-------------------------------------------------------*/
-signed int
-ab_genMath(
-   signed int numSI
-){
-   signed int maskSI =
-      numSI >> ( (sizeof(signed int) << 3) - 1 );
-
-   return (numSI + maskSI) ^ maskSI;
-} /*ab_genMath*/
-
-/*-------------------------------------------------------\
-| Fun03: abSL_genMath
-|   - does a branchless absolute value for signed long
-| Input:
-|   - numSL:
-|     o singed long (non-long) to get absolute value of
-| Output:
-|   - Returns:
-|     o absolute value of numSL
-\-------------------------------------------------------*/
-signed long
-abSL_genMath(
-   signed long numSL
-){
-   signed long maskSL =
-      numSL >> ( (sizeof(signed long) << 3) - 1 );
-
-   return (numSL + maskSL) ^ maskSL;
-} /*abSL_genMath*/
 
 /*=======================================================\
 : License:
@@ -122,8 +65,8 @@ abSL_genMath(
 :   However, for cases were the public domain is not
 :   suitable, such as countries that do not respect the
 :   public domain or were working with the public domain
-:   is inconvient / not possible, this code is under the
-:   MIT license.
+:   is inconveint / not possible, this code is under the
+:   MIT license
 : 
 : Public domain:
 : 

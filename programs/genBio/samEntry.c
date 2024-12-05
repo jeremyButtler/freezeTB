@@ -3014,7 +3014,7 @@ getRefLen_samEntry(
                 goto memErr_fun26_sec04;
 
             *headStrPtr = tmpStr;
-            tmpStr = '\0';
+            *tmpStr = '\0';
             *lenHeadULPtr <<= 1;
           } /*If: need to resize*/
 

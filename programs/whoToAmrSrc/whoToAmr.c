@@ -507,13 +507,11 @@ WHO2021Catalog_whoToAmr(
      tmpStr = &lineHeapStr[uiIter];
 
      /*get around multi entries; they used commas*/
-     for(
-        tmpStr = tmpStr;
-        *tmpStr < 48;
-        ++tmpStr
-     ){ /*Loop: move past first entry*/
+     while(*tmpStr < 48)
+     { /*Loop: move past first entry*/
          if(*tmpStr == '\0')
             goto fileErr_fun03_sec05_sub03;
+         ++tmpStr;
      } /*Loop: move past first entry*/
 
      tmpStr +=
@@ -4404,8 +4402,8 @@ addCodonPos_whoToAmr(
                amrSTPtr[siIndex - 1].dirFlagSC;
 
             if(
-                  amrSTPtr[siIndex].wholeGeneFlagSC
-               && def_geneDel_amrST
+                 amrSTPtr[siIndex].wholeGeneFlagSC
+               & def_geneDel_amrST
             ){ /*If: add in coordinate for gene deletion*/
 
                if(amrSTPtr[siIndex].refPosUI <= 0)

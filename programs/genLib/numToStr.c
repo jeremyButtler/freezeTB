@@ -162,6 +162,9 @@ double_numToStr(
    decDbl = numDbl - numSL;
 
    do{
+      if(cstr[retUI] == '.')
+         break; /*finished*/
+
       cstr[retUI++] = (numSL % 10) + 48;
       numSL /= 10;
    } while(numSL);
@@ -187,7 +190,7 @@ double_numToStr(
 
    if(decDbl != 0)
    { /*If: have decimal part*/
-      cstr[retUI++] = '.';
+      cstr[retUI++] = '\0';
 
       while(decDbl != 0)
       { /*Loop: add in decimals*/
@@ -202,51 +205,6 @@ double_numToStr(
 
          --decUC;
       } /*Loop: add in decimals*/
-
-      if(decDbl * 10 >= 5)
-      { /*If: need to round up*/
-         cstr[retUI] = '\0';
-         startStr = &cstr[retUI - 1];
-
-         if(*startStr != '9')
-            ++(*startStr);
-
-         else
-         { /*Else: need to round multiple values*/
-            while(*startStr == '9')
-            { /*Loop: round up*/
-               if(
-                     startStr == cstr
-                  || *startStr == '-'
-               ){ /*If: need to round up on frist digit*/
-                  endStr = startStr + 1;
-
-                  while(*endStr != '\0')        
-                  { /*Loop: copy values*/
-                     *endStr ^= *startStr;
-                     *startStr ^= *endStr;
-                     *endStr++ ^= *startStr;
-                  } /*Loop: copy values*/
-
-                  *endStr = *startStr; /*copy last value*/
-
-                  *startStr = '1';
-                  ++retUI; /*account for one more digit*/
-
-                  goto rounded_fun03_sec03;
-               } /*If: need to round up on frist digit*/
-
-               if(*startStr != '.')
-                  *startStr = '0';
-
-               --startStr;
-            } /*Loop: round up*/
-
-            ++(*startStr); /*round up last digit*/
-
-            rounded_fun03_sec03:;
-         } /*Else: need to round multiple values*/
-      } /*If: need to round up*/
    } /*If: have decimal part*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

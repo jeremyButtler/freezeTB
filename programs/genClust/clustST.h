@@ -152,7 +152,7 @@ typedef struct res_edDist res_edDist;
 
 #define def_readErrRate_clustST 0.046f
 #define def_conErrRate_clustST 0.023f
-#define def_maxVarErrRatio_clustST 50
+#define def_maxVarErrRatio_clustST 100
 
 #define def_lenWeight_clustST 2.0f
 

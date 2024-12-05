@@ -80,28 +80,19 @@ The stuff unique to freezeTB is under an dual license. The
   - the slidshows and write up in slidesAndWriting
     - except luaFilters and nbib files
 
-# Requirements 
-
-1. minimap2 (use homebrew for mac; apt for debian)
-   - for command line version you only need a sam file,
-     so minimap2 can be replaced.
-2. R (for graphs)
-   - R with tcltk needed if using guiFreezeTB.r
-3. tcltk if using guiFreezeTB (program)
-   - unix (Linux and Mac) should already have an older
-     tcltk, which will work
-
 # Install
 
-- The installation menence, your start to the dark side
+## My starwars joke
+
+- The installation menence; your start to the dark side
   - step one: anger; why are there so many requirments
-  - step two: hatred; why will it not install on OS X
+  - step two: hatered; why will it not install on OS X
   - step three: fear; must I use Ubuntu instead of X
   - step four: chaos; repeat steps one to four for the
     next program
   - step five: disaster; install Ubuntu
 
-- The light side
+- The light side; a cycle of hardship
   - step one: peace; do I really need this program
   - step two: knowledge; maybe there is an alternative
   - step three: serenity; the alternative will install
@@ -110,54 +101,38 @@ The stuff unique to freezeTB is under an dual license. The
   - step five: disaster; I did need it, repeat steps
     one through four
 
-## Easy way for unix
+## Requirements Installation (Linux/Mac)
 
-The easy way is to do a local install, which will only
-  install freezeTB for you (no other user gets). The
-  advanatage about a local install is that you do not need
-  special permissions to install. The downside is that
-  each user on your system needs a copy.
+For Linux I am assuming you are using a Debian based
+  distrabution, such as Ubuntu.
 
-### Local (only you):
+1. For **Mac** homebrew [https://brew.sh/](https://brew.sh/)
+   - website: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+2. minimap2
+   - for command line version you only need a sam file,
+     so minimap2 can be replaced.
+   - For **Linux** `sudo apt-get install minimap2;`
+   - For **Mac** `brew install minimap2;`
+3. R (for graphs)
+   - For **Linux** `sudo apt-get install r-base;`
+   - For **Mac** `brew install r`
+4. tcltk
+   - **Linux** `sudo apt-get install tcl-dev tk-dev`
+   - **Mac** `brew install xquartz tcl-tk`
+
+## Linux:
 
 ```
-# make sure have local install and Downloads directory
-
-if [[ ! -d "$HOME/Downloads" ]]; then
-   mkdir "$HOME/Downloads";
-fi
-
-if [[ ! -d "$HOME/local/bin" ]]; then
-   mkdir -p "$HOME/local/bin";
-fi
-
-# check if have path setup to local (add to path if not)
-
-localBl="$(grep "$HOME/local/bin" <<< "$PATH")"
-
-if [[ "$localBl" == "" ]]; then
-   printf "export \"PATH=$HOME/local/bin:$PATH\"\n" >> $HOME/.bashrc;
-fi
-
-export "PATH=$HOME/local/bin:$PATH"
-
-# you can remove $HOME/local/bin from your path by
-# deleting the "export PATH=/home/<user name>/local/bin:"
-# from your .bashrc file
-cd $HOME/Downloads
+cd ~/Downloads
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
 make -f mkfile.unix
-make -f mkfile.unix install PREFIX=$HOME/local/bin DB_PREFIX=$HOME/Documents
+sudo make -f mkfile.unix install
 ```
 
-### Global (everyone)
+## Mac
 
 ```
-cd $HOME/Downloads
-git clone https://github.com/jeremybuttler/freezeTB
-cd freezeTB
-
 if [[ ! -d "/usr/local/bin" ]]; then
    sudo mkdir -p "/usr/local/bin";
 fi
@@ -166,67 +141,31 @@ if [[ ! -d "/usr/local/share" ]]; then
    sudo mkdir -p "/usr/local/share";
 fi
 
+cd ~/Downloads
+git clone https://github.com/jeremybuttler/freezeTB
+cd freezeTB
 make -f mkfile.unix
 sudo make -f mkfile.unix install
 ```
-
-## Minimap2 the next step 
-
-After this you will need minimap2 (I am assuming you do
-  not have minimap2). The easy way is with a package
-  manager.
-
-
-## Linux minimap2 local install
-
-The easy way is `sudo apt-get install minimap2`.
-
-### Local:
-
-```
-cd $HOME/Downloads
-git clone https://github.com/lh3/minimap2
-cd minimap2
-make
-cp minimap2 $HOME/local/bin
-chmod a+x $HOME/local/bin/minimap2
-```
-
-### Global:
-
-```
-cd $HOME/Downloads
-git clone https://github.com/lh3/minimap2
-cd minimap2
-make
-sudo cp minimap2 /usr/local/bin
-sudo chmod a+x /usr/local/bin/minimap2
-```
-
-### Mac minimap2
-
 The easy way is `brew install minimap2`.
 
-## Mac minimap2 easy
+### Mac minimap2 from source
 
-This is for the M chip series. If you have an old Mac with
-  an intel/AMD CPU; then do the Linux install.
-
-### Local:
-
-```
-cd $HOME/Downloads
-git clone https://github.com/lh3/minimap2
-cd minimap2
-make arm_neon=1 aarch64=1
-cp minimap2 $HOME/local/bin
-chmod a+x $HOME/local/bin/minimap2
-```
-
-### Global:
+If yo do not want to use the brew install for minimap2
+  then you can install it from source. Linux is very
+  similar, except remove the `arm_neon=1` and `aarch64=1`
+  flags from the `make` command.
 
 ```
-cd $HOME/Downloads
+if [[ ! -d "/usr/local/bin" ]]; then
+   sudo mkdir -p "/usr/local/bin";
+fi
+
+if [[ ! -d "/usr/local/share" ]]; then
+   sudo mkdir -p "/usr/local/share";
+fi
+
+cd ~/Downloads
 git clone https://github.com/lh3/minimap2
 cd minimap2
 make arm_neon=1 aarch64=1
@@ -241,10 +180,12 @@ sudo chmod a+x /usr/local/bin/minimap2
 Use Unix, there is no hope. Well, there would be if I had
   precompiled binaries.
 
-Rscript gui works, but primrary GUI needs the Rscript
-  detection step (so non-working).
+The Rscript gui works, but the primrary GUI needs the
+  Rscript detection step (so non-working). Also, I need to
+  take time to figure out how to get tcltk setup on
+  windows. Then I can give instructions.
 
-### Actuall method (source)
+### Windoows Actuall method (source)
 
 This is not the method your are looking for
 
@@ -267,18 +208,19 @@ This is not the method your are looking for
    - or compile minimap2 and copy the .exe file
 10. copy the freezeTBGui.Rscript (freezeTBGui) file in
    scripts to your desktop or were you want it.
-11. Make sure R is installed or if not install R or Rstudio
+11. Make sure R is installed or if not install R or
+    Rstudio
    [https://cran.r-project.org/bin/windows/base/](
     https://cran.r-project.org/bin/windows/base/)
-12. right click freezeTBGui and select "open with", then
-   "more programs", then "R", "R <version number>",
-   "bin", "Rscript"
+12. right click freezeTBGui.Rscript and select
+    "open with", then "more programs", then "R",
+    "R <version number>", "bin", "Rscript"
 
 ![
   picture showing how to open developer console
 ](windows10devConsole.png)
 
-## Minimap2 (from source)
+### Windows Minimap2 (from source)
 
 I include a minimap2.exe compiled binary in winBin.
   So, you do not need this. However, here are the
@@ -327,66 +269,80 @@ Copy minimap2 to your freezeTB install location or into
 
 ## GUI
 
-### Unix:
+If it is guiFreezeTB then just double click, if
+  freezeTBGui.Rscript then in a terminal
+  type `freezeTBGui.Rscript`. On Linux (not Mac) you can
+  likely double click the `freezeTBGui.Rscript` file
+  after doing `chmod a+x freezeTBGui.Rscript` to run.
 
-Open a terminal and
- type `$HOME/local/bin/freezeTBGui.Rscript` for a local
- install or `freezeTBGui.Rscript` for a global install (or
- if it is in your path). Then fill in the values needed.
+It is a bit odd that double clicking will work on Linux,
+  but not Mac. From what I have seen, I think this is due
+  to Mac trying to second guess the shebang line for my R
+  scripts and assumes you really wanted a R session.
+
+For windows, if you set up Windows to always open up
+  a `.Rscript` file with `Rscript` then you just need to
+  double click freezeTBGui.Rscript. If not, then get
+  open "freezeTBGui" with "R studio" and hit run (the
+  green arrow). Or if you do not want R studio you can
+  open a terminal and cd to the freezeTBGui
+  script `cd %ProgramFiles%\freezeTB` location and then
+  call Rscript to run the
+  gui `%ProgramFiles%\R\<Rversion>\bin\Rscript %ProgramFiles/freezeTB/freezeTBGui.Rscript`.
+
+Ye Windows is a pain. So, set the default open with
+  program for a `.Rscript` file to `Rscript`. Makes life
+  so much easier.
+
+## Command line:
+
+I have setup freezeTB to auto detect database files. It
+  looks for the freezeTBFiles databases in the working
+  directory and in a few other locations. So, you should 
+  need to provide any databases unless you want different
+  settings.
+
+For Linux freezeTB will also search for the freezeTBFiles
+  directory (has databases) in `~/Documents` frist and
+  then in `/usr/local/share`.
+
+For Windows freezeTB will also search for the
+  freezeTBFiles directory (has databases)
+  in `%HOME%\Documents` (user Documents) frist and
+  then in `%PUBLIC%\Documents` (Public Documents).
+
+### Mac/Linux:
+
+Get the help message with `freezeTB -h`. It is long so
+  I would recomend doing `freezeTB -h | less` on Linux.
+
+Map reads to the reference using
+  minimap2: `minimap2 -a /usr/local/share/freezeTBFiles/NC000962.fa reads.fastq > reads.sam`.
+
+Then run
+  freezeTB: `freezeTB -sam reads.sam -prefix goodName`.
+
+To get graphs
+  do: `graphAmpDepth.r -stats goodName-depths.tsv -who /usr/local/share/freezeTBFiles/amrDb.tsv -prefix goodName`
 
 ### Windows:
 
-You should be able to double click the "freezeTBGui" file
-  to launch. If not, then get open "freezeTBGui" with
-  "R studio" and hit run (the green arrow).
+Windows command line is painfull, but yes you can use it.
+  This should work, so long as carriage returns do not
+  become an issue. If have errors or inifinite loops, let
+  me know.
 
-## CLI (command line)
+You can get the help message
+  with: `%ProgramFiles%\freezeTB\freezeTB.exe -h`
 
-Technically this can work on windows, but it is not in the
-  system path. So, would require you to
-  enter `"C:\\Program Files\\freezeTB\program"' every
-  time.
+Map reads to the reference using
+  minimap2: `%ProgramFiles%/freezeTB/minimap2.exe -a %PUBLIC%\Documents\freezeTBFiles\NC000962.fa reads.fastq > reads.sam`.
 
-You can print the help message with `freezeTB -h`.
+Map reads to the reference using
+  freezeTB: `%ProgramFiles%\freezeTB\freezeTB.exe -sam reads.sam -prefix goodName`
 
-```
-minimap -a /usr/local/share/freezeTBFiles/NC000962.fa reads.fastq > reads.sam;
-freezeTB -sam reads.sam -prefix good-name;
-```
-
-or
-
-```
-minimap -a /usr/local/share/freezeTBFiles/NC000962.fa reads.fastq | freezeTB.sh -sam - -prefix good-name
-```
-
-A more complex way to run freezeTB is to provide the paths
-  to all the databases (AMR, MIRU, spoligotyping, and
-  gene-table). You will have to do this if you the files
-  are not in the default location or if you decide to
-  use an different reference for the AMR database.
-
-If these cases are normal, then I would recommend putting
-  the commands in an bash script.
-
-```
-freezeTB \
-    -sam reads.sam \
-    -prefix good-name \
-    -amr-tbl freezeTBFiles/who-2023.tsv \
-    -miru-tbl freezeTBFiles/miruTbl.tsv \
-    -gene-coords freezeTBFiles/gene-tbl.tsv \
-    -spoligo freezeTBFiles/spoligotype-seq.fa \
-    -db-spoligo freezeTBFiles/spoligo-lineages.csv \
-    -dr-start 3119037 \
-    -dr-end 3123624;
-```
-
-Were `-dr-start` and `-dr-end` are the coordinates for the
-  direct repeat region in the reference genome.
-
-You can leave out `-spoligo` if you are changing an
-  reference, since it has sequences not coordinates.
+Buld graphs (if wanted)
+  do: `%ProgramFiles%\R\<R version>\bin\Rscript %ProgramFiles%\freezeTB\graphAmdDepth.r -stats goodName-depths.tsv -who %PUBLIC%\Documents\freezeTBFiles\amrDb.tsv -prefix goodName`
 
 # How it works
 
@@ -453,20 +409,19 @@ Introduction to the monster book of monsters:
 
 I have made the programs in freezeTb to be modular. This
   means that if you like a particular program, then you
-  can compile it separately.
+  can compile it out separately.
 
-For unix the programs are all installed in the install
-  step, however for windows you will have to copy each
-  one.
+For unix several of the programs are installed in the
+  install step, however for windows you will have to copy
+  each one.
 
 ## freezeTB core:
 
 Chapter one: monsters that consume all hope
 
 - freezeTB: core program for freezeTB
-- guiFreezeTB: primrary gui
+- guiFreezeTB: primrary gui that wraps freezeTB
 - graphAmpDepth.r: Rscript that makes graphs for freezeTB
-  - only needed for guiFreezeTB, Rscript has built in
 
 ## Modules:
 
@@ -521,18 +476,96 @@ Chapter four: the undead awaken
 
 - freezeTBGui.Rscript: gui built in R using tcltk, was
   replaced with guiFreezeTB, but still works
-- outputGui.Rscript: runs the output menu for freezeTB
-  separately (older, but works)
+- outputGui.Rscript: runs only the output menu displayed
+  by freezeTBGui.Rscript
 - gui-run.tcl: script used to build guiFreezeTB gui
-  - will run if use wish from tcltk
+  - will run if use `wish` from tcltk
 - oldGraphAmpDepth.r is older version of graphAmpDepth
   that used ggplot2
 - oldCode: old code I am not quite ready to throw
   away yet (or am to lazy to clean)
 
+## Really random stuff:
+
+Chapter five: the GUI feind
+
+In programs/guiFreezeTB there is a script called gui.tcl.
+  This is the GUI script used in guiFreezeTB. However,
+  you need to use rmBlocks from my `build` repository to
+  get it to run with wish (`rmBlocks < gui.tcl | wish`).
+
+The main reason for gui.tcl is that it allows you to edit
+  the gui for guiFreezeTB and view it in reall time. You
+  can the integrate it into the guiFreezeTB code with the
+  addScript.sh script `bash addScript.sh`. You would then
+  do `make -f mkfile.unix` or `make -f mkfile.mac` to
+  rebuild guiFreezeTB with your own gui.
+
+To run addScript.sh you will need `scriptToCStr` from
+  my `build` repository.
+
+On the surface it sounds good, until you dig in. Then
+  comes the nightmere of my documentation (adds a lot of
+  lines) and just how many lines this GUI takes (1k with
+  everything merged and comments removed). You will also
+  need to understand my styntax for rmBlocks.
+
+The rmBlocks rules:
+
+Items in strings `""` are considered literal.
+
+Blocks are distinguished by `---` and are only 1 level
+  deep.
+
+```
+--- start of a block
+   stuff to be merged goes here
+     all lines in blocks are merged into a single line
+     in rmBlocks
+
+   # also comments in blocks are removed
+
+   Each block start/end is percisly three dashes, so four
+     dashes (----) is not a block start or end.
+--- ; # end of a block
+```
+
+Code unique to the tcltk script is between
+  two `#>>>script<<<#` blocks. This is code such as
+  default settings variables and the run freezeTB command.
+  These are defined in the actual C code.
+
+```
+#>>>script<<<#
+only seen in the script, removed by scriptToCStr
+#>>>script<<<#
+```
+
+I also have one point were I need to remove code unique to
+  a C program from the script. To do this I use the block
+  comment from rmBlock `#--- ---#` and put them in script
+  only blocks.
+
+```
+#>>>script<<<#
+script freezeTB command goes here. It is a call to the
+  freezeTB program.
+
+#--- comment block to remove C call
+#>>>script<<<#
+
+C freezeTB call (internal function) goes here and is
+  removed with rmBlocks. However, scriptToCStr will remove
+  the comment blocks, enabling it for the C code.
+
+#>>>script<<<#
+End of comment block ---#
+#>>>script<<<#
+```
+
 # freezeTB as an bash script
 
-Chapter five: make your own monster
+Chapter six: make your own monster
 
 A better picture of how freezeTB works might be gotten by
   showing how it would look if I used an bash script. This

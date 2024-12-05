@@ -354,6 +354,9 @@ sortSync_strAry(
    ^   - find the max search value (number rounds to sort)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   if(lenUL <= 1)
+      return; /*nothing to do*/
+
    /*Recursion formuia: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
    subUL = 1; /*Initialzie first array*/
 

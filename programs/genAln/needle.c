@@ -229,7 +229,7 @@ needle(
    ^  - fill in initial negatives for reference
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   dirMatrixSC[0] = def_mvIns_alnDefs;
+   dirMatrixSC[0] = def_mvStop_alnDefs; /*stop to start*/
    scoreArySL[0] = settings->gapSS;
 
    for(
@@ -237,7 +237,7 @@ needle(
       indexUL <= lenRefUL;
       ++indexUL
    ){ /*Loop: initialize the first row*/
-      dirMatrixSC[indexUL] = def_mvIns_alnDefs;
+      dirMatrixSC[indexUL] = def_mvDel_alnDefs;
       scoreArySL[indexUL] = scoreArySL[indexUL - 1];
 
       #ifdef NOEXTEND
@@ -385,6 +385,8 @@ needle(
             delScoreSL +=
                settings->delArySS[dirMatrixSC[indexUL]];
          #endif
+
+         ++indexUL;
       } /*Loop; compare one query to one reference base*/
 
       /**************************************************\
