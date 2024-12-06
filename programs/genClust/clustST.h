@@ -125,9 +125,9 @@
 #ifndef CLUSTER_STRUCTURES_H
 #define CLUSTER_STRUCTURES_H
 
-typedef struct samEntry samEntry;
-typedef struct set_tbCon set_tbCon;
-typedef struct res_edDist res_edDist;
+struct samEntry;
+struct set_tbCon;
+struct res_edDist;
 
 
 /*error return types*/

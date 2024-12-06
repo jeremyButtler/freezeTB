@@ -8,10 +8,10 @@
 '     - make a string array
 '   o fun02: realloc_strAry
 '     - rellocates memory for a string array
-'   o fun04: add_strAry
-'     - adds a string to a string array
 '   o .h fun03: get_strAry
 '     - finds pointer of a string in a string array
+'   o fun04: add_strAry
+'     - adds a string to a string array
 '   o fun06: cmp_strAry
 '     - compares two strings in a string array
 '   o fun07: sort_strAry

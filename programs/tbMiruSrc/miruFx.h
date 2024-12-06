@@ -28,10 +28,10 @@
 #define def_minPercScore_miruFx 0.9f
 #define def_maxAmpLen_miruFx 5000
 
-typedef struct seqST seqST;
-typedef struct miruTbl miruTbl;
-typedef struct refST_kmerFind refST_kmerFind;
-typedef struct tblST_kmerFind tblST_kmerFind;
+struct seqST;
+struct miruTbl;
+struct refST_kmerFind;
+struct tblST_kmerFind;
 
 /*-------------------------------------------------------\
 | Fun02: readTbl_miruFx

@@ -7,21 +7,21 @@
 '     - Included libraries, definitions and preprocessor
 '       checks
 '   o fun01: cpLen_ulCp
-'     - copies cpStr into dupStr using unsigned longs
+'     - copies cpStr into dupStr using ulong_ulCps
 '   o fun02: mkDelim_ulCp
-'     - makes an unsigned long delimintor from a character
+'     - makes an ulong_ulCp delimintor from a character
 '       deliminator for use in cpStrDelim
 '   o .c note01: ifDelim_ulCp
 '     - logic for detecting if the input deliminator is in
-'       input unsigned long
+'       input ulong_ulCp
 '   o fun03: cpDelim_ulCp
 '     - copies string until deliminator is found
 '   o fun04: lenStr_ulCp
-'     - finds the length of a string using unsigned longs
+'     - finds the length of a string using ulong_ulCps
 '   o fun05: lenStrNull_ulCp
-'     - finds the length of a string using unsigned longs
+'     - finds the length of a string using ulong_ulCps
 '       but also stops at null '\0'
-'   o fun06: ifEndLine_ulCp
+'   o .h fun06: ifEndLine_ulCp
 '     - checks if input long is end of line
 '   o fun07: endLine_ulCp
 '     - finds the end of a c-string (all OS's; looks for
@@ -62,26 +62,37 @@
 #ifndef UNSINGED_LONG_COPY_H
 #define UNSINGED_LONG_COPY_H
 
-/*unsigned long shortcuts*/
+/*plan9 defines long as 32 bit, so need an extra check*/
+#ifdef PLAN9_64
+   typedef unsigned long long ulong_ulCP;   
+#else
+   typedef unsigned long ulong_ulCp;   
+#endif
+
+/*ulong_ulCp shortcuts*/
 /*the compiler should truncate these as needed*/
 #define def_null_ulCp 0
-#define def_newline_ulCp (unsigned long)0x0a0a0a0a0a0a0a0a
-#define def_one_ulCp (unsigned long) 0x0101010101010101
-#define def_tab_ulCp (unsigned long) 0x0909090909090909
-#define def_highBit_ulCp (unsigned long)0x8080808080808080
+#define def_newline_ulCp (ulong_ulCp)0x0a0a0a0a0a0a0a0a
+#define def_carriage_ulCp (ulong_ulCp) 0x0d0d0d0d0d0d0d0d
+#define def_tab_ulCp (ulong_ulCp) 0x0909090909090909
+#define def_space_ulCp (ulong_ulCp) 0x2020202020202020
+#define def_comma_ulCp (ulong_ulCp) 0x2c2c2c2c2c2c2c2c
 
-#define def_four_ulCp (unsigned long) 0x0404040404040404
-#define def_eight_ulCp (unsigned long) 0x0808080808080808
+#define def_one_ulCp (ulong_ulCp) 0x0101010101010101
+#define def_highBit_ulCp (ulong_ulCp) 0x8080808080808080
+
+#define def_four_ulCp (ulong_ulCp) 0x0404040404040404
+#define def_eight_ulCp (ulong_ulCp) 0x0808080808080808
 
 /*for white space checks*/
-#define def_31_ulCp (unsigned long) 0x0f0f0f0f0f0f0f0f
-#define def_gt63_ulCp (unsigned long) 0xc0c0c0c0c0c0c0c0
+#define def_31_ulCp (ulong_ulCp) 0x0f0f0f0f0f0f0f0f
+#define def_gt63_ulCp (ulong_ulCp) 0xc0c0c0c0c0c0c0c0
    /*0xc0 is 12*/
 
 
 #define def_bitsPerChar_ulCp 8
-#define def_charInUL_ulCp sizeof(unsigned long)
-#define def_modUL_ulCp (sizeof(unsigned long ) -1)
+#define def_charInUL_ulCp sizeof(ulong_ulCp)
+#define def_modUL_ulCp (sizeof(ulong_ulCp ) -1)
    /*The mod values are 7 (longs), 3 (ints), and 1
    `  (shorts), so, 1 - number of bytes will give me the
    `  mod value
@@ -92,14 +103,14 @@
 `  that it will fail. However, it is very unlikely a
 `  long will by 128 bits.
 */
-#define def_shiftULBy_ulCp ((sizeof(unsigned long) >> 1) - (sizeof(unsigned long) >> 3))
+#define def_shiftULBy_ulCp ((sizeof(ulong_ulCp) >> 1) - (sizeof(ulong_ulCp) >> 3))
 
 /*Logic:
-`   - sizeof(unsigned long) >> 1:
+`   - sizeof(ulong_ulCp) >> 1:
 `     o This gets the number of bytes to shift to get
 `       an 32 bit or 16 bit number to one bytes. Basically
 `       it is divide by 2
-`   - (sizeof(unsigned long) >> 3)
+`   - (sizeof(ulong_ulCp) >> 3)
 `     o This adds in 1 if I have eight bytes. It is needed
 `       as the 64 bit correction step
 `   - (sizeof(long) >> 1) - (sizeof(long) >> 3)
@@ -113,7 +124,7 @@
 
 /*-------------------------------------------------------\
 | Fun01: cpLen_ulCp
-|   - copies cpStr into dupStr using unsigned longs
+|   - copies cpStr into dupStr using ulong_ulCps
 | Input:
 |   - dupStr:
 |     o pointer to string to copy cpStr into
@@ -134,7 +145,7 @@ cpLen_ulCp(
 
 /*-------------------------------------------------------\
 | Fun02: mkDelim_ulCp
-|   - makes an unsigned long delimintor from a character
+|   - makes an ulong_ulCp delimintor from a character
 |     deliminator for use in cpStrDelim
 | Input:
 |   - delimC:
@@ -143,7 +154,7 @@ cpLen_ulCp(
 |   - Modifies:
 |     o dupStr to hold the characters from cpStr
 \-------------------------------------------------------*/
-unsigned long
+ulong_ulCp
 mkDelim_ulCp(
    signed char delimSC
 );
@@ -172,19 +183,19 @@ unsigned int
 cpDelim_ulCp(
    signed char *dupStr,
    signed char *cpStr,
-   unsigned long delimUL,
+   ulong_ulCp delimUL,
    signed char delimSC
 );
 
 /*-------------------------------------------------------\
 | Fun04: lenStr_ulCp
-|   - finds the length of a string using unsigned longs
+|   - finds the length of a string using ulong_ulCps
 | Input:
 |   - inStr:
 |     o c-string or string with deliminator to find length
 |       of
 |   - delimUL:
-|     o deliminator (as unsigned long (fun02)) at end of
+|     o deliminator (as ulong_ulCp (fun02)) at end of
 |       string
 |   - delimSC:
 |     o deliminator (as char) at end of string
@@ -195,20 +206,20 @@ cpDelim_ulCp(
 unsigned int
 lenStr_ulCp(
    signed char *inStr,
-   unsigned long delimUL,
+   ulong_ulCp delimUL,
    signed char delimSC
 );
 
 /*-------------------------------------------------------\
 | Fun05: lenStrNull_ulCp
-|   - finds the length of a string using unsigned longs
+|   - finds the length of a string using ulong_ulCps
 |     but also stops at null '\0'
 | Input:
 |   - inStr:
 |     o c-string or string with deliminator to find length
 |       of
 |   - delimUL:
-|     o deliminator (as unsigned long (fun02)) at end of
+|     o deliminator (as ulong_ulCp (fun02)) at end of
 |       string
 |   - delimSC:
 |     o deliminator (as char) at end of string
@@ -219,7 +230,7 @@ lenStr_ulCp(
 unsigned int
 lenStrNull_ulCp(
    signed char *inStr,
-   unsigned long delimUL,
+   ulong_ulCp delimUL,
    signed char delimSC
 );
 
@@ -228,7 +239,7 @@ lenStrNull_ulCp(
 |   - checks if input long is end of line
 | Input:
 |   - strUL:
-|     o unsigned long to check for end of line
+|     o ulong_ulCp to check for end of line
 | Output:
 |   - Returns:
 |     o > 0 if have end of line
@@ -386,7 +397,7 @@ void
 swapDelim_ulCp(
    signed char *firstStr,
    signed char *secStr,
-   unsigned long delimUL,
+   ulong_ulCp delimUL,
    signed char delimSC
 );
 
@@ -416,7 +427,7 @@ signed long
 eql_ulCp(
    signed char *qryStr,
    signed char *refStr,
-   unsigned long delimUL,
+   ulong_ulCp delimUL,
    signed char delimSC
 );
 

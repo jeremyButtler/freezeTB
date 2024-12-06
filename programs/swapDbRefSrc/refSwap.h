@@ -35,8 +35,8 @@
 #ifndef REFERENCE_SWAP_H
 #define REFERENCE_SWAP_H
 
-typedef struct samEntry samEntry;
-typedef struct amrST amrST;
+struct samEntry;
+struct amrST;
 
 /*-------------------------------------------------------\
 | Fun01: cnvtCoords_refSwap

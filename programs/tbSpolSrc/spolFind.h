@@ -36,12 +36,12 @@
 #ifndef SPOLIGOTYPE_FIND_H
 #define SPOLIGOTYPE_FIND_H
 
-typedef struct samEntry samEntry;
-typedef struct seqST seqST;
-typedef struct alnSet alnSet;
+struct samEntry;
+struct seqST;
+struct alnSet;
 
-typedef struct tblST_kmerFind tblST_kmerFind;
-typedef struct refST_kmerFind refST_kmerFind;
+struct tblST_kmerFind;
+struct refST_kmerFind;
 
 /*-------------------------------------------------------\
 | Fun01: fx_spolFind

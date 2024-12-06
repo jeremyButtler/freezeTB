@@ -43,7 +43,7 @@
 #ifndef CONVERT_WHO_TO_TBAMR_DATABASE_H
 #define CONVERT_WHO_TO_TBAMR_DATABASE_H
 
-typedef struct amrST amrST;
+struct amrST;
 
 #define def_noRes_whoToAmr 1
 

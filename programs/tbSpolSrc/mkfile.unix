@@ -73,5 +73,10 @@ $(genAln)/kmerFind.$O: $(genAln)/kmerFind.c $(genAln)/kmerFind.h $(genAln)/memwa
 install:
 	cp $(NAME) $(PREFIX)
 	chmod a+x $(PREFIX)/$(NAME)
+
+install:
+	cp $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
+
 clean:
 	rm $(objFiles) tbSpol.$O spolFind.$O spolST.$O;

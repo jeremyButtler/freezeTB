@@ -60,7 +60,7 @@
 #ifndef TB_CONSENSUS_H
 #define TB_CONSENSUS_H
 
-typedef struct samEntry samEntry;
+struct samEntry;
 
 /*Settings for consensus buildiing*/
 
@@ -325,7 +325,7 @@ freeStack_set_tbCon(
 \-------------------------------------------------------*/
 signed char
 addRead_tbCon(
-   samEntry *samSTPtr,       /*read to add to consensus*/
+   struct samEntry *samSTPtr, /*read to add to consensus*/
    struct conNt_tbCon *conNtAryST[], /*Consensus array*/
    unsigned int *lenRefUI,       /*Length of reference*/
    struct set_tbCon *settings
@@ -365,7 +365,7 @@ addRead_tbCon(
 |         amplicons it will be an array
 |     o 0 for memory erors
 \-------------------------------------------------------*/
-samEntry *
+struct samEntry *
 collapse_tbCon(
    struct conNt_tbCon conNtAryST[], /*to collapse*/
    unsigned int lenConAryUI,   /*length of consensus*/
@@ -410,7 +410,7 @@ collapse_tbCon(
 |         amplicons it will be an array
 |     o 0 for memory erors
 \-------------------------------------------------------*/
-samEntry *
+struct samEntry *
 noFragCollapse_tbCon(
    struct conNt_tbCon conNtAryST[], /*to collapse*/
    unsigned int lenConAryUI,   /*length of consensus*/

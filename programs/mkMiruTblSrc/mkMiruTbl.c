@@ -1177,7 +1177,7 @@ main(
 
    buffHeapStr[numBytesUL] = '\0';
    posBuffStr = buffHeapStr;
-   posBuffStr += endLine_ulCp(buffHeapStr);
+   posBuffStr += endLineUnix_ulCp(buffHeapStr);
 
    /*****************************************************\
    * Main Sec05 Sub03:
@@ -1233,7 +1233,7 @@ main(
 
       buffHeapStr[numBytesUL] = '\0';
       posBuffStr = buffHeapStr;
-      posBuffStr += endLine_ulCp(buffHeapStr);
+      posBuffStr += endLineUnix_ulCp(buffHeapStr);
    } /*Loop: Read in the first line*/
 
    /*****************************************************\

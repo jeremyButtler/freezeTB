@@ -46,6 +46,7 @@ $(genLib)/ulCp.$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
 $(genLib)/charCp.$O: $(genLib)/charCp.c $(genLib)/charCp.h
 	$(CC) -o $(genLib)/charCp.$O -c $(CFLAGS) $(genLib)/charCp.c
 
+
 install:
 	cp $(NAME) $(PREFIX)
 	chmod a+x $(PREFIX)/$(NAME)

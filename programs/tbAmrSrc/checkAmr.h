@@ -53,8 +53,8 @@
 #ifndef CHECK_AMR_H
 #define CHECK_AMR_H
 
-typedef struct samEntry samEntry;
-typedef struct amrST amrST;
+struct samEntry;
+struct amrST;
 
 /*-------------------------------------------------------\
 | ST01: amrHit_checkAmr
@@ -163,7 +163,7 @@ LoFFor_checkAmr(
    signed int endGeneSI,
    signed int refPosSI,
    signed int readPosSI,
-   struct samEntry* samSTPtr,
+   struct samEntry *samSTPtr,
    signed int cigPosSI,
    signed int cigBaseSI,
    signed int *delCntSI,
@@ -206,7 +206,7 @@ LofRev_checkAmr(
    signed int endGeneSI,
    signed int refPosSI,
    signed int readPosSI,
-   struct samEntry* samSTPtr,
+   struct samEntry *samSTPtr,
    signed int cigPosSI,
    signed int cigBaseSI,
    signed int *delCntSI,

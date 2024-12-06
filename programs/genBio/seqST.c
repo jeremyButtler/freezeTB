@@ -166,6 +166,8 @@ addLine_seqST(
        fgets((char *) tmpStr,spareBuffUL,(FILE *) inFILE)
     ){ /*While I have lines to read*/
         tmpUL = endLine_ulCp(tmpStr);
+           /*will end at '\r' from windows*/
+
         *curBuffUL += tmpUL;
         tmpStr = *buffStr + *curBuffUL;
         *filePosUL += tmpUL;
@@ -190,7 +192,7 @@ addLine_seqST(
             tmpStr = *buffStr + *curBuffUL;
         } /*If: need to resize buffer*/
 
-        if (*tmpStr == '\n')
+        if(*tmpStr != '\0')
         { /*If: found end of line*/
             ++(*filePosUL);
             return 0; /*finshed with line*/
@@ -281,7 +283,6 @@ getFqSeq_seqST(
             &filePosUL,
             (FILE *) fqFILE     /*fq file with header*/
     ); /*get the header (will resize as needed)*/
-
 
     if(errUC)
        return errUC; /*EOF or memory allocation error*/

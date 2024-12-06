@@ -68,6 +68,8 @@
 '     - reallocates memory for a refs_samEntry struct
 '   o fun26: getRefLen_samEntry
 '     - gets reference ids & length from a sam file header
+'   o fun27: findRef_refs_samEntry
+'     - finds a reference id in a refs_samEntry struct
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
 '        pdf
@@ -528,7 +530,7 @@ findQScores_samEntry(
     uint uiQScore = 0;
     uint uiChar = 0;
     
-    ulong qAdjustUL =
+    ulong_ulCp qAdjustUL =
        mkDelim_ulCp((schar) def_adjQ_samEntry);
 
     /*Find the number of q-score characters in buffer*/
@@ -627,7 +629,10 @@ cpQEntry_samEntry(
   uchar *tmpStr = 0;
   uint uiQ = 0;
   uint uiChar = 0;
-  ulong qAdjustUL=mkDelim_ulCp((schar) def_adjQ_samEntry);
+
+  ulong_ulCp qAdjustUL =
+     mkDelim_ulCp((schar) def_adjQ_samEntry);
+
   ulong *cpPtrUL = (ulong *) (cpQStr);
   ulong *dupPtrUL = (ulong *) samSTPtr->qStr;
   ulong qScoreUL = 0;
@@ -786,7 +791,8 @@ getLine_samEntry(
    ^   - make sure hav entire line
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   oldLenUL += endLine_ulCp(tmpStr);
+   oldLenUL += endLineUnix_ulCp(tmpStr);
+      /*just want line end, so can ignore '\r'*/
    tmpStr = *buffStr + oldLenUL;
 
    while(*tmpStr != '\n')
@@ -823,7 +829,7 @@ getLine_samEntry(
 
       checkEOL_fun10_sec03_samEntry:;
 
-      oldLenUL += endLine_ulCp(tmpStr);
+      oldLenUL += endLineUnix_ulCp(tmpStr);
       tmpStr = *buffStr + oldLenUL;
    } /*Loop: Find the length of  the line*/
    
@@ -904,7 +910,6 @@ lineTo_samEntry(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   ulong tabUL = mkDelim_ulCp((schar) '\t');
    signed char *tmpStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -925,7 +930,7 @@ lineTo_samEntry(
       cpDelim_ulCp(
          samSTPtr->qryIdStr,
          buffStr,
-         tabUL,
+         def_tab_ulCp,
          '\t'
       ); /*Copy the reference id/name*/
 
@@ -955,7 +960,7 @@ lineTo_samEntry(
       cpDelim_ulCp(
          samSTPtr->refIdStr,
          buffStr,
-         tabUL,
+         def_tab_ulCp,
          '\t'
       ); /*Copy the reference id/name*/
    
@@ -1167,7 +1172,7 @@ lineTo_samEntry(
       cpDelim_ulCp(
          samSTPtr->rNextStr,
          buffStr,
-         tabUL,
+         def_tab_ulCp,
          '\t'
       ); /*Copy the query id/name*/
 
@@ -1208,7 +1213,8 @@ lineTo_samEntry(
 
    if(samSTPtr->readLenUI == 0 && buffStr[0] != '*')
       samSTPtr->readLenUI =
-         lenStr_ulCp(buffStr, tabUL, '\t');
+         (uint)
+         lenStr_ulCp(buffStr, def_tab_ulCp, '\t');
 
    else if(buffStr[0] == '*')
    { /*Else If: There  is no sequence entry*/
@@ -1305,7 +1311,8 @@ lineTo_samEntry(
    else
    { /*Else: have extra entry*/
       /*not sure if char or ul copy better here*/
-      samSTPtr->lenExtraUI = endLine_ulCp(buffStr);
+      samSTPtr->lenExtraUI = endLineUnix_ulCp(buffStr);
+         /*this will save '\r' on windows*/
 
       if(samSTPtr->lenExtraUI > samSTPtr->lenExtraBuffUI)
       { /*If: I need to resize the buffer*/
@@ -3093,6 +3100,32 @@ getRefLen_samEntry(
    ret_fun26_sec04:;
    return errSC;
 } /*getRefLen_samEntry*/
+
+/*-------------------------------------------------------\
+| Fun27: findRef_refs_samEntry
+|   - finds a reference id in a refs_samEntry struct
+| Input:
+|   - idStr:
+|     o c-string with reference id to find
+|   - refSTPtr:
+|     o pointer to refs_samEntry struct with references
+| Output:
+|   - Returns:
+|     o index of reference id if found
+|     o < 0 if reference id not in list
+\-------------------------------------------------------*/
+signed long
+findRef_refs_samEntry(
+   signed char *idStr,            /*id to find*/
+   struct refs_samEntry *refSTPtr /*holds ref lengths*/
+){
+   return
+      find_strAry(
+         refSTPtr->idAryStr,
+         idStr,
+         refSTPtr->numRefUI
+      );
+} /*findRef_refs_samEntry*/
 
 /*=======================================================\
 : License:

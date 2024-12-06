@@ -1474,7 +1474,7 @@ WHO2023Catalog_whoToAmr(
        )
     ){ /*Loop: find number of lines in file*/
        tmpStr = buffHeapStr;
-       tmpStr += endLine_ulCp(buffHeapStr);
+       tmpStr += endLineUnix_ulCp(buffHeapStr);
 
        /*Make sure my buffer can read in the full line*/
        while(*tmpStr != '\n')
@@ -1503,7 +1503,7 @@ WHO2023Catalog_whoToAmr(
            if(! tmpStr)
               break; /*EOF ran out of file*/
            
-           tmpStr += endLine_ulCp(buffHeapStr);
+           tmpStr += endLineUnix_ulCp(buffHeapStr);
        } /*Loop: read in complete line*/
 
        ++lenFileUI;
@@ -3634,7 +3634,7 @@ addCodonPos_whoToAmr(
    { /*Loop: count number of genes*/
       while(posSI < (sint) bytesInBuffUL)
       { /*Loop: find number of new lines in buffer*/
-         posSI += endLine_ulCp(&buffStr[posSI]);
+         posSI += endLineUnix_ulCp(&buffStr[posSI]);
          numGenesSI += (buffStr[posSI] == '\n');
          ++posSI;
       } /*Loop: find number of new lines in buffer*/

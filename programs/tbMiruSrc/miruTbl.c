@@ -1770,7 +1770,7 @@ get_miruTbl(
 
    while(! errSC)
    { /*Loop: read in each line*/
-      tmpStr += endLine_ulCp(tmpStr);
+      tmpStr += endLineUnix_ulCp(tmpStr);
       tblHeapST->numLinSI += (*tmpStr == '\n');
       ++tmpStr; /*get off new line*/
 
@@ -1796,7 +1796,7 @@ get_miruTbl(
    /*need to finsh reading the file*/
    while(posSI < totalBytesSI)
    { /*Loop: find the end of the file*/
-      posSI += endLine_ulCp(&buffHeapStr[posSI]);
+      posSI += endLineUnix_ulCp(&buffHeapStr[posSI]);
       tblHeapST->numLinSI += (buffHeapStr[posSI] =='\n');
       ++posSI; /*get off the new line*/
    } /*Loop: find the end of the file*/

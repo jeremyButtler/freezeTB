@@ -39,7 +39,6 @@
 #include <stdio.h>
 
 #include "../genLib/base10str.h"
-#include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
 #include "../genBio/seqST.h"
 #include "../genBio/samEntry.h"
@@ -56,6 +55,7 @@
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
+!   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/numToStr.h"
 !   o .h  #include "../genLib/genMath.h" .h max macro only
 !   o .h  #include "../genLib/strAry.h"

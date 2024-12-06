@@ -31,8 +31,6 @@
 
 #include <stdio.h>
 
-#include "../genLib/ulCp.h"
-
 #include "../genBio/samEntry.h"
 #include "../genBio/tbCon.h"
 #include "../genBio/edDist.h"
@@ -49,6 +47,7 @@
 ! Hidden libraries:
 !   - .c  #include "../genLib/base10str.h"
 !   - .c  #include "../genLib/numToStr.h"
+!   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/charCp.h"
 !   - .c  #include "../genLib/strAry.h"
 !   - .h  #include "../genBio/ntTo5Bit.h"
@@ -963,7 +962,7 @@ getMaxDepth_edClust(
 |     o list of con_clustST structs with consensus
 |       clusters
 \-------------------------------------------------------*/
-con_clustST *
+struct con_clustST *
 cluster_edClust(
    struct index_clustST **indexSTPtr,
    struct set_clustST *clustSetSTPtr,

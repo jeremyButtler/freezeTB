@@ -3949,7 +3949,6 @@ run_freezeTB(
 
    schar multiRefBl = 0; /*1: means multiple refs/exit*/
    sint lenRefSI = 0;
-   ulong tabUL = mkDelim_ulCp('\t'); /*only used in ref*/
    schar refIdStr[def_lenFileName_freezeTB];
 
    /*for filtering reads*/
@@ -5040,7 +5039,7 @@ run_freezeTB(
             cpDelim_ulCp(
                refIdStr,
                tmpStr,
-               tabUL,
+               def_tab_ulCp,
                '\t'
             ); /*copy reference id*/
 

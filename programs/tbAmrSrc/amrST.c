@@ -1341,7 +1341,7 @@ readTbl_amrST(
       fgets((char *) buffHeapStr, lenBuffUI, amrFILE)
    ){ /*Loop: get number of amrs from file*/
       tmpStr = buffHeapStr;
-      posSI = endLine_ulCp(buffHeapStr);
+      posSI = endLineUnix_ulCp(buffHeapStr);
 
       tmpSI += posSI;
       tmpStr += posSI;

@@ -128,6 +128,8 @@ freeHeap_str_ptrAry(
 | Fun05: mk_str_ptrAry
 |   - make an initialized heap allocated str_ptrAry struct
 | Input:
+|   - numElmSL:
+|     o number elements to have
 | Output:
 |   - Returns:
 |     o pointer to str_ptrAry struct
@@ -135,6 +137,7 @@ freeHeap_str_ptrAry(
 \-------------------------------------------------------*/
 struct str_ptrAry *
 mk_str_ptrAry(
+   signed long numElmSL
 );
 
 /*-------------------------------------------------------\

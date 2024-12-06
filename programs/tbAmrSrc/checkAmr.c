@@ -64,7 +64,6 @@
 #include "amrST.h"
 #include "drugAry.h"
 
-#include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
 #include "../genLib/genMath.h"
 #include "../genBio/codonTbl.h"
@@ -77,6 +76,7 @@
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
+!   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/base10StrToNum.h"
 !   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genLib/strAry.h"

@@ -83,7 +83,7 @@
 #ifndef MIRU_TABLE_STRUCTURE_H
 #define MIRU_TABLE_STRUCTURE_H
 
-typedef struct samEntry samEntry;
+struct samEntry;
 
 /*This is the number to shift to get to the next string
 `   in an array

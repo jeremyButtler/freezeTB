@@ -1067,7 +1067,8 @@ getNumLines_clustST(
          tmpStr = buffStr;
       } /*Else: read in more file*/
 
-      tmpStr += endLine_ulCp(tmpStr);
+      tmpStr += endLineUnix_ulCp(tmpStr);
+         /*in this case do not care about '\r'*/
    } /*Loop: find number of new lines*/
 
    if(*(tmpStr - 1) != '\n')
@@ -1466,8 +1467,9 @@ mk_index_clustST(
       *   - get next entry
       \**************************************************/
 
+      /*moving to end of line, so want to skip '\r'*/
       retHeapST->lenLineAryUI[lineUL] =
-         endLine_ulCp(*buffStrPtr);
+         endLineUnix_ulCp(*buffStrPtr);
 
       ++retHeapST->lenLineAryUI[lineUL]; /*for '\n'*/
 
@@ -2492,7 +2494,7 @@ pbins_clustST(
 
    schar *clustHeapAryBl = 0;  /*tells if printed header*/
    schar outFileStr[2048]; /*holds output file name*/
-   uint lenPrefixUI = endLine_ulCp(prefixStr);
+   uint lenPrefixUI = endStr_ulCp(prefixStr);
    FILE *outFILE = 0;
 
    ulong offsetUL = 0; /*offset to next read*/

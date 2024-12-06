@@ -691,7 +691,7 @@ getRefs_spolFind(
 
    while(bytesReadUL)
    { /*Loop: Find the number of sequences*/
-      tmpStr += endLine_ulCp(tmpStr);
+      tmpStr += endLineUnix_ulCp(tmpStr);
 
       if(*tmpStr == '\n')
       { /*If: I found an new line*/

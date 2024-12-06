@@ -99,7 +99,7 @@ all: guiFreezeTB.c.$O
 guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
 	$(CC) -o guiFreezeTB.c.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
-$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.$O
+$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
 	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
 
 $(freezeTB)freezeTB.$O: $(freezeTB)freezeTB.c $(freezeTB)freezeTBPaths.$O $(freezeTBObjs)

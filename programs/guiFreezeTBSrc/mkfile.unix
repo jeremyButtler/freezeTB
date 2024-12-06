@@ -4,14 +4,25 @@
 
 CC=cc
 LD=cc
-NAME = guiFreezeTB
-PREFIX = /usr/local/bin
 
-C_FLAGS = -O3 -Wall -Wextra
+NAME = guiFreezeTB
+PREFIX=/usr/local/bin
+
+C_FLAGS = \
+   -O3 \
+   -Wall \
+   -Wextra
+
+#   -DUSE_TCL_STUBS \
+#   -DUSE_TK_STUBS \
+
 C_INCLUDE_PATH = \
    "-I/usr/include:-I/usr/local/include"
 
 # these shell commands track down libtcl and libtk
+#tclLib=$(shell find /*/lib* -name libtclstub*.a 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
+#tkLib=$(shell find /*/lib* -name libtkstub*.a 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
+
 tclLib=$(shell find /*/lib* -name libtcl*.so 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
 tkLib=$(shell find /*/lib* -name libtk*.so 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
 
@@ -85,7 +96,7 @@ all: guiFreezeTB.c.$O
 guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
 	$(CC) -o guiFreezeTB.c.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
-$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.$O
+$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
 	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
 
 $(freezeTB)freezeTB.$O: $(freezeTB)freezeTB.c $(freezeTB)freezeTBPaths.$O $(freezeTBObjs)
@@ -182,8 +193,8 @@ $(tbSpol)spolST.$O: $(tbSpol)spolST.c $(tbSpol)spolST.h  $(tbSpol)tbSpolDefs.h $
 	$(CC) -o $(tbSpol)spolST.$O -c $(C_FLAGS) $(tbSpol)spolST.c
 
 install:
-	mv $(NAME) $(PREFIX);
-	chmod a+x $(PREFIX)/$(NAME);
+	cp $(NAME) $(PREFIX)
+	chmod a+x $(PREFIX)/$(NAME)
 
 clean:
 	rm $(objFiles) $(freezeTBObjs);
