@@ -1,5 +1,0 @@
-#b ampMapCounts.c:7
-#b ampMapCounts.c:83
-#b ampMapCounts.c:118
-b ampMapCounts.c:114
-r -sam full.sam -no-sup-tbl

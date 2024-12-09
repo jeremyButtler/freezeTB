@@ -1,4 +1,0 @@
-Catalogue of mutations in Mycobacterium tuberculosis complex and their association with drug resistance,
-second edition. Geneva: World Health Organization; 2023. Licence: CC BY-NC-SA 3.0 IGO.
-
-https://github.com/GTB-tbsequencing/mutation-catalogue-2023/tree/main/Final%20Result%20Files

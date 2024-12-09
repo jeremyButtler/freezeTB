@@ -1,3 +1,0 @@
-b readIdSubsample.h:298
-
-r -sam ../generalLib/ontPrimReads-map.sam

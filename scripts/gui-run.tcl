@@ -46,7 +46,7 @@
    # required input
    variable glob_fqIn "" ;
    variable glob_dirOut "" ;
-   variable glob_prefix "Hufflepuff" ;
+   variable glob_prefix "FTB_output" ;
 
    # read filtering settings
    variable glob_mask 0 ;    # mask primer sites

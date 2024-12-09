@@ -520,7 +520,7 @@ mixedInfectTK = tkframe(optionsTK, borderwidth = 2);
 #   - tcl global variables
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-PREFIX_TCL = tclVar("Hufflepuff");
+PREFIX_TCL = tclVar("FTB_output");
 ADJ_COORDS_BL_TCL = tclVar(0); # Ajdust coordiantes
 ADJ_COORDS_REF_TCL = tclVar("NC000962.3");
 

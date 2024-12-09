@@ -150,14 +150,7 @@
 
 #define def_lenFileName_freezeTB 1024
 
-signed char *def_prefix_freezeTB = (schar *) "Hufflepuff";
-   /*this is here to tweak Tara's nose a bit.
-   `   She is an Harry Potter Ravenclaw fan. I figure
-   `   Ravenclaw is the worst thing other then Slytherin,
-   `   which is evil.
-   */
-
-
+signed char *def_prefix_freezeTB = (schar *) "FTB_output";
 signed char *def_depthFlag_freezeTB = (schar *) "tb";
 
 /*-------------------------------------------------------\
