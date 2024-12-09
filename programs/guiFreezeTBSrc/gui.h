@@ -8,7 +8,7 @@
 static signed char *
    glob_guiScript_gui =
    (signed char *)
-   "\n\
+" \n\
    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n\
    # gui SOF: Start Of File                            \n\
    #   - freezeTB gui in tcltk (copy to guiFreezeTB.c) \n\
@@ -80,8 +80,6 @@ static signed char *
                                                        \n\
    variable glob_depthImg [image create photo -file \"\"] ;\n\
    variable glob_coverImg [image create photo -file \"\"] ;\n\
-                                                       \n\
-   variable                                            \n\
                                                        \n\
    #***************************************************\n\
    # Header Sec01 Sub02:                               \n\
@@ -469,8 +467,8 @@ static signed char *
    set fq_types {                                      \n\
       { {fastq}    {.fastq}    }                       \n\
       { {fastq}    {.fq}       }                       \n\
-      { {fastq.gz} {.fastq.gz} }                       \n\
-      { {fastq.gz} {.fq.gz}    }                       \n\
+      { {fastq.gz} {.gz} }                             \n\
+      { {fastq.gz} {.gz}    }                          \n\
    } ; # fastq file exentions                          \n\
                                                        \n\
    set fa_types {                                      \n\
@@ -653,7 +651,7 @@ static signed char *
                  ---tk_getOpenFile                     \n\
                     -multiple TRUE                     \n\
                     -title $fqTitle                    \n\
-                    -filetypes $fq_types               \n\
+                    -filetypes $::fq_types             \n\
                  ---                                   \n\
            ] ;                                         \n\
                                                        \n\
@@ -1477,7 +1475,7 @@ static signed char *
            set faFile [                                \n\
               --- tk_getOpenFile                       \n\
                  -title \"select reference (as fasta)\"\n\
-                 -filetypes $fa_types                  \n\
+                 -filetypes $::fa_types                \n\
               ---] ; # find the reference fasta        \n\
                                                        \n\
            if {$faFile eq \"\"} {                      \n\
@@ -1522,7 +1520,7 @@ static signed char *
            set tsvFile [                               \n\
               ---tk_getOpenFile                        \n\
                  -title \"select gene coordinate file\"\n\
-                 -filetypes $tsv_types                 \n\
+                 -filetypes $::tsv_types               \n\
               --- ] ; # find gene coordinates file     \n\
                                                        \n\
            if {$tsvFile eq \"\"} {                     \n\
@@ -1681,7 +1679,7 @@ static signed char *
          set maskFile [                                \n\
             ---tk_getOpenFile                          \n\
                -title \"maksing coordinates\"          \n\
-               -filetypes $tsv_types                   \n\
+               -filetypes $::tsv_types                 \n\
             ---                                        \n\
          ] ;                                           \n\
                                                        \n\
@@ -1769,25 +1767,23 @@ static signed char *
    tk::frame .main.amr.db ;                            \n\
    pack .main.amr.db -anchor w -side top ;             \n\
                                                        \n\
-   tk::label .main.amr.db.lab -text $glob_amrDb        \n\
+   tk::label .main.amr.db.lab -text $glob_amrDb ;      \n\
                                                        \n\
    ---tk::button                                       \n\
       .main.amr.db.but                                 \n\
       -text \"AMR database\"                           \n\
       -command {                                       \n\
    ---                                                 \n\
-         upvar 0 glob_amrDb amrDb ;                    \n\
-                                                       \n\
          set tsvFile [                                 \n\
             ---tk_getOpenFile                          \n\
                -title \"select AMR database\"          \n\
-               -filetypes $tsv_types                   \n\
+               -filetypes $::tsv_types                 \n\
             ---] ;                                     \n\
           if {$tsvFile eq \"\" } {                     \n\
                                                        \n\
           } else {                                     \n\
             .main.amr.db.lab configure -text $tsvFile ;\n\
-            set amrDb $tsvFile ;                       \n\
+            set ::glob_amrDb $tsvFile ;                \n\
           } ; # Else: AMR database input               \n\
      } ; # amr database button                         \n\
                                                        \n\
@@ -1901,12 +1897,10 @@ static signed char *
       -text \"MIRU-VNTR database\"                     \n\
       -command {                                       \n\
    ---                                                 \n\
-         upvar glob_miruDb miruDb ;                    \n\
-                                                       \n\
          set tsvFile [                                 \n\
             ---tk_getOpenFile                          \n\
                -title \"select MIRU-VNTR database\"    \n\
-               -filetypes $tsv_types                   \n\
+               -filetypes $::tsv_types                 \n\
             --- ] ; # get MIRU databse                 \n\
                                                        \n\
          if { $tsvFile eq \"\" } {                     \n\
@@ -1916,7 +1910,7 @@ static signed char *
                configure                               \n\
                -text $tsvFile                          \n\
              ---;                                      \n\
-             set miruDb $tsvFile ;                     \n\
+             set ::glob_miruDb $tsvFile ;              \n\
          } ; # Else: miru database selected            \n\
    } ; # -command get MIRU database                    \n\
                                                        \n\
@@ -1951,7 +1945,7 @@ static signed char *
          set spacerFa [                                \n\
             ---tk_getOpenFile                          \n\
                -title \"spoligotype spacer sequences\" \n\
-               -filetypes $fa_types                    \n\
+               -filetypes $::fa_types                  \n\
             --- ] ; # get spacer sequence fasta file   \n\
                                                        \n\
          if {$spacerFa eq \"\"} {                      \n\
@@ -1996,7 +1990,7 @@ static signed char *
          set spolTsv [                                 \n\
             ---tk_getOpenFile                          \n\
                -title \"spoligotype lineage database\" \n\
-               -filetypes $csv_types                   \n\
+               -filetypes $::csv_types                 \n\
             --- ] ;                                    \n\
                                                        \n\
          if {$spolTsv eq \"\"} {                       \n\

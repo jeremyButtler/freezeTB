@@ -1,5 +1,3 @@
-# note need to install tcl-devel and tk-devel packages
-
 CC=cc
 LD=cc
 
@@ -10,23 +8,39 @@ C_FLAGS = \
    -Wall \
    -Wextra
 
-#C_INCLUDE_PATH = \
-#   "-I/usr/X11/include -I/usr/X11R6/include -I/usr/include -I/usr/local/include -I/opt/homebrew/include/ -I/opt/X11/include"
-C_INCLUDE_PATH = "-I/opt/homebrew/include/tcl-tk"
+# find the tcl libraries on mac
+tclLibRes = $(shell sh TclGetLib.sh)
+tclLib = $(shell cut -f 1 <<< "$(tclLibRes)")
+tclPath = $(shell cut -f 2 <<< "$(tclLibRes)")
 
-# these shell commands track down libtcl and libtk
-tclLib=$(shell find /opt/homebrew/lib -name tcl* 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
-tkLib=$(shell find /opt/homebrew/lib -name tk* 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
+# find the tk libraries on mac
+tkLibRes = $(shell sh TkGetLib.sh)
+tkLib = $(shell cut -f 1 <<< "$(tkLibRes)")
+tkPath = $(shell cut -f 2 <<< "$(tkLibRes)")
+
+
+# remove duplicate library names
+libPath = $(shell printf "%s\n%s\n" "$(tclPath)" "$(tkPath)" | sort | uniq)
+
+# get likley include paths from library names
+includePath = $(shell sh libToInclude.sh "$(libPath)")
+
+C_INCLUDE_PATH = \
+   -I/opt/homebrew/include/X11 \
+   -I/usr/X11/include \
+   $(includePath)
 
 LIBRARY_PATH = \
-   "-L/opt/homebrew/lib"
+   $(libPath) \
+   -L/usr/lib \
+   -L/opt/homebrew/lib/X11 \
+   -L/usr/X11 \
+   -L/usr/X11R6
 
 LD_FLAGS = \
    -lX11 \
    -l$(tclLib) \
-   -l$(tkLib) \
-   -lm \
-   -ldl
+   -l$(tkLib)
 
 slash = /
 genLib = ..$(slash)genLib$(slash)
@@ -76,7 +90,7 @@ freezeTBObjs =\
    $(tbAmr)amrST.$O \
    $(tbAmr)drugAry.$O \
    $(tbSpol)spolST.$O \
-   $(tbSpol)spolFind.$O \
+   $(tbSpol)spolFind.$O
 
 all: guiFreezeTB.c.$O
 	$(LD) -o $(NAME) $(LIBRARY_PATH) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
@@ -84,7 +98,7 @@ all: guiFreezeTB.c.$O
 guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
 	$(CC) -o guiFreezeTB.c.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
-$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.$O
+$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
 	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
 
 $(freezeTB)freezeTB.$O: $(freezeTB)freezeTB.c $(freezeTB)freezeTBPaths.$O $(freezeTBObjs)

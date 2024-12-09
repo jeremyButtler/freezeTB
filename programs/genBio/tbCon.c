@@ -1185,15 +1185,33 @@ collapse_tbCon(
             `  uiEndRef
             */
 
-         insPerSupF =
-              (float) conNtAryST[uiEndRef].numInsSI
-            / (float) keptReadsSI;
+         if(keptReadsSI > 0)
+            insPerSupF =
+                 (float) conNtAryST[uiEndRef].numInsSI
+               / (float) keptReadsSI;
+         else
+            insPerSupF = 0;
 
-         delPerSupF =
-              (float) conNtAryST[uiEndRef].numDelSI
-            / (float) conNtAryST[uiEndRef].ntKeptSI;
+         if(conNtAryST[uiEndRef].ntKeptSI > 0)
+            delPerSupF =
+                 (float) conNtAryST[uiEndRef].numDelSI
+               / (float) conNtAryST[uiEndRef].ntKeptSI;
+         else
+            delPerSupF = 0;
 
-         snpPerSupF = 1 - delPerSupF;
+         nonMaskBaseUI = conNtAryST[uiRef].numASI;
+         nonMaskBaseUI += conNtAryST[uiRef].numTSI;
+         nonMaskBaseUI += conNtAryST[uiRef].numGSI;
+         nonMaskBaseUI += conNtAryST[uiRef].numCSI;
+
+         snpPerSupF = nonMaskBaseUI;
+         nonMaskBaseUI += conNtAryST[uiRef].numDelSI;
+
+
+         if(nonMaskBaseUI > 0)
+            snpPerSupF /= (float) nonMaskBaseUI;
+         else
+            snpPerSupF = 0;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
          + Fun13 Sec04 Sub02 Cat03:
@@ -1447,17 +1465,22 @@ collapse_tbCon(
             `  uiRef
             */
 
-         insPerSupF =
-              (float) conNtAryST[uiRef].numInsSI
-            / (float) keptReadsSI;
+         if(keptReadsSI > 0)
+            insPerSupF =
+                 (float) conNtAryST[uiRef].numInsSI
+               / (float) keptReadsSI;
+         else
+            insPerSupF = 0;
 
          /*For deletions an masked base is equivlent to no
          `   support
          */
-         delPerSupF = (float) conNtAryST[uiRef].numDelSI;
-
-         delPerSupF /=
-            (float) conNtAryST[uiRef].ntKeptSI;
+         if(conNtAryST[uiRef].numDelSI > 0)
+            delPerSupF =
+                 (float) conNtAryST[uiRef].numDelSI
+               / (float) conNtAryST[uiRef].ntKeptSI;
+         else
+            delPerSupF = 0;
 
          /*Find the number of non-anonymous bases
          `   For tbCon all anonymous bases are N's (masked)
@@ -1469,7 +1492,12 @@ collapse_tbCon(
 
          snpPerSupF = nonMaskBaseUI;
          nonMaskBaseUI += conNtAryST[uiRef].numDelSI;
-         snpPerSupF /= (float) nonMaskBaseUI;
+
+
+         if(nonMaskBaseUI > 0)
+            snpPerSupF /= (float) nonMaskBaseUI;
+         else
+            snpPerSupF = 0;
 
          /***********************************************\
          * Fun13 Sec05 Sub02:
@@ -1993,15 +2021,33 @@ noFragCollapse_tbCon(
          `  uiRef
          */
 
-      insPerSupF =
-           (float) conNtAryST[uiRef].numInsSI
-         / (float) keptReadsSI;
+      if(keptReadsSI > 0)
+         insPerSupF =
+              (float) conNtAryST[uiRef].numInsSI
+            / (float) keptReadsSI;
+      else
+         insPerSupF = 0;
 
-      delPerSupF =
-           (float) conNtAryST[uiRef].numDelSI
-         / (float) conNtAryST[uiRef].ntKeptSI;
+      if(conNtAryST[uiRef].ntKeptSI > 0)
+         delPerSupF =
+              (float) conNtAryST[uiRef].numDelSI
+            / (float) conNtAryST[uiRef].ntKeptSI;
+      else
+         delPerSupF = 0;
 
-      snpPerSupF = 1 - delPerSupF;
+      nonMaskBaseUI = conNtAryST[uiRef].numASI;
+      nonMaskBaseUI += conNtAryST[uiRef].numTSI;
+      nonMaskBaseUI += conNtAryST[uiRef].numGSI;
+      nonMaskBaseUI += conNtAryST[uiRef].numCSI;
+
+      snpPerSupF = nonMaskBaseUI;
+      nonMaskBaseUI += conNtAryST[uiRef].numDelSI;
+
+
+      if(nonMaskBaseUI > 0)
+         snpPerSupF /= (float) nonMaskBaseUI;
+      else
+         snpPerSupF = 0;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun14 Sec04 Sub01 Cat03:
@@ -2292,17 +2338,22 @@ noFragCollapse_tbCon(
          `  startSI
          */
 
-      insPerSupF =
-           (float) conNtAryST[startSI].numInsSI
-         / (float) keptReadsSI;
+      if(keptReadsSI > 0)
+         insPerSupF =
+              (float) conNtAryST[startSI].numInsSI
+            / (float) keptReadsSI;
+      else
+         insPerSupF = 0;
 
       /*For deletions an masked base is equivlent to no
       `   support
       */
-      delPerSupF = (float) conNtAryST[startSI].numDelSI;
-
-      delPerSupF /=
-         (float) conNtAryST[startSI].ntKeptSI;
+      if(conNtAryST[uiRef].ntKeptSI > 0)
+         delPerSupF =
+              (float) conNtAryST[startSI].numDelSI
+            / (float) conNtAryST[startSI].ntKeptSI;
+      else
+         delPerSupF = 0;
 
       /*Find the number of non-anonymous bases
       `   For tbCon all anonymous bases are N's (masked)
@@ -2314,7 +2365,11 @@ noFragCollapse_tbCon(
 
       snpPerSupF = nonMaskBaseUI;
       nonMaskBaseUI += conNtAryST[startSI].numDelSI;
-      snpPerSupF /= (float) nonMaskBaseUI;
+
+      if(nonMaskBaseUI > 0)
+         snpPerSupF /= (float) nonMaskBaseUI;
+      else
+         snpPerSupF = 0;
 
       /**************************************************\
       * Fun14 Sec05 Sub03:

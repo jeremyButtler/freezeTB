@@ -1107,13 +1107,16 @@ cluster_edClust(
    while(numReadsSL >= clustSetSTPtr->minDepthUI)
    { /*Loop: cluster reads*/
 
-      fprintf(
-         stderr,
-         "\r%07li ",
-         numReadsSL
-      ); /*update on how many reads left*/
+      #ifdef P_STATUS
+         fprintf(
+            stderr,
+            "\r%07li ",
+            numReadsSL
+         ); /*update on how many reads left*/
 
-      fflush(stderr);
+         fflush(stderr);
+         /*plan9 treats carriage return as actual code*/
+      #endif
 
       /**************************************************\
       * Fun05 Sec04 Sub02:

@@ -7,41 +7,47 @@
 '     - holds the system specs
 '   o .c fun01: cpStr_osST:
 '     - copy a string to a pointer
-'   o fun02: getCpuBit_osST
+'   o fun02: getCpuBit_specs_osST
 '     - finds if 64/32/16/8 bit OS
-'   o fun03: getOS_osST
+'   o fun03: getOS_specs_osST
 '     - checks for compiled OS using OS macros (non-user
 '       supplied)
-'   o fun04: getCpu_osST
+'   o fun04: getCpu_specs_osST
 '     - gets system cpu information and for ARM adds in
 '       simd (based on cpu version)
-'   o fun05: getSIMD_osST
+'   o fun05: getSIMD_specs_osST
 '     - gets intel simd type using compiler macros and
 '       sets default SMID to scalar
-'   o fun06: blank_specs_osST
+'   o fun06: getEndin_specs_osST
+'     - gets if cpu is big or little endin
+'   o fun07: blank_specs_osST
 '     - blanks all values in an specs_osST struct
-'   o fun07: init_specs_osST
+'   o fun08: init_specs_osST
 '     - initializes all values in a specs_osST struct to 0
-'   o fun08: freeStack_specs_osST
+'   o fun09: freeStack_specs_osST
 '     - frees variables in a specs_osST struct
-'   o fun09: freeHeap_specs_osST
+'   o fun10: freeHeap_specs_osST
 '     - frees a specs_osST struct
-'   o fun10: setup_specs_osST
+'   o fun11: setup_specs_osST
 '     - setups a specs_osST struct; memory allocate +specs
-'   o fun11: mk_specs_osST
+'   o fun12: mk_specs_osST
 '     - makes and returns heap allocated specs_osST struct
-'   o fun12: addOS_specs_osST
+'   o fun13: addOS_specs_osST
 '     - adds an os to the os list in a specs_osST struct
-'   o fun13: addCpu_specs_osST
+'   o fun14: addCpu_specs_osST
 '     - adds a cpu to the cpu list in a specs_osST struct
 '       and for ARM cpus adds if has simd support (by 
 '       cpu version)
-'   o fun14: addSIMD_specs_osST
+'   o fun15: addSIMD_specs_osST
 '     - adds a SIMD to simd list in a specs_osST struct
-'   o fun15: addBit_specs_osST
+'   o fun16: addBit_specs_osST
 '     - add cpu bit size to osBitUS in specs_osST struct
-'   o fun16: addFlag_specs_osST
+'   o fun17: addEndin_specs_osST
+'     - add if big end in or small end in
+'   o fun18: addFlag_specs_osST
 '     - uses flags to add a value into a specs_osST struct
+'   o fun19: phelp_specs_osST
+'     - prints input part of help message for osST
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -106,6 +112,9 @@
 #define def_cpuType_osST 1 /*cpu type*/
 #define def_lastCPU_osST 2 /*any cpu*/
 
+#define def_bigEndIn_osST 1    /*big endin cpu*/
+#define def_littleEndIn_osST 2 /*little endin cpu*/
+
 /*-------------------------------------------------------\
 | ST01: specs_osST
 |   - holds the system specs
@@ -126,10 +135,11 @@ typedef struct specs_osST
    unsigned char sizeCPUAryUC[def_maxCPU_osST];
 
    unsigned short osBitUS;  /*only number allowed here*/
+   unsigned char endinUC;/*1 if big end OS*/
 }specs_osST;
 
 /*-------------------------------------------------------\
-| Fun02: getCpuBit_osST
+| Fun02: getCpuBit_specs_osST
 |   - finds if 64/32/16/8 bit OS
 | Input:
 |   - osSTPtr:
@@ -137,12 +147,12 @@ typedef struct specs_osST
 | Output:
 \-------------------------------------------------------*/
 void
-getCpuBit_osST(
+getCpuBit_specs_osST(
    struct specs_osST *osSTPtr
 );
 
 /*-------------------------------------------------------\
-| Fun03: getOS_osST
+| Fun03: getOS_specs_osST
 |   - checks for compiled OS using compiler macros
 | Input:
 |   - osSTPtr:
@@ -160,12 +170,12 @@ getCpuBit_osST(
 |     o def_memErr_osST for memory errors
 \-------------------------------------------------------*/
 signed char
-getOS_osST(
+getOS_specs_osST(
    struct specs_osST *osSTPtr
 );
 
 /*-------------------------------------------------------\
-| Fun04: getCpu_osST
+| Fun04: getCpu_specs_osST
 |   - gets system cpu information and for ARM adds in
 |     simd (based on cpu version)
 | Input:
@@ -188,12 +198,12 @@ getOS_osST(
 |      https://stackoverflow.com/questions/152016/detecting-cpu-architecture-compile-time
 \-------------------------------------------------------*/
 signed char
-getCpu_osST(
+getCpu_specs_osST(
    struct specs_osST *osSTPtr
 );
 
 /*-------------------------------------------------------\
-| Fun05: getSIMD_osST
+| Fun05: getSIMD_specs_osST
 |   - gets intel simd type using compiler macros and sets
 |     default SMID to scalar
 | Input:
@@ -218,12 +228,33 @@ getCpu_osST(
 |      assumed)
 \-------------------------------------------------------*/
 signed char
-getSIMD_osST(
+getSIMD_specs_osST(
    struct specs_osST *osSTPtr
 );
 
 /*-------------------------------------------------------\
-| Fun06: blank_specs_osST
+| Fun06: getEndin_specs_osST
+|   - gets if cpu is big or little endin
+| Input:
+|   - osSTPtr:
+|     o pointer to specs_osST struct to add endin to
+| Output:
+|   - Modifies:
+|     o endinUC in osSTPtr to be def_bigEndin_osST if
+|       cpu is big endin
+|     o endinUC in osSTPtr to be def_littleEndin_osST if
+|       cpu is little endin
+| Note:
+|   - trick is from stack overflow
+|     https://stackoverflow.com/questions/12791864/c-program-to-check-little-vs-big-endin
+\-------------------------------------------------------*/
+void
+getEndin_specs_osST(
+   struct specs_osST *osSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun07: blank_specs_osST
 |   - blanks all values in an specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -238,7 +269,7 @@ blank_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun07: init_specs_osST
+| Fun08: init_specs_osST
 |   - initializes all values in a specs_osST struct to 0
 | Input:
 |   - osSTPtr:
@@ -253,7 +284,7 @@ init_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun08: freeStack_specs_osST
+| Fun09: freeStack_specs_osST
 |   - frees variables in a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -268,7 +299,7 @@ freeStack_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun09: freeHeap_specs_osST
+| Fun10: freeHeap_specs_osST
 |   - frees a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -283,7 +314,7 @@ freeHeap_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun10: setup_specs_osST
+| Fun11: setup_specs_osST
 |   - setups a specs_osST struct (memory allocate + specs)
 | Input:
 |   - osSTPtr:
@@ -303,7 +334,7 @@ setup_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun11: mk_specs_osST
+| Fun12: mk_specs_osST
 |   - makes and returns heap allocated specs_osST struct
 | Input:
 | Output:
@@ -315,7 +346,7 @@ struct specs_osST *
 mk_specs_osST(
 );
 /*-------------------------------------------------------\
-| Fun12: addOS_specs_osST
+| Fun13: addOS_specs_osST
 |   - adds an os to the os list in a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -344,7 +375,7 @@ addOS_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun13: addCpu_specs_osST
+| Fun14: addCpu_specs_osST
 |   - adds a cpu to the cpu list in a specs_osST struct
 |     and for ARM cpus adds if has simd support (by cpu 
 |     version)
@@ -373,7 +404,7 @@ addCpu_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun14: addSIMD_specs_osST
+| Fun15: addSIMD_specs_osST
 |   - adds a SIMD to the simd list in a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -404,7 +435,7 @@ addSIMD_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun15: addBit_specs_osST
+| Fun16: addBit_specs_osST
 |   - add cpu bit size to osBitUS in specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -420,7 +451,24 @@ addBit_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun16: addFlag_specs_osST
+| Fun17: addEndin_specs_osST
+|   - add if big end in or small end in
+| Input:
+|   - osSTPtr:
+|     o pointer to a specs_osST struct add endin to
+|   - endinBl:
+|     o 1: for big endin
+|     o 0: for small endin
+| Output:
+\-------------------------------------------------------*/
+void
+addEndin_specs_osST(
+   struct specs_osST *osSTPtr,
+   unsigned char endinBl
+);
+
+/*-------------------------------------------------------\
+| Fun18: addFlag_specs_osST
 |   - uses flags to add a value into a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -439,7 +487,7 @@ addBit_specs_osST(
 |     o 0 for no errors
 |     o def_memErr_osST for memory error
 |     o def_badFlag_osST if invalid flag input
-|     o def_badbit_osST if value for bit flag is
+|     o def_badBit_osST if value for bit flag is
 |       non-numierc or to large
 \-------------------------------------------------------*/
 signed char
@@ -451,7 +499,7 @@ addFlag_specs_osST(
 );
 
 /*-------------------------------------------------------\
-| Fun17: phelp_specs_osST
+| Fun19: phelp_specs_osST
 |   - prints input part of help message for osST
 | Input:
 |   - outFILE:

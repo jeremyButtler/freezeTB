@@ -28,8 +28,8 @@
 #endif
 
 /*tcltk libraries*/
-#include <tcl.h>
 #include <tk.h>
+#include <tcl.h>
 
 #include "../genLib/numToStr.h"
 #include "../genLib/ulCp.h"
@@ -96,7 +96,7 @@
 !   o .c  #include "../tbSpolSrc/spolST.h"
 !   o .c  #include "../tbAmrSrc/amrST.h"
 !   o .c  #include "../tbAmrSrc/drugAry.h"
-\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
 | Gui:
@@ -173,6 +173,7 @@ initTK_guiFreezeTB(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   sint errSI = 0;
    schar *tmpStr = 0;
    schar *cmdHeapStr = 0;
    schar defStr[4096]; /*for setting defaults*/
@@ -182,12 +183,25 @@ initTK_guiFreezeTB(
    ^   - initialize values
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*initialize the interperator for tcl and tk*/
-   if( Tcl_Init(tclInterpSTPtr) == TCL_ERROR)
-      return TCL_ERROR;
+   if( Tcl_Init(tclInterpSTPtr) != TCL_OK)
+   { /*If: failed to initialize tcl*/
+      fprintf(
+         stderr,
+         "Could not initialize interpetor for tcl\n"
+      );
 
-   if( Tk_Init(tclInterpSTPtr) == TCL_ERROR)
       return TCL_ERROR;
+   } /*If: failed to initialize tcl*/
+
+   if( Tk_Init(tclInterpSTPtr) != TCL_OK)
+   { /*If: failed to initialize tk*/
+      fprintf(
+         stderr,
+         "Could not initialize interpetor for tk\n"
+      );
+
+      return TCL_ERROR;
+   } /*If: failed to initialize tk*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec03:
@@ -255,16 +269,22 @@ initTK_guiFreezeTB(
       
    refPath_freezeTBPaths(tmpStr);
 
-   if(
+   errSI =
       Tcl_Eval(
          tclInterpSTPtr,
          (char *) defStr
-      ) == TCL_ERROR
-   ){ /*If: error setting up reference*/
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error setting up reference*/
       fprintf(
          stderr,
-         "reference variable setup error\n"
+         "%s\nreference variable setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+
       );
+
+      return TCL_ERROR;
    } /*If: error setting up reference*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -282,10 +302,22 @@ initTK_guiFreezeTB(
       
    coordPath_freezeTBPaths(tmpStr);
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncoordinate paths setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat03:
@@ -302,10 +334,22 @@ initTK_guiFreezeTB(
       
    amrPath_freezeTBPaths(tmpStr);
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nAMR database paths setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat04:
@@ -322,10 +366,22 @@ initTK_guiFreezeTB(
       
    maskPath_freezeTBPaths(tmpStr);
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nmasking coordinates paths setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat05:
@@ -342,10 +398,22 @@ initTK_guiFreezeTB(
       
    miruPath_freezeTBPaths(tmpStr);
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nMIRU-VNTR database path setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat06:
@@ -362,10 +430,22 @@ initTK_guiFreezeTB(
       
    spolSpacerPath_freezeTBPaths(tmpStr);
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nSpoligo spacer fasta path setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat07:
@@ -382,10 +462,22 @@ initTK_guiFreezeTB(
       
    spolLineagePath_freezeTBPaths(tmpStr);
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nSpoligo lineage databse path setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*****************************************************\
    * Fun03 Sec03 Sub03:
@@ -418,10 +510,22 @@ initTK_guiFreezeTB(
       def_minMapq_tbConDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nmin mapq setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub03 Cat02:
@@ -441,10 +545,22 @@ initTK_guiFreezeTB(
       def_minMedianQ_freezeTBDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nmin median q-score setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub03 Cat03:
@@ -464,10 +580,22 @@ initTK_guiFreezeTB(
       def_minMeanQ_freezeTBDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up reference fasta path*/
+   errSI = 
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nmin mean q-score setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub03 Cat04:
@@ -487,10 +615,22 @@ initTK_guiFreezeTB(
       def_minLen_tbConDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nmin length setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*****************************************************\
    * Fun03 Sec03 Sub04:
@@ -518,10 +658,22 @@ initTK_guiFreezeTB(
       3
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nAMR min percent mapped reads setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*****************************************************\
    * Fun03 Sec03 Sub05:
@@ -554,10 +706,22 @@ initTK_guiFreezeTB(
       def_fudgeLen_tbMiruDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nMIRU-VNTR fudge length error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub05 Cat02:
@@ -578,10 +742,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nspoligotype min percent score error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub05 Cat03:
@@ -601,10 +777,22 @@ initTK_guiFreezeTB(
       def_DRStart_tbSpolDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nspoligoty DR start setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub05 Cat04:
@@ -624,10 +812,22 @@ initTK_guiFreezeTB(
       def_DREnd_tbSpolDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nspoligoty DR end setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*****************************************************\
    * Fun03 Sec03 Sub06:
@@ -664,10 +864,22 @@ initTK_guiFreezeTB(
       def_minDepth_tbConDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nconsensus min depth setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub06 Cat02:
@@ -687,10 +899,22 @@ initTK_guiFreezeTB(
       def_minNtQ_tbConDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nconsensus min base q-score setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub06 Cat03:
@@ -710,10 +934,22 @@ initTK_guiFreezeTB(
       def_minInsQ_tbConDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nconsnesus min ins q-score setuperror\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub06 Cat04:
@@ -734,10 +970,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nconsnesus min %% snp support setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub06 Cat05:
@@ -758,10 +1006,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nconsnesus min %% ins support setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub06 Cat06:
@@ -782,10 +1042,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nconsnesus min %% del support setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*****************************************************\
    * Fun03 Sec03 Sub07:
@@ -818,10 +1090,22 @@ initTK_guiFreezeTB(
       def_minPrintDepth_tbConDefs
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nvariant print min depth setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub07 Cat03:
@@ -842,10 +1126,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nvariant print min base %% sup setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub07 Cat05:
@@ -866,10 +1162,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nvariant print min ins %% sup setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub07 Cat06:
@@ -890,10 +1198,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nvariant print min del %% sup setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*****************************************************\
    * Fun03 Sec03 Sub08:
@@ -946,10 +1266,22 @@ initTK_guiFreezeTB(
       def_minDepth_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster min depth setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat02:
@@ -970,10 +1302,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster min %% depth setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat03:
@@ -993,10 +1337,22 @@ initTK_guiFreezeTB(
       def_minSnpQ_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster min snp q-score setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat04:
@@ -1016,10 +1372,22 @@ initTK_guiFreezeTB(
       def_indelLen_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster min indel length setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat05:
@@ -1040,10 +1408,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster read %% error rate setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat06:
@@ -1064,11 +1444,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
 
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster con %% error rate setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat07:
@@ -1088,10 +1479,22 @@ initTK_guiFreezeTB(
       def_maxVarErrRatio_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster error ration setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat08:
@@ -1111,10 +1514,22 @@ initTK_guiFreezeTB(
       def_windowError_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster window error ration setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat09:
@@ -1134,10 +1549,22 @@ initTK_guiFreezeTB(
       def_window_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster window length setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat10:
@@ -1157,10 +1584,22 @@ initTK_guiFreezeTB(
       def_lenWeight_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster length weight setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat11:
@@ -1181,10 +1620,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster min con %% simularity setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat12:
@@ -1205,10 +1656,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster consensus %% overlap setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat13:
@@ -1229,10 +1692,22 @@ initTK_guiFreezeTB(
       2
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster max con %% simularity setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub08 Cat14:
@@ -1252,10 +1727,22 @@ initTK_guiFreezeTB(
       def_conRebuild_clustST
    );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) defStr
-   ); /*set up global output directory*/
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\ncluster number con rebuilds setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec04:
@@ -1270,13 +1757,25 @@ initTK_guiFreezeTB(
          0  /*want to remove comments*/
       );
 
-   Tcl_Eval(
-      tclInterpSTPtr,
-      (char *) cmdHeapStr
-   );
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) cmdHeapStr
+      );
 
    free(cmdHeapStr);
    cmdHeapStr = 0;
+
+   if(errSI != TCL_OK)
+   { /*If: hadd error*/
+      fprintf(
+         stderr,
+         "%s\ncould not launch freezeTB gui\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: hadd error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec05:
@@ -1313,6 +1812,7 @@ main(
    numArgsSI = tclArgsSI;
 
    tclArgsSI = 0;
+
    /*
    goto cleanUp_main_sec0x;
 

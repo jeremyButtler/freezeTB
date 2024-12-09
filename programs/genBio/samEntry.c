@@ -2795,6 +2795,7 @@ realloc_refs_samEntry(
 |     o FILE pointer to print all headers to (0 no print)
 |   - headStrPtr:
 |     o pointer to c-string to hold non-reference headers
+|     o use null for if not saving headers
 |   - lenHeadULPtr:
 |     o unsigned long with headStrPtr length
 | Output:
@@ -2853,7 +2854,10 @@ getRefLen_samEntry(
 
    blank_refs_samEntry(refSTPtr);
 
-   if(! *headStrPtr)
+   if(! headStrPtr) ;
+      /*not saving headers*/
+
+   else if(! *headStrPtr)
    { /*If: need memory*/
       *headStrPtr = malloc(4096 * sizeof(schar));
 
@@ -3003,8 +3007,9 @@ getRefLen_samEntry(
        *   - copy no reference header
        \*************************************************/
 
-       else
+       else if(headStrPtr)
        { /*Else: is non-reference header*/
+
           if(
                 headBytesUL + samSTPtr->lenExtraUI + 1
              >= *lenHeadULPtr

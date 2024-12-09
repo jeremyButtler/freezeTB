@@ -20,6 +20,10 @@
 #ifndef REMOVE_BLOCKS_AND_COMMENTS_H
 #define REMOVE_BLOCKS_AND_COMMENTS_H
 
+/*keep these values negative*/
+#define def_memErr_rmBlocks -1
+#define def_EOF_rmBlocks -2
+
 /*-------------------------------------------------------\
 | Fun01: str_rmBlocks
 |   - converts blocks in string (---) to single lines

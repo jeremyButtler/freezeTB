@@ -7,41 +7,47 @@
 '     - holds the system specs
 '   o .c fun01: cpStr_osST:
 '     - copy a string to a pointer
-'   o fun02: getCpuBit_osST
+'   o fun02: getCpuBit_specs_osST
 '     - finds if 64/32/16/8 bit OS
-'   o fun03: getOS_osST
+'   o fun03: getOS_specs_osST
 '     - checks for compiled OS using OS macros (non-user
 '       supplied)
-'   o fun04: getCpu_osST
+'   o fun04: getCpu_specs_osST
 '     - gets system cpu information and for ARM adds in
 '       simd (based on cpu version)
-'   o fun05: getSIMD_osST
+'   o fun05: getSIMD_specs_osST
 '     - gets intel simd type using compiler macros and
 '       sets default SMID to scalar
-'   o fun06: blank_specs_osST
+'   o fun06: specs_osST
+'     - gets if cpu is big or little endin
+'   o fun07: blank_specs_osST
 '     - blanks all values in an specs_osST struct
-'   o fun07: init_specs_osST
+'   o fun08: init_specs_osST
 '     - initializes all values in a specs_osST struct to 0
-'   o fun08: freeStack_specs_osST
+'   o fun09: freeStack_specs_osST
 '     - frees variables in a specs_osST struct
-'   o fun09: freeHeap_specs_osST
+'   o fun10: freeHeap_specs_osST
 '     - frees a specs_osST struct
-'   o fun10: setup_specs_osST
+'   o fun11: setup_specs_osST
 '     - setups a specs_osST struct; memory allocate +specs
-'   o fun11: mk_specs_osST
+'   o fun12: mk_specs_osST
 '     - makes and returns heap allocated specs_osST struct
-'   o fun12: addOS_specs_osST
+'   o fun13: addOS_specs_osST
 '     - adds an os to the os list in a specs_osST struct
-'   o fun13: addCpu_specs_osST
+'   o fun14: addCpu_specs_osST
 '     - adds a cpu to the cpu list in a specs_osST struct
 '       and for ARM cpus adds if has simd support (by 
 '       cpu version)
-'   o fun14: addSIMD_specs_osST
+'   o fun15: addSIMD_specs_osST
 '     - adds a SIMD to simd list in a specs_osST struct
-'   o fun15: addBit_specs_osST
+'   o fun16: addBit_specs_osST
 '     - add cpu bit size to osBitUS in specs_osST struct
-'   o fun16: addFlag_specs_osST
+'   o fun17: addEndin_specs_osST
+'     - add if big end in or small end in
+'   o fun18: addFlag_specs_osST
 '     - uses flags to add a value into a specs_osST struct
+'   o fun19: phelp_specs_osST
+'     - prints input part of help message for osST
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -290,7 +296,7 @@ cpStr_osST(
 } /*addStr_osST*/
 
 /*-------------------------------------------------------\
-| Fun02: getCpuBit_osST
+| Fun02: getCpuBit_specs_osST
 |   - finds if 64/32/16/8 bit OS
 | Input:
 |   - osSTPtr:
@@ -298,7 +304,7 @@ cpStr_osST(
 | Output:
 \-------------------------------------------------------*/
 void
-getCpuBit_osST(
+getCpuBit_specs_osST(
    struct specs_osST *osSTPtr
 ){
 
@@ -313,10 +319,10 @@ getCpuBit_osST(
    /*unsigned longs should most of the time be limited to
    `   the maximum value in an OS
    */
-} /*getCpuBit_osST*/
+} /*getCpuBit_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun03: getOS_osST
+| Fun03: getOS_specs_osST
 |   - checks for compiled OS using compiler macros
 | Input:
 |   - osSTPtr:
@@ -334,7 +340,7 @@ getCpuBit_osST(
 |     o def_memErr_osST for memory errors
 \-------------------------------------------------------*/
 signed char
-getOS_osST(
+getOS_specs_osST(
    struct specs_osST *osSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun03 TOC:
@@ -1360,10 +1366,10 @@ getOS_osST(
       ) return def_memErr_osST;
 
       return 0;
-} /*getOS_osST*/
+} /*getOS_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun04: getCpu_osST
+| Fun04: getCpu_specs_osST
 |   - gets system cpu information and for ARM adds in
 |     simd (based on cpu version)
 | Input:
@@ -1386,7 +1392,7 @@ getOS_osST(
 |      https://stackoverflow.com/questions/152016/detecting-cpu-architecture-compile-time
 \-------------------------------------------------------*/
 signed char
-getCpu_osST(
+getCpu_specs_osST(
    struct specs_osST *osSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun04 TOC:
@@ -1465,6 +1471,7 @@ getCpu_osST(
                )
             ) return def_memErr_osST;
 
+            osSTPtr->osBitUS = 32;
             break;
          /*386 (x86 cpu, 32 bit)*/
 
@@ -1475,6 +1482,8 @@ getCpu_osST(
 
          case '6':
          /*68000 or 68020*/
+
+            osSTPtr->osBitUS = 32; /*both are 32 bit*/
 
             if(
               cpStr_osST(
@@ -1516,6 +1525,8 @@ getCpu_osST(
 
          case 'm':
          /*Case: mips*/
+            osSTPtr->osBitUS = 32;
+
             if(
                cpStr_osST(
                  &osSTPtr->cpuAryStr[def_cpuVer_osST],
@@ -1534,6 +1545,11 @@ getCpu_osST(
 
          case 'p':
          /*Case: power cpu*/
+            if(tmpStr[5] == '6')
+               osSTPtr->osBitUS = 64; /*power64*/
+            else
+               osSTPtr->osBitUS = 32; /*power\0*/
+
             if(
                cpStr_osST(
                  &osSTPtr->cpuAryStr[def_cpuType_osST],
@@ -1552,6 +1568,11 @@ getCpu_osST(
 
          case 's':
          /*Case: sparc and spim cpus*/
+            if(tmpStr[6] == '6')
+               osSTPtr->osBitUS = 64; /*sparc64*/
+            else
+               osSTPtr->osBitUS = 32; /*sparc\0*/
+
             if(tmpStr[2] == 'a')
             { /*If: sparc CPU*/
                if(
@@ -1599,6 +1620,8 @@ getCpu_osST(
          /*Case: amd64/arm/arm64*/
             if(tmpStr[1] == 'm')
             { /*If: amd64 cpu*/
+              osSTPtr->osBitUS = 64;
+
               if(
                cpStr_osST(
                   &osSTPtr->cpuAryStr[def_cpuType_osST],
@@ -1624,15 +1647,18 @@ getCpu_osST(
             ) return def_memErr_osST;
 
             if(tmpStr[3] != '6')
+            { /*If: 32 bit arm cpu (not 64 bit)*/
+               osSTPtr->osBitUS = 32;
                break;
-               /*not 64 bit arm*/
+            } /*If: 32 bit arm cpu (not 64 bit)*/
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
             + Fun04 Sec01 Sub06 Cat03:
             +   - arm 64 bit (arm8) detection + neon simd
             \+++++++++++++++++++++++++++++++++++++++++++*/
 
-            /*64 bit arm cpu*/
+            osSTPtr->osBitUS = 64;
+
             if(
                cpStr_osST(
                  &osSTPtr->cpuAryStr[def_cpuVer_osST],
@@ -3227,10 +3253,10 @@ getCpu_osST(
       ) return def_memErr_osST;
 
       return 0;
-} /*getCpu_osST*/
+} /*getCpu_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun05: getSIMD_osST
+| Fun05: getSIMD_specs_osST
 |   - gets intel simd type using compiler macros and sets
 |     default SMID to scalar
 | Input:
@@ -3255,7 +3281,7 @@ getCpu_osST(
 |      assumed)
 \-------------------------------------------------------*/
 signed char
-getSIMD_osST(
+getSIMD_specs_osST(
    struct specs_osST *osSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun05 TOC:
@@ -4214,10 +4240,43 @@ getSIMD_osST(
    ) return def_memErr_osST;
 
    return 0;
-} /*getSIMD_osST*/
+} /*getSIMD_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun06: blank_specs_osST
+| Fun06: getEndin_specs_osST
+|   - gets if cpu is big or little endin
+| Input:
+|   - osSTPtr:
+|     o pointer to specs_osST struct to add endin to
+| Output:
+|   - Modifies:
+|     o endinUC in osSTPtr to be def_bigEndin_osST if
+|       cpu is big endin
+|     o endinUC in osSTPtr to be def_littleEndin_osST if
+|       cpu is little endin
+| Note:
+|   - trick is from stack overflow
+|     https://stackoverflow.com/questions/12791864/c-program-to-check-little-vs-big-endin
+\-------------------------------------------------------*/
+void
+getEndin_specs_osST(
+   struct specs_osST *osSTPtr
+){
+   int testSI = 1;
+   char *endSCPtr = (char *) &testSI;
+
+   if( *endSCPtr )
+      osSTPtr->endinUC = def_littleEndIn_osST;
+   else
+      osSTPtr->endinUC = def_bigEndIn_osST;
+
+   /*In the stack overflow it was mentioned pointers were
+   `  used to avoid compiler fixing assignment
+   */
+} /*specs_osST*/
+
+/*-------------------------------------------------------\
+| Fun07: blank_specs_osST
 |   - blanks all values in an specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -4233,6 +4292,7 @@ blank_specs_osST(
    unsigned char ucCnt = 0;
 
    osSTPtr->osBitUS = 0;
+   osSTPtr->endinUC = 0;
 
    for(
       ucCnt = 0;
@@ -4280,7 +4340,7 @@ blank_specs_osST(
 } /*blank_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun07: init_specs_osST
+| Fun08: init_specs_osST
 |   - initializes all values in a specs_osST struct to 0
 | Input:
 |   - osSTPtr:
@@ -4324,7 +4384,7 @@ init_specs_osST(
 } /*init_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun08: freeStack_specs_osST
+| Fun09: freeStack_specs_osST
 |   - frees variables in a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -4392,7 +4452,7 @@ freeStack_specs_osST(
 } /*freeStack_sepcs_osST*/
 
 /*-------------------------------------------------------\
-| Fun09: freeHeap_specs_osST
+| Fun10: freeHeap_specs_osST
 |   - frees a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -4413,7 +4473,7 @@ freeHeap_specs_osST(
 } /*freeHeap_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun10: setup_specs_osST
+| Fun11: setup_specs_osST
 |   - setups a specs_osST struct (memory allocate + specs)
 | Input:
 |   - osSTPtr:
@@ -4431,18 +4491,18 @@ signed char
 setup_specs_osST(
    struct specs_osST *osSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun10 TOC:
+   ' Fun11 TOC:
    '   - setups a specs_osST struct
-   '   o fun10 sec01:
+   '   o fun11 sec01:
    '     - variable declaration + clearing old data
-   '   o fun10 sec02:
+   '   o fun11 sec02:
    '     - allocate memory
-   '   o fun10 sec03:
+   '   o fun11 sec03:
    '     - get system specs (from macros) + return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec01:
+   ^ Fun11 Sec01:
    ^   - variable declaration + clearing old data
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4450,7 +4510,7 @@ setup_specs_osST(
    freeStack_specs_osST(osSTPtr);/*calls init_specs_osST*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec02:
+   ^ Fun11 Sec02:
    ^   - allocate memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4458,7 +4518,7 @@ setup_specs_osST(
       malloc(def_osDepth_osST * sizeof(signed char *));
 
    if(! osSTPtr->osAryStr)
-      goto memErr_fun10_sec0x;
+      goto memErr_fun11_sec0x;
 
    for(
       ucCnt = 0;
@@ -4471,7 +4531,7 @@ setup_specs_osST(
       malloc(def_maxSIMD_osST * sizeof(signed char *));
 
    if(! osSTPtr->simdAryStr)
-      goto memErr_fun10_sec0x;
+      goto memErr_fun11_sec0x;
 
    for(
       ucCnt = 0;
@@ -4484,7 +4544,7 @@ setup_specs_osST(
       malloc(def_maxCPU_osST * sizeof(signed char *));
 
    if(! osSTPtr->cpuAryStr)
-      goto memErr_fun10_sec0x;
+      goto memErr_fun11_sec0x;
 
    for(
       ucCnt = 0;
@@ -4493,33 +4553,34 @@ setup_specs_osST(
    ) osSTPtr->cpuAryStr[ucCnt] = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec03:
+   ^ Fun11 Sec03:
    ^   - get system specs (from macros) + return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*get system specs*/
-   getCpuBit_osST(osSTPtr);
+   getEndin_specs_osST(osSTPtr);
+   getCpuBit_specs_osST(osSTPtr);
 
-   if(getSIMD_osST(osSTPtr))
-      goto memErr_fun10_sec0x;
+   if(getSIMD_specs_osST(osSTPtr))
+      goto memErr_fun11_sec0x;
 
    /*cpu is after simd because ARM simd (neon/arm6)
    `  support is detected by OS not compiler flags
    */
-   if(getCpu_osST(osSTPtr))
-      goto memErr_fun10_sec0x;
+   if(getCpu_specs_osST(osSTPtr))
+      goto memErr_fun11_sec0x;
 
-   if(getOS_osST(osSTPtr))
-      goto memErr_fun10_sec0x;
+   if(getOS_specs_osST(osSTPtr))
+      goto memErr_fun11_sec0x;
 
    return 0;
 
-   memErr_fun10_sec0x:;
+   memErr_fun11_sec0x:;
       return def_memErr_osST;
 } /*setup_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun11: mk_specs_osST
+| Fun12: mk_specs_osST
 |   - makes and returns heap allocated specs_osST struct
 | Input:
 | Output:
@@ -4535,27 +4596,27 @@ mk_specs_osST(
    retHeapST = malloc(sizeof(specs_osST));
 
    if(! retHeapST)
-      goto memErr_fun11;
+      goto memErr_fun12;
 
    init_specs_osST(retHeapST);
 
    if(setup_specs_osST(retHeapST))
-      goto memErr_fun11;
+      goto memErr_fun12;
 
-   goto ret_fun11;
+   goto ret_fun12;
 
-   memErr_fun11:;
+   memErr_fun12:;
       if(retHeapST)
          freeHeap_specs_osST(retHeapST);
       retHeapST = 0;
-      goto ret_fun11;
+      goto ret_fun12;
 
-   ret_fun11:;
+   ret_fun12:;
       return retHeapST;
 } /*mk_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun12: addOS_specs_osST
+| Fun13: addOS_specs_osST
 |   - adds an os to the os list in a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -4582,18 +4643,18 @@ addOS_specs_osST(
    signed char *osStr,
    signed char levSC
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun12 TOC:
+   ' Fun13 TOC:
    '   - adds OS to os list in a specs_osST struct
-   '   o fun12 sec01:
+   '   o fun13 sec01:
    '     - add os to user specified level (not -1)
-   '   o fun12 sec02:
+   '   o fun13 sec02:
    '     - level not specified, find os level and add
-   '   o fun12 sec03:
+   '   o fun13 sec03:
    '     - add all os and return (level = -1 only)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec01:
+   ^ Fun13 Sec01:
    ^   - add os to user specified level (not -1)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4618,24 +4679,24 @@ addOS_specs_osST(
    } /*If: user wanted a specific level*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec02:
+   ^ Fun13 Sec02:
    ^   - level not specified find OS level and add
-   ^   o fun12 sec02 sub01:
+   ^   o fun13 sec02 sub01:
    ^     - blank all os levels (except all level)
-   ^   o fun12 sec02 sub02:
+   ^   o fun13 sec02 sub02:
    ^     - android OS
-   ^   o fun12 sec02 sub03:
+   ^   o fun13 sec02 sub03:
    ^     - linux OS
-   ^   o fun12 sec02 sub04:
+   ^   o fun13 sec02 sub04:
    ^     - mac OS
-   ^   o fun12 sec02 sub05:
+   ^   o fun13 sec02 sub05:
    ^     - bsd OS
-   ^   o fun12 sec02 sub06:
+   ^   o fun13 sec02 sub06:
    ^     - bsd OS
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub01:
+   * Fun13 Sec02 Sub01:
    *   - blank os levels
    \*****************************************************/
 
@@ -4649,7 +4710,7 @@ addOS_specs_osST(
       osSTPtr->osAryStr[def_groupOS_osST][0] = '\0';
 
    /*****************************************************\
-   * Fun12 Sec02 Sub02:
+   * Fun13 Sec02 Sub02:
    *   - android OS
    \*****************************************************/
 
@@ -4685,7 +4746,7 @@ addOS_specs_osST(
    } /*If: android OS*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub03:
+   * Fun13 Sec02 Sub03:
    *   - linux OS
    \*****************************************************/
 
@@ -4714,7 +4775,7 @@ addOS_specs_osST(
    } /*Else If: linux OS*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub04:
+   * Fun13 Sec02 Sub04:
    *   - mac OS
    \*****************************************************/
 
@@ -4743,22 +4804,22 @@ addOS_specs_osST(
    } /*Else If: mac OS*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub05:
+   * Fun13 Sec02 Sub05:
    *   - bsd OS
-   *   o fun12 sec02 sub05 cat01:
+   *   o fun13 sec02 sub05 cat01:
    *     - openbsd OS
-   *   o fun12 sec02 sub05 cat02:
+   *   o fun13 sec02 sub05 cat02:
    *     - freebsd OS
-   *   o fun12 sec02 sub05 cat03:
+   *   o fun13 sec02 sub05 cat03:
    *     - netbsd OS
-   *   o fun12 sec02 sub05 cat04:
+   *   o fun13 sec02 sub05 cat04:
    *     - drgonflyebsd OS
-   *   o fun12 sec02 sub05 cat05:
+   *   o fun13 sec02 sub05 cat05:
    *     - bsd OS
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun12 Sec02 Sub05 Cat01:
+   + Fun13 Sec02 Sub05 Cat01:
    +   - openbsd OS
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4794,7 +4855,7 @@ addOS_specs_osST(
    } /*Else If: openbsd OS*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun12 Sec02 Sub05 Cat02:
+   + Fun13 Sec02 Sub05 Cat02:
    +   - freebsd OS
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4830,7 +4891,7 @@ addOS_specs_osST(
    } /*Else If: freebsd OS*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun12 Sec02 Sub05 Cat03:
+   + Fun13 Sec02 Sub05 Cat03:
    +   - netbsd OS
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4866,7 +4927,7 @@ addOS_specs_osST(
    } /*Else If: netbsd OS*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun12 Sec02 Sub05 Cat04:
+   + Fun13 Sec02 Sub05 Cat04:
    +   - dragonflyebsd OS
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4902,7 +4963,7 @@ addOS_specs_osST(
    } /*Else If: dragonflybsd OS*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun12 Sec02 Sub05 Cat05:
+   + Fun13 Sec02 Sub05 Cat05:
    +   - bsd (general) OS
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4930,7 +4991,7 @@ addOS_specs_osST(
    } /*Else If: bsd (general) OS*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub06:
+   * Fun13 Sec02 Sub06:
    *   - os with only group level
    \*****************************************************/
 
@@ -4950,7 +5011,7 @@ addOS_specs_osST(
    } /*Else: OS does not have subgroup or variant*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec03:
+   ^ Fun13 Sec03:
    ^   - add all os group label in and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4966,7 +5027,7 @@ addOS_specs_osST(
 } /*addOS_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun13: addCpu_specs_osST
+| Fun14: addCpu_specs_osST
 |   - adds a cpu to the cpu list in a specs_osST struct
 |     and for ARM cpus adds if has simd support (by cpu 
 |     version)
@@ -4993,20 +5054,20 @@ addCpu_specs_osST(
    signed char *cpuStr,
    signed char levSC
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun13 TOC:
+   ' Fun14 TOC:
    '   - adds cpu to os list in a specs_osST struct
-   '   o fun13 sec01:
+   '   o fun14 sec01:
    '     - add cpu to user specified level (not -1)
-   '   o fun13 sec02:
+   '   o fun14 sec02:
    '     - find cpu level and check if arm (levSC < 0)
-   '   o fun13 sec03:
+   '   o fun14 sec03:
    '     - if ont arm cpu, add as type cpu (levSC < 0)
-   '   o fun13 sec04:
+   '   o fun14 sec04:
    '     - add all cpu flag in (levSC < 0) and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun13 Sec01:
+   ^ Fun14 Sec01:
    ^   - add cpu to user specified level (not -1)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5031,14 +5092,14 @@ addCpu_specs_osST(
    } /*If: user wanted a specific level*/
  
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun13 Sec02:
+   ^ Fun14 Sec02:
    ^   - find cpu level and add (check if ARM)
-   ^   o fun13 sec02 sub01:
+   ^   o fun14 sec02 sub01:
    ^     - detect if is AMR cpu (has version) add ARM type
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun13 Sec02 Sub01:
+   * Fun14 Sec02 Sub01:
    *   - detect if is AMR cpu (has version) add ARM type
    \*****************************************************/
 
@@ -5046,7 +5107,7 @@ addCpu_specs_osST(
          (cpuStr[0] & ~32) != 'A'
       || (cpuStr[1] & ~32) != 'R'
       || (cpuStr[2] & ~32) != 'M'
-   ) goto addCpuType_fun13_sec03;
+   ) goto addCpuType_fun14_sec03;
      /*not an ARM cpu*/
 
    if(
@@ -5058,26 +5119,26 @@ addCpu_specs_osST(
    ) return def_memErr_osST;
 
    /*****************************************************\
-   * Fun13 Sec02 Sub02:
+   * Fun14 Sec02 Sub02:
    *   - detect if is AMR cpu (has version) add ARM type
-   *   o fun13 sec02 sub02 cat01:
+   *   o fun14 sec02 sub02 cat01:
    *     - arm version 2 + start switch
-   *   o fun13 sec02 sub02 cat02:
+   *   o fun14 sec02 sub02 cat02:
    *     - arm version 3
-   *   o fun13 sec02 sub02 cat03:
+   *   o fun14 sec02 sub02 cat03:
    *     - arm version4
-   *   o fun13 sec02 sub02 cat04:
+   *   o fun14 sec02 sub02 cat04:
    *     - arm version 5
-   *   o fun13 sec02 sub02 cat05:
+   *   o fun14 sec02 sub02 cat05:
    *     - arm version 6 and arm6 simd
-   *   o fun13 sec02 sub02 cat06:
+   *   o fun14 sec02 sub02 cat06:
    *     - arm version 7 and neon + aarch32 (neon32)
-   *   o fun13 sec02 sub02 cat07:
+   *   o fun14 sec02 sub02 cat07:
    *     - arm version 8 and neon + aarch64 (neon64)
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun13 Sec02 Sub02 Cat01:
+   + Fun14 Sec02 Sub02 Cat01:
    +   - arm version 2 + start switch
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5097,7 +5158,7 @@ addCpu_specs_osST(
       /*Case: ARM version 2*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun13 Sec02 Sub02 Cat02:
+      + Fun14 Sec02 Sub02 Cat02:
       +   - arm version 3
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5115,7 +5176,7 @@ addCpu_specs_osST(
       /*Case: ARM version 3*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun13 Sec02 Sub02 Cat03:
+      + Fun14 Sec02 Sub02 Cat03:
       +   - arm version 4
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5133,7 +5194,7 @@ addCpu_specs_osST(
       /*Case: ARM version 4*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun13 Sec02 Sub02 Cat04:
+      + Fun14 Sec02 Sub02 Cat04:
       +   - arm version 5
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5151,7 +5212,7 @@ addCpu_specs_osST(
       /*Case: ARM version 5*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun13 Sec02 Sub02 Cat05:
+      + Fun14 Sec02 Sub02 Cat05:
       +   - arm version 6 + arm6 simd
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5192,7 +5253,7 @@ addCpu_specs_osST(
       /*Case: ARM version 6*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun13 Sec02 Sub02 Cat06:
+      + Fun14 Sec02 Sub02 Cat06:
       +   - arm version 7 + neon aarch 32
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5238,7 +5299,7 @@ addCpu_specs_osST(
       /*Case: ARM version 7*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun13 Sec02 Sub02 Cat07:
+      + Fun14 Sec02 Sub02 Cat07:
       +   - arm version 8 + neon aarch 64
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5284,23 +5345,23 @@ addCpu_specs_osST(
       /*Case: ARM version 8*/
    } /*Switch: check ARM cpu version*/
 
-   goto allCpu_fun13_sec04;
+   goto allCpu_fun14_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun13 Sec03:
+   ^ Fun14 Sec03:
    ^   - non-ARM cpu add as type (no version)
-   ^   o fun13 sec03 sub01:
+   ^   o fun14 sec03 sub01:
    ^     - check if moterola 68000 cpu
-   ^   o fun13 sec03 sub02:
+   ^   o fun14 sec03 sub02:
    ^     - check if moterola 68020 cpu
-   ^   o fun13 sec03 sub03:
+   ^   o fun14 sec03 sub03:
    ^     - else cpu without version
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   addCpuType_fun13_sec03:;
+   addCpuType_fun14_sec03:;
 
    /*****************************************************\
-   * Fun13 Sec03 Sub01:
+   * Fun14 Sec03 Sub01:
    *   - check if moterola 68000 cpu
    \*****************************************************/
 
@@ -5326,11 +5387,11 @@ addCpu_specs_osST(
          )
       ) return def_memErr_osST;
 
-      goto allCpu_fun13_sec04;
+      goto allCpu_fun14_sec04;
    } /*If: moterola 68000 cpu*/
 
    /*****************************************************\
-   * Fun13 Sec03 Sub02:
+   * Fun14 Sec03 Sub02:
    *   - check if moterola 68020 cpu
    \*****************************************************/
 
@@ -5356,11 +5417,11 @@ addCpu_specs_osST(
          )
       ) return def_memErr_osST;
 
-      goto allCpu_fun13_sec04;
+      goto allCpu_fun14_sec04;
    } /*If: moterola 68020 cpu*/
 
    /*****************************************************\
-   * Fun13 Sec03 Sub03:
+   * Fun14 Sec03 Sub03:
    *   - else cpu without version
    \*****************************************************/
 
@@ -5379,14 +5440,14 @@ addCpu_specs_osST(
       ) return def_memErr_osST;
    } /*Else If: not all cpu flags*/
 
-   goto allCpu_fun13_sec04;
+   goto allCpu_fun14_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun13 Sec04:
+   ^ Fun14 Sec04:
    ^   - add all cpu type flag
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   allCpu_fun13_sec04:;
+   allCpu_fun14_sec04:;
 
       if(
          cpStr_osST(
@@ -5400,7 +5461,7 @@ addCpu_specs_osST(
 } /*addCpu_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun14: addSIMD_specs_osST
+| Fun15: addSIMD_specs_osST
 |   - adds a SIMD to the simd list in a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -5429,26 +5490,26 @@ addSIMD_specs_osST(
    signed char *simdStr,
    signed char levSC
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun14 TOC:
+   ' Fun15 TOC:
    '   - adds simd to simd list in a specs_osST struct
-   '   o fun14 sec01:
+   '   o fun15 sec01:
    '     - add simd to user specified level (not -1)
-   '   o fun14 sec02:
-   '     - level unspecified, find simd level and add
-   '   o fun14 sec03:
-   '     - if unkown simd (levSC < 0)
-   '   o fun14 sec04:
+   '   o fun15 sec02:
+   '     - level un15specified, find simd level and add
+   '   o fun15 sec03:
+   '     - if un15kown simd (levSC < 0)
+   '   o fun15 sec04:
    '     - add simd cpu flag in (levSC < 0) and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun14 Sec01:
+   ^ Fun15 Sec01:
    ^   - add simd to user specified level (not -1)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(levSC > def_lastSIMD_osST)
       return def_levelErr_osST;
-      /*unkown simd level*/
+      /*un15kown simd level*/
 
    if(levSC == def_lastSIMD_osST)
       levSC = def_5thSIMD_osST;
@@ -5457,9 +5518,9 @@ addSIMD_specs_osST(
    { /*If: user wanted a specific level*/
       if(
          cpStr_osST(
-            &osSTPtr->simdAryStr[(unsigned char) levSC],
-            &osSTPtr->sizeSIMDAryUC[(unsigned char) levSC],
-            simdStr
+           &osSTPtr->simdAryStr[(unsigned char) levSC],
+           &osSTPtr->sizeSIMDAryUC[(unsigned char) levSC],
+           simdStr
          )
       ) return def_memErr_osST;
 
@@ -5467,20 +5528,20 @@ addSIMD_specs_osST(
    } /*If: user wanted a specific level*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun14 Sec02:
-   ^   - level unspecified, find simd level and add
-   ^   o fun14 sec02 sub01:
+   ^ Fun15 Sec02:
+   ^   - level un15specified, find simd level and add
+   ^   o fun15 sec02 sub01:
    ^     - blank simd values
-   ^   o fun14 sec02 sub02:
+   ^   o fun15 sec02 sub02:
    ^     - x86/amd64 simd
-   ^   o fun14 sec02 sub03:
+   ^   o fun15 sec02 sub03:
    ^     - neon simd
-   ^   o fun14 sec02 sub04:
+   ^   o fun15 sec02 sub04:
    ^     - simds with only one level (exluding last (all))
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun14 Sec02 Sub01:
+   * Fun15 Sec02 Sub01:
    *   - blank simd values
    \*****************************************************/
 
@@ -5503,23 +5564,23 @@ addSIMD_specs_osST(
       osSTPtr->simdAryStr[def_5thSIMD_osST][0] = '\0';
 
    /*****************************************************\
-   * Fun14 Sec02 Sub02:
+   * Fun15 Sec02 Sub02:
    *   - x86/amd64 simd
-   *   o fun14 sec02 sub02 cat01:
+   *   o fun15 sec02 sub02 cat01:
    *     - avx512
-   *   o fun14 sec02 sub02 cat02:
+   *   o fun15 sec02 sub02 cat02:
    *     - avx2
-   *   o fun14 sec02 sub02 cat03:
+   *   o fun15 sec02 sub02 cat03:
    *     - sse4
-   *   o fun14 sec02 sub02 cat04:
+   *   o fun15 sec02 sub02 cat04:
    *     - ss3
-   *   o fun14 sec02 sub02 cat05:
+   *   o fun15 sec02 sub02 cat05:
    *     - sse2
    *   o note: sse is only a single level (sub04 handles)
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub02 Cat01:
+   + Fun15 Sec02 Sub02 Cat01:
    +   - avx512
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5580,7 +5641,7 @@ addSIMD_specs_osST(
    } /*If: avx512*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub02 Cat02:
+   + Fun15 Sec02 Sub02 Cat02:
    +   - avx2
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5633,7 +5694,7 @@ addSIMD_specs_osST(
    } /*Else If: avx2*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub02 Cat03:
+   + Fun15 Sec02 Sub02 Cat03:
    +   - sse4
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5678,7 +5739,7 @@ addSIMD_specs_osST(
    } /*Else If: sse4*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub02 Cat04:
+   + Fun15 Sec02 Sub02 Cat04:
    +   - sse3
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5715,7 +5776,7 @@ addSIMD_specs_osST(
    } /*Else If: sse3*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub02 Cat05:
+   + Fun15 Sec02 Sub02 Cat05:
    +   - sse2
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5744,16 +5805,16 @@ addSIMD_specs_osST(
    } /*Else If: sse2*/
 
    /*****************************************************\
-   * Fun14 Sec02 Sub03:
+   * Fun15 Sec02 Sub03:
    *   - ARM neon simd
-   *   o fun14 sec02 sub03 cat01:
+   *   o fun15 sec02 sub03 cat01:
    *     - neon32 (neon for aarch32)
-   *   o fun14 sec02 sub03 cat02:
+   *   o fun15 sec02 sub03 cat02:
    *     - neon64 (neon for aarch64)
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub03 Cat01:
+   + Fun15 Sec02 Sub03 Cat01:
    +   - neon32 (neon for aarch32)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5782,7 +5843,7 @@ addSIMD_specs_osST(
    } /*Else If: neon32*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun14 Sec02 Sub03 Cat02:
+   + Fun15 Sec02 Sub03 Cat02:
    +   - neon64 (neon for aarch64)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5810,7 +5871,7 @@ addSIMD_specs_osST(
    } /*Else If: neon64*/
 
    /*****************************************************\
-   * Fun14 Sec02 Sub03:
+   * Fun15 Sec02 Sub03:
    *   - simds with only one level (exluding last (all))
    \*****************************************************/
 
@@ -5830,7 +5891,7 @@ addSIMD_specs_osST(
    } /*Else: simd only has one level (not scalar)*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun14 Sec02:
+   ^ Fun15 Sec02:
    ^   - add default scalar simd in
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5846,7 +5907,7 @@ addSIMD_specs_osST(
 } /*addSIMD_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun15: addBit_specs_osST
+| Fun16: addBit_specs_osST
 |   - add cpu bit size to osBitUS in specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -5864,7 +5925,26 @@ addBit_specs_osST(
 } /*addBig_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun16: addFlag_specs_osST
+| Fun17: addEndin_specs_osST
+|   - add if big end in or small end in
+| Input:
+|   - osSTPtr:
+|     o pointer to a specs_osST struct add endin to
+|   - endinBl:
+|     o 1: for big endin
+|     o 0: for small endin
+| Output:
+\-------------------------------------------------------*/
+void
+addEndin_specs_osST(
+   struct specs_osST *osSTPtr,
+   unsigned char endinBl
+){
+   osSTPtr->endinUC = endinBl;
+} /*addBig_specs_osST*/
+
+/*-------------------------------------------------------\
+| Fun18: addFlag_specs_osST
 |   - uses flags to add a value into a specs_osST struct
 | Input:
 |   - osSTPtr:
@@ -5883,7 +5963,7 @@ addBit_specs_osST(
 |     o 0 for no errors
 |     o def_memErr_osST for memory error
 |     o def_badFlag_osST if invalid flag input
-|     o def_badbit_osST if value for bit flag is
+|     o defbadBit_osST if value for bit flag is
 |       non-numierc or to large
 \-------------------------------------------------------*/
 signed char
@@ -5893,48 +5973,50 @@ addFlag_specs_osST(
    signed char *valStr,
    signed int *argSIPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun16 TOC:
+   ' Fun18 TOC:
    '   - uses flags to add value into specs_osST struct
-   '   o fun16 sec01:
+   '   o fun18 sec01:
    '     - os flags
-   '   o fun16 sec02:
+   '   o fun18 sec02:
    '     - cpu flags
-   '   o fun16 sec03:
+   '   o fun18 sec03:
    '     - simd flags
-   '   o fun16 sec04:
+   '   o fun18 sec04:
    '     - cpu bit type
-   '   o fun16 sec05:
+   '   o fun18 sec05:
+   '     - add endin in
+   '   o fun18 sec06:
    '     - blank stat flag
-   '   o fun16 sec06:
+   '   o fun18 sec07:
    '     - unkown flag
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    signed char *tmpStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec01:
+   ^ Fun18 Sec01:
    ^   - os flags
-   ^   o fun16 sec01 sub01:
+   ^   o fun18 sec01 sub01:
    ^     - os flags; any OS
-   ^   o fun16 sec01 sub02:
+   ^   o fun18 sec01 sub02:
    ^     - specific os input
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun16 Sec01 Sub01:
+   * Fun18 Sec01 Sub01:
    *   - os flags; any OS
-   *   o fun16 sec01 sub01 cat01:
+   *   o fun18 sec01 sub01 cat01:
    *     - no level any os
-   *   o fun16 sec01 sub01 cat02:
+   *   o fun18 sec01 sub01 cat02:
    *     - variant level any os
-   *   o fun16 sec01 sub01 cat03:
+   *   o fun18 sec01 sub01 cat03:
    *     - subgroup level any os
-   *   o fun16 sec01 sub01 cat04:
+   *   o fun18 sec01 sub01 cat04:
    *     - group level any os
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub01 Cat01:
+   + Fun18 Sec01 Sub01 Cat01:
    +   - no level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5959,7 +6041,7 @@ addFlag_specs_osST(
    } /*If: os flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub01 Cat02:
+   + Fun18 Sec01 Sub01 Cat02:
    +   - variant level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5984,7 +6066,7 @@ addFlag_specs_osST(
    } /*If: os variant flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub01 Cat03:
+   + Fun18 Sec01 Sub01 Cat03:
    +   - subgroup level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6009,7 +6091,7 @@ addFlag_specs_osST(
    } /*If: os subgroup flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub01 Cat04:
+   + Fun18 Sec01 Sub01 Cat04:
    +   - group level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6035,50 +6117,50 @@ addFlag_specs_osST(
    } /*If: os group flag*/
 
    /*****************************************************\
-   * Fun16 Sec01 Sub02:
+   * Fun18 Sec01 Sub02:
    *   - specific os input
-   *   o fun16 sec01 sub02 cat01:
+   *   o fun18 sec01 sub02 cat01:
    *     - droid (android) os flag
-   *   o fun16 sec01 sub02 cat02:
+   *   o fun18 sec01 sub02 cat02:
    *     - linux os flag
-   *   o fun16 sec01 sub02 cat03:
+   *   o fun18 sec01 sub02 cat03:
    *     - mac os flag
-   *   o fun16 sec01 sub02 cat04:
+   *   o fun18 sec01 sub02 cat04:
    *     - openbsd os flag
-   *   o fun16 sec01 sub02 cat05:
+   *   o fun18 sec01 sub02 cat05:
    *     - freebsd os flag
-   *   o fun16 sec01 sub02 cat06:
+   *   o fun18 sec01 sub02 cat06:
    *     - netbsd os flag
-   *   o fun16 sec01 sub02 cat07:
+   *   o fun18 sec01 sub02 cat07:
    *     - dragonflye bsd os flag
-   *   o fun16 sec01 sub02 cat08:
+   *   o fun18 sec01 sub02 cat08:
    *     - bsd os flag
-   *   o fun16 sec01 sub02 cat09:
+   *   o fun18 sec01 sub02 cat09:
    *     - unix os flag
-   *   o fun16 sec01 sub02 cat10:
+   *   o fun18 sec01 sub02 cat10:
    *     - amiga os flag
-   *   o fun16 sec01 sub02 cat11:
+   *   o fun18 sec01 sub02 cat11:
    *     - beOS os
-   *   o fun16 sec01 sub02 cat12:
+   *   o fun18 sec01 sub02 cat12:
    *     - sun os
-   *   o fun16 sec01 sub02 cat13:
+   *   o fun18 sec01 sub02 cat13:
    *     - morph os
-   *   o fun16 sec01 sub02 cat14:
+   *   o fun18 sec01 sub02 cat14:
    *     - syllable os
-   *   o fun16 sec01 sub02 cat15:
+   *   o fun18 sec01 sub02 cat15:
    *     - hurd os
-   *   o fun16 sec01 sub02 cat16:
+   *   o fun18 sec01 sub02 cat16:
    *     - xinuos os
-   *   o fun16 sec01 sub02 cat17:
+   *   o fun18 sec01 sub02 cat17:
    *     - plan9 os
-   *   o fun16 sec01 sub02 cat18:
+   *   o fun18 sec01 sub02 cat18:
    *     - win (windows) os
-   *   o fun16 sec01 sub02 cat19:
+   *   o fun18 sec01 sub02 cat19:
    *     - cygwin (windows lynx enviroment)
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat01:
+   + Fun18 Sec01 Sub02 Cat01:
    +   - droid (android) os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6101,7 +6183,7 @@ addFlag_specs_osST(
    } /*If: android os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat02:
+   + Fun18 Sec01 Sub02 Cat02:
    +   - linux os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6124,7 +6206,7 @@ addFlag_specs_osST(
    } /*If: linux os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat03:
+   + Fun18 Sec01 Sub02 Cat03:
    +   - mac os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6147,7 +6229,7 @@ addFlag_specs_osST(
    } /*If: mac os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat04:
+   + Fun18 Sec01 Sub02 Cat04:
    +   - openbsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6170,7 +6252,7 @@ addFlag_specs_osST(
    } /*If: openbsd os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat05:
+   + Fun18 Sec01 Sub02 Cat05:
    +   - freebsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6193,7 +6275,7 @@ addFlag_specs_osST(
    } /*If: freebsd os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat06:
+   + Fun18 Sec01 Sub02 Cat06:
    +   - netbsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6216,7 +6298,7 @@ addFlag_specs_osST(
    } /*If: netbsd os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat07:
+   + Fun18 Sec01 Sub02 Cat07:
    +   - dragonflyebsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6239,7 +6321,7 @@ addFlag_specs_osST(
    } /*If: dragonflyebsd os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat08:
+   + Fun18 Sec01 Sub02 Cat08:
    +   - bsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6262,7 +6344,7 @@ addFlag_specs_osST(
    } /*If: bsd os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat09:
+   + Fun18 Sec01 Sub02 Cat09:
    +   - unix os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6285,7 +6367,7 @@ addFlag_specs_osST(
    } /*If: unix os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat10:
+   + Fun18 Sec01 Sub02 Cat10:
    +   - amiga os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6308,7 +6390,7 @@ addFlag_specs_osST(
    } /*If: amiga os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat11:
+   + Fun18 Sec01 Sub02 Cat11:
    +   - beOS os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6331,7 +6413,7 @@ addFlag_specs_osST(
    } /*If: beos os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat12:
+   + Fun18 Sec01 Sub02 Cat12:
    +   - sun os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6354,7 +6436,7 @@ addFlag_specs_osST(
    } /*If: sun os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat13:
+   + Fun18 Sec01 Sub02 Cat13:
    +   - morph os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6377,7 +6459,7 @@ addFlag_specs_osST(
    } /*If: morph os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat14:
+   + Fun18 Sec01 Sub02 Cat14:
    +   - syllable os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6400,7 +6482,7 @@ addFlag_specs_osST(
    } /*If: syllable os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat15:
+   + Fun18 Sec01 Sub02 Cat15:
    +   - hurd os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6423,7 +6505,7 @@ addFlag_specs_osST(
    } /*If: hurd os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat16:
+   + Fun18 Sec01 Sub02 Cat16:
    +   - xinuos os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6446,7 +6528,7 @@ addFlag_specs_osST(
    } /*If: xinuos os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat17:
+   + Fun18 Sec01 Sub02 Cat17:
    +   - plan9 os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6469,7 +6551,7 @@ addFlag_specs_osST(
    } /*If: plan9 os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat18:
+   + Fun18 Sec01 Sub02 Cat18:
    +   - win os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6492,7 +6574,7 @@ addFlag_specs_osST(
    } /*If: win os*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec01 Sub02 Cat19:
+   + Fun18 Sec01 Sub02 Cat19:
    +   - cygwin (windows lynx enviroment)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6515,29 +6597,29 @@ addFlag_specs_osST(
    } /*If: cygwin os*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec02:
+   ^ Fun18 Sec02:
    ^   - cpu flags
-   ^   o fun16 sec01 sub01:
+   ^   o fun18 sec01 sub01:
    ^     - cpu flags; any cpu
-   ^   o fun16 sec01 sub02:
+   ^   o fun18 sec01 sub02:
    ^     - arm cpu flags
-   ^   o fun16 sec01 sub03:
+   ^   o fun18 sec01 sub03:
    ^     - cpu flags; non-arm cpu flags
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun16 Sec02 Sub01:
+   * Fun18 Sec02 Sub01:
    *   - cpu flags; any cpu
-   *   o fun16 sec02 sub01 cat01:
+   *   o fun18 sec02 sub01 cat01:
    *     - no level any cpu
-   *   o fun16 sec02 sub01 cat02:
+   *   o fun18 sec02 sub01 cat02:
    *     - cpu version level; any cpu
-   *   o fun16 sec02 sub01 cat03:
+   *   o fun18 sec02 sub01 cat03:
    *     - cpu type level; any cpu
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub01 Cat01:
+   + Fun18 Sec02 Sub01 Cat01:
    +   - no level any cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6563,7 +6645,7 @@ addFlag_specs_osST(
    } /*If: cpu flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub01 Cat02:
+   + Fun18 Sec02 Sub01 Cat02:
    +   - cpu version level; any cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6589,14 +6671,14 @@ addFlag_specs_osST(
    } /*If: cpu flag; version level*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub01 Cat03:
+   + Fun18 Sec02 Sub01 Cat03:
    +   - cpu type level; any cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(
       ! eqlNull_ulCp(
          flagStr,
-         (signed char *) "-cpu-ver"
+         (signed char *) "-cpu-type"
       )
    ){ /*If: cpu flag; type level*/
       if(! valStr)
@@ -6615,28 +6697,28 @@ addFlag_specs_osST(
    } /*If: cpu flag; type level*/
 
    /*****************************************************\
-   * Fun16 Sec02 Sub02:
+   * Fun18 Sec02 Sub02:
    *   - cpu flags; arm cpu flags
-   *   o fun16 sec02 sub02 cat01:
+   *   o fun18 sec02 sub02 cat01:
    *     - arm 2 cpu input
-   *   o fun16 sec02 sub02 cat02:
+   *   o fun18 sec02 sub02 cat02:
    *     - arm 3 cpu input
-   *   o fun16 sec02 sub02 cat03:
+   *   o fun18 sec02 sub02 cat03:
    *     - arm 4 cpu input
-   *   o fun16 sec02 sub02 cat04:
+   *   o fun18 sec02 sub02 cat04:
    *     - arm 5 cpu input
-   *   o fun16 sec02 sub02 cat05:
+   *   o fun18 sec02 sub02 cat05:
    *     - arm 6 cpu input
-   *   o fun16 sec02 sub02 cat06:
+   *   o fun18 sec02 sub02 cat06:
    *     - arm 7 cpu input
-   *   o fun16 sec02 sub02 cat07:
+   *   o fun18 sec02 sub02 cat07:
    *     - arm 8 cpu input
-   *   o fun16 sec02 sub02 cat08:
+   *   o fun18 sec02 sub02 cat08:
    *     - arm (no version) cpu input
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat01:
+   + Fun18 Sec02 Sub02 Cat01:
    +   - arm 2 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6659,7 +6741,7 @@ addFlag_specs_osST(
    } /*If: arm2 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat02:
+   + Fun18 Sec02 Sub02 Cat02:
    +   - arm 3 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6682,7 +6764,7 @@ addFlag_specs_osST(
    } /*If: arm3 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub04 Cat03:
+   + Fun18 Sec02 Sub04 Cat03:
    +   - arm 4 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6705,7 +6787,7 @@ addFlag_specs_osST(
    } /*If: arm4 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub05 Cat04:
+   + Fun18 Sec02 Sub05 Cat04:
    +   - arm 5 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6728,7 +6810,7 @@ addFlag_specs_osST(
    } /*If: arm5 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub06 Cat05:
+   + Fun18 Sec02 Sub06 Cat05:
    +   - arm 6 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6751,7 +6833,7 @@ addFlag_specs_osST(
    } /*If: arm6 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub07 Cat06:
+   + Fun18 Sec02 Sub07 Cat06:
    +   - arm 7 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6774,7 +6856,7 @@ addFlag_specs_osST(
    } /*If: arm7 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub08 Cat07:
+   + Fun18 Sec02 Sub08 Cat07:
    +   - arm 8 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6797,7 +6879,7 @@ addFlag_specs_osST(
    } /*If: arm8 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat08:
+   + Fun18 Sec02 Sub02 Cat08:
    +   - arm (no version) cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6820,32 +6902,32 @@ addFlag_specs_osST(
    } /*If: arm cpu input*/
 
    /*****************************************************\
-   * Fun16 Sec02 Sub03:
+   * Fun18 Sec02 Sub03:
    *   - cpu flags; non-arm cpu flags
-   *   o fun16 sec02 sub01 cat01:
+   *   o fun18 sec02 sub01 cat01:
    *     - x86/amd64
-   *   o fun16 sec02 sub01 cat02:
+   *   o fun18 sec02 sub01 cat02:
    *     - powerpc
-   *   o fun16 sec02 sub01 cat03:
+   *   o fun18 sec02 sub01 cat03:
    *     - superh
-   *   o fun16 sec02 sub01 cat04:
+   *   o fun18 sec02 sub01 cat04:
    *     - sparc
-   *   o fun16 sec02 sub01 cat05:
+   *   o fun18 sec02 sub01 cat05:
    *     - mips
-   *   o fun16 sec02 sub01 cat06:
+   *   o fun18 sec02 sub01 cat06:
    *     - spim (simulated mips)
-   *   o fun16 sec02 sub01 cat07:
+   *   o fun18 sec02 sub01 cat07:
    *     - riscv
-   *   o fun16 sec02 sub01 cat08:
+   *   o fun18 sec02 sub01 cat08:
    *     - m68k
-   *   o fun16 sec02 sub01 cat09:
+   *   o fun18 sec02 sub01 cat09:
    *     - 68000 cpu (m68k)
-   *   o fun16 sec02 sub01 cat10:
+   *   o fun18 sec02 sub01 cat10:
    *     - 68020 cpu (m68k)
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat01:
+   + Fun18 Sec02 Sub02 Cat01:
    +   - x86/amd64 cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6886,7 +6968,7 @@ addFlag_specs_osST(
    } /*If: x86 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat02:
+   + Fun18 Sec02 Sub02 Cat02:
    +   - powerpc
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6909,7 +6991,7 @@ addFlag_specs_osST(
    } /*If: powerpc cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat03:
+   + Fun18 Sec02 Sub02 Cat03:
    +   - superh
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6932,7 +7014,7 @@ addFlag_specs_osST(
    } /*If: superh cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat04:
+   + Fun18 Sec02 Sub02 Cat04:
    +   - sparc
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6955,7 +7037,7 @@ addFlag_specs_osST(
    } /*If: sparc cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat05:
+   + Fun18 Sec02 Sub02 Cat05:
    +   - mips
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6978,7 +7060,7 @@ addFlag_specs_osST(
    } /*If: mips cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat06:
+   + Fun18 Sec02 Sub02 Cat06:
    +   - spim
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7001,7 +7083,7 @@ addFlag_specs_osST(
    } /*If: spim cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat07:
+   + Fun18 Sec02 Sub02 Cat07:
    +   - riscv
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7024,7 +7106,7 @@ addFlag_specs_osST(
    } /*If: riscv cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat08:
+   + Fun18 Sec02 Sub02 Cat08:
    +   - m68k
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7047,7 +7129,7 @@ addFlag_specs_osST(
    } /*If: m68k cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat09:
+   + Fun18 Sec02 Sub02 Cat09:
    +   - 68000 (m68k)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7070,7 +7152,7 @@ addFlag_specs_osST(
    } /*If: 68000 cpu input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec02 Sub02 Cat10:
+   + Fun18 Sec02 Sub02 Cat10:
    +   - 68020 (m68k)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7093,35 +7175,35 @@ addFlag_specs_osST(
    } /*If: 68020 cpu input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec03:
+   ^ Fun18 Sec03:
    ^   - simd flags
-   ^   o fun16 sec01 sub01:
+   ^   o fun18 sec01 sub01:
    ^     - simd flags; any simd
-   ^   o fun16 sec01 sub02:
+   ^   o fun18 sec01 sub02:
    ^     - specific simd flags
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun16 Sec03 Sub01:
+   * Fun18 Sec03 Sub01:
    *   - simd flags; any simd
-   *   o fun16 sec03 sub01 cat01:
+   *   o fun18 sec03 sub01 cat01:
    *     - no level any simd
-   *   o fun16 sec03 sub01 cat02:
+   *   o fun18 sec03 sub01 cat02:
    *     - 0th level; any simd
-   *   o fun16 sec03 sub01 cat03:
+   *   o fun18 sec03 sub01 cat03:
    *     - 1st level; any simd
-   *   o fun16 sec03 sub01 cat04:
+   *   o fun18 sec03 sub01 cat04:
    *     - 2nd level; any simd
-   *   o fun16 sec03 sub01 cat05:
+   *   o fun18 sec03 sub01 cat05:
    *     - 3rd level; any simd
-   *   o fun16 sec03 sub01 cat06:
+   *   o fun18 sec03 sub01 cat06:
    *     - 4th level; any simd
-   *   o fun16 sec03 sub01 cat07:
+   *   o fun18 sec03 sub01 cat07:
    *     - 5th level; any simd
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub01 Cat01:
+   + Fun18 Sec03 Sub01 Cat01:
    +   - no level any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7147,7 +7229,7 @@ addFlag_specs_osST(
    } /*If: simd flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub01 Cat02:
+   + Fun18 Sec03 Sub01 Cat02:
    +   - 0th level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7173,7 +7255,7 @@ addFlag_specs_osST(
    } /*If: 0th level simd flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec13 Sub11 Cat03:
+   + Fun18 Sec13 Sub11 Cat03:
    +   - 1st level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7199,7 +7281,7 @@ addFlag_specs_osST(
    } /*If: 1st level simd flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec13 Sub11 Cat04:
+   + Fun18 Sec13 Sub11 Cat04:
    +   - 2nd level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7225,7 +7307,7 @@ addFlag_specs_osST(
    } /*If: 2nd level simd flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec13 Sub11 Cat05:
+   + Fun18 Sec13 Sub11 Cat05:
    +   - 3rd level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7251,7 +7333,7 @@ addFlag_specs_osST(
    } /*If: 3rd level simd flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec13 Sub11 Cat06:
+   + Fun18 Sec13 Sub11 Cat06:
    +   - 4th level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7277,7 +7359,7 @@ addFlag_specs_osST(
    } /*If: 4th level simd flag*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec13 Sub11 Cat07:
+   + Fun18 Sec13 Sub11 Cat07:
    +   - 5th level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7303,32 +7385,32 @@ addFlag_specs_osST(
    } /*If: 5th level simd flag*/
 
    /*****************************************************\
-   * Fun16 Sec03 Sub02:
+   * Fun18 Sec03 Sub02:
    *   - specific simd flags
-   *   o fun16 sec03 sub01 cat01:
+   *   o fun18 sec03 sub01 cat01:
    *     - avx512
-   *   o fun16 sec03 sub01 cat02:
+   *   o fun18 sec03 sub01 cat02:
    *     - avx2
-   *   o fun16 sec03 sub01 cat03:
+   *   o fun18 sec03 sub01 cat03:
    *     - sse4
-   *   o fun16 sec03 sub01 cat04:
+   *   o fun18 sec03 sub01 cat04:
    *     - sse3
-   *   o fun16 sec03 sub01 cat05:
+   *   o fun18 sec03 sub01 cat05:
    *     - sse2
-   *   o fun16 sec03 sub01 cat06:
+   *   o fun18 sec03 sub01 cat06:
    *     - sse
-   *   o fun16 sec03 sub01 cat07:
+   *   o fun18 sec03 sub01 cat07:
    *     - arm6
-   *   o fun16 sec03 sub01 cat08:
+   *   o fun18 sec03 sub01 cat08:
    *     - neon32
-   *   o fun16 sec03 sub01 cat09:
+   *   o fun18 sec03 sub01 cat09:
    *     - neon64
-   *   o fun16 sec03 sub01 cat10:
+   *   o fun18 sec03 sub01 cat10:
    *     - neon
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat01:
+   + Fun18 Sec03 Sub02 Cat01:
    +   - avx512 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7351,7 +7433,7 @@ addFlag_specs_osST(
    } /*If: avx512*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat02:
+   + Fun18 Sec03 Sub02 Cat02:
    +   - avx2 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7374,7 +7456,7 @@ addFlag_specs_osST(
    } /*If: avx2*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat03:
+   + Fun18 Sec03 Sub02 Cat03:
    +   - sse4 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7397,7 +7479,7 @@ addFlag_specs_osST(
    } /*If: sse4*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat04:
+   + Fun18 Sec03 Sub02 Cat04:
    +   - sse3 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7420,7 +7502,7 @@ addFlag_specs_osST(
    } /*If: sse3*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat05:
+   + Fun18 Sec03 Sub02 Cat05:
    +   - sse2 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7443,7 +7525,7 @@ addFlag_specs_osST(
    } /*If: sse2*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat06:
+   + Fun18 Sec03 Sub02 Cat06:
    +   - sse flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7466,7 +7548,7 @@ addFlag_specs_osST(
    } /*If: sse*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat07:
+   + Fun18 Sec03 Sub02 Cat07:
    +   - arm6 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7489,7 +7571,7 @@ addFlag_specs_osST(
    } /*If: arm6*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat08:
+   + Fun18 Sec03 Sub02 Cat08:
    +   - neon32 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7512,7 +7594,7 @@ addFlag_specs_osST(
    } /*If: neon32*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat09:
+   + Fun18 Sec03 Sub02 Cat09:
    +   - neon64 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7535,7 +7617,7 @@ addFlag_specs_osST(
    } /*If: neon64*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec03 Sub02 Cat10:
+   + Fun18 Sec03 Sub02 Cat10:
    +   - neon flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7558,20 +7640,22 @@ addFlag_specs_osST(
    } /*If: neon*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec04:
+   ^ Fun18 Sec04:
    ^   - cpu bit type
-   ^   o fun16 sec01 sub01:
+   ^   o fun18 sec01 sub01:
    ^     - any bit
-   ^   o fun16 sec01 sub02:
+   ^   o fun18 sec01 sub02:
+   ^     - 8 bit (bulid and everything else will fail here)
+   ^   o fun18 sec01 sub03:
    ^     - 16 bit (bulid will probably fail here)
-   ^   o fun16 sec01 sub03:
+   ^   o fun18 sec01 sub04:
    ^     - 32 bit
-   ^   o fun16 sec01 sub04:
+   ^   o fun18 sec01 sub05:
    ^     - 64 bit
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun16 Sec04 Sub01:
+   * Fun18 Sec04 Sub01:
    *   - any bit
    \*****************************************************/
 
@@ -7600,7 +7684,23 @@ addFlag_specs_osST(
    } /*If:any cpu bit input*/
 
    /*****************************************************\
-   * Fun16 Sec04 Sub02:
+   * Fun18 Sec04 Sub02:
+   *   - 8 bit (bulid and everything else will fail here)
+   \*****************************************************/
+
+   if(
+      ! eqlNull_ulCp(
+         flagStr,
+         (signed char *) "-8bit"
+      )
+   ){ /*If: 8bit*/
+      osSTPtr->osBitUS = 8;
+      ++(*argSIPtr);
+      return 0;
+   } /*If:  8bit*/
+
+   /*****************************************************\
+   * Fun18 Sec04 Sub03:
    *   - 16 bit (bulid will probably fail here)
    \*****************************************************/
 
@@ -7616,7 +7716,7 @@ addFlag_specs_osST(
    } /*If: 16bit*/
 
    /*****************************************************\
-   * Fun32 Sec04 Sub03:
+   * Fun32 Sec04 Sub04:
    *   - 32 bit
    \*****************************************************/
 
@@ -7632,7 +7732,7 @@ addFlag_specs_osST(
    } /*If: 32bit*/
 
    /*****************************************************\
-   * Fun64 Sec04 Sub04:
+   * Fun64 Sec04 Sub05:
    *   - 64 bit
    \*****************************************************/
 
@@ -7648,7 +7748,34 @@ addFlag_specs_osST(
    } /*If: 64bit*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec05:
+   ^ Fun18 Sec05:
+   ^   - add endin in
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(
+      ! eqlNull_ulCp(
+         flagStr,
+         (signed char *) "-big-endin"
+      )
+   ){ /*If: big endin cpu*/
+      osSTPtr->endinUC = def_bigEndIn_osST;
+      ++(*argSIPtr);
+      return 0;
+   } /*If: big endin cpu*/
+
+   if(
+      ! eqlNull_ulCp(
+         flagStr,
+         (signed char *) "-little-endin"
+      )
+   ){ /*If: little endin cpu*/
+      osSTPtr->endinUC = def_littleEndIn_osST;
+      ++(*argSIPtr);
+      return 0;
+   } /*If: little endin cpu*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun18 Sec06:
    ^   - blank stat flag
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7716,7 +7843,7 @@ addFlag_specs_osST(
    } /*If: blanking simd flags*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec06:
+   ^ Fun18 Sec07:
    ^   - unkown flag
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7725,7 +7852,7 @@ addFlag_specs_osST(
 } /*addFlag_specs_osST*/
 
 /*-------------------------------------------------------\
-| Fun17: phelp_specs_osST
+| Fun19: phelp_specs_osST
 |   - prints input part of help message for osST
 | Input:
 |   - outFILE:
@@ -7741,17 +7868,17 @@ phelp_specs_osST(
    void *outFILE,
    signed char *indentStr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun17 TOC:
+   ' Fun19 TOC:
    '   - prints input part of help message of osST
-   '   o fun17 sec01:
+   '   o fun19 sec01:
    '     - os part of help message
-   '   o fun17 sec02:
+   '   o fun19 sec02:
    '     - cpu part of help  message
-   '   o fun17 sec03:
+   '   o fun19 sec03:
    '     - simd flags
-   '   o fun17 sec04:
+   '   o fun19 sec04:
    '     - cpu bit type
-   '   o fun17 sec05:
+   '   o fun19 sec05:
    '     - blanking specs flags
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -7762,24 +7889,24 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec01:
+   ^ Fun19 Sec01:
    ^   - os part of help message
-   ^   o fun17 sec01 sub01:
+   ^   o fun19 sec01 sub01:
    ^     - os specific flags
-   ^   o fun17 sec01 sub02:
+   ^   o fun19 sec01 sub02:
    ^     - specific os input
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun17 Sec01 Sub01:
+   * Fun19 Sec01 Sub01:
    *   - os flags; any OS
-   *   o fun17 sec01 sub01 cat01:
+   *   o fun19 sec01 sub01 cat01:
    *     - no level any os
-   *   o fun17 sec01 sub01 cat02:
+   *   o fun19 sec01 sub01 cat02:
    *     - variant level any os
-   *   o fun17 sec01 sub01 cat03:
+   *   o fun19 sec01 sub01 cat03:
    *     - subgroup level any os
-   *   o fun17 sec01 sub01 cat04:
+   *   o fun19 sec01 sub01 cat04:
    *     - group level any os
    \*****************************************************/
 
@@ -7791,7 +7918,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub01 Cat01:
+   + Fun19 Sec01 Sub01 Cat01:
    +   - no level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7813,7 +7940,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub01 Cat02:
+   + Fun19 Sec01 Sub01 Cat02:
    +   - variant level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7835,7 +7962,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub01 Cat03:
+   + Fun19 Sec01 Sub01 Cat03:
    +   - subgroup level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7857,7 +7984,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub01 Cat04:
+   + Fun19 Sec01 Sub01 Cat04:
    +   - group level any os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7879,45 +8006,45 @@ phelp_specs_osST(
    );
 
    /*****************************************************\
-   * Fun17 Sec01 Sub02:
+   * Fun19 Sec01 Sub02:
    *   - specific os input
-   *   o fun17 sec01 sub02 cat01:
+   *   o fun19 sec01 sub02 cat01:
    *     - droid (android) os flag
-   *   o fun17 sec01 sub02 cat02:
+   *   o fun19 sec01 sub02 cat02:
    *     - linux os flag
-   *   o fun17 sec01 sub02 cat03:
+   *   o fun19 sec01 sub02 cat03:
    *     - mac os flag
-   *   o fun17 sec01 sub02 cat04:
+   *   o fun19 sec01 sub02 cat04:
    *     - openbsd os flag
-   *   o fun17 sec01 sub02 cat05:
+   *   o fun19 sec01 sub02 cat05:
    *     - freebsd os flag
-   *   o fun17 sec01 sub02 cat06:
+   *   o fun19 sec01 sub02 cat06:
    *     - netbsd os flag
-   *   o fun17 sec01 sub02 cat07:
+   *   o fun19 sec01 sub02 cat07:
    *     - dragonflye bsd os flag
-   *   o fun17 sec01 sub02 cat08:
+   *   o fun19 sec01 sub02 cat08:
    *     - bsd os flag
-   *   o fun17 sec01 sub02 cat09:
+   *   o fun19 sec01 sub02 cat09:
    *     - unix os flag
-   *   o fun17 sec01 sub02 cat10:
+   *   o fun19 sec01 sub02 cat10:
    *     - amiga os flag
-   *   o fun17 sec01 sub02 cat11:
+   *   o fun19 sec01 sub02 cat11:
    *     - beOS os
-   *   o fun17 sec01 sub02 cat12:
+   *   o fun19 sec01 sub02 cat12:
    *     - sun os
-   *   o fun17 sec01 sub02 cat13:
+   *   o fun19 sec01 sub02 cat13:
    *     - morph os
-   *   o fun17 sec01 sub02 cat14:
+   *   o fun19 sec01 sub02 cat14:
    *     - syllable os
-   *   o fun17 sec01 sub02 cat15:
+   *   o fun19 sec01 sub02 cat15:
    *     - hurd os
-   *   o fun17 sec01 sub02 cat16:
+   *   o fun19 sec01 sub02 cat16:
    *     - xinuos os
-   *   o fun17 sec01 sub02 cat17:
+   *   o fun19 sec01 sub02 cat17:
    *     - plan9 os
-   *   o fun17 sec01 sub02 cat18:
+   *   o fun19 sec01 sub02 cat18:
    *     - win (windows) os
-   *   o fun17 sec01 sub02 cat19:
+   *   o fun19 sec01 sub02 cat19:
    *     - cygwin (windows lynx enviroment)
    \*****************************************************/
 
@@ -7929,7 +8056,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat01:
+   + Fun19 Sec01 Sub02 Cat01:
    +   - droid (android) os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7951,7 +8078,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat02:
+   + Fun19 Sec01 Sub02 Cat02:
    +   - linux os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7973,7 +8100,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat03:
+   + Fun19 Sec01 Sub02 Cat03:
    +   - mac os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7995,7 +8122,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat04:
+   + Fun19 Sec01 Sub02 Cat04:
    +   - openbsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8017,7 +8144,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat05:
+   + Fun19 Sec01 Sub02 Cat05:
    +   - freebsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8039,7 +8166,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat06:
+   + Fun19 Sec01 Sub02 Cat06:
    +   - netbsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8061,7 +8188,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat07:
+   + Fun19 Sec01 Sub02 Cat07:
    +   - dragonflyebsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8083,7 +8210,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat08:
+   + Fun19 Sec01 Sub02 Cat08:
    +   - bsd os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8105,7 +8232,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat09:
+   + Fun19 Sec01 Sub02 Cat09:
    +   - unix os flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8127,7 +8254,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat10:
+   + Fun19 Sec01 Sub02 Cat10:
    +   - amiga os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8149,7 +8276,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat11:
+   + Fun19 Sec01 Sub02 Cat11:
    +   - beOS os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8171,7 +8298,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat12:
+   + Fun19 Sec01 Sub02 Cat12:
    +   - sun os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8193,7 +8320,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat13:
+   + Fun19 Sec01 Sub02 Cat13:
    +   - morph os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8215,7 +8342,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat14:
+   + Fun19 Sec01 Sub02 Cat14:
    +   - syllable os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8237,7 +8364,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat15:
+   + Fun19 Sec01 Sub02 Cat15:
    +   - hurd os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8259,7 +8386,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat16:
+   + Fun19 Sec01 Sub02 Cat16:
    +   - xinuos os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8281,7 +8408,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat17:
+   + Fun19 Sec01 Sub02 Cat17:
    +   - plan9 os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8303,7 +8430,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat18:
+   + Fun19 Sec01 Sub02 Cat18:
    +   - win os
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8325,7 +8452,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec01 Sub02 Cat19:
+   + Fun19 Sec01 Sub02 Cat19:
    +   - cygwin (windows lynx enviroment)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8347,24 +8474,24 @@ phelp_specs_osST(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec02:
+   ^ Fun19 Sec02:
    ^   - cpu flags
-   ^   o fun17 sec01 sub01:
+   ^   o fun19 sec01 sub01:
    ^     - cpu flags; any cpu
-   ^   o fun17 sec01 sub02:
+   ^   o fun19 sec01 sub02:
    ^     - arm cpu flags
-   ^   o fun17 sec01 sub03:
+   ^   o fun19 sec01 sub03:
    ^     - cpu flags; non-arm cpu flags
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun17 Sec02 Sub01:
+   * Fun19 Sec02 Sub01:
    *   - cpu flags; any cpu
-   *   o fun17 sec02 sub01 cat01:
+   *   o fun19 sec02 sub01 cat01:
    *     - no level any cpu
-   *   o fun17 sec02 sub01 cat02:
+   *   o fun19 sec02 sub01 cat02:
    *     - cpu version level; any cpu
-   *   o fun17 sec02 sub01 cat03:
+   *   o fun19 sec02 sub01 cat03:
    *     - cpu type level; any cpu
    \*****************************************************/
 
@@ -8376,7 +8503,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub01 Cat01:
+   + Fun19 Sec02 Sub01 Cat01:
    +   - no level any cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8398,7 +8525,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub01 Cat02:
+   + Fun19 Sec02 Sub01 Cat02:
    +   - cpu version level; any cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8420,7 +8547,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub01 Cat03:
+   + Fun19 Sec02 Sub01 Cat03:
    +   - cpu type level; any cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8442,23 +8569,23 @@ phelp_specs_osST(
    );
 
    /*****************************************************\
-   * Fun17 Sec02 Sub02:
+   * Fun19 Sec02 Sub02:
    *   - cpu flags; arm cpu flags
-   *   o fun17 sec02 sub02 cat01:
+   *   o fun19 sec02 sub02 cat01:
    *     - arm 2 cpu input
-   *   o fun17 sec02 sub02 cat02:
+   *   o fun19 sec02 sub02 cat02:
    *     - arm 3 cpu input
-   *   o fun17 sec02 sub02 cat03:
+   *   o fun19 sec02 sub02 cat03:
    *     - arm 4 cpu input
-   *   o fun17 sec02 sub02 cat04:
+   *   o fun19 sec02 sub02 cat04:
    *     - arm 5 cpu input
-   *   o fun17 sec02 sub02 cat05:
+   *   o fun19 sec02 sub02 cat05:
    *     - arm 6 cpu input
-   *   o fun17 sec02 sub02 cat06:
+   *   o fun19 sec02 sub02 cat06:
    *     - arm 7 cpu input
-   *   o fun17 sec02 sub02 cat07:
+   *   o fun19 sec02 sub02 cat07:
    *     - arm 8 cpu input
-   *   o fun17 sec02 sub02 cat08:
+   *   o fun19 sec02 sub02 cat08:
    *     - arm (no version) cpu input
    \*****************************************************/
 
@@ -8470,7 +8597,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat01:
+   + Fun19 Sec02 Sub02 Cat01:
    +   - arm 2 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8492,7 +8619,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat02:
+   + Fun19 Sec03 Sub02 Cat02:
    +   - arm 3 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8514,7 +8641,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec04 Sub04 Cat03:
+   + Fun19 Sec04 Sub04 Cat03:
    +   - arm 4 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8536,7 +8663,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec05 Sub05 Cat04:
+   + Fun19 Sec05 Sub05 Cat04:
    +   - arm 5 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8558,7 +8685,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec06 Sub06 Cat05:
+   + Fun19 Sec06 Sub06 Cat05:
    +   - arm 6 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8580,7 +8707,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec07 Sub07 Cat06:
+   + Fun19 Sec07 Sub07 Cat06:
    +   - arm 7 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8602,7 +8729,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec08 Sub08 Cat07:
+   + Fun19 Sec08 Sub08 Cat07:
    +   - arm 8 cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8624,7 +8751,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat08:
+   + Fun19 Sec02 Sub02 Cat08:
    +   - arm (no version) cpu input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8646,32 +8773,32 @@ phelp_specs_osST(
    );
 
    /*****************************************************\
-   * Fun17 Sec02 Sub03:
+   * Fun19 Sec02 Sub03:
    *   - cpu flags; non-arm cpu flags
-   *   o fun17 sec02 sub01 cat01:
+   *   o fun19 sec02 sub01 cat01:
    *     - x86/amd64
-   *   o fun17 sec02 sub01 cat02:
+   *   o fun19 sec02 sub01 cat02:
    *     - powerpc
-   *   o fun17 sec02 sub01 cat03:
+   *   o fun19 sec02 sub01 cat03:
    *     - superh
-   *   o fun17 sec02 sub01 cat04:
+   *   o fun19 sec02 sub01 cat04:
    *     - sparc
-   *   o fun17 sec02 sub01 cat05:
+   *   o fun19 sec02 sub01 cat05:
    *     - mips
-   *   o fun17 sec02 sub01 cat06:
+   *   o fun19 sec02 sub01 cat06:
    *     - spim (simulated mips)
-   *   o fun17 sec02 sub01 cat07:
+   *   o fun19 sec02 sub01 cat07:
    *     - riscv
-   *   o fun17 sec02 sub01 cat08:
+   *   o fun19 sec02 sub01 cat08:
    *     - m68k
-   *   o fun17 sec02 sub01 cat09:
+   *   o fun19 sec02 sub01 cat09:
    *     - 68000 cpu (m68k)
-   *   o fun17 sec02 sub01 cat10:
+   *   o fun19 sec02 sub01 cat10:
    *     - 68020 cpu (m68k)
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat01:
+   + Fun19 Sec02 Sub02 Cat01:
    +   - x86/amd64 cpu
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8693,7 +8820,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat02:
+   + Fun19 Sec02 Sub02 Cat02:
    +   - powerpc
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8715,7 +8842,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat03:
+   + Fun19 Sec02 Sub02 Cat03:
    +   - superh
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8737,7 +8864,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat04:
+   + Fun19 Sec02 Sub02 Cat04:
    +   - sparc
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8759,7 +8886,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat05:
+   + Fun19 Sec02 Sub02 Cat05:
    +   - mips
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8781,7 +8908,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat06:
+   + Fun19 Sec02 Sub02 Cat06:
    +   - spim
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8803,7 +8930,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat07:
+   + Fun19 Sec02 Sub02 Cat07:
    +   - riscv
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8825,7 +8952,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat08:
+   + Fun19 Sec02 Sub02 Cat08:
    +   - m68k
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8847,7 +8974,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat09:
+   + Fun19 Sec02 Sub02 Cat09:
    +   - 68000 (m68k)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8869,7 +8996,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec02 Sub02 Cat10:
+   + Fun19 Sec02 Sub02 Cat10:
    +   - 68020 (m68k)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8891,30 +9018,30 @@ phelp_specs_osST(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec03:
+   ^ Fun19 Sec03:
    ^   - simd flags
-   ^   o fun17 sec01 sub01:
+   ^   o fun19 sec01 sub01:
    ^     - simd flags; any simd
-   ^   o fun17 sec01 sub02:
+   ^   o fun19 sec01 sub02:
    ^     - specific simd flags
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun17 Sec03 Sub01:
+   * Fun19 Sec03 Sub01:
    *   - simd flags; any simd
-   *   o fun17 sec03 sub01 cat01:
+   *   o fun19 sec03 sub01 cat01:
    *     - no level any simd
-   *   o fun17 sec03 sub01 cat02:
+   *   o fun19 sec03 sub01 cat02:
    *     - 0th level; any simd
-   *   o fun17 sec03 sub01 cat03:
+   *   o fun19 sec03 sub01 cat03:
    *     - 1st level; any simd
-   *   o fun17 sec03 sub01 cat04:
+   *   o fun19 sec03 sub01 cat04:
    *     - 2nd level; any simd
-   *   o fun17 sec03 sub01 cat05:
+   *   o fun19 sec03 sub01 cat05:
    *     - 3rd level; any simd
-   *   o fun17 sec03 sub01 cat06:
+   *   o fun19 sec03 sub01 cat06:
    *     - 4th level; any simd
-   *   o fun17 sec03 sub01 cat07:
+   *   o fun19 sec03 sub01 cat07:
    *     - 5th level; any simd
    \*****************************************************/
 
@@ -8926,7 +9053,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub01 Cat01:
+   + Fun19 Sec03 Sub01 Cat01:
    +   - no level any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8948,7 +9075,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub01 Cat02:
+   + Fun19 Sec03 Sub01 Cat02:
    +   - 0th level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8970,7 +9097,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec13 Sub11 Cat03:
+   + Fun19 Sec13 Sub11 Cat03:
    +   - 1st level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8992,7 +9119,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec13 Sub11 Cat04:
+   + Fun19 Sec13 Sub11 Cat04:
    +   - 2nd level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9014,7 +9141,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec13 Sub11 Cat05:
+   + Fun19 Sec13 Sub11 Cat05:
    +   - 3rd level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9036,7 +9163,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec13 Sub11 Cat06:
+   + Fun19 Sec13 Sub11 Cat06:
    +   - 4th level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9058,7 +9185,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec13 Sub11 Cat07:
+   + Fun19 Sec13 Sub11 Cat07:
    +   - 5th level; any simd
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9080,27 +9207,27 @@ phelp_specs_osST(
    );
 
    /*****************************************************\
-   * Fun17 Sec03 Sub02:
+   * Fun19 Sec03 Sub02:
    *   - specific simd flags
-   *   o fun17 sec03 sub01 cat01:
+   *   o fun19 sec03 sub01 cat01:
    *     - avx512
-   *   o fun17 sec03 sub01 cat02:
+   *   o fun19 sec03 sub01 cat02:
    *     - avx2
-   *   o fun17 sec03 sub01 cat03:
+   *   o fun19 sec03 sub01 cat03:
    *     - sse4
-   *   o fun17 sec03 sub01 cat04:
+   *   o fun19 sec03 sub01 cat04:
    *     - sse3
-   *   o fun17 sec03 sub01 cat05:
+   *   o fun19 sec03 sub01 cat05:
    *     - sse2
-   *   o fun17 sec03 sub01 cat06:
+   *   o fun19 sec03 sub01 cat06:
    *     - sse
-   *   o fun17 sec03 sub01 cat07:
+   *   o fun19 sec03 sub01 cat07:
    *     - arm6
-   *   o fun17 sec03 sub01 cat08:
+   *   o fun19 sec03 sub01 cat08:
    *     - neon32
-   *   o fun17 sec03 sub01 cat09:
+   *   o fun19 sec03 sub01 cat09:
    *     - neon64
-   *   o fun17 sec03 sub01 cat10:
+   *   o fun19 sec03 sub01 cat10:
    *     - neon
    \*****************************************************/
 
@@ -9112,7 +9239,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat01:
+   + Fun19 Sec03 Sub02 Cat01:
    +   - avx512 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9134,7 +9261,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat02:
+   + Fun19 Sec03 Sub02 Cat02:
    +   - avx2 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9156,7 +9283,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat03:
+   + Fun19 Sec03 Sub02 Cat03:
    +   - sse4 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9178,7 +9305,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat04:
+   + Fun19 Sec03 Sub02 Cat04:
    +   - sse3 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9200,7 +9327,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat05:
+   + Fun19 Sec03 Sub02 Cat05:
    +   - sse2 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9222,7 +9349,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat06:
+   + Fun19 Sec03 Sub02 Cat06:
    +   - sse flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9244,7 +9371,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat07:
+   + Fun19 Sec03 Sub02 Cat07:
    +   - arm6 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9266,7 +9393,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat08:
+   + Fun19 Sec03 Sub02 Cat08:
    +   - neon32 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9288,7 +9415,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat09:
+   + Fun19 Sec03 Sub02 Cat09:
    +   - neon64 flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9310,7 +9437,7 @@ phelp_specs_osST(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun17 Sec03 Sub02 Cat10:
+   + Fun19 Sec03 Sub02 Cat10:
    +   - neon flag
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9332,15 +9459,15 @@ phelp_specs_osST(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec04:
+   ^ Fun19 Sec04:
    ^   - cpu bit type
-   ^   o fun17 sec01 sub01:
+   ^   o fun19 sec01 sub01:
    ^     - any bit
-   ^   o fun17 sec01 sub02:
+   ^   o fun19 sec01 sub02:
    ^     - 16 bit (bulid will probably fail here)
-   ^   o fun17 sec01 sub03:
+   ^   o fun19 sec01 sub03:
    ^     - 32 bit
-   ^   o fun17 sec01 sub04:
+   ^   o fun19 sec01 sub04:
    ^     - 64 bit
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -9352,7 +9479,7 @@ phelp_specs_osST(
    ); /*catagory for input*/
 
    /*****************************************************\
-   * Fun17 Sec04 Sub01:
+   * Fun19 Sec04 Sub01:
    *   - any bit
    \*****************************************************/
 
@@ -9374,7 +9501,7 @@ phelp_specs_osST(
    );
 
    /*****************************************************\
-   * Fun17 Sec04 Sub02:
+   * Fun19 Sec04 Sub02:
    *   - 16 bit (bulid will probably fail here)
    \*****************************************************/
 
@@ -9425,7 +9552,47 @@ phelp_specs_osST(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec05:
+   ^ Fun19 Sec05:
+   ^   - cpu endin
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "%s%s%s-big-endin: [Optional]\n",
+      indentStr,
+      indentStr,
+      indentStr
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "%s%s%s%so set CPU type to big endin cpu\n",
+      indentStr,
+      indentStr,
+      indentStr,
+      indentStr
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "%s%s%s-little-endin: [Optional]\n",
+      indentStr,
+      indentStr,
+      indentStr
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "%s%s%s%so set CPU type to little endin cpu\n",
+      indentStr,
+      indentStr,
+      indentStr,
+      indentStr
+   );
+
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun19 Sec06:
    ^   - blanking specs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
