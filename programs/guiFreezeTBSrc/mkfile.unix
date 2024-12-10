@@ -12,7 +12,7 @@ C_FLAGS = -O3 -Wall -Wextra
 # these shell commands track down libtcl and libtk
 
 # try to track down included file paths
-C_INCLUDE_PATH = $(bash findIncludePath.sh)
+C_INCLUDE_PATH = $(shell bash findIncludePath.sh)
 
 # these shell scripts track down the libraries
 tkLib=$(shell bash tkGetLib.sh)
@@ -37,7 +37,7 @@ objFiles = \
    $(genBuild)rmBlocks.$O \
    $(freezeTB)freezeTBPaths.$O \
    $(freezeTB)freezeTB.$O \
-   guiFreezeTB.c.$O
+   guiFreezeTB.$O
 
 freezeTBObjs =\
    $(genLib)base10str.$O \
@@ -70,11 +70,12 @@ freezeTBObjs =\
    $(tbSpol)spolST.$O \
    $(tbSpol)spolFind.$O \
 
-all: guiFreezeTB.c.$O
+all: guiFreezeTB.$O
 	$(LD) -o $(NAME) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
 
-guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
-	$(CC) -o guiFreezeTB.c.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
+
+guiFreezeTB.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
+	$(CC) -o guiFreezeTB.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
 $(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
 	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_FLAGS) $(genBuild)rmBlocks.c

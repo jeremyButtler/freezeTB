@@ -10,6 +10,8 @@ all:
 	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C programs
 
 install:
+	if [ ! -d "$PREFIX" ] ; then mkdir -p "$PREFIX"; fi
+	if [ ! -d "$DB_PREFIX" ] ; then mkdir -p "$DB_PREFIX"; fi
 	make PREFIX="$$(echo "$$(echo $$(cd $$(echo  "$(PREFIX)") && pwd))")" -f mkfile.$(ext) -C programs install
 	  # need the echo "$$(echo $$(cd $$(echo "$(PREFIX)") && pwd)) 
      # to convert the relative path to absolute

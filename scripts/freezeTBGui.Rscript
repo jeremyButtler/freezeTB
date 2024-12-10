@@ -3623,7 +3623,7 @@ function(
              2, # two columns
              byrow = TRUE
          ) # File types allowd to see
-      ); # Let the user select an fastq file
+      );
 
    if(! is.na(fileStr[1])){
       assign(
@@ -3717,7 +3717,7 @@ function(
              2, # two columns
              byrow = TRUE
          ) # File types allowd to see
-      ); # Let the user select an fastq file
+      );
 
    if(! is.na(fileStr[1])){
       assign(

@@ -57,7 +57,7 @@ static signed char *
    # required input                                    \n\
    variable glob_fqIn \"\" ;                           \n\
    variable glob_dirOut \"\" ;                         \n\
-   variable glob_prefix \"Hufflepuff\" ;               \n\
+   variable glob_prefix \"FTB_output\" ;               \n\
                                                        \n\
    # read filtering settings                           \n\
    variable glob_mask 0 ;    # mask primer sites       \n\

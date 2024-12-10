@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$0")"; # move to freezeTB directory
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# macInstall SOF: Start Of File
+#   - install guiFreezeTB on a mac
+#   o sec01:
+#     - variable declarations
+#   o sec02:
+#     - homebrew check or install
+#   o sec03:
+#     - X11 (xquatz) check
+#   o sec04:
+#     - tcltk check/install (looking for tk)
+#   o sec05:
+#     - R check/install
+#   o sec06:
+#     - minimap2 check/install
+#   o sec07:
+#     - install freezeTB
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec01:
+#   - variable declarations
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+libStr=""; # library paths
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec02:
+#   - homebrew check or install
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+libStr="$(brew --version)";
+
+if [[ "$libStr" == "" ]];
+then # If: need to install homebrew
+   printf "installing homebrew\n";
+   printf "enter your user password when prompted\n";
+
+   /bin/bash \
+       -c "$( \
+          curl \
+             -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh \
+        )"; # install home brew
+
+   # homebrew set up enviromental enviroment commands
+   echo >> ~/.bash_profile;
+
+   echo \
+       'eval "$(/opt/homebrew/bin/brew shellenv)"' \
+       >> ~/.bash_profile;
+
+   eval "$(/opt/homebrew/bin/brew shellenv)";
+fi # If: need to install homebrew
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec03:
+#   - X11 (xquatz) check
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+libStr="$(sh programs/guiFreezeTBSrc/x11GetLib.sh)";
+
+if [[ ! -f "$libStr" ]];
+then # If: need to install X11/Xquartz
+   printf "Installing X11 (xquatz)\n";
+   brew install xquartz;
+fi # If: need to install X11/Xquartz
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec04:
+#   - tcltk check/install
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+libStr="$(bash programs/guiFreezeTBSrc/tkGetLib.sh)";
+
+if [[ ! -f "$libStr" ]];
+then # If: need to install tcltk
+   printf "Installing tcltk\n";
+   brew install tcl-tk;
+# If: need to install tcltk
+else
+# Else: make sure tcl is not missing
+   libStr="$(bash programs/guiFreezeTBSrc/tclGetLib.sh)";
+
+   if [[ ! -f "$libStr" ]];
+   then # If: need to install tcltk
+      printf "Installing tcltk\n";
+      brew install tcl-tk;
+   fi # If: need to install tcltk
+# Else: make sure tcl is not missing
+fi # check if need to install tcltk
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec05:
+#   - R check/install
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+libStr="$(R --version)";
+
+if [[ "$libStr" == "" ]];
+then # If: need to install R
+   printf "Installing R\n";
+   brew install R;
+fi # If: need to install R
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec06:
+#   - minimap2 check/install
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+libStr="$(minimap2 --version)";
+
+if [[ "$libStr" == "" ]];
+then # If: need to install minimap2
+   printf "Installing minimap2\n";
+   brew install minimap2;
+fi # If: need to install minimap2
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Sec07:
+#   - install freezeTB
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+make -f mkfile.unix;
+sudo make -f mkfile.unix install;

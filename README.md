@@ -49,26 +49,17 @@ The stuff unique to freezeTB is under a dual license. The
 
 # Install
 
-## Requirements Installation (Linux/Mac)
+## Linux:
 
 For Linux I am assuming you are using a Debian based
-  distribution, such as Ubuntu.
+  distribution, such as Ubuntu. However, I have not been
+  able to get the GUI (graphical user interface) compiled
+  on Ubuntu (some linking issue). But, I have on void
+  Linux.
 
-1. For **Mac** homebrew [https://brew.sh/](https://brew.sh/)
-   - website: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-2. minimap2
-   - for command line version you only need a sam file,
-     so minimap2 can be replaced.
-   - For **Linux** `sudo apt-get install minimap2;`
-   - For **Mac** `brew install minimap2;`
-3. R (for graphs)
-   - For **Linux** `sudo apt-get install r-base;`
-   - For **Mac** `brew install r`
-4. tcltk
-   - **Linux** `sudo apt-get install tcl-dev tk-dev`
-   - **Mac** `brew install xquartz tcl-tk`
-
-## Linux:
+1. minimap2: `sudo apt-get install minimap2;`
+2. R: `sudo apt-get install r-base;`
+3. tcltk:`sudo apt-get install tcl-dev tk-dev`
 
 ```
 cd ~/Downloads
@@ -80,15 +71,22 @@ sudo make -f mkfile.unix install
 
 ## Mac
 
+Easy way: download freezeTB from github, then double
+  click `macInstall` or in terminal do `./macInstall`. It
+  will auto get the dependencies for you. Be prepared to
+  enter your password for root/administrator steps.
+
+Harder way:
+
+1. Install homebrew [https://brew.sh/](https://brew.sh/)
+2. Install X11 (xquartz) `brew install xquartz`
+3. Install tcltk `brew install tcl-tk`
+4. Install R `brew install R`
+5. Install minimap2 `brew install minimap2`
+
+Then you can install freezeTB:
+
 ```
-if [[ ! -d "/usr/local/bin" ]]; then
-   sudo mkdir -p "/usr/local/bin";
-fi
-
-if [[ ! -d "/usr/local/share" ]]; then
-   sudo mkdir -p "/usr/local/share";
-fi
-
 cd ~/Downloads
 git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
@@ -101,8 +99,8 @@ The easy way is `brew install minimap2`.
 
 If yo do not want to use the brew install for minimap2
   then you can install it from source. Linux is very
-  similar, except remove the `arm_neon=1` and `aarch64=1`
-  flags from the `make` command.
+  similar, except for x86 CPUs (non-ARM) remove
+  do `make` instead of `make arm_neon=1 aarch64=1`.
 
 ```
 if [[ ! -d "/usr/local/bin" ]]; then
@@ -126,23 +124,26 @@ sudo chmod a+x /usr/local/bin/minimap2
 ### Easy method
 
 Use Unix, there is no hope. Well, there would be if I had
-  precompiled binaries.
+  pre-compiled binaries.
 
-The Rscript gui works, but the primrary GUI needs the
-  Rscript detection step (so non-working). Also, I need to
-  take time to figure out how to get tcltk setup on
-  windows. Then I can give instructions.
+The Rscript gui works (may be a bit buggy), but the
+  primary GUI needs the Rscript detection step (so
+  non-working). Also, I need to take time to figure out
+  how to get tcltk setup on windows. Then I can give
+  instructions.
 
-### Windoows Actuall method (source)
+### Windoows method (source)
 
 This is not the method your are looking for
+
+GUI has not been tested.
 
 1. Install visual studio or at least the developer console
    from visual studio
 2. Make a freezeTB directory in "C:\Program Files"
 3. Download freezeTB from git hub and unzip in Downloads
 4. Copy the freezeTBFiles directory to Documents (or public
-   Documents ["C:\Public\Documents"])
+   .
 5. open the developer console
    (visual studio->view->developer console) and
    do `cd $HOME$/Downloads/freezeTB`.
@@ -275,9 +276,9 @@ To get graphs
 
 ### Windows:
 
-Windows command line is painfull, but yes you can use it.
+Windows command line is painful, but yes you can use it.
   This should work, so long as carriage returns do not
-  become an issue. If have errors or inifinite loops, let
+  become an issue. If have errors or infinite loops, let
   me know.
 
 You can get the help message

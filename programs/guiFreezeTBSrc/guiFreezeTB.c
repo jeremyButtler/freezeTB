@@ -1792,7 +1792,7 @@ initTK_guiFreezeTB(
 int
 main(
    int numArgsSI,
-   char *argAryStr[]
+   const char *argAryStr[]
 ){
    sint tclArgsSI = 1; /*in case user input something*/
                        /*also for error report at end*/
@@ -1812,16 +1812,6 @@ main(
    numArgsSI = tclArgsSI;
 
    tclArgsSI = 0;
-
-   /*
-   goto cleanUp_main_sec0x;
-
-   err_main_sec0x:;
-      tclArgsSI = 1;
-      goto cleanUp_main_sec0x;
-
-   cleanUp_main_sec0x:;
-   */
-     return tclArgsSI;
+   return tclArgsSI;
 } /*main*/
 

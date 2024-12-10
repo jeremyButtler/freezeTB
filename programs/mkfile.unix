@@ -41,4 +41,6 @@ clean:
 		swapDbRefSrc/*.o.$(ext) \
 		genLib/*.o.$(ext) \
 		genBio/*.o.$(ext) \
-		genAln/*.o.$(ext)
+		genAln/*.o.$(ext) \
+		genClust/*.o.$(ext) \
+		genBuild/*.o.$(ext)
