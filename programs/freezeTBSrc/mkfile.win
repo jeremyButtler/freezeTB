@@ -1,6 +1,6 @@
 LD=link
 CC=cl
-CFLAGS= /O2 /Ot /Za /Tc
+CFLAGS= /DWINDOWS /O2 /Ot /Za /Tc
 NAME=freezeTB.exe
 PREFIX=%appData%
 genLib=..\genLib

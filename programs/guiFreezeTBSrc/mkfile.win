@@ -5,7 +5,7 @@ CC=cl
 LD=link
 
 NAME = guiFreezeTB.exe
-C_FLAGS = /Ot /O2 /Za /Tc
+C_FLAGS = /DWINDOWS /Ot /O2 /Za /Tc
 
 C_INCLUDE_PATH =
 
