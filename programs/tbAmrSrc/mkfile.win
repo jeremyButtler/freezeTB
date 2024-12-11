@@ -1,8 +1,8 @@
 LD=link
 CC=cl
-CFLAGS= \O2 \Ot \Za \Tc
+CFLAGS= /O2 /Ot /Za /Tc
 NAME=tbAmr.exe
-PREFIX=$$appData$$
+PREFIX=%appData%
 genLib=..\genLib
 genBio=..\genBio
 genAln=..\genAln
@@ -22,43 +22,43 @@ objFiles=\
    checkAmr.$O
 
 all: tbAmr.$O $(objFiles)
-	$(LD) /out:$(NAME) $(CFLAGS) tbAmr.$O $(objFiles)
+	$(LD) /out:$(NAME) tbAmr.$O $(objFiles)
 
 tbAmr.$O: tbAmr.c checkAmr.$O tbAmrDefs.h
-	$(CC) /Fo:tbAmr.$O /c $(CFLAGS) tbAmr.c
+	$(CC) /Fo:tbAmr.$O $(CFLAGS) tbAmr.c
 
 checkAmr.$O: checkAmr.c checkAmr.h amrST.$O $(genLib)\genMath.$O $(genBio)\codonTbl.$O $(genBio)\samEntry.$O
-	$(CC) /Fo:checkAmr.$O /c $(CFLAGS) checkAmr.c
+	$(CC) /Fo:checkAmr.$O $(CFLAGS) checkAmr.c
 
 drugAry.$O: drugAry.c drugAry.h
-	$(CC) /Fo:drugAry.$O /c $(CFLAGS) drugAry.c
+	$(CC) /Fo:drugAry.$O $(CFLAGS) drugAry.c
 
 amrST.$O: amrST.c amrST.h drugAry.$O $(genLib)\ulCp.$O $(genLib)\charCp.$O $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:amrST.$O /c $(CFLAGS) amrST.c
+	$(CC) /Fo:amrST.$O $(CFLAGS) amrST.c
 
 $(genLib)\base10str.$O: $(genLib)\base10str.c $(genLib)\base10str.h
-	$(CC) /Fo:$(genLib)\base10str.$O /c $(CFLAGS) $(genLib)\base10str.c
+	$(CC) /Fo:$(genLib)\base10str.$O $(CFLAGS) $(genLib)\base10str.c
 
 $(genLib)\numToStr.$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
-	$(CC) /Fo:$(genLib)\numToStr.$O /c $(CFLAGS) $(genLib)\numToStr.c
+	$(CC) /Fo:$(genLib)\numToStr.$O $(CFLAGS) $(genLib)\numToStr.c
 
 $(genLib)\charCp.$O: $(genLib)\charCp.c $(genLib)\charCp.h
-	$(CC) /Fo:$(genLib)\charCp.$O /c $(CFLAGS) $(genLib)\charCp.c
+	$(CC) /Fo:$(genLib)\charCp.$O $(CFLAGS) $(genLib)\charCp.c
 
 $(genLib)\ulCp.$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
-	$(CC) /Fo:$(genLib)\ulCp.$O /c $(CFLAGS) $(genLib)\ulCp.c
+	$(CC) /Fo:$(genLib)\ulCp.$O $(CFLAGS) $(genLib)\ulCp.c
 
 $(genLib)\genMath.$O: $(genLib)\genMath.c $(genLib)\genMath.h
-	$(CC) /Fo:$(genLib)\genMath.$O /c $(CFLAGS) $(genLib)\genMath.c
+	$(CC) /Fo:$(genLib)\genMath.$O $(CFLAGS) $(genLib)\genMath.c
 
 $(genLib)\strAry.$O: $(genLib)\strAry.c $(genLib)\strAry.h $(genLib)\ulCp.$O
-	$(CC) /Fo:$(genLib)\strAry.$O /c $(CFLAGS) $(genLib)\strAry.c
+	$(CC) /Fo:$(genLib)\strAry.$O $(CFLAGS) $(genLib)\strAry.c
 
 $(genBio)\codonTbl.$O: $(genBio)\codonTbl.c $(genBio)\codonTbl.h $(genBio)\ntTo2Bit.h $(genBio)\revNtTo2Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\codonTbl.$O /c $(CFLAGS) $(genBio)\codonTbl.c
+	$(CC) /Fo:$(genBio)\codonTbl.$O $(CFLAGS) $(genBio)\codonTbl.c
 
 $(genBio)\samEntry.$O: $(genBio)\samEntry.c $(genBio)\samEntry.h $(genLib)\strAry.$O $(genLib)\ulCp.$O $(genLib)\base10str.$O $(genLib)\numToStr.$O $(genBio)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\samEntry.$O /c $(CFLAGS) $(genBio)\samEntry.c
+	$(CC) /Fo:$(genBio)\samEntry.$O $(CFLAGS) $(genBio)\samEntry.c
 
 install:
 	copy $(NAME) $(PREFIX)

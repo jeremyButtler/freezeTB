@@ -1,7 +1,7 @@
 LD=link
 CC=cl
 CFLAGS= /O2 /Ot /Za /Tc
-PREFIX="%PROGRAMFILES%\freezeTB"
+PREFIX="%ProgramFiles%\freezeTB"
 ext=win
 O=.o.$(ext)
 

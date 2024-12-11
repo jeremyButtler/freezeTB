@@ -1,8 +1,8 @@
 LD=link
 CC=cl
-CFLAGS= \O2 \Ot \Za \Tc
+CFLAGS= /O2 /Ot /Za /Tc
 NAME=swapDbRef.exe
-PREFIX=$$appData$$
+PREFIX=%appData%
 genLib=..\genLib
 genBio=..\genBio
 genAln=..\genAln
@@ -23,34 +23,34 @@ all: swapDbRef.$O $(objFiles)
 	$(LD) /out:$(NAME) swapDbRef.$O refSwap.$O $(objFiles)
 
 swapDbRef.$O: swapDbRef.c refSwap.$O $(genLib)\charCp.$O
-	$(CC) /Fo:swapDbRef.$O /c $(CFLAGS) swapDbRef.c
+	$(CC) /Fo:swapDbRef.$O $(CFLAGS) swapDbRef.c
 
 refSwap.$O: refSwap.c refSwap.h $(genBio)\samEntry.$O $(tbAmr)\amrST.$O
-	$(CC) /Fo:refSwap.$O /c $(CFLAGS) refSwap.c
+	$(CC) /Fo:refSwap.$O $(CFLAGS) refSwap.c
 
 $(genLib)\base10str.$O: $(genLib)\base10str.c $(genLib)\base10str.h
-	$(CC) /Fo:$(genLib)\base10str.$O /c $(CFLAGS) $(genLib)\base10str.c
+	$(CC) /Fo:$(genLib)\base10str.$O $(CFLAGS) $(genLib)\base10str.c
 
 $(genLib)\numToStr.$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
-	$(CC) /Fo:$(genLib)\numToStr.$O /c $(CFLAGS) $(genLib)\numToStr.c
+	$(CC) /Fo:$(genLib)\numToStr.$O $(CFLAGS) $(genLib)\numToStr.c
 
 $(genLib)\charCp.$O: $(genLib)\charCp.c $(genLib)\charCp.h
-	$(CC) /Fo:$(genLib)\charCp.$O /c $(CFLAGS) $(genLib)\charCp.c
+	$(CC) /Fo:$(genLib)\charCp.$O $(CFLAGS) $(genLib)\charCp.c
 
 $(genLib)\ulCp.$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
-	$(CC) /Fo:$(genLib)\ulCp.$O /c $(CFLAGS) $(genLib)\ulCp.c
+	$(CC) /Fo:$(genLib)\ulCp.$O $(CFLAGS) $(genLib)\ulCp.c
 
 $(genLib)\strAry.$O: $(genLib)\strAry.c $(genLib)\strAry.h $(genLib)\ulCp.$O
-	$(CC) /Fo:$(genLib)\strAry.$O /c $(CFLAGS) $(genLib)\strAry.c
+	$(CC) /Fo:$(genLib)\strAry.$O $(CFLAGS) $(genLib)\strAry.c
 
 $(genBio)\samEntry.$O: $(genBio)\samEntry.c $(genBio)\samEntry.h $(genLib)\strAry.$O $(genLib)\base10str.$O $(genLib)\numToStr.$O $(genBio)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\samEntry.$O /c $(CFLAGS) $(genBio)\samEntry.c
+	$(CC) /Fo:$(genBio)\samEntry.$O $(CFLAGS) $(genBio)\samEntry.c
 
 $(tbAmr)\drugAry.$O: $(tbAmr)\drugAry.c $(tbAmr)\drugAry.h
-	$(CC) /Fo:$(tbAmr)\drugAry.$O /c $(CFLAGS) $(tbAmr)\drugAry.c
+	$(CC) /Fo:$(tbAmr)\drugAry.$O $(CFLAGS) $(tbAmr)\drugAry.c
 
 $(tbAmr)\amrST.$O: $(tbAmr)\amrST.c $(tbAmr)\amrST.h $(tbAmr)\drugAry.$O $(genLib)\ulCp.$O $(genLib)\charCp.$O $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(tbAmr)\amrST.$O /c $(CFLAGS) $(tbAmr)\amrST.c
+	$(CC) /Fo:$(tbAmr)\amrST.$O $(CFLAGS) $(tbAmr)\amrST.c
 
 install:
 	copy $(NAME) $(PREFIX)

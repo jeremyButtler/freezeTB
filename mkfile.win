@@ -1,7 +1,7 @@
 LD=link
 CC=cl
 CFLAGS= /O2 /Ot /Za /Tc
-PREFIX="%PROGRAMFILES%\freezeTB"
+PREFIX="%ProgramFiles%\freezeTB"
 DB_PREFIX="%PUBLIC%\Documents";
 R_SCRIPT_PATH="%PROGRAMFILES%\R\R-4.3.3\bin\Rscript.exe"
 ext=win

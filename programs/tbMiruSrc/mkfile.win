@@ -1,8 +1,8 @@
 LD=link
 CC=cl
-CFLAGS= \O2 \Ot \Za \Tc
+CFLAGS= /O2 /Ot /Za /Tc
 NAME=tbMiru.exe
-PREFIX=$$appData$$
+PREFIX=%appData%
 genLib=..\genLib
 genBio=..\genBio
 genAln=..\genAln
@@ -23,52 +23,52 @@ objFiles=\
    $(genAln)\kmerFind.$O
 
 all: tbMiru.$O $(objFiles)
-	$(LD) /out:$(NAME) $(CFLAGS) tbMiru.$O miruFx.$O miruTbl.$O $(objFiles)
+	$(LD) /out:$(NAME) tbMiru.$O miruFx.$O miruTbl.$O $(objFiles)
 
 tbMiru.$O: tbMiru.c miruTbl.$O miruFx.$O
-	$(CC) /Fo:tbMiru.$O /c $(CFLAGS) tbMiru.c
+	$(CC) /Fo:tbMiru.$O $(CFLAGS) tbMiru.c
 
 miruFx.$O: miruFx.c miruFx.h miruTbl.$O $(genLib)\charCp.$O $(genAln)\kmerFind.$O
-	$(CC) /Fo:miruFx.$O /c $(CFLAGS) miruFx.c
+	$(CC) /Fo:miruFx.$O $(CFLAGS) miruFx.c
 
 miruTbl.$O: miruTbl.c miruTbl.h tbMiruDefs.h $(genBio)\samEntry.$O $(genLib)\charCp.$O $(genLib)\genMath.h
-	$(CC) /Fo:miruTbl.$O /c $(CFLAGS) miruTbl.c
+	$(CC) /Fo:miruTbl.$O $(CFLAGS) miruTbl.c
 
 $(genLib)\base10str.$O: $(genLib)\base10str.c $(genLib)\base10str.h
-	$(CC) /Fo:$(genLib)\base10str.$O /c $(CFLAGS) $(genLib)\base10str.c
+	$(CC) /Fo:$(genLib)\base10str.$O $(CFLAGS) $(genLib)\base10str.c
 
 $(genLib)\numToStr.$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
-	$(CC) /Fo:$(genLib)\numToStr.$O /c $(CFLAGS) $(genLib)\numToStr.c
+	$(CC) /Fo:$(genLib)\numToStr.$O $(CFLAGS) $(genLib)\numToStr.c
 
 $(genLib)\charCp.$O: $(genLib)\charCp.c $(genLib)\charCp.h
-	$(CC) /Fo:$(genLib)\charCp.$O /c $(CFLAGS) $(genLib)\charCp.c
+	$(CC) /Fo:$(genLib)\charCp.$O $(CFLAGS) $(genLib)\charCp.c
 
 $(genLib)\ulCp.$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
-	$(CC) /Fo:$(genLib)\ulCp.$O /c $(CFLAGS) $(genLib)\ulCp.c
+	$(CC) /Fo:$(genLib)\ulCp.$O $(CFLAGS) $(genLib)\ulCp.c
 
 $(genLib)\shellSort.$O: $(genLib)\shellSort.c $(genLib)\shellSort.h
-	$(CC) /Fo:$(genLib)\shellSort.$O /c $(CFLAGS) $(genLib)\shellSort.c
+	$(CC) /Fo:$(genLib)\shellSort.$O $(CFLAGS) $(genLib)\shellSort.c
 
 $(genLib)\strAry.$O: $(genLib)\strAry.c $(genLib)\strAry.h $(genLib)\ulCp.$O
-	$(CC) /Fo:$(genLib)\strAry.$O /c $(CFLAGS) $(genLib)\strAry.c
+	$(CC) /Fo:$(genLib)\strAry.$O $(CFLAGS) $(genLib)\strAry.c
 
 $(genBio)\seqST.$O: $(genBio)\seqST.c $(genBio)\seqST.h $(genLib)\ulCp.$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\seqST.$O /c $(CFLAGS) $(genBio)\seqST.c
+	$(CC) /Fo:$(genBio)\seqST.$O $(CFLAGS) $(genBio)\seqST.c
 
 $(genBio)\samEntry.$O: $(genBio)\samEntry.c $(genBio)\samEntry.h $(genLib)\strAry.$O $(genLib)\ulCp.$O $(genLib)\base10str.$O $(genLib)\numToStr.$O $(genBio)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\samEntry.$O /c $(CFLAGS) $(genBio)\samEntry.c
+	$(CC) /Fo:$(genBio)\samEntry.$O $(CFLAGS) $(genBio)\samEntry.c
 
 $(genAln)\indexToCoord.$O: $(genAln)\indexToCoord.c $(genAln)\indexToCoord.h
-	$(CC) /Fo:$(genAln)\indexToCoord.$O /c $(CFLAGS) $(genAln)\indexToCoord.c
+	$(CC) /Fo:$(genAln)\indexToCoord.$O $(CFLAGS) $(genAln)\indexToCoord.c
 
 $(genAln)\alnSet.$O: $(genAln)\alnSet.c $(genAln)\alnSet.h $(genAln)\alnDefs.h $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genAln)\alnSet.$O /c $(CFLAGS) $(genAln)\alnSet.c
+	$(CC) /Fo:$(genAln)\alnSet.$O $(CFLAGS) $(genAln)\alnSet.c
 
 $(genAln)\memwater.$O: $(genAln)\memwater.c $(genAln)\memwater.h $(genAln)\alnSet.$O $(genAln)\indexToCoord.$O $(genBio)\seqST.$O $(genLib)\genMath.h
-	$(CC) /Fo:$(genAln)\memwater.$O /c $(CFLAGS) $(genAln)\memwater.c
+	$(CC) /Fo:$(genAln)\memwater.$O $(CFLAGS) $(genAln)\memwater.c
 
 $(genAln)\kmerFind.$O: $(genAln)\kmerFind.c $(genAln)\kmerFind.h $(genAln)\memwater.$O $(genLib)\shellSort.$O 
-	$(CC) /Fo:$(genAln)\kmerFind.$O /c $(CFLAGS) $(genAln)\kmerFind.c
+	$(CC) /Fo:$(genAln)\kmerFind.$O $(CFLAGS) $(genAln)\kmerFind.c
 
 install:
 	cp $(NAME) $(PREFIX)

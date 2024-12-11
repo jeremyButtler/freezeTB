@@ -77,103 +77,103 @@ all: guiFreezeTB.c.$O
 	$(LD) /out:$(NAME) $(LIBRARY_PATH) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
 
 guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
-	$(CC) /Fo:guiFreezeTB.c.$O /c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
+	$(CC) /Fo:guiFreezeTB.c.$O $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
 $(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
-	$(CC) /Fo:$(genBuild)rmBlocks.$O /c $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
+	$(CC) /Fo:$(genBuild)rmBlocks.$O $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
 
 $(freezeTB)freezeTB.$O: $(freezeTB)freezeTB.c $(freezeTB)freezeTBPaths.$O $(freezeTBObjs)
-	$(CC) /Fo:$(freezeTB)freezeTB.$O /c $(C_FLAGS) $(freezeTB)freezeTB.c
+	$(CC) /Fo:$(freezeTB)freezeTB.$O $(C_FLAGS) $(freezeTB)freezeTB.c
 
 $(freezeTB)freezeTBPaths.$O: $(freezeTB)freezeTBPaths.c $(freezeTB)freezeTBPaths.h $(freezeTB)freezeTBDefs.h $(genLib)ulCp.$O $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(freezeTB)freezeTBPaths.$O /c $(C_FLAGS) $(freezeTB)freezeTBPaths.c
+	$(CC) /Fo:$(freezeTB)freezeTBPaths.$O $(C_FLAGS) $(freezeTB)freezeTBPaths.c
 
 $(genLib)base10str.$O: $(genLib)base10str.c $(genLib)base10str.h
-	$(CC) /Fo:$(genLib)base10str.$O /c $(C_FLAGS) $(genLib)base10str.c
+	$(CC) /Fo:$(genLib)base10str.$O $(C_FLAGS) $(genLib)base10str.c
 
 $(genLib)numToStr.$O: $(genLib)numToStr.c $(genLib)numToStr.h
-	$(CC) /Fo:$(genLib)numToStr.$O /c $(C_FLAGS) $(genLib)numToStr.c
+	$(CC) /Fo:$(genLib)numToStr.$O $(C_FLAGS) $(genLib)numToStr.c
 
 $(genLib)charCp.$O: $(genLib)charCp.c $(genLib)charCp.h
-	$(CC) /Fo:$(genLib)charCp.$O /c $(C_FLAGS) $(genLib)charCp.c
+	$(CC) /Fo:$(genLib)charCp.$O $(C_FLAGS) $(genLib)charCp.c
 
 $(genLib)ulCp.$O: $(genLib)ulCp.c $(genLib)ulCp.h
-	$(CC) /Fo:$(genLib)ulCp.$O /c $(C_FLAGS) $(genLib)ulCp.c
+	$(CC) /Fo:$(genLib)ulCp.$O $(C_FLAGS) $(genLib)ulCp.c
 
 $(genLib)genMath.$O: $(genLib)genMath.c $(genLib)genMath.h
-	$(CC) /Fo:$(genLib)genMath.$O /c $(C_FLAGS) $(genLib)genMath.c
+	$(CC) /Fo:$(genLib)genMath.$O $(C_FLAGS) $(genLib)genMath.c
 
 $(genLib)shellSort.$O: $(genLib)shellSort.c $(genLib)shellSort.h
-	$(CC) /Fo:$(genLib)shellSort.$O /c $(C_FLAGS) $(genLib)shellSort.c
+	$(CC) /Fo:$(genLib)shellSort.$O $(C_FLAGS) $(genLib)shellSort.c
 
 $(genLib)strAry.$O: $(genLib)strAry.c $(genLib)strAry.h $(genLib)ulCp.$O
-	$(CC) /Fo:$(genLib)strAry.$O /c $(C_FLAGS) $(genLib)strAry.c
+	$(CC) /Fo:$(genLib)strAry.$O $(C_FLAGS) $(genLib)strAry.c
 
 $(genBio)codonTbl.$O: $(genBio)codonTbl.c $(genBio)codonTbl.h $(genBio)ntTo2Bit.h $(genBio)revNtTo2Bit.h $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)codonTbl.$O /c $(C_FLAGS) $(genBio)codonTbl.c
+	$(CC) /Fo:$(genBio)codonTbl.$O $(C_FLAGS) $(genBio)codonTbl.c
 
 $(genBio)seqST.$O: $(genBio)seqST.c $(genBio)seqST.h $(genLib)ulCp.$O $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)seqST.$O /c $(C_FLAGS) $(genBio)seqST.c
+	$(CC) /Fo:$(genBio)seqST.$O $(C_FLAGS) $(genBio)seqST.c
 
 $(genBio)geneCoord.$O: $(genBio)geneCoord.c $(genBio)geneCoord.h $(genLib)ulCp.$O $(genLib)base10str.$O $(genLib)charCp.$O $(genLib)genMath.h $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)geneCoord.$O /c $(C_FLAGS) $(genBio)geneCoord.c
+	$(CC) /Fo:$(genBio)geneCoord.$O $(C_FLAGS) $(genBio)geneCoord.c
 
 $(genBio)samEntry.$O: $(genBio)samEntry.c $(genBio)samEntry.h $(genLib)ulCp.$O $(genLib)base10str.$O $(genLib)numToStr.$O $(genBio)ntTo5Bit.h $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)samEntry.$O /c $(C_FLAGS) $(genBio)samEntry.c
+	$(CC) /Fo:$(genBio)samEntry.$O $(C_FLAGS) $(genBio)samEntry.c
 
 $(genBio)trimSam.$O: $(genBio)trimSam.c $(genBio)trimSam.h $(genBio)samEntry.$O
-	$(CC) /Fo:$(genBio)trimSam.$O /c $(C_FLAGS) $(genBio)trimSam.c
+	$(CC) /Fo:$(genBio)trimSam.$O $(C_FLAGS) $(genBio)trimSam.c
 
 $(genBio)ampDepth.$O: $(genBio)ampDepth.c $(genBio)ampDepth.h $(genBio)samEntry.$O $(genBio)geneCoord.$O $(genLib)genMath.h
-	$(CC) /Fo:$(genBio)ampDepth.$O /c $(C_FLAGS) $(genBio)ampDepth.c
+	$(CC) /Fo:$(genBio)ampDepth.$O $(C_FLAGS) $(genBio)ampDepth.c
 
 $(genBio)maskPrim.$O: $(genBio)maskPrim.c $(genBio)maskPrim.h $(genBio)samEntry.$O $(genLib)shellSort.$O
-	$(CC) /Fo:$(genBio)maskPrim.$O /c $(C_FLAGS) $(genBio)maskPrim.c
+	$(CC) /Fo:$(genBio)maskPrim.$O $(C_FLAGS) $(genBio)maskPrim.c
 
 $(genBio)adjCoords.$O: $(genBio)adjCoords.c $(genBio)adjCoords.h $(genBio)samEntry.$O $(genBio)geneCoord.$O
-	$(CC) /Fo:$(genBio)adjCoords.$O /c $(C_FLAGS) $(genBio)adjCoords.c
+	$(CC) /Fo:$(genBio)adjCoords.$O $(C_FLAGS) $(genBio)adjCoords.c
 
 $(genBio)tbCon.$O: $(genBio)tbCon.c $(genBio)tbCon.h $(genBio)tbConDefs.h $(genBio)samEntry.$O $(genLib)genMath.$O
-	$(CC) /Fo:$(genBio)tbCon.$O /c $(C_FLAGS) $(genBio)tbCon.c
+	$(CC) /Fo:$(genBio)tbCon.$O $(C_FLAGS) $(genBio)tbCon.c
 
 $(genBio)edDist.$O: $(genBio)edDist.c $(genBio)edDist.h $(genBio)samEntry.$O $(genBio)seqST.$O $(genLib)genMath.h
-	$(CC) /Fo:$(genBio)edDist.$O /c $(C_FLAGS) $(genBio)edDist.c
+	$(CC) /Fo:$(genBio)edDist.$O $(C_FLAGS) $(genBio)edDist.c
 
 $(genAln)indexToCoord.$O: $(genAln)indexToCoord.c $(genAln)indexToCoord.h
-	$(CC) /Fo:$(genAln)indexToCoord.$O /c $(C_FLAGS) $(genAln)indexToCoord.c
+	$(CC) /Fo:$(genAln)indexToCoord.$O $(C_FLAGS) $(genAln)indexToCoord.c
 
 $(genAln)alnSet.$O: $(genAln)alnSet.c $(genAln)alnSet.h $(genAln)alnDefs.h $(genLib)base10str.$O $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(genAln)alnSet.$O /c $(C_FLAGS) $(genAln)alnSet.c
+	$(CC) /Fo:$(genAln)alnSet.$O $(C_FLAGS) $(genAln)alnSet.c
 
 $(genAln)memwater.$O: $(genAln)memwater.c $(genAln)memwater.h $(genAln)alnSet.$O $(genAln)indexToCoord.$O $(genBio)seqST.$O $(genLib)genMath.h
-	$(CC) /Fo:$(genAln)memwater.$O /c $(C_FLAGS) $(genAln)memwater.c
+	$(CC) /Fo:$(genAln)memwater.$O $(C_FLAGS) $(genAln)memwater.c
 
 $(genAln)kmerFind.$O: $(genAln)kmerFind.c $(genAln)kmerFind.h $(genAln)memwater.$O $(genLib)shellSort.$O 
-	$(CC) /Fo:$(genAln)kmerFind.$O /c $(C_FLAGS) $(genAln)kmerFind.c
+	$(CC) /Fo:$(genAln)kmerFind.$O $(C_FLAGS) $(genAln)kmerFind.c
 
 $(genClust)edClust.$O: $(genClust)edClust.c $(genClust)edClust.h $(genClust)clustST.$O
-	$(CC) /Fo:$(genClust)edClust.$O /c $(C_FLAGS) $(genClust)edClust.c
+	$(CC) /Fo:$(genClust)edClust.$O $(C_FLAGS) $(genClust)edClust.c
 
 $(genClust)clustST.$O: $(genClust)clustST.c $(genClust)clustST.h $(genBio)samEntry.$O $(genBio)tbCon.$O $(genBio)edDist.$O $(genLib)genMath.h
-	$(CC) /Fo:$(genClust)clustST.$O /c $(C_FLAGS) $(genClust)clustST.c
+	$(CC) /Fo:$(genClust)clustST.$O $(C_FLAGS) $(genClust)clustST.c
 
 $(tbMiru)miruTbl.$O: $(tbMiru)miruTbl.c $(tbMiru)miruTbl.h $(tbMiru)tbMiruDefs.h $(genBio)samEntry.$O $(genLib)charCp.$O $(genLib)genMath.$O
-	$(CC) /Fo:$(tbMiru)miruTbl.$O /c $(C_FLAGS) $(tbMiru)miruTbl.c
+	$(CC) /Fo:$(tbMiru)miruTbl.$O $(C_FLAGS) $(tbMiru)miruTbl.c
 
 $(tbAmr)drugAry.$O: $(tbAmr)drugAry.c $(tbAmr)drugAry.h
-	$(CC) /Fo:$(tbAmr)drugAry.$O /c $(C_FLAGS) $(tbAmr)drugAry.c
+	$(CC) /Fo:$(tbAmr)drugAry.$O $(C_FLAGS) $(tbAmr)drugAry.c
 
 $(tbAmr)amrST.$O: $(tbAmr)amrST.c $(tbAmr)amrST.h $(tbAmr)drugAry.$O $(genLib)ulCp.$O $(genLib)charCp.$O $(genLib)base10str.$O $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(tbAmr)amrST.$O /c $(C_FLAGS) $(tbAmr)amrST.c
+	$(CC) /Fo:$(tbAmr)amrST.$O $(C_FLAGS) $(tbAmr)amrST.c
 
 $(tbAmr)checkAmr.$O: $(tbAmr)checkAmr.c $(tbAmr)checkAmr.h $(tbAmr)amrST.$O $(genBio)samEntry.$O $(genBio)codonTbl.$O $(genLib)genMath.$O
-	$(CC) /Fo:$(tbAmr)checkAmr.$O /c $(C_FLAGS) $(tbAmr)checkAmr.c
+	$(CC) /Fo:$(tbAmr)checkAmr.$O $(C_FLAGS) $(tbAmr)checkAmr.c
 
 $(tbSpol)spolFind.$O: $(tbSpol)spolFind.c $(tbSpol)spolFind.h $(tbSpol)tbSpolDefs.h $(genBio)samEntry.$O $(genBio)seqST.$O $(genAln)kmerFind.$O
-	$(CC) /Fo:$(tbSpol)spolFind.$O /c $(C_FLAGS) $(tbSpol)spolFind.c
+	$(CC) /Fo:$(tbSpol)spolFind.$O $(C_FLAGS) $(tbSpol)spolFind.c
 
 $(tbSpol)spolST.$O: $(tbSpol)spolST.c $(tbSpol)spolST.h  $(tbSpol)tbSpolDefs.h $(genLib)ulCp.$O $(genLib)charCp.$O $(genLib)numToStr.$O $(genLib)genMath.h $(genLib)dataTypeShortHand.h
-	$(CC) /Fo:$(tbSpol)spolST.$O /c $(C_FLAGS) $(tbSpol)spolST.c
+	$(CC) /Fo:$(tbSpol)spolST.$O $(C_FLAGS) $(tbSpol)spolST.c
 
 install:
 	move $(NAME) $(PREFIX);
