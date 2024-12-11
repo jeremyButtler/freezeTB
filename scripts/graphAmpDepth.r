@@ -453,7 +453,7 @@ while(iArg <= lenInputI)
       iArg = iArg + 1;
       minLenSI = as.numeric(inputStr[iArg]);
    } else{
-      phelp_graphAmpDepth("-h");
+      phelp_graphAmpDepth();
       print(paste(inputStr[iArg], "is not recongnzied"));
       errBl = TRUE;
       break;
