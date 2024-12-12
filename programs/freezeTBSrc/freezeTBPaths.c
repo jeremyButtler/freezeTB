@@ -24,6 +24,10 @@
 '     - finds default reference fasta path (guifreezeTB)
 '   o fun10: outputPath_freezeTBPaths
 '     - sets up an ouput file name & opens "w", the closes
+'   o fun11: guiTclPath_freezeTBPaths
+'     - path to tcl script for GUI
+'   o license:
+'     - licensing for this code (public dofun04 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -93,6 +97,10 @@ signed char
 signed char
    *def_ref_freezeTBPaths =
       (schar *) "NC000962.fa";
+
+signed char
+   *def_tclGui_freezeTBPaths =
+      (schar *) "gui-FTB.tcl";
 
 /*-------------------------------------------------------\
 | Fun01: getSharePath_freezeTBPaths
@@ -1249,3 +1257,237 @@ outputPath_freezeTBPaths(
    fclose(testFILE);
    return 0;
 } /*outputPath_freezeTBPaths*/
+
+/*-------------------------------------------------------\
+| Fun11: guiTclPath_freezeTBPaths
+|   - path to tcl script for GUI
+| Input:
+|   - guiPathStr:
+|     o c-string to add tcl script path to
+| Output:
+|   - Modifies:
+|     o guiPathStr to have the default path or '\0' if
+|       could not find file
+|   - Returns:
+|     o 0 for no errors
+|     o 1 if could not open file
+\-------------------------------------------------------*/
+signed char
+tclGuiPath_freezeTBPaths(
+   signed char *guiPathStr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun11 TOC:
+   '   - path to tcl script for GUI
+   '   o fun09 sec01:
+   '     - variable declarations
+   '   o fun09 sec02:
+   '     - see if database in working directory
+   '   o fun09 sec03:
+   '     - if not, check local documents folder
+   '   o fun09 sec04:
+   '     - if not, check global share/documents
+   '   o fun09 sec05:
+   '     - clean up
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   schar *tmpStr = 0;
+   schar *sharePathStr = getSharePath_freezeTBPaths();
+   schar *homePathStr = getHomePath_freezeTBPaths();
+
+   FILE *testFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec02:
+   ^   - see if database in working directory
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   tmpStr = guiPathStr;
+
+   cpDelim_ulCp(
+      tmpStr,
+      def_tclGui_freezeTBPaths,
+      0,
+      '\0'
+   );
+
+   testFILE =
+      fopen(
+         (char *) tmpStr,
+         "r"
+      );
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec03:
+   ^   - if not, check local documents folder
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(! testFILE)
+   { /*If: database not in current directory*/
+      tmpStr = guiPathStr;
+
+      tmpStr +=
+         cpDelim_ulCp(
+           tmpStr,
+           homePathStr,
+           0,
+           '\0'
+         );
+
+      tmpStr +=
+         cpDelim_ulCp(
+            tmpStr,
+            def_path_freezeTBPaths,
+            0,
+            '\0'
+         );
+
+      tmpStr +=
+         cpDelim_ulCp(
+            tmpStr,
+            def_tclGui_freezeTBPaths,
+            0,
+            '\0'
+         );
+
+      testFILE =
+         fopen(
+            (char *) guiPathStr,
+            "r"
+         );
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun09 Sec04:
+      ^   - if not, check global share/documents
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+      if(! testFILE)
+      { /*If: database not in $HOME/documents*/
+         tmpStr = guiPathStr;
+
+         tmpStr +=
+            cpDelim_ulCp(
+              tmpStr,
+              sharePathStr,
+              0,
+              '\0'
+            );
+
+         tmpStr +=
+            cpDelim_ulCp(
+               tmpStr,
+               def_altPath_freezeTBPaths,
+               0,
+               '\0'
+            );
+
+         tmpStr +=
+            cpDelim_ulCp(
+               tmpStr,
+               def_tclGui_freezeTBPaths,
+               0,
+               '\0'
+            );
+
+         testFILE =
+            fopen(
+               (char *) guiPathStr,
+               "r"
+            );
+
+         if(! testFILE)
+            goto err_fun09_sec05;
+      } /*If: database not in $HOME/documents*/
+   } /*If: database not in current directory*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec05:
+   ^   - clean up
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(testFILE)
+      fclose(testFILE);
+
+   testFILE = 0;
+
+   return 0;
+
+   err_fun09_sec05:;
+      guiPathStr[0] = '\0'; /*no idea*/
+      return 1;
+} /*tclGuiPath_freezeTBPaths*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

@@ -3851,9 +3851,9 @@ input_freezeTB(
 |      o clustering progress to stderr
 |    - Returns:
 |      o 0 for no errors
-|      o 1 for no errors
+|      o c-string with error message
 \-------------------------------------------------------*/
-int
+signed char *
 run_freezeTB(
    int numArgsSI,
    const char *argAryStr[]
@@ -3925,6 +3925,8 @@ run_freezeTB(
 
    schar errSC = 0;
    slong errSL = 0;
+
+   schar *errHeapStr = 0;
 
    /*****************************************************\
    * Fun04 Sec01 Sub03:
@@ -4144,6 +4146,9 @@ run_freezeTB(
 
    numLineagesSI = 0;
 
+   /*will always assume works*/
+   errHeapStr = malloc(2048 * sizeof(schar *));
+
    /*****************************************************\
    * Fun04 Sec02 Sub03:
    *   - get input
@@ -4179,7 +4184,29 @@ run_freezeTB(
    if(errSC)
    { /*If: error*/
       --errSC; /*convert help/version print to no error*/
-      goto cleanUp_fun04_sec11_sub03;
+
+      if(errSC)
+      { /*If: had error with input*/
+         tmpStr = errHeapStr;
+
+         *tmpStr++ = 'i';
+         *tmpStr++ = 'n';
+         *tmpStr++ = 'p';
+         *tmpStr++ = 'u';
+         *tmpStr++ = 't';
+         *tmpStr++ = ' ';
+         *tmpStr++ = 'e';
+         *tmpStr++ = 'r';
+         *tmpStr++ = 'r';
+         *tmpStr++ = 'o';
+         *tmpStr++ = 'r';
+         *tmpStr++ = '\0';
+
+         goto err_fun04_sec11_sub02;
+      } /*If: had input error*/
+
+      else
+         goto ret_fun04_sec11;
    } /*If: error*/
 
    /*****************************************************\
@@ -4187,13 +4214,23 @@ run_freezeTB(
    *   - set up memory
    \*****************************************************/
 
+   if(! errHeapStr)
+   { /*If: hadd memory error*/
+      fprintf(
+         stderr,
+         "memory error setting error report string\n"
+      );
+
+      goto err_fun04_sec11_sub02;
+   } /*If: hadd memory error*/
+
    errSC = setup_samEntry(&samStackST);
 
    if(errSC)
    { /*If: memory error*/
-      fprintf(
-         stderr,
-         "memory error setting up samEntry struct\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "memory error samEntry struct setup"
       );
 
       goto err_fun04_sec11_sub02;
@@ -4208,13 +4245,14 @@ run_freezeTB(
 
    if(errSC)
    { /*If: memory error*/
-      fprintf(
-         stderr,
-         "memory error setting up tblST_kmerFind struct\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "mem error tblST_kmerFind struct setup"
       );
 
       goto err_fun04_sec11_sub02;
    } /*If: memory error*/
+
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun04 Sec03:
@@ -4246,9 +4284,16 @@ run_freezeTB(
 
    if(! outFILE)
    { /*If: I could not open the MIRU table*/
-      fprintf(
-         stderr,
-         "unable to open -miru-tbl %s\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            (schar *) "unable to open -miru-tbl "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          miruDbFileStr
       );
 
@@ -4271,9 +4316,16 @@ run_freezeTB(
 
    if(! outFILE)
    { /*If: could not open spoligo spacer sequences*/
-      fprintf(
-         stderr,
-         "unable to open -spoligo %s\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            (schar *) "unable to open -spoligo "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          spoligoRefFileStr
       );
 
@@ -4329,9 +4381,16 @@ run_freezeTB(
 
    if(! outFILE)
    { /*If: could not open the filtered read stats file*/
-      fprintf(
-         stderr,
-         "unable to open -amr-tbl %s\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "unable to open -amr-tbl "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          amrDbFileStr
       );
 
@@ -4361,10 +4420,17 @@ run_freezeTB(
 
       if(! samFILE)
       { /*If: could not open the sam file*/
-         fprintf(
-            stderr,
-            "could not open -sam %s\n",
-            samFileStr 
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "could not open -sam "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
+            samFileStr
          );
 
          goto err_fun04_sec11_sub02;
@@ -4384,10 +4450,17 @@ run_freezeTB(
 
    if(! outFILE)
    { /*If: could not open gene coordinates file*/
-      fprintf(
-         stderr,
-         "could not open -gene-coords %s\n",
-         samFileStr 
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "could not open -gene-coords "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         coordFileStr
       );
 
       goto err_fun04_sec11_sub02;
@@ -4435,9 +4508,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "unable to open depths ouput file: "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          readStatsStr
       );
 
@@ -4458,9 +4538,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+          errHeapStr,
+          (schar *) "unable to open con tsv output file: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
          conTsvStr
       );
 
@@ -4481,9 +4568,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+         errHeapStr,
+         (schar *) "unable to open read AMR output file: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
          readAmrStr
       );
 
@@ -4504,9 +4598,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+           errHeapStr,
+           (schar *) "unable to open AMR id output file: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
          idFileStr
       );
 
@@ -4527,9 +4628,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+          errHeapStr,
+          (schar *) "unable to open con AMR output file: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
          conAmrStr
       );
 
@@ -4550,9 +4658,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "unable to open read miru output: "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          readMiruStr
       );
 
@@ -4573,9 +4688,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "unable to open con miru output: "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          conMiruStr
       );
 
@@ -4596,9 +4718,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+           errHeapStr,
+           (schar *) "unable to open con spoligo output: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
          outSpoligoFileStr
       );
 
@@ -4619,9 +4748,16 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+          errHeapStr,
+          (schar *) "unable to open read spoligo output: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
          outReadSpoligoFileStr
       );
 
@@ -4642,10 +4778,17 @@ run_freezeTB(
 
    if(errSC)
    { /*If: could not open file*/
-      fprintf(
-         stderr,
-         "unable to open %s for output\n",
-         outReadSpoligoFileStr
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "unable to open consensus output: "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         samConStr
       );
 
       goto err_fun04_sec11_sub02;
@@ -4689,19 +4832,48 @@ run_freezeTB(
    if(! coordsHeapST)
    { /*If: error*/
       if(lenBuffUL & def_memErr_geneCoord)
-         fprintf(
-            stderr,
-            "memory error reading -gene-coords %s\n",
+      { /*If: had memory error*/
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+          cpStr_ulCp(
+            errHeapStr,
+            (schar *) "memory error reading -gene-coords "
+          );
+
+         cpStr_ulCp(
+            tmpStr,
             coordFileStr
          );
+      } /*If: had memory error*/
 
       else
-         fprintf(
-            stderr,
-            "line %lu is wrong in -gene-coords %s\n",
-            lenBuffUL >> 8,
+      { /*Else: wrong coordinates*/
+         tmpStr = errHeapStr;
+
+         *tmpStr++ = 'l';
+         *tmpStr++ = 'i';
+         *tmpStr++ = 'n';
+         *tmpStr++ = 'e';
+         *tmpStr++ = ' ';
+
+         tmpStr +=
+            numToStr(
+               tmpStr,
+               lenBuffUL >> 8
+            );
+ 
+         tmpStr +=
+            cpStr_ulCp(
+               tmpStr,
+               (schar *) " is wrong in -gene-coords "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
             coordFileStr
          );
+      } /*Else: wrong coordinates*/
 
       goto err_fun04_sec11_sub02;
    } /*If: error*/
@@ -4735,17 +4907,28 @@ run_freezeTB(
    if(errSC)
    { /*If: error*/
       if(errSC == def_fileErr_amrST)
-         fprintf(
-           stderr,
-           "%s is not in tbAmr format or has no data\n",
-           amrDbFileStr
+      { /*If: file error*/
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               amrDbFileStr
+            );
+
+         cpStr_ulCp(
+            tmpStr,
+            (schar *) " not in tbAmr format or empty"
          );
+      } /*If: file error*/
 
       if(errSC == def_memErr_amrST)
-         fprintf(
-           stderr,
-           "memory error; when processing variant id's\n"
+      { /*If: memory error*/
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "memory error processing variant id"
          );
+      } /*If: memory error*/
 
       goto err_fun04_sec11_sub02;
    } /*If: error*/
@@ -4764,18 +4947,36 @@ run_freezeTB(
    if(errSC)
    { /*If: error*/
       if(errSC == def_fileErr_tbMiruDefs)
-         fprintf(
-            stderr,
-            "Could not open -miru-tbl %s\n",
-            miruDbFileStr
-          ); /*Let the user know the error type*/
+      { /*If: had file error*/
+         tmpStr = errHeapStr;
 
-      else
-         fprintf(
-            stderr,
-            "memory error reading -miru-tbl %s\n",
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "Could not open -miru-tbl "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
             miruDbFileStr
          );
+      } /*If: had file error*/
+
+      else
+      { /*Else: memory error*/
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "memory error reading -miru-tbl "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
+            miruDbFileStr
+         );
+      } /*Else: memory error*/
 
       goto err_fun04_sec11_sub02;
    } /*If: error*/
@@ -4802,9 +5003,16 @@ run_freezeTB(
    { /*If: error*/
       if(errSC == def_fileErr_kmerFind)
       { /*If: file error*/
-         fprintf(
-            stderr,
-            "-spoligo %s is not valid\n",
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "invalid file: -spoligo "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
             spoligoRefFileStr
          );
  
@@ -4813,9 +5021,9 @@ run_freezeTB(
  
       else
       { /*Else: memory error*/
-         fprintf(
-            stderr,
-            "Ran out of memory getting spoligo seqs\n"
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "memory error getting spoligo seqs"
          );
  
           goto err_fun04_sec11_sub02;
@@ -4854,9 +5062,16 @@ run_freezeTB(
 
          else
          { /*Else: memory error*/
-            fprintf(
-               stderr,
-               "memory error -db %s\n",
+            tmpStr = errHeapStr;
+
+            tmpStr +=
+               cpStr_ulCp(
+                  errHeapStr,
+                  (schar *) "memory error -db-spoligo "
+               );
+
+            cpStr_ulCp(
+               tmpStr,
                spoligoDbFileStr
             );
 
@@ -4890,28 +5105,67 @@ run_freezeTB(
       { /*If: error*/
          if(errSL == def_emptyFileErr_maskPrim)
          { /*If: empty file*/
-            fprintf(
-               stderr,
-               "-mask-prim %s is emtpy\n",
+            tmpStr = errHeapStr;
+
+            tmpStr +=
+               cpStr_ulCp(
+                  errHeapStr,
+                  (schar *) "empty file -mask-prim "
+               );
+
+            cpStr_ulCp(
+               tmpStr,
                maskPrimFileStr
             );
          } /*If: empty file*/
 
          else if(errSL & def_fileErr_maskPrim)
          { /*Else If: invalid line*/
-            fprintf(
-               stderr,
-               "line %lu in -mask-prim %s is invalid\n",
-               (errSL >> 8),
-               maskPrimFileStr
+            tmpStr = errHeapStr;
+
+            *tmpStr++ = 'l';
+            *tmpStr++ = 'i';
+            *tmpStr++ = 'n';
+            *tmpStr++ = 'e';
+            *tmpStr++ = ' ';
+
+            tmpStr +=
+               numToStr(
+                  tmpStr,
+                  errSL >> 8
+               );
+ 
+            tmpStr +=
+               cpStr_ulCp(
+                  tmpStr,
+                  (schar *) " is wrong in -mask-prim "
+               );
+
+            tmpStr +=
+               cpStr_ulCp(
+                  tmpStr,
+                  maskPrimFileStr
+
+               );
+
+            cpStr_ulCp(
+               tmpStr,
+               (schar *) " (or invalid file)"
             );
          } /*Else If: invalid line*/
          
          else
          { /*Else: memory error*/
-            fprintf(
-               stderr,
-               "memory error reading -mask-prim %s\n",
+            tmpStr = errHeapStr;
+
+            tmpStr +=
+              cpStr_ulCp(
+                 errHeapStr,
+                 (schar *) "mem error reading -mask-prim "
+              );
+
+            cpStr_ulCp(
+               tmpStr,
                maskPrimFileStr
             );
          } /*Else: memory error*/
@@ -5007,11 +5261,18 @@ run_freezeTB(
       ){ /*If: sequence entry*/
          if(multiRefBl)
          { /*If: sam file has multiple references*/
-            fprintf(
-               stderr,
-               "-sam %s has multiple references\n",
+            tmpStr = errHeapStr;
+
+            tmpStr +=
+               cpStr_ulCp(
+                  errHeapStr,
+                  (schar *) "multiple references in -sam "
+               );
+
+            cpStr_ulCp(
+               tmpStr,
                samFileStr
-            ); 
+            );
 
             goto err_fun04_sec11_sub02;
          } /*If: sam file has multiple references*/
@@ -5085,18 +5346,36 @@ run_freezeTB(
    if(errSC)
    { /*If: error reading sam file header*/
       if(errSC == def_EOF_samEntry)
-         fprintf(
-            stderr,
-            "-sam %s only has header or is empty\n",
+      { /*If: empty sam file*/
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "no sequences in -sam "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
             samFileStr
          );
+      } /*If: empty sam file*/
 
       else
-         fprintf(
-            stderr,
-            "memory error reading header of -sam %s\n",
+      { /*Else: memory error*/
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "memory error reading -sam "
+            );
+
+         cpStr_ulCp(
+            tmpStr,
             samFileStr
          );
+      } /*Else: memory error*/
 
       goto err_fun04_sec11_sub02;
    } /*If: error reading sam file header*/
@@ -5262,9 +5541,9 @@ run_freezeTB(
 
    if(! readMapArySI)
    { /*If: memory error*/
-      fprintf(
-         stderr,
-         "memory error (read histogram allocation)\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "memory error (read histogram malloc)"
       );
 
       goto err_fun04_sec11_sub02;
@@ -5278,9 +5557,9 @@ run_freezeTB(
 
    if(! filt_readMapArySI)
    { /*If: memory error*/
-      fprintf(
-         stderr,
-         "memory error (read histogram allocation)\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "memory error (read histogram malloc)"
       );
 
       goto err_fun04_sec11_sub02;
@@ -5411,10 +5690,18 @@ run_freezeTB(
                
          if(errSC & def_memErr_tbConDefs)
          { /*If: memory error*/
-            fprintf(
-                stderr,
-                "memory error add read %u to consensus\n",
-                totalReadsUI
+            tmpStr = errHeapStr;
+
+            tmpStr +=
+               cpStr_ulCp(
+                  errHeapStr,
+                  (schar *) "con memory error on read "
+               );
+
+          
+            numToStr(
+               tmpStr,
+               totalReadsUI
             );
 
             goto err_fun04_sec11_sub02;
@@ -5438,10 +5725,17 @@ run_freezeTB(
 
       if(errSC)
       { /*If: memory error*/
-         fprintf(
-             stderr,
-             "memory error on AMR check for  read %u\n",
-             totalReadsUI
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "AMR check memory error on read "
+            );
+
+         numToStr(
+            tmpStr,
+            totalReadsUI
          );
 
          goto err_fun04_sec11_sub02;
@@ -5493,10 +5787,17 @@ run_freezeTB(
 
       if(spolErrSC & def_memErr_tbConDefs)
       { /*If: memory error*/
-         fprintf(
-             stderr,
-             "memory error detecting spoligo (read %u)\n",
-             totalReadsUI
+         tmpStr = errHeapStr;
+
+         tmpStr +=
+            cpStr_ulCp(
+               errHeapStr,
+               (schar *) "spoligo memory error on read "
+            );
+
+         numToStr(
+            tmpStr,
+            totalReadsUI
          );
 
          goto err_fun04_sec11_sub02;
@@ -5681,11 +5982,19 @@ run_freezeTB(
 
    if(errSC)
    { /*If: impossible case*/
-      fprintf(
-         stderr,
-         "could not write read MIRU table to %s\n",
-         readMiruStr
-      );
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            (schar *) "spoligo memory error on read "
+         );
+
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            readMiruStr
+         );
    } /*If: impossible case*/
 
    /*****************************************************\
@@ -5790,9 +6099,9 @@ run_freezeTB(
 
    if(! samConSTAry)
    { /*If: error*/
-      fprintf(
-         stderr,
-         "could not collapse consensus\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "could not collapse consensus"
       );
 
       goto err_fun04_sec11_sub02;
@@ -5963,9 +6272,9 @@ run_freezeTB(
 
    if(errSC)
    { /*If: error*/
-      fprintf(
-         stderr,
-         "error during consensus analyisis step\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "error during consensus analyisis step"
       );
 
       goto err_fun04_sec11_sub02;
@@ -5987,11 +6296,18 @@ run_freezeTB(
 
    if(errSC)
    { /*If: error*/
-      fprintf(
-         stderr,
-         "could not write consensuses MIRU lineages %s\n",
+      tmpStr = errHeapStr;
+
+      tmpStr += 
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "could not write con MIRU lineages "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
          conMiruStr
-      ); 
+      );
 
       goto err_fun04_sec11_sub02;
    } /*If: error*/
@@ -6074,15 +6390,13 @@ run_freezeTB(
 
    if(samFILE == stdin)
    { /*If: piping file to mixed infection detect*/
-      fprintf(
-         stderr,
-         "-sam is stdin; not allowed for mixed infection"
-      );
+      tmpStr = errHeapStr;
 
-      fprintf(
-         stderr,
-         " mode\n"
-      );
+      tmpStr += 
+         cpStr_ulCp(
+          errHeapStr,
+          (schar *) "do not use -sam stdin for clustering"
+         );
 
       goto err_fun04_sec11_sub02;
    } /*If: piping file to mixed infection detect*/
@@ -6141,21 +6455,21 @@ run_freezeTB(
    if(errSC)
    { /*If: error*/
       if(errSC == def_memErr_edClust)
-         fprintf(
-            stderr,
-            "memory error during mixed infection step\n"
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "clustering memory error\n"
          );
 
       else if(errSC == def_fileErr_edClust)
-         fprintf(
-            stderr,
-            "file error during mixed infection step\n"
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "clustering file error\n"
          );
 
       else
-         fprintf(
-            stderr,
-            "no reads for mixed infection step\n"
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "clustering no reads in sam file\n"
          );
 
       goto err_fun04_sec11_sub02;
@@ -6191,9 +6505,9 @@ run_freezeTB(
 
    if(errSC)
    { /*If: had error*/
-      fprintf(
-         stderr,
-         "memory error printing cluster consensuses\n"
+      cpStr_ulCp(
+         errHeapStr,
+         (schar *) "cluster memory error consensus print"
       );
 
       goto err_fun04_sec11_sub02;
@@ -6214,14 +6528,14 @@ run_freezeTB(
    if(errSC)
    { /*If: had error*/
       if(errSC == def_memErr_clustST)
-         fprintf(
-            stderr,
-            "memory error printing clusters\n"
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "cluster memory error cluster print"
          );
       else
-         fprintf(
-            stderr,
-            "file error printing clusters\n"
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "cluster file error cluster print"
          );
 
       goto err_fun04_sec11_sub02;
@@ -6354,11 +6668,19 @@ run_freezeTB(
 
    if(errSC)
    { /*If: error*/
-      fprintf(
-         stderr,
-         "could not write consensuses MIRU lineages %s\n",
-         conMiruStr
-      ); 
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (schar *) "consensus MIRU print error: "
+         );
+
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            conMiruStr
+         );
 
       goto err_fun04_sec11_sub02;
    } /*If: error*/
@@ -6415,6 +6737,8 @@ run_freezeTB(
 
    ret_fun04_sec11:;
       errSC = 0;
+      free(errHeapStr);
+      errHeapStr = 0;
       goto cleanUp_fun04_sec11_sub03;
 
    /*****************************************************\
@@ -6578,7 +6902,7 @@ run_freezeTB(
 
       logFILE = 0;
 
-      return errSC;
+      return errHeapStr;
 } /*run_freezeTB*/
 
 /*=======================================================\

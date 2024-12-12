@@ -72,9 +72,10 @@ sudo make -f mkfile.unix install
 ## Mac
 
 Easy way: download freezeTB from github, then double
-  click `macInstall` or in terminal do `./macInstall`. It
-  will auto get the dependencies for you. Be prepared to
-  enter your password for root/administrator steps.
+  click `macExe`. This is a wrapper to call
+  the `macInstall`. The `macInstall` script will auto get
+  dependencies for you. Be prepared to enter your password
+  for root/administrator steps.
 
 Harder way:
 

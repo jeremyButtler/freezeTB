@@ -14,6 +14,8 @@
    #include <stdlib.h>
 #endif
 
+#include <stdio.h>
+
 #include "freezeTB.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
@@ -85,9 +87,41 @@ main(
    int numArgsSI,
    const char *argAryStr[]
 ){
-   return
+   signed char *errHeapStr = 0;
+   int retSI = 0;
+
+   errHeapStr =
       run_freezeTB(
          numArgsSI,
          argAryStr
       ); /*really runs freezeTB program*/
+
+   if(! errHeapStr)
+      goto noErr_main;
+
+   else
+   { /*Else: had error*/
+      fprintf(
+         stderr,
+         "freezeTB error: %s\n",
+         errHeapStr
+      );
+
+      goto err_main;
+   } /*Else: had error*/
+
+   noErr_main:;
+      retSI = 0;
+      goto ret_main;
+
+   err_main:;
+      retSI = 1;
+      goto ret_main;
+
+   ret_main:;
+      if(errHeapStr)
+         free(errHeapStr);
+      errHeapStr = 0;
+
+      return retSI;
 } /*main*/

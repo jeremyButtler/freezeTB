@@ -28,26 +28,28 @@
 '     - ingores unused ascii characters (> 32, not '\t')
 '   o fun08: endStr_ulCp
 '     - finds the end of a c-string ('\0')
-'   o fun09: cpLine_ulCp
+'   o fun09: cpStr_ulCp
+'     - copies string until \0
+'   o fun10: cpLineUnix_ulCp
+'     - copies string until end of line (\0, \n)
+'   o fun11: cpLine_ulCp
 '     - copies string until end of line (\0, \r, \n)
 '     - ingores unused ascii characters (> 32, not '\t')
-'   o fun10: cpWhite_ulCp
+'   o fun12: cpWhite_ulCp
 '     - copies string until white space
-'   o fun11: rmWhite_ulCp
+'   o fun13: rmWhite_ulCp
 '     - removes white space from c-string
-'   o fun12: swapDelim_ulCp
+'   o fun15: swapDelim_ulCp
 '     - swaps two strings until deliminator is found
-'   o fun13: eql_ulCp
+'   o fun15: eql_ulCp
 '     - compares two strings until deliminator is found
-'   o fun14: eqlNull_ulCp
+'   o fun16: eqlNull_ulCp
 '     - compares two strings until null is found
-'   o fun15: eqlWhite_ulCp
+'   o fun17: eqlWhite_ulCp
 '     - compares two strings until white space is found
-'   o fun16: endLineUnix_ulCp
+'   o fun18: endLineUnix_ulCp
 '     - finds the end of a c-string. This assumes that the
 '       line ends in an '\0' or an '\n'
-'   o fun17: cpLineUnix_ulCp
-'     - copies string until end of line
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -398,7 +400,103 @@ endStr_ulCp(
 } /*endStr_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun09: cpLine_ulCp
+| Fun09: cpStr_ulCp
+|   - copies string until \0
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+| Output:
+|   - Modifies:
+|     o  dupStr to hold the characters from cpStr
+| Note:
+|   - This will likely not be very good at copying short
+|     strings.
+\-------------------------------------------------------*/
+unsigned int
+cpStr_ulCp(
+   signed char *dupStr,
+   signed char *cpStr
+){
+   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+
+   signed char *dupTmpStr = 0;
+   signed char *cpTmpStr = 0;
+
+   unsigned int uiChar = 0;
+
+   while(! ((*cpUL - def_one_ulCp) & def_highBit_ulCp) )
+      *dupUL++ = *cpUL++;
+
+   cpTmpStr = (signed char *) cpUL;
+   dupTmpStr = (signed char *) dupUL;
+
+   while(*cpTmpStr != '\0')
+      *dupTmpStr++ = *cpTmpStr++;
+
+   uiChar = dupTmpStr - dupStr;
+   dupStr[uiChar] = '\0';
+   return uiChar; /*the number of characters copied*/
+} /*cpStr_ulCp*/
+
+/*-------------------------------------------------------\
+| Fun10: cpLineUnix_ulCp
+|   - copies string until end of line (\0, \n)
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+| Output:
+|   - Modifies:
+|     o  dupStr to hold the characters from cpStr
+| Note:
+|   - This will likely not be very good at copying short
+|     strings.
+\-------------------------------------------------------*/
+unsigned int
+cpLineUnix_ulCp(
+   signed char *dupStr,
+   signed char *cpStr
+){
+   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+
+   signed char *dupTmpStr = 0;
+   signed char *cpTmpStr = 0;
+
+   unsigned int uiChar = 0;
+   ulong_ulCp checkUL = 0;
+
+   /*see note01 ifDelim_ulCp for logic)*/
+   checkUL = *cpUL & (~ def_newline_ulCp);
+   checkUL -= def_one_ulCp;
+   checkUL &= def_highBit_ulCp;
+
+   while(! checkUL)
+   { /*Loop: copy line with longs*/
+      *dupUL++ = *cpUL++;
+
+      checkUL = *cpUL & (~ def_newline_ulCp);
+      checkUL -= def_one_ulCp;
+      checkUL &= def_highBit_ulCp;
+   } /*Loop: copy line with longs*/
+
+   cpTmpStr = (signed char *) cpUL;
+   dupTmpStr = (signed char *) dupUL;
+
+   while(*cpTmpStr & (~ '\n'))
+      *dupTmpStr++ = *cpTmpStr++;
+
+   uiChar = dupTmpStr - dupStr;
+   dupStr[uiChar] = '\0';
+   return uiChar; /*the number of characters copied*/
+} /*cpLineUnix_ulCp*/
+
+/*-------------------------------------------------------\
+| Fun11: cpLine_ulCp
 |   - copies string until end of line (\0, \r, \n)
 |   - ingores all unused ascii characters (> 32, not '\t')
 | Input:
@@ -443,7 +541,7 @@ cpLine_ulCp(
 } /*cpLine_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun10: cpWhite_ulCp
+| Fun12: cpWhite_ulCp
 |   - copies string until white space
 | Input:
 |   - dupStr:
@@ -516,7 +614,7 @@ cpWhite_ulCp(
 } /*cpWhite_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun11: rmWhite_ulCp
+| Fun13: rmWhite_ulCp
 |   - removes white space from c-string
 | Input:
 |   - inStr:
@@ -547,7 +645,7 @@ rmWhite_ulCp(
       checkUL |= (checkUL << 1);
       checkUL &= def_highBit_ulCp;
       checkUL ^= def_highBit_ulCp;
-      /*see fun10 for logic*/
+      /*see fun12 for logic*/
 
       if(! checkUL)
          *dupUL++ = *cpUL++;
@@ -579,7 +677,7 @@ rmWhite_ulCp(
 } /*rmWhite_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun12: swapDelim_ulCp
+| Fun15: swapDelim_ulCp
 |   - swaps two strings until deliminator is found
 | Input:
 |   - firstStr:
@@ -606,20 +704,20 @@ swapDelim_ulCp(
    ulong_ulCp delimUL,
    signed char delimSC
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun12: swapDelim_ulCp
+   ' Fun15: swapDelim_ulCp
    '   - swaps two strings until deliminator is found
-   '   o fun12 sec01:
+   '   o fun15 sec01:
    '     - variable declarations
-   '   o fun12 sec02:
+   '   o fun15 sec02:
    '     - swap until first deliminator
-   '   o fun12 sec03:
+   '   o fun15 sec03:
    '     - if 1st string ends early, finsh swapping second
-   '   o fun12 sec04:
+   '   o fun15 sec04:
    '     - else 2nd string ends early, finsh swapping 1st
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec01:
+   ^ Fun15 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -630,7 +728,7 @@ swapDelim_ulCp(
    ulong_ulCp secCheckUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec02:
+   ^ Fun15 Sec02:
    ^   - swap until first deliminator
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -662,7 +760,7 @@ swapDelim_ulCp(
    secStr = (signed char *) secUL;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec03:
+   ^ Fun15 Sec03:
    ^   - if first string ends early, finsh swapping second
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -705,7 +803,7 @@ swapDelim_ulCp(
    } /*If: first string ended*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec04:
+   ^ Fun15 Sec04:
    ^   - else 2nd string ends early, finsh swapping 1st
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -749,7 +847,7 @@ swapDelim_ulCp(
 } /*swapDelim_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun13: eql_ulCp
+| Fun15: eql_ulCp
 |   - compares two strings until deliminator is found
 | Input:
 |   - qryStr:
@@ -816,7 +914,7 @@ eql_ulCp(
 } /*eql_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun14: eqlNull_ulCp
+| Fun16: eqlNull_ulCp
 |   - compares two strings until null is found
 | Input:
 |   - qryStr:
@@ -876,7 +974,7 @@ eqlNull_ulCp(
 } /*eqlNull_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun15: eqlWhite_ulCp
+| Fun17: eqlWhite_ulCp
 |   - compares two strings until white space is found
 | Input:
 |   - qryStr:
@@ -957,7 +1055,7 @@ eqlWhite_ulCp(
 } /*eqlWhite_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun16: endLineUnix_ulCp
+| Fun18: endLineUnix_ulCp
 |   - finds the end of a c-string. This assumes that the
 |     line ends in an '\0' or an '\n'
 | Input:
@@ -991,60 +1089,6 @@ endLineUnix_ulCp(
 
    return uiLenStr;
 } /*endLineUnix_ulCp*/
-
-/*-------------------------------------------------------\
-| Fun17: cpLineUnix_ulCp
-|   - copies string until end of line (\0, \n)
-| Input:
-|   - dupStr:
-|     o Pointer to string to copy cpStr into
-|   - cpStr:
-|     o Pointer to string to copy
-| Output:
-|   - Modifies:
-|     o  dupStr to hold the characters from cpStr
-| Note:
-|   - This will likely not be very good at copying short
-|     strings.
-\-------------------------------------------------------*/
-unsigned int
-cpLineUnix_ulCp(
-   signed char *dupStr,
-   signed char *cpStr
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
-   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
-
-   signed char *dupTmpStr = 0;
-   signed char *cpTmpStr = 0;
-
-   unsigned int uiChar = 0;
-   ulong_ulCp checkUL = 0;
-
-   /*see note01 ifDelim_ulCp for logic)*/
-   checkUL = *cpUL & (~ def_newline_ulCp);
-   checkUL -= def_one_ulCp;
-   checkUL &= def_highBit_ulCp;
-
-   while(! checkUL)
-   { /*Loop: copy line with longs*/
-      *dupUL++ = *cpUL++;
-
-      checkUL = *cpUL & (~ def_newline_ulCp);
-      checkUL -= def_one_ulCp;
-      checkUL &= def_highBit_ulCp;
-   } /*Loop: copy line with longs*/
-
-   cpTmpStr = (signed char *) cpUL;
-   dupTmpStr = (signed char *) dupUL;
-
-   while(*cpTmpStr & (~ '\n'))
-      *dupTmpStr++ = *cpTmpStr++;
-
-   uiChar = dupTmpStr - dupStr;
-   dupStr[uiChar] = '\0';
-   return uiChar; /*the number of characters copied*/
-} /*cpLineUnix_ulCp*/
 
 /*=======================================================\
 : License:

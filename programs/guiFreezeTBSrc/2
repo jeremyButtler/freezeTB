@@ -13,8 +13,6 @@
 '     - wrapper function to run freezeTB
 '   o fun03: initTK_guiFreezeTB
 '     - initializes (sets up) and launches freezeTB gui
-'   o main:
-'     - main function to run the freezeTB gui
 '   o license:
 '     - licensing for this code (public dofun04 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -132,149 +130,16 @@ wrap_guiFreezeTB(
    Tcl_Interp *interpTclSTPtr,
    int numArgsSI,
    const char *argAryStr[]
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun01 TOC:
-   '   - wrapper function to run freezeTB
-   '   o fun01 sec01:
-   '     - variable declartions and run freezeTB
-   '   o fun01 sec02:
-   '     - deal with errors
-   '   o fun01 sec03:
-   '     - clean up and return
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun01 Sec01:
-   ^   - variable declartions and run freezeTB
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   signed char *errHeapStr = 0;
-   signed char *errMessageHeapStr = 0;
-   signed char *tmpStr = 0;
-   uint lenUI = 0;
-   int retSI = 0;
-
-   errHeapStr =
-      run_freezeTB(
+){
+   if(
+      ! run_freezeTB(
          numArgsSI,
          argAryStr
-      );
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun01 Sec02:
-   ^   - deal with errors
-   ^   o fun01 sec01 sub01:
-   ^     - if had no errors, return
-   ^   o fun01 sec01 sub02:
-   ^     - else error, allocate memory for message command
-   ^   o fun01 sec01 sub03:
-   ^     - else error, build and launch error message
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*****************************************************\
-   * Fun01 Sec01 Sub01:
-   *   - if had no errors, return
-   \*****************************************************/
-
-   if(! errStr)
-      goto noErr_fun01_sec03;
-
-   /*****************************************************\
-   * Fun01 Sec01 Sub02:
-   *   - else error, allocate memory for message command
-   \*****************************************************/
+      )
+   ) return TCL_OK;
 
    else
-   { /*Else: had error*/
-      lenUI = lenStrNull_ulCp(errHeapStr);
-
-      errMessageHeapStr =
-         malloc(lenUI + 256) * sizeof(schar));
-
-      if(! errMessageHeapStr)
-      { /*If: memory error*/
-         fprintf(
-            stderr,
-            "memory error printing error message %s\n",
-            errHeapStr
-         );
-
-         Tcl_Eval(
-            interpTclSTPtr,
-            "tk_messageBox -message \"memory error\""
-         );
-
-         goto err_fun01_sec03;
-      } /*If: memory error*/
-
-      /**************************************************\
-      * Fun01 Sec01 Sub03:
-      *   - else error, build and launch error message
-      \**************************************************/
-
-      tmpStr = errMessageHeapStr;
-
-      tmpStr +=
-         cpStr_ulCp(
-            tmpStr,
-            (schar *) "tk_messageBox -message \""
-      );
-
-      tmpStr +=
-         cpStr_ulCp(
-            tmpStr,
-            errHeapStr
-      );
-
-      free(errHeapStr);
-      errHeapStr = 0;
-
-      tmpStr +=
-         cpStr_ulCp(
-            tmpStr,
-            (schar *) "\" -title \"ERROR\""
-      );
-
-      /*launch the messgage box*/
-      if(
-         Tcl_Eval(
-            interpTclSTPtr,
-            errMessageHeapStr
-         )
-      ){ /*If: had error launching message box*/
-         fprintf(
-           stderr,
-           "failed to launch message box with %s error\n",
-           errMessageHeapStr
-         );
-      } /*If: had error launching message box*/
-
-      goto err_fun01_sec03;
-   } /*Else: had error*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun01 Sec03:
-   ^   - clean up and return
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   noErr_fun01_sec03_sec03;
-      retSI = TCL_OK;
-      goto ret_fun01_sec03_sec03:
-
-   err_fun01_sec03:;
-      retSI = TCL_ERROR;
-      goto ret_fun01_sec03_sec03:
-
-   ret_fun01_sec03_sec03;
-     if(errHeapStr)
-        free(errHeapStr);
-     errHeapStr = 0;
-
-     if(errMessageHeapStr)
-        free(errMessageHeapStr);
-     errMessageHeapStr = 0;
-
-     return retSI;
+      return TCL_ERROR;
 } /*wrap_guiFreezeTB*/
 
 
@@ -300,6 +165,8 @@ initTK_guiFreezeTB(
    '   o fun03 sec03:
    '     - set up global variables
    '   o fun03 sec04:
+   '     - set up the gui
+   '   o fun03 sec05:
    '     - return finished
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -1881,6 +1748,39 @@ initTK_guiFreezeTB(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec04:
+   ^   - set up the gui
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   cmdHeapStr =
+      str_rmBlocks(
+         glob_guiScript_gui,
+         endStr_ulCp(glob_guiScript_gui),
+         0, /*do not care about length*/
+         0  /*want to remove comments*/
+      );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) cmdHeapStr
+      );
+
+   free(cmdHeapStr);
+   cmdHeapStr = 0;
+
+   if(errSI != TCL_OK)
+   { /*If: hadd error*/
+      fprintf(
+         stderr,
+         "%s\ncould not launch freezeTB gui\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: hadd error*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun03 Sec05:
    ^   - return finished
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1891,84 +1791,21 @@ initTK_guiFreezeTB(
    return TCL_OK; /*no problems*/
 } /*initTK_guiFreezeTB*/
 
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' Main:
-'   - main function to run the freezeTB gui
-' Input:
-' Output:
-'   - outputs files for freezeTB or error messages
-\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 int
 main(
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Main TOC:
-   '   - run freezeTB gui
-   '   o main sec01:
-   '     - variable declarations
-   '   o main sec02:
-   '     - memory allocation for tcltk args
-   '   o main sec03:
-   '     - run gui
-   '   o main sec04:
-   '     - clean up and return
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec01:
-   ^   - variable declarations
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   schar **tclArgsHeapStr = 0;
-   sint tclArgsSI = 0; /*in case user input something*/
+){
+   sint tclArgsSI = 1; /*in case user input something*/
                        /*also for error report at end*/
 
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec02:
-   ^   - memory allocation for tcltk args
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+   tclArgsSI = numArgsSI;
 
-   tclArgsHeapStr = malloc(2 * sizeof(signed char *));
-
-   if(! tclArgsHeapStr)
-      goto memErr_main_sec04;
-
-   tclArgsSI = 2;
-
-
-   tclArgsHeapStr[0] = malloc(16 * sizeof(signed char *));
-
-   if(! tclArgsHeapStr)
-      goto memErr_main_sec04;
-
-   cpStr_ulCp(
-      tclArgsHeapStr[0],
-      (schar *) "freezeTB"
-   ); /*copy gui title*/
-
-
-   tclArgsHeapStr[1]=malloc(2048 * sizeof(signed char *));
-
-   if(! tclArgsHeapStr)
-      goto memErr_main_sec04;
-
-   if(tclGuiPath_freezeTBPaths(tclArgsHeapStr[1]))
-   { /*If: had file error*/
-      fprintf(
-        stderr,
-        "could not find tcl gui script for freezeTB gui\n"
-      );
-
-      goto guiErr_main_sec04;
-   } /*If: had file error*/
-    
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec03:
-   ^   - run gui
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   if(numArgsSI > 1)
+      numArgsSI = 1;
 
    Tk_Main(
       tclArgsSI, /*so argAryStr is always blank*/
-      tclArgsHeapStr,
+      argAryStr,
       initTK_guiFreezeTB
    );
    /*TK_Main does not return, so should not happen*/
@@ -1977,43 +1814,6 @@ main(
 
    tclArgsSI = 0;
    return tclArgsSI;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec03:
-   ^   - run gui
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   memErr_main_sec04:;
-      fprintf(
-         stderr,
-         "memory error setting up tcl arguments\n"
-      );
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec04:
-   ^   - clean up and return
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   tclArgsSI = 0;
-   goto clean_main_sec04;
-
-   guiErr_main_sec04:;
-      tclArgsSI = 2;
-      goto clean_main_sec04;
-
-   clean_main_sec04:;
-      if(tclArgsHeapStr)
-      { /*If: need to free tcl input*/
-         if(tclArgsHeapStr[0])
-            free(tclArgsHeapStr[0]);
-         if(tclArgsHeapStr[1])
-            free(tclArgsHeapStr[1]);
-         free(tclArgsHeapStr);
-      } /*If: need to free tcl input*/
-
-      tclArgsHeapStr = 0;
-
-      return tclArgsSI;
 } /*main*/
 
 /*=======================================================\

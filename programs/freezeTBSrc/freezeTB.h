@@ -41,9 +41,9 @@
 |      o clustering progress to stderr
 |    - Returns:
 |      o 0 for no errors
-|      o 1 for no errors
+|      o c-string with error message
 \-------------------------------------------------------*/
-int
+signed char *
 run_freezeTB(
    int numArgsSI,
    const char *argAryStr[]

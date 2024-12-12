@@ -296,7 +296,7 @@ colPalAry =
 
 inputStr = commandArgs(); # Holds the user input
 prefixStr = "Hufflepuff";   # name of output file
-amrFileStr = findFile_graphAmpDepth("amrDb.tsv");
+amrFileStr = NULL;
 errBl = FALSE;
 
 dataDF = NULL;
@@ -493,7 +493,8 @@ if(! is.null(amrFileStr)){
          sep = "\t",
          header = TRUE
       );
-} # If: I have a who catalog with amr positions ot map
+} else {amrDF = NULL;}
+
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Part02 Sec03:

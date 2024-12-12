@@ -29,26 +29,28 @@
 '     - ingores unused ascii characters (> 32, not '\t')
 '   o fun08: endStr_ulCp
 '     - finds the end of a c-string ('\0')
-'   o fun09: cpLine_ulCp
+'   o fun09: cpStr_ulCp
+'     - copies string until \0
+'   o fun10: cpLineUnix_ulCp
+'     - copies string until end of line (\0, \n)
+'   o fun11: cpLine_ulCp
 '     - copies string until end of line (\0, \r, \n)
 '     - ingores unused ascii characters (> 32, not '\t')
-'   o fun10: cpWhite_ulCp
+'   o fun12: cpWhite_ulCp
 '     - copies string until white space
-'   o fun11: rmWhite_ulCp
+'   o fun13: rmWhite_ulCp
 '     - removes white space from c-string
-'   o fun12: swapDelim_ulCp
+'   o fun15: swapDelim_ulCp
 '     - swaps two strings until deliminator is found
-'   o fun13: cmpDelim_ulCp
+'   o fun15: cmpDelim_ulCp
 '     - compares two strings until deliminator is found
-'   o fun14: eqlNull_ulCp
+'   o fun16: eqlNull_ulCp
 '     - compares two strings until null is found
-'   o fun15: eqlWhite_ulCp
+'   o fun17: eqlWhite_ulCp
 '     - compares two strings until white space is found
-'   o fun16: endLineUnix_ulCp
+'   o fun18: endLineUnix_ulCp
 '     - finds the end of a c-string. This assumes that the
 '       line ends in an '\0' or an '\n'
-'   o fun17: cpLineUnix_ulCp
-'     - copies string until end of line (\0, \n)
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -314,7 +316,50 @@ endStr_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun09: cpLine_ulCp
+| Fun09: cpStr_ulCp
+|   - copies string until \0
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+| Output:
+|   - Modifies:
+|     o  dupStr to hold the characters from cpStr
+| Note:
+|   - This will likely not be very good at copying short
+|     strings.
+\-------------------------------------------------------*/
+unsigned int
+cpStr_ulCp(
+   signed char *dupStr,
+   signed char *cpStr
+);
+
+/*-------------------------------------------------------\
+| Fun10: cpLineUnix_ulCp
+|   - copies string until end of line
+| Input:
+|   - dupStr:
+|     o Pointer to string to copy cpStr into
+|   - cpStr:
+|     o Pointer to string to copy
+| Output:
+|   - Modifies:
+|     o  dupStr to hold the characters from cpStr
+| Note:
+|   - This will likely not be very good at copying short
+|     strings.
+\-------------------------------------------------------*/
+unsigned int
+cpLineUnix_ulCp(
+   signed char *dupStr,
+   signed char *cpStr
+);
+
+
+/*-------------------------------------------------------\
+| Fun11: cpLine_ulCp
 |   - copies string until end of line
 | Input:
 |   - dupStr:
@@ -335,7 +380,7 @@ cpLine_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun10: cpWhite_ulCp
+| Fun12: cpWhite_ulCp
 |   - copies string until white space
 | Input:
 |   - dupStr:
@@ -356,7 +401,7 @@ cpWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun11: rmWhite_ulCp
+| Fun13: rmWhite_ulCp
 |   - removes white space from c-string
 | Input:
 |   - inStr:
@@ -373,7 +418,7 @@ rmWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun12: swapDelim_ulCp
+| Fun15: swapDelim_ulCp
 |   - swaps two strings until deliminator is found
 | Input:
 |   - firstStr:
@@ -402,7 +447,7 @@ swapDelim_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun13: cmpDelim_ulCp
+| Fun15: cmpDelim_ulCp
 |   - compares two strings until deliminator is found
 | Input:
 |   - qryStr:
@@ -432,7 +477,7 @@ eql_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun14: eqlNull_ulCp
+| Fun16: eqlNull_ulCp
 |   - compares two strings until null is found
 | Input:
 |   - qryStr:
@@ -455,7 +500,7 @@ eqlNull_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun15: eqlWhite_ulCp
+| Fun17: eqlWhite_ulCp
 |   - compares two strings until white space is found
 | Input:
 |   - qryStr:
@@ -478,7 +523,7 @@ eqlWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun16: endLineUnix_ulCp
+| Fun18: endLineUnix_ulCp
 |   - finds the end of a c-string. This assumes that the
 |     line ends in an '\0' or an '\n'
 | Input:
@@ -491,27 +536,6 @@ eqlWhite_ulCp(
 unsigned int
 endLineUnix_ulCp(
    signed char *inStr
-);
-
-/*-------------------------------------------------------\
-| Fun17: cpLineUnix_ulCp
-|   - copies string until end of line
-| Input:
-|   - dupStr:
-|     o Pointer to string to copy cpStr into
-|   - cpStr:
-|     o Pointer to string to copy
-| Output:
-|   - Modifies:
-|     o  dupStr to hold the characters from cpStr
-| Note:
-|   - This will likely not be very good at copying short
-|     strings.
-\-------------------------------------------------------*/
-unsigned int
-cpLineUnix_ulCp(
-   signed char *dupStr,
-   signed char *cpStr
 );
 
 #endif

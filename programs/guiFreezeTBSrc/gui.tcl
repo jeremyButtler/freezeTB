@@ -444,7 +444,7 @@
       return $dbPath ;
    } ; # getPath
 
-   #>>>script<<<#
+   #>>>script
 
    #***************************************************
    # Header Sec03 Sub02:
@@ -511,7 +511,7 @@
    variable glob_maxClustMask 0.05 ;
    variable glob_numRebuilds 1 ;
 
-   #>>>script<<<#
+   #<<<script
 
    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    # Header Sec04:
@@ -551,7 +551,7 @@
    #     - run freezeTB
    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-   #>>>script<<<#
+   #>>>script
 
    #****************************************************
    # Header Sec05 Sub01:
@@ -669,7 +669,7 @@
       return 0 ;
    } ; # freezeTB
 
-   #>>>script<<<#
+   #<<<script
 
    #--------------------------------------------------
    # Tcl01: tcl_isInt_gui
@@ -1238,15 +1238,14 @@
 
          setFreezeTBStatus ;
 
-         #>>>script<<<#
-         if { [ freezeTBProc $tbCmd ] } {
-         #--- using to remove non-script command
-         #>>>script<<<#
-
-         if { [catch {eval freezeTB $tbCmd } out] } {
-         #>>>script<<<#
-         block comment to remove non-script cmd ---#
-         #>>>script<<<#
+         #>>>script
+            if { [ freezeTBProc $tbCmd ] } {
+            #--- using to remove non-script command
+         #<<<script
+            if { [catch {eval freezeTB $tbCmd } out] } {
+         #>>>script
+            ---#
+         #<<<script
             ---tk_messageBox
                -message "freezeTB error"
                -title "ERROR"
