@@ -98,7 +98,7 @@ The easy way is `brew install minimap2`.
 
 ### Mac minimap2 from source
 
-If yo do not want to use the brew install for minimap2
+If you do not want to use the brew install for minimap2
   then you can install it from source. Linux is very
   similar, except for x86 CPUs (non-ARM) remove
   do `make` instead of `make arm_neon=1 aarch64=1`.
@@ -133,7 +133,7 @@ The Rscript gui works (may be a bit buggy), but the
   how to get tcltk setup on windows. Then I can give
   instructions.
 
-### Windoows method (source)
+### Windows method (source)
 
 This is not the method your are looking for
 
@@ -143,26 +143,26 @@ GUI has not been tested.
    from visual studio
 2. Make a freezeTB directory in "C:\Program Files"
 3. Download freezeTB from git hub and unzip in Downloads
-4. Copy the freezeTBFiles directory to Documents (or public
-   .
-5. open the developer console
+4. Copy the freezeTBFiles directory to Documents
+   (or public)
+5. Open the developer console
    (visual studio->view->developer console) and
    do `cd $HOME$/Downloads/freezeTB`.
-6. compile freezeTB with `nmake /F mkfile.win`, then close
+6. Compile freezeTB with `nmake /F mkfile.win`, then close
    the developer console
-7. in the freezeTB folder copy the freezeTB.exe in
+7. In the freezeTB folder copy the freezeTB.exe in
    "programs->freezeTBSrc" to the freezeTB folder in
     "C:\Program Files"
-9. copy the minimap2.exe (minimap2) file minimap2Windows
+9. Copy the minimap2.exe (minimap2) file minimap2Windows
    to your freezeTB folder in "C:\Program fIles"
    - or compile minimap2 and copy the .exe file
-10. copy the freezeTBGui.Rscript (freezeTBGui) file in
-   scripts to your desktop or were you want it.
+10. Copy the freezeTBGui.Rscript (freezeTBGui) file in
+    scripts to your desktop or where you want it.
 11. Make sure R is installed or if not install R or
     Rstudio
-   [https://cran.r-project.org/bin/windows/base/](
-    https://cran.r-project.org/bin/windows/base/)
-12. right click freezeTBGui.Rscript and select
+    [https://cran.r-project.org/bin/windows/base/](
+     https://cran.r-project.org/bin/windows/base/)
+12. Right click freezeTBGui.Rscript and select
     "open with", then "more programs", then "R",
     "R <version number>", "bin", "Rscript"
 
