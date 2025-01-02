@@ -126,3 +126,23 @@ fi # If: need to install minimap2
 
 make -f mkfile.unix;
 sudo make -f mkfile.unix install;
+
+# set up shortcut by sim link
+ln /usr/local/bin/guiFreezeTB ~/Desktop/freezeTB;
+
+# set up fileicon
+libStr="$(fileicon --version)";
+
+if [[ "$libStr" == "" ]];
+then # If: need to install fileicon
+   brew install fileicon
+
+   libStr="$(fileicon --version)";
+
+   if [[ "$libStr" != "" ]];
+   then # If: can set icon
+       fileicon set ~/Desktop/freezeTB FTB-icon.png;
+   fi # If: can set icon
+else
+   fileicon set ~/Desktop/freezeTB FTB-icon.png;
+fi # If: need to install fileicon
