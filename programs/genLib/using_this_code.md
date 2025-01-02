@@ -5,6 +5,26 @@ Here to give you an orientation of the C code files and
 
 # Libraries:
 
+- Table Of Contents (TOC)
+  - [base10str](#base10str)
+    - c-string to base10 number conversoin
+  - [charCp](#charcp)
+    - byte copy functions
+  - [dataTypeShortHand](#datatypeshorthand)
+    - shorthand values for datatypes
+  - [genMath](#genmath)
+    - math (branchless) functions
+  - [numToStr](#numtostr)
+    - number to c-string
+  - [ptrAry](#ptrary)
+    - c-string array (using pointers)
+  - [shellSort](#shellsort)
+    - shell short and their functions
+  - [strAry](#strary)
+    - c-string array (no pointers, fixed, 60 byte width)
+  - [ulCp](#ulcp)
+    - long byte copy and string manipulation functions
+
 I gues for me libraries include .c and .h files and are
   not limited to .so/.dylib files. These are sometimes
   redunent, but often are more nuianced then the base
@@ -15,7 +35,7 @@ To find a list of functions see the SOF (Start Of File)
   at the start of each file. They should be mostly up to
   date.
 
-## base10str:
+## base10str
 
 base10str is here to convert c-strings into nubmers. Has
   both a .c and .h file.
@@ -45,7 +65,7 @@ Has functions for manipulating c-strings. Not very
 
 Has both .c and .h files.
 
-## datTypeShortHand:
+## dataTypeShortHand:
 
 Has my shorthand notations for data types. Mainly because
   I do not like to type `unsigned` or `signed` all the
@@ -132,6 +152,10 @@ The string is justs a c-string, so use free() to free you
   strAry.
 
 ## ulCp
+
+Will not work on big endin systems. The X86 CPUs are
+  little endin, while the ARM CPUs can be both, but often
+  use little endin OS's.
 
 ulCp is short for unsigned long copy. It is like charCp,
   except that it uses unsigned long. As a general rule it

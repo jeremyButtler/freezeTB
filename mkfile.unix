@@ -18,10 +18,9 @@ install:
 	cp -r freezeTBFiles $(PREFIX)
 	chmod a+r $(PREFIX)/freezeTBFiles
 	chmod a+r $(PREFIX)/freezeTBFiles/*
+   chmod a+rx /usr/local/share/freezeTBFiles/gui-FTB.tcl;
 	cp scripts/graphAmpDepth.r $(PREFIX)
 	chmod a+x $(PREFIX)/graphAmpDepth.r
-	cp scripts/freezeTBGui.Rscript $(PREFIX)
-	chmod a+x $(PREFIX)/freezeTBGui.Rscript
 
 clean:
 	make PREFIX="$(PREFIX)" -f mkfile.$(ext) -C programs clean

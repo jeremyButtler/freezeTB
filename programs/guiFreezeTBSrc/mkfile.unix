@@ -22,7 +22,6 @@ LD_FLAGS = $(tkLib) $(tclLib) $(x11Lib)
 
 slash = /
 genLib = ..$(slash)genLib$(slash)
-genBuild = ..$(slash)genBuild$(slash)
 genBio = ..$(slash)genBio$(slash)
 genClust = ..$(slash)genClust$(slash)
 genAln = ..$(slash)genAln$(slash)
@@ -34,7 +33,6 @@ freezeTB = ..$(slash)freezeTBSrc$(slash)
 O = o.unix
 
 objFiles = \
-   $(genBuild)rmBlocks.$O \
    $(freezeTB)freezeTBPaths.$O \
    $(freezeTB)freezeTB.$O \
    guiFreezeTB.$O
@@ -74,11 +72,8 @@ all: guiFreezeTB.$O
 	$(LD) -o $(NAME) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
 
 
-guiFreezeTB.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
+guiFreezeTB.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(freezeTB)freezeTB.$O
 	$(CC) -o guiFreezeTB.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
-
-$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
-	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_FLAGS) $(genBuild)rmBlocks.c
 
 $(freezeTB)freezeTB.$O: $(freezeTB)freezeTB.c $(freezeTB)freezeTBPaths.$O $(freezeTBObjs)
 	$(CC) -o $(freezeTB)freezeTB.$O -c $(C_FLAGS) $(freezeTB)freezeTB.c

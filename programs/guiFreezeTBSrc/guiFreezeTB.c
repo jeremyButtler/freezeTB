@@ -3,12 +3,7 @@
 '   - test script for GUI, will be renameed when becomes
 '     the acutal freezeTB gui
 '   o header:
-'     - included libraries and tcltk scripts (variables)
-'   o tcl01: glob_tcl_isInt_test
-'     - checks if input key is numeric and if string is
-'       between max and min
-'   o gui:
-'     - tcltk script to build gui (glob_guiScript_gui)
+'     - included libraries
 '   o fun02: wrap_guifreezeTB
 '     - wrapper function to run freezeTB
 '   o fun03: initTK_guiFreezeTB
@@ -24,6 +19,9 @@
 |   - included libraries
 \-------------------------------------------------------*/
 
+/*little lower than cmd version because report filters*/
+#define def_amrPercSup_guiFreezeTB 0.01
+
 #ifdef PLAN9
    #include <u.h>
    #include <libc.h>
@@ -37,7 +35,6 @@
 
 #include "../genLib/numToStr.h"
 #include "../genLib/ulCp.h"
-#include "../genBuild/rmBlocks.h"
 
 #include "../freezeTBSrc/freezeTB.h"
 #include "../freezeTBSrc/freezeTBPaths.h" /*(file paths)*/
@@ -49,7 +46,6 @@
 #include "../tbMiruSrc/tbMiruDefs.h"
 #include "../tbSpolSrc/tbSpolDefs.h"
 #include "../freezeTBSrc/freezeTBDefs.h"
-#include "gui.h" /*has script for gui*/
 
 #include "../genClust/clustST.h" /*for default values*/
     /*edClust uses .c, so need both*/
@@ -101,11 +97,6 @@
 !   o .c  #include "../tbAmrSrc/amrST.h"
 !   o .c  #include "../tbAmrSrc/drugAry.h"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-/*-------------------------------------------------------\
-| Gui:
-|   - tcltk script to build gui
-\-------------------------------------------------------*/
 
 /*-------------------------------------------------------\
 | Fun01: wrap_guifreezeTB
@@ -176,8 +167,8 @@ wrap_guiFreezeTB(
    *   - if had no errors, return
    \*****************************************************/
 
-   if(! errStr)
-      goto noErr_fun01_sec03;
+   if(! errHeapStr)
+      goto noErr_fun01_sec03_sec03;
 
    /*****************************************************\
    * Fun01 Sec01 Sub02:
@@ -186,10 +177,10 @@ wrap_guiFreezeTB(
 
    else
    { /*Else: had error*/
-      lenUI = lenStrNull_ulCp(errHeapStr);
+      lenUI = endStr_ulCp(errHeapStr);
 
       errMessageHeapStr =
-         malloc(lenUI + 256) * sizeof(schar));
+         malloc((lenUI + 256) * sizeof(schar));
 
       if(! errMessageHeapStr)
       { /*If: memory error*/
@@ -239,7 +230,7 @@ wrap_guiFreezeTB(
       if(
          Tcl_Eval(
             interpTclSTPtr,
-            errMessageHeapStr
+            (char *) errMessageHeapStr
          )
       ){ /*If: had error launching message box*/
          fprintf(
@@ -257,15 +248,15 @@ wrap_guiFreezeTB(
    ^   - clean up and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   noErr_fun01_sec03_sec03;
+   noErr_fun01_sec03_sec03:;
       retSI = TCL_OK;
-      goto ret_fun01_sec03_sec03:
+      goto ret_fun01_sec03_sec03;
 
    err_fun01_sec03:;
       retSI = TCL_ERROR;
-      goto ret_fun01_sec03_sec03:
+      goto ret_fun01_sec03_sec03;
 
-   ret_fun01_sec03_sec03;
+   ret_fun01_sec03_sec03:;
      if(errHeapStr)
         free(errHeapStr);
      errHeapStr = 0;
@@ -404,6 +395,13 @@ initTK_guiFreezeTB(
       
    refPath_freezeTBPaths(tmpStr);
 
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
@@ -436,6 +434,13 @@ initTK_guiFreezeTB(
       );
       
    coordPath_freezeTBPaths(tmpStr);
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
 
    errSI =
       Tcl_Eval(
@@ -475,6 +480,13 @@ initTK_guiFreezeTB(
          (char *) defStr
       );
 
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
@@ -500,6 +512,13 @@ initTK_guiFreezeTB(
       );
       
    maskPath_freezeTBPaths(tmpStr);
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
 
    errSI =
       Tcl_Eval(
@@ -533,6 +552,13 @@ initTK_guiFreezeTB(
       
    miruPath_freezeTBPaths(tmpStr);
 
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
@@ -565,6 +591,13 @@ initTK_guiFreezeTB(
       
    spolSpacerPath_freezeTBPaths(tmpStr);
 
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
@@ -596,6 +629,13 @@ initTK_guiFreezeTB(
       );
       
    spolLineagePath_freezeTBPaths(tmpStr);
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
 
    errSI =
       Tcl_Eval(
@@ -789,7 +829,7 @@ initTK_guiFreezeTB(
 
    double_numToStr(
       tmpStr,
-      def_minPercMapped_tbAmrDefs,
+      def_amrPercSup_guiFreezeTB,
       3
    );
 
@@ -1918,7 +1958,7 @@ main(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar **tclArgsHeapStr = 0;
+   char **tclArgsHeapStr = 0;
    sint tclArgsSI = 0; /*in case user input something*/
                        /*also for error report at end*/
 
@@ -1941,7 +1981,7 @@ main(
       goto memErr_main_sec04;
 
    cpStr_ulCp(
-      tclArgsHeapStr[0],
+      (schar *) tclArgsHeapStr[0],
       (schar *) "freezeTB"
    ); /*copy gui title*/
 
@@ -1951,8 +1991,9 @@ main(
    if(! tclArgsHeapStr)
       goto memErr_main_sec04;
 
-   if(tclGuiPath_freezeTBPaths(tclArgsHeapStr[1]))
-   { /*If: had file error*/
+   if(
+     tclGuiPath_freezeTBPaths((schar *) tclArgsHeapStr[1])
+   ){ /*If: had file error*/
       fprintf(
         stderr,
         "could not find tcl gui script for freezeTB gui\n"
@@ -1967,27 +2008,10 @@ main(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    Tk_Main(
-      tclArgsSI, /*so argAryStr is always blank*/
+      (int) tclArgsSI, /*so argAryStr is always blank*/
       tclArgsHeapStr,
       initTK_guiFreezeTB
-   );
-   /*TK_Main does not return, so should not happen*/
-
-   numArgsSI = tclArgsSI;
-
-   tclArgsSI = 0;
-   return tclArgsSI;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Main Sec03:
-   ^   - run gui
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   memErr_main_sec04:;
-      fprintf(
-         stderr,
-         "memory error setting up tcl arguments\n"
-      );
+   ); /*TK_Main does not return, so should not happen*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec04:
@@ -1996,6 +2020,13 @@ main(
 
    tclArgsSI = 0;
    goto clean_main_sec04;
+
+   memErr_main_sec04:;
+      fprintf(
+         stderr,
+         "memory error setting up tcl arguments\n"
+      );
+      goto clean_main_sec04;
 
    guiErr_main_sec04:;
       tclArgsSI = 2;

@@ -9,39 +9,19 @@ NAME = guiFreezeTB
 
 C_FLAGS = \
    -O0 \
-   -static \
-   -DBUG \
    -Wall \
    -Wextra \
    -ggdb \
    -g
 
-#   -DUSE_TCL_STUBS \
-#   -DUSE_TK_STUBS \
+# try to track down included file paths
+C_INCLUDE_PATH = $(shell bash findIncludePath.sh)
 
-C_INCLUDE_PATH = \
-   "-I/usr/include:-I/usr/local/include"
-
-# these shell commands track down libtcl and libtk
-#tclLib=$(shell find /*/lib* -name libtclstub*.a 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
-#tkLib=$(shell find /*/lib* -name libtkstub*.a 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
-
-tclLib=$(shell find /*/lib* -name libtcl*.so 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
-tkLib=$(shell find /*/lib* -name libtk*.so 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/.*\///; s/lib//; s/\.so//;' | sort -V -r | uniq | sed 's/ .*//;')
-
-tclPath=$(shell find /*/lib* -name libtcl*.so 2>/dev/null | grep -E "tcl(9|(8\.[3-9]))" | sed 's/\(.*\)\/libtcl.*/-L\1:/;' | sort -V | uniq | tr '\n' '@' | sed 's/@//g;')
-tkPath=$(shell find /*/lib* -name libtk*.so 2>/dev/null | grep -E "tk(9|(8\.[3-9]))" | sed 's/\(.*\)\/libtk.*/-L\1:/;' | sort -V | uniq | tr '\n' '@' | sed 's/@//g;')
-
-LIBRARY_PATH = \
-   "$(tclPath)$(tkPath)-L/usr/lib:-L/usr/local/lib:-L/sofware/x11r5_dev/lib"
-
-LD_FLAGS = \
-   -lc \
-	-l$(tclLib) \
-	-l$(tkLib) \
-   -lX11 \
-   -lm \
-   -ldl
+# these shell scripts track down the libraries
+tkLib=$(shell bash tkGetLib.sh)
+tclLib=$(shell bash tclGetLib.sh)
+x11Lib=$(shell bash x11GetLib.sh)
+LD_FLAGS = $(tkLib) $(tclLib) $(x11Lib)
 
 slash = /
 genLib = ..$(slash)genLib$(slash)
@@ -57,10 +37,9 @@ freezeTB = ..$(slash)freezeTBSrc$(slash)
 O = o.bug
 
 objFiles = \
-   $(genBuild)rmBlocks.$O \
    $(freezeTB)freezeTBPaths.$O \
    $(freezeTB)freezeTB.$O \
-   guiFreezeTB.c.$O
+   guiFreezeTB.$O
 
 freezeTBObjs =\
    $(genLib)base10str.$O \
@@ -93,14 +72,11 @@ freezeTBObjs =\
    $(tbSpol)spolST.$O \
    $(tbSpol)spolFind.$O \
 
-all: guiFreezeTB.c.$O
-	$(LD) -o $(NAME) $(LIBRARY_PATH) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
+all: guiFreezeTB.$O
+	$(LD) -o $(NAME) $(LD_FLAGS) $(objFiles) $(freezeTBObjs)
 
-guiFreezeTB.c.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(genBuild)rmBlocks.$O $(freezeTB)freezeTB.$O gui.h
-	$(CC) -o guiFreezeTB.c.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
-
-$(genBuild)rmBlocks.$O: $(genBuild)rmBlocks.c $(genBuild)rmBlocks.h
-	$(CC) -o $(genBuild)rmBlocks.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) $(genBuild)rmBlocks.c
+guiFreezeTB.$O: guiFreezeTB.c $(genLib)ulCp.$O $(genLib)numToStr.$O $(freezeTB)freezeTB.$O
+	$(CC) -o guiFreezeTB.$O -c $(C_INCLUDE_PATH) $(C_FLAGS) guiFreezeTB.c
 
 $(freezeTB)freezeTB.$O: $(freezeTB)freezeTB.c $(freezeTB)freezeTBPaths.$O $(freezeTBObjs)
 	$(CC) -o $(freezeTB)freezeTB.$O -c $(C_FLAGS) $(freezeTB)freezeTB.c

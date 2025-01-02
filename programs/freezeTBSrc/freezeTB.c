@@ -5599,6 +5599,7 @@ run_freezeTB(
          if(errSC)
          { /*If: read is not in coordinates list*/
             ++offTargReadsSI;
+            errSC = 0;
             goto nextRead_fun04_sec07_sub09;
          } /*If: read is not in coordinates list*/
       } /*If: need to adjust coordinates*/
@@ -5885,7 +5886,7 @@ run_freezeTB(
 
    phist_ampDepth(
       readMapArySI,
-      tbConSettings.minPrintDepthSI,      
+      1,            /*using 1 so all data is printed*/      
       coordsHeapST,
       numCoordsSI,
       offTargReadsSI,
@@ -5924,7 +5925,7 @@ run_freezeTB(
 
    phist_ampDepth(
       filt_readMapArySI,
-      tbConSettings.minPrintDepthSI,      
+      1,            /*using 1 so all data is printed*/      
       coordsHeapST,
       numCoordsSI,
       0,

@@ -3,9 +3,9 @@
 #   - version number and defaults for freezeTb
 ########################################################*/
 
-#define def_year_freezeTBDefs 2024
-#define def_month_freezeTBDefs 10
-#define def_day_freezeTBDefs 23
+#define def_year_freezeTBDefs 2025
+#define def_month_freezeTBDefs 01
+#define def_day_freezeTBDefs 01
 
 #define def_minMedianQ_freezeTBDefs 7
 #define def_minMeanQ_freezeTBDefs 7

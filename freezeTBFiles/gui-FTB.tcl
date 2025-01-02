@@ -89,16 +89,7 @@ variable freezeTBVer "" ; # freezeTB version
 
 # viridis default color pallete
 
-#--- currently magma from viridis is used instead
-set glob_noAmrCol "#440154" ;        # viridis purple
-set glob_noAmrTextCol "#FDE725" ;    # viridis yellow
-
-set glob_amrCol "#FDE725" ;          # viridis light green
-set glob_amrTextCol "#440154" ;      # viridis purple
-
-set glob_lowDepthCol "#21908" ;      # viridis yellow
-set glob_lowDepthTextCol "#FDE725" ; # viridis purple
----#
+#
 
 # viridis magma color pallete
 set glob_noAmrCol "#000004" ;         # magma dark purple
@@ -111,114 +102,11 @@ set glob_lowDepthCol "#FDE725" ;     # magma yellow
 set glob_lowDepthTextCol "#000004" ; # magma dark purple
 
 # keep this list lower case
----set
-   glob_amrList
-   [list
-      "amikacin"
-      "bedaquiline"
-      "capreomycin"
-      "clofazimine"
-      "delamanid"
-      "ethambutol"
-      "ethionamide"
-      "fluoroquine"
-      "isoniazid"
-      "kanamycin"
-      "levofloxacin"
-      "linezolid"
-      "moxifloxacin"
-      "penicillin-myceial-dreg"
-      "pyrazinamide"
-      "rifampicin"
-      "streptomycin"
-   ]
----;
+set glob_amrList [list "amikacin" "bedaquiline" "capreomycin" "clofazimine" "delamanid" "ethambutol" "ethionamide" "fluoroquine" "isoniazid" "kanamycin" "levofloxacin" "linezolid" "moxifloxacin" "penicillin-myceial-dreg" "pyrazinamide" "rifampicin" "streptomycin" ] ;
 
-#--- no longer using, but here for ids
----set
-   glob_amrShort
-   [list
-      "Amk" # amikacin
-      "Bdq" # bedaquiline
-      "Cap" # capreomycin
-      "Cfz" # clorfazimine
-      "Dlm" # delamanid
-      "Emb" # ethambutol
-      "Eto" # ethionamide
-      "Flq" # fluoroquine
-      "Inz" # isoniazid (also Iso, Inz, or Inh)
-      "Kan" # kanamycin
-      "Lfx" # levofloxacin
-      "Lzd" # linezolid
-      "Mfx" # moxifloxacin
-      "Pmd" # penicillin-myceial-dreg
-      "Pza" # pyrazinamide (Pyz, Pza, Pyr)
-      "Rif" # rifampicin (Rif, Rmp, Rfm)
-      "Str" # strptomycin (Str, Stp, Stm)
-   ]
----;
----#
+#
 
-#---
-| Drug         | gene1 | gene2 | gene3 | gene4 | gene5 | gene6 |
-|:-------------|:------|:------|:------|:------|:------|:------|
-| Amikacin     | eis   | rrs   | .     | .     | .     | .     |
-| Bedaquiline  | atpE  | rv0678| .     | .     | .     | .     |
-| Capreomycin  | rrl   | rrs   | tlyA  | .     | .     | .     |
-| Clofazimine  | fbiA  | fbiB  | fbiC  | fgd1  | rv0678| .     |
-| Delamanid    | ddn   | fbiA  | fbiB  | fbiC  | fgd1  | rv2983|
-| Ethambutol   | embA  | embB  | .     | .     | .     | .     |
-| Ethionamide  | ethA  | fabG1 | inhA  | .     | .     | .     |
-| Fluoroquine  | gyrA  | gyrB  | .     | .     | .     | .     |
-| Isoniazid    | fabG1 | inhA  | katG  | .     | .     | .     |
-| Kanamycin    | eis   | rrs   | .     | .     | .     | .     |
-| Levofloxacin | gyrA  | gyrB  | .     | .     | .     | .     |
-| Linezolid    | rplC  | rrl   | .     | .     | .     | .     |
-| Moxifloxacin | gyrA  | gyrB  | .     | .     | .     | .     |
-| Pyrazinamide | pncA  | .     | .     | .     | .     | .     |
-| Rifampicin   | rpoB  | .     | .     | .     | .     | .     |
-| Streptomycin | gidB  | rpsL  | rrs   | .     | .     | .     |
-| Pretomanid   | ddn   | fbiA  | fbiB  | fbiC  | fgd1  | .     |
-| PMD          | ddn   | fbiA  | fbiB  | fbiC  | fgd1  | rv2983|
-
-Table: list of genes targeted by durgs, Pretomanid is not
-  in the WHO database. PMD and fluoroquine is not in
-  default table, but is in WHO database as cross
-  resistance
-
-| Drug         | ddn | fbiA | fbiB | fbiC | fgd1 | rv0687 | rv2983 | pepQ | atpE | gyrA | gyrB | eis | rrs | rrl | tlyA | gidB | rpsL | rplC | fabG1 | inhA | katG | ethA | embA | embB | pncA | rpoB |
-|:-------------|:---:|:----:|:----:|:----:|:----:|:------:|:------:|:----:|:----:|:----:|:----:|:---:|:---:|:---:|:----:|:----:|:----:|:----:|:-----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
-| Pretomanid   | tbl | tbl  | tbl  | tbl  | tbl  |   .    |   ?    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Delamanid    |  X  |  X   |  X   |  X   |  X   |   .    |   X    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| PMD          |  X  |  X   |  X   |  X   |  X   |   .    |   X    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Clofazimine  |  .  | tbl? | tbl? | tbl? | tbl? |   X    |   .    | who  |  ?   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Bedaquiline  |  .  |  .   |  .   |  .   |  .   |   X    |   .    | who  |  X   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Fluoroquine  |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  X   |  X   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Levofloxacin |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  X   |  X   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Moxifloxacin |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  X   |  X   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Amikacin     |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  X  |  X  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Kanamycin    |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  X  |  X  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Capreomycin  |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  X  | tbl |  X   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Streptomycin |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  X  |  .  |  .   |  X   |  X   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Linezolid    |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  .  |  X  |  .   |  .   |  .   |  X   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  .   |
-| Ethionamide  |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |  tbl  |  X   |  .   |  X   |  .   |  .   |  .   |  .   |
-| Isoniazid    |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |  tbl  |  X   |  X   |  .   |  .   |  .   |  .   |  .   |
-| Ethambutol   |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   | tbl  |  X   |  .   |  .   |
-| Pyrazinamide |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  X   |  .   |
-| Rifampicin   |  .  |  .   |  .   |  .   |  .   |   .    |   .    |  .   |  .   |  .   |  .   |  .  |  .  |  .  |  .   |  .   |  .   |  .   |   .   |  .   |  .   |  .   |  .   |  .   |  .   |  X   |
-
-Table: list of drugs by gene. Pretomanid is not in the
-  who database, but it looks like Delamanid is a good
-  proxy'.' if no resistance, 'X' both table and WHO agree
-  has resitance, 'tbl' if resistance is from table only,
-  'tbl?' is table flagged resistance, but I wonder if
-  mistake, 'who' if resistance is from 2023 catalog only.
-  A '?' marks my own speculation, my idea is these drugs
-  follow other drugs closely enough, were I would expect
-  the same mechanisim is targeted (or genes are
-  duplicates). So, I I expect absent genes are just
-  missed.
----#
+#
 
 set glob_amrGenes {
    {"Amk" "eis" "rrs"}
@@ -290,38 +178,19 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 
    set mapPath "minimap2.exe" ;
 
-   ---set
-      status
-      [catch
-       {exec minimap2.exe --version} ::mapVer
-      ]
-   --- ; # get minimap2 version
+   set status [catch {exec minimap2.exe --version} ::mapVer ]  ; # get minimap2 version
 
    if { $status eq 0 } {
       # got minimap2 version, nothing else to do
    } else {
-      ---set mapPath 
-         [file join
-            $programFiles
-            "freezeTB"
-            "minimap2.exe"
-         ]
-      ---; # build alternate minimap2 path
+      set mapPath [file join $programFiles "freezeTB" "minimap2.exe" ] ; # build alternate minimap2 path
 
-      ---set
-         status
-         [catch
-          {exec $mapPath --version} ::mapVer
-         ]
-      --- ; # get minimap2 version
+      set status [catch {exec $mapPath --version} ::mapVer ]  ; # get minimap2 version
 
       if { $status eq 0 } {
          # found minmap2; nothing else to do
       } else {
-         ---tk_messageBox
-            -message "Could not find minimap2.exe"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "Could not find minimap2.exe" -title "ERROR" ;
       } ; # If: check if could not find minimap2
    } ; # find minimap2 path
 
@@ -334,38 +203,18 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    # the keys came from https://stackoverflow.com/questions/62427584/find-rscript-exe-on-windows
 
    # NEED to try this on a windows machine
-   ---registry
-      get
-      "HKCU\Software\Classes\RWorkspace\Shell\Open\Command"
-      "Rscript.exe"
-   ---; # see if can find Rscript.exe in .RData
+   registry get "HKCU\Software\Classes\RWorkspace\Shell\Open\Command" "Rscript.exe" ; # see if can find Rscript.exe in .RData
 
-   ---registry
-      get 
-      "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-      "Rscript.exe"
-   ---; # see if can find Rscript.exe in Uninstall
+   registry get "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" "Rscript.exe" ; # see if can find Rscript.exe in Uninstall
 
    # last resort; try to find Rscript.exe in its
    # expected location
-   ---set
-     rPath
-     [file join
-        $programFiles
-        "R"
-        "*"
-        "bin"
-        "Rscript.exe"
-     ] # build Rscript search path
-   ---;
+   set rPath [file join $programFiles "R" "*" "bin" "Rscript.exe" ] ;
 
    if { [llength $rPath] eq 0 } {
       set $::glob_mkGraphBl 0 ;
 
-      ---tk_messageBox
-         -message "Rscript.exe not found"
-         -title "ERROR"
-      ---;
+      tk_messageBox -message "Rscript.exe not found" -title "ERROR" ;
 
       return false ;
    } else {
@@ -377,26 +226,16 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    # Header Sec02 Sub01 Cat04:
    #   - windows detect graphing script
    #++++++++++++++++++++++++++++++++++++++++++++++++
-   
+ 
    set graphScript "graphAmpDepth.r" ;
 
    if { [file exists $graphScript] eq 0 } {
-      ---set
-         graphScript
-         [file join
-          $programFiles
-          "freezeTB"
-          $graphScript
-         ]
-      ---;
+      set graphScript [file join $programFiles "freezeTB" $graphScript ] ;
 
       if { [file exists $graphScript] eq 0 } {
          set $::glob_mkGraphBl 0 ;
 
-         ---tk_messageBox
-            -message "graphAmpDepth.r not found"
-            -title "no graphing script"
-         ---;
+         tk_messageBox -message "graphAmpDepth.r not found" -title "no graphing script" ;
 
          set graphScript "" ;
       } ; # If: could not find graphing script
@@ -420,27 +259,15 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    set mapPath "minimap2" ;
    set rPath "Rscript" ; # linux should be in path
 
-   ---set
-      status
-      [catch {exec $mapPath --version} ::mapVer ]
-   --- ; # seeing if minimap2 exists
+   set status [catch {exec $mapPath --version} ::mapVer ]  ; # seeing if minimap2 exists
 
    if { $status ne 0 } {
       set mapPath "./minimap2" ;
 
-      ---set
-         status
-         [catch
-             {exec $mapPath --version}
-             ::mapVer
-         ]
-      --- ; # seeing if local minimap2 exists
+      set status [catch {exec $mapPath --version} ::mapVer ]  ; # seeing if local minimap2 exists
 
       if { $status eq 0 } {
-         ---tk_messageBox
-            -message "minimap2 not found"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "minimap2 not found" -title "ERROR" ;
 
          return false ;
       } ; # If: minimap2 could not be found
@@ -450,22 +277,16 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    # Header Sec02 Sub02 Cat02:
    #   - unix find graphing script
    #++++++++++++++++++++++++++++++++++++++++++++++++
-   
+ 
    set graphScript "graphAmpDepth.r" ;
 
    if { [file exists $graphScript] eq 0 } {
-      ---set
-         graphScript
-         [file join "/usr/local/bin" $graphScript]
-      ---;
+      set graphScript [file join "/usr/local/bin" $graphScript] ;
 
       if { [file exists $graphScript] eq 0 } {
          set $::glob_mkGraphBl 0 ;
 
-         ---tk_messageBox
-            -message "graphAmpDepth.r not found"
-            -title "no graphing script"
-         ---;
+         tk_messageBox -message "graphAmpDepth.r not found" -title "no graphing script" ;
 
          set graphScript "" ;
       } ; # If: could not find graphing script
@@ -477,19 +298,13 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 #   - check/get Rscript version
 #***************************************************
 
----set
-   status
-   [catch {exec $rPath --version} rVersion]
----;
+set status [catch {exec $rPath --version} rVersion] ;
 
 if { $status eq 0 } {
 } else {
    set $::glob_mkGraphBl 0 ;
 
-   ---tk_messageBox
-      -message "Unable to run Rscript"
-      -title "ERROR"
-   ---;
+   tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
 
    return false;
 }
@@ -510,124 +325,7 @@ if { $status eq 0 } {
 #   - set up default database finder function
 #***************************************************
 
-#>>>script
-
-proc getPath { fileStr } {
-  set dbPath $fileStr ;
-
-  if { [file exists $dbPath ] eq 0 } {
-     set dbPath $::env(HOME) ;
-     set dbPath [ file join $dbPath "Documents" ] ;
-     set dbPath [ file join $dbPath "freezeTBFiles" ] ;
-     set dbPath [ file join $dbPath $fileStr ] ;
-
-     if { [file exists $dbPath ] eq 0 } {
-        set osStr [lindex $::tcl_platform(os) 0] ;
-
-        if { osStr eq "Windows" } {
-           ---set
-              dbPath
-              [file join
-               $::env(PUBLIC)
-               "Documents"
-               "freezeTBFiles"
-               $fileStr
-              ]
-           ---;
-
-           if { [file exists $dbPath ] eq 0 } {
-              set dbPath "NA" ;
-              ---tk_messageBox
-                 -message [concat $fileStr "not found"]
-                 -title "missing database"
-              ---;
-           } ; # If: database not in global location
-
-        } else {
-          set dbPath "/usr/local/share/freezeTBFiles" ;
-          set dbPath [file join $dbPath $fileStr] ;
-
-          if { [file exists $dbPath ] eq 0 } {
-             set dbPath "NA" ;
-             ---tk_messageBox
-                -message [concat $fileStr "not found"]
-                -title "missing database"
-             ---;
-          } ; # If: database not in global location
-        } ; # check if windows or unix
-      } ; # If: database not in HOME/Documents
-   } ; # If: database not in directory
-
-   return $dbPath ;
-} ; # getPath
-
-#***************************************************
-# Header Sec03 Sub02:
-#   - database global variable set up
-#***************************************************
-
-variable glob_refFa [getPath "NC000962.fa"] ;
-variable glob_coordsTsv [getPath "coords.tsv"] ;
-variable glob_amrDb [getPath "amrDb.tsv"] ;
-#variable glob_maskCoords [getPath "mask.tsv"] ;
-variable glob_maskCoords "" ;
-variable glob_miruDb [getPath "miruTbl.tsv"] ;
-variable glob_spacer [getPath "spoligo-spacers.fa"] ;
-variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
-
-#***************************************************
-# Header Sec03 Sub03:
-#   - non-database default settings
-#***************************************************
-
-# read filtering settings
-variable glob_mapq 15 ;
-variable glob_medQ 7 ;
-variable glob_meanQ 7 ;
-variable glob_minLen 50 ;
-
-# amr settings
-variable glob_amrPercSup 0.1 ;
-
-# lineage settings
-variable glob_miruFudge 15 ;
-variable glob_spolSim 0.9 ;
-variable glob_drStart 3119037 ;
-variable glob_drEnd 3123624 ;
-
-# consensus settings
-variable glob_depth 10 ;
-variable glob_snpq 3 ;
-variable glob_insq 3 ;
-variable glob_basePerc 0.4 ;
-variable glob_insPerc 0.7 ;
-variable glob_delPerc 0.7 ;
-
-# consensus variant settings
-variable glob_minVarDepth 10 ;
-variable glob_baseVarPerc 0.1 ;
-variable glob_insVarPerc 0.2 ;
-variable glob_delVarPerc 0.2 ;
-
-# cluster settings
-variable glob_minClustDepth 10 ;
-variable glob_minClustPercDepth 0.01 ;
-variable glob_minClustSnpQ 3 ;
-variable glob_minClustIndelLen 10 ;
-
-variable glob_clustReadErr 0.043 ;
-variable glob_clustConErr 0.023 ;
-variable glob_clustErrRatio 50 ;
-variable glob_clustWinErrRatio 200 ;
-variable glob_clustWinLen 500 ;
-variable glob_lenWeight 2 ;
-
-variable glob_maxClustSim 0.99 ;
-variable glob_minClustOverlap 0.75 ;
-variable glob_maxClustMask 0.05 ;
-variable glob_numRebuilds 1 ;
-
-#<<<script
+# 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Header Sec04:
@@ -667,125 +365,7 @@ set csv_types {
 #     - run freezeTB
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-#>>>script
-
-#****************************************************
-# Header Sec05 Sub01:
-#   - windows find freezeTB + function declaration
-#***************************************************
-
-proc freezeTBProc { argsList } {
-
-  if { [lindex $::tcl_platform(os) 0] eq "Windows" } {
-      # this is windows
-      set programFiles $::env(PROGRAMFILES) ;
-
-      set freezeTBPath "freezeTB.exe" ;
-
-      ---set
-         status
-         [catch
-          {exec $freezeTBPath --version} ::freezeTBVer
-         ]
-      --- ;
-
-      if { $status eq 0 } {
-         # found freezeTB
-      } else {
-         ---set freezeTBPath 
-            [file join
-               $programFiles
-               "freezeTB"
-               "minimap2.exe"
-            ]
-         ---; # build alternate freezeTB path
-
-         ---set
-            status
-            [catch
-             {exec $freezeTBPath --version}
-             ::freezeTBVer
-            ]
-         --- ;
-
-         if { $status eq 0 } {
-            # found freezeTB
-         } else {
-            ---tk_messageBox
-               -message "no freezeTB.exe detected"
-               -title "ERROR"
-            ---;
-
-            return 1 ;
-         } ;
-      } ; # find freezeTB path
-
-   #************************************************
-   # Header Sec05 Sub02:
-   #   - unix find freezeTB
-   #************************************************
-
-   } else {
-      set freezeTBPath "freezeTB" ;
-
-      ---set
-         status
-         [catch
-          {exec $freezeTBPath --version}
-          ::freezeTBVer
-         ]
-      --- ;
-
-      if { $status ne 0 } {
-         set freezeTBPath "./freezeTB" ;
-
-         ---set
-            status
-            [catch
-                {exec $freezeTBPath --version}
-                ::freezeTBVer
-            ]
-         --- ;
-
-         if { $status eq 0 } {
-            ---tk_messageBox
-               -message "freezeTB not found"
-               -title "ERROR"
-            ---;
-
-            return 1 ;
-         } ; # If: local freezeTB could not be found
-      } ; # If: freezeTB not in path
-   } ; # check if windows or linux
-
-   #***************************************************
-   # Header Sec05 Sub03:
-   #   - set up freezeTB command
-   #***************************************************
-
-   ---set
-      status
-      [catch
-       { eval exec \$freezeTBPath $argsList }
-       result
-      ]
-   ---; # run freezeTB
-
-   if { [ string equal $::errorCode NONE ] } {
-      return 0 ;
-   } else {
-      ---tk_messageBox
-         -message $result
-         -title "ERROR running freezeTB"
-      ---;
-
-      return 1 ;
-   } ; # check for errors
-
-   return 0 ;
-} ; # freezeTB
-
-#<<<script
+# 
 
 #--------------------------------------------------
 # Tcl01: tcl_isInt_gui
@@ -929,46 +509,28 @@ pack .main.reqIn.fq -anchor w -side top ;
 
 tk::label .main.reqIn.fq.lab -text "" ;
 
----tk::button
-    .main.reqIn.fq.but
-    -text "fastq files"
-    -command {
----
+tk::button .main.reqIn.fq.but -text "fastq files" -command { 
         set fqTitle "select fastq files" ;
         upvar 0 glob_fqIn fqIn ; # make global var
 
         set fqFiles [
-              ---tk_getOpenFile
-                 -multiple TRUE
-                 -title $fqTitle
-                 -filetypes $::fq_types
-              --- 
+              tk_getOpenFile -multiple TRUE -title $fqTitle -filetypes $::fq_types
         ] ;
 
         if {$fqFiles eq ""} {
 
         } elseif {[llength $fqFiles] == 1} {
-           ---.main.reqIn.fq.lab
-              configure
-              -text $fqFiles ;
-           ---
+           .main.reqIn.fq.lab configure -text $fqFiles ;
 
           set fqIn $fqFiles ; # update list
         } else {
-          ---.main.reqIn.fq.lab
-           configure
-           -text [file dirname [lindex $fqFiles 1] ]
-          ---;
+          .main.reqIn.fq.lab configure -text [file dirname [lindex $fqFiles 1] ] ;
 
           set fqIn $fqFiles ; # update list
         } ; # set up fastq label for input
 } ; # command button fires
 
----pack
-   .main.reqIn.fq.but
-   .main.reqIn.fq.lab
-   -side left ;
----
+pack .main.reqIn.fq.but .main.reqIn.fq.lab -side left ; 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui02 Sec03:
@@ -980,33 +542,20 @@ pack .main.reqIn.out -anchor w -side top ;
 
 tk::label .main.reqIn.out.lab -text "" ;
 
----tk::button
-      .main.reqIn.out.but
-      -text "output directory"
-      -command {
----
+tk::button .main.reqIn.out.but -text "output directory" -command { 
          upvar 0 glob_dirOut dirOut ;
 
          set outDir [
-            ---tk_chooseDirectory
-               -title "select output directory"
-            ---
+            tk_chooseDirectory -title "select output directory"
          ] ;
          if {$outDir ne ""} {
-            ---.main.reqIn.out.lab
-               configure -text $outDir ;
-            ---
+            .main.reqIn.out.lab configure -text $outDir ;
 
             set dirOut $outDir ;
          } ; # If: have output directory
    } ; # output directory button
 
----pack
-   .main.reqIn.out.but
-   .main.reqIn.out.lab
-   -side left
-   -anchor w ;
----
+pack .main.reqIn.out.but .main.reqIn.out.lab -side left -anchor w ; 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui02 Sec04:
@@ -1016,10 +565,7 @@ tk::label .main.reqIn.out.lab -text "" ;
 tk::frame .main.reqIn.prefix -borderwidth 2 ;
 pack .main.reqIn.prefix -anchor w -side top ;
 
----tk::entry
-   .main.reqIn.prefix.lab
-   -textvariable glob_prefix ;
----
+tk::entry .main.reqIn.prefix.lab -textvariable glob_prefix ; 
 
 pack .main.reqIn.prefix.lab -anchor w -side top
 
@@ -1075,37 +621,24 @@ pack .main.reqIn.runexit -anchor w -side top ;
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc setMapStatus {} {
-      ---.main.reqIn.runexit.statuslab
-         configure 
-         -text "running minimap2"
-      ---;
+      .main.reqIn.runexit.statuslab configure -text "running minimap2" ;
 
       wm title . "running minimap2 (freezeTB)" ;
 } ; # sets running minimap2 status
 
 proc setFreezeTBStatus {} {
-      ---.main.reqIn.runexit.statuslab
-         configure 
-         -text "running freezeTB"
-      ---;
+      .main.reqIn.runexit.statuslab configure -text "running freezeTB" ;
 
       wm title . "running freezeTB" ;
 } ; # sets running freezeTB stats
 
----tk::button
-   .main.reqIn.runexit.runbut
-   -text "run"
-   -command {
----
+tk::button .main.reqIn.runexit.runbut -text "run" -command { 
       # check if have required input/files
 
       if { $::glob_fqIn eq "" } {
          .main.menu.reqBut invoke ;
 
-         ---tk_messageBox
-            -message "no fastq files input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no fastq files input" -title "ERROR" ;
 
          return false ; # no fastq files
       } ; # no fastq file input
@@ -1113,70 +646,49 @@ proc setFreezeTBStatus {} {
       if { $::glob_prefix eq "" } {
          .main.menu.reqBut invoke ;
 
-         ---tk_messageBox
-            -message "no prefix input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no prefix input" -title "ERROR" ;
          return false;
       } ; #  no prefix (was deleted)
 
       if { $::glob_prefix eq "" } {
          .main.menu.reqBut invoke ;
 
-         ---tk_messageBox
-            -message "no prefix input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no prefix input" -title "ERROR" ;
          return false;
       } ; #  no prefix (was deleted)
 
       if { $::glob_refFa eq "" } {
          .main.menu.filtBut invoke ;
 
-         ---tk_messageBox
-            -message "no reference input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no reference input" -title "ERROR" ;
          return false;
       } ; #  no reference input
 
       if { $::glob_coordsTsv eq "" } {
          .main.menu.filtBut invoke ;
 
-         ---tk_messageBox
-            -message "no coordinates input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no coordinates input" -title "ERROR" ;
          return false;
       } ; #  no coordiantes file for ampDepth
 
       if { $::glob_amrDb eq "" } {
          .main.menu.amrBut invoke ;
 
-         ---tk_messageBox
-            -message "no AMR database input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no AMR database input" -title "ERROR" ;
          return false;
       } ; # no AMR database for tbAmr
 
       if { $::glob_miruDb eq "" } {
          .main.menu.linBut invoke ;
 
-         ---tk_messageBox
-            -message "no MIRU-VNTR database input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no MIRU-VNTR database input" -title "ERROR" ;
          return false;
       } ; #  no miru database
 
       if { $::glob_spacer eq "" } {
          .main.menu.linBut invoke ;
 
-         ---tk_messageBox
-            -message "no spoligotype sequences input"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "no spoligotype sequences input" -title "ERROR" ;
          return false;
       } ; #  no spoligotype spacer sequences
 
@@ -1185,26 +697,17 @@ proc setFreezeTBStatus {} {
       #   - set up minimap2 output file name
       #+++++++++++++++++++++++++++++++++++++++++++++
 
-      ---set
-         prefix
-         [ file join $glob_dirOut $glob_prefix ]
-      ---; # build output file path*/
+      set prefix [ file join $glob_dirOut $glob_prefix ] ; # build output file path*/
 
       file mkdir $prefix ;
 
       if { [file isdirectory $prefix] eq 0 } {
-         ---tk_messageBox
-            -message "failed to make directory"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "failed to make directory" -title "ERROR" ;
 
         return false
       } ; # failed to make output directory
 
-      ---set
-         prefix
-         [file join $prefix $glob_prefix]
-      ---;
+      set prefix [file join $prefix $glob_prefix] ;
 
       set samFile $prefix ;
       append samFile "-map.sam" ;
@@ -1233,37 +736,22 @@ proc setFreezeTBStatus {} {
 
       setMapStatus ; # dispaly running minimap2
 
-      ---.main.reqIn.runexit.statuslab
-         configure 
-         -text "running minimap2"
-      ---;
+      .main.reqIn.runexit.statuslab configure -text "running minimap2" ;
 
       puts $logFile $cmdStr ;
 
       wm title . "running minimap2 (freezeTB)" ;
 
       # run minimap2 command
-      ---set
-         status
-         [ catch { eval exec $cmdStr }  result ]
-      ---; # eval converts string to correct format
+      set status [ catch { eval exec $cmdStr }  result ] ; # eval converts string to correct format
 
       if { [ string equal $::errorCode NONE ] } {
          # using errorCode here because minimap2
          # outputs to stderr
       } else {
-         ---set
-            errMsgStr
-            [concat
-               "Error runing minimap2\n ERROR: "
-               $result
-            ]
-         ---;
+         set errMsgStr [concat "Error runing minimap2\n ERROR: " $result ] ;
 
-         ---tk_messageBox
-            -message $errMsgStr
-            -title "ERROR"
-         ---;
+         tk_messageBox -message $errMsgStr -title "ERROR" ;
 
          puts $logFile $errMsgStr ;
          clost $logFile ;
@@ -1271,16 +759,13 @@ proc setFreezeTBStatus {} {
          return false ;
          # probably need 
       } ; # Else had error
-        
+ 
       #+++++++++++++++++++++++++++++++++++++++++++++
       # Gui02 Sec05 Sub02 Cat04:
       #   - add freezeTB databases
       #+++++++++++++++++++++++++++++++++++++++++++++
 
-      ---puts
-         $logFile
-         [concat "freezeTB: " $::freezeTBVer]
-      ---; # print freezeTB version
+      puts $logFile [concat "freezeTB: " $::freezeTBVer] ; # print freezeTB version
 
       # set up databases
 
@@ -1307,14 +792,7 @@ proc setFreezeTBStatus {} {
          } else {
             lappend tbCmd "-mask-prim" "-" ;
 
-            ---tk_messageBox
-               -message
-                  [concat
-                   "no coordinates files for masking"
-                   "skipping masking step"
-                  ]
-               -title "skipping step"
-            ---;
+            tk_messageBox -message [concat "no coordinates files for masking" "skipping masking step" ] -title "skipping step" ;
          } ; # check if masking primers
       } ; # checking if masking or not
 
@@ -1396,7 +874,7 @@ proc setFreezeTBStatus {} {
 
          lappend tbCmd "-len-weigth" ;
          lappend tbCmd $glob_lenWeight ;
-        
+ 
          lappend tbCmd "-clust-depth" ;
          lappend tbCmd $glob_minClustDepth ;
 
@@ -1453,21 +931,13 @@ proc setFreezeTBStatus {} {
       puts $logFile [concat "freezeTB " $tbCmd ] ;
       setFreezeTBStatus ;
 
-      #>>>script
-         if { [ freezeTBProc $tbCmd ] } {
-         #--- using to remove non-script command
-      #<<<script
+ 
 
          if { [catch {eval freezeTB $tbCmd } out] } {
 
-      #>>>script
-         ---#
-      #<<<script
+ 
 
-         ---tk_messageBox
-            -message "freezeTB error"
-            -title "ERROR"
-         ---;
+         tk_messageBox -message "freezeTB error" -title "ERROR" ;
 
          puts $logFile "freezeTB error" ;
 
@@ -1481,10 +951,7 @@ proc setFreezeTBStatus {} {
 
       wm title . "Required freezeTB" ;
 
-      ---.main.reqIn.runexit.statuslab
-         configure 
-         -text ""
-      ---;
+      .main.reqIn.runexit.statuslab configure -text "" ;
 
       set ::glob_outPref $prefix ;
       set ::glob_outCur $prefix ;
@@ -1498,21 +965,11 @@ proc setFreezeTBStatus {} {
 #   - exit button and pack (run/exit)
 #***************************************************
 
----tk::button
-   .main.reqIn.runexit.exitbut
-   -text "exit"
-   -command {exit}
---- ;
+tk::button .main.reqIn.runexit.exitbut -text "exit" -command {exit}  ;
 
 tk::label .main.reqIn.runexit.statuslab -text "" ;
 
----pack
-   .main.reqIn.runexit.runbut
-   .main.reqIn.runexit.exitbut
-   .main.reqIn.runexit.statuslab
-   -anchor w
-   -side left
----;
+pack .main.reqIn.runexit.runbut .main.reqIn.runexit.exitbut .main.reqIn.runexit.statuslab -anchor w -side left ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Gui03 TOC:
@@ -1546,13 +1003,7 @@ pack .main.menu -anchor w -side top ;
 #   - set up required input button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
----tk::button
-   .main.menu.reqBut
-   -text "required"
-   -relief sunken
-   -state disabled
-   -command {
----
+tk::button .main.menu.reqBut -text "required" -relief sunken -state disabled -command { 
       pack forget .main.reqIn ;
       pack forget .main.filt ;
       pack forget .main.amr ;
@@ -1588,13 +1039,7 @@ pack .main.menu.reqBut -anchor w -side left
 #   - set up read filtering button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
----tk::button
-   .main.menu.filtBut
-   -text "filtering"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.menu.filtBut -text "filtering" -relief raised -state normal -command { 
       pack forget .main.reqIn ;
       pack forget .main.filt ;
       pack forget .main.amr ;
@@ -1630,13 +1075,7 @@ pack .main.menu.filtBut -anchor w -side left
 #   - set up AMR menu button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
----tk::button
-   .main.menu.amrBut
-   -text "AMRs"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.menu.amrBut -text "AMRs" -relief raised -state normal -command { 
       pack forget .main.reqIn ;
       pack forget .main.filt ;
       pack forget .main.amr ;
@@ -1669,13 +1108,7 @@ pack .main.menu.amrBut -anchor w -side left
 #   - set up lineage menu button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
----tk::button
-   .main.menu.linBut
-   -text "lineage"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.menu.linBut -text "lineage" -relief raised -state normal -command { 
       pack forget .main.reqIn ;
       pack forget .main.filt ;
       pack forget .main.amr ;
@@ -1711,13 +1144,7 @@ pack .main.menu.linBut -anchor w -side left
 #   - set up consensus menu button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
----tk::button
-   .main.menu.conBut
-   -text "consensus"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.menu.conBut -text "consensus" -relief raised -state normal -command { 
       pack forget .main.reqIn ;
       pack forget .main.filt ;
       pack forget .main.amr ;
@@ -1729,30 +1156,16 @@ pack .main.menu.linBut -anchor w -side left
       pack .main.con -anchor w -side top ;
       pack .main.menu -anchor w -side top ;
 
-      ---set
-         conState
-         [.main.con.menu.tbBut configure -state]
-      ---;
-      ---set
-         conClick [lsearch $conState "disabled"]
-      ---;
+      set conState [.main.con.menu.tbBut configure -state] ;
+      set conClick [lsearch $conState "disabled"] ;
 
-      ---set
-         varState
-         [.main.con.menu.varBut configure -state]
-      ---;
-      ---set
-         varClick [lsearch $varState "disabled"]
-      ---;
+      set varState [.main.con.menu.varBut configure -state] ;
+      set varClick [lsearch $varState "disabled"] ;
 
       if { $conClick >= 0 } {
          wm title . "Consensus tbCon freezeTB" ;
       } elseif { $varClick >= 0 } {
-         ---wm
-            title
-            .
-            "Consensus variant tbCon freezeTB"
-         ---;
+         wm title . "Consensus variant tbCon freezeTB" ;
       } elseif { $varClick >= 0 } {
       } else {
          wm title . "Consensus cluster freezeTB" ;
@@ -1781,13 +1194,7 @@ pack .main.menu.conBut -anchor w -side left
 #   - set up output settings menu
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
----tk::button
-   .main.menu.outBut
-   -text "output"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.menu.outBut -text "output" -relief raised -state normal -command { 
 
       pack forget .main.reqIn ;
       pack forget .main.filt ;
@@ -1859,37 +1266,22 @@ pack .main.filt.ref -anchor w -side top ;
 
 tk::label .main.filt.ref.lab -text $glob_refFa ;
 
----tk::button
-    .main.filt.ref.but
-    -text "reference"
-    -command {
----
+tk::button .main.filt.ref.but -text "reference" -command { 
         upvar 0 glob_refFa refFa ;
 
         set faFile [
-           --- tk_getOpenFile
-              -title "select reference (as fasta)"
-              -filetypes $::fa_types
-           ---] ; # find the reference fasta
+            tk_getOpenFile -title "select reference (as fasta)" -filetypes $::fa_types ] ; # find the reference fasta
 
         if {$faFile eq ""} {
 
         } else {
-           ---.main.filt.ref.lab
-              configure
-              -text $faFile ; # update label
-           ---
+           .main.filt.ref.lab configure -text $faFile ;
 
           set refFa $faFile ; # update list
         } ; # Else: fasta selected
 } ; # select reference button
 
----pack
-   .main.filt.ref.but
-   .main.filt.ref.lab
-   -anchor w
-   -side left
----
+pack .main.filt.ref.but .main.filt.ref.lab -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec03:
@@ -1899,42 +1291,24 @@ tk::label .main.filt.ref.lab -text $glob_refFa ;
 tk::frame .main.filt.coords ;
 pack .main.filt.coords -anchor w -side top ;
 
----tk::label
-   .main.filt.coords.lab
-   -text $glob_coordsTsv
---- ;
+tk::label .main.filt.coords.lab -text $glob_coordsTsv  ;
 
----tk::button
-    .main.filt.coords.but
-    -text "coordinates file"
-    -command {
----
+tk::button .main.filt.coords.but -text "coordinates file" -command { 
         upvar 0 glob_coordsTsv coordsTsv ;
 
         set tsvFile [
-           ---tk_getOpenFile
-              -title "select gene coordinate file"
-              -filetypes $::tsv_types
-           --- ] ; # find gene coordinates file
+           tk_getOpenFile -title "select gene coordinate file" -filetypes $::tsv_types  ] ; # find gene coordinates file
 
         if {$tsvFile eq ""} {
 
         } else {
-           ---.main.filt.coords.lab
-              configure
-              -text $tsvFile # update label
-           ---;
+           .main.filt.coords.lab configure -text $tsvFile ;
 
           set coordsTsv $tsvFile ;
         } ; # Else: file selected
 } ; # select reference button
 
----pack
-   .main.filt.coords.but
-   .main.filt.coords.lab
-   -anchor w
-   -side left
----
+pack .main.filt.coords.but .main.filt.coords.lab -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec04:
@@ -1944,24 +1318,11 @@ pack .main.filt.coords -anchor w -side top ;
 tk::frame .main.filt.mapq
 pack .main.filt.mapq -anchor w -side top
 
----tk::label
-   .main.filt.mapq.lab
-   -text "mapq (0-93)"
----
+tk::label .main.filt.mapq.lab -text "mapq (0-93)" 
 
----tk::entry
-   .main.filt.mapq.entry
-   -textvariable glob_mapq
-   -validate key        # validate on key press
-   -vcmd { tcl_isInt_gui %P %i 0 93 }
---- ; # get mapqping quality
+tk::entry .main.filt.mapq.entry -textvariable glob_mapq -validate key -vcmd { tcl_isInt_gui %P %i 0 93 }  ; # get mapqping quality
 
----pack
-   .main.filt.mapq.lab
-   .main.filt.mapq.entry
-   -anchor w
-   -side left ;
----
+pack .main.filt.mapq.lab .main.filt.mapq.entry -anchor w -side left ; 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec05:
@@ -1971,24 +1332,11 @@ pack .main.filt.mapq -anchor w -side top
 tk::frame .main.filt.medQ
 pack .main.filt.medQ -anchor w -side top
 
----tk::label
-   .main.filt.medQ.lab
-   -text "median Q (0-93)"
---- ; # medain q-score entry leabe
+tk::label .main.filt.medQ.lab -text "median Q (0-93)"  ; # medain q-score entry leabe
 
----tk::entry
-   .main.filt.medQ.entry
-   -textvariable glob_medQ
-   -validate key
-   -vcmd { tcl_isInt_gui %P %i 0 93 }
---- ; # get median q-score
+tk::entry .main.filt.medQ.entry -textvariable glob_medQ -validate key -vcmd { tcl_isInt_gui %P %i 0 93 }  ; # get median q-score
 
----pack
-   .main.filt.medQ.lab
-   .main.filt.medQ.entry
-   -anchor w
-   -side left
----
+pack .main.filt.medQ.lab .main.filt.medQ.entry -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec06:
@@ -1998,24 +1346,11 @@ pack .main.filt.medQ -anchor w -side top
 tk::frame .main.filt.meanQ
 pack .main.filt.meanQ -anchor w -side top
 
----tk::label
-   .main.filt.meanQ.lab
-   -text "min mean Q (0-93)"
---- ; # medain q-score entry leabe
+tk::label .main.filt.meanQ.lab -text "min mean Q (0-93)"  ; # medain q-score entry leabe
 
----tk::entry
-   .main.filt.meanQ.entry
-   -textvariable glob_meanQ
-   -validate key
-   -vcmd { tcl_isInt_gui %P %i 0 93 }
---- ; # get mean q-score
+tk::entry .main.filt.meanQ.entry -textvariable glob_meanQ -validate key -vcmd { tcl_isInt_gui %P %i 0 93 }  ; # get mean q-score
 
----pack
-   .main.filt.meanQ.lab
-   .main.filt.meanQ.entry
-   -anchor w
-   -side left
----
+pack .main.filt.meanQ.lab .main.filt.meanQ.entry -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec07:
@@ -2025,24 +1360,11 @@ pack .main.filt.meanQ -anchor w -side top
 tk::frame .main.filt.len
 pack .main.filt.len -anchor w -side top
 
----tk::label
-   .main.filt.len.lab
-   -text "min length (> 0)"
---- ; # medain q-score entry leabe
+tk::label .main.filt.len.lab -text "min length (> 0)"  ; # medain q-score entry leabe
 
----tk::entry
-   .main.filt.len.entry
-   -textvariable glob_minLen
-   -validate key
-   -vcmd { tcl_isInt_gui %P %i 1 2000000000 }
---- ; # get minimum read length
+tk::entry .main.filt.len.entry -textvariable glob_minLen -validate key -vcmd { tcl_isInt_gui %P %i 1 2000000000 }  ; # get minimum read length
 
----pack
-   .main.filt.len.lab
-   .main.filt.len.entry
-   -anchor w
-   -side left
----
+pack .main.filt.len.lab .main.filt.len.entry -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec08:
@@ -2052,36 +1374,19 @@ pack .main.filt.len -anchor w -side top
 tk::frame .main.filt.mask
 pack .main.filt.mask -anchor w -side top
 
----tk::checkbutton
-   .main.filt.mask.check
-   -text "mask primers"    # text for user
-   -variable glob_mask
---- ; # if doing long or short reads
+tk::checkbutton .main.filt.mask.check -text "mask primers" -variable glob_mask  ; # if doing long or short reads
 
----tk::label
-   .main.filt.mask.lab
-   -text $::glob_maskCoords
---- ; # label for masking file
+tk::label .main.filt.mask.lab -text $::glob_maskCoords  ; # label for masking file
 
----tk::button
-   .main.filt.mask.but
-   -text "masking coordinates"
-   -command {
----
+tk::button .main.filt.mask.but -text "masking coordinates" -command { 
       set maskFile [
-         ---tk_getOpenFile
-            -title "maksing coordinates"
-            -filetypes $::tsv_types
-         ---
+         tk_getOpenFile -title "maksing coordinates" -filetypes $::tsv_types
       ] ;
 
       if {$maskFile eq "" } {
 
       } else {
-         ---.main.filt.mask.lab
-            configure
-            -text $maskFile ;
-         ---
+         .main.filt.mask.lab configure -text $maskFile ;
          set ::glob_maskCoords $maskFile ;
 
          # turn on the check button
@@ -2089,13 +1394,7 @@ pack .main.filt.mask -anchor w -side top
       } ; # Else: masking coordinates input
    } ; # button to get mask coordinates file
 
----pack
-   .main.filt.mask.check
-   .main.filt.mask.but
-   .main.filt.mask.lab
-   -anchor w
-   -side left
----
+pack .main.filt.mask.check .main.filt.mask.but .main.filt.mask.lab -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec09:
@@ -2105,11 +1404,7 @@ pack .main.filt.mask -anchor w -side top
 tk::frame .main.filt.adj ;
 pack .main.filt.adj -anchor w -side top ;
 
----tk::checkbutton
-   .main.filt.adj.check
-   -text "adjust coordinates"    # text for user
-   -variable glob_adjust
---- ; # if doing long or short reads
+tk::checkbutton .main.filt.adj.check -text "adjust coordinates" -variable glob_adjust  ; # if doing long or short reads
 
 pack .main.filt.adj.check -anchor w -side left ;
 
@@ -2121,13 +1416,7 @@ pack .main.filt.adj.check -anchor w -side left ;
 tk::frame .main.filt.sr
 pack .main.filt.sr -anchor w -side top
 
----tk::checkbutton
-   .main.filt.sr.check
-   -offvalue "-x map-ont" # ONT long reads
-   -onvalue "-x sr"       # illumina short reads
-   -text "short reads"    # text for user
-   -variable glob_srCheck
---- ; # if doing long or short reads
+tk::checkbutton .main.filt.sr.check -offvalue "-x map-ont" -onvalue "-x sr" -text "short reads" -variable glob_srCheck  ; # if doing long or short reads
 
 pack .main.filt.sr.check -anchor w -side left ;
 
@@ -2161,16 +1450,9 @@ pack .main.amr.db -anchor w -side top ;
 
 tk::label .main.amr.db.lab -text $glob_amrDb ;
 
----tk::button
-   .main.amr.db.but
-   -text "AMR database"
-   -command {
----
+tk::button .main.amr.db.but -text "AMR database" -command { 
       set tsvFile [
-         ---tk_getOpenFile
-            -title "select AMR database"
-            -filetypes $::tsv_types
-         ---] ;
+         tk_getOpenFile -title "select AMR database" -filetypes $::tsv_types ] ;
        if {$tsvFile eq "" } {
 
        } else {
@@ -2179,12 +1461,7 @@ tk::label .main.amr.db.lab -text $glob_amrDb ;
        } ; # Else: AMR database input
   } ; # amr database button
 
----pack
-   .main.amr.db.but
-   .main.amr.db.lab
-   -anchor w
-   -side left 
----
+pack .main.amr.db.but .main.amr.db.lab -anchor w -side left 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui05 Sec03:
@@ -2194,24 +1471,11 @@ tk::label .main.amr.db.lab -text $glob_amrDb ;
 tk::frame .main.amr.sup ;
 pack .main.amr.sup -anchor w -side top ;
 
----tk::label
-   .main.amr.sup.lab
-   -text "% AMR support (0-1)"
---- ;
+tk::label .main.amr.sup.lab -text "% AMR support (0-1)"  ;
 
----tk::entry
-   .main.amr.sup.entry
-   -textvariable glob_amrPercSup
-   -validate key
-   -vcmd { tcl_isFloat_gui %P %i 0 1 }
---- ; # get minimum percent read depth for AMR
+tk::entry .main.amr.sup.entry -textvariable glob_amrPercSup -validate key -vcmd { tcl_isFloat_gui %P %i 0 1 }  ; # get minimum percent read depth for AMR
 
----pack
-   .main.amr.sup.lab
-   .main.amr.sup.entry
-   -anchor w
-   -side left
---- ;
+pack .main.amr.sup.lab .main.amr.sup.entry -anchor w -side left  ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui05 Sec04:
@@ -2221,17 +1485,9 @@ pack .main.amr.sup -anchor w -side top ;
 tk::frame .main.amr.frameshift ;
 pack .main.amr.frameshift -anchor w -side top ;
 
----tk::checkbutton
-   .main.amr.frameshift.check
-   -text "check frameshifts"
-   -variable glob_frameshift
---- ;
+tk::checkbutton .main.amr.frameshift.check -text "check frameshifts" -variable glob_frameshift  ;
 
----pack
-   .main.amr.frameshift.check
-   -anchor w
-   -side left
---- ;
+pack .main.amr.frameshift.check -anchor w -side left  ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Gui06 TOC:
@@ -2284,34 +1540,19 @@ pack .main.lin.db.miru -anchor w -side top ;
 
 tk::label .main.lin.db.miru.lab -text $glob_miruDb ;
 
----tk::button
-   .main.lin.db.miru.but
-   -text "MIRU-VNTR database"
-   -command {
----
+tk::button .main.lin.db.miru.but -text "MIRU-VNTR database" -command { 
       set tsvFile [
-         ---tk_getOpenFile
-            -title "select MIRU-VNTR database"
-            -filetypes $::tsv_types
-         --- ] ; # get MIRU databse
+         tk_getOpenFile -title "select MIRU-VNTR database" -filetypes $::tsv_types  ] ; # get MIRU databse
 
       if { $tsvFile eq "" } {
 
       } else {
-         ---.main.lin.db.miru.lab
-            configure
-            -text $tsvFile
-          ---;
+         .main.lin.db.miru.lab configure -text $tsvFile ;
           set ::glob_miruDb $tsvFile ;
       } ; # Else: miru database selected
 } ; # -command get MIRU database
 
----pack
-   .main.lin.db.miru.but
-   .main.lin.db.miru.lab
-   -anchor w
-   -side left
----
+pack .main.lin.db.miru.but .main.lin.db.miru.lab -anchor w -side left 
 
 #***************************************************
 # Gui06 Sec02 Sub03:
@@ -2321,42 +1562,23 @@ tk::label .main.lin.db.miru.lab -text $glob_miruDb ;
 tk::frame .main.lin.db.spacer ;
 pack .main.lin.db.spacer -anchor w -side top ;
 
----tk::label
-   .main.lin.db.spacer.lab
-   -text
-   $glob_spacer
---- ; # holds spacer database location
+tk::label .main.lin.db.spacer.lab -text $glob_spacer  ; # holds spacer database location
 
----tk::button
-   .main.lin.db.spacer.but
-   -text "spoligotype spacers"
-   -command {
----
+tk::button .main.lin.db.spacer.but -text "spoligotype spacers" -command { 
       upvar 0 glob_spacer spacer ;
 
       set spacerFa [
-         ---tk_getOpenFile
-            -title "spoligotype spacer sequences"
-            -filetypes $::fa_types
-         --- ] ; # get spacer sequence fasta file
+         tk_getOpenFile -title "spoligotype spacer sequences" -filetypes $::fa_types  ] ; # get spacer sequence fasta file
 
       if {$spacerFa eq ""} {
 
       } else {
-         ---.main.lin.db.spacer.lab
-            configure
-            -text $spacerFa
-         ---;
+         .main.lin.db.spacer.lab configure -text $spacerFa ;
          set spacer $spacerFa ;
       } ; # Else: user input fasta
 } ; # button for spacers database
 
----pack
-   .main.lin.db.spacer.but
-   .main.lin.db.spacer.lab
-   -anchor w
-   -side left
---- ;   
+pack .main.lin.db.spacer.but .main.lin.db.spacer.lab -anchor w -side left  ;
 
 #***************************************************
 # Gui06 Sec02 Sub04:
@@ -2366,42 +1588,23 @@ pack .main.lin.db.spacer -anchor w -side top ;
 tk::frame .main.lin.db.spol ;
 pack .main.lin.db.spol -anchor w -side top ;
 
----tk::label
-   .main.lin.db.spol.lab
-   -text
-   $glob_spolDb
---- ; # holds spol database location
+tk::label .main.lin.db.spol.lab -text $glob_spolDb  ; # holds spol database location
 
----tk::button
-   .main.lin.db.spol.but
-   -text "spoligotype database"
-   -command {
----
+tk::button .main.lin.db.spol.but -text "spoligotype database" -command { 
       upvar 0 glob_spolDb spolDb ;
 
       set spolTsv [
-         ---tk_getOpenFile
-            -title "spoligotype lineage database"
-            -filetypes $::csv_types
-         --- ] ;
+         tk_getOpenFile -title "spoligotype lineage database" -filetypes $::csv_types  ] ;
 
       if {$spolTsv eq ""} {
 
       } else {
-         ---.main.lin.db.spol.lab
-            configure
-            -text $spolTsv
-         ---;
+         .main.lin.db.spol.lab configure -text $spolTsv ;
          set spolDb $spolTsv ;
       } ; # Else: user input csv
 } ; # button for spols database
 
----pack
-   .main.lin.db.spol.but
-   .main.lin.db.spol.lab
-   -anchor w
-   -side left
---- ;   
+pack .main.lin.db.spol.but .main.lin.db.spol.lab -anchor w -side left  ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui06 Sec03:
@@ -2411,25 +1614,11 @@ pack .main.lin.db.spol -anchor w -side top ;
 tk::frame .main.lin.miru ;
 pack .main.lin.miru -anchor w -side top ;
 
----tk::label
-   .main.lin.miru.lab
-   -text
-   "fudge (0-100)"
---- ;
+tk::label .main.lin.miru.lab -text "fudge (0-100)"  ;
 
----tk::entry
-   .main.lin.miru.entry
-   -textvariable glob_miruFudge
-   -validate key
-   -vcmd { tcl_isInt_gui %P %i 0 100 }
-; --- # -command for fudge entry
+tk::entry .main.lin.miru.entry -textvariable glob_miruFudge -validate key -vcmd { tcl_isInt_gui %P %i 0 100 } ;  # -command for fudge entry
 
----pack
-   .main.lin.miru.lab
-   .main.lin.miru.entry
-   -anchor w
-   -side left
---- ;
+pack .main.lin.miru.lab .main.lin.miru.entry -anchor w -side left  ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui06 Sec04:
@@ -2462,24 +1651,11 @@ pack .main.lin.spol -anchor w -side top ;
 tk::frame .main.lin.spol.sim ;
 pack .main.lin.spol.sim -anchor w -side top ;
 
----tk::label
-   .main.lin.spol.sim.lab
-   -text "spoligo min % match (0-1)"
---- ;
+tk::label .main.lin.spol.sim.lab -text "spoligo min % match (0-1)"  ;
 
----tk::entry
-   .main.lin.spol.sim.entry
-   -textvariable glob_spolSim
-   -validate key
-   -vcmd { tcl_isFloat_gui %P %i 0 1 }
---- ; # entry for minimum percent match
+tk::entry .main.lin.spol.sim.entry -textvariable glob_spolSim -validate key -vcmd { tcl_isFloat_gui %P %i 0 1 }  ; # entry for minimum percent match
 
----pack
-  .main.lin.spol.sim.lab
-  .main.lin.spol.sim.entry
-  -anchor w
-  -side left
---- ;
+pack .main.lin.spol.sim.lab .main.lin.spol.sim.entry -anchor w -side left  ;
 
 #***************************************************
 # Gui06 Sec04 Sub03:
@@ -2492,10 +1668,7 @@ pack .main.lin.spol.dr -anchor w -side top ;
 tk::frame .main.lin.spol.dr.dr ;
 pack .main.lin.spol.dr.dr -anchor w -side top ;
 
----tk::label
-   .main.lin.spol.dr.dr.lab
-   -text "Direct Repeat Coordinates:"
---- ;
+tk::label .main.lin.spol.dr.dr.lab -text "Direct Repeat Coordinates:"  ;
 
 pack .main.lin.spol.dr.dr.lab -anchor w -side left ;
 
@@ -2507,24 +1680,11 @@ pack .main.lin.spol.dr.dr.lab -anchor w -side left ;
 tk::frame .main.lin.spol.dr.start ;
 pack .main.lin.spol.dr.start -anchor w -side top ;
 
----tk::label
-   .main.lin.spol.dr.start.lab
-   -text "    start (> 0):"
---- ;
+tk::label .main.lin.spol.dr.start.lab -text "    start (> 0):"  ;
 
----tk::entry
-   .main.lin.spol.dr.start.entry
-   -textvariable glob_drStart
-   -validate key
-   -vcmd { tcl_isInt_gui %P %i 1 2000000000 }
---- ; # direct repeat start
+tk::entry .main.lin.spol.dr.start.entry -textvariable glob_drStart -validate key -vcmd { tcl_isInt_gui %P %i 1 2000000000 }  ; # direct repeat start
 
----pack
-   .main.lin.spol.dr.start.lab
-   .main.lin.spol.dr.start.entry
-   -anchor w
-   -side left
---- ;
+pack .main.lin.spol.dr.start.lab .main.lin.spol.dr.start.entry -anchor w -side left  ;
 
 #***************************************************
 # Gui06 Sec04 Sub05:
@@ -2534,24 +1694,11 @@ pack .main.lin.spol.dr.start -anchor w -side top ;
 tk::frame .main.lin.spol.dr.end ;
 pack .main.lin.spol.dr.end -anchor w -side top ;
 
----tk::label
-   .main.lin.spol.dr.end.lab
-   -text "    end (> 0):"
---- ;
+tk::label .main.lin.spol.dr.end.lab -text "    end (> 0):"  ;
 
----tk::entry
-   .main.lin.spol.dr.end.entry
-   -textvariable glob_drEnd
-   -validate key
-   -vcmd { tcl_isInt_gui %P %i 1 2000000000 }
---- ; # direct repeat end
+tk::entry .main.lin.spol.dr.end.entry -textvariable glob_drEnd -validate key -vcmd { tcl_isInt_gui %P %i 1 2000000000 }  ; # direct repeat end
 
----pack
-   .main.lin.spol.dr.end.lab
-   .main.lin.spol.dr.end.entry
-   -anchor w
-   -side left
---- ;
+pack .main.lin.spol.dr.end.lab .main.lin.spol.dr.end.entry -anchor w -side left  ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Gui07 TOC:
@@ -2599,13 +1746,7 @@ pack .main.con.tb -anchor w -side top ;
 #   - set up tbCon menu button
 #***************************************************
 
----tk::button
-   .main.con.menu.tbBut
-   -text "tbCon"
-   -relief sunken
-   -state disabled
-   -command {
----
+tk::button .main.con.menu.tbBut -text "tbCon" -relief sunken -state disabled -command { 
       pack forget .main.con.menu ;
       pack forget .main.con.tb ;
       pack forget .main.con.var ;
@@ -2616,21 +1757,9 @@ pack .main.con.tb -anchor w -side top ;
 
       wm title . "Consensus tbCon freezeTB" ;
 
-      ---.main.con.menu.tbBut
-         configure
-         -state disabled
-         -relief sunken
-      ---;
-      ---.main.con.menu.varBut
-         configure
-         -state normal
-         -relief raised
-      ---;
-      ---.main.con.menu.clustBut
-         configure
-         -state normal
-         -relief raised
-      ---;
+      .main.con.menu.tbBut configure -state disabled -relief sunken ;
+      .main.con.menu.varBut configure -state normal -relief raised ;
+      .main.con.menu.clustBut configure -state normal -relief raised ;
    } ; # show tbCon menu
 
 pack .main.con.menu.tbBut -anchor w -side left ;
@@ -2640,13 +1769,7 @@ pack .main.con.menu.tbBut -anchor w -side left ;
 #   - set up tbCon variant menu button
 #***************************************************
 
----tk::button
-   .main.con.menu.varBut
-   -text "tbCon variant"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.con.menu.varBut -text "tbCon variant" -relief raised -state normal -command { 
       pack forget .main.con.menu ;
       pack forget .main.con.tb ;
       pack forget .main.con.var ;
@@ -2655,26 +1778,10 @@ pack .main.con.menu.tbBut -anchor w -side left ;
       pack .main.con.menu -anchor w -side top ;
       pack .main.con.var -anchor w -side top ;
 
-      ---wm
-         title
-         .
-         "Consensus Variant tbCon freezeTB"
-      ---;
-      ---.main.con.menu.tbBut
-         configure
-         -state normal
-         -relief raised
-      ---;
-      ---.main.con.menu.varBut
-         configure
-         -state disabled
-         -relief sunken
-      ---;
-      ---.main.con.menu.clustBut
-         configure
-         -state normal
-         -relief raised
-      ---;
+      wm title . "Consensus Variant tbCon freezeTB" ;
+      .main.con.menu.tbBut configure -state normal -relief raised ;
+      .main.con.menu.varBut configure -state disabled -relief sunken ;
+      .main.con.menu.clustBut configure -state normal -relief raised ;
    } ; # show tbCon variant menu
 
 pack .main.con.menu.varBut -anchor w -side left ;
@@ -2684,13 +1791,7 @@ pack .main.con.menu.varBut -anchor w -side left ;
 #   - set up cluster menu button
 #***************************************************
 
----tk::button
-   .main.con.menu.clustBut
-   -text "cluster"
-   -relief raised
-   -state normal
-   -command {
----
+tk::button .main.con.menu.clustBut -text "cluster" -relief raised -state normal -command { 
       pack forget .main.con.menu ;
       pack forget .main.con.tb ;
       pack forget .main.con.var ;
@@ -2701,28 +1802,12 @@ pack .main.con.menu.varBut -anchor w -side left ;
 
       wm title . "Consensus cluster freezeTB" ;
 
-      ---.main.con.menu.tbBut
-         configure
-         -state normal
-         -relief raised
-      ---;
-      ---.main.con.menu.varBut
-         configure
-         -state normal
-         -relief raised
-      ---;
-      ---.main.con.menu.clustBut
-         configure
-         -state disabled
-         -relief sunken
-      ---;
+      .main.con.menu.tbBut configure -state normal -relief raised ;
+      .main.con.menu.varBut configure -state normal -relief raised ;
+      .main.con.menu.clustBut configure -state disabled -relief sunken ;
    } ; # show edClust menu
 
-   ---pack
-      .main.con.menu.clustBut
-      -anchor w
-      -side left
-   ---;
+   pack .main.con.menu.clustBut -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui07 Sec02:
@@ -2749,24 +1834,11 @@ pack .main.con.menu.varBut -anchor w -side left ;
 tk::frame .main.con.tb.snpq ;
 pack .main.con.tb.snpq -anchor w -side top ;
 
----tk::label
-   .main.con.tb.snpq.lab
-   -text "Min snp q-score (0-93)"
----;
+tk::label .main.con.tb.snpq.lab -text "Min snp q-score (0-93)" ;
 
----tk::entry
-   .main.con.tb.snpq.entry
-   -textvariable glob_snpq
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 0 93 }
---- ; # min snp q-score entry
+tk::entry .main.con.tb.snpq.entry -textvariable glob_snpq -validate key -vcmd {tcl_isInt_gui %P %i 0 93 }  ; # min snp q-score entry
 
----pack
-   .main.con.tb.snpq.lab
-   .main.con.tb.snpq.entry
-   -anchor w
-   -side left
----;
+pack .main.con.tb.snpq.lab .main.con.tb.snpq.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec02 Sub02:
@@ -2776,24 +1848,11 @@ pack .main.con.tb.snpq -anchor w -side top ;
 tk::frame .main.con.tb.insq ;
 pack .main.con.tb.insq -anchor w -side top ;
 
----tk::label
-   .main.con.tb.insq.lab
-   -text "Min insertion q-score (0-93)"
----;
+tk::label .main.con.tb.insq.lab -text "Min insertion q-score (0-93)" ;
 
----tk::entry
-   .main.con.tb.insq.entry
-   -textvariable glob_insq
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 0 93 }
---- ; # min ins q-score entry
+tk::entry .main.con.tb.insq.entry -textvariable glob_insq -validate key -vcmd {tcl_isInt_gui %P %i 0 93 }  ; # min ins q-score entry
 
----pack
-   .main.con.tb.insq.lab
-   .main.con.tb.insq.entry
-   -anchor w
-   -side left
----;
+pack .main.con.tb.insq.lab .main.con.tb.insq.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec02 Sub03:
@@ -2803,24 +1862,11 @@ pack .main.con.tb.insq -anchor w -side top ;
 tk::frame .main.con.tb.depth ;
 pack .main.con.tb.depth -anchor w -side top ;
 
----tk::label
-   .main.con.tb.depth.lab
-   -text "Min read depth (> 0)"
----;
+tk::label .main.con.tb.depth.lab -text "Min read depth (> 0)" ;
 
----tk::entry
-   .main.con.tb.depth.entry
-   -textvariable glob_depth
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ;
+tk::entry .main.con.tb.depth.entry -textvariable glob_depth -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ;
 
----pack
-   .main.con.tb.depth.lab
-   .main.con.tb.depth.entry
-   -anchor w
-   -side left
----;
+pack .main.con.tb.depth.lab .main.con.tb.depth.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec02 Sub04:
@@ -2830,24 +1876,11 @@ pack .main.con.tb.depth -anchor w -side top ;
 tk::frame .main.con.tb.baseperc ;
 pack .main.con.tb.baseperc -anchor w -side top ;
 
----tk::label
-   .main.con.tb.baseperc.lab
-   -text "Min % base support (0-1)"
----;
+tk::label .main.con.tb.baseperc.lab -text "Min % base support (0-1)" ;
 
----tk::entry
-   .main.con.tb.baseperc.entry
-   -textvariable glob_basePerc
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent depth for base
+tk::entry .main.con.tb.baseperc.entry -textvariable glob_basePerc -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent depth for base
 
----pack
-   .main.con.tb.baseperc.lab
-   .main.con.tb.baseperc.entry
-   -anchor w
-   -side left
----;
+pack .main.con.tb.baseperc.lab .main.con.tb.baseperc.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec02 Sub05:
@@ -2857,24 +1890,11 @@ pack .main.con.tb.baseperc -anchor w -side top ;
 tk::frame .main.con.tb.insperc ;
 pack .main.con.tb.insperc -anchor w -side top ;
 
----tk::label
-   .main.con.tb.insperc.lab
-   -text "Min % insertion support (0-1)"
----;
+tk::label .main.con.tb.insperc.lab -text "Min % insertion support (0-1)" ;
 
----tk::entry
-   .main.con.tb.insperc.entry
-   -textvariable glob_insPerc
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent depth for ins
+tk::entry .main.con.tb.insperc.entry -textvariable glob_insPerc -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent depth for ins
 
----pack
-   .main.con.tb.insperc.lab
-   .main.con.tb.insperc.entry
-   -anchor w
-   -side left
----;
+pack .main.con.tb.insperc.lab .main.con.tb.insperc.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec02 Sub06:
@@ -2884,24 +1904,11 @@ pack .main.con.tb.insperc -anchor w -side top ;
 tk::frame .main.con.tb.delperc ;
 pack .main.con.tb.delperc -anchor w -side top ;
 
----tk::label
-   .main.con.tb.delperc.lab
-   -text "Min % deletion support (0-1)"
----;
+tk::label .main.con.tb.delperc.lab -text "Min % deletion support (0-1)" ;
 
----tk::entry
-   .main.con.tb.delperc.entry
-   -textvariable glob_delPerc
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent depth for del
+tk::entry .main.con.tb.delperc.entry -textvariable glob_delPerc -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent depth for del
 
----pack
-   .main.con.tb.delperc.lab
-   .main.con.tb.delperc.entry
-   -anchor w
-   -side left
----;
+pack .main.con.tb.delperc.lab .main.con.tb.delperc.entry -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui07 Sec03:
@@ -2924,24 +1931,11 @@ pack .main.con.tb.delperc -anchor w -side top ;
 tk::frame .main.con.var.depth ;
 pack .main.con.var.depth -anchor w -side top ;
 
----tk::label
-   .main.con.var.depth.lab
-   -text "Variant: min read depth (> 0)"
----;
+tk::label .main.con.var.depth.lab -text "Variant: min read depth (> 0)" ;
 
----tk::entry
-   .main.con.var.depth.entry
-   -textvariable glob_minVarDepth
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ; # min snp q-score entry
+tk::entry .main.con.var.depth.entry -textvariable glob_minVarDepth -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ; # min snp q-score entry
 
----pack
-   .main.con.var.depth.lab
-   .main.con.var.depth.entry
-   -anchor w
-   -side left
----;
+pack .main.con.var.depth.lab .main.con.var.depth.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec03 Sub04:
@@ -2951,24 +1945,11 @@ pack .main.con.var.depth -anchor w -side top ;
 tk::frame .main.con.var.baseperc ;
 pack .main.con.var.baseperc -anchor w -side top ;
 
----tk::label
-   .main.con.var.baseperc.lab
-   -text "Variant: min % base support (0-1)"
----;
+tk::label .main.con.var.baseperc.lab -text "Variant: min % base support (0-1)" ;
 
----tk::entry
-   .main.con.var.baseperc.entry
-   -textvariable glob_baseVarPerc
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent depth for base
+tk::entry .main.con.var.baseperc.entry -textvariable glob_baseVarPerc -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent depth for base
 
----pack
-   .main.con.var.baseperc.lab
-   .main.con.var.baseperc.entry
-   -anchor w
-   -side left
----;
+pack .main.con.var.baseperc.lab .main.con.var.baseperc.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec03 Sub05:
@@ -2978,24 +1959,11 @@ pack .main.con.var.baseperc -anchor w -side top ;
 tk::frame .main.con.var.insperc ;
 pack .main.con.var.insperc -anchor w -side top ;
 
----tk::label
-   .main.con.var.insperc.lab
-   -text "Variant: min % insertion support (0-1)"
----;
+tk::label .main.con.var.insperc.lab -text "Variant: min % insertion support (0-1)" ;
 
----tk::entry
-   .main.con.var.insperc.entry
-   -textvariable glob_insVarPerc
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent depth for ins
+tk::entry .main.con.var.insperc.entry -textvariable glob_insVarPerc -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent depth for ins
 
----pack
-   .main.con.var.insperc.lab
-   .main.con.var.insperc.entry
-   -anchor w
-   -side left
----;
+pack .main.con.var.insperc.lab .main.con.var.insperc.entry -anchor w -side left ;
 
 #***************************************************
 # Gui07 Sec03 Sub05:
@@ -3005,24 +1973,11 @@ pack .main.con.var.insperc -anchor w -side top ;
 tk::frame .main.con.var.delperc ;
 pack .main.con.var.delperc -anchor w -side top ;
 
----tk::label
-   .main.con.var.delperc.lab
-   -text "Variant: min % deletion support (0-1)"
----;
+tk::label .main.con.var.delperc.lab -text "Variant: min % deletion support (0-1)" ;
 
----tk::entry
-   .main.con.var.delperc.entry
-   -textvariable glob_delVarPerc
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent depth for del
+tk::entry .main.con.var.delperc.entry -textvariable glob_delVarPerc -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent depth for del
 
----pack
-   .main.con.var.delperc.lab
-   .main.con.var.delperc.entry
-   -anchor w
-   -side left
----;
+pack .main.con.var.delperc.lab .main.con.var.delperc.entry -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui07 Sec04:
@@ -3044,40 +1999,20 @@ pack .main.con.var.delperc -anchor w -side top ;
 
 tk::frame .main.con.clust.mid ;
 
----tk::checkbutton
-   .main.con.clust.check
-   -text "cluster"
-   -variable glob_clustBl
----
+tk::checkbutton .main.con.clust.check -text "cluster" -variable glob_clustBl 
 
 pack .main.con.clust.check -anchor w -side top ;
 pack .main.con.clust.mid -anchor w -side top ;
 
----tk::frame
-   .main.con.clust.mid.filt
-   -borderwidth 2
-   -relief groove
----;
+tk::frame .main.con.clust.mid.filt -borderwidth 2 -relief groove ;
 
----tk::frame
-   .main.con.clust.mid.calc
-   -borderwidth 2
-   -relief groove
----;
+tk::frame .main.con.clust.mid.calc -borderwidth 2 -relief groove ;
 
----tk::frame
-   .main.con.clust.con
-   -borderwidth 2
-   -relief groove
----;
+tk::frame .main.con.clust.con -borderwidth 2 -relief groove ;
 
 pack .main.con.clust.mid.filt -anchor w -side left ;
 
----pack
-   .main.con.clust.mid.calc
-   -anchor e
-   -side right
----;
+pack .main.con.clust.mid.calc -anchor e -side right ;
 
 pack .main.con.clust.con -anchor s -side top ;
 
@@ -3102,30 +2037,13 @@ pack .main.con.clust.con -anchor s -side top ;
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.filt.depth
----pack
-   .main.con.clust.mid.filt.depth
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.filt.depth -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.filt.depth.lab
-   -text "min depth (> 0)"
----
+tk::label .main.con.clust.mid.filt.depth.lab -text "min depth (> 0)" 
 
----tk::entry
-   .main.con.clust.mid.filt.depth.entry
-   -textvariable glob_minClustDepth
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ; # min read depth for clustering
+tk::entry .main.con.clust.mid.filt.depth.entry -textvariable glob_minClustDepth -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ; # min read depth for clustering
 
----pack
-   .main.con.clust.mid.filt.depth.lab
-   .main.con.clust.mid.filt.depth.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.filt.depth.lab .main.con.clust.mid.filt.depth.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub02 Cat02:
@@ -3133,30 +2051,13 @@ tk::frame .main.con.clust.mid.filt.depth
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.filt.percdepth
----pack
-   .main.con.clust.mid.filt.percdepth
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.filt.percdepth -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.filt.percdepth.lab
-   -text "min % depth (0-1)"
----
+tk::label .main.con.clust.mid.filt.percdepth.lab -text "min % depth (0-1)" 
 
----tk::entry
-   .main.con.clust.mid.filt.percdepth.entry
-   -textvariable glob_minClustPercDepth
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # min percent read depth for clustering
+tk::entry .main.con.clust.mid.filt.percdepth.entry -textvariable glob_minClustPercDepth -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # min percent read depth for clustering
 
----pack
-   .main.con.clust.mid.filt.percdepth.lab
-   .main.con.clust.mid.filt.percdepth.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.filt.percdepth.lab .main.con.clust.mid.filt.percdepth.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub02 Cat03:
@@ -3164,30 +2065,13 @@ tk::frame .main.con.clust.mid.filt.percdepth
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.filt.snpq
----pack
-   .main.con.clust.mid.filt.snpq
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.filt.snpq -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.filt.snpq.lab
-   -text "min snp Q (0-93)"
----
+tk::label .main.con.clust.mid.filt.snpq.lab -text "min snp Q (0-93)" 
 
----tk::entry
-   .main.con.clust.mid.filt.snpq.entry
-   -textvariable glob_minClustSnpQ
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 0 93 }
---- ; # min snp q-score
+tk::entry .main.con.clust.mid.filt.snpq.entry -textvariable glob_minClustSnpQ -validate key -vcmd {tcl_isInt_gui %P %i 0 93 }  ; # min snp q-score
 
----pack
-   .main.con.clust.mid.filt.snpq.lab
-   .main.con.clust.mid.filt.snpq.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.filt.snpq.lab .main.con.clust.mid.filt.snpq.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub02 Cat04:
@@ -3195,47 +2079,22 @@ tk::frame .main.con.clust.mid.filt.snpq
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.filt.indellen
----pack
-   .main.con.clust.mid.filt.indellen
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.filt.indellen -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.filt.indellen.lab
-   -text "min indel length (> 0)"
----
+tk::label .main.con.clust.mid.filt.indellen.lab -text "min indel length (> 0)" 
 
----tk::entry
-   .main.con.clust.mid.filt.indellen.entry
-   -textvariable glob_minClustIndelLen
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ; # min snp q-score
+tk::entry .main.con.clust.mid.filt.indellen.entry -textvariable glob_minClustIndelLen -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ; # min snp q-score
 
----pack
-   .main.con.clust.mid.filt.indellen.lab
-   .main.con.clust.mid.filt.indellen.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.filt.indellen.lab .main.con.clust.mid.filt.indellen.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub02 Cat05:
 #   - depth profiling
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
----tk::checkbutton
-   .main.con.clust.mid.filt.depthprofile
-   -text "Depth profile"
-   -variable glob_depthProfBl
---- ; # min snp q-score
+tk::checkbutton .main.con.clust.mid.filt.depthprofile -text "Depth profile" -variable glob_depthProfBl  ; # min snp q-score
 
----pack
-   .main.con.clust.mid.filt.depthprofile
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.filt.depthprofile -anchor w -side left 
 #***************************************************
 # Gui07 Sec04 Sub03:
 #   - set up cluster calcuations
@@ -3257,30 +2116,13 @@ tk::frame .main.con.clust.mid.filt.indellen
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.calc.readerr
----pack
-   .main.con.clust.mid.calc.readerr
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.calc.readerr -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.calc.readerr.lab
-   -text "read map read error rate (0-1)"
----
+tk::label .main.con.clust.mid.calc.readerr.lab -text "read map read error rate (0-1)" 
 
----tk::entry
-   .main.con.clust.mid.calc.readerr.entry
-   -textvariable glob_clustReadErr
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # expected read error rate
+tk::entry .main.con.clust.mid.calc.readerr.entry -textvariable glob_clustReadErr -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # expected read error rate
 
----pack
-   .main.con.clust.mid.calc.readerr.lab
-   .main.con.clust.mid.calc.readerr.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.calc.readerr.lab .main.con.clust.mid.calc.readerr.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub03 Cat02:
@@ -3288,30 +2130,13 @@ tk::frame .main.con.clust.mid.calc.readerr
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.calc.conerr
----pack
-   .main.con.clust.mid.calc.conerr
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.calc.conerr -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.calc.conerr.lab
-   -text "consensus map read error rate (0-1)"
----
+tk::label .main.con.clust.mid.calc.conerr.lab -text "consensus map read error rate (0-1)" 
 
----tk::entry
-   .main.con.clust.mid.calc.conerr.entry
-   -textvariable glob_clustConErr
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # expected consensus error rate
+tk::entry .main.con.clust.mid.calc.conerr.entry -textvariable glob_clustConErr -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # expected consensus error rate
 
----pack
-   .main.con.clust.mid.calc.conerr.lab
-   .main.con.clust.mid.calc.conerr.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.calc.conerr.lab .main.con.clust.mid.calc.conerr.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub03 Cat03:
@@ -3319,30 +2144,13 @@ tk::frame .main.con.clust.mid.calc.conerr
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.calc.errratio
----pack
-   .main.con.clust.mid.calc.errratio
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.calc.errratio -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.calc.errratio.lab
-   -text "var:err 100*(variant/error) (> 0)"
----
+tk::label .main.con.clust.mid.calc.errratio.lab -text "var:err 100*(variant/error) (> 0)" 
 
----tk::entry
-   .main.con.clust.mid.calc.errratio.entry
-   -textvariable glob_clustErrRatio
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ;
+tk::entry .main.con.clust.mid.calc.errratio.entry -textvariable glob_clustErrRatio -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ;
 
----pack
-   .main.con.clust.mid.calc.errratio.lab
-   .main.con.clust.mid.calc.errratio.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.calc.errratio.lab .main.con.clust.mid.calc.errratio.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub03 Cat04:
@@ -3350,30 +2158,13 @@ tk::frame .main.con.clust.mid.calc.errratio
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.calc.winerr
----pack
-   .main.con.clust.mid.calc.winerr
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.calc.winerr -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.calc.winerr.lab
-   -text "window var:err (> 0)"
----
+tk::label .main.con.clust.mid.calc.winerr.lab -text "window var:err (> 0)" 
 
----tk::entry
-   .main.con.clust.mid.calc.winerr.entry
-   -textvariable glob_clustWinErrRatio
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ;
+tk::entry .main.con.clust.mid.calc.winerr.entry -textvariable glob_clustWinErrRatio -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ;
 
----pack
-   .main.con.clust.mid.calc.winerr.lab
-   .main.con.clust.mid.calc.winerr.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.calc.winerr.lab .main.con.clust.mid.calc.winerr.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub03 Cat05:
@@ -3381,30 +2172,13 @@ tk::frame .main.con.clust.mid.calc.winerr
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.calc.winlen
----pack
-   .main.con.clust.mid.calc.winlen
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.calc.winlen -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.calc.winlen.lab
-   -text "window length (> 0)"
----
+tk::label .main.con.clust.mid.calc.winlen.lab -text "window length (> 0)" 
 
----tk::entry
-   .main.con.clust.mid.calc.winlen.entry
-   -textvariable glob_clustWinLen
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 1 2000000000 }
---- ;
+tk::entry .main.con.clust.mid.calc.winlen.entry -textvariable glob_clustWinLen -validate key -vcmd {tcl_isInt_gui %P %i 1 2000000000 }  ;
 
----pack
-   .main.con.clust.mid.calc.winlen.lab
-   .main.con.clust.mid.calc.winlen.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.calc.winlen.lab .main.con.clust.mid.calc.winlen.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub03 Cat06:
@@ -3412,30 +2186,13 @@ tk::frame .main.con.clust.mid.calc.winlen
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.mid.calc.lenweight
----pack
-   .main.con.clust.mid.calc.lenweight
-   -anchor w
-   -side top
----;
+pack .main.con.clust.mid.calc.lenweight -anchor w -side top ;
 
----tk::label
-   .main.con.clust.mid.calc.lenweight.lab
-   -text "score: median Q + log2(len)*input (> 0)"
----
+tk::label .main.con.clust.mid.calc.lenweight.lab -text "score: median Q + log2(len)*input (> 0)" 
 
----tk::entry
-   .main.con.clust.mid.calc.lenweight.entry
-   -textvariable glob_lenWeight
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 1 2000000000 }
---- ;
+tk::entry .main.con.clust.mid.calc.lenweight.entry -textvariable glob_lenWeight -validate key -vcmd {tcl_isFloat_gui %P %i 1 2000000000 }  ;
 
----pack
-   .main.con.clust.mid.calc.lenweight.lab
-   .main.con.clust.mid.calc.lenweight.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.mid.calc.lenweight.lab .main.con.clust.mid.calc.lenweight.entry -anchor w -side left 
 
 #***************************************************
 # Gui07 Sec04 Sub04:
@@ -3456,30 +2213,13 @@ tk::frame .main.con.clust.mid.calc.lenweight
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.con.maxsim
----pack
-   .main.con.clust.con.maxsim
-   -anchor w
-   -side top
----;
+pack .main.con.clust.con.maxsim -anchor w -side top ;
 
----tk::label
-   .main.con.clust.con.maxsim.lab
-   -text "max % similarity (0-1)"
----
+tk::label .main.con.clust.con.maxsim.lab -text "max % similarity (0-1)" 
 
----tk::entry
-   .main.con.clust.con.maxsim.entry
-   -textvariable glob_maxClustSim
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # max percent read depth for clustering
+tk::entry .main.con.clust.con.maxsim.entry -textvariable glob_maxClustSim -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # max percent read depth for clustering
 
----pack
-   .main.con.clust.con.maxsim.lab
-   .main.con.clust.con.maxsim.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.con.maxsim.lab .main.con.clust.con.maxsim.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub04 Cat02:
@@ -3487,30 +2227,13 @@ tk::frame .main.con.clust.con.maxsim
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.con.minoverlap
----pack
-   .main.con.clust.con.minoverlap
-   -anchor w
-   -side top
----;
+pack .main.con.clust.con.minoverlap -anchor w -side top ;
 
----tk::label
-   .main.con.clust.con.minoverlap.lab
-   -text "min % consensus overlap (0-1)"
----
+tk::label .main.con.clust.con.minoverlap.lab -text "min % consensus overlap (0-1)" 
 
----tk::entry
-   .main.con.clust.con.minoverlap.entry
-   -textvariable glob_minClustOverlap
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # max percent read depth for clustering
+tk::entry .main.con.clust.con.minoverlap.entry -textvariable glob_minClustOverlap -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # max percent read depth for clustering
 
----pack
-   .main.con.clust.con.minoverlap.lab
-   .main.con.clust.con.minoverlap.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.con.minoverlap.lab .main.con.clust.con.minoverlap.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub04 Cat03:
@@ -3518,30 +2241,13 @@ tk::frame .main.con.clust.con.minoverlap
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.con.maxmask
----pack
-   .main.con.clust.con.maxmask
-   -anchor w
-   -side top
----;
+pack .main.con.clust.con.maxmask -anchor w -side top ;
 
----tk::label
-   .main.con.clust.con.maxmask.lab
-   -text "max % masking (0-1)"
----
+tk::label .main.con.clust.con.maxmask.lab -text "max % masking (0-1)" 
 
----tk::entry
-   .main.con.clust.con.maxmask.entry
-   -textvariable glob_maxClustMask
-   -validate key
-   -vcmd {tcl_isFloat_gui %P %i 0 1 }
---- ; # max percent read depth for clustering
+tk::entry .main.con.clust.con.maxmask.entry -textvariable glob_maxClustMask -validate key -vcmd {tcl_isFloat_gui %P %i 0 1 }  ; # max percent read depth for clustering
 
----pack
-   .main.con.clust.con.maxmask.lab
-   .main.con.clust.con.maxmask.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.con.maxmask.lab .main.con.clust.con.maxmask.entry -anchor w -side left 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui07 Sec04 Sub04 Cat04:
@@ -3549,30 +2255,13 @@ tk::frame .main.con.clust.con.maxmask
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.con.clust.con.numbuild
----pack
-   .main.con.clust.con.numbuild
-   -anchor w
-   -side top
----;
+pack .main.con.clust.con.numbuild -anchor w -side top ;
 
----tk::label
-   .main.con.clust.con.numbuild.lab
-   -text "times to rebuild consensus (0-100)"
----
+tk::label .main.con.clust.con.numbuild.lab -text "times to rebuild consensus (0-100)" 
 
----tk::entry
-   .main.con.clust.con.numbuild.entry
-   -textvariable glob_numRebuilds
-   -validate key
-   -vcmd {tcl_isInt_gui %P %i 0 100 }
---- ; # min percent read depth for clustering
+tk::entry .main.con.clust.con.numbuild.entry -textvariable glob_numRebuilds -validate key -vcmd {tcl_isInt_gui %P %i 0 100 }  ; # min percent read depth for clustering
 
----pack
-   .main.con.clust.con.numbuild.lab
-   .main.con.clust.con.numbuild.entry
-   -anchor w
-   -side left
----
+pack .main.con.clust.con.numbuild.lab .main.con.clust.con.numbuild.entry -anchor w -side left 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Gui08 TOC:
@@ -3652,7 +2341,7 @@ tk::frame .main.out.amr ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc setAmrLab {prefixStr pathStr} {
-  
+ 
    set fileStr $prefixStr ;       # set up file prefix
    append fileStr "-depths.tsv" ; # add read depth file id
 
@@ -3687,11 +2376,7 @@ proc setAmrLab {prefixStr pathStr} {
    foreach drugList $::glob_amrGenes {
       set lowDepthBl 0 ; # marks if set low depth color
 
-      ---for
-         {set siGene 1}
-         {$siGene  < [llength $drugList]}
-         {incr siGene}
-      --- {
+      for {set siGene 1} {$siGene  < [llength $drugList]} {incr siGene}  {
          # get first gene and convert to lower case
          set geneStr [lindex $drugList $siGene] ;
          set geneStr [string tolower $geneStr] ;
@@ -3716,17 +2401,9 @@ proc setAmrLab {prefixStr pathStr} {
       append labStr "." $tmpStr "lab" ; # add id ending
 
       if {$lowDepthBl eq 0} {
-         ---$labStr
-            configure
-            -background $::glob_noAmrCol
-            -fg $::glob_noAmrTextCol
-         ---; # set color for gene has read depth
+         $labStr configure -background $::glob_noAmrCol -fg $::glob_noAmrTextCol ; # set color for gene has read depth
       } else {
-         ---$labStr
-            configure
-            -background $::glob_lowDepthCol
-            -fg $::glob_lowDepthTextCol
-         ---; # set color for gene has read depth
+         $labStr configure -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol ; # set color for gene has read depth
       } ; # color label based on if found all genes
    } ; # Loop: color labels by low depth
 } ; # set AMR report labels by gene depth
@@ -3736,60 +2413,7 @@ proc setAmrLab {prefixStr pathStr} {
 #   - function; consensus AMR report
 #**************************************************
 
-#---
-# removing because might be confusing
-proc conAmrRep {prefixStr} {
-   set fileStr $prefixStr ;
-   append fileStr "-con-amrs.tsv" ;
-
-   set openFILE [open $fileStr] ;
-   gets $openFILE line ; # get header line
-   set amrList "" ;
-
-   # set amr labels to low depth colorings (or no depth)
-   setAmrLab $prefixStr .main.out.report.conAmr ;
-
-   while {[gets $openFILE line] > -1} {
-      set line [split $line "\t"] ;
-      set tmpStr [lindex $line 2] ;
-      set amrList [concat $amrList $tmpStr] ;
-
-      if { [lindex $line 3] ne "NA" } {
-         set tmpStr [split [lindex $line 3] "_"] ;
-         set amrList [concat $amrList $tmpStr] ;
-      } ; # If: have cross resistance
-
-      # remove duplicates
-      set amrList [lsort -unique $amrList] ;
-   } ; # Loop: read file by line
-
-   # make sure always lower case
-   close $openFILE ;
-   set amrList [string tolower $amrList] ;
-
-   ---for
-      { set siAmr 0 }
-      { $siAmr < [llength $::glob_amrList] }
-      { incr siAmr }
-   --- {
-      set tmpStr [lindex $::glob_amrList $siAmr] ;
-      set tmpStr [string tolower $tmpStr] ;
-
-      set labStr [lindex $::glob_amrGenes $siAmr 0] ;
-      set labStr [string tolower $labStr] ;
-      append labStr "lab" ;
-
-      if { [lsearch $amrList $tmpStr] ne -1 } {
-         ---.main.out.report.conAmr.$labStr
-            configure
-            -background $::glob_amrCol
-            -fg $::glob_amrTextCol
-         ---;
-      } ; # If: found AMR
-      # else no AMR detected, color already set; setAmrLab
-   } ; # Loop: build amr labels
-} ; # conAmrRep
----#
+#
 
 #**************************************************
 # Gui08 Sec02 Sub03:
@@ -3841,11 +2465,7 @@ proc readAmrRep {prefixStr} {
    close $openFILE ;
    set amrList [string tolower $amrList] ;
 
-   ---for
-      { set siAmr 0 }
-      { $siAmr < [llength $::glob_amrList] }
-      { incr siAmr }
-   --- {
+   for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr }  {
       set tmpStr [lindex $::glob_amrList $siAmr] ;
       set tmpStr [string tolower $tmpStr] ;
 
@@ -3854,11 +2474,7 @@ proc readAmrRep {prefixStr} {
       append labStr "lab" ;
 
       if { [lsearch $amrList $tmpStr] ne -1 } {
-         ---.main.out.report.readAmr.$labStr
-            configure
-            -background $::glob_amrCol
-            -fg $::glob_amrTextCol
-         ---;
+         .main.out.report.readAmr.$labStr configure -background $::glob_amrCol -fg $::glob_amrTextCol ;
       } ; # If: found an AMR
       # else no AMR detected, color already set; setAmrLab
    } ; # Loop: build amr labels
@@ -3879,25 +2495,13 @@ proc conSpol {prefixStr} {
    close $openFILE ;
 
    if {$statusBl < 0} {
-      ---.main.out.report.conspol.octal.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.conspol.octal.reslab configure -text "NA" ;
 
-      ---.main.out.report.conspol.sit.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.conspol.sit.reslab configure -text "NA" ;
 
-      ---.main.out.report.conspol.strain.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.conspol.strain.reslab configure -text "NA" ;
 
-      ---.main.out.report.conspol.orig.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.conspol.orig.reslab configure -text "NA" ;
 
       return false ;
    } ; # If: no spoligotype entry
@@ -3906,25 +2510,13 @@ proc conSpol {prefixStr} {
 
    # each value is either NA or has actual value
 
-   ---.main.out.report.conspol.octal.reslab
-      configure
-      -text [lindex $lineStr 3]
-   ---;
+   .main.out.report.conspol.octal.reslab configure -text [lindex $lineStr 3] ;
 
-   ---.main.out.report.conspol.sit.reslab
-      configure
-      -text [lindex $lineStr 5]
-   ---;
+   .main.out.report.conspol.sit.reslab configure -text [lindex $lineStr 5] ;
 
-   ---.main.out.report.conspol.strain.reslab
-      configure
-      -text [lindex $lineStr 1]
-   ---;
+   .main.out.report.conspol.strain.reslab configure -text [lindex $lineStr 1] ;
 
-   ---.main.out.report.conspol.orig.reslab
-      configure
-      -text [lindex $lineStr 6]
-   ---;
+   .main.out.report.conspol.orig.reslab configure -text [lindex $lineStr 6] ;
 } ; # conSpol
 
 #**************************************************
@@ -3942,25 +2534,13 @@ proc readSpol {prefixStr} {
    close $openFILE ;
 
    if {$statusBl < 0} {
-      ---.main.out.report.readspol.octal.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.readspol.octal.reslab configure -text "NA" ;
 
-      ---.main.out.report.readspol.sit.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.readspol.sit.reslab configure -text "NA" ;
 
-      ---.main.out.report.readspol.strain.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.readspol.strain.reslab configure -text "NA" ;
 
-      ---.main.out.report.readspol.orig.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.readspol.orig.reslab configure -text "NA" ;
 
       return false ;
    } ; # If: no spoligotype entry
@@ -3969,25 +2549,13 @@ proc readSpol {prefixStr} {
 
    # each value is either NA or has actual value
 
-   ---.main.out.report.readspol.octal.reslab
-      configure
-      -text [lindex $lineStr 3]
-   ---;
+   .main.out.report.readspol.octal.reslab configure -text [lindex $lineStr 3] ;
 
-   ---.main.out.report.readspol.sit.reslab
-      configure
-      -text [lindex $lineStr 5]
-   ---;
+   .main.out.report.readspol.sit.reslab configure -text [lindex $lineStr 5] ;
 
-   ---.main.out.report.readspol.strain.reslab
-      configure
-      -text [lindex $lineStr 1]
-   ---;
+   .main.out.report.readspol.strain.reslab configure -text [lindex $lineStr 1] ;
 
-   ---.main.out.report.readspol.orig.reslab
-      configure
-      -text [lindex $lineStr 6]
-   ---;
+   .main.out.report.readspol.orig.reslab configure -text [lindex $lineStr 6] ;
 } ; # readSpol
 
 #**************************************************
@@ -3999,16 +2567,13 @@ proc conMiru {prefixStr} {
    set fileStr $prefixStr ;
    append fileStr "-con-miru.tsv" ;
    set openFILE [open $fileStr] ;
-   
+ 
    gets $openFILE lineStr ; # get header
    set status [gets $openFILE lineStr] ;
    close $openFILE ;
 
    if {$status < 0} {
-      ---.main.out.report.miru.reslab
-         configure
-         -text "NA"
-      ---;
+      .main.out.report.miru.reslab configure -text "NA" ;
       return false ;
    } ; # If: no entry
 
@@ -4021,18 +2586,12 @@ proc conMiru {prefixStr} {
 
    if {[llength $tmpStr] < 2} {
       if {[lindex $tmpStr 0] eq "NA"} {
-         ---.main.out.report.miru.reslab
-            configure
-            -text "NA"
-         ---;
+         .main.out.report.miru.reslab configure -text "NA" ;
          return false ;
       } ; # If: no lineage detected
    } ; # If: have many duplicates
 
-   ---.main.out.report.miru.reslab
-      configure
-      -text $lineStr
-   ---;
+   .main.out.report.miru.reslab configure -text $lineStr ;
 
    return true ;
 } ; # conMiru
@@ -4049,7 +2608,7 @@ proc depthGraph {prefixStr} {
    } ; # If: image exists
 
    if {$::glob_mkGraphBl ne 0 } {
-      
+ 
       set tmpStr $prefixStr ;
       append tmpStr "-depths.tsv" ;
 
@@ -4057,51 +2616,22 @@ proc depthGraph {prefixStr} {
       append tmpPathStr "-readDepth.png" ;
 
       if { [file exists $tmpPathStr] eq 1 } {
-         ---set
-           ::glob_depthImg
-           [image create photo -file $tmpPathStr]
-         ---;
+         set ::glob_depthImg [image create photo -file $tmpPathStr] ;
 
-         ---.main.out.depth.graph
-            configure
-            -image $::glob_depthImg
-         ---;
+         .main.out.depth.graph configure -image $::glob_depthImg ;
 
       } else {
-         ---set status
-            [catch
-               {exec
-                  $::rPath
-                  $::graphScript
-                  -stats $tmpStr
-                  -who $::glob_amrDb
-                  -prefix $prefixStr
-               }
-            ]
-         ---; # run R to build graphs
+         set status [catch {exec $::rPath $::graphScript -stats $tmpStr -who $::glob_amrDb -prefix $prefixStr } ] ; # run R to build graphs
 
          if { $status ne 0 } {
-            ---tk_messageBox
-              -message "failed to build depth graph"
-              -title "ERROR"
-            ---;
+            tk_messageBox -message "failed to build depth graph" -title "ERROR" ;
 
             # turn off graphing
             .main.out.set.graph.check toggle ;
          } else {
-            ---set
-              ::glob_depthImg
-              [image
-                 create
-                 photo
-                 -file $tmpPathStr
-              ]
-            ---;
+            set ::glob_depthImg [image create photo -file $tmpPathStr ] ;
 
-            ---.main.out.depth.graph
-               configure
-               -image $::glob_depthImg
-            ---;
+            .main.out.depth.graph configure -image $::glob_depthImg ;
          } ; # Else: add image
       } ; # check if need to build graphs
     } ; # check if users wants graphs displayed
@@ -4126,51 +2656,22 @@ proc coverageGraph {prefixStr} {
       append tmpPathStr "-coverage.png" ;
 
       if { [file exists $tmpPathStr] eq 1 } {
-         ---set
-           ::glob_coverImg
-           [image create photo -file $tmpPathStr]
-         ---;
+         set ::glob_coverImg [image create photo -file $tmpPathStr] ;
 
-         ---.main.out.cover.graph
-            configure
-            -image $::glob_coverImg
-         ---;
+         .main.out.cover.graph configure -image $::glob_coverImg ;
 
       } else {
-         ---set status
-            [catch
-               {exec
-                  $::rPath
-                  $::graphScript
-                  -stats $tmpStr
-                  -who $::glob_amrDb
-                  -prefix $prefixStr
-               }
-            ]
-         ---; # run R to build graphs
+         set status [catch {exec $::rPath $::graphScript -stats $tmpStr -who $::glob_amrDb -prefix $prefixStr } ] ; # run R to build graphs
 
          if { $status ne 0 } {
-            ---tk_messageBox
-              -message "failed to build cover graph"
-              -title "ERROR"
-            ---;
+            tk_messageBox -message "failed to build cover graph" -title "ERROR" ;
 
             # turn off graphing
             .main.out.set.graph.check toggle ;
          } else {
-            ---set
-              ::glob_coverImg
-              [image
-                 create
-                 photo
-                 -file $tmpPathStr
-              ]
-            ---;
+            set ::glob_coverImg [image create photo -file $tmpPathStr ] ;
 
-            ---.main.out.cover.graph
-               configure
-               -image $::glob_coverImg
-            ---;
+            .main.out.cover.graph configure -image $::glob_coverImg ;
          } ; # Else: add image
       } ; # check if need to build graphs
     } ; # check if users wants graphs displayed
@@ -4221,10 +2722,7 @@ proc conAmrTbl {prefixStr indentStr} {
    set pad5 [string length "mutant"];
 
    if {[gets $openFILE lineStr] < 0} {
-      ---.main.out.amr.read.tbl.lab
-          configure
-          -text "NA"
-      ---;
+      .main.out.amr.read.tbl.lab configure -text "NA" ;
 
       return false ;
    } ; # If; nothing in file
@@ -4251,19 +2749,8 @@ proc conAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # loop converts drug name to short hand
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
 
       set lenUI [string length $tmpStr] ;
@@ -4279,19 +2766,8 @@ proc conAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # loop converts drug names to three letters
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
 
       set lenUI [string length $tmpStr] ;
@@ -4315,10 +2791,7 @@ proc conAmrTbl {prefixStr indentStr} {
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
    if {$pad1 eq 0} {
-      ---.main.out.amr.con.tbl.lab
-          configure
-          -text "NA"
-      ---;
+      .main.out.amr.con.tbl.lab configure -text "NA" ;
 
       return false ;
    } ; # If; nothing in file
@@ -4366,19 +2839,8 @@ proc conAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # loop converts to three letter code
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
       set tmpStr [format "%-*s" $pad2 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
@@ -4393,19 +2855,8 @@ proc conAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # loop converts drug to three letter codes
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
 
       set tmpStr [format "%-*s" $pad3 $tmpStr] ;
@@ -4435,10 +2886,7 @@ proc conAmrTbl {prefixStr indentStr} {
    .main.out.amr.con.tbl.txt delete 0.0 end ;
    .main.out.amr.con.tbl.txt insert end $tblStr ;
 
-   ---.main.out.amr.con.tbl.txt
-       configure
-       -state disabled
-   ---; # disable editing
+   .main.out.amr.con.tbl.txt configure -state disabled ; # disable editing
 
    close $openFILE ;
    return true ;
@@ -4495,10 +2943,7 @@ proc readAmrTbl {prefixStr indentStr} {
    set pad9 [string length "gene-depth"];
 
    if {[gets $openFILE lineStr] < 0} {
-      ---.main.out.amr.read.tbl.lab
-          configure
-          -text "NA"
-      ---;
+      .main.out.amr.read.tbl.lab configure -text "NA" ;
 
       return false ;
    } ; # If; nothing in file
@@ -4525,19 +2970,8 @@ proc readAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # reducing to three letter code if possible
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
 
       set lenUI [string length $tmpStr] ;
@@ -4553,19 +2987,8 @@ proc readAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # reducing to three letter code if possible
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
 
       set lenUI [string length $tmpStr] ;
@@ -4604,14 +3027,10 @@ proc readAmrTbl {prefixStr indentStr} {
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
    if {$pad0 eq 0} {
-      ---.main.out.amr.read.tbl.lab
-          configure
-          -text "NA"
-      ---;
+      .main.out.amr.read.tbl.lab configure -text "NA" ;
 
       return false ;
    } ; # If; nothing in file
-
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
    # Gui08 Sec02 Sub10 Cat07:
@@ -4662,19 +3081,8 @@ proc readAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # try to reduce drug to three letter code
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
       set tmpStr [format "%-*s" $pad1 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
@@ -4688,19 +3096,8 @@ proc readAmrTbl {prefixStr indentStr} {
       set tmpStr [string tolower $tmpStr] ;
 
       # try to reduce drug to three letter code
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
+      for { set siAmr 0 } { $siAmr < [llength $::glob_amrList] } { incr siAmr } {
+         set tmpStr [regsub [lindex $::glob_amrList $siAmr] $tmpStr [lindex $::glob_amrGenes $siAmr 0] ] ;
       } ; # Loop: convert AMR ids to short hand
 
       set tmpStr [format "%-*s" $pad2 $tmpStr] ;
@@ -4746,15 +3143,11 @@ proc readAmrTbl {prefixStr indentStr} {
    .main.out.amr.read.tbl.txt delete 0.0 end ;
    .main.out.amr.read.tbl.txt insert end $tblStr ;
 
-   ---.main.out.amr.read.tbl.txt
-       configure
-       -state disabled
-   ---; # disable editing
+   .main.out.amr.read.tbl.txt configure -state disabled ; # disable editing
 
    close $openFILE ;
    return true ;
 } ; # readAmrTbl
-
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec03:
@@ -4780,15 +3173,9 @@ tk::frame .main.out.set.prefix ;
 pack .main.out.set.prefix -anchor w -side top ;
 tk::label .main.out.set.prefix.lab -text "" ;
 
----tk::button
-   .main.out.set.prefix.but
-   -text "get prefix"
-   -command {
----
+tk::button .main.out.set.prefix.but -text "get prefix" -command { 
       set fileStr [
-         ---tk_getOpenFile
-            -title "select freezeTB output"
-         ---
+         tk_getOpenFile -title "select freezeTB output"
       ] ;
 
       if { $fileStr eq "" } {
@@ -4812,32 +3199,17 @@ tk::label .main.out.set.prefix.lab -text "" ;
          set prefStr [regsub grap.* $prefStr ""] ;
          set prefStr [regsub coverage.* $prefStr ""] ;
 
-         ---set
-            prefStr
-            [string range $prefStr 0 end-1]
-         ---; # remove dash regsub could not remove
-
+         set prefStr [string range $prefStr 0 end-1] ; # remove dash regsub could not remove
 
          # save prefix and update label
 
-         ---set
-            outPrefStr
-            [file join $dirStr $prefStr]
-         ---;
+         set outPrefStr [file join $dirStr $prefStr] ;
 
-        ---.main.out.set.prefix.lab
-           configure
-           -text $outPrefStr
-        ---;
+        .main.out.set.prefix.lab configure -text $outPrefStr ;
       } ; # check if anything was input
    } ; # get file prefix
 
----pack
-   .main.out.set.prefix.but
-   .main.out.set.prefix.lab
-   -anchor w
-   -side left
----;
+pack .main.out.set.prefix.but .main.out.set.prefix.lab -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec03 Sub02:
@@ -4847,23 +3219,11 @@ tk::label .main.out.set.prefix.lab -text "" ;
 tk::frame .main.out.set.snp ;
 pack .main.out.set.snp -anchor w -side top ;
 
----tk::label
-   .main.out.set.snp.lab
-   -text "min AMR SNP % support"
----;
+tk::label .main.out.set.snp.lab -text "min AMR SNP % support" ;
 
----tk::entry
-   .main.out.set.snp.entry
-   -textvariable glob_outSnpSup
-   -vcmd { tcl_isFloat_gui %P %i 0 1 }
----;
+tk::entry .main.out.set.snp.entry -textvariable glob_outSnpSup -vcmd { tcl_isFloat_gui %P %i 0 1 } ;
 
----pack
-   .main.out.set.snp.lab
-   .main.out.set.snp.entry
-   -anchor w
-   -side left
----;
+pack .main.out.set.snp.lab .main.out.set.snp.entry -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec03 Sub03:
@@ -4873,23 +3233,11 @@ pack .main.out.set.snp -anchor w -side top ;
 tk::frame .main.out.set.indel ;
 pack .main.out.set.indel -anchor w -side top ;
 
----tk::label
-   .main.out.set.indel.lab
-   -text "min AMR Indel % support"
----;
+tk::label .main.out.set.indel.lab -text "min AMR Indel % support" ;
 
----tk::entry
-   .main.out.set.indel.entry
-   -textvariable glob_outIndelSup
-   -vcmd { tcl_isFloat_gui %P %i 0 1 }
----;
+tk::entry .main.out.set.indel.entry -textvariable glob_outIndelSup -vcmd { tcl_isFloat_gui %P %i 0 1 } ;
 
----pack
-   .main.out.set.indel.lab
-   .main.out.set.indel.entry
-   -anchor w
-   -side left
----;
+pack .main.out.set.indel.lab .main.out.set.indel.entry -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec03 Sub04:
@@ -4899,17 +3247,9 @@ pack .main.out.set.indel -anchor w -side top ;
 tk::frame .main.out.set.graph ;
 pack .main.out.set.graph -anchor w -side top ;
 
----tk::checkbutton
-   .main.out.set.graph.check
-   -text "build graphs"
-   -variable glob_mkGraphBl
----;
+tk::checkbutton .main.out.set.graph.check -text "build graphs" -variable glob_mkGraphBl ;
 
----pack
-  .main.out.set.graph.check
-  -anchor w
-  -side left
----;
+pack .main.out.set.graph.check -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec03 Sub05:
@@ -4919,11 +3259,7 @@ pack .main.out.set.graph -anchor w -side top ;
 tk::frame .main.out.set.run ;
 pack .main.out.set.run -anchor w -side top ;
 
----tk::button
-   .main.out.set.run.but
-   -text "get report"
-   -command {
----
+tk::button .main.out.set.run.but -text "get report" -command { 
       upvar 0 glob_outCur curPrefix ;
       upvar 0 glob_outPref newPrefix ;
       set curPrefix $newPrefix ;
@@ -4977,11 +3313,7 @@ pack .main.out.menu -anchor w -side top ;
 #   - add settings button
 #**************************************************
 
----tk::button
-   .main.out.menu.setBut
-   -text "out"
-   -command {
----
+tk::button .main.out.menu.setBut -text "out" -command { 
       pack forget .main.out.set ;
       pack forget .main.out.report ;
       pack forget .main.out.depth ;
@@ -4993,35 +3325,15 @@ pack .main.out.menu -anchor w -side top ;
       pack .main.out.menu ;
       wm title . "output select freezeTB" ;
 
-      ---.main.out.menu.setBut
-          configure
-          -relief sunken
-          -state disabled
-      ---;
+      .main.out.menu.setBut configure -relief sunken -state disabled ;
 
-      ---.main.out.menu.reportBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.reportBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.depthBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.depthBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.coverBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.coverBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.amrBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.amrBut configure -relief raised -state normal ;
    } ; # set up output setting button
 
 pack .main.out.menu.setBut -anchor w -side left ;
@@ -5031,11 +3343,7 @@ pack .main.out.menu.setBut -anchor w -side left ;
 #   - add report button
 #**************************************************
 
----tk::button
-   .main.out.menu.reportBut
-   -text "report"
-   -command {
----
+tk::button .main.out.menu.reportBut -text "report" -command { 
       pack forget .main.out.set ;
       pack forget .main.out.report ;
       pack forget .main.out.depth ;
@@ -5046,44 +3354,17 @@ pack .main.out.menu.setBut -anchor w -side left ;
       pack .main.out.report ;
       pack .main.out.menu ;
 
-      ---wm
-         title
-         .
-         [concat
-            [file tail $glob_outCur]
-            "report freezeTB"
-         ]
-     ---;
+      wm title . [concat [file tail $glob_outCur] "report freezeTB" ] ;
 
-      ---.main.out.menu.setBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.setBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.reportBut
-          configure
-          -relief sunken
-          -state disabled
-      ---;
+      .main.out.menu.reportBut configure -relief sunken -state disabled ;
 
-      ---.main.out.menu.depthBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.depthBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.coverBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.coverBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.amrBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.amrBut configure -relief raised -state normal ;
    } ;
 
 pack .main.out.menu.reportBut -anchor w -side left ;
@@ -5093,11 +3374,7 @@ pack .main.out.menu.reportBut -anchor w -side left ;
 #   - add mean read depth graph button
 #**************************************************
 
----tk::button
-   .main.out.menu.depthBut
-   -text "read depth"
-   -command {
----
+tk::button .main.out.menu.depthBut -text "read depth" -command { 
       pack forget .main.out.set ;
       pack forget .main.out.report ;
       pack forget .main.out.depth ;
@@ -5108,44 +3385,17 @@ pack .main.out.menu.reportBut -anchor w -side left ;
       pack .main.out.depth ;
       pack .main.out.menu ;
 
-      ---wm
-         title
-         .
-         [concat
-            [file tail $glob_outCur]
-            "read depth freezeTB"
-         ]
-     ---;
+      wm title . [concat [file tail $glob_outCur] "read depth freezeTB" ] ;
 
-      ---.main.out.menu.setBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.setBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.reportBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.reportBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.depthBut
-          configure
-          -relief sunken
-          -state disabled
-      ---;
+      .main.out.menu.depthBut configure -relief sunken -state disabled ;
 
-      ---.main.out.menu.coverBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.coverBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.amrBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.amrBut configure -relief raised -state normal ;
    } ;
 
 pack .main.out.menu.depthBut -anchor w -side left ;
@@ -5155,11 +3405,7 @@ pack .main.out.menu.depthBut -anchor w -side left ;
 #   - add coverage graph button
 #**************************************************
 
----tk::button
-   .main.out.menu.coverBut
-   -text "coverage"
-   -command {
----
+tk::button .main.out.menu.coverBut -text "coverage" -command { 
       pack forget .main.out.set ;
       pack forget .main.out.report ;
       pack forget .main.out.depth ;
@@ -5170,44 +3416,17 @@ pack .main.out.menu.depthBut -anchor w -side left ;
       pack .main.out.cover ;
       pack .main.out.menu ;
 
-      ---wm
-         title
-         .
-         [concat
-            [file tail $glob_outCur]
-            "coverage freezeTB"
-         ]
-     ---;
+      wm title . [concat [file tail $glob_outCur] "coverage freezeTB" ] ;
 
-      ---.main.out.menu.setBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.setBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.reportBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.reportBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.depthBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.depthBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.coverBut
-          configure
-          -relief sunken
-          -state disabled
-      ---;
+      .main.out.menu.coverBut configure -relief sunken -state disabled ;
 
-      ---.main.out.menu.amrBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.amrBut configure -relief raised -state normal ;
    } ;
 
 pack .main.out.menu.coverBut -anchor w -side left ;
@@ -5217,11 +3436,7 @@ pack .main.out.menu.coverBut -anchor w -side left ;
 #   - add AMR table button
 #**************************************************
 
----tk::button
-   .main.out.menu.amrBut
-   -text "AMR table"
-   -command {
----
+tk::button .main.out.menu.amrBut -text "AMR table" -command { 
       pack forget .main.out.set ;
       pack forget .main.out.report ;
       pack forget .main.out.depth ;
@@ -5232,44 +3447,17 @@ pack .main.out.menu.coverBut -anchor w -side left ;
       pack .main.out.amr ;
       pack .main.out.menu ;
 
-      ---wm
-         title
-         .
-         [concat
-            [file tail $glob_outCur]
-            "AMR table freezeTB"
-         ]
-     ---;
+      wm title . [concat [file tail $glob_outCur] "AMR table freezeTB" ] ;
 
-      ---.main.out.menu.setBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.setBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.reportBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.reportBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.depthBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.depthBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.coverBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.coverBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.amrBut
-          configure
-          -relief sunken
-          -state disabled
-      ---;
+      .main.out.menu.amrBut configure -relief sunken -state disabled ;
    } ;
 
 pack .main.out.menu.amrBut -anchor w -side left ;
@@ -5279,11 +3467,7 @@ pack .main.out.menu.amrBut -anchor w -side left ;
 #   - add input button
 #**************************************************
 
----tk::button
-   .main.out.menu.inBut
-   -text "input"
-   -command {
----
+tk::button .main.out.menu.inBut -text "input" -command { 
       pack forget .main.out.set ;
       pack forget .main.out.report ;
       pack forget .main.out.depth ;
@@ -5293,35 +3477,15 @@ pack .main.out.menu.amrBut -anchor w -side left ;
 
       .main.menu.reqBut invoke ;
 
-      ---.main.out.menu.setBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.setBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.reportBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.reportBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.depthBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.depthBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.coverBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.coverBut configure -relief raised -state normal ;
 
-      ---.main.out.menu.amrBut
-          configure
-          -relief raised
-          -state normal
-      ---;
+      .main.out.menu.amrBut configure -relief raised -state normal ;
    } ;
 
 pack .main.out.menu.inBut -anchor w -side left ;
@@ -5346,55 +3510,7 @@ pack .main.out.menu.inBut -anchor w -side left ;
 #   - build consensus AMR labels
 #**************************************************
 
-#---
-tk::frame .main.out.report.conAmr ;
-pack .main.out.report.conAmr -anchor w -side top ;
-
----tk::label
-   .main.out.report.conAmr.lab
-   -text "con  AMRs:" 
----;
-
----pack
-   .main.out.report.conAmr.lab
-   -anchor w
-   -side left
----;
-
-foreach amr $::glob_amrGenes {
-   set tmpStr [lindex $amr 0] ; # get drug name
-   set tmpStr [string tolower $tmpStr] ;
-   append tmpStr "lab" ;
-
-   ---tk::label
-      .main.out.report.conAmr.$tmpStr
-      -text [lindex $amr 0]
-      -background $glob_noAmrCol
-      -fg $glob_amrTextCol
-   ---;
-
-   ---pack
-      .main.out.report.conAmr.$tmpStr
-      -anchor w
-      -side left
-   ---;
-
-   # add a space between the labels
-   set tmpStr [string tolower $amr] ;
-   append tmpStr "space" ;
-
-   ---tk::label
-      .main.out.report.conAmr.$tmpStr
-      -text ""
-   ---;
-
-   ---pack
-      .main.out.report.conAmr.$tmpStr
-      -anchor w
-      -side left
-   ---;
-} ; # Loop: build amr labels
----#
+#
 
 #**************************************************
 # Gui08 Sec05 Sub02:
@@ -5405,56 +3521,28 @@ foreach amr $::glob_amrGenes {
 tk::frame .main.out.report.space ;
 tk::frame .main.out.report.readAmr ;
 
----pack
-   .main.out.report.space
-   .main.out.report.readAmr
-   -anchor w
-   -side top
----;
+pack .main.out.report.space .main.out.report.readAmr -anchor w -side top ;
 
----tk::label
-   .main.out.report.readAmr.lab
-   -text "read AMRs:" 
----;
+tk::label .main.out.report.readAmr.lab -text "read AMRs:" ;
 
----pack
-   .main.out.report.readAmr.lab
-   -anchor w
-   -side left
----;
+pack .main.out.report.readAmr.lab -anchor w -side left ;
 
 foreach amr $::glob_amrGenes {
    set tmpStr [lindex $amr 0] ; # get drug name
    set tmpStr [string tolower $tmpStr] ;
    append tmpStr "lab" ;
 
-   ---tk::label
-      .main.out.report.readAmr.$tmpStr
-      -text [lindex $amr 0]
-      -background $::glob_noAmrCol
-      -fg $::glob_noAmrTextCol
-   ---;
+   tk::label .main.out.report.readAmr.$tmpStr -text [lindex $amr 0] -background $::glob_noAmrCol -fg $::glob_noAmrTextCol ;
 
-   ---pack
-      .main.out.report.readAmr.$tmpStr
-      -anchor w
-      -side left
-   ---;
+   pack .main.out.report.readAmr.$tmpStr -anchor w -side left ;
 
    # add a space between the labels
    set tmpStr [string tolower $amr] ;
    append tmpStr "space" ;
 
-   ---tk::label
-      .main.out.report.readAmr.$tmpStr
-      -text ""
-   ---;
+   tk::label .main.out.report.readAmr.$tmpStr -text "" ;
 
-   ---pack
-      .main.out.report.readAmr.$tmpStr
-      -anchor w
-      -side left
-   ---;
+   pack .main.out.report.readAmr.$tmpStr -anchor w -side left ;
 } ; # Loop: build amr labels
 
 #**************************************************
@@ -5469,48 +3557,21 @@ tk::frame .main.out.report.amrLegend ;
 pack .main.out.report.legSpace -side top -anchor w ;
 pack .main.out.report.amrLegend -side top -anchor w ;
 
----tk::label
-   .main.out.report.amrLegend.legLab
-   -text "legend: "
----;
+tk::label .main.out.report.amrLegend.legLab -text "legend: " ;
 
 # making spaces for clear breaks between colors
 tk::label .main.out.report.amrLegend.spaceOne ;
 tk::label .main.out.report.amrLegend.spaceTwo ;
 
 # legend lables
----tk::label
-   .main.out.report.amrLegend.noAmrLab
-   -background $::glob_noAmrCol
-   -fg $::glob_noAmrTextCol
-   -text "No drug resistance"
----;
+tk::label .main.out.report.amrLegend.noAmrLab -background $::glob_noAmrCol -fg $::glob_noAmrTextCol -text "No drug resistance" ;
 
----tk::label
-   .main.out.report.amrLegend.lowDepthLab
-   -background $::glob_lowDepthCol
-   -fg $::glob_lowDepthTextCol
-   -text "No resistance, but missing genes"
----;
+tk::label .main.out.report.amrLegend.lowDepthLab -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol -text "No resistance, but missing genes" ;
 
----tk::label
-   .main.out.report.amrLegend.amrLab
-   -background $::glob_amrCol
-   -fg $::glob_amrTextCol
-   -text "Drug resistance"
----;
+tk::label .main.out.report.amrLegend.amrLab -background $::glob_amrCol -fg $::glob_amrTextCol -text "Drug resistance" ;
 
----pack 
-   .main.out.report.amrLegend.legLab
-   .main.out.report.amrLegend.noAmrLab
-   .main.out.report.amrLegend.spaceOne
-   .main.out.report.amrLegend.lowDepthLab
-   .main.out.report.amrLegend.spaceTwo
-   .main.out.report.amrLegend.amrLab
-   -anchor w
-   -side left
----;
-   
+pack .main.out.report.amrLegend.legLab .main.out.report.amrLegend.noAmrLab .main.out.report.amrLegend.spaceOne .main.out.report.amrLegend.lowDepthLab .main.out.report.amrLegend.spaceTwo .main.out.report.amrLegend.amrLab -anchor w -side left ;
+ 
 #**************************************************
 # Gui08 Sec05 Sub04:
 #   - consensus spoligotype
@@ -5541,16 +3602,9 @@ pack .main.out.report.conspol -anchor w -side top ;
 tk::frame .main.out.report.conspol.head ;
 pack .main.out.report.conspol.head -anchor w -side top ;
 
----tk::label 
-   .main.out.report.conspol.head.lab
-   -text "Consensus spoligotype:"
----;
+tk::label .main.out.report.conspol.head.lab -text "Consensus spoligotype:" ;
 
----pack
-   .main.out.report.conspol.head.lab
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.head.lab -anchor w -side top ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub04 Cat02:
@@ -5558,34 +3612,15 @@ pack .main.out.report.conspol.head -anchor w -side top ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.conspol.octal ;
----pack
-  .main.out.report.conspol.octal
-  -anchor w
-  -side top
----;
+pack .main.out.report.conspol.octal -anchor w -side top ;
 
----pack
-   .main.out.report.conspol.octal
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.octal -anchor w -side top ;
 
----tk::label 
-   .main.out.report.conspol.octal.headlab
-   -text "     Octal: "
----;
+tk::label .main.out.report.conspol.octal.headlab -text "     Octal: " ;
 
----tk::label 
-   .main.out.report.conspol.octal.reslab
-   -text "NA"
----;
+tk::label .main.out.report.conspol.octal.reslab -text "NA" ;
 
----pack
-   .main.out.report.conspol.octal.headlab
-   .main.out.report.conspol.octal.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.conspol.octal.headlab .main.out.report.conspol.octal.reslab -anchor w -side left ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub04 Cat03:
@@ -5593,34 +3628,15 @@ tk::frame .main.out.report.conspol.octal ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.conspol.sit ;
----pack
-   .main.out.report.conspol.sit
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.sit -anchor w -side top ;
 
----pack
-   .main.out.report.conspol.sit
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.sit -anchor w -side top ;
 
----tk::label 
-   .main.out.report.conspol.sit.headlab
-   -text "     SIT: "
----;
+tk::label .main.out.report.conspol.sit.headlab -text "     SIT: " ;
 
----tk::label 
-   .main.out.report.conspol.sit.reslab
-   -text "NA"
----;
+tk::label .main.out.report.conspol.sit.reslab -text "NA" ;
 
----pack
-   .main.out.report.conspol.sit.headlab
-   .main.out.report.conspol.sit.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.conspol.sit.headlab .main.out.report.conspol.sit.reslab -anchor w -side left ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub04 Cat03:
@@ -5628,34 +3644,15 @@ tk::frame .main.out.report.conspol.sit ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.conspol.strain ;
----pack
-   .main.out.report.conspol.strain
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.strain -anchor w -side top ;
 
----pack
-   .main.out.report.conspol.strain
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.strain -anchor w -side top ;
 
----tk::label 
-   .main.out.report.conspol.strain.headlab
-   -text "     Strain: "
----;
+tk::label .main.out.report.conspol.strain.headlab -text "     Strain: " ;
 
----tk::label 
-   .main.out.report.conspol.strain.reslab
-   -text "NA"
----;
+tk::label .main.out.report.conspol.strain.reslab -text "NA" ;
 
----pack
-   .main.out.report.conspol.strain.headlab
-   .main.out.report.conspol.strain.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.conspol.strain.headlab .main.out.report.conspol.strain.reslab -anchor w -side left ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub04 Cat04:
@@ -5663,34 +3660,15 @@ tk::frame .main.out.report.conspol.strain ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.conspol.orig ;
----pack
-  .main.out.report.conspol.orig
-  -anchor w
-  -side top
----;
+pack .main.out.report.conspol.orig -anchor w -side top ;
 
----pack
-   .main.out.report.conspol.orig
-   -anchor w
-   -side top
----;
+pack .main.out.report.conspol.orig -anchor w -side top ;
 
----tk::label 
-   .main.out.report.conspol.orig.headlab
-   -text "     Countries: "
----;
+tk::label .main.out.report.conspol.orig.headlab -text "     Countries: " ;
 
----tk::label 
-   .main.out.report.conspol.orig.reslab
-   -text "NA"
----;
+tk::label .main.out.report.conspol.orig.reslab -text "NA" ;
 
----pack
-   .main.out.report.conspol.orig.headlab
-   .main.out.report.conspol.orig.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.conspol.orig.headlab .main.out.report.conspol.orig.reslab -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec05 Sub05:
@@ -5720,22 +3698,11 @@ tk::frame .main.out.report.readspol ;
 pack .main.out.report.readspol -anchor w -side top ;
 
 tk::frame .main.out.report.readspol.head ;
----pack
-   .main.out.report.readspol.head
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.head -anchor w -side top ;
 
----tk::label 
-   .main.out.report.readspol.head.lab
-   -text "Read spoligotype:"
----;
+tk::label .main.out.report.readspol.head.lab -text "Read spoligotype:" ;
 
----pack
-   .main.out.report.readspol.head.lab
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.head.lab -anchor w -side top ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub05 Cat02:
@@ -5743,34 +3710,15 @@ tk::frame .main.out.report.readspol.head ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.readspol.octal ;
----pack
-  .main.out.report.readspol.octal
-  -anchor w
-  -side top
----;
+pack .main.out.report.readspol.octal -anchor w -side top ;
 
----pack
-   .main.out.report.readspol.octal
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.octal -anchor w -side top ;
 
----tk::label 
-   .main.out.report.readspol.octal.headlab
-   -text "     Octal: "
----;
+tk::label .main.out.report.readspol.octal.headlab -text "     Octal: " ;
 
----tk::label 
-   .main.out.report.readspol.octal.reslab
-   -text "NA"
----;
+tk::label .main.out.report.readspol.octal.reslab -text "NA" ;
 
----pack
-   .main.out.report.readspol.octal.headlab
-   .main.out.report.readspol.octal.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.readspol.octal.headlab .main.out.report.readspol.octal.reslab -anchor w -side left ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub05 Cat03:
@@ -5778,34 +3726,15 @@ tk::frame .main.out.report.readspol.octal ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.readspol.sit ;
----pack
-   .main.out.report.readspol.sit
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.sit -anchor w -side top ;
 
----pack
-   .main.out.report.readspol.sit
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.sit -anchor w -side top ;
 
----tk::label 
-   .main.out.report.readspol.sit.headlab
-   -text "     SIT: "
----;
+tk::label .main.out.report.readspol.sit.headlab -text "     SIT: " ;
 
----tk::label 
-   .main.out.report.readspol.sit.reslab
-   -text "NA"
----;
+tk::label .main.out.report.readspol.sit.reslab -text "NA" ;
 
----pack
-   .main.out.report.readspol.sit.headlab
-   .main.out.report.readspol.sit.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.readspol.sit.headlab .main.out.report.readspol.sit.reslab -anchor w -side left ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub05 Cat03:
@@ -5813,34 +3742,15 @@ tk::frame .main.out.report.readspol.sit ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.readspol.strain ;
----pack
-   .main.out.report.readspol.strain
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.strain -anchor w -side top ;
 
----pack
-   .main.out.report.readspol.strain
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.strain -anchor w -side top ;
 
----tk::label 
-   .main.out.report.readspol.strain.headlab
-   -text "     Strain: "
----;
+tk::label .main.out.report.readspol.strain.headlab -text "     Strain: " ;
 
----tk::label 
-   .main.out.report.readspol.strain.reslab
-   -text "NA"
----;
+tk::label .main.out.report.readspol.strain.reslab -text "NA" ;
 
----pack
-   .main.out.report.readspol.strain.headlab
-   .main.out.report.readspol.strain.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.readspol.strain.headlab .main.out.report.readspol.strain.reslab -anchor w -side left ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub05 Cat04:
@@ -5848,34 +3758,15 @@ tk::frame .main.out.report.readspol.strain ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 tk::frame .main.out.report.readspol.orig ;
----pack
-  .main.out.report.readspol.orig
-  -anchor w
-  -side top
----;
+pack .main.out.report.readspol.orig -anchor w -side top ;
 
----pack
-   .main.out.report.readspol.orig
-   -anchor w
-   -side top
----;
+pack .main.out.report.readspol.orig -anchor w -side top ;
 
----tk::label 
-   .main.out.report.readspol.orig.headlab
-   -text "     Countries: "
----;
+tk::label .main.out.report.readspol.orig.headlab -text "     Countries: " ;
 
----tk::label 
-   .main.out.report.readspol.orig.reslab
-   -text "NA"
----;
+tk::label .main.out.report.readspol.orig.reslab -text "NA" ;
 
----pack
-   .main.out.report.readspol.orig.headlab
-   .main.out.report.readspol.orig.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.readspol.orig.headlab .main.out.report.readspol.orig.reslab -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec05 Sub06:
@@ -5889,22 +3780,11 @@ pack .main.out.report.space4 -anchor w -side top ;
 tk::frame .main.out.report.miru ;
 pack .main.out.report.miru -anchor w -side top ;
 
----tk::label
-   .main.out.report.miru.headlab
-   -text "MIRU-VNTR: "
----;
+tk::label .main.out.report.miru.headlab -text "MIRU-VNTR: " ;
 
----tk::label
-   .main.out.report.miru.reslab
-   -text "NA"
----;
+tk::label .main.out.report.miru.reslab -text "NA" ;
 
----pack
-   .main.out.report.miru.headlab
-   .main.out.report.miru.reslab
-   -anchor w
-   -side left
----;
+pack .main.out.report.miru.headlab .main.out.report.miru.reslab -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec06:
@@ -5942,34 +3822,16 @@ pack .main.out.amr.con.head -anchor w -side top ;
 tk::frame .main.out.amr.con.tbl ;
 pack .main.out.amr.con.tbl -anchor w -side top ;
 
----tk::label
-   .main.out.amr.con.head.lab
-   -font "Courier"
-   -text "Consensus ARMs:"
----;
+tk::label .main.out.amr.con.head.lab -font "Courier" -text "Consensus ARMs:" ;
 
----text
-   .main.out.amr.con.tbl.txt
-   -height 10
-   -yscrollcommand ".main.out.amr.con.tbl.scroll set"
----; # set up text box
+text .main.out.amr.con.tbl.txt -height 10 -yscrollcommand ".main.out.amr.con.tbl.scroll set" ; # set up text box
 
 # so user can not edit
 .main.out.amr.con.tbl.txt configure -state disabled ;
 
----scrollbar
-   .main.out.amr.con.tbl.scroll
-   -command ".main.out.amr.con.tbl.txt yview"
-   -orient v
----; # setup scroll bar for text box
+scrollbar .main.out.amr.con.tbl.scroll -command ".main.out.amr.con.tbl.txt yview" -orient v ; # setup scroll bar for text box
 
----pack
-   .main.out.amr.con.head.lab
-   .main.out.amr.con.tbl.txt
-   .main.out.amr.con.tbl.scroll
-   -anchor nw
-   -side left
----;
+pack .main.out.amr.con.head.lab .main.out.amr.con.tbl.txt .main.out.amr.con.tbl.scroll -anchor nw -side left ;
 
 #**************************************************
 # Gui08 Sec07 Sub02:
@@ -5985,31 +3847,13 @@ pack .main.out.amr.read.head -anchor w -side top ;
 tk::frame .main.out.amr.read.tbl ;
 pack .main.out.amr.read.tbl -anchor w -side top ;
 
----tk::label
-   .main.out.amr.read.head.lab
-   -font "Courier"
-   -text "Read AMRs:"
----;
+tk::label .main.out.amr.read.head.lab -font "Courier" -text "Read AMRs:" ;
 
----text
-   .main.out.amr.read.tbl.txt
-   -height 10
-   -yscrollcommand ".main.out.amr.read.tbl.scroll set"
----; # set up text box
+text .main.out.amr.read.tbl.txt -height 10 -yscrollcommand ".main.out.amr.read.tbl.scroll set" ; # set up text box
 
 # so user can not edit
 .main.out.amr.read.tbl.txt configure -state disabled ;
 
----scrollbar
-   .main.out.amr.read.tbl.scroll
-   -command ".main.out.amr.read.tbl.txt yview"
-   -orient v
----; # setup scroll bar for text box
+scrollbar .main.out.amr.read.tbl.scroll -command ".main.out.amr.read.tbl.txt yview" -orient v ; # setup scroll bar for text box
 
----pack
-   .main.out.amr.read.head.lab
-   .main.out.amr.read.tbl.txt
-   .main.out.amr.read.tbl.scroll
-   -anchor nw
-   -side left
----;
+pack .main.out.amr.read.head.lab .main.out.amr.read.tbl.txt .main.out.amr.read.tbl.scroll -anchor nw -side left ;

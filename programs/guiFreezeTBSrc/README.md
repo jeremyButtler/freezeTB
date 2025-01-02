@@ -25,6 +25,7 @@ sudo chmod a+x /usr/local/bin/graphAmpDepth.r;
 sudo cp ../../freezeTBFiles /usr/local/share;
 sudo chmod -R a+r /usr/local/share/freezeTBFiles;
 sudo chmod a+r /usr/local/share/freezeTBFiles/*;
+sudo chmod a+rx /usr/local/share/freezeTBFiles/gui-FTB.tcl;
 ```
 
 copy the guiFreezeTB binarary (program) to your desired
@@ -55,6 +56,7 @@ sudo chmod a+x /usr/local/bin/graphAmpDepth.r;
 sudo cp ../../freezeTBFiles /usr/local/share;
 sudo chmod -R a+r /usr/local/share/freezeTBFiles;
 sudo chmod a+r /usr/local/share/freezeTBFiles/*;
+sudo chmod a+rx /usr/local/share/freezeTBFiles/gui-FTB.tcl;
 ```
 
 copy the guiFreezeTB binarary (program) to your desired

@@ -63,18 +63,16 @@ Chapter three: do not underestimate the pixies
 - scripts/getSeqByCoord.sh:
   - extracts amplicon sequences by coordinate
   - creates: amp_seq.fa
-    - ampicon sequencees (map reads to with miniamp2)
+    - ampicon sequencees (map reads to with minimap2)
 
 ## Older progams (some functional):
 
 Chapter four: the undead awaken
 
 - freezeTBGui.Rscript: gui built in R using tcltk, was
-  replaced with guiFreezeTB, but still works
+  replaced with guiFreezeTB, but might work (no idea)
 - outputGui.Rscript: runs only the output menu displayed
-  by freezeTBGui.Rscript
-- gui-run.tcl: script used to build guiFreezeTB gui
-  - will run if use `wish` from tcltk
+  by freezeTBGui.Rscript (should work)
 - oldGraphAmpDepth.r is older version of graphAmpDepth
   that used ggplot2
 
@@ -85,27 +83,33 @@ Chapter five: the GUI fiend
 In programs/guiFreezeTB there is a script called gui.tcl.
   This is the GUI script used in guiFreezeTB. However,
   you need to use rmBlocks from my `build` repository to
-  get it to run with wish (`rmBlocks < gui.tcl | wish`).
+  get it to run with wish
+  (`rmBlocks -file gui.tcl | wish`). You will also need
+  the command line freezeTB (installed by default if
+  did default install). However, it does run on its own
+  with wish.
 
 The main reason for gui.tcl is that it allows you to edit
   the gui for guiFreezeTB and view it in reall time. You
-  can the integrate it into the guiFreezeTB code with the
-  addScript.sh script `bash addScript.sh`. You would then
-  do `make -f mkfile.unix` or `make -f mkfile.mac` to
-  rebuild guiFreezeTB with your own gui.
-
-To run addScript.sh you will need `scriptToCStr` from
-  my `build` repository.
+  can then convert it to the freezeTB gui script using
+  `rmBlocks -no-script -file gui.tcl > gui-FTB.tcl`. You
+  can then copy `gui-FTB.tcl` to your freezeTBFiles
+  location to get the new gui.
 
 On the surface it sounds good, until you dig in. Then
-  comes the nightmere of my documentation (adds a lot of
+  comes the nightmare of my documentation (adds a lot of
   lines) and just how many lines this GUI takes (1k with
   everything merged and comments removed). You will also
-  need to understand my styntax for rmBlocks.
+  need to understand my syntax for rmBlocks.
+
+I also need to release rmBlocks. It is currently part of a
+  larger, side project I am working on. So, I do not plan
+  on releasing it any time soon, but if you need it let me
+  know and I will make the project public.
 
 The rmBlocks rules:
 
-Items in strings `""` are considered literal.
+Items in strings `""` or `''` are considered literal.
 
 Blocks are distinguished by `---` and are only 1 level
   deep.
@@ -123,15 +127,15 @@ Blocks are distinguished by `---` and are only 1 level
 --- ; # end of a block
 ```
 
-Code unique to the tcltk script is between
-  two `#>>>script<<<#` blocks. This is code such as
-  default settings variables and the run freezeTB command.
-  These are defined in the actual C code.
+Code unique to the tcltk script is between `#>>>script`
+  and `#<<<script` blocks. This is code such as default
+  settings variables and the run freezeTB command.  These
+  are defined in the actual C code.
 
 ```
-#>>>script<<<#
+#>>>script
 only seen in the script, removed by scriptToCStr
-#>>>script<<<#
+#<<<script
 ```
 
 I also have one point were I need to remove code unique to
@@ -151,9 +155,9 @@ C freezeTB call (internal function) goes here and is
   removed with rmBlocks. However, scriptToCStr will remove
   the comment blocks, enabling it for the C code.
 
-#>>>script<<<#
+#>>>script
 End of comment block ---#
-#>>>script<<<#
+#<<<script
 ```
 
 # freezeTB as an bash script
