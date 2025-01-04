@@ -93,7 +93,7 @@ variable freezeTBVer "" ; # freezeTB version
 set glob_noAmrCol "#440154" ;        # viridis purple
 set glob_noAmrTextCol "#FDE725" ;    # viridis yellow
 
-set glob_amrCol "#FDE725" ;          # viridis light green
+set glob_amrCol "#51C56AFF" ;        # viridis light green
 set glob_amrTextCol "#440154" ;      # viridis purple
 
 set glob_lowDepthCol "#21908" ;      # viridis yellow
