@@ -70,6 +70,8 @@
 '     - gets reference ids & length from a sam file header
 '   o fun27: findRef_refs_samEntry
 '     - finds a reference id in a refs_samEntry struct
+'   o fun28: addRef_samEntry
+'     - adds reference information to array in refStack
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
 '        pdf
@@ -91,6 +93,7 @@
 #define def_EOF_samEntry 1
 #define def_memErr_samEntry 2
 #define def_fileErr_samEntry 4
+#define def_expand_samEntry 8  /*expanded an array*/
 
 /*-------------------------------------------------------\
 | ST01: samEntry
@@ -791,6 +794,40 @@ signed long
 findRef_refs_samEntry(
    signed char *idStr,            /*id to find*/
    struct refs_samEntry *refSTPtr /*holds ref lengths*/
+);
+
+/*-------------------------------------------------------\
+| Fun28: addRef_samEntry
+|   - adds reference information to array in refStack
+| Input:
+|   - idStr:
+|     o c-string with id to add
+|   - lenUI:
+|     o length of reference sequence
+|   - refsPtr:
+|     o pointer to refs_samEntry struct to add ref to
+|   - errSCPtr:
+|     o pointer to signed char to hold errors
+| Output:
+|   - Modifies:
+|     o idAryStr in refsPtr to have idStr
+|     o lenAryUI in refsPtr to have lenUI
+|     o numRefUI in refsPtr to be resized if realloc used
+|     o arrySizeUI in refsPtr to be incurmented by 1
+|     o errSCPtr to be
+|       * 0 for no error
+|       * def_expand_samEntry if needed to realloc
+|       * def_memErr_samEntry for memory error
+|   - Returns
+|     o index of reference
+|     o -1 for errors
+\-------------------------------------------------------*/
+signed long
+addRef_samEntry(
+   signed char *idStr,
+   unsigned int lenUI,
+   struct refs_samEntry *refsPtr,
+   signed char *errSCPtr
 );
 
 #endif

@@ -514,7 +514,7 @@ eql_ulCp(
    while( ! ifDelim_ulCp(*qryUL, delimUL) )
    { /*Loop: Copy cpStr to dupStr*/
       if(*qryUL != *refUL)
-         return *(qryUL - 1) - *(refUL - 1);
+         break;
 
       ++qryUL;
       ++refUL;
@@ -563,7 +563,7 @@ eqlNull_ulCp(
    while( ! ifNull_ulCp(*qryUL) )
    { /*Loop: Copy cpStr to dupStr*/
       if(*qryUL != *refUL)
-         return *(qryUL - 1) - *(refUL - 1);
+         break;
 
       ++qryUL;
       ++refUL;
@@ -612,7 +612,7 @@ eqlWhite_ulCp(
    while( ! ifWhite_ulCp(*qryUL) )
    { /*Loop: Copy cpStr to dupStr*/
       if(*qryUL != *refUL)
-         return *(qryUL - 1) - *(refUL - 1);
+         break;
 
       ++qryUL;
       ++refUL;
@@ -770,13 +770,19 @@ swapDelim_ulCp(
 
       while(*firstStr != delimSC)
       { /*Loop: copy first string*/
+         if(*secStr == '\0')
+            break;
+
          *firstStr ^= *secStr;
          *secStr ^= *firstStr;
          *firstStr++ ^= *secStr++;
       } /*Loop: copy first string*/
 
-      *firstStr++ = *secStr;
-      *secStr++ = '\0';
+      if(*secStr != '\0')
+      { /*If: second string has more values*/
+         *firstStr++ = *secStr;
+         *secStr++ = '\0';
+      } /*If: second string has more values*/
 
       firstUL = (ulong_ulCp *) firstStr;
       secUL = (ulong_ulCp *) secStr;
@@ -787,7 +793,7 @@ swapDelim_ulCp(
       firstStr = (signed char *) firstUL;
       secStr = (signed char *) secUL;
 
-      while(*firstStr != delimSC)
+      while(*secStr != delimSC)
          *firstStr++ = *secStr++;
 
       *firstStr = '\0';
@@ -801,15 +807,21 @@ swapDelim_ulCp(
    else
    { /*Else: second string ended*/
 
-      while(*firstStr != delimSC)
+      while(*secStr != delimSC)
       { /*Loop: copy first string*/
+         if(*firstStr == '\0')
+            break;
+
          *firstStr ^= *secStr;
          *secStr ^= *firstStr;
          *firstStr++ ^= *secStr++;
       } /*Loop: copy first string*/
 
-      *secStr++ = *firstStr;
-      *firstStr++ = '\0';
+      if(*firstStr != '\0')
+      { /*If: first string has more values*/
+         *secStr++ = *firstStr;
+         *firstStr++ = '\0';
+      } /*If: first string has more values*/
 
       firstUL = (ulong_ulCp *) firstStr;
       secUL = (ulong_ulCp *) secStr;

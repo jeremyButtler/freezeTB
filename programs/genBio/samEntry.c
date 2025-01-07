@@ -70,6 +70,8 @@
 '     - gets reference ids & length from a sam file header
 '   o fun27: findRef_refs_samEntry
 '     - finds a reference id in a refs_samEntry struct
+'   o fun28: addRef_samEntry
+'     - adds reference information to array in refStack
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
 '        pdf
@@ -2765,12 +2767,13 @@ realloc_refs_samEntry(
 
    refSTPtr->idAryStr = tmpSCPtr;
 
+   refSTPtr->arySizeUI = numRefsUI;
 
    done_fun24:;
-   return 0;
+      return 0;
 
    memErr_fun24:;
-   return def_memErr_samEntry;
+      return def_memErr_samEntry;
 } /*realloc_refs_samEntry*/
 
 /*-------------------------------------------------------\
@@ -2958,19 +2961,18 @@ getRefLen_samEntry(
           *   - copy reference id and move to length
           \**********************************************/
 
-          cpStr =
-             get_strAry(
-                refSTPtr->idAryStr,
-                refSTPtr->numRefUI
-             );
+          
+          cpStr = tmpStr;
 
-          tmpStr +=
-             cpDelim_ulCp(
-                cpStr,
-                tmpStr,
-                def_tab_ulCp,
-                '\t'
-             );
+          while(*tmpStr != '\t' && *tmpStr != '\0')
+             ++tmpStr;
+          *tmpStr = '\0';
+
+          add_strAry(
+             cpStr,
+             refSTPtr->idAryStr,
+             refSTPtr->numRefUI
+          ); /*sorting at end for better speed*/
 
           ++tmpStr;
          
@@ -3131,6 +3133,75 @@ findRef_refs_samEntry(
          refSTPtr->numRefUI
       );
 } /*findRef_refs_samEntry*/
+
+/*-------------------------------------------------------\
+| Fun28: addRef_samEntry
+|   - adds reference information to array in refStack
+| Input:
+|   - idStr:
+|     o c-string with id to add
+|   - lenUI:
+|     o length of reference sequence
+|   - refsPtr:
+|     o pointer to refs_samEntry struct to add ref to
+|   - errSCPtr:
+|     o pointer to signed char to hold errors
+| Output:
+|   - Modifies:
+|     o idAryStr in refsPtr to have idStr
+|     o lenAryUI in refsPtr to have lenUI
+|     o numRefUI in refsPtr to be resized if realloc used
+|     o arrySizeUI in refsPtr to be incurmented by 1
+|     o errSCPtr to be
+|       * 0 for no error
+|       * def_expand_samEntry if needed to realloc
+|       * def_memErr_samEntry for memory error
+|   - Returns
+|     o index of reference
+|     o -1 for errors
+\-------------------------------------------------------*/
+signed long
+addRef_samEntry(
+   signed char *idStr,
+   unsigned int lenUI,
+   struct refs_samEntry *refsPtr,
+   signed char *errSCPtr
+){
+   unsigned long retUL = 0;
+
+   *errSCPtr = 0;
+
+
+   if(refsPtr->numRefUI >= refsPtr->arySizeUI)
+   { /*If: need more memory*/
+      *errSCPtr =
+         realloc_refs_samEntry(
+            refsPtr,
+            refsPtr->arySizeUI + 16
+         );
+
+      if(*errSCPtr)
+         goto memErr_fun28;
+
+      *errSCPtr = def_expand_samEntry;
+   } /*If: need more memory*/
+
+
+   retUL =
+      addSort_strAry(
+         idStr,
+         refsPtr->idAryStr,
+         refsPtr->numRefUI
+      );
+
+   refsPtr->lenAryUI[retUL] = lenUI;
+   ++refsPtr->numRefUI;
+
+   return *errSCPtr;
+
+   memErr_fun28:;
+      return def_memErr_samEntry;
+} /*addRef_samEntry*/
 
 /*=======================================================\
 : License:
