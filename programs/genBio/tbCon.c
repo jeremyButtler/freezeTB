@@ -1306,7 +1306,24 @@ collapse_tbCon(
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       retSamST[siFrag].lenQryIdUC =
-         numToStr(retSamST[siFrag].qryIdStr, uiRef);
+         cpStr_ulCp(
+             retSamST[siFrag].qryIdStr,
+             refIdStr
+         );
+
+      retSamST[siFrag].qryIdStr[
+         retSamST[siFrag].lenQryIdUC
+      ] = '_';
+
+      ++retSamST[siFrag].lenQryIdUC;
+
+      retSamST[siFrag].lenQryIdUC +=
+         numToStr(
+            &retSamST[siFrag].qryIdStr[
+               retSamST[siFrag].lenQryIdUC
+            ],
+         uiRef
+      );
 
       retSamST[siFrag].qryIdStr[
          retSamST[siFrag].lenQryIdUC
@@ -2142,20 +2159,28 @@ noFragCollapse_tbCon(
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    retSamST->lenQryIdUC =
-      numToStr(retSamST->qryIdStr, (uint) startSI);
+      cpStr_ulCp(
+          retSamST->qryIdStr,
+          refIdStr
+      ); /*get reference id*/
 
-   retSamST->qryIdStr[
-      retSamST->lenQryIdUC
-   ] = '-';
-
+   retSamST->qryIdStr[retSamST->lenQryIdUC] = '_';
    ++retSamST->lenQryIdUC;
 
    retSamST->lenQryIdUC +=
       (uchar)
       numToStr(
-         &retSamST->qryIdStr[
-            retSamST->lenQryIdUC
-         ],
+         &retSamST->qryIdStr[retSamST->lenQryIdUC],
+         (uint) startSI
+      ); /*add starting coordinate*/
+
+   retSamST->qryIdStr[retSamST->lenQryIdUC] = '-';
+   ++retSamST->lenQryIdUC;
+
+   retSamST->lenQryIdUC +=
+      (uchar)
+      numToStr(
+         &retSamST->qryIdStr[retSamST->lenQryIdUC],
          (uint) endSI
       ); /*Copy the ending position*/
 
@@ -2348,7 +2373,7 @@ noFragCollapse_tbCon(
       /*For deletions an masked base is equivlent to no
       `   support
       */
-      if(conNtAryST[uiRef].ntKeptSI > 0)
+      if(conNtAryST[startSI].ntKeptSI > 0)
          delPerSupF =
               (float) conNtAryST[startSI].numDelSI
             / (float) conNtAryST[startSI].ntKeptSI;

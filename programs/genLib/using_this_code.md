@@ -153,9 +153,14 @@ The string is justs a c-string, so use free() to free you
 
 ## ulCp
 
-Will not work on big endin systems. The X86 CPUs are
-  little endin, while the ARM CPUs can be both, but often
-  use little endin OS's.
+I have no idea if this will work on big endin systems. Not
+  a big deal since most user OSs are little endin. I have
+  tested one or two functions using qemu to emulate a
+  mk68040 processor on a debian image I found online
+  ([https://people.debian.org/~gio/dqib/](
+   https://people.debian.org/~gio/dqib/)
+  ). It seems to work, but then I also had mixed results
+  with a browser emulator.
 
 ulCp is short for unsigned long copy. It is like charCp,
   except that it uses unsigned long. As a general rule it
@@ -163,8 +168,8 @@ ulCp is short for unsigned long copy. It is like charCp,
   is often faster than charCp or other byte by byte
   methods (at least on 64 bit). It also allows for you to
   use your own deliminators for some functions. Use
-  mkDelim_ulCp to make a deliminator (store it in an
-  ulong_ulCp dataType).
+  mkDelim_ulCp (fun02) to make a deliminator (store it in
+  an ulong_ulCp dataType).
 
 I had to define my own data type for ulCp because plan9
   treats longs as 32 bits. So, their is a special flag
@@ -187,3 +192,22 @@ I have defined several deliminators at the top of the
 | comma           | def_comma_ulCp       |
 
 Table: of deliminators in ulCp.h
+
+There are also several long check macros to see if a value
+  is in a long (fun03 to fun08 in ulCp.h).
+
+| deliminator     | function          | function id |
+|:----------------|:-----------------:|:------------|
+| user defined    | ifDelim_ulCp      | Fun03       |
+| null + user     | ifDelimNull_ulCp  | Fun04       |
+| null ('\\0')    | ifNull_ulCp       | Fun05       |
+| newline + null  | ifLineUnix_ulCp   | Fun06       |
+| \\n + \\r + \\0 | ifEndLine_ulCp    | Fun07       |
+| white space     | ifWhite_ulCp      | Fun08       |
+
+Table: of macros that check a long for certain charaters.
+  for user or user defined deliminators, use a pre-defined
+  deliminator or `ulong_ulCp delim = mkDelim_ulCp(value)`
+  to make a deliminator. By white space I mean any
+  asccii value less then 33 (this includes space, tab,
+  carriage return, newline, and null).

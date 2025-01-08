@@ -177,12 +177,17 @@ struct res_edDist;
 #define def_maxConSim_clustST 0.99f
 #define def_maxNPerc_clustST 0.05f /*10% N limit*/
 
+#define def_repInterval_clustST 0
+   /*do not report reads left*/
+
 /*-------------------------------------------------------\
 | ST01: set_clustST
 |   - has settings for clustering
 \-------------------------------------------------------*/
 typedef struct set_clustST
 {
+   signed long repIntervalSL; /*how often to log status*/
+
    /*unique to profClsut--------------------------------*/
    float minProbF;     /*min probability to keep profile*/
    unsigned int minVarUI; /*min number varaints*/

@@ -1000,6 +1000,7 @@ cluster_edClust(
    schar errSC = 0;         /*for error checking*/
 
    slong numReadsSL = 0;    /*number of reads left*/
+   slong lastReadsSL = 0;   /*last number of reads left*/
    ulong clustReadsUL = 0;  /*number reads clustered*/
    slong depthSL = 0;       /*read depth for cluster*/
     
@@ -1094,6 +1095,7 @@ cluster_edClust(
    \*****************************************************/
 
    numReadsSL = (*indexSTPtr)->keptSL;
+   lastReadsSL = numReadsSL;
 
    if(logFILE)
       fprintf(
@@ -1102,21 +1104,39 @@ cluster_edClust(
          numReadsSL
       );
 
+   if(clustSetSTPtr->repIntervalSL > 0)
+   { /*If: user wanted logging*/
+      fprintf(
+         stderr,
+         "kept reads: %li\n",
+         numReadsSL
+      ); /*If reporting read counts*/
+
+      fflush(stderr);
+   } /*If: user wanted logging*/
+
    clustSetSTPtr->clustSI = 1; /*on first cluster*/
 
    while(numReadsSL >= clustSetSTPtr->minDepthUI)
    { /*Loop: cluster reads*/
 
-      #ifdef P_STATUS
-         fprintf(
-            stderr,
-            "\r%07li ",
-            numReadsSL
-         ); /*update on how many reads left*/
+      if(clustSetSTPtr->repIntervalSL > 0)
+      { /*If: reporting status*/
+         if(
+               (lastReadsSL - numReadsSL)
+            >= clustSetSTPtr->repIntervalSL
+         ){ /*If: logging interval*/
+            fprintf(
+               stderr,
+               "Reads left: %li\n",
+               numReadsSL
+            ); /*update on how many reads left*/
+
+            lastReadsSL = numReadsSL;
+         } /*If: logging interval*/
 
          fflush(stderr);
-         /*plan9 treats carriage return as actual code*/
-      #endif
+      } /*If: reporting status*/
 
       /**************************************************\
       * Fun05 Sec04 Sub02:

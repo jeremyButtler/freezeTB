@@ -52,18 +52,20 @@
 '     o fun19: endLine_ulCp
 '       - finds the end of a c-string (all OS's; looks for
 '         '\0', '\n', and '\r')
+'     o fun20: endWhite_ulCp
+'       - finds 1st white space ('\t',' ','\n','\0','\r')
 '   String comparision:
-'     o fun20: eql_ulCp
+'     o fun21: eql_ulCp
 '       - compares two strings until deliminator is found
-'     o fun21: eqlNull_ulCp
+'     o fun22: eqlNull_ulCp
 '       - compares two strings until null is found
-'     o fun22: eqlWhite_ulCp
+'     o fun23: eqlWhite_ulCp
 '       - compares two strings until white space is found
 '   String cleanup:
-'     o fun23: rmWhite_ulCp
+'     o fun24: rmWhite_ulCp
 '       - removes white space from c-string
 '   String swap:
-'      o fun24: swapDelim_ulCp
+'      o fun25: swapDelim_ulCp
 '        - swaps two strings until deliminator is found
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -478,9 +480,36 @@ endLine_ulCp(
    return tmpStr - inStr;
 } /*endLine_ulCp*/
 
+/*-------------------------------------------------------\
+| Fun20: endWhite_ulCp
+|   - finds 1st white space ('\t', ' ', '\n', '\0', '\r')
+| Input:
+|   - inStr:
+|     o c-string or string to look for whitespace in
+| Output:
+|   - Returns:
+|     o number of characters in the string
+\-------------------------------------------------------*/
+unsigned int
+endWhite_ulCp(
+   signed char *inStr
+){
+   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+   signed char *tmpStr = 0;
+
+   while( ! ifWhite_ulCp(*ptrUL) )
+      ++ptrUL;
+
+   tmpStr = (signed char *) ptrUL;
+
+   while( *tmpStr > 33)
+      ++tmpStr;
+
+   return tmpStr - inStr;
+} /*endWhite_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun20: eql_ulCp
+| Fun21: eql_ulCp
 |   - compares two strings until deliminator is found
 | Input:
 |   - qryStr:
@@ -536,7 +565,7 @@ eql_ulCp(
 } /*eql_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun21: eqlNull_ulCp
+| Fun22: eqlNull_ulCp
 |   - compares two strings until null is found
 | Input:
 |   - qryStr:
@@ -585,7 +614,7 @@ eqlNull_ulCp(
 } /*eqlNull_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun22: eqlWhite_ulCp
+| Fun23: eqlWhite_ulCp
 |   - compares two strings until white space is found
 | Input:
 |   - qryStr:
@@ -637,7 +666,7 @@ eqlWhite_ulCp(
 } /*eqlWhite_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun23: rmWhite_ulCp
+| Fun24: rmWhite_ulCp
 |   - removes white space from c-string
 | Input:
 |   - inStr:
@@ -677,8 +706,8 @@ rmWhite_ulCp(
             ++uiChar
          ){ /*Loop: remove white space*/
             if(*cpStr == '\0')
-               break; /*finished*/
-            else if(*cpStr < 32)
+               goto done_fun24;
+            else if(*cpStr < 33)
                ++cpStr;
             else
                *cpStr++ = *dupStr++;
@@ -689,12 +718,13 @@ rmWhite_ulCp(
       } /*Else: have white space, manually copy*/
    } /*Loop: remove white space*/
 
-   *dupStr = '\0';
-   return dupStr - inStr;
+   done_fun24:;
+      *dupStr = '\0';
+      return dupStr - inStr;
 } /*rmWhite_ulCp*/
 
 /*-------------------------------------------------------\
-| Fun24: swapDelim_ulCp
+| Fun25: swapDelim_ulCp
 |   - swaps two strings until deliminator is found
 | Input:
 |   - firstStr:

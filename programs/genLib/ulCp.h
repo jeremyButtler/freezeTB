@@ -53,18 +53,20 @@
 '     o fun19: endLine_ulCp
 '       - finds the end of a c-string (all OS's; looks for
 '         '\0', '\n', and '\r')
+'     o fun20: endWhite_ulCp
+'       - finds 1st white space ('\t',' ','\n','\0','\r')
 '   String comparision:
-'     o fun20: eql_ulCp
+'     o fun21: eql_ulCp
 '       - compares two strings until deliminator is found
-'     o fun21: eqlNull_ulCp
+'     o fun22: eqlNull_ulCp
 '       - compares two strings until null is found
-'     o fun22: eqlWhite_ulCp
+'     o fun23: eqlWhite_ulCp
 '       - compares two strings until white space is found
 '   String cleanup:
-'     o fun23: rmWhite_ulCp
+'     o fun24: rmWhite_ulCp
 '       - removes white space from c-string
 '   String swap:
-'      o fun24: swapDelim_ulCp
+'      o fun25: swapDelim_ulCp
 '        - swaps two strings until deliminator is found
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -100,6 +102,9 @@
 
 #define def_four_ulCp (ulong_ulCp) 0x0404040404040404
 #define def_eight_ulCp (ulong_ulCp) 0x0808080808080808
+
+#define def_hi3Bits_ulCp (ulong_ulCp) 0xe0e0e0e0e0e0e0e0
+   /*gets the high three bits in a char*/
 
 /*for white space checks*/
 #define def_31_ulCp (ulong_ulCp) 0x0f0f0f0f0f0f0f0f
@@ -370,14 +375,14 @@
 |     o 0 if white space not found
 |     o not 0 if white space found
 \-------------------------------------------------------*/
-#define ifWhite_ulCp(ulStr) ( ( (((ulStr) - (def_one_ulCp)) & def_32Or64_ulCp) - def_one_ulCp ) & def_highBit_ulCp )
+#define ifWhite_ulCp(ulStr) ( ( (((ulStr) - def_one_ulCp) & def_hi3Bits_ulCp) - def_one_ulCp ) & def_highBit_ulCp )
 /*Logic:
 `   - checks if have ' ', '\t', '\n', '\r', or '\0' (< 33)
 `   - cvtSpace: ulStr - def_one_ulCp:
 `     o convert space to 31 [no 32 flag] (null goes to -1)
 `     o values > 32 (non-white) still have 32 flag
-`   - rmLowBit: cvtSpace & def_32Or64_ulCp:
-`     o removes bits < 32/64 (1, 2, 4, 8, 16 flags)
+`   - rmLowBit: cvtSpace & def_hi3Bits_ulCp:
+`     o removes bits < 32/64/128 (1, 2, 4, 8, 16 flags)
 `   - whiteToNeg: rmLowBit - def_one_ulCp:
 `     o converts white space to negative -1
 `     o null goes to -2
@@ -619,7 +624,22 @@ endLine_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun20: eql_ulCp
+| Fun20: endWhite_ulCp
+|   - finds 1st white space ('\t', ' ', '\n', '\0', '\r')
+| Input:
+|   - inStr:
+|     o c-string or string to look for whitespace in
+| Output:
+|   - Returns:
+|     o number of characters in the string
+\-------------------------------------------------------*/
+unsigned int
+endWhite_ulCp(
+   signed char *inStr
+);
+
+/*-------------------------------------------------------\
+| Fun21: eql_ulCp
 |   - compares two strings until deliminator is found
 | Input:
 |   - qryStr:
@@ -649,7 +669,7 @@ eql_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun21: eqlNull_ulCp
+| Fun22: eqlNull_ulCp
 |   - compares two strings until null is found
 | Input:
 |   - qryStr:
@@ -672,7 +692,7 @@ eqlNull_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun22: eqlWhite_ulCp
+| Fun23: eqlWhite_ulCp
 |   - compares two strings until white space is found
 | Input:
 |   - qryStr:
@@ -695,7 +715,7 @@ eqlWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun23: rmWhite_ulCp
+| Fun24: rmWhite_ulCp
 |   - removes white space from c-string
 | Input:
 |   - inStr:
@@ -712,7 +732,7 @@ rmWhite_ulCp(
 );
 
 /*-------------------------------------------------------\
-| Fun24: swapDelim_ulCp
+| Fun25: swapDelim_ulCp
 |   - swaps two strings until deliminator is found
 | Input:
 |   - firstStr:

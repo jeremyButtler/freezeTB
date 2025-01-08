@@ -184,6 +184,8 @@ void
 init_set_clustST(
    struct set_clustST *clustSetSTPtr
 ){
+   clustSetSTPtr->repIntervalSL = def_repInterval_clustST;
+
    /*unique to clustST*/
    clustSetSTPtr->minProbF = def_minProb_clustST;
    clustSetSTPtr->minVarUI = def_minVar_clustST;
@@ -1151,6 +1153,7 @@ mk_index_clustST(
    slong filePosSL = 0; /*position at in file*/
 
    slong indexSL = 0;        /*find reads reference*/
+   slong slCnt = 0;          /*shifting indexs*/
 
    struct index_clustST *retHeapST = 0;
 
@@ -1314,6 +1317,9 @@ mk_index_clustST(
          retHeapST->clustArySI[lineUL] =
             def_discard_clustST;
 
+         retHeapST->refAryUI[lineUL] =
+            def_discard_clustST;
+
          retHeapST->indexAryUL[lineUL] =(ulong) filePosSL;
 
          retHeapST->startAryUI[lineUL] = 0;
@@ -1392,43 +1398,50 @@ mk_index_clustST(
 
             else
             { /*Else: is a new reference*/
-               ++retHeapST->numRefUI;
-
                if(
-                     retHeapST->numRefUI
+                     retHeapST->numRefUI + 1
                   >= retHeapST->lenRefUI
                ){ /*If: need more memory*/
 
                   errSC =
                      realloc_index_clustST(
                         retHeapST,
-                        retHeapST->lenUL, /*not resized*/
-                        retHeapST->lenRefUI << 1
+                        retHeapST->lenUL, /*not resizing*/
+                        (retHeapST->numRefUI + 1) << 1
                      );
+                     /*we have two arrays, the reference
+                     `   id array and the read array, we
+                     `   only need to resize reference id
+                     */
 
                   if(errSC)
                      goto memErr_fun20_sec04;
 
                } /*If: need more memory*/
 
-               add_strAry(
-                  samSTPtr->refIdStr,
-                  retHeapST->refIdAryStr,
-                  retHeapST->numRefUI
-               );
+               indexSL =
+                  (signed long)
+                  addSort_strAry(
+                     samSTPtr->refIdStr,
+                     retHeapST->refIdAryStr,
+                     retHeapST->numRefUI
+                  );
 
-               retHeapST->refNumAryUI[
-                  retHeapST->numRefUI
-               ] = retHeapST->numRefUI;
+               /*need to account for inserted index*/
+               for(
+                  slCnt =(slong) retHeapST->numRefUI;
+                  slCnt > indexSL;
+                  --slCnt
+               ) retHeapST->refNumAryUI[slCnt] =
+                    retHeapST->refNumAryUI[slCnt - 1];
+
+               ++retHeapST->numRefUI;
+
+               retHeapST->refNumAryUI[indexSL] =
+                  retHeapST->numRefUI;
 
                retHeapST->refAryUI[lineUL] =
                   retHeapST->numRefUI;
-
-               sortSync_strAry(
-                  retHeapST->refIdAryStr,
-                  retHeapST->refNumAryUI,
-                  retHeapST->numRefUI
-               ); /*sort for quick lookup later*/
             } /*Else: is a new reference*/
          } /*Else: get reference*/
 

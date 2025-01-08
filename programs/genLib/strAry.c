@@ -280,6 +280,8 @@ findClose_strAry(
       } /*Else: found matching string*/
    } /*Loop: Search for the querys index*/
 
+   if(midSL == lenSL)
+      return midSL;     /*at end of array, insert here*/
    if(cmpSL > 0)
       return midSL + 1; /*query still greater*/
    else
