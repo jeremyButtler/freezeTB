@@ -389,6 +389,9 @@ void
 freeStack_samEntry(
    struct samEntry *samSTPtr
 ){
+    if(! samSTPtr)
+       return; /*nothing to do*/
+
     blank_samEntry((samSTPtr));
     
     free((samSTPtr)->seqStr);
@@ -424,6 +427,9 @@ freeStack_samEntry(
 void freeHeap_samEntry(
    struct samEntry *samSTPtr
 ){
+    if(! samSTPtr)
+       return; /*nothing to do*/
+
     freeStack_samEntry(samSTPtr);
     free(samSTPtr);
 } /*freeHeap_samEntry*/

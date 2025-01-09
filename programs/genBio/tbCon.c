@@ -385,6 +385,7 @@ freeStack_set_tbCon(
 |     o def_header_tbConDefs for sam file header entry
 |     o def_noMap_tbConDefs for an unmapped read
 |     o def_noSeq_tbConDefs for a read missing a sequence
+|     o def_lowMapq_tbConDefs for low mapping qualities
 |     o def_memErr_tbConDefs for memory errors
 \-------------------------------------------------------*/
 signed char
