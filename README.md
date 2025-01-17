@@ -1,36 +1,49 @@
 # Use
 
-freezeTb is a program that detects gene mutations
+freezeTB is a program that detects gene mutations
   associated with drug resistance from nanopore sequenced
   tuberculosis samples. It also outputs a set of
   consensus fragments (as a sam file) and checks for
-  lineages by spoligotyping and or MIRU-VNTR.
+  lineages by spoligotyping and/or MIRU-VNTR.
 
-Currently freezeTb uses the WHO 2023 mutation catalog.
+Currently freezeTb uses the WHO 2023 mutation catalog from
+  [https://github.com/GTB-tbsequencing/mutation-catalogue-2023]
+  (https://github.com/GTB-tbsequencing/mutation-catalogue-2023).
 
 # License:
 
-freezeTB does include databases from other repositories
-  and complied code (minimap2) from other repositories. In
-  those cases the licensing will be under the owners
+freezeTB includes databases from other repositories and
+  complied code (minimap2) from other repositories. In
+  those cases the licensing will be under the owner's
   repository.
 
-Here are the order of merlin winners:
+Here are the order of Merlin winners:
 
 - Taken from other sources:
   - files in freezeTBFiles
-    - amrDb.tsv is the who 2023 catalog (converted)
+    - amrDb.tsv is the WHO 2023 catalog (converted)
     - spoligo-lineages.csv from TBProfiler
     - NC000962.fa and genes-NC000962.fa were from Genbank
       - also in benchmark as tbdb.fasta
     - miruTbl.tsv is the modified MIRU-VNTRU table from
       MIRUReader (github)
     - spoligo-spacers.fa were from a spoligotyping program
-      on github (can not remember which one)
+      - Kamerbeek J, Schouls L, Kolk A, van Agterveld M,
+        van Soolingen D, Kuijper S, Bunschoten A,
+        Molhuizen H, Shaw R, Goyal M, van Embden J.
+        Simultaneous detection and strain differentiation
+        of Mycobacterium tuberculosis for diagnosis and
+        epidemiology. J Clin Microbiol. 1997
+        Apr;35(4):907-14.
+        doi: [10.1128/jcm.35.4.907-914.1997](
+              10.1128/jcm.35.4.907-914.1997).
+        PMID: 9157152; PMCID: PMC229700.
   - minimap2 (MIT) window binaries compiled from
     [https://github.com/lh3/minimap2](
      https://github.com/lh3/minimap2)
-  - tcltk (the gui)
+  - tcltk (the GUI (graphical user interface [the window])
+    - [https://github.com/tcltk/tk](https://github.com/tcltk/tk)
+    - [https://github.com/tcltk/tk](https://github.com/tcltk/tcl)
 
 The stuff unique to freezeTB is under a dual license. The
   primary license is Unlicense. However, not all
@@ -71,13 +84,27 @@ sudo make -f mkfile.unix install
 
 ## Mac
 
-Easy way: download freezeTB from github, then double
-  click `macExe`. This is a wrapper to call
-  the `macInstall`. The `macInstall` script will auto get
-  dependencies for you. Be prepared to enter your password
-  for root/administrator steps.
+You can install freezTB in multiple ways. The easiest way
+  is using the Mac installer script. The harder way is
+  from source.
 
-Harder way:
+## Easy way:
+
+download freezeTB from github, then use the
+  `macInstall` script to install dependencies and
+  freezeTB.
+
+```
+cd ~/Downloads
+git clone https://github.com/jeremybuttler/freezeTB
+cd freezeTB
+sh macInstall
+```
+
+Enter your password when prompted.
+
+
+## Harder way:
 
 1. Install homebrew [https://brew.sh/](https://brew.sh/)
 2. Install X11 (xquartz) `brew install xquartz`
@@ -94,7 +121,6 @@ cd freezeTB
 make -f mkfile.unix
 sudo make -f mkfile.unix install
 ```
-The easy way is `brew install minimap2`.
 
 ### Mac minimap2 from source
 
@@ -124,14 +150,7 @@ sudo chmod a+x /usr/local/bin/minimap2
 
 ### Easy method
 
-Use Unix, there is no hope. Well, there would be if I had
-  pre-compiled binaries.
-
-The Rscript gui works (may be a bit buggy), but the
-  primary GUI needs the Rscript detection step (so
-  non-working). Also, I need to take time to figure out
-  how to get tcltk setup on windows. Then I can give
-  instructions.
+I need to build the easy way. Work in progress.
 
 ### Windows method (source)
 
@@ -174,8 +193,9 @@ GUI has not been tested.
 
 I include a minimap2.exe compiled binary in winBin.
   So, you do not need this. However, here are the
-  steps if you want a more recent version of minimap2
-  or if you are on an ARM CPU.
+  steps if you want a more recent version of minimap2. If
+  your computers CPU is an ARM (snap dragon) you will need
+  to compile minimap2 from source.
 
 First install Cygwin using the setup-x86_64.exe (is a
   link):
@@ -186,11 +206,11 @@ First install Cygwin using the setup-x86_64.exe (is a
 When at "Select Packages" menu for Cygwin install:
 
 - Search for "make" then select the package named make.
-  - make sure you are looking at the "full" and not the
+  - Ensure you are looking at the "full" and not the
     "pending list"
-  - change "Skip" to make verison number with dropdown
+  - change "Skip" to make version number with dropdown
     menu (choose most recent non-testing version)
-  - do not install gcc (it can not statically link)
+  - do not install gcc (it cannot statically link)
 - mingw64-x86_64-gcc-core
 - mingw64-x86_64-zlib
 
@@ -219,30 +239,9 @@ Copy minimap2 to your freezeTB install location or into
 
 ## GUI
 
-If it is guiFreezeTB then just double click, if
-  freezeTBGui.Rscript then in a terminal
-  type `freezeTBGui.Rscript`. On Linux (not Mac) you can
-  likely double click the `freezeTBGui.Rscript` file
-  after doing `chmod a+x freezeTBGui.Rscript` to run.
+The freezeTB icon should be on your desktop.
 
-It is a bit odd that double clicking will work on Linux,
-  but not Mac. From what I have seen, I think this is due
-  to Mac trying to second guess the shebang line for my R
-  scripts and assumes you really wanted a R session.
-
-For windows, if you set up Windows to always open up
-  a `.Rscript` file with `Rscript` then you just need to
-  double click freezeTBGui.Rscript. If not, then get
-  open "freezeTBGui" with "R studio" and hit run (the
-  green arrow). Or if you do not want R studio you can
-  open a terminal and cd to the freezeTBGui
-  script `cd %ProgramFiles%\freezeTB` location and then
-  call Rscript to run the
-  gui `%ProgramFiles%\R\<Rversion>\bin\Rscript %ProgramFiles/freezeTB/freezeTBGui.Rscript`.
-
-Ye Windows is a pain. So, set the default open with
-  program for a `.Rscript` file to `Rscript`. Makes life
-  so much easier.
+For Windows, the freezeTB GUI needs some work.
 
 ## Command line:
 
@@ -258,7 +257,7 @@ For Linux freezeTB will also search for the freezeTBFiles
 
 For Windows freezeTB will also search for the
   freezeTBFiles directory (has databases)
-  in `%HOME%\Documents` (user Documents) frist and
+  in `%HOME%\Documents` (user Documents) first and
   then in `%PUBLIC%\Documents` (Public Documents).
 
 ### Mac/Linux:
@@ -291,14 +290,14 @@ Map reads to the reference using
 Map reads to the reference using
   freezeTB: `%ProgramFiles%\freezeTB\freezeTB.exe -sam reads.sam -prefix goodName`
 
-Buld graphs (if wanted)
+Build graphs (if wanted)
   do: `%ProgramFiles%\R\<R version>\bin\Rscript %ProgramFiles%\freezeTB\graphAmdDepth.r -stats goodName-depths.tsv -who %PUBLIC%\Documents\freezeTBFiles\amrDb.tsv -prefix goodName`
 
 # Extra files:
 
 - howWorks.md has a description of the steps used in
   freezeTB
-- included-programs.md includes a list of programs chat
+- included-programs.md includes a list of programs that
   come with freezeTB. Some are installed by default,
   others are side programs. The side programs often do
   a single step (ex AMR analysis) in the freezeTB program.

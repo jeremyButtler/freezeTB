@@ -1,0 +1,68 @@
+<!DOCTYPE html> <!-- tells is html document -->
+<html>          <!-- html opening tag -->
+  <head>        <!-- html header metadata, css, ect... -->
+     <title> freezeTB </title> <!-- name of webpage -->
+  </head>
+
+  <body>         <!-- visible webpage contents -->
+    <img
+       src="FTB-icon.png"
+       width="136"
+       height="110"
+       alt="Icon for freezeTB"
+       align="left"
+       align="top"
+       border="0"
+       hspace="10"
+    > <!-- image block end -->
+      <!-- I used `file image.png` to get dimensions -->
+
+    <!-- center freezeTB header with icon (gui) -->
+    <p> <BR> </p>
+    <h1> freezeTB online</h1> <!-- heading -->
+
+
+   <!-- build freezeTB main input options -->
+   <BR clear="all"> <!-- makes text on new line -->
+   <form
+    method="post"
+    action="localhost/cgi-bin/test"
+   > <!-- need to add action="http://web/path/to/cgi" -->
+      <p>
+         Fastq_files: 
+         <input
+            type="file"
+            id="fqFile"
+            multiple="multiple"
+            name="fqFile"
+            accept=".fastq,.fq,.fastq.gz,fq.gz"
+         > <!-- file upload button (lynx has issues) -->
+           <!-- limit file upload size server side -->
+
+         <BR>
+         Prefix:
+         <input
+            type="text"
+            name="prefix"
+            size="16"
+            value="FTB_out"
+         > <!-- prefix text box -->
+
+         <BR>
+         <input type=submit value="run_freezeTB">
+         <input type=reset value="reset">
+       </p>
+   </form>
+
+    <p>          <!-- freezeTB description paragraph-->
+       freezeTB detects gene mutations associated with<BR>
+       drug resistance in Nanopore sequenced reads.<BR>
+    </p>          <!-- freezeTB description paragraph-->
+
+    <p>           <!-- freezeTB warning statement -->
+       <b> freezeTB is for research use only (not CLIA<BR>
+           certified)
+       <b>
+    </p>          <!-- freezeTB warning -->
+  </body>         <!-- end of body -->
+</html>           <!-- html ending tag -->
