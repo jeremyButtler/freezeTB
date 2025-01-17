@@ -7,8 +7,8 @@ freezeTB is a program that detects gene mutations
   lineages by spoligotyping and/or MIRU-VNTR.
 
 Currently freezeTb uses the WHO 2023 mutation catalog from
-  [https://github.com/GTB-tbsequencing/mutation-catalogue-2023]
-  (https://github.com/GTB-tbsequencing/mutation-catalogue-2023).
+  [https://github.com/GTB-tbsequencing/mutation-catalogue-2023](
+   https://github.com/GTB-tbsequencing/mutation-catalogue-2023).
 
 # License:
 
