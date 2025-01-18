@@ -29,6 +29,8 @@
    #include <stdlib.h>
 #endif
 
+#include <stdio.h>
+
 /*tcltk libraries*/
 #include <tk.h>
 #include <tcl.h>

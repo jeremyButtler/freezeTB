@@ -20,11 +20,13 @@ freezeTB includes databases from other repositories and
 Here are the order of Merlin winners:
 
 - Taken from other sources:
-  - files in freezeTBFiles
-    - amrDb.tsv is the WHO 2023 catalog (converted)
-    - spoligo-lineages.csv from TBProfiler
+  - Files in freezeTBFiles
+    - The amr database (amrDb.tsv) is from the WHO 2023
+      catalog
+    - The spoligotype lineages csv (spoligo-lineages.csv)
+      is from TBProfiler
     - NC000962.fa and genes-NC000962.fa were from Genbank
-      - also in benchmark as tbdb.fasta
+      - Also in benchmark as tbdb.fasta
     - miruTbl.tsv is the modified MIRU-VNTRU table from
       MIRUReader (github)
     - spoligo-spacers.fa were from a spoligotyping program
