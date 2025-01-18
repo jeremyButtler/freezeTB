@@ -58,6 +58,7 @@ then # If: need to install homebrew
        >> ~/.bash_profile;
 
    eval "$(/opt/homebrew/bin/brew shellenv)";
+   source ~/.bash_profile;
 fi # If: need to install homebrew
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
