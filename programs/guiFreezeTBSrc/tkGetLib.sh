@@ -26,6 +26,7 @@
 for strLib in \
    /opt/homebrew/lib/lib*tk*.dylib \
    /opt/homebrew/Cellar/tcl-tk@8/8.6.15/lib/lib*tk*.dylib\
+   /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9tk9.0.dylib \
    /usr/lib/libtk*.so \
    /usr/lib/x86_64-linux-gnu/libtk*.so \
    /usr/lib64/libtk*.so \

@@ -25,7 +25,8 @@
 
 for strLib in \
   /opt/homebrew/lib/libtcl*.dylib \
-  /opt/homebrew/Cellar/tcl-tcl@8/8.6.15/lib/libtcl*.dylib\
+  /opt/homebrew/Cellar/tcl-tk@8/8.6.15/lib/libtcl*.dylib\
+  /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib \
   /usr/lib/libtcl*.so \
   /usr/lib/x86_64-linux-gnu/libtcl*.so \
   /usr/lib64/libtcl*.so \
