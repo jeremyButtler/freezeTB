@@ -25,10 +25,21 @@ Here are the order of Merlin winners:
       catalog
     - The spoligotype lineages csv (spoligo-lineages.csv)
       is from TBProfiler
+      - Phelan JE, O'Sullivan DM, Machado D, Ramos J,
+        Oppong YEA, Campino S, O'Grady J, McNerney R,
+        Hibberd ML, Viveiros M, Huggett JF, Clark TG.
+        Integrating informatics tools and portable
+        sequencing technology for rapid detection of
+        resistance to anti-tuberculous drugs. Genome Med.
+        2019 Jun 24;11(1):41.
+        doi: 10.1186/s13073-019-0650-x.
+        PMID: 31234910; PMCID: PMC6591855
     - NC000962.fa and genes-NC000962.fa were from Genbank
       - Also in benchmark as tbdb.fasta
-    - miruTbl.tsv is the modified MIRU-VNTRU table from
-      MIRUReader (github)
+    - My MIRU-VNTR database (miruTbl.tsv) came from
+      MIRUReader
+      [https://github.com/phglab/MIRUReader](
+       https://github.com/phglab/MIRUReader)
     - spoligo-spacers.fa were from a spoligotyping program
       - Kamerbeek J, Schouls L, Kolk A, van Agterveld M,
         van Soolingen D, Kuijper S, Bunschoten A,
@@ -37,15 +48,17 @@ Here are the order of Merlin winners:
         of Mycobacterium tuberculosis for diagnosis and
         epidemiology. J Clin Microbiol. 1997
         Apr;35(4):907-14.
-        doi: [10.1128/jcm.35.4.907-914.1997](
-              10.1128/jcm.35.4.907-914.1997).
+        doi: 10.1128/jcm.35.4.907-914.1997.
         PMID: 9157152; PMCID: PMC229700.
-  - minimap2 (MIT) window binaries compiled from
-    [https://github.com/lh3/minimap2](
-     https://github.com/lh3/minimap2)
-  - tcltk (the GUI (graphical user interface [the window])
-    - [https://github.com/tcltk/tk](https://github.com/tcltk/tk)
-    - [https://github.com/tcltk/tk](https://github.com/tcltk/tcl)
+  - For windows I compiled a minimap2 (MIT) binaries
+    - [https://github.com/lh3/minimap2](
+       https://github.com/lh3/minimap2)
+  - I used tcltk to make the GUI (graphical user
+    interface [the window])
+    - [https://github.com/tcltk/tk](
+       https://github.com/tcltk/tk)
+    - [https://github.com/tcltk/tk](
+       https://github.com/tcltk/tcl)
 
 The stuff unique to freezeTB is under a dual license. The
   primary license is Unlicense. However, not all
@@ -55,12 +68,13 @@ The stuff unique to freezeTB is under a dual license. The
   MIT license.
 
 - Unique to freezeTB:
-  - everything in programs
+  - Everything in programs
     - This is the reason Norbert, I mean freezeTB, can fly
       on Windows.
-  - everything in scripts
-  - the terrible guides (guides folder)
-  - the scripts in benchmark
+  - The icon
+  - Everything in scripts
+  - The terrible guides (guides folder)
+  - The scripts in benchmark
 
 # Install
 
@@ -72,9 +86,9 @@ For Linux I am assuming you are using a Debian based
   on Ubuntu (some linking issue). But, I have on void
   Linux.
 
-1. minimap2: `sudo apt-get install minimap2;`
-2. R: `sudo apt-get install r-base;`
-3. tcltk:`sudo apt-get install tcl-dev tk-dev`
+1. Install minimap2: `sudo apt-get install minimap2;`
+2. Install R: `sudo apt-get install r-base;`
+3. Instlal: tcltk:`sudo apt-get install tcl-dev tk-dev`
 
 ```
 cd ~/Downloads
@@ -92,9 +106,12 @@ You can install freezTB in multiple ways. The easiest way
 
 ## Easy way:
 
-download freezeTB from github, then use the
+Download freezeTB from github and then use the
   `macInstall` script to install dependencies and
   freezeTB.
+
+Open a terminal (apps->terminal). Then copy the code
+  beneath into the terminal and hit enter/return.
 
 ```
 cd ~/Downloads
@@ -188,7 +205,7 @@ GUI has not been tested.
     "R <version number>", "bin", "Rscript"
 
 ![
-  picture showing how to open developer console
+  Picture showing how to open developer console
 ](windows10devConsole.png)
 
 ### Windows Minimap2 (from source)
@@ -196,8 +213,8 @@ GUI has not been tested.
 I include a minimap2.exe compiled binary in winBin.
   So, you do not need this. However, here are the
   steps if you want a more recent version of minimap2. If
-  your computers CPU is an ARM (snap dragon) you will need
-  to compile minimap2 from source.
+  your computer's CPU is an ARM CPU, such as a snap dragon
+  CPU, you will need to compile minimap2 from source.
 
 First install Cygwin using the setup-x86_64.exe (is a
   link):
@@ -210,11 +227,11 @@ When at "Select Packages" menu for Cygwin install:
 - Search for "make" then select the package named make.
   - Ensure you are looking at the "full" and not the
     "pending list"
-  - change "Skip" to make version number with dropdown
+  - Change "Skip" to make version number with dropdown
     menu (choose most recent non-testing version)
-  - do not install gcc (it cannot statically link)
-- mingw64-x86_64-gcc-core
-- mingw64-x86_64-zlib
+  - Do not install gcc (it cannot statically link)
+- Select the mingw64-x86_64-gcc-core entry
+- Select the mingw64-x86_64-zlib entry
 
 Download minimap2 to your downloads folder
 
@@ -226,7 +243,7 @@ Unzip the minimap2-master folder (right click->extract)
 Open a Cygwin terminal (run Cygwin). Then move into
   minimap2's directory 
   (`cd c:/Users/<user name>/Downloads/minimap2-master/minimap2-master`).
-  - for me `cd c:/Users/Jeremy/Downloads/minimap2-master/minimap2-master`
+  - For me `cd c:/Users/Jeremy/Downloads/minimap2-master/minimap2-master`
 
 Build minimap2
   with `make CC=x86_64-w64-mingw32-gcc CFLAGS=--static`.
@@ -297,9 +314,14 @@ Build graphs (if wanted)
 
 # Extra files:
 
-- howWorks.md has a description of the steps used in
-  freezeTB
-- included-programs.md includes a list of programs that
+The extra files are saved as `.md` files. You can view
+  these at `https://github.com/jeremybuttler/freezeTB` or
+  you can right click and select open with. Choose your
+  regular text editor to view the files.
+
+- The howWorks.md file has a description of the steps used
+  in freezeTB
+- Included-programs.md includes a list of programs that
   come with freezeTB. Some are installed by default,
   others are side programs. The side programs often do
   a single step (ex AMR analysis) in the freezeTB program.
