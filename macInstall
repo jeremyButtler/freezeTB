@@ -53,6 +53,10 @@ then # If: need to install homebrew
        'eval "$(/opt/homebrew/bin/brew shellenv)"' \
        >> ~/.bash_profile;
 
+   echo \
+       'PATH="$PATH:/opt/homebrew/bin"' \
+       >> ~/.bash_profile;
+
    eval "$(/opt/homebrew/bin/brew shellenv)";
 fi # If: need to install homebrew
 
