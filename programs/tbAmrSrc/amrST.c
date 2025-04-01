@@ -58,9 +58,6 @@
 #include "../genLib/charCp.h"
 #include "drugAry.h"
 
-/*Only .h files*/
-#include "../genLib/dataTypeShortHand.h"
-
 /*-------------------------------------------------------\
 | Fun01: blank_amrST
 |   - sets all non-pointer values in amrSTPtr to 0
@@ -75,7 +72,7 @@ void
 blank_amrST(
    struct amrST *amrSTPtr
 ){
-   sint siAmr = 0;
+   signed int siAmr = 0;
 
    amrSTPtr->refPosUI = 0;
    amrSTPtr->codonPosUI = 0;
@@ -240,7 +237,7 @@ freeHeapAry_amrST(
    struct amrST *amrSTAry, /*array to free*/
    unsigned long numElmUL /*number of elements*/
 ){
-   ulong ulElm = 0;
+   unsigned long ulElm = 0;
 
    if(amrSTAry)
    { /*If: have array to free*/
@@ -272,8 +269,8 @@ swap_amrST(
    struct amrST *firstAmrST,
    struct amrST *secAmrST
 ){
-   schar *tmpStr = 0;
-   sint siAmr = 0;
+   signed char *tmpStr = 0;
+   signed int siAmr = 0;
    
    firstAmrST->refPosUI ^= secAmrST->refPosUI;
    secAmrST->refPosUI ^= firstAmrST->refPosUI;
@@ -496,19 +493,19 @@ sortPos_amrST(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*number of elements to sort*/
-  ulong numElmUL = (endUI) - (startUI);
+  unsigned long numElmUL = (endUI) - (startUI);
   
   /*number of sorting rounds*/
-  ulong subUL = 0;
-  ulong nextElmUL = 0;
-  ulong lastElmUL = 0;
-  ulong elmOnUL = 0;
+  unsigned long subUL = 0;
+  unsigned long nextElmUL = 0;
+  unsigned long lastElmUL = 0;
+  unsigned long elmOnUL = 0;
   
   /*get arrays to sort from the matrix (for sanity)*/
   
   /*variables to incurment loops*/
-  ulong ulIndex = 0;
-  ulong ulElm = 0;
+  unsigned long ulIndex = 0;
+  unsigned long ulElm = 0;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun07 Sec02:
@@ -617,19 +614,19 @@ sortGeneId_amrST(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Number of elements to sort*/
-  ulong numElmUL = (endUI) - (startUI);
+  unsigned long numElmUL = (endUI) - (startUI);
   
   /*Number of sorting rounds*/
-  ulong subUL = 0;
-  ulong nextElmUL = 0;
-  ulong lastElmUL = 0;
-  ulong elmOnUL = 0;
+  unsigned long subUL = 0;
+  unsigned long nextElmUL = 0;
+  unsigned long lastElmUL = 0;
+  unsigned long elmOnUL = 0;
   
   /*Get arrays to sort from the matrix (for sanity)*/
   
   /*Variables to incurment loops*/
-  ulong ulIndex = 0;
-  ulong ulElm = 0;
+  unsigned long ulIndex = 0;
+  unsigned long ulElm = 0;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun08 Sec02:
@@ -834,18 +831,21 @@ p_amrST(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   ulong ulAmr = 0;    /*looping through amrSTAry*/
+   unsigned long ulAmr = 0; /*looping through amrSTAry*/
 
-   sint siDrug = 0;    /*looping through drugAryStr*/
-   schar *drugStr = 0; /*printing out the drug id's*/
-   ulong ulRes = 0;    /*checking amr's resitance*/
-   ulong ulCross = 0;  /*check amr's cross resitance*/
-   sint siAmrSet = 0;  /*flag set on*/
-   sint siFlag = 0;    /*flag on in a set*/
-   sint siDrugOn = 0;  /*drug on*/
-   schar resBl = 0;
+   signed int siDrug = 0;   /*looping through drugAryStr*/
+   signed char *drugStr = 0;/*printing out the drug id's*/
 
-   schar *tmpStr = 0;
+   unsigned long ulRes = 0; /*checking amr's resitance*/
+   unsigned long ulCross = 0;
+      /*check amr's cross resitance*/
+
+   signed int siAmrSet = 0;  /*flag set on*/
+   signed int siFlag = 0;    /*flag on in a set*/
+   signed int siDrugOn = 0;  /*drug on*/
+   signed char resBl = 0;
+
+   signed char *tmpStr = 0;
 
    FILE *outFILE = 0;
 
@@ -1055,7 +1055,7 @@ p_amrST(
       for(
          siAmrSet = 0;
          siAmrSet
-            < (sint)
+            < (signed int)
               (
                   1 + numDrugsSI
                 / (sizeof(unsigned long) << 3)
@@ -1069,7 +1069,7 @@ p_amrST(
 
          for(
             siFlag=0;
-            siFlag < (sint) def_maxFlags_amrST;
+            siFlag < (signed int) def_maxFlags_amrST;
             ++siFlag
          ){ /*Loop: print antibiotic resitance*/
             /*check if this buffer was completely filled*/
@@ -1079,12 +1079,12 @@ p_amrST(
 
             /*add resitance entry*/
             resBl =
-               (schar)
+               (signed char)
                ( (-(ulRes & 1) ) & def_resFlag_amrST );
 
             /*add cross resistance entry*/
             resBl |=
-               (schar)
+               (signed char)
                ((-(ulCross &1)) & def_crossResFlag_amrST);
 
             /*Logic (both lines)
@@ -1220,8 +1220,8 @@ p_amrST(
 |   - durgStrAry:
 |     o pointer to a c-string to hold antbiotic names
 |   - numDrugsSI
-|     o pointer to uint to hold number of drugs in
-|       drugAryStr
+|     o pointer to signed int to hold number of drugs
+|       in drugAryStr
 |   - maxDrugsI:
 |     o maximum number of drugs drugAryStr can hold
 |     o this is changed when drugAryStr is resized
@@ -1272,25 +1272,27 @@ readTbl_amrST(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   uint lenBuffUI = 1 << 11; /*around 4096 bytes*/
-   schar *buffHeapStr = 0;   /*buffer to read file into*/
-   schar *tmpStr = 0;        /*for temporary operations*/
+   unsigned int lenBuffUI = 1 << 11; /*around 4096 bytes*/
+   signed char *buffHeapStr = 0;
+      /*buffer to read file into*/
+   signed char *tmpStr = 0;
+      /*for temporary operations*/
 
-   sint longestLineSI = 0;
-   sint tmpSI = 0;
-   sint posSI = 0;
+   signed int longestLineSI = 0;
+   signed int tmpSI = 0;
+   signed int posSI = 0;
 
    /*boolean to check if I need to make a new drug array*/
-   schar newDrugAryBl = (*drugAryStr == 0);
+   signed char newDrugAryBl = (*drugAryStr == 0);
 
-   sint siEndDrug = 0;   /*marks end of the drug entry*/
-   sint siStartDrug = 0; /*marks start of the drug entry*/
-   sint siDrug = 0;      /*iterator for loops*/
+   signed int siEndDrug = 0;  /*mark end of drug entry*/
+   signed int siStartDrug = 0;/*mark start of drug entry*/
+   signed int siDrug = 0;     /*iterator for loops*/
 
    struct amrST *amrSTAry = 0;
-   uint uiAmr = 0;
-   ulong *drugResUL = 0;
-   ulong *drugCrossResUL = 0;
+   unsigned int uiAmr = 0;
+   unsigned long *drugResUL = 0;
+   unsigned long *drugCrossResUL = 0;
 
    FILE *amrFILE = 0;
 
@@ -1309,7 +1311,8 @@ readTbl_amrST(
       goto fileErr_fun11_sec06_sub03;
 
    /*set up buffer*/
-   buffHeapStr = malloc((lenBuffUI + 9) * sizeof(schar));
+   buffHeapStr =
+       malloc((lenBuffUI + 9) * sizeof(signed char));
      /*+9 for null + 8 bytes for ulCp overshoot*/
 
    if(buffHeapStr == 0)
@@ -1371,7 +1374,8 @@ readTbl_amrST(
    free(buffHeapStr);
    buffHeapStr = 0;
    lenBuffUI = longestLineSI + 1;
-   buffHeapStr = malloc((lenBuffUI + 9) * sizeof(schar));
+   buffHeapStr =
+      malloc((lenBuffUI + 9) * sizeof(signed char));
 
    if(buffHeapStr == 0)
       goto memErr_fun11_sec06_sub02;
@@ -1382,7 +1386,7 @@ readTbl_amrST(
    \*****************************************************/
 
    tmpStr =
-      (schar *)
+      (signed char *)
       fgets(
          (char *) buffHeapStr,
          lenBuffUI,
@@ -1410,7 +1414,7 @@ readTbl_amrST(
    while(
       match_charCp(
          &buffHeapStr[siEndDrug],
-         (schar *) "endAntibiotics",
+         (signed char *) "endAntibiotics",
          '\t',
          &siEndDrug
       )
@@ -1543,7 +1547,7 @@ readTbl_amrST(
 
    /*get past header*/
    tmpStr =
-      (schar *)
+      (signed char *)
       fgets(
          (char *) buffHeapStr,
          lenBuffUI,
@@ -2159,7 +2163,7 @@ readTbl_amrST(
 
       while(*tmpStr != '*')
       { /*Loop: check for antibiotic resistance*/
-         if(siDrug >= (sint) def_maxFlags_amrST)
+         if(siDrug >= (signed int) def_maxFlags_amrST)
          { /*If: I need to start a new array*/
             siDrug = 0;
             ++drugResUL;
@@ -2317,7 +2321,7 @@ readTbl_amrST(
       nextLine_readAmrST:;
 
       tmpStr =
-         (schar *)
+         (signed char *)
          fgets(
             (char *) buffHeapStr,
             lenBuffUI,

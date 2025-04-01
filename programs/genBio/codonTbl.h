@@ -6,21 +6,6 @@
 '     - guards
 '   o tbl01 codonLkTbl:
 '     - Table to convert three bases to codons
-'   o fun01: codonToAA_codonTbl
-'     - converts codon into an amino acid
-'   o fun02: revCodonToAA_codonTbl
-'     - reverses complements input codon & gets amino acid
-'   o fun03: bacStartCode_codonTbl
-'     - checks to see if input bases is a bacterial start
-'       codon (convert nt with ntTo2Bit.h)
-'   o fun04: bacStart_codonTbl
-'     - checks if codon (no conversion) is a start codon
-'   o fun05: bactRevStart_codonTbl
-'     - checks if codon (no conversion) is a start codon
-'       for a reverse complement sequence
-'   o fun06: aaTripToChar_codonTbl
-'     - converts a three letter amino acid idenity to its
-'       single letter amino acid identity
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -32,6 +17,10 @@
 
 #ifndef CODON_TABLE_H
 #define CODON_TABLE_H
+
+/*keep these in sync with codonFun and as negative*/
+#define def_unkownNt_codonTbl -1
+#define def_incomplete_codonTbl -2
 
 /*--------------------------------------------------------\
 | Tbl01 codonTbl:
@@ -79,141 +68,6 @@ static signed char codonTbl[5][5][5] =
          {'x', 'x', 'x', 'x', 'x'}  /*2nd element is N*/
       }, /*First element is an N*/
    }; /*codonTbl*/
-
-/*-------------------------------------------------------\
-| Fun01: codonToAA_codonTbl
-|   - converts codon into an amino acid
-| Input:
-|   - firstNtSC:
-|     o first base in codon
-|   - secNtSC:
-|     o second base in codon
-|   - thirdNtSC:
-|     o last base in codon
-| Output:
-|   - Returns:
-|     o amino acid of the input codon
-\-------------------------------------------------------*/
-signed char
-codonToAA_codonTbl(
-   signed char firstNtSC,
-   signed char secNtSC,
-   signed char thirdNtSC
-);
-
-/*-------------------------------------------------------\
-| Fun02: revCodonToAA_codonTbl
-|   - reverses complements input codon & finds amino acid
-| Input:
-|   - firstNtSC:
-|     o first base in the foward codon, but third (last)
-|       base in the reverse complement codon
-|   - secNtSC:
-|     o second base in forward codon, but second (middle)
-|       base in the reverse complement codon
-|   - thirdNtSC:
-|     o last base in forward codon, but first base in the
-|       reverse complement codon
-| Output:
-|   - Returns:
-|     o reverse complement amino acid of the input
-|       codon
-\-------------------------------------------------------*/
-signed char
-revCodonToAA_codonTbl(
-   signed char firstNtSC,
-   signed char secNtSC,
-   signed char thirdNtSC
-);
-
-/*-------------------------------------------------------\
-| Fun03: bacStartCode_codonTbl
-|   - checks to see if input bases is a bacterial start
-|     codon (convert nt with ntTo2Bit.h)
-| Input:
-|   - firstNtSC:
-|     o first base to check; it needs to be the output of
-|       an base to code look up table
-|   - secBaseC:
-|     o second base to check; it needs to be the output
-|       of an base to code look up table
-|   - thirdBaseC:
-|     o third base to check; it needs to be the output
-|       of an base to code look up table
-| Output:
-|   - Returns:
-|     o 1 if this is an bacterial start codon
-|     o 0 if this is not an bacterial start codon
-\-------------------------------------------------------*/
-signed char
-bactStartCode_codonTbl(
-   unsigned char firstNtSC,
-   unsigned char secNtSC,
-   unsigned char thirdNtSC
-);
-
-/*-------------------------------------------------------\
-| Fun04: bacStart_codonTbl
-|   - checks if codon (no conversion) is a start codon
-| Input:
-|   - firstNtSC:
-|     o first base to check
-|   - secBaseC:
-|     o second base to check
-|   - thirdBaseC:
-|     o third base to check
-| Output:
-|   - Returns:
-|     o 1 if this is a bacterial start codon
-|     o 0 if this is not a bacterial start codon
-\-------------------------------------------------------*/
-signed char
-bactStart_codonTbl(
-   signed char firstNtSC,
-   signed char secNtSC,
-   signed char thirdNtSC
-);
-
-/*-------------------------------------------------------\
-| Fun05: bactRevStart_codonTbl
-|   - checks if codon (no conversion) is a start codon
-|     for a reverse complement sequence
-| Input:
-|   - firstNtSC:
-|     o first base to check (last in codon)
-|   - secBaseC:
-|     o second base to check (middle in codon)
-|   - thirdBaseC:
-|     o third base to check (first in codon)
-| Output:
-|   - Returns:
-|     o 1 if this is a reverse bacterial start codon
-|     o 0 if this is not a reverse bacterial start codon
-\-------------------------------------------------------*/
-signed char
-bactRevStart_codonTbl(
-   signed char firstNtSC,
-   signed char secNtSC,
-   signed char thirdNtSC
-);
-
-/*-------------------------------------------------------\
-| Fun06: aaTripToChar_codonTbl
-|   - converts a three letter amino acid idenity to its
-|     single letter amino acid identity
-| Input:
-|   - codonStr:
-|     o c-string with the three letter amino acid to
-|       convert
-| Output:
-|   - Returns:
-|     o one letter code for the amino acid
-|     o 0 for an invalid code
-\-------------------------------------------------------*/
-signed char
-aaTripToChar_codonTbl(
-   signed char *codonStr
-);
 
 #endif
 

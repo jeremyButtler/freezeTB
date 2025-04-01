@@ -61,9 +61,6 @@ variable glob_mask 0 ;    # mask primer sites
 variable glob_adjust 0 ;  # adjust mapp coordinates
 variable glob_srCheck "map-ont" ; # map setting
 
-# amr setting
-variable glob_frameshift 0 ; # AMR frameshift scan
-
 # clustering
 variable glob_clustBl 0 ;
 variable glob_depthProfBl 0 ;
@@ -71,9 +68,6 @@ variable glob_depthProfBl 0 ;
 # output settings
 variable glob_outPref "" ; # report user is getting
 variable glob_outCur "" ;  # current shown report
-variable glob_outSnpSup 0.1 ;
-variable glob_outIndelSup 0.4 ;
-variable glob_mkGraphBl 1 ;
 
 variable glob_depthImg [image create photo -file ""] ;
 variable glob_coverImg [image create photo -file ""] ;
@@ -81,6 +75,11 @@ variable glob_coverImg [image create photo -file ""] ;
 # version numbers
 variable mapVer "" ; # minimap2 version
 variable freezeTBVer "" ; # freezeTB version
+variable rVer "" ; # holds R version
+
+variable mapPath "" ; # path to minimap2
+variable rPath "" ; # path to Rscript
+variable graphScript "" ; # graphAmpDepth.r path
 
 #***************************************************
 # Header Sec01 Sub02:
@@ -146,15 +145,15 @@ set glob_lowDepthTextCol "#000004" ; # magma dark purple
       "Emb" # ethambutol
       "Eto" # ethionamide
       "Flq" # fluoroquine
-      "Inz" # isoniazid (also Iso, Inz, or Inh)
+      "Inh" # isoniazid (also Iso, Inz, or Inh)
       "Kan" # kanamycin
       "Lfx" # levofloxacin
       "Lzd" # linezolid
       "Mfx" # moxifloxacin
-      "Pmd" # penicillin-myceial-dreg
+      "Pmd" # protonimid
       "Pza" # pyrazinamide (Pyz, Pza, Pyr)
       "Rif" # rifampicin (Rif, Rmp, Rfm)
-      "Str" # strptomycin (Str, Stp, Stm)
+      "Stm" # strptomycin (Str, Stp, Stm)
    ]
 ---;
 ---#
@@ -229,7 +228,7 @@ set glob_amrGenes {
    {"Emb" "embA" "embB"}
    {"Eto" "ethA" "fabG1" "inhA"}
    {"Flq" "gyrA" "gyrB"}
-   {"Inz" "fabG1" "inhA" "katG"}
+   {"Inh" "fabG1" "inhA" "katG"}
    {"Kan" "eis" "rrs"}
    {"Lfx" "gyrA" "gyrB"}
    {"Lzd" "rrl" "rplC"}
@@ -237,7 +236,7 @@ set glob_amrGenes {
    {"Pmd" "ddn" "fbiA" "fbiB" "fbiC" "fgd1" "rv2983"}
    {"Pza" "pncA"}
    {"Rif" "rpoB"}
-   {"Str" "rrs" "gidB" "rpsL"}
+   {"Stm" "rrs" "gidB" "rpsL"}
 } ; # drugs and resistance gene matrix
     # index 1 is drug; rest of index are genes or NA if
     #   at end of gene list (index 6 is last item)
@@ -249,8 +248,6 @@ set glob_amrGenes {
 #     - windows program detection
 #   o header sec02 sub02:
 #     - unix program detection
-#   o header sec02 sub03:
-#     - check/get Rscript version
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #***************************************************
@@ -271,38 +268,33 @@ set glob_amrGenes {
 #   - windows general setup 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
-variable mapPath "" ; # minimap2 path
-variable rPath "" ;   # Rscript path
+variable ::mapPath "" ; # minimap2 path
+variable ::rPath "" ;   # Rscript path
 
 if { [lindex $tcl_platform(os) 0] eq "Windows" } {
-   # this is windows
-
-   package require registry ;
-      # registry is a base tcl package for windows
-      # registry manipulations
-
    set programFiles $::env(PROGRAMFILES) ;
+   set appData $::env(LOCALAPPDATA);
 
    #++++++++++++++++++++++++++++++++++++++++++++++++
    # Header Sec02 Sub01 Cat02:
    #   - windows detect minimap2
    #++++++++++++++++++++++++++++++++++++++++++++++++
 
-   set mapPath "minimap2.exe" ;
+   set ::mapPath "minimap2.exe" ;
 
    ---set
       status
       [catch
-       {exec minimap2.exe --version} ::mapVer
+       {exec $::mapPath --version} ::mapVer
       ]
    --- ; # get minimap2 version
 
    if { $status eq 0 } {
       # got minimap2 version, nothing else to do
    } else {
-      ---set mapPath 
+      ---set ::mapPath 
          [file join
-            $programFiles
+            $appData
             "freezeTB"
             "minimap2.exe"
          ]
@@ -311,18 +303,39 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
       ---set
          status
          [catch
-          {exec $mapPath --version} ::mapVer
+          {exec $::mapPath --version} ::mapVer
          ]
       --- ; # get minimap2 version
 
       if { $status eq 0 } {
          # found minmap2; nothing else to do
       } else {
-         ---tk_messageBox
-            -message "Could not find minimap2.exe"
-            -title "ERROR"
-         ---;
-      } ; # If: check if could not find minimap2
+         ---set ::mapPath 
+            [file join
+               $programFiles
+               "freezeTB"
+               "minimap2.exe"
+            ]
+         ---; # build alternate minimap2 path
+
+         ---set
+            status
+            [catch
+             {exec $::mapPath --version} ::mapVer
+            ]
+         --- ; # get minimap2 version
+
+            if { $status eq 0 } {
+            # if minimap2.exe is in app data path
+         } else {
+            ---tk_messageBox
+               -message "Could not find minimap2.exe"
+               -title "ERROR"
+            ---;
+
+            return false ;
+         } ; # If: check if could not find minimap2
+      } ; # see if minimap2 is in global install
    } ; # find minimap2 path
 
    #++++++++++++++++++++++++++++++++++++++++++++++++
@@ -330,77 +343,91 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    #   - windows detect Rscript
    #++++++++++++++++++++++++++++++++++++++++++++++++
 
-   # find path to 
-   # the keys came from https://stackoverflow.com/questions/62427584/find-rscript-exe-on-windows
+   # Not best method, but works for default installs
+   
+   # R is always in program files
+   set ::rPath [file join $programFiles "R"] ;
+	set errSC 1 ;  # assume R not found
 
-   # NEED to try this on a windows machine
-   ---registry
-      get
-      "HKCU\Software\Classes\RWorkspace\Shell\Open\Command"
-      "Rscript.exe"
-   ---; # see if can find Rscript.exe in .RData
-
-   ---registry
-      get 
-      "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-      "Rscript.exe"
-   ---; # see if can find Rscript.exe in Uninstall
-
-   # last resort; try to find Rscript.exe in its
-   # expected location
    ---set
-     rPath
-     [file join
-        $programFiles
-        "R"
-        "*"
-        "bin"
-        "Rscript.exe"
-     ] # build Rscript search path
+      rDirList
+      [glob -type d -nocomplain -directory $::rPath * ]
    ---;
 
-   if { [llength $rPath] eq 0 } {
-      set $::glob_mkGraphBl 0 ;
+   set lenSI [llength $rDirList] ;
 
-      ---tk_messageBox
-         -message "Rscript.exe not found"
-         -title "ERROR"
-      ---;
-
-      return false ;
+   for {set siDir 0} {$siDir < $lenSI} {incr siDir} {
+      set ::rPath [ lindex $rDirList $siDir ] ;
+      set ::rPath [ file join $::rPath "bin" ] ;
+      set ::rPath [ file join $::rPath "Rscript.exe" ] ;
+      set errSC [catch {exec $::rPath --version} ::rVer ] ;
+   
+      if { $errSC eq 0 } {
+         break ; # found at least one Rscript
+      } ; # If: found path to Rscript
+   } ; # Loop: check if have a Rscript exe
+   
+   if { $errSC eq 0 } {
+      # If: found Rscript
    } else {
-      set rPath [lindex $rPath 0] ;
-      # make sure have only one Rscript.exe
-   } ; # See if Rscript was finally found
+      set ::rPath "Rscript.exe" ;
+      ---set
+         errSC
+   		[catch {exec $::rPath --version} ::rVer ]
+   	---; # see if Rscript is in path (unlikely)
+   
+   	if { $errSC ne 0 } {
+        set ::glob_mkGraphBl 0 ;
+        set ::rPath "" ;
+   
+        ---tk_messageBox
+           -message "Unable to run Rscript"
+           -title "ERROR"
+        ---;
+      } ; # If: no R-script
+   } ; # If: unable to find Rscript
 
    #++++++++++++++++++++++++++++++++++++++++++++++++
    # Header Sec02 Sub01 Cat04:
    #   - windows detect graphing script
    #++++++++++++++++++++++++++++++++++++++++++++++++
    
-   set graphScript "graphAmpDepth.r" ;
+   if { $::rPath ne "" } {
+      set ::graphScript "graphAmpDepth.r" ;
 
-   if { [file exists $graphScript] eq 0 } {
-      ---set
-         graphScript
-         [file join
-          $programFiles
-          "freezeTB"
-          $graphScript
-         ]
-      ---;
-
-      if { [file exists $graphScript] eq 0 } {
-         set $::glob_mkGraphBl 0 ;
-
-         ---tk_messageBox
-            -message "graphAmpDepth.r not found"
-            -title "no graphing script"
+      if { [file exists $::graphScript] eq 0 } {
+         ---set
+            ::graphScript
+            [file join
+             $appData
+             "freezeTB"
+             "graphAmpDepth.r"
+            ]
          ---;
 
-         set graphScript "" ;
-      } ; # If: could not find graphing script
-   } ; # If: did not find graphing script
+         if { [file exists $::graphScript] eq 0 } {
+            ---set
+               ::graphScript
+               [file join
+                $programFiles
+                "freezeTB"
+                "graphAmpDepth.r"
+               ]
+            ---;
+
+            if { [file exists $::graphScript] eq 0 } {
+               set ::glob_mkGraphBl 0 ;
+
+               ---tk_messageBox
+                  -message "graphAmpDepth.r not found"
+                  -title "no graphing script"
+               ---;
+
+               set ::graphScript "" ;
+            } ; # If: could not find graphing script
+         } ; # If: need to check global install
+      } ; # If: did not find local graphing script
+   } ; # If: have Rscript; find graph script
 
 #***************************************************
 # Header Sec02 Sub02:
@@ -417,8 +444,8 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 } else {
-   set mapPath "minimap2" ;
-   set rPath "Rscript" ; # linux should be in path
+   set ::mapPath "minimap2" ;
+   set ::rPath "Rscript" ; # linux should be in path
 
    ---set
       status
@@ -426,12 +453,12 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    --- ; # seeing if minimap2 exists
 
    if { $status ne 0 } {
-      set mapPath "./minimap2" ;
+      set ::mapPath "./minimap2" ;
 
       ---set
          status
          [catch
-             {exec $mapPath --version}
+             {exec $::mapPath --version}
              ::mapVer
          ]
       --- ; # seeing if local minimap2 exists
@@ -448,51 +475,55 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 
    #++++++++++++++++++++++++++++++++++++++++++++++++
    # Header Sec02 Sub02 Cat02:
+   #   - unix find Rscript
+   #++++++++++++++++++++++++++++++++++++++++++++++++
+
+   ---set
+      status
+      [catch {exec $::rPath --version} ::rVer]
+   ---;
+   
+   if { $status eq 0 } {
+   } else {
+      set ::glob_mkGraphBl 0 ;
+      set ::rPath "" ;
+   
+      ---tk_messageBox
+         -message "Unable to run Rscript"
+         -title "ERROR"
+      ---;
+   }
+   
+   
+   #++++++++++++++++++++++++++++++++++++++++++++++++
+   # Header Sec02 Sub02 Cat03:
    #   - unix find graphing script
    #++++++++++++++++++++++++++++++++++++++++++++++++
    
-   set graphScript "graphAmpDepth.r" ;
+	if { $::rPath ne "" } {
+      set ::graphScript "graphAmpDepth.r" ;
 
-   if { [file exists $graphScript] eq 0 } {
-      ---set
-         graphScript
-         [file join "/usr/local/bin" $graphScript]
-      ---;
-
-      if { [file exists $graphScript] eq 0 } {
-         set $::glob_mkGraphBl 0 ;
-
-         ---tk_messageBox
-            -message "graphAmpDepth.r not found"
-            -title "no graphing script"
+      if { [file exists $::graphScript] eq 0 } {
+         ---set
+            ::graphScript
+            [file join "/usr/local/bin" "graphAmpDepth.r"]
          ---;
 
-         set graphScript "" ;
-      } ; # If: could not find graphing script
-   } ; # If: did not find graphing script
-} ; # check if windows or linux
+         if { [file exists $::graphScript] eq 0 } {
+            set ::glob_mkGraphBl 0 ;
 
-#***************************************************
-# Header Sec02 Sub03:
-#   - check/get Rscript version
-#***************************************************
+            ---tk_messageBox
+               -message "graphAmpDepth.r not found"
+               -title "no graphing script"
+            ---;
 
----set
-   status
-   [catch {exec $rPath --version} rVersion]
----;
-
-if { $status eq 0 } {
-} else {
-   set $::glob_mkGraphBl 0 ;
-
-   ---tk_messageBox
-      -message "Unable to run Rscript"
-      -title "ERROR"
-   ---;
-
-   return false;
-}
+            set ::graphScript "" ;
+         } ; # If: could not find graphing script
+      } ; # If: did not find graphing script
+   } else {
+      # path is already set
+   } ; # check if have Rscript for graphAmpDepth.r
+} ;    # check if windows or linux
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Header Sec03:
@@ -524,7 +555,7 @@ proc getPath { fileStr } {
      if { [file exists $dbPath ] eq 0 } {
         set osStr [lindex $::tcl_platform(os) 0] ;
 
-        if { osStr eq "Windows" } {
+        if { $osStr eq "Windows" } {
            ---set
               dbPath
               [file join
@@ -536,11 +567,38 @@ proc getPath { fileStr } {
            ---;
 
            if { [file exists $dbPath ] eq 0 } {
-              set dbPath "NA" ;
-              ---tk_messageBox
-                 -message [concat $fileStr "not found"]
-                 -title "missing database"
+              ---set
+                 dbPath
+                 [file join
+                  $::env(LOCALAPPDATA)
+                  "freezeTB"
+                  "freezeTBFiles"
+                  $fileStr
+                 ]
               ---;
+
+              if { [file exists $dbPath ] eq 0 } {
+            
+                 ---set
+                    dbPath
+                    [file join
+                     $::env(PROGRAMFILES)
+                     "freezeTB"
+                     "freezeTBFiles"
+                     $fileStr
+                    ]
+                 ---;
+
+                 if { [file exists $dbPath ] eq 0 } {
+                    set dbPath "NA" ;
+                    ---tk_messageBox
+                       -message [concat
+                                 $fileStr "not found"
+                                ]
+                       -title "missing database"
+                    ---;
+                 } ; # If: database not found
+              } ; # If: databsae not in app data
            } ; # If: database not in global location
 
         } else {
@@ -586,8 +644,16 @@ variable glob_medQ 7 ;
 variable glob_meanQ 7 ;
 variable glob_minLen 50 ;
 
+# indel clean up
+variable glob_rmHomoBl 1 ;       # 1: do indel clean up
+variable glob_rmHomo_homoSI 4 ;  # rm indels in homos >= 4
+variable glob_rmHomo_indelSI 4 ; #rm indels 5bp or smaller
+
 # amr settings
 variable glob_amrPercSup 0.1 ;
+variable glob_amrIndelSupF 0.25 ;
+variable glob_amrFrameSupF 0.25 ;
+variable glob_frameshift 1 ; # AMR frameshift scan
 
 # lineage settings
 variable glob_miruFudge 15 ;
@@ -626,6 +692,11 @@ variable glob_maxClustSim 0.99 ;
 variable glob_minClustOverlap 0.75 ;
 variable glob_maxClustMask 0.05 ;
 variable glob_numRebuilds 1 ;
+
+# output settings
+variable glob_outSnpSup 0.1 ;
+variable glob_outIndelSup 0.25 ;
+variable glob_mkGraphBl 1 ;
 
 #<<<script
 
@@ -679,6 +750,7 @@ proc freezeTBProc { argsList } {
   if { [lindex $::tcl_platform(os) 0] eq "Windows" } {
       # this is windows
       set programFiles $::env(PROGRAMFILES) ;
+      set appData $::env(LOCALAPPDATA) ;
 
       set freezeTBPath "freezeTB.exe" ;
 
@@ -694,9 +766,9 @@ proc freezeTBProc { argsList } {
       } else {
          ---set freezeTBPath 
             [file join
-               $programFiles
+               $appData
                "freezeTB"
-               "minimap2.exe"
+               "freezeTB.exe"
             ]
          ---; # build alternate freezeTB path
 
@@ -711,13 +783,32 @@ proc freezeTBProc { argsList } {
          if { $status eq 0 } {
             # found freezeTB
          } else {
-            ---tk_messageBox
-               -message "no freezeTB.exe detected"
-               -title "ERROR"
-            ---;
+            ---set freezeTBPath 
+               [file join
+                  $programFiles
+                  "freezeTB"
+                  "freezeTB.exe"
+               ]
+            ---; # build alternate freezeTB path
+   
+            ---set
+               status
+               [catch
+                {exec $freezeTBPath --version}
+                ::freezeTBVer
+               ]
+            --- ;
+   
+            if { $status eq 0 } {
+            } else {
+               ---tk_messageBox
+                  -message "no freezeTB.exe detected"
+                  -title "ERROR"
+               ---;
 
-            return 1 ;
-         } ;
+               return 1 ;
+           } ; # check if global install
+        } ; # check if local install
       } ; # find freezeTB path
 
    #************************************************
@@ -1056,16 +1147,18 @@ pack .main.reqIn.runexit -anchor w -side top ;
 #   o gui02 sec05 sub02 cat05:
 #     - add freezeTB filtering settings
 #   o gui02 sec05 sub02 cat06:
-#     - add freezeTB lineage settings
+#     - add indel cleanup settings (freezeTB)
 #   o gui02 sec05 sub02 cat07:
-#     - add freezeTB tbCon consensus settings
+#     - add freezeTB lineage settings
 #   o gui02 sec05 sub02 cat08:
-#     - add freezeTB tbCon and AMR print settings
+#     - add freezeTB tbCon consensus settings
 #   o gui02 sec05 sub02 cat09:
-#     - add freezeTB clustering settings
+#     - add freezeTB tbCon and AMR print settings
 #   o gui02 sec05 sub02 cat10:
-#     - run freezeTB
+#     - add freezeTB clustering settings
 #   o gui02 sec05 sub02 cat11:
+#     - run freezeTB
+#   o gui02 sec05 sub02 cat12:
 #     - run output part of gui
 #***************************************************
 
@@ -1191,6 +1284,7 @@ proc setFreezeTBStatus {} {
       ---; # build output file path*/
 
       file mkdir $prefix ;
+      # can handle spaces
 
       if { [file isdirectory $prefix] eq 0 } {
          ---tk_messageBox
@@ -1209,7 +1303,7 @@ proc setFreezeTBStatus {} {
       set samFile $prefix ;
       append samFile "-map.sam" ;
 
-      # set up log file
+      # set up log file (handles spaces)
       set logFile $prefix ;
       append logFile "-log.txt" ;
 
@@ -1222,14 +1316,19 @@ proc setFreezeTBStatus {} {
 
       puts $logFile [concat "minmimap2: " $::mapVer] ;
 
-      set cmdStr $::mapPath ;
-      append cmdStr " -a" ;
+      set cmdStr " -a" ;
       append cmdStr " -x" ;
       append cmdStr " " $::glob_srCheck ;
-      append cmdStr " " $::glob_refFa ;
-      append cmdStr " " [ join $::glob_fqIn " " ] ;
-      append cmdStr " > " ;
-      append cmdStr $samFile ;
+      append cmdStr " \"" $::glob_refFa "\" " ;
+
+      foreach fqStr $::glob_fqIn {
+         append cmdStr " \"" $fqStr "\"" ;
+      } ; # Loop: guard input fastqs from spaces
+
+      # older file  merge method
+      # set extraStr [ join $::glob_fqIn " " ] ;
+
+      append cmdStr " > \"" $samFile "\"" ;
 
       setMapStatus ; # dispaly running minimap2
 
@@ -1238,15 +1337,20 @@ proc setFreezeTBStatus {} {
          -text "running minimap2"
       ---;
 
-      puts $logFile $cmdStr ;
+      ---puts
+         $logFile
+         [concat $::mapPath $cmdStr]
+      ---;
 
       wm title . "running minimap2 (freezeTB)" ;
 
       # run minimap2 command
       ---set
          status
-         [ catch { eval exec $cmdStr }  result ]
-      ---; # eval converts string to correct format
+         [catch {eval exec $::mapPath $cmdStr}
+          result
+         ]
+      ---;
 
       if { [ string equal $::errorCode NONE ] } {
          # using errorCode here because minimap2
@@ -1283,17 +1387,17 @@ proc setFreezeTBStatus {} {
       ---; # print freezeTB version
 
       # set up databases
-
       set tbCmd [list "-sam" $samFile] ;
       lappend tbCmd "-prefix" $prefix ;
-      lappend tbCmd "-amr-tbl" $glob_amrDb ;
+      lappend tbCmd "-amr-tbl" $::glob_amrDb ;
       lappend tbCmd "-gene-coords" ;
-      lappend tbCmd $glob_coordsTsv ;
-      lappend tbCmd "-miru-tbl" $glob_miruDb ;
-      lappend tbCmd "-spoligo" $glob_spacer ;
+      lappend tbCmd $::glob_coordsTsv ;
+      lappend tbCmd "-miru-tbl" $::glob_miruDb ;
+      lappend tbCmd "-spoligo" $::glob_spacer ;
 
       if { $::glob_spolDb ne ""} {
-         lappend tbCmd "-db-spoligo" $::glob_spolDb ;
+         lappend tbCmd "-db-spoligo" ;
+         lappend tbCmd $::glob_spolDb ;
      } else {
         # no database, ignore
      } ; # check if have spoligotype database
@@ -1337,6 +1441,23 @@ proc setFreezeTBStatus {} {
 
       #+++++++++++++++++++++++++++++++++++++++++++++
       # Gui02 Sec05 Sub02 Cat06:
+      #   - add indel cleanup settings (freezeTB)
+      #+++++++++++++++++++++++++++++++++++++++++++++
+
+      if { $::glob_rmHomoBl ne 0 } {
+         lappend tbCmd "-rmHomo" ;
+
+         lappend tbCmd "-rmHomo-homo" ;
+         lappend tbCmd $::glob_rmHomo_homoSI ;
+
+         lappend tbCmd "-rmHomo-indel" ;
+         lappend tbCmd $::glob_rmHomo_indelSI ;
+      } else {
+         lappend tbCmd "-no-rmHomo" ;
+      } ; # check if doing indel clean
+
+      #+++++++++++++++++++++++++++++++++++++++++++++
+      # Gui02 Sec05 Sub02 Cat07:
       #   - add freezeTB lineage settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1348,7 +1469,7 @@ proc setFreezeTBStatus {} {
       lappend tbCmd $::glob_spolSim ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat07:
+      # Gui02 Sec05 Sub02 Cat08:
       #   - add freezeTB tbCon consensus settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1361,18 +1482,24 @@ proc setFreezeTBStatus {} {
       lappend tbCmd "-perc-del-sup" $::glob_delPerc ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat08:
+      # Gui02 Sec05 Sub02 Cat09:
       #   - add freezeTB tbCon & AMR print settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
       lappend tbCmd "-min-amr-map-perc" ;
       lappend tbCmd $glob_amrPercSup ;
 
+      lappend tbCmd "-amr-indel-sup" ;
+      lappend tbCmd $::glob_amrIndelSupF ;
+
       if { $glob_frameshift ne 0 } {
          lappend tbCmd "-frameshift" ;
+         lappend tbCmd "-frameshift-sup" ;
+         lappend tbCmd $::glob_amrFrameSupF ;
       } else {
          lappend tbCmd "-no-frameshift" ;
       } ; # check if doing frameshift checking
+
 
       lappend tbCmd "-p-min-depth" ;
       lappend tbCmd $glob_minVarDepth ;
@@ -1387,14 +1514,14 @@ proc setFreezeTBStatus {} {
       lappend tbCmd $glob_delVarPerc ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat09:
+      # Gui02 Sec05 Sub02 Cat10:
       #   - add freezeTB clustering settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
       if { $glob_clustBl ne 0 } {
          lappend tbCmd "-clust" ;
 
-         lappend tbCmd "-len-weigth" ;
+         lappend tbCmd "-len-weight" ;
          lappend tbCmd $glob_lenWeight ;
         
          lappend tbCmd "-clust-depth" ;
@@ -1446,7 +1573,7 @@ proc setFreezeTBStatus {} {
       } ; # check if clustering
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat10:
+      # Gui02 Sec05 Sub02 Cat11:
       #   - run freezeTB
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1475,7 +1602,7 @@ proc setFreezeTBStatus {} {
       } ; # If had error
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat11:
+      # Gui02 Sec05 Sub02 Cat12:
       #   - run output part of freezeTB
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1840,6 +1967,12 @@ pack .main.menu.outBut -anchor w -side left ;
 #     - adjust coordinates text box
 #   o gui04 sec10:
 #     - short read mapping check box
+#   o gui04 sec11:
+#     - indel cleanup (rmHomo) checkbox
+#   o gui04 sec12:
+#     - indel cleanup (rmHomo) homopolymer isze
+#   o gui04 sec13:
+#     - indel cleanup (rmHomo) indel size
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2131,6 +2264,70 @@ pack .main.filt.sr -anchor w -side top
 
 pack .main.filt.sr.check -anchor w -side left ;
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui04 Sec11:
+#   - indel cleanup (rmHomo) checkbox
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.filt.rmHomo
+pack .main.filt.rmHomo -anchor w -side top
+
+---tk::checkbutton
+   .main.filt.rmHomo.check
+   -offvalue 0       # do not clean up
+   -onvalue 1        # do clean up
+   -text "indel clean up"    # text for user
+   -variable ::glob_rmHomoBl
+--- ; # tells if doing indel cleanup step
+
+pack .main.filt.rmHomo.check -anchor w -side left ;
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui04 Sec12:
+#   - indel cleanup (rmHomo) homopolymer isze
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.filt.homoSize
+pack .main.filt.homoSize -anchor w -side top
+
+---tk::label
+   .main.filt.homoSize.lab
+   -text "min homopolymer size (indel clean)"
+--- ; # get minimum homopolymer size to remove at
+
+---tk::entry
+   .main.filt.homoSize.entry
+   -textvariable ::glob_rmHomo_homoSI
+   -validate key
+   -vcmd { tcl_isInt_gui %P %i 1 100 }
+--- ; # get minimum homopolymer size to remove at
+
+pack .main.filt.homoSize.entry -anchor w -side left ;
+pack .main.filt.homoSize.lab -anchor w -side left ;
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui04 Sec13:
+#   - indel cleanup (rmHomo) indel size
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.filt.indelSize
+pack .main.filt.indelSize -anchor w -side top
+
+---tk::label
+   .main.filt.indelSize.lab
+   -text "max indel size (indel clean)"
+--- ; # get maximum indel size to clean up
+
+---tk::entry
+   .main.filt.indelSize.entry
+   -textvariable ::glob_rmHomo_indelSI
+   -validate key
+   -vcmd { tcl_isInt_gui %P %i 1 100 }
+--- ; # get maximum indel size to remove
+
+pack .main.filt.indelSize.entry -anchor w -side left ;
+pack .main.filt.indelSize.lab -anchor w -side left ;
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Gui05 TOC:
 #   - amr settings
@@ -2140,7 +2337,11 @@ pack .main.filt.sr.check -anchor w -side left ;
 #     - get amr database
 #   o gui05 sec03:
 #     - min read AMR percent support
+#   o gui05 sec04:
+#     - min read AMR indel percent support
 #   o gui05 sec05:
+#     - min frameshift AMR indel percent support
+#   o gui05 sec06:
 #     - frameshift check box
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2215,6 +2416,61 @@ pack .main.amr.sup -anchor w -side top ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui05 Sec04:
+#   - min read AMR indel percent support
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.amr.indelsup ;
+pack .main.amr.indelsup -anchor w -side top ;
+
+---tk::label
+   .main.amr.indelsup.lab
+   -text "% indel AMR support (0-1)"
+--- ;
+
+---tk::entry
+   .main.amr.indelsup.entry
+   -textvariable ::glob_amrIndelSupF
+   -validate key
+   -vcmd { tcl_isFloat_gui %P %i 0 1 }
+--- ; # get minimum percent read depth for AMR
+
+---pack
+   .main.amr.indelsup.lab
+   .main.amr.indelsup.entry
+   -anchor w
+   -side left
+--- ;
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui05 Sec05:
+#   - min frameshift AMR indel percent support
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.amr.frameSup ;
+pack .main.amr.frameSup -anchor w -side top ;
+
+---tk::label
+   .main.amr.frameSup.lab
+   -text "% indel AMR support (0-1)"
+--- ;
+
+---tk::entry
+   .main.amr.frameSup.entry
+   -textvariable glob_amrFrameSupF
+   -validate key
+   -vcmd { tcl_isFloat_gui %P %i 0 1 }
+--- ; # get minimum percent read depth for AMR
+
+---pack
+   .main.amr.frameSup.lab
+   .main.amr.frameSup.entry
+   -anchor w
+   -side left
+--- ;
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui05 Sec05:
 #   - frameshift check box
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -3622,7 +3878,7 @@ tk::frame .main.out.amr ;
 #   o gui08 sec02 sub05:
 #     - function; read spoligotype
 #   o gui08 sec02 sub06:
-#     - function consensus MIRU-VNTR
+#     - function read MIRU-VNTR
 #   o gui08 sec02 sub07:
 #     - function; read depth graph
 #   o gui08 sec02 sub08:
@@ -3869,6 +4125,7 @@ proc readAmrRep {prefixStr} {
 #   - function; consensus spoligotype
 #**************************************************
 
+#--- removing due to noise
 proc conSpol {prefixStr} {
    set fileStr $prefixStr ;
    append fileStr "-con-spoligo.tsv" ;
@@ -3926,6 +4183,7 @@ proc conSpol {prefixStr} {
       -text [lindex $lineStr 6]
    ---;
 } ; # conSpol
+---#
 
 #**************************************************
 # Gui08 Sec02 Sub05:
@@ -3992,12 +4250,12 @@ proc readSpol {prefixStr} {
 
 #**************************************************
 # Gui08 Sec02 Sub06:
-#   - function consensus MIRU-VNTR
+#   - function read MIRU-VNTR
 #**************************************************
 
-proc conMiru {prefixStr} {
+proc readMiru {prefixStr} {
    set fileStr $prefixStr ;
-   append fileStr "-con-miru.tsv" ;
+   append fileStr "-read-mirulin.tsv" ;
    set openFILE [open $fileStr] ;
    
    gets $openFILE lineStr ; # get header
@@ -4035,7 +4293,7 @@ proc conMiru {prefixStr} {
    ---;
 
    return true ;
-} ; # conMiru
+} ; # readMiru
 
 #**************************************************
 # Gui08 Sec02 Sub07:
@@ -4043,15 +4301,23 @@ proc conMiru {prefixStr} {
 #**************************************************
 
 proc depthGraph {prefixStr} {
+   # deal with spaces
+   set dbStr "\"" ;
+   append dbStr $::glob_amrDb "\"" ;
+
+   set graphStr "\"" ;
+   append graphStr $::graphScript "\"" ;
+
    # delete old graphs
    if {! [image inuse $::glob_depthImg] } {
          image delete $::glob_depthImg ;
    } ; # If: image exists
 
+
    if {$::glob_mkGraphBl ne 0 } {
       
-      set tmpStr $prefixStr ;
-      append tmpStr "-depths.tsv" ;
+      set tmpStr "\"" ;
+      append tmpStr $prefixStr "-depths.tsv\"" ;
 
       set tmpPathStr $prefixStr ;
       append tmpPathStr "-readDepth.png" ;
@@ -4068,14 +4334,26 @@ proc depthGraph {prefixStr} {
          ---;
 
       } else {
+         # on windows this fails, for some odd reason
+         #   windows does not like calling Rscript
+
+         # using quotes incase of spaces
+         set quoteStr "\"" ;
+         append quoteStr $prefixStr "\"" ;
+         set prefixStr $quoteStr ;
+
          ---set status
             [catch
-               {exec
-                  $::rPath
-                  $::graphScript
-                  -stats $tmpStr
-                  -who $::glob_amrDb
-                  -prefix $prefixStr
+               {eval exec
+                  \$::rPath
+                  " "
+                  $graphStr
+                  " -stats "
+                  $tmpStr
+                  " -who "
+                  $dbStr
+                  " -prefix "
+                  $prefixStr
                }
             ]
          ---; # run R to build graphs
@@ -4113,17 +4391,25 @@ proc depthGraph {prefixStr} {
 #**************************************************
 
 proc coverageGraph {prefixStr} {
+   # deal with spaces
+   set dbStr "\"" ;
+   append dbStr $::glob_amrDb "\"" ;
+
+   set graphStr "\"" ;
+   append graphStr $::graphScript "\"" ;
+
    # delete old graphs
    if {! [image inuse $::glob_coverImg] } {
          image delete $::glob_coverImg ;
    } ; # If: image exists
 
    if {$::glob_mkGraphBl ne 0 } {
-      set tmpStr $prefixStr ;
-      append tmpStr "-covers.tsv" ;
+      set tmpStr "\"" ;
+      append tmpStr $prefixStr "-depths.tsv\"" ;
 
       set tmpPathStr $prefixStr ;
       append tmpPathStr "-coverage.png" ;
+
 
       if { [file exists $tmpPathStr] eq 1 } {
          ---set
@@ -4137,6 +4423,11 @@ proc coverageGraph {prefixStr} {
          ---;
 
       } else {
+         # using quotes incase of spaces
+         set quoteStr "\"" ;
+         append quoteStr $prefixStr "\"" ;
+         set prefixStr $quoteStr ;
+
          ---set status
             [catch
                {exec
@@ -4188,7 +4479,7 @@ proc coverageGraph {prefixStr} {
 #   o gui08 sec02 sub09 cat04:
 #     - get AMR cross resistance column length
 #   o gui08 sec02 sub09 cat05:
-#     - find length of mutation column
+#     - mutation, variant, level, additive, needs gene
 #   o gui08 sec02 sub09 cat06:
 #     - print no AMR case
 #   o gui08 sec02 sub09 cat07:
@@ -4200,14 +4491,14 @@ proc coverageGraph {prefixStr} {
 #   o gui08 sec02 sub09 cat10:
 #     - get cross resistant drugs (3 letter)
 #   o gui08 sec02 sub09 cat11:
-#     - get mutation column
+#     - get mutation, var id, level, additvee, needs
 #   o gui08 sec02 sub09 cat12:
 #     - add text to consensus AMR table + return
 #**************************************************
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec02 Sub09 Cat01:
-#   - open file and get header lenghts
+#   - open file and get header lengths
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc conAmrTbl {prefixStr indentStr} {
@@ -4218,7 +4509,11 @@ proc conAmrTbl {prefixStr indentStr} {
    set pad1 [string length "gene"] ;
    set pad2 [string length "drug"] ;
    set pad3 [string length "cross-res"] ;
-   set pad5 [string length "mutant"];
+   set pad4 [string length "var_id"] ;
+   set pad5 [string length "mutant"] ;
+   set pad9 [string length "level"] ;
+   set pad10 [string length "additive"] ;
+   set pad11 [string length "needs"] ;
 
    if {[gets $openFILE lineStr] < 0} {
       ---.main.out.amr.read.tbl.lab
@@ -4299,12 +4594,33 @@ proc conAmrTbl {prefixStr indentStr} {
 
       #++++++++++++++++++++++++++++++++++++++++++++
       # Gui08 Sec02 Sub09 Cat05:
-      #   - find length of mutation column
+      #   - mutation, variant, level, additive, +
       #++++++++++++++++++++++++++++++++++++++++++++
 
+      # variant id
+      set tmpStr [lindex $lineStr 4] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad4 < $lenUI} { set pad4 $lenUI ; } ;
+
+      # mutation
       set tmpStr [lindex $lineStr 5] ;
       set lenUI [string length $tmpStr] ;
       if {$pad5 < $lenUI} { set pad5 $lenUI ; } ;
+
+      # resistance level
+      set tmpStr [lindex $lineStr 9] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad9 < $lenUI} { set pad9 $lenUI ; } ;
+
+      # is resistance additive
+      set tmpStr [lindex $lineStr 10] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad10 < $lenUI} { set pad10 $lenUI ; } ;
+
+      # does resistance need a gene
+      set tmpStr [lindex $lineStr 11] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad11 < $lenUI} { set pad11 $lenUI ; } ;
    } ; # Loop: find longest entries per column
 
    close $openFILE ;
@@ -4337,7 +4653,19 @@ proc conAmrTbl {prefixStr indentStr} {
    set tmpStr [format "%-*s" $pad3 "cross-res"] ;
    append tblStr $tmpStr $indentStr;
 
+   set tmpStr [format "%-*s" $pad4 "var_id"] ;
+   append tblStr $tmpStr $indentStr;
+
    set tmpStr [format "%-*s" $pad5 "mutant"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad9 "level"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad10 "additive"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad11 "needs"] ;
    append tblStr $tmpStr $indentStr;
 
    append tblStr "\n";
@@ -4413,11 +4741,32 @@ proc conAmrTbl {prefixStr indentStr} {
 
       #++++++++++++++++++++++++++++++++++++++++++++
       # Gui08 Sec02 Sub09 Cat11:
-      #   - get mutation column
+      #   - get mutation, var id, level, additvee, needs
       #++++++++++++++++++++++++++++++++++++++++++++
 
+      # variant id
+      set tmpStr [lindex $lineStr 4] ; # mut type
+      set tmpStr [format "%-*s" $pad4 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # mutation type
       set tmpStr [lindex $lineStr 5] ; # mut type
       set tmpStr [format "%-*s" $pad5 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # resitance level
+      set tmpStr [lindex $lineStr 9] ; # mut type
+      set tmpStr [format "%-*s" $pad9 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # additive resistance
+      set tmpStr [lindex $lineStr 10] ; # mut type
+      set tmpStr [format "%-*s" $pad10 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # needs gene
+      set tmpStr [lindex $lineStr 11] ; # mut type
+      set tmpStr [format "%-*s" $pad11 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       append tblStr "\n" ; # next row
@@ -4458,7 +4807,7 @@ proc conAmrTbl {prefixStr indentStr} {
 #   o gui08 sec02 sub10 cat05:
 #     - find mutation and % support lengths
 #   o gui08 sec02 sub10 cat06:
-#     - find gene depth length
+#     - find gene depth length + others
 #   o gui08 sec02 sub10 cat07:
 #     - print NA for nothing in file case
 #   o gui08 sec02 sub10 cat08:
@@ -4470,9 +4819,9 @@ proc conAmrTbl {prefixStr indentStr} {
 #   o gui08 sec02 sub10 cat11:
 #     - add cross-resistance drugs to header
 #   o gui08 sec02 sub10 cat12:
-#     - add mutation and % support to table
+#     - add mutation + % support + variant id
 #   o gui08 sec02 sub10 cat13:
-#     - add gene depth
+#     - add gene depth + resistance data
 #   o gui08 sec02 sub10 cat14:
 #     - put table into AMR read table label
 #**************************************************
@@ -4490,9 +4839,13 @@ proc readAmrTbl {prefixStr indentStr} {
    set pad0 [string length "gene"] ;
    set pad1 [string length "drug"] ;
    set pad2 [string length "cross-res"] ;
-   set pad4 [string length "mutant"];
-   set pad8 [string length "%sup"];
-   set pad9 [string length "gene-depth"];
+   set pad3 [string length "var_id"] ;
+   set pad4 [string length "mutant"] ;
+   set pad8 [string length "%sup"] ;
+   set pad9 [string length "gene-depth"] ;
+   set pad10 [string length "level"] ;
+   set pad11 [string length "additive"] ;
+   set pad12 [string length "needs"] ;
 
    if {[gets $openFILE lineStr] < 0} {
       ---.main.out.amr.read.tbl.lab
@@ -4588,18 +4941,39 @@ proc readAmrTbl {prefixStr indentStr} {
 
       #++++++++++++++++++++++++++++++++++++++++++++
       # Gui08 Sec02 Sub10 Cat06:
-      #   - find gene depth length
+      #   - find gene depth length + others
       #++++++++++++++++++++++++++++++++++++++++++++
 
+      # depth
       set tmpStr [lindex $lineStr 9] ;
       set lenUI [string length $tmpStr] ;
       if {$pad9 < $lenUI} { set pad9 $lenUI ; } ;
+
+      # variant id
+      set tmpStr [lindex $lineStr 3] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad3 < $lenUI} { set pad3 $lenUI ; } ;
+
+      # AMR level
+      set tmpStr [lindex $lineStr 10] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad10 < $lenUI} { set pad10 $lenUI ; } ;
+
+      # AMR is additive
+      set tmpStr [lindex $lineStr 11] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad11 < $lenUI} { set pad11 $lenUI ; } ;
+
+      # AMR requires gene
+      set tmpStr [lindex $lineStr 12] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad12 < $lenUI} { set pad12 $lenUI ; } ;
    } ; # Loop: find longest entries per column
 
    close $openFILE ;
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub10 Cat06:
+   # Gui08 Sec02 Sub10 Cat07:
    #   - print NA for nothing in file case
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4627,6 +5001,9 @@ proc readAmrTbl {prefixStr indentStr} {
    set tmpStr [format "%-*s" $pad2 "cross-res"] ;
    append tblStr $tmpStr $indentStr;
 
+   set tmpStr [format "%-*s" $pad3 "var_id"] ;
+   append tblStr $tmpStr $indentStr;
+
    set tmpStr [format "%-*s" $pad4 "mutant"] ;
    append tblStr $tmpStr $indentStr;
 
@@ -4634,6 +5011,15 @@ proc readAmrTbl {prefixStr indentStr} {
    append tblStr $tmpStr $indentStr;
 
    set tmpStr [format "%-*s" $pad9 "gene-depth"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad10 "level"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad11 "additive"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad12 "needs"] ;
    append tblStr $tmpStr $indentStr;
 
    append tblStr "\n";
@@ -4648,6 +5034,23 @@ proc readAmrTbl {prefixStr indentStr} {
 
    while {[gets $openFILE lineStr] > -1} {
       set lineStr [split $lineStr "\t"] ;
+
+
+      # get percent support (0 to 1)
+      set tmpF [lindex $lineStr 8] ;
+      set tmpF [expr $tmpF / 100] ;
+
+      # make sure keeping entry
+      if {[lindex $tmpStr 4] eq "snp"} {
+         if { $tmpF < $::glob_outSnpSup} {
+             continue ;
+         } ; # If: support is to low
+      } else {
+         if { $tmpF < $::glob_outIndelSup} {
+             continue ;
+         } ; # If: support is to low
+      } ; # check if snp or indel
+
 
       set tmpStr [lindex $lineStr 0] ; # gene id
       set tmpStr [format "%-*s" $pad0 $tmpStr] ;
@@ -4708,8 +5111,13 @@ proc readAmrTbl {prefixStr indentStr} {
 
       #++++++++++++++++++++++++++++++++++++++++++++
       # Gui08 Sec02 Sub10 Cat11:
-      #   - add mutation and % support to table
+      #   - add mutation + % support + variant id
       #++++++++++++++++++++++++++++++++++++++++++++
+
+      # variant id
+      set tmpStr [lindex $lineStr 3] ;
+      set tmpStr [format "%-*s" $pad3 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
 
       # mutation type
       set tmpStr [lindex $lineStr 4] ;
@@ -4723,12 +5131,27 @@ proc readAmrTbl {prefixStr indentStr} {
 
       #++++++++++++++++++++++++++++++++++++++++++++
       # Gui08 Sec02 Sub10 Cat12:
-      #   - add gene depth
+      #   - add gene depth + resistance data
       #++++++++++++++++++++++++++++++++++++++++++++
 
       # mutation type
       set tmpStr [lindex $lineStr 9] ;
       set tmpStr [format "%-*s" $pad9 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # resitance level
+      set tmpStr [lindex $lineStr 10] ;
+      set tmpStr [format "%-*s" $pad10 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # resistance is additive
+      set tmpStr [lindex $lineStr 11] ;
+      set tmpStr [format "%-*s" $pad11 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # resistance is needs gene
+      set tmpStr [lindex $lineStr 12] ;
+      set tmpStr [format "%-*s" $pad12 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       append tblStr "\n" ; # next row
@@ -4855,6 +5278,7 @@ pack .main.out.set.snp -anchor w -side top ;
 ---tk::entry
    .main.out.set.snp.entry
    -textvariable glob_outSnpSup
+   -validate key
    -vcmd { tcl_isFloat_gui %P %i 0 1 }
 ---;
 
@@ -4881,6 +5305,7 @@ pack .main.out.set.indel -anchor w -side top ;
 ---tk::entry
    .main.out.set.indel.entry
    -textvariable glob_outIndelSup
+   -validate key
    -vcmd { tcl_isFloat_gui %P %i 0 1 }
 ---;
 
@@ -4924,23 +5349,24 @@ pack .main.out.set.run -anchor w -side top ;
    -text "get report"
    -command {
 ---
-      upvar 0 glob_outCur curPrefix ;
-      upvar 0 glob_outPref newPrefix ;
-      set curPrefix $newPrefix ;
+      set ::glob_outCur $::glob_outPref ;
 
-      #conAmrRep $curPrefix ;
-      readAmrRep $curPrefix ;
-      depthGraph $curPrefix ;
-      coverageGraph $curPrefix ;
-      conSpol $curPrefix ;
-      readSpol $curPrefix ;
-      conMiru $curPrefix ;
-      conAmrTbl $curPrefix "   " ;
-      readAmrTbl $curPrefix "   " ;
+      #conAmrRep $::glob_outCur ;
+
+      readAmrRep $::glob_outCur ;
+      depthGraph $::glob_outCur ;
+      coverageGraph $::glob_outCur ;
+
+      #conSpol $::glob_outCur ;
+
+      readSpol $::glob_outCur ;
+      readMiru $::glob_outCur ;
+      conAmrTbl $::glob_outCur "   " ;
+      readAmrTbl $::glob_outCur "   " ;
 
       .main.out.menu.reportBut invoke ;
       .main.out.set.prefix.lab configure -text "" ;
-      set $newPrefix "" ;
+      set ::glob_outPref "" ;
    } ; # build the report
 
 pack .main.out.set.run.but -anchor w -side left ;
@@ -5526,6 +5952,8 @@ tk::label .main.out.report.amrLegend.spaceTwo ;
 #     - countries dectected in (use orig for short)
 #**************************************************
 
+#--- removing because adds to much noise
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub04 Cat01:
 #   - consensus spoligotype label
@@ -5691,6 +6119,8 @@ tk::frame .main.out.report.conspol.orig ;
    -anchor w
    -side left
 ---;
+
+---#
 
 #**************************************************
 # Gui08 Sec05 Sub05:
@@ -5950,7 +6380,8 @@ pack .main.out.amr.con.tbl -anchor w -side top ;
 
 ---text
    .main.out.amr.con.tbl.txt
-   -height 10
+   -height 20
+   -width 81
    -yscrollcommand ".main.out.amr.con.tbl.scroll set"
 ---; # set up text box
 
@@ -5993,7 +6424,8 @@ pack .main.out.amr.read.tbl -anchor w -side top ;
 
 ---text
    .main.out.amr.read.tbl.txt
-   -height 10
+   -height 20
+   -width 110
    -yscrollcommand ".main.out.amr.read.tbl.scroll set"
 ---; # set up text box
 

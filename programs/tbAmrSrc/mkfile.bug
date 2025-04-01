@@ -14,7 +14,7 @@ objFiles=\
    $(genLib)/charCp.$O \
    $(genLib)/strAry.$O \
    $(genLib)/genMath.$O \
-   $(genBio)/codonTbl.$O \
+   $(genBio)/codonFun.$O \
    $(genBio)/samEntry.$O \
    drugAry.$O \
    amrST.$O \
@@ -26,13 +26,13 @@ all: tbAmr.$O $(objFiles)
 tbAmr.$O: tbAmr.c checkAmr.$O tbAmrDefs.h
 	$(CC) -o tbAmr.$O -c $(CFLAGS) tbAmr.c
 
-checkAmr.$O: checkAmr.c checkAmr.h amrST.$O $(genLib)/genMath.$O $(genBio)/codonTbl.$O $(genBio)/samEntry.$O
+checkAmr.$O: checkAmr.c checkAmr.h amrST.$O $(genLib)/genMath.$O $(genBio)/codonFun.$O $(genBio)/samEntry.$O
 	$(CC) -o checkAmr.$O -c $(CFLAGS) checkAmr.c
 
 drugAry.$O: drugAry.c drugAry.h
 	$(CC) -o drugAry.$O -c $(CFLAGS) drugAry.c
 
-amrST.$O: amrST.c amrST.h drugAry.$O $(genLib)/ulCp.$O $(genLib)/charCp.$O $(genLib)/base10str.$O $(genLib)/dataTypeShortHand.h
+amrST.$O: amrST.c amrST.h drugAry.$O $(genLib)/ulCp.$O $(genLib)/charCp.$O $(genLib)/base10str.$O
 	$(CC) -o amrST.$O -c $(CFLAGS) amrST.c
 
 $(genLib)/base10str.$O: $(genLib)/base10str.c $(genLib)/base10str.h
@@ -53,10 +53,10 @@ $(genLib)/genMath.$O: $(genLib)/genMath.c $(genLib)/genMath.h
 $(genLib)/strAry.$O: $(genLib)/strAry.c $(genLib)/strAry.h $(genLib)/ulCp.$O
 	$(CC) -o $(genLib)/strAry.$O -c $(CFLAGS) $(genLib)/strAry.c
 
-$(genBio)/codonTbl.$O: $(genBio)/codonTbl.c $(genBio)/codonTbl.h $(genBio)/ntTo2Bit.h $(genBio)/revNtTo2Bit.h $(genLib)/dataTypeShortHand.h
-	$(CC) -o $(genBio)/codonTbl.$O -c $(CFLAGS) $(genBio)/codonTbl.c
+$(genBio)/codonFun.$O: $(genBio)/codonFun.c $(genBio)/codonFun.h $(genBio)/codonTbl.h $(genBio)/ntTo2Bit.h $(genBio)/revNtTo2Bit.h
+	$(CC) -o $(genBio)/codonFun.$O -c $(CFLAGS) $(genBio)/codonFun.c
 
-$(genBio)/samEntry.$O: $(genBio)/samEntry.c $(genBio)/samEntry.h $(genLib)/strAry.$O $(genLib)/ulCp.$O $(genLib)/base10str.$O $(genLib)/numToStr.$O $(genBio)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
+$(genBio)/samEntry.$O: $(genBio)/samEntry.c $(genBio)/samEntry.h $(genLib)/strAry.$O $(genLib)/ulCp.$O $(genLib)/base10str.$O $(genLib)/numToStr.$O $(genBio)/ntTo5Bit.h
 	$(CC) -o $(genBio)/samEntry.$O -c $(CFLAGS) $(genBio)/samEntry.c
 
 clean:

@@ -39,38 +39,40 @@
 '   o fun13: findRefPos_samEntry
 '     - Find an reference coordinate in an sequence in
 '       an sam entry structure
-'   o fun14: p_samEntry
+'   o fun14: swap_samEntry
+'     - swaps two samEntry structs
+'   o fun15: p_samEntry
 '     - Prints the sam file entry to a file. This does not
 '       print any extra stats that were found.
-'   o fun15: pfq_samEntry
+'   o fun16: pfq_samEntry
 '     - Prints the sam entry as a fastq entry to a fastq
 '       file
-'   o fun16: pfa_samEntry
+'   o fun17: pfa_samEntry
 '     - Prints the sam entry as a fasta entry to a fasta
 '       file
-'   o fun17: pstats_samEntry
+'   o fun18: pstats_samEntry
 '     - Prints out the stats in a samEntry struct to a file
-'   o fun18: revCmp_samEntry
+'   o fun19: revCmp_samEntry
 '     - reverse complements a sam file sequence entry
-'   o fun19: getHead_samEntry
+'   o fun20: getHead_samEntry
 '     - get header for a sam file
-'   o fun20: blank_refs_samEntry
+'   o fun21: blank_refs_samEntry
 '     - blanks a refs_samEntry struct
-'   o fun21: init_refs_samEntry
+'   o fun22: init_refs_samEntry
 '     - initializes a refs_samEntry struct
-'   o fun22: freeStack_refs_samEntry
+'   o fun23: freeStack_refs_samEntry
 '     - frees variables in a refs_samEntry struct
-'   o fun23: freeHeap_refs_samEntry
+'   o fun24: freeHeap_refs_samEntry
 '     - frees a refs_samEntry struct
-'   o fun24: setup_refs_samEntry
+'   o fun25: setup_refs_samEntry
 '     - allocates memory for a refs_samEntry struct
-'   o fun25: realloc_refs_samEntry
+'   o fun26: realloc_refs_samEntry
 '     - reallocates memory for a refs_samEntry struct
-'   o fun26: getRefLen_samEntry
+'   o fun27: getRefLen_samEntry
 '     - gets reference ids & length from a sam file header
-'   o fun27: findRef_refs_samEntry
+'   o fun28: findRef_refs_samEntry
 '     - finds a reference id in a refs_samEntry struct
-'   o fun28: addRef_samEntry
+'   o fun29: addRef_samEntry
 '     - adds reference information to array in refStack
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
@@ -101,7 +103,6 @@
 #include "../genLib/strAry.h"
 
 /*These have no .c files*/
-#include "../genLib/dataTypeShortHand.h"
 #include "ntTo5Bit.h"
    /*look up table to see if have anonymous bases*/
 
@@ -120,7 +121,7 @@ void
 blank_samEntry(
    struct samEntry *samSTPtr
 ){
-    uint uiIter = 0;
+    unsigned int uiIter = 0;
 
     samSTPtr->qryIdStr[0] = '\0'; /*query id/name*/
     samSTPtr->lenQryIdUC = 0;     /*Length of query id*/
@@ -139,8 +140,9 @@ blank_samEntry(
        samSTPtr->cigArySI[uiIter] = 0;
     } /*Loop: Clear all cigar entries*/
 
-    samSTPtr->rNextStr[0] = '\0'; /*rNext entry*/
-    samSTPtr->lenRNextUC = 0;     /*Length of rNext*/
+    samSTPtr->rNextStr[0] = '*';  /*rNext entry*/
+    samSTPtr->rNextStr[1] = '\0'; /*rNext entry*/
+    samSTPtr->lenRNextUC = 1;     /*Length of rNext*/
 
     if(samSTPtr->seqStr)
        samSTPtr->seqStr[0] = '\0';
@@ -270,13 +272,13 @@ setup_samEntry(
     samSTPtr->seqStr =
        calloc(
           1024,
-          sizeof(schar)
+          sizeof(signed char)
        ); /*allocate some memory for sequence*/
 
     if(! samSTPtr->seqStr)
        goto memErr_fun03_sec06;
 
-    samSTPtr->lenSeqBuffUI = 1024;
+    samSTPtr->lenSeqBuffUI = 1024 - 8;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun03 Sec02:
@@ -291,13 +293,13 @@ setup_samEntry(
     samSTPtr->qStr =
        calloc(
           1024,
-          sizeof(schar)
+          sizeof(signed char)
        ); /*allocate some memory for q-score*/
 
     if(! samSTPtr->qStr)
        goto memErr_fun03_sec06;
 
-    samSTPtr->lenQBuffUI = 1024;
+    samSTPtr->lenQBuffUI = 1024 - 8;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun03 Sec03:
@@ -312,13 +314,13 @@ setup_samEntry(
     samSTPtr->cigTypeStr =
        calloc(
           256,
-          sizeof(schar)
+          sizeof(signed char)
        ); /*allocate memory for cigary type*/
 
     if(! samSTPtr->cigTypeStr)
        goto memErr_fun03_sec06;
 
-    samSTPtr->lenCigBuffUI = 256;
+    samSTPtr->lenCigBuffUI = 256 - 8;
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun03 Sec04:
@@ -333,7 +335,7 @@ setup_samEntry(
     samSTPtr->cigArySI =
        calloc(
           256,
-          sizeof(sint)
+          sizeof(signed int)
        ); /*allocate memory for cigar counts*/
 
     if(! samSTPtr->cigArySI)
@@ -352,7 +354,7 @@ setup_samEntry(
     samSTPtr->extraStr =
        calloc(
           1024,
-          sizeof(schar)
+          sizeof(signed char)
        ); /*allocate memory for extra entry*/
 
     if(! samSTPtr->extraStr)
@@ -447,7 +449,7 @@ struct samEntry *
 mk_samEntry(
 ){
   struct samEntry *samST=malloc(sizeof(struct samEntry));
-  uchar errUC = 0;
+  unsigned char errUC = 0;
   
   if(samST)
   { /*If: I did not have a memory error*/
@@ -531,15 +533,17 @@ void
 findQScores_samEntry(
    struct samEntry *samSTPtr
 ){
-    ulong qScoresUL = 0;
-    ulong *qPtrUL = (ulong *) (samSTPtr)->qStr;
+    unsigned long qScoresUL = 0;
+    unsigned long *qPtrUL =
+       (unsigned long *)
+       samSTPtr->qStr;
 
-    uchar *scoreAryUC = 0;
-    uint uiQScore = 0;
-    uint uiChar = 0;
+    unsigned char *scoreAryUC = 0;
+    unsigned int uiQScore = 0;
+    unsigned int uiChar = 0;
     
     ulong_ulCp qAdjustUL =
-       mkDelim_ulCp((schar) def_adjQ_samEntry);
+       mkDelim_ulCp((signed char) def_adjQ_samEntry);
 
     /*Find the number of q-score characters in buffer*/
     for(
@@ -551,7 +555,7 @@ findQScores_samEntry(
        qScoresUL = qPtrUL[uiQScore] - qAdjustUL;
 
        scoreAryUC =
-          (uchar *)
+          (unsigned char *)
           &qScoresUL;
        
        for(
@@ -559,13 +563,17 @@ findQScores_samEntry(
           uiChar < def_charInUL_ulCp;
           ++uiChar
        ){ /*Loop: Get the q-score entries*/
-         ++(samSTPtr)->qHistUI[scoreAryUC[uiChar]];
-         (samSTPtr)->sumQUL += (uchar) scoreAryUC[uiChar];
+
+         ++samSTPtr->qHistUI[scoreAryUC[uiChar]];
+         samSTPtr->sumQUL +=
+             (unsigned char)
+             scoreAryUC[uiChar];
+
        } /*Loop: Get the q-score entries*/
     } /*Loop: Update the q-score historgram and sum*/
     
     uiQScore = (samSTPtr)->readLenUI;
-    scoreAryUC = (uchar *) (samSTPtr)->qStr;
+    scoreAryUC = (unsigned char *) (samSTPtr)->qStr;
     
     for(
        uiQScore -=
@@ -634,16 +642,17 @@ cpQEntry_samEntry(
   ^   - Variable declerations
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-  uchar *tmpStr = 0;
-  uint uiQ = 0;
-  uint uiChar = 0;
+  unsigned char *tmpStr = 0;
+  unsigned int uiQ = 0;
+  unsigned int uiChar = 0;
 
   ulong_ulCp qAdjustUL =
-     mkDelim_ulCp((schar) def_adjQ_samEntry);
+           mkDelim_ulCp((signed char) def_adjQ_samEntry);
 
-  ulong *cpPtrUL = (ulong *) (cpQStr);
-  ulong *dupPtrUL = (ulong *) samSTPtr->qStr;
-  ulong qScoreUL = 0;
+  unsigned long *cpPtrUL = (unsigned long *) cpQStr;
+  unsigned long *dupPtrUL =
+                (unsigned long *) samSTPtr->qStr;
+  unsigned long qScoreUL = 0;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun09 Sec02:
@@ -672,7 +681,7 @@ cpQEntry_samEntry(
   ) { /*Loop: Copy the q-score entries*/
      dupPtrUL[uiQ] = cpPtrUL[uiQ];
      qScoreUL = dupPtrUL[uiQ] - qAdjustUL;
-     tmpStr = (uchar *) &qScoreUL;
+     tmpStr = (unsigned char *) &qScoreUL;
      
      for(
         uiChar = 0;
@@ -697,8 +706,11 @@ cpQEntry_samEntry(
      uiQ < (samSTPtr)->readLenUI;
      ++uiQ
   ) { /*Loop: Copy the q-score entries*/
+
      samSTPtr->qStr[uiQ] = cpQStr[uiQ];
-     qScoreUL = (uchar) cpQStr[uiQ] - def_adjQ_samEntry;
+     qScoreUL =
+        (unsigned char)
+        cpQStr[uiQ] - def_adjQ_samEntry;
 
      ++samSTPtr->qHistUI[qScoreUL];
      samSTPtr->sumQUL += qScoreUL;
@@ -760,9 +772,9 @@ getLine_samEntry(
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   ushort extraBuffUS = 4096;
+   unsigned short extraBuffUS = 4096;
 
-   ulong oldLenUL = 0;
+   unsigned long oldLenUL = 0;
    signed char *tmpStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -773,7 +785,8 @@ getLine_samEntry(
    if(*buffStr == 0)
    { /*If: I need to create a buffer*/
       *lenBuffUL = 0;
-      *buffStr = malloc((extraBuffUS +9) * sizeof(schar));
+      *buffStr =
+          malloc((extraBuffUS +9) * sizeof(signed char));
 
       if(*buffStr == 0)
          goto memErr_fun10_sec04;
@@ -782,7 +795,7 @@ getLine_samEntry(
    } /*If: I need to create a buffer*/
 
    tmpStr =
-      (schar *)
+      (signed char *)
       fgets(
          (char *) *buffStr,
          *lenBuffUL,
@@ -812,7 +825,7 @@ getLine_samEntry(
       tmpStr =
          realloc(
             *buffStr,
-            (*lenBuffUL + 9) * sizeof(schar)
+            (*lenBuffUL + 9) * sizeof(signed char)
          );
 
       /*check for memory errors; let user handle
@@ -825,7 +838,7 @@ getLine_samEntry(
       tmpStr = *buffStr + oldLenUL;
 
       tmpStr =
-         (schar *)
+         (signed char *)
          fgets(
             (char *) tmpStr,
             *lenBuffUL >> 1,
@@ -934,7 +947,7 @@ lineTo_samEntry(
     ` hard to tell
    */
    samSTPtr->lenQryIdUC =
-     (uchar)
+     (unsigned char)
       cpDelim_ulCp(
          samSTPtr->qryIdStr,
          buffStr,
@@ -964,7 +977,7 @@ lineTo_samEntry(
 
    /*Not clear wich version is faster here*/
    samSTPtr->lenRefIdUC =
-      (uchar)
+      (unsigned char)
       cpDelim_ulCp(
          samSTPtr->refIdStr,
          buffStr,
@@ -1058,7 +1071,7 @@ lineTo_samEntry(
 
           samSTPtr->cigTypeStr = tmpStr;
 
-         tmpStr = (schar *)
+         tmpStr = (signed char *)
             realloc(
                samSTPtr->cigArySI,
                samSTPtr->lenCigBuffUI * sizeof(int)
@@ -1176,7 +1189,7 @@ lineTo_samEntry(
 
    /*Not sure which is better here*/
    samSTPtr->lenRNextUC =
-      (uchar)
+      (unsigned char)
       cpDelim_ulCp(
          samSTPtr->rNextStr,
          buffStr,
@@ -1221,7 +1234,7 @@ lineTo_samEntry(
 
    if(samSTPtr->readLenUI == 0 && buffStr[0] != '*')
       samSTPtr->readLenUI =
-         (uint)
+         (unsigned int)
          lenStr_ulCp(buffStr, def_tab_ulCp, '\t');
 
    else if(buffStr[0] == '*')
@@ -1305,7 +1318,8 @@ lineTo_samEntry(
 
          samSTPtr->extraStr = 0;
 
-         samSTPtr->extraStr = malloc(10 * sizeof(schar));
+         samSTPtr->extraStr =
+            malloc(10 * sizeof(signed char));
          
          if(samSTPtr->extraStr == 0)
             goto memErr_fun11_sec14;
@@ -1330,7 +1344,7 @@ lineTo_samEntry(
          samSTPtr->extraStr =
             calloc(
                samSTPtr->lenExtraUI + 9,
-               sizeof(schar)
+               sizeof(signed char)
             );
          
          if(samSTPtr->extraStr == 0)
@@ -1391,7 +1405,7 @@ get_samEntry(
    unsigned long *lenBuffUL,
    void *samFILE
 ){
-   schar errSC = 0;
+   signed char errSC = 0;
 
    errSC =
       getLine_samEntry(
@@ -1576,7 +1590,262 @@ findRefPos_samEntry(
 } /*findRefPos_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun14: p_samEntry
+| Fun14: swap_samEntry
+|   - swaps two samEntry structs
+| Input:
+|   - firstSTPtr:
+|     o pointer to first samEntry struct to swap
+|   - secSTPtr:
+|     o pointer to second samEntry struct to swap
+| Output:
+|   - Modifies:
+|     o all variables in firstSTPtr to be same as secSTPtr
+|     o all variables in sedSTPtr to be same as firstSTPtr
+\-------------------------------------------------------*/
+void
+swap_samEntry(
+   struct samEntry *firstSTPtr,
+   struct samEntry *secSTPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun14 TOC:
+   '   - swap two samEntry structs
+   '   o fun14 sec01:
+   '     - swap query id + variable declaration
+   '   o fun14 sec02:
+   '     - swap reference id
+   '   o fun14 sec03:
+   '     - swap cigar entries
+   '   o fun14 sec04:
+   '     - swap rNext entries
+   '   o fun14 sec05:
+   '     - swap sequence entires
+   '   o fun14 sec06:
+   '     - swap q-score line
+   '   o fun14 sec07:
+   '     - swap extra line entires
+   '   o fun14 sec08:
+   '     - swap mapq, flag, PNEXT, and TLEN
+   '   o fun14 sec09:
+   '     - swap q-score stat entries
+   '   o fun14 sec10:
+   '     - swap lengths (read/aligned) and coordinates
+   '   o fun14 sec11:
+   '     - swap matches, SNPs, indels, and masked stats
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec01:
+   ^   - swap query id + variable declaration
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char *swapSCPtr = 0;
+   float swapF = 0;
+   unsigned short usIndex = 0;
+
+
+   swapNull_ulCp(
+      firstSTPtr->qryIdStr,
+      secSTPtr->qryIdStr
+   );
+
+   firstSTPtr->lenQryIdUC ^= secSTPtr->lenQryIdUC;
+   secSTPtr->lenQryIdUC ^= firstSTPtr->lenQryIdUC;
+   firstSTPtr->lenQryIdUC ^= secSTPtr->lenQryIdUC;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec02:
+   ^   - swap reference id
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapNull_ulCp(
+      firstSTPtr->refIdStr,
+      secSTPtr->refIdStr
+   );
+
+   firstSTPtr->lenRefIdUC ^= secSTPtr->lenRefIdUC;
+   secSTPtr->lenRefIdUC ^= firstSTPtr->lenRefIdUC;
+   firstSTPtr->lenRefIdUC ^= secSTPtr->lenRefIdUC;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec03:
+   ^   - swap cigar entries
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapSCPtr = firstSTPtr->cigTypeStr;
+   firstSTPtr->cigTypeStr = secSTPtr->cigTypeStr;
+   secSTPtr->cigTypeStr = swapSCPtr;
+
+   swapSCPtr = (signed char *) firstSTPtr->cigArySI;
+   firstSTPtr->cigArySI = secSTPtr->cigArySI;
+   secSTPtr->cigArySI = (signed int *) swapSCPtr;
+  
+   firstSTPtr->lenCigUI ^= secSTPtr->lenCigUI;
+   secSTPtr->lenCigUI ^= firstSTPtr->lenCigUI;
+   firstSTPtr->lenCigUI ^= secSTPtr->lenCigUI;
+
+   firstSTPtr->lenCigBuffUI ^= secSTPtr->lenCigBuffUI;
+   secSTPtr->lenCigBuffUI ^= firstSTPtr->lenCigBuffUI;
+   firstSTPtr->lenCigBuffUI ^= secSTPtr->lenCigBuffUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec04:
+   ^   - swap rNext entries
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapNull_ulCp(
+      firstSTPtr->rNextStr,
+      secSTPtr->rNextStr
+   );
+
+   firstSTPtr->lenRNextUC ^= secSTPtr->lenRNextUC;
+   secSTPtr->lenRNextUC ^= firstSTPtr->lenRNextUC;
+   firstSTPtr->lenRNextUC ^= secSTPtr->lenRNextUC;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec05:
+   ^   - swap sequence entires
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapSCPtr = firstSTPtr->seqStr;
+   firstSTPtr->seqStr = secSTPtr->seqStr;
+   secSTPtr->seqStr = swapSCPtr;
+
+   firstSTPtr->lenSeqBuffUI ^= secSTPtr->lenSeqBuffUI;
+   secSTPtr->lenSeqBuffUI ^= firstSTPtr->lenSeqBuffUI;
+   firstSTPtr->lenSeqBuffUI ^= secSTPtr->lenSeqBuffUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec06:
+   ^   - swap q-score line
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapSCPtr = firstSTPtr->qStr;
+   firstSTPtr->qStr = secSTPtr->qStr;
+   secSTPtr->qStr = swapSCPtr;
+
+   firstSTPtr->lenQBuffUI ^= secSTPtr->lenQBuffUI;
+   secSTPtr->lenQBuffUI ^= firstSTPtr->lenQBuffUI;
+   firstSTPtr->lenQBuffUI ^= secSTPtr->lenQBuffUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec07:
+   ^   - swap extra line entires
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapSCPtr = firstSTPtr->extraStr;
+   firstSTPtr->extraStr = secSTPtr->extraStr;
+   secSTPtr->extraStr = swapSCPtr;
+
+   firstSTPtr->lenExtraUI ^= secSTPtr->lenExtraUI;
+   secSTPtr->lenExtraUI ^= firstSTPtr->lenExtraUI;
+   firstSTPtr->lenExtraUI ^= secSTPtr->lenExtraUI;
+
+   firstSTPtr->lenExtraBuffUI ^= secSTPtr->lenExtraBuffUI;
+   secSTPtr->lenExtraBuffUI ^= firstSTPtr->lenExtraBuffUI;
+   firstSTPtr->lenExtraBuffUI ^= secSTPtr->lenExtraBuffUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec08:
+   ^   - swap mapq, flag, PNEXT, and TLEN
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   firstSTPtr->mapqUC ^= secSTPtr->mapqUC;
+   secSTPtr->mapqUC ^= firstSTPtr->mapqUC;
+   firstSTPtr->mapqUC ^= secSTPtr->mapqUC;
+
+   firstSTPtr->flagUS ^= secSTPtr->flagUS;
+   secSTPtr->flagUS ^= firstSTPtr->flagUS;
+   firstSTPtr->flagUS ^= secSTPtr->flagUS;
+
+   firstSTPtr->pNextSI ^= secSTPtr->pNextSI;
+   secSTPtr->pNextSI ^= firstSTPtr->pNextSI;
+   firstSTPtr->pNextSI ^= secSTPtr->pNextSI;
+
+   firstSTPtr->tLenSI ^= secSTPtr->tLenSI;
+   secSTPtr->tLenSI ^= firstSTPtr->tLenSI;
+   firstSTPtr->tLenSI ^= secSTPtr->tLenSI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec09:
+   ^   - swap q-score stat entries
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   swapF = firstSTPtr->medianQF;
+   firstSTPtr->medianQF = secSTPtr->medianQF;
+   secSTPtr->medianQF = swapF;
+
+   swapF = firstSTPtr->meanQF;
+   firstSTPtr->meanQF = secSTPtr->meanQF;
+   secSTPtr->meanQF = swapF;
+
+   firstSTPtr->sumQUL ^= secSTPtr->sumQUL;
+   secSTPtr->sumQUL ^= firstSTPtr->sumQUL;
+   firstSTPtr->sumQUL ^= secSTPtr->sumQUL;
+
+   for(
+      usIndex = 0;
+      usIndex < def_maxQ_samEntry;
+      ++usIndex
+   ){ /*Loop: swap q-score histogram entries*/
+      firstSTPtr->qHistUI[usIndex] ^=
+         secSTPtr->qHistUI[usIndex];
+
+      secSTPtr->qHistUI[usIndex] ^=
+         firstSTPtr->qHistUI[usIndex];
+
+      firstSTPtr->qHistUI[usIndex] ^=
+         secSTPtr->qHistUI[usIndex];
+   }  /*Loop: swap q-score histogram entries*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec10:
+   ^   - swap lengths (read/aligned) and coordinates
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   firstSTPtr->refStartUI ^= secSTPtr->refStartUI;
+   secSTPtr->refStartUI ^= firstSTPtr->refStartUI;
+   firstSTPtr->refStartUI ^= secSTPtr->refStartUI;
+
+   firstSTPtr->refEndUI ^= secSTPtr->refEndUI;
+   secSTPtr->refEndUI ^= firstSTPtr->refEndUI;
+   firstSTPtr->refEndUI ^= secSTPtr->refEndUI;
+
+   firstSTPtr->readLenUI ^= secSTPtr->readLenUI;
+   secSTPtr->readLenUI ^= firstSTPtr->readLenUI;
+   firstSTPtr->readLenUI ^= secSTPtr->readLenUI;
+
+   firstSTPtr->alnReadLenUI ^= secSTPtr->alnReadLenUI;
+   secSTPtr->alnReadLenUI ^= firstSTPtr->alnReadLenUI;
+   firstSTPtr->alnReadLenUI ^= secSTPtr->alnReadLenUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec11:
+   ^   - swap matches, SNPs, indels, and masked stats
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   firstSTPtr->numMatchUI ^= secSTPtr->numMatchUI;
+   secSTPtr->numMatchUI ^= firstSTPtr->numMatchUI;
+   firstSTPtr->numMatchUI ^= secSTPtr->numMatchUI;
+
+   firstSTPtr->numSnpUI ^= secSTPtr->numSnpUI;
+   secSTPtr->numSnpUI ^= firstSTPtr->numSnpUI;
+   firstSTPtr->numSnpUI ^= secSTPtr->numSnpUI;
+
+   firstSTPtr->numInsUI ^= secSTPtr->numInsUI;
+   secSTPtr->numInsUI ^= firstSTPtr->numInsUI;
+   firstSTPtr->numInsUI ^= secSTPtr->numInsUI;
+
+   firstSTPtr->numDelUI ^= secSTPtr->numDelUI;
+   secSTPtr->numDelUI ^= firstSTPtr->numDelUI;
+   firstSTPtr->numDelUI ^= secSTPtr->numDelUI;
+
+   firstSTPtr->numMaskUI ^= secSTPtr->numMaskUI;
+   secSTPtr->numMaskUI ^= firstSTPtr->numMaskUI;
+   firstSTPtr->numMaskUI ^= secSTPtr->numMaskUI;
+} /*swap_samEntry*/
+
+/*-------------------------------------------------------\
+| Fun15: p_samEntry
 |   - Prints the sam file entry to a file. This does not
 |     print any extra stats that were found.
 | Input:
@@ -1609,13 +1878,13 @@ signed char
 p_samEntry(
    struct samEntry *samSTPtr,
    signed char **buffStr,
-   ulong *lenBuffUL,
+   unsigned long *lenBuffUL,
    signed char pNoNewLineBl,
    void *outFILE
 ){
-   uint uiCig = 0;
-   schar *tmpStr = *buffStr;
-   ulong maxLenUL = 0; 
+   unsigned int uiCig = 0;
+   signed char *tmpStr = *buffStr;
+   unsigned long maxLenUL = 0; 
 
    maxLenUL =
         (samSTPtr)->lenQryIdUC
@@ -1636,7 +1905,7 @@ p_samEntry(
    tmpStr = *buffStr;
    
    if(! (*buffStr))
-      goto memErr_fun14;
+      goto memErr_fun15;
    
    else if(
          (samSTPtr)->extraStr[0] == '@'
@@ -1648,7 +1917,7 @@ p_samEntry(
          (samSTPtr)->extraStr
       ); /*Print out the header (in extra since commnet)*/
 
-      goto noErr_fun14;
+      goto noErr_fun15;
    } /*Else If: this was a header*/
    
    /*Copy the query id to the buffer*/
@@ -1705,21 +1974,24 @@ p_samEntry(
    *tmpStr++ = '\t';
 
    /*RNEXT*/
-   cpLen_ulCp(
-      tmpStr,
-      (samSTPtr)->rNextStr,
-      (samSTPtr)->lenRNextUC
-   );
+   if(samSTPtr->rNextStr[0] != '\0')
+      cpLen_ulCp(
+         tmpStr,
+         samSTPtr->rNextStr,
+         samSTPtr->lenRNextUC
+      );
+   else
+      *tmpStr++ = '*';
 
    tmpStr += (samSTPtr)->lenRNextUC;
    *tmpStr++ = '\t';
 
    /*PNEXT*/
-   tmpStr += numToStr(tmpStr, (samSTPtr)->mapqUC);
+   tmpStr += numToStr(tmpStr, (samSTPtr)->pNextSI);
    *tmpStr++ = '\t';
 
    /*TLEN*/
-   tmpStr += numToStr(tmpStr, (samSTPtr)->mapqUC);
+   tmpStr += numToStr(tmpStr, (samSTPtr)->tLenSI);
    *tmpStr++ = '\t';
 
    /*Copy the sequence to the buffer*/
@@ -1771,15 +2043,15 @@ p_samEntry(
       (FILE *) (outFILE)
    );
    
-   noErr_fun14:;
+   noErr_fun15:;
    return 0;
 
-   memErr_fun14:;
+   memErr_fun15:;
    return def_memErr_samEntry;
 } /*p_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun15: pfq_samEntry
+| Fun16: pfq_samEntry
 |   - Prints the sam entry as fastq entry to a fastq file
 | Input:
 |   - samST:
@@ -1837,7 +2109,7 @@ pfq_samEntry(
 } /*p_samEntryAsFq*/
 
 /*-------------------------------------------------------\
-| Fun16: pfa_samEntry
+| Fun17: pfa_samEntry
 |   - Prints the sam entry as fasta entry to a fasta file
 | Input:
 |   - samST:
@@ -1889,7 +2161,7 @@ pfa_samEntry(
 } /*pfa_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun17: pstats_samEntry
+| Fun18: pstats_samEntry
 |   - Prints out the stats in a samEntry struct to a file
 | Input:
 |   - samEntryST:
@@ -1915,39 +2187,39 @@ pstats_samEntry(
    signed char pNsBl,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun17 TOC:
+   ' Fun18 TOC:
    '   - Prints stats in a samEntry struct to file
-   '   o fun17 sec01:
+   '   o fun18 sec01:
    '     - variable declerations
-   '   o fun17 sec02:
+   '   o fun18 sec02:
    '     - check if comment, if not check if print header
-   '   o fun17 sec03:
+   '   o fun18 sec03:
    '     - print out general stats
-   '   o fun17 sec04:
+   '   o fun18 sec04:
    '     - print matches, snps, ins, dels, and masking.
    '     - if asked also include anonymous bases
-   '   o fun17 sec05:
+   '   o fun18 sec05:
    '     - print out the accuracy stats
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec01:
+   ^ Fun18 Sec01:
    ^   - variable declerations 
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   uint matchNCntUI = 0;
-   uint snpNCntUI = 0;
-   uint insNCntUI = 0;
-   uint maskNCntUI = 0;
-   uint *cntUI = 0;
+   unsigned int matchNCntUI = 0;
+   unsigned int snpNCntUI = 0;
+   unsigned int insNCntUI = 0;
+   unsigned int maskNCntUI = 0;
+   unsigned int *cntUI = 0;
 
-   sint siCig = 0;
-   sint numNtSI = 0;
-   schar *tmpStr = 0;
-   uchar ntUC = 0;
+   signed int siCig = 0;
+   signed int numNtSI = 0;
+   signed char *tmpStr = 0;
+   unsigned char ntUC = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec02:
+   ^ Fun18 Sec02:
    ^   - check if comment, if not check if print header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1996,7 +2268,7 @@ pstats_samEntry(
       } /*If: I need to print the header*/
 
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun17 Sec03:
+      ^ Fun18 Sec03:
       ^   - print out general stats
       \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2013,27 +2285,27 @@ pstats_samEntry(
       );
 
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun17 Sec04:
+      ^ Fun18 Sec04:
       ^   - print matches, snps, ins, dels, and masking.
       ^   - if asked also include anonymous bases
-      ^   o fun17 sec04 sub01:
+      ^   o fun18 sec04 sub01:
       ^     - print anonymous bases; have sequence?
-      ^   o fun17 sec04 sub02:
+      ^   o fun18 sec04 sub02:
       ^     - find number anonymous bases
-      ^   o fun17 sec04 sub03:
+      ^   o fun18 sec04 sub03:
       ^     - print out anonymous base and other counts
-      ^   o fun17 sec04 sub04:
+      ^   o fun18 sec04 sub04:
       ^     - not printing anoynous bases do regular print
       \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
       /**************************************************\
-      * Fun17 Sec04 Sub01:
+      * Fun18 Sec04 Sub01:
       *   - (print anonymous bases) check if have sequence
       \**************************************************/
 
       if( pNsBl )
       { /*If: I am finding the anonymous base counts*/
-         tmpStr = (schar *) (samSTPtr)->seqStr;
+         tmpStr = (signed char *) (samSTPtr)->seqStr;
 
          if(*tmpStr == '*')
          { /*If: no sequence to check for anonymous*/
@@ -2062,17 +2334,17 @@ pstats_samEntry(
               (samSTPtr)->numMaskUI
             );
 
-            goto pqscore_fun17_sec05;
+            goto pqscore_fun18_sec05;
          } /*If: no sequence to check for anonymous*/
 
          /***********************************************\
-         * Fun17 Sec04 Sub02:
+         * Fun18 Sec04 Sub02:
          *   - find number anonymous bases
          \***********************************************/
 
          siCig = 0;
 
-         while(siCig < (sint) (samSTPtr)->lenCigUI)
+         while(siCig < (signed int) (samSTPtr)->lenCigUI)
          { /*Loop: count number of anonymous bases*/
             numNtSI = (samSTPtr)->cigArySI[siCig];
 
@@ -2113,7 +2385,7 @@ pstats_samEntry(
 
             while(numNtSI > 0)
             { /*Loop: Check each nucleotide*/
-               ntUC = ntTo5Bit[(uchar) *tmpStr];
+               ntUC = ntTo5Bit[(unsigned char) *tmpStr];
                (*cntUI) +=
                   (!!(ntUC & def_n_fithBit_ntTo5Bit));
 
@@ -2125,7 +2397,7 @@ pstats_samEntry(
          } /*Loop: count number of anonymous bases*/
 
          /***********************************************\
-         * Fun17 Sec04 Sub03:
+         * Fun18 Sec04 Sub03:
          *   - print anonymous base and other counts
          \***********************************************/
 
@@ -2164,7 +2436,7 @@ pstats_samEntry(
       } /*If: I am finding the anonymous base counts*/
 
       /**************************************************\
-      * Fun17 Sec04 Sub04:
+      * Fun18 Sec04 Sub04:
       *   - not printing anoynous bases do regular print
       \**************************************************/
 
@@ -2182,11 +2454,11 @@ pstats_samEntry(
       } /*Else: I am not counting anonymous bases*/
       
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun17 Sec05:
+      ^ Fun18 Sec05:
       ^   - print out the q-scores
       \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-      pqscore_fun17_sec05:;
+      pqscore_fun18_sec05:;
 
       fprintf(
         (FILE *) (outFILE),
@@ -2199,7 +2471,7 @@ pstats_samEntry(
 } /*pstats_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun18: revCmp_samEntry
+| Fun19: revCmp_samEntry
 |   - reverse complements a sam file sequence entry
 | Input:
 |   - samSTPtr:
@@ -2212,34 +2484,34 @@ void
 revCmp_samEntry(
    struct samEntry *samSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun18 TOC:
+   ' Fun19 TOC:
    '   - reverse complements a sam file sequence entry
-   '   o fun18 sec01:
+   '   o fun19 sec01:
    '     - variable declarations
-   '   o fun18 sec02:
+   '   o fun19 sec02:
    '     - check if have sequence and qscore entries
-   '   o fun18 sec03:
+   '   o fun19 sec03:
    '     - reverse complement sequence and q-scores
-   '   o fun18 sec04:
+   '   o fun19 sec04:
    '     - reverse the cigar and flag
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec01:
+   ^ Fun19 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *startStr = 0;
-   schar *endStr = 0;
+   signed char *startStr = 0;
+   signed char *endStr = 0;
 
-   schar *qStartStr = 0;
-   schar *qEndStr = 0;
+   signed char *qStartStr = 0;
+   signed char *qEndStr = 0;
 
-   sint *startSIPtr;
-   sint *endSIPtr;
+   signed int *startSIPtr;
+   signed int *endSIPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec02:
+   ^ Fun19 Sec02:
    ^   - check if have sequence and qscore entries
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2272,18 +2544,18 @@ revCmp_samEntry(
    } /*Else: have q-score entry*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec03:
+   ^ Fun19 Sec03:
    ^   - reverse complement sequence and q-scores
-   ^   o fun18 sec03 sub01:
+   ^   o fun19 sec03 sub01:
    ^     - reverse q-score entries + start loop
-   ^   o fun18 sec03 sub02:
+   ^   o fun19 sec03 sub02:
    ^     - reverse complement sequence entry
-   ^   o fun18 sec03 sub03:
+   ^   o fun19 sec03 sub03:
    ^     - make sure last sequence base is complement
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun18 Sec03 Sub01:
+   * Fun19 Sec03 Sub01:
    *   - reverse q-score entries + start loop
    \*****************************************************/
 
@@ -2300,7 +2572,7 @@ revCmp_samEntry(
       } /*If: have qscore entry*/
 
       /**************************************************\
-      * Fun18 Sec03 Sub02:
+      * Fun19 Sec03 Sub02:
       *   - reverse complement sequence entry
       \**************************************************/
 
@@ -2355,7 +2627,7 @@ revCmp_samEntry(
    } /*Loop: reverse complement*/
 
    /*****************************************************\
-   * Fun18 Sec03 Sub03:
+   * Fun19 Sec03 Sub03:
    *   - make sure last sequence base is complement
    \*****************************************************/
 
@@ -2386,7 +2658,7 @@ revCmp_samEntry(
    } /*If: have middle base*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec04:
+   ^ Fun19 Sec04:
    ^   - reverse the cigar and flag
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2427,7 +2699,7 @@ revCmp_samEntry(
 } /*revCmp_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun19: getHead_samEntry
+| Fun20: getHead_samEntry
 |   - get header for a sam file
 | Input:
 |   - samSTPtr:
@@ -2455,39 +2727,40 @@ getHead_samEntry(
    unsigned long *lenULPtr,
    void *samFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun19 TOC:
+   ' Fun20 TOC:
    '   - get header for a sam file
-   '   o fun19 sec01:
+   '   o fun20 sec01:
    '     - variable declarations
-   '   o fun19 sec02:
+   '   o fun20 sec02:
    '     - memory allocation and get first line
-   '   o fun19 sec03:
+   '   o fun20 sec03:
    '     - get header
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec01:
+   ^ Fun20 Sec01:
    ^   - varaible declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   #define len_fun19_samEntry 4096
+   #define len_fun20_samEntry 4096
 
    signed char errSC = 0;
    signed char *retHeapStr = 0;
    signed char *tmpStr = 0;
-   uint lenHeadUI = 0;
-   uint sizeRetUI = 0;
+   unsigned int lenHeadUI = 0;
+   unsigned int sizeRetUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec02:
+   ^ Fun20 Sec02:
    ^   - memory allocation and get first line
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   retHeapStr =malloc(len_fun19_samEntry * sizeof(schar));
-   sizeRetUI = len_fun19_samEntry;
+   retHeapStr =
+      malloc(len_fun20_samEntry * sizeof(signed char));
+   sizeRetUI = len_fun20_samEntry;
 
    if(! retHeapStr)
-      goto memErr_fun19_sec04;
+      goto memErr_fun20_sec04;
 
    errSC =
       get_samEntry(
@@ -2500,13 +2773,13 @@ getHead_samEntry(
    if(errSC)
    { /*If: had error*/
       if(errSC == def_memErr_samEntry)
-         goto memErr_fun19_sec04;
+         goto memErr_fun20_sec04;
       else
-         goto memErr_fun19_sec04; /*EOF or file error*/
+         goto memErr_fun20_sec04; /*EOF or file error*/
    } /*If: had error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec03:
+   ^ Fun20 Sec03:
    ^   - get header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2517,7 +2790,7 @@ getHead_samEntry(
 
       if(lenHeadUI + samSTPtr->lenExtraUI > sizeRetUI - 1)
       { /*If: need to resize buffer*/
-         sizeRetUI = lenHeadUI + len_fun19_samEntry;
+         sizeRetUI = lenHeadUI + len_fun20_samEntry;
          sizeRetUI += samSTPtr->lenExtraUI;
 
          tmpStr =
@@ -2527,7 +2800,7 @@ getHead_samEntry(
             );
 
          if(! tmpStr)
-            goto memErr_fun19_sec04;
+            goto memErr_fun20_sec04;
 
          retHeapStr = tmpStr;
          tmpStr = 0;
@@ -2553,27 +2826,27 @@ getHead_samEntry(
    } /*Loop: get header*/
 
    if(errSC == def_memErr_samEntry)
-      goto memErr_fun19_sec04;
+      goto memErr_fun20_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec04:
+   ^ Fun20 Sec04:
    ^   - return result
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto ret_fun19_sec04;
+   goto ret_fun20_sec04;
 
-   memErr_fun19_sec04:;
+   memErr_fun20_sec04:;
    if(retHeapStr)
       free(retHeapStr);
    retHeapStr = 0;
-   goto ret_fun19_sec04;
+   goto ret_fun20_sec04;
 
-   ret_fun19_sec04:;
+   ret_fun20_sec04:;
    return retHeapStr;
 } /*getHead_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun20: blank_refs_samEntry
+| Fun21: blank_refs_samEntry
 |   - blanks a refs_samEntry struct
 | Input:
 |   - refsSTPtr:
@@ -2596,7 +2869,7 @@ blank_refs_samEntry(
 } /*blank_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun21: init_refs_samEntry
+| Fun22: init_refs_samEntry
 |   - initializes a refs_samEntry struct
 | Input:
 |   - refsSTPtr:
@@ -2617,7 +2890,7 @@ init_refs_samEntry(
 } /*init_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun22: freeStack_refs_samEntry
+| Fun23: freeStack_refs_samEntry
 |   - frees variables in a refs_samEntry struct
 | Input:
 |   - refsSTPtr:
@@ -2643,7 +2916,7 @@ freeStack_refs_samEntry(
 } /*freeStack_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun23: freeHeap_refs_samEntry
+| Fun24: freeHeap_refs_samEntry
 |   - frees a refs_samEntry struct
 | Input:
 |   - refsSTPtr:
@@ -2664,7 +2937,7 @@ freeHeap_refs_samEntry(
 } /*freeHeap_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun24: setup_refs_samEntry
+| Fun25: setup_refs_samEntry
 |   - allocates memory for a refs_samEntry struct
 | Input:
 |   - refsSTPtr:
@@ -2700,29 +2973,29 @@ setup_refs_samEntry(
    refSTPtr->lenAryUI =
       calloc(
          numRefsUI,
-         sizeof(uint)
+         sizeof(unsigned int)
       );
 
    if(! refSTPtr->lenAryUI)
-      goto memErr_fun24;
+      goto memErr_fun25;
 
 
    refSTPtr->idAryStr = mk_strAry(numRefsUI);
 
    if(! refSTPtr->idAryStr)
-      goto memErr_fun24;
+      goto memErr_fun25;
 
    refSTPtr->arySizeUI = numRefsUI;
    blank_refs_samEntry(refSTPtr);
 
    return 0;
 
-   memErr_fun24:;
+   memErr_fun25:;
    return def_memErr_samEntry;
 } /*setup_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun25: realloc_refs_samEntry
+| Fun26: realloc_refs_samEntry
 |   - reallocates memory for a refs_samEntry struct
 | Input:
 |   - refsSTPtr:
@@ -2743,23 +3016,23 @@ realloc_refs_samEntry(
    struct refs_samEntry *refSTPtr,
    unsigned int numRefsUI
 ){
-   schar *tmpSCPtr = 0;
+   signed char *tmpSCPtr = 0;
 
    if(numRefsUI == refSTPtr->numRefUI)
-      goto done_fun24; /*already correct size*/
+      goto done_fun25; /*already correct size*/
 
 
    tmpSCPtr =
-      (schar *)
+      (signed char *)
       realloc(
          refSTPtr->lenAryUI,
-         numRefsUI * sizeof(uint)
+         numRefsUI * sizeof(unsigned int)
       );
 
    if(! tmpSCPtr)
-      goto memErr_fun24;
+      goto memErr_fun25;
 
-   refSTPtr->lenAryUI = (uint *) tmpSCPtr;
+   refSTPtr->lenAryUI = (unsigned int *) tmpSCPtr;
 
 
    tmpSCPtr =
@@ -2769,21 +3042,21 @@ realloc_refs_samEntry(
       );
 
    if(! tmpSCPtr)
-      goto memErr_fun24;
+      goto memErr_fun25;
 
    refSTPtr->idAryStr = tmpSCPtr;
 
    refSTPtr->arySizeUI = numRefsUI;
 
-   done_fun24:;
+   done_fun25:;
       return 0;
 
-   memErr_fun24:;
+   memErr_fun25:;
       return def_memErr_samEntry;
 } /*realloc_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun26: getRefLen_samEntry
+| Fun27: getRefLen_samEntry
 |   - gets reference ids and length from a sam file header
 | Input:
 |   - refSTPtr:
@@ -2833,31 +3106,31 @@ getRefLen_samEntry(
    signed char **headStrPtr,     /*holds non-ref header*/
    unsigned long *lenHeadULPtr   /*length of headStrPtr*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun26 TOC:
+   ' Fun27 TOC:
    '   - gets reference ids and length from sam header
-   '   o fun26 sec01:
+   '   o fun27 sec01:
    '     - variable declarations
-   '   o fun26 sec02:
+   '   o fun27 sec02:
    '     - blank and get first line of sam file
-   '   o fun26 sec03:
+   '   o fun27 sec03:
    '     - get reference lengths
-   '   o fun26 sec04:
+   '   o fun27 sec04:
    '     - return results
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec01:
+   ^ Fun27 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
-   schar *tmpStr = 0;
-   schar *cpStr = 0;
+   signed char errSC = 0;
+   signed char *tmpStr = 0;
+   signed char *cpStr = 0;
 
    unsigned long headBytesUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec02:
+   ^ Fun27 Sec02:
    ^   - blank and get first line of sam file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2868,20 +3141,20 @@ getRefLen_samEntry(
 
    else if(! *headStrPtr)
    { /*If: need memory*/
-      *headStrPtr = malloc(4096 * sizeof(schar));
+      *headStrPtr = malloc(4096 * sizeof(signed char));
 
       if(! *headStrPtr)
-         goto memErr_fun26_sec04;
+         goto memErr_fun27_sec04;
 
       *lenHeadULPtr = 4069;
    } /*If: need memory*/
 
    if(! *buffStrPtr)
    { /*If: need memory*/
-      *buffStrPtr = malloc(4096 * sizeof(schar));
+      *buffStrPtr = malloc(4096 * sizeof(signed char));
 
       if(! *buffStrPtr)
-         goto memErr_fun26_sec04;
+         goto memErr_fun27_sec04;
 
       *lenBuffULPtr = 4069;
    } /*If: need memory*/
@@ -2897,32 +3170,32 @@ getRefLen_samEntry(
    if(errSC)
    { /*If: had error*/
       if(errSC == def_memErr_samEntry)
-         goto memErr_fun26_sec04;
+         goto memErr_fun27_sec04;
       else
-         goto fileErr_fun26_sec04;
+         goto fileErr_fun27_sec04;
    } /*If: had error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec03:
+   ^ Fun27 Sec03:
    ^   - get reference lengths
-   ^   o fun26 sec03 sub01:
+   ^   o fun27 sec03 sub01:
    ^     - check if have sequence header
-   ^   o fun26 sec03 sub02:
+   ^   o fun27 sec03 sub02:
    ^     - check if have enough memory for header
-   ^   o fun26 sec03 sub03:
+   ^   o fun27 sec03 sub03:
    ^     - copy reference id and move to length
-   ^   o fun26 sec03 sub04:
+   ^   o fun27 sec03 sub04:
    ^     - get length and incurment ref number
-   ^   o fun26 sec03 sub05:
+   ^   o fun27 sec03 sub05:
    ^     - copy no reference header
-   ^   o fun26 sec03 sub06:
+   ^   o fun27 sec03 sub06:
    ^     - get next entry
-   ^   o fun26 sec03 sub07:
+   ^   o fun27 sec03 sub07:
    ^     - final error check and sort ids
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun26 Sec03 Sub01:
+   * Fun27 Sec03 Sub01:
    *   - check if have sequence header
    \*****************************************************/
 
@@ -2942,11 +3215,11 @@ getRefLen_samEntry(
           while(*tmpStr++ != ':')
           { /*Loop: past next part of SQ line*/
              if(*tmpStr < 31)
-                goto nextEntry_fun26_sec03_sub06;
+                goto nextEntry_fun27_sec03_sub06;
           } /*Loop: past next part of SQ line*/
 
           /**********************************************\
-          * Fun26 Sec03 Sub02:
+          * Fun27 Sec03 Sub02:
           *   - check if have enough memory for header
           \**********************************************/
 
@@ -2959,11 +3232,11 @@ getRefLen_samEntry(
                 );
 
                 if(errSC)
-                   goto memErr_fun26_sec04;
+                   goto memErr_fun27_sec04;
           } /*If: need more memory*/
 
           /**********************************************\
-          * Fun26 Sec03 Sub03:
+          * Fun27 Sec03 Sub03:
           *   - copy reference id and move to length
           \**********************************************/
 
@@ -2983,17 +3256,17 @@ getRefLen_samEntry(
           ++tmpStr;
          
           if(*tmpStr < 31 )
-             goto fileErr_fun26_sec04; /*end of line*/
+             goto fileErr_fun27_sec04; /*end of line*/
 
           /*Move past the LN: flag*/
           while(*tmpStr++ !=':')
           { /*Loop: get past LN: flag*/
              if(*tmpStr < 31)
-                goto fileErr_fun26_sec04; /*non-numeric*/
+                goto fileErr_fun27_sec04; /*non-numeric*/
           } /*Loop: get past LN: flag*/
 
           /**********************************************\
-          * Fun26 Sec03 Sub04:
+          * Fun27 Sec03 Sub04:
           *   - get length and incurment ref number
           \**********************************************/
 
@@ -3005,13 +3278,13 @@ getRefLen_samEntry(
              );
 
           if(*tmpStr > 31)
-             goto fileErr_fun26_sec04; /*non-numeric*/
+             goto fileErr_fun27_sec04; /*non-numeric*/
 
           ++refSTPtr->numRefUI; /*will end at index 1*/
        } /*If: has length information*/
 
        /*************************************************\
-       * Fun26 Sec03 Sub05:
+       * Fun27 Sec03 Sub05:
        *   - copy no reference header
        \*************************************************/
 
@@ -3027,11 +3300,11 @@ getRefLen_samEntry(
                 realloc(
                    *headStrPtr,
                      ((*lenHeadULPtr << 1) + 1)
-                   * sizeof(schar)
+                   * sizeof(signed char)
                 );
 
              if(! tmpStr)
-                goto memErr_fun26_sec04;
+                goto memErr_fun27_sec04;
 
             *headStrPtr = tmpStr;
             *tmpStr = '\0';
@@ -3054,11 +3327,11 @@ getRefLen_samEntry(
        } /*Else: is non-reference header*/
 
        /*************************************************\
-       * Fun26 Sec03 Sub06:
+       * Fun27 Sec03 Sub06:
        *   - get next entry
        \*************************************************/
 
-       nextEntry_fun26_sec03_sub06:;
+       nextEntry_fun27_sec03_sub06:;
 
        if(outFILE)
        { /*If: printing the header*/
@@ -3081,12 +3354,12 @@ getRefLen_samEntry(
    } /*Loop: get reference entries*/
 
    /*****************************************************\
-   * Fun26 Sec03 Sub07:
+   * Fun27 Sec03 Sub07:
    *   - final error check and sort ids
    \*****************************************************/
 
    if(errSC == def_memErr_samEntry)
-      goto memErr_fun26_sec04;
+      goto memErr_fun27_sec04;
 
    sortSync_strAry(
       refSTPtr->idAryStr,
@@ -3095,27 +3368,27 @@ getRefLen_samEntry(
    ); /*sort by reference id name (quicker find later)*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec04:
+   ^ Fun27 Sec04:
    ^   - return results
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    errSC = 0;
-   goto ret_fun26_sec04;
+   goto ret_fun27_sec04;
 
-   memErr_fun26_sec04:;
+   memErr_fun27_sec04:;
    errSC = def_memErr_samEntry;
-   goto ret_fun26_sec04;
+   goto ret_fun27_sec04;
 
-   fileErr_fun26_sec04:;
+   fileErr_fun27_sec04:;
    errSC = def_fileErr_samEntry;
-   goto ret_fun26_sec04;
+   goto ret_fun27_sec04;
 
-   ret_fun26_sec04:;
+   ret_fun27_sec04:;
    return errSC;
 } /*getRefLen_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun27: findRef_refs_samEntry
+| Fun28: findRef_refs_samEntry
 |   - finds a reference id in a refs_samEntry struct
 | Input:
 |   - idStr:
@@ -3141,7 +3414,7 @@ findRef_refs_samEntry(
 } /*findRef_refs_samEntry*/
 
 /*-------------------------------------------------------\
-| Fun28: addRef_samEntry
+| Fun29: addRef_samEntry
 |   - adds reference information to array in refStack
 | Input:
 |   - idStr:
@@ -3187,7 +3460,7 @@ addRef_samEntry(
          );
 
       if(*errSCPtr)
-         goto memErr_fun28;
+         goto memErr_fun29;
 
       *errSCPtr = def_expand_samEntry;
    } /*If: need more memory*/
@@ -3205,7 +3478,7 @@ addRef_samEntry(
 
    return *errSCPtr;
 
-   memErr_fun28:;
+   memErr_fun29:;
       return def_memErr_samEntry;
 } /*addRef_samEntry*/
 

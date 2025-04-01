@@ -57,7 +57,7 @@
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
 #include "../genLib/genMath.h"
-#include "../genBio/codonTbl.h"
+#include "../genBio/codonFun.h"
 
 #include "../tbAmrSrc/drugAry.h"
 #include "../tbAmrSrc/amrST.h"
@@ -67,6 +67,7 @@
 #include "../genLib/dataTypeShortHand.h"
 #include "../genBio/ntTo2Bit.h"
 #include "../genBio/revNtTo2Bit.h"
+#include "../genBio/codonTbl.h"
 
 /*-------------------------------------------------------\
 | Fun01: amrIsRes_whoToAmr
@@ -2791,7 +2792,7 @@ parseVarId_whoToAmr(
 
      else 
      { /*Else: not a stop codon*/
-        firstAaSC = aaTripToChar_codonTbl(varStr);
+        firstAaSC = aaTripToChar_codonFun(varStr);
         varStr += 3;
      } /*Else: not a stop codon*/
 
@@ -2968,7 +2969,7 @@ parseVarId_whoToAmr(
 
         /*three letter amino acid code*/
         else
-           secAaSC = aaTripToChar_codonTbl(varStr);
+           secAaSC = aaTripToChar_codonFun(varStr);
 
         if(
            addOneAa_whoToAmr(
@@ -3024,7 +3025,7 @@ parseVarId_whoToAmr(
 
      else
      { /*Else: has three letter code*/
-        secAaSC = aaTripToChar_codonTbl(varStr);
+        secAaSC = aaTripToChar_codonFun(varStr);
         varStr += 3;
      } /*Else: has three letter code*/
 
@@ -3142,7 +3143,7 @@ parseVarId_whoToAmr(
 
            else
            { /*Else: three letter codon*/
-              *cpStr++ = aaTripToChar_codonTbl(varStr);
+              *cpStr++ = aaTripToChar_codonFun(varStr);
               varStr += 3;
            } /*Else: three letter codon*/
         } /*Loop: copy aa from varStr*/
@@ -3313,7 +3314,7 @@ parseVarId_whoToAmr(
 
         else
         { /*Else: three letter codon*/
-           *cpStr++ = aaTripToChar_codonTbl(varStr);
+           *cpStr++ = aaTripToChar_codonFun(varStr);
            varStr += 3;
         } /*Else: three letter codon*/
      } /*Loop: copy aa from varStr*/

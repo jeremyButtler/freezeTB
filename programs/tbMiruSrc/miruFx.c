@@ -53,6 +53,7 @@
 !   - .c  #include "../genAln/memwater.h"
 !   - .h  #include "../genLib/genMath.h"
 !   - .h  #include "../genLib/alnDefs.h"
+!   - .h  #include "../genBio/kmerBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -80,6 +81,15 @@ swap_refST_kmerFind_miruFx(
    float fSwap = 0;
    struct seqST *seqSwapPtr = 0;
 
+
+   refAryST[firstSI].lenKmerUC ^=
+      refAryST[secSI].lenKmerUC;
+   refAryST[secSI].lenKmerUC ^=
+      refAryST[firstSI].lenKmerUC;
+   refAryST[firstSI].lenKmerUC ^=
+      refAryST[secSI].lenKmerUC;
+
+
    refAryST[firstSI].minKmersUI ^=
       refAryST[secSI].minKmersUI;
    refAryST[secSI].minKmersUI ^=
@@ -106,14 +116,6 @@ swap_refST_kmerFind_miruFx(
    refAryST[firstSI].maxRevScoreF =
       refAryST[secSI].maxRevScoreF;
    refAryST[secSI].maxRevScoreF = fSwap;
-
-
-   refAryST[firstSI].lenAryUI ^=
-      refAryST[secSI].lenAryUI;
-   refAryST[secSI].lenAryUI ^=
-      refAryST[firstSI].lenAryUI;
-   refAryST[firstSI].lenAryUI ^=
-      refAryST[secSI].lenAryUI;
 
 
    siSwapPtr = refAryST[firstSI].forKmerArySI;

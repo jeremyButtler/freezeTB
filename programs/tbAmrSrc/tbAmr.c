@@ -35,7 +35,6 @@
 #include "amrST.h"
 
 /*Only .h file*/
-#include "../genLib/dataTypeShortHand.h"
 #include "tbAmrDefs.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
@@ -289,10 +288,16 @@ void phelp_tbAmr(
    *   o fun02 sec02 sub04 cat01:
    *     - checking frameshift paramater
    *   o fun02 sec02 sub04 cat02:
-   *     - min depth paramater
+   *     - minimum frameshift precent support
    *   o fun02 sec02 sub04 cat03:
-   *     - min % reads mapping parameter
+   *     - indels in amino acid SNP AMRs
    *   o fun02 sec02 sub04 cat04:
+   *     - min depth paramater
+   *   o fun02 sec02 sub04 cat05:
+   *     - min % reads mapping parameter
+   *   o fun02 sec02 sub04 cat06:
+   *     - Min % indel support
+   *   o fun02 sec02 sub04 cat07:
    *     - min % of total reads parameter
    \*****************************************************/
 
@@ -335,6 +340,50 @@ void phelp_tbAmr(
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
     + Fun02 Sec02 Sub04 Cat02:
+    +   - minimum frameshift precent support
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(
+       (FILE *) outFILE,
+       "  -frameshift-sup %0.2f: [Optional; %0.2f]\n",
+       def_framshiftSup_tbAmrDefs,
+       def_framshiftSup_tbAmrDefs
+    );
+
+   fprintf(
+      (FILE *) outFILE,
+      "    o Minimum percent support to keep frameshift\n"
+   );
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun02 Sec02 Sub04 Cat03:
+    +   - indels in amino acid SNP AMRs
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    if(def_aaIndel_tbAmrDefs)
+       fprintf(
+          (FILE *) outFILE,
+          "  -aa-indel: [Optinal; Yes]\n"
+       );
+    else
+       fprintf(
+          (FILE *) outFILE,
+          "  -aa-indel: [Optinal; No]\n"
+       );
+
+
+    fprintf(
+       (FILE *) outFILE,
+       "    o allow indels in SNP amino acid AMRs\n"
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "    o Turn off with: -no-aa-indel\n"
+    );
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun02 Sec02 Sub04 Cat04:
     +   - min depth paramater
     \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -356,7 +405,7 @@ void phelp_tbAmr(
     );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
-    + Fun02 Sec02 Sub04 Cat03:
+    + Fun02 Sec02 Sub04 Cat05:
     +   - Min % reads mapping parameter
     \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -383,7 +432,25 @@ void phelp_tbAmr(
     );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
-    + Fun02 Sec02 Sub04 Cat04:
+    + Fun02 Sec02 Sub04 Cat06:
+    +   - Min % indel support
+    \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    fprintf(
+       (FILE *) outFILE,
+       "  -indel-sup %.2f: [Optional; %.2f]\n",
+       def_minIndelSup_tbAmrDefs,
+       def_minIndelSup_tbAmrDefs
+   );
+
+    fprintf(
+       (FILE *) outFILE,
+       "    o Minimum percent support to keep indel\n"
+    );
+
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
+    + Fun02 Sec02 Sub04 Cat07:
     +   - Min % of total reads parameter
     \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -462,6 +529,10 @@ void phelp_tbAmr(
 |     o set to 1 if user input reads (as sam file)
 |   - framshiftBl:
 |     o set to 1 (check frameshits) or 0 (do not check)
+|   - aaIndeBl:
+|     o set to 1 if user wanted indel in snp aa AMRs
+|     o set to 0 if user wanted indels only on indel aa
+|       AMRs
 |   - minDepthUI:
 |     o min read depth the user input
 |   - minPerMapF:
@@ -470,6 +541,10 @@ void phelp_tbAmr(
 |   - minPercTotalF:
 |     o set to the min percent of reads total reads to
 |       keep an AMR the user wants
+|   - minFramSupFPtr:
+|     o minimum percent support to keep a frameshift
+|   - minIndelPerFPtr:
+|     o minimum percent support to keep a indel AMR
 | Output:
 |   - Modifies:
 |     o all input variables
@@ -483,14 +558,17 @@ input_tbAmr(
    int numArgsSI,
    char *argAryStr[],
    signed char **amrTblStr,  /*table with AMRs*/
-   signed char **samFileStr,  /*sam file to check*/
-   signed char **outFileStr,  /*file to output to*/
-   signed char **idFileStr,   /*prefix for read id files*/
-   signed char *readsBl,      /*1: user input reads*/
-   signed char *frameshiftBl, /*1: checking frameshifts*/
-   uint *minDepthUI,   /*min read depth to keep an amr*/
-   float *minPercMapF, /*min % support to keep amr; read*/
-   float *minPercTotalF/*min % mapped reads to keep*/
+   signed char **samFileStr, /*sam file to check*/
+   signed char **outFileStr, /*file to output to*/
+   signed char **idFileStr,  /*prefix for read id files*/
+   signed char *readsBl,     /*1: user input reads*/
+   signed char *frameshiftBl,/*1: checking frameshifts*/
+   signed char *aaIndelBl ,  /*1: indel in SNP aa AMR*/
+   unsigned int *minDepthUI, /*read depth to keep an amr*/
+   float *minPercMapF,      /*% read support to keep amr*/
+   float *minPercTotalF,     /*% mapped reads to keep*/
+   float *minFramSupFPtr,    /*% support for frameshift*/
+   float *minIndelPerFPtr    /*% support to keep indel*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun03 TOC:
    '   - gets user input
@@ -509,9 +587,9 @@ input_tbAmr(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *tmpStr = 0;
-   schar errSC = 0;
-   sint siArg = 1;
+   signed char *tmpStr = 0;
+   signed char errSC = 0;
+   signed int siArg = 1;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -536,12 +614,14 @@ input_tbAmr(
    ^   o fun03 sec03 sub04:
    ^     - frameshift settings
    ^   o fun03 sec03 sub05:
-   ^     - help message checks
+   ^     - indels allowed in amino acid AMRs
    ^   o fun03 sec03 sub06:
-   ^     - version number checks
+   ^     - help message checks
    ^   o fun03 sec03 sub07:
+   ^     - version number checks
+   ^   o fun03 sec03 sub09:
    ^     - invalid input
-   ^   o fun03 sec03 sub08:
+   ^   o fun03 sec03 sub09:
    ^     - move to next argument
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -554,36 +634,36 @@ input_tbAmr(
    { /*Loop: get input*/
       if(
          ! eql_charCp(
-            (schar *) "-amr-tbl",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-amr-tbl",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*If: amr table*/
          ++siArg;
-         *amrTblStr = (schar *) argAryStr[siArg];
+         *amrTblStr = (signed char *) argAryStr[siArg];
       } /*If: amr table*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-sam",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-sam",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: sam file with reads*/
          ++siArg;
-         *samFileStr = (schar *) argAryStr[siArg];
+         *samFileStr = (signed char *) argAryStr[siArg];
          *readsBl = 1;
       } /*Else if: sam file with reads*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-sam-con",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-sam-con",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: sam file with consensuses*/
          ++siArg;
-         *samFileStr = (schar *) argAryStr[siArg];
+         *samFileStr = (signed char *) argAryStr[siArg];
          *readsBl = 0;
       } /*Else if: sam file with consensuses*/
 
@@ -594,25 +674,25 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-out",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-out",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: output file*/
          ++siArg;
-         *outFileStr = (schar *) argAryStr[siArg];
+         *outFileStr = (signed char *) argAryStr[siArg];
       } /*Else if: output file*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-id-file",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-id-file",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       )
       { /*Else if: output id file*/
          ++siArg;
-         *idFileStr = (schar *) argAryStr[siArg];
+         *idFileStr = (signed char *) argAryStr[siArg];
       } /*Else if: output id file*/
 
       /**************************************************\
@@ -622,17 +702,17 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-min-depth",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-min-depth",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: minimum read depth for AMR*/
          ++siArg;
-         tmpStr = (schar *) argAryStr[siArg];
+         tmpStr = (signed char *) argAryStr[siArg];
 
          tmpStr +=
            strToUI_base10str(
-              (schar *) argAryStr[siArg],
+              (signed char *) argAryStr[siArg],
               minDepthUI
            );
 
@@ -650,9 +730,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-min-amr-map-perc",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-min-amr-map-perc",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: minimum map percent input*/
          ++siArg;
@@ -661,14 +741,38 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-min-total-map-perc",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-min-total-map-perc",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: total map percent input*/
          ++siArg;
          *minPercTotalF= atof(argAryStr[siArg]);
       } /*Else if: total map percent input*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-indel-sup",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else if: minumum indel percent support*/
+         ++siArg;
+         *minIndelPerFPtr = atof(argAryStr[siArg]);
+
+         if(
+               *minIndelPerFPtr < 0
+            || *minIndelPerFPtr > 1
+         ){ /*If: input out of range*/
+            fprintf(
+               stderr,
+               "-indel-sup %s must be between 0 and 1\n",
+               argAryStr[siArg]
+            );
+
+            goto err_fun03_sec04;
+         }  /*If: input out of range*/
+      }  /*Else if: minumum indel percent support*/
 
       /**************************************************\
       * Fun03 Sec03 Sub04:
@@ -677,30 +781,93 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-frameshift",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-frameshift",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ) *frameshiftBl = 1;
 
       else if( 
          ! eql_charCp(
-            (schar *) "-no-frameshift",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-no-frameshift",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ) *frameshiftBl = 0;
 
+      else if(
+         ! eql_charCp(
+            (signed char *) "-frameshift-sup",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: changing min frameshift support*/
+         *frameshiftBl = 1;
+         ++siArg;
+         tmpStr = (signed char *) argAryStr[siArg];
+
+         tmpStr +=
+           strToF_base10str(
+              (signed char *) argAryStr[siArg],
+              minFramSupFPtr
+           );
+
+         if(*tmpStr != '\0')
+         { /*If: non-numeric or to large*/
+             fprintf(
+                stderr,
+                "-frameshift-sup %s; non-numeric\n",
+                argAryStr[siArg]
+             );
+
+            goto err_fun03_sec04;
+         } /*If: non-numeric or to large*/
+
+         if(
+               *minFramSupFPtr > 1
+            || *minFramSupFPtr < 0
+         ){ /*If: out of bounds*/
+             fprintf(
+               stderr,
+               "-frameshift-sup %s; not between 0 to 1\n",
+               argAryStr[siArg]
+             );
+
+            goto err_fun03_sec04;
+         }  /*If: out of bounds*/
+      }  /*Else If: changing min frameshift support*/
+
       /**************************************************\
       * Fun03 Sec03 Sub05:
+      *   - indels allowed in amino acid AMRs
+      \**************************************************/
+
+      else if( 
+         ! eql_charCp(
+            (signed char *) "-aa-indel",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ) *aaIndelBl = 1;
+
+      else if( 
+         ! eql_charCp(
+            (signed char *) "-no-aa-indel",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ) *aaIndelBl = 0;
+
+      /**************************************************\
+      * Fun03 Sec03 Sub06:
       *   - help message checks
       \**************************************************/
 
       else if(
          ! eql_charCp(
-            (schar *) "-h",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-h",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: help message*/
          phelp_tbAmr(stdout);
@@ -709,9 +876,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "--h",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--h",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: help message*/
          phelp_tbAmr(stdout);
@@ -720,9 +887,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "help",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: help message*/
          phelp_tbAmr(stdout);
@@ -731,9 +898,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-help",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: help message*/
          phelp_tbAmr(stdout);
@@ -742,9 +909,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "--help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--help",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: help message*/
          phelp_tbAmr(stdout);
@@ -752,15 +919,15 @@ input_tbAmr(
       } /*Else if: help message*/
 
       /**************************************************\
-      * Fun03 Sec03 Sub06:
+      * Fun03 Sec03 Sub07:
       *   - version number checks
       \**************************************************/
 
       else if(
          ! eql_charCp(
-            (schar *) "-v",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-v",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: version number*/
          pversion_tbAmr(stdout);
@@ -769,9 +936,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "--v",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--v",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: version number*/
          pversion_tbAmr(stdout);
@@ -780,9 +947,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "version",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: version number*/
          pversion_tbAmr(stdout);
@@ -791,9 +958,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "-version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-version",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: version number*/
          pversion_tbAmr(stdout);
@@ -802,9 +969,9 @@ input_tbAmr(
 
       else if(
          ! eql_charCp(
-            (schar *) "--version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--version",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else if: version number*/
          pversion_tbAmr(stdout);
@@ -812,7 +979,7 @@ input_tbAmr(
       } /*Else if: version number*/
 
       /**************************************************\
-      * Fun03 Sec03 Sub07:
+      * Fun03 Sec03 Sub08:
       *   - invalid input
       \**************************************************/
 
@@ -828,7 +995,7 @@ input_tbAmr(
       } /*Else: invalid input*/
 
       /**************************************************\
-      * Fun03 Sec03 Sub08:
+      * Fun03 Sec03 Sub09:
       *   - move to next argument
       \**************************************************/
 
@@ -845,15 +1012,15 @@ input_tbAmr(
 
    phelp_fun03_sec04:;
    pversion_fun03_sec04:;
-   errSC = 1;
-   goto ret_fun03_sec04;
+      errSC = 1;
+      goto ret_fun03_sec04;
 
    err_fun03_sec04:;
-   errSC = 2;
-   goto ret_fun03_sec04;
+      errSC = 2;
+      goto ret_fun03_sec04;
 
    ret_fun03_sec04:;
-   return errSC;
+      return errSC;
 } /*input_tbAmr*/
 
 /*-------------------------------------------------------\
@@ -873,11 +1040,11 @@ main(
    ' Main TOC:
    '   o main sec01:
    '     - variable declerations
-   '   o main Sec02:
+   '   o main sec02:
    '     - get and check user input (open files)
-   '   o main Sec03:
+   '   o main sec03:
    '     - open amr table file and get AMRs
-   '   o main Sec04:
+   '   o main sec04:
    '     - check for resistance mutations
    '   o main Sec05:
    '     - clean up
@@ -889,26 +1056,36 @@ main(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*user input variables*/
-   schar *amrTblStr = 0;  /*table with AMRs*/
-   schar *samFileStr = 0; /*sequences to check for AMRs*/
-   schar *outFileStr = 0; /*holds path to output file*/
-   schar *idFileStr = 0;  /*name of file to print ids to*/
+   signed char *amrTblStr = 0;  /*table with AMRs*/
+   signed char *samFileStr = 0; /*gets sam file entries*/
+   signed char *outFileStr = 0; /*path to output file*/
+   signed char *idFileStr = 0;
+      /*name of file to print ids to*/
 
-   schar readsBl;     /*tells if read/consensus sam file*/
+   signed char readsBl;
+     /*tells if read/consensus sam file*/
 
    /*read filtering settings*/
-   uint minDepthUI = def_minDepth_tbAmrDefs;
+   unsigned int minDepthUI = def_minDepth_tbAmrDefs;
    float minPercMapF = def_minPercMapped_tbAmrDefs;
    float minPercTotalF = def_minPercTotalReads_tbAmrDefs;
-   schar frameshiftBl = def_checkFramshift_tbAmrDefs;
+   float minIndelSupF = def_minIndelSup_tbAmrDefs;
+   signed char aaIndelBl = def_aaIndel_tbAmrDefs;
 
-   schar *drugHeapAryStr = 0;/*holds antibiotic names*/
-   sint numDrugsSI = 0;  /*holds number drugs in drugAry*/
-   sint maxDrugsSI = 0;  /*max drugs drugAry can have*/
+   float minShiftSupF = def_framshiftSup_tbAmrDefs;
+   signed char frameshiftBl =
+      def_checkFramshift_tbAmrDefs;
+
+   signed char *drugHeapAryStr = 0;
+      /*holds antibiotic names*/
+   signed int numDrugsSI = 0;
+      /*holds number drugs in drugAry*/
+   signed int maxDrugsSI = 0;
+     /*max drugs drugAry can have*/
    
-   schar errSC = 0;
+   signed char errSC = 0;
 
-   uint numAmrUI = 0;
+   unsigned int numAmrUI = 0;
 
    FILE *checkFILE = 0;
 
@@ -940,9 +1117,12 @@ main(
         &idFileStr,    /*prefix for read id files*/
         &readsBl,      /*1: user input reads*/
         &frameshiftBl, /*1: user wants frameshift checks*/
+        &aaIndelBl,    /*1: allow indels in snp aa AMRs*/
         &minDepthUI,   /*min read depth to keep an amr*/
         &minPercMapF,  /*min % support to keep amr; read*/
-        &minPercTotalF /*min % mapped reads to keep*/
+        &minPercTotalF,/*min % mapped reads to keep*/
+        &minShiftSupF, /*min % support for frameshift*/
+        &minIndelSupF  /*min % support to keep indel*/
      );
 
    if(errSC)
@@ -993,7 +1173,7 @@ main(
       checkFILE =
          fopen(
             (char *) outFileStr,
-            "r"
+            "w"
          );
 
       if(! checkFILE)
@@ -1076,13 +1256,16 @@ main(
    errSC =
       samFindAmrs_checkAmr(
          amrHeapST,
-         (sint) numAmrUI,
+         (signed int) numAmrUI,
          drugHeapAryStr,
          readsBl,      /*reads or consesnsuses*/
          frameshiftBl, /*process frameshifts*/
+         aaIndelBl,
          minDepthUI,   /*minimum read depth*/
          minPercMapF,  /*min % support to keep amr*/
          minPercTotalF,/*min % mapped reads to keep*/
+         minIndelSupF, /*min % support to keep indel*/
+         minShiftSupF, /*min % support for frameshift*/
          samFileStr,
          outFileStr,
          idFileStr /*prefix for variant read id files*/
@@ -1177,7 +1360,7 @@ main(
 
    checkFILE = 0;
 
-   return (sint) errSC;
+   return (signed int) errSC;
 } /*main*/
 
 /*=======================================================\

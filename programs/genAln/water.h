@@ -9,8 +9,6 @@
 ' SOF: Start Of Functions
 '   o header:
 '     - forward declerations and guards
-'   o .c fun01: scoreIndel_water
-'     - gets the indel score for a water alignment
 '   o fun01 water:
 '     - run a memory efficent Waterman Smith alignment on
 '       input sequences
@@ -56,6 +54,8 @@ struct dirMatrix;
 |      if they are to small
 |    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
 |      or scoreAryUL are resized
+|    o sets errSC in matrixSTPtr to def_memErr_needle if
+|      had memory errors
 |  - Returns:
 |    o score for alignment
 \-------------------------------------------------------*/

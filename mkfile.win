@@ -3,7 +3,6 @@ CC=cl
 CFLAGS= /O2 /Ot /Za /Tc
 PREFIX="%ProgramFiles%\freezeTB"
 DB_PREFIX="%PUBLIC%\Documents";
-R_SCRIPT_PATH="%PROGRAMFILES%\R\R-4.3.3\bin\Rscript.exe"
 ext=win
 O=.o.$(ext)
 
@@ -13,6 +12,7 @@ all:
 	cd ..
 
 install:
+	move programs\guiFreezeTB\guiFreezeTB.exe "$(PREFIX)"
 	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
 	copy scripts\freezeTBGui.Rscript "$(PREFIX)"
 

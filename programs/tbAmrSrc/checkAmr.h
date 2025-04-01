@@ -228,6 +228,10 @@ LofRev_checkAmr(
 |   - frameshiftBl:
 |     o 1: check for LoFs in frameshift
 |     o 0: treat frameshifts as exact matches
+|   - aaIndelBl:
+|     o 1: amino acid changes, if codon has indel not
+|          in target position, check amino acids
+|     o 0: ignore all sequences with indel in codon
 |   - errSC:
 |     o pointer to signed char to hold the error output
 | Output:
@@ -247,6 +251,7 @@ checkAmr(
    signed int numAmrSI,       /*length of amrAryST*/
    signed int *numHitsSI,     /*holds number amr hits*/
    signed char frameshiftBl,  /*1: frameshift/indel mode*/
+   signed char aaIndelBl,     /*1: check aa for indels*/
    signed char *errSC         /*for error reporting*/
 );
 
@@ -320,6 +325,12 @@ pReadHead_checkAmr(
 |   - minPercTotalF:
 |     o min percent of mapped reads needed to keep an amr
 |       (compared to all reads [total depth])
+|   - minFrameshiftF:
+|     o minimum percent support to keep a frame shift
+|   - minIndelSupF:
+|     o minimum percent support to keep an indel AMR
+|   - framShiftBl:
+|     o 1: looked for frameshifts in data
 |   - totalReadsUI:
 |     o total number of reads input
 |   - amrAryST:
@@ -338,6 +349,9 @@ pRead_checkAmr(
    unsigned int minDepthUI,
    float minPercMapF,
    float minPercTotalF,
+   float minFrameshiftF,    /*% support for frameshift*/
+   float minIndelSupF,      /*% support to keep indel*/
+   signed char frameShiftBl,/*looked for frameshifts*/
    unsigned int totalReadsUI,
    struct amrST *amrAryST,
    unsigned int numAmrsUI,
@@ -398,6 +412,10 @@ pIdVarTbl_checkAmr(
 |   - framshiftBl:
 |     o 1: check for framshifts (LoF/frameshift AMRs)
 |     o 0: ingore frameshifts (are exact matches)
+|   - aaIndelBl:
+|     o 1: amino acid changes, if codon has indel not
+|          in target position, check amino acids
+|     o 0: ignore all sequences with indel in codon
 |   - minDepthUI:
 |     o minumum depth to keep an amr (reads only)
 |   - minPercMapF:
@@ -406,6 +424,10 @@ pIdVarTbl_checkAmr(
 |   - minPercTotalF:
 |     o mininimum percent of mapped reads needed to keep
 |       an amr (all possible mapped reads; reads only)
+|   - minIndelSupF:
+|     o minimum percent support to keep an indel AMR
+|   - minFrameshiftF:
+|     o minimum percent support to keep a frame shift
 |   - samFileStr:
 |     o c-string with sam file to check for AMRs
 |   - outFileStr:
@@ -429,9 +451,12 @@ samFindAmrs_checkAmr(
    signed char *drugAryStr, /*antibiotic names*/
    signed char readsBl,     /*1: checking reads not cons*/
    signed char frameshiftBl,/*1: check frameshifts*/
+   signed char aaIndelBl,     /*1: check aa for indels*/
    unsigned int minDepthUI, /*min depth to keep amr*/
    float minPercMapF,       /*% support to keep amr*/
    float minPercTotalF,     /*% mapped reads to keep amr*/
+   float minIndelSupF,      /*%support to keep indel amr*/
+   float minFrameshiftF,    /*% support for frameshift*/
    signed char *samFileStr, /*sam file to check*/
    signed char *outFileStr, /*output file (main)*/
    signed char *idFileStr   /*output file (ids)*/

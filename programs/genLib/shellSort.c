@@ -66,6 +66,9 @@
 '     - sorts signed char array from least to greatest
 '   o fun25: dbl_shellSort
 '     - sorts a double array from least to greatest
+'   o fun26: uiTwinShort_kmerFind
+'     - sorts a unsigned int array from least to greatest
+'       and keeps it linked to a second unsigned int array
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -1848,6 +1851,134 @@ dbl_shellSort(
       subUL = (subUL - 1) / 3; /*Move to next round*/
    } /*Loop: all rounds*/
 } /*dbl_shellSort*/
+
+/*-------------------------------------------------------\
+| Fun26: uiTwinSort_shellSort
+|   - sorts a unsigned int array from least to greatest
+|     and keeps it linked to a second unsigned int array
+| Input:
+|   - uiAry:
+|     o array to sort
+|   - uiSecAry:
+|     o second array to keep in order with uiAry
+|   - startUL:
+|     o first element to start sorting at
+|   - endUL:
+|     o last element to sort (index 0)
+| Output:
+|   - Modifies:
+|     o uiAry to be sorted form least to greatest
+|     o uiSecAry to be sorted by uiAry
+\-------------------------------------------------------*/
+void
+uiTwinSort_shellSort(
+   unsigned int *uiAry,
+   unsigned int *uiSecAry,
+   unsigned long startUL,
+   unsigned long endUL
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun26 TOC:
+   '   - sorts signed int array from least to greatest
+   '   o fun26 sec01:
+   '     - variable declerations
+   '   o fun26 sec02:
+   '     - find the number of rounds to sort for
+   '   o fun26 sec03:
+   '     - sort the arrays
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun26 Sec01:
+   ^   - variable declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*Number of elements to sort*/
+   unsigned long numElmUL = endUL - startUL;
+
+   /*Number of sorting rounds*/
+   unsigned long subUL = 0;
+   unsigned long nextUL = 0;
+   unsigned long lastUL = 0;
+   unsigned long onUL = 0;
+
+   /*Variables to incurment loops*/
+   unsigned long uiIndex = 0;
+   unsigned long uiElm = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun26 Sec02:
+   ^   - find the max search value (number rounds to sort)
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(numElmUL <= 1)
+      return; /*nothing to sort*/
+
+   /*Recursion formuia: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
+   subUL = 1; /*Initialzie first array*/
+
+   while(subUL < numElmUL - 1)
+      subUL = (3 * subUL) + 1;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun26 Sec03:
+   ^   - sort arrays
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while(subUL > 0)
+   { /*Loop: all rounds*/
+      for(
+         uiIndex = 0;
+         uiIndex <= subUL;
+         ++uiIndex
+      ){ /*Loop: though sub array*/
+         uiElm = uiIndex;
+
+         for(
+            uiElm = uiIndex;
+            uiElm + subUL <= endUL;
+            uiElm += subUL
+         ){ /*Loop: swap elements in subarray*/
+            nextUL = uiElm + subUL;
+
+            if(uiAry[uiElm] > uiAry[nextUL])
+            { /*If I need to swap an element*/
+               uiAry[uiElm] ^= uiAry[nextUL];
+               uiAry[nextUL] ^= uiAry[uiElm];
+               uiAry[uiElm] ^= uiAry[nextUL];
+
+
+               uiSecAry[uiElm] ^= uiSecAry[nextUL];
+               uiSecAry[nextUL] ^= uiSecAry[uiElm];
+               uiSecAry[uiElm] ^= uiSecAry[nextUL];
+
+               lastUL = uiElm;
+               onUL = uiElm;
+
+               while(lastUL >= subUL)
+               { /*loop: move swapped element back*/
+                  lastUL -= subUL;
+
+                  if(uiAry[onUL] > uiAry[lastUL])
+                     break; /*Positioned the element*/
+   
+                  uiAry[onUL] ^= uiAry[lastUL];
+                  uiAry[lastUL] ^= uiAry[onUL];
+                  uiAry[onUL] ^= uiAry[lastUL];
+
+                  uiSecAry[onUL] ^= uiSecAry[lastUL];
+                  uiSecAry[lastUL] ^= uiSecAry[onUL];
+                  uiSecAry[onUL] ^= uiSecAry[lastUL];
+
+                  onUL = lastUL;
+               } /*Loop: move swapped element back*/
+            } /*If I need to swap elements*/
+         } /*Loop: swap elements in subarray*/
+      } /*Loop: though sub array*/
+
+      subUL = (subUL - 1) / 3; /*Move to next round*/
+   } /*Loop: all rounds*/
+} /*uiTwinSort_shellSort*/
+
 
 /*=======================================================\
 : License:

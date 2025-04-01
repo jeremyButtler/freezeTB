@@ -2773,11 +2773,11 @@ plineages_miruTbl(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siPrim = 0;
-   sint siLin = 0;
-   sint bestLinSI = 0;
+   signed int siPrim = 0;
+   signed int siLin = 0;
+   signed int bestLinSI = 0;
 
-   sint *hitAryI = 0;
+   signed int *hitAryI = 0;
    FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2799,7 +2799,7 @@ plineages_miruTbl(
          );
 
       if(! outFILE)
-         return def_fileErr_tbMiruDefs;
+         goto fileErr_fun27_sec04;
    } /*Else: user supplied an file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2897,12 +2897,21 @@ plineages_miruTbl(
 
    sort_miruTbl(miruTblSTPtr); /*So can be re-used*/
 
-   if(outFILE != stdout)
-      fclose(outFILE);
+   siPrim = 0;
+   goto ret_fun27_sec04;
 
-   outFILE = 0;
+   fileErr_fun27_sec04:;
+      siPrim = def_fileErr_tbMiruDefs; 
+      goto ret_fun27_sec04;
 
-   return 0;
+   ret_fun27_sec04:;
+      if(
+            outFILE
+         && outFILE != stdout
+      ) fclose(outFILE);
+      outFILE = 0;
+
+      return (signed char) siPrim;
 } /*plineages_miruTbl*/
 
 /*=======================================================\

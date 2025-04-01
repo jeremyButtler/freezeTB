@@ -4,16 +4,39 @@
 ########################################################*/
 
 #define def_year_freezeTBDefs 2025
-#define def_month_freezeTBDefs 01
-#define def_day_freezeTBDefs 01
+#define def_month_freezeTBDefs 3
+#define def_day_freezeTBDefs 25
 
 #define def_minMedianQ_freezeTBDefs 7
 #define def_minMeanQ_freezeTBDefs 7
+
+/*AMR settings*/
+#define def_minPercMapped_freezeTBDefs 0.1f
+#define def_amrIndelSup_freezeTBDefs 0.25f
+   /*percent support to keep indel*/
+#define def_frameshift_freezeTBDefs 1
+   /*1: check for frameshifts*/
+#define def_supFrameshift_freezeTBDefs 0.25f
+   /*percent support to keep frameshift*/
 
 #define def_adjCoord_freezeTBDefs 0
  /*1: adjust coordinates from amplicon/gene to reference*/
 #define def_mixedInfect_freezeTBDefs 0
  /*1: run mixed infection detection*/
+
+#define def_indelClean_freezeTBDefs 1
+   /*1: clean up homopolymer indels; 0 do not*/
+#define def_minHomo_freezeTBDefs 4
+   /*start removing indels if in homopolymers larger then
+   `  3 bases
+   */
+#define def_maxIndel_freezeTBDefs 4
+   /*stop removing indels when indels are longer than
+   `  5 bases
+   */
+#define def_homoMask_freezeTBDefs 0
+   /*0 is use reference base*/
+
 
 /*=======================================================\
 : License:

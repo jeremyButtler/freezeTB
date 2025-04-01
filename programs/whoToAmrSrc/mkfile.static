@@ -14,7 +14,7 @@ objFiles=\
    $(genLib)/ulCp.$O \
    $(genLib)/charCp.$O \
    $(genLib)/genMath.$O \
-   $(genBio)/codonTbl.$O \
+   $(genBio)/codonFun.$O \
    $(tbAmr)/drugAry.$O \
    $(tbAmr)/amrST.$O
 
@@ -24,7 +24,7 @@ all: mainWhoToAmr.$O $(objFiles)
 mainWhoToAmr.$O: mainWhoToAmr.c whoToAmr.$O
 	$(CC) -o mainWhoToAmr.$O -c $(CFLAGS) mainWhoToAmr.c
 
-whoToAmr.$O: whoToAmr.c whoToAmr.h genIndice.$O $(tbAmr)/amrST.$O $(genBio)/codonTbl.$O $(genLib)/genMath.$O
+whoToAmr.$O: whoToAmr.c whoToAmr.h genIndice.$O $(tbAmr)/amrST.$O $(genBio)/codonFun.$O $(genLib)/genMath.$O
 	$(CC) -o whoToAmr.$O -c $(CFLAGS) whoToAmr.c
 
 genIndice.$O: genIndice.c genIndice.h $(genLib)/charCp.$O $(genLib)/base10str.$O $(genLib)/dataTypeShortHand.h
@@ -51,8 +51,8 @@ $(genLib)/numToStr.$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
 $(genLib)/genMath.$O: $(genLib)/genMath.c $(genLib)/genMath.h
 	$(CC) -o $(genLib)/genMath.$O -c $(CFLAGS) $(genLib)/genMath.c
 
-$(genBio)/codonTbl.$O: $(genBio)/codonTbl.c $(genBio)/codonTbl.h $(genBio)/ntTo2Bit.h $(genBio)/revNtTo2Bit.h $(genLib)/dataTypeShortHand.h
-	$(CC) -o $(genBio)/codonTbl.$O -c $(CFLAGS) $(genBio)/codonTbl.c
+$(genBio)/codonFun.$O: $(genBio)/codonFun.c $(genBio)/codonFun.h $(genBio)/codonTbl.h $(genBio)/ntTo2Bit.h $(genBio)/revNtTo2Bit.h $(genLib)/dataTypeShortHand.h
+	$(CC) -o $(genBio)/codonFun.$O -c $(CFLAGS) $(genBio)/codonFun.c
 
 install:
 	cp $(NAME) $(PREFIX)

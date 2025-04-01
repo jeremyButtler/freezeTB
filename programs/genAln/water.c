@@ -10,8 +10,6 @@
 '   - has function to do Smith Waterman pairwise alignment
 '   o header:
 '     - included libraries
-'   o .c fun01: scoreIndel_water
-'     - gets the indel score for a water alignment
 '   o fun01 water:
 '     - run a memory efficent Waterman Smith alignment on
 '       input sequences
@@ -40,7 +38,6 @@
 #include "indexToCoord.h"
 
 /*.h files only*/
-#include "../genLib/dataTypeShortHand.h"
 #include "../genLib/genMath.h" /*only using .h commands*/
 #include "alnDefs.h"
 
@@ -80,6 +77,8 @@
 |      if they are to small
 |    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
 |      or scoreAryUL are resized
+|    o sets errSC in matrixSTPtr to def_memErr_needle if
+|      had memory errors
 |  - Returns:
 |    o score for alignment
 \-------------------------------------------------------*/
@@ -122,25 +121,26 @@ water(
    \*****************************************************/
 
    /*Get start & end of query and reference sequences*/
-   schar *refSeqStr =
+   signed char *refSeqStr =
       refSTPtr->seqStr + refSTPtr->offsetUL;
 
-   schar *qrySeqStr =
+   signed char *qrySeqStr =
       qrySTPtr->seqStr + qrySTPtr->offsetUL;
 
    /*Find the length of the reference and query*/
-   ulong lenQryUL =
+   unsigned long lenQryUL =
       qrySTPtr->endAlnUL - qrySTPtr->offsetUL + 1;
 
-   ulong lenRefUL =
+   unsigned long lenRefUL =
       refSTPtr->endAlnUL - refSTPtr->offsetUL + 1;
      /*The + 1 is to account for index 0 of endAlnUL*/
 
-   ulong lenMatrixUL = (lenRefUL + 1) * (lenQryUL + 1);
+   unsigned long lenMatrixUL =
+     (lenRefUL + 1) * (lenQryUL + 1);
      /*+1 for the gap column and row*/
 
-   ulong ulRef = 0;
-   ulong ulQry = 0;
+   unsigned long ulRef = 0;
+   unsigned long ulQry = 0;
 
    /*Set up counters for the query and reference base
    `  index
@@ -150,14 +150,15 @@ water(
    *  - variables holding the scores (only two rows)
    \*****************************************************/
 
-   slong snpScoreSL = 0;    /*Score for deletion*/
-   slong nextSnpScoreSL = 0;/*Score for match/snp*/
+   signed long snpScoreSL = 0;    /*Score for deletion*/
+   signed long nextSnpScoreSL = 0;/*Score for match/snp*/
 
-   slong insScoreSL = 0;    /*Score for deletion*/
-   slong delScoreSL = 0;    /*Score for deletion*/
+   signed long insScoreSL = 0;    /*Score for deletion*/
+   signed long delScoreSL = 0;    /*Score for deletion*/
 
    /*Marks when to reset score buffer (every second row)*/
-   slong *scoreArySL = 0;/*scoring row for alignment*/
+   signed long *scoreArySL = 0;
+      /*scoring row for alignment*/
 
    /*****************************************************\
    * Fun01 Sec01 Sub03:
@@ -165,10 +166,9 @@ water(
    \*****************************************************/
 
    /*Direction matrix (one cell holds one direction)*/
-   schar *dirMatrixSC = 0;/*Direction matrix*/
-   schar *insDir = 0;    /*Direction above cell*/
-   ulong indexUL = 0;
-   /*slong keepSL = 0; here for unbranched version*/
+   signed char *dirMatrixSC = 0;/*Direction matrix*/
+   signed char *insDir = 0;    /*Direction above cell*/
+   unsigned long indexUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
@@ -381,7 +381,7 @@ water(
 
          /*check if have negative or positive score*/
          /*no branched version is slower here
-         keepSL = (slong) -(scoreArySL[ulRef] > 0);
+         keepSL = (signed long) -(scoreArySL[ulRef] > 0);
          dirMatrixSC[indexUL] &= keepSL;
          scoreArySL[ulRef] &= keepSL;
          */
@@ -452,6 +452,7 @@ water(
    ` This is not needed, but is nice.
    */
 
+   matrixSTPtr->errSC = 0;
    --indexUL; /*get off last -1*/
    dirMatrixSC[indexUL] = def_mvStop_alnDefs;
    return matrixSTPtr->scoreSL; /*best score*/
@@ -462,12 +463,11 @@ water(
    \*****************************************************/
 
    memErr_fun01_sec05:;
-   matrixSTPtr->errSC = def_memErr_water;
-   goto errCleanUp_fun01_sec05;
+      matrixSTPtr->errSC = def_memErr_water;
+      goto errCleanUp_fun01_sec05;
 
    errCleanUp_fun01_sec05:;
-
-   return 0;
+     return 0;
 } /*water*/
 
 /*=======================================================\

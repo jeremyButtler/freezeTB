@@ -50,6 +50,8 @@ struct dirMatrix;
 |      if they are to small
 |    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
 |      or scoreAryUL are resized
+|    o sets errSC in matrixSTPtr to def_memErr_needle if
+|      had memory errors
 |  - Returns:
 |    o score for alignment
 \-------------------------------------------------------*/

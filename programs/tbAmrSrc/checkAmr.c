@@ -66,13 +66,13 @@
 
 #include "../genLib/charCp.h"
 #include "../genLib/genMath.h"
-#include "../genBio/codonTbl.h"
+#include "../genBio/codonFun.h"
 #include "../genBio/samEntry.h"
 
 /*Only .h files*/
-#include "../genLib/dataTypeShortHand.h"
 #include "../genBio/ntTo2Bit.h"
 #include "../genBio/revNtTo2Bit.h"
+#include "../genBio/codonTbl.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
@@ -229,10 +229,9 @@ LoFFor_checkAmr(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint extraNtSI = 0; /*extra bases from last entry*/
-   schar aaC = 0;
-   schar LoFBl = 0;
-   schar haveStartBl = 0;
+   signed int extraNtSI = 0; /*extra bases; last entry*/
+   signed char aaSC = 0;
+   signed char LoFBl = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun05 Sec02:
@@ -258,28 +257,27 @@ LoFFor_checkAmr(
 
        else
        { /*Else: not deletion*/
-          aaC =
-            codonToAA_codonTbl(
+          aaSC =
+            codonToAA_codonFun(
                samSTPtr->seqStr[readPosSI],
                samSTPtr->seqStr[readPosSI + 1],
                samSTPtr->seqStr[readPosSI + 2]
             );
 
-          aaC = aaC != 'x';
+          aaSC = aaSC != 'x';
 
           LoFBl =
              ! (
-               bactStart_codonTbl(
+               bactStart_codonFun(
                  (samSTPtr)->seqStr[readPosSI],
                  (samSTPtr)->seqStr[readPosSI + 1],
                  (samSTPtr)->seqStr[readPosSI + 2]
                 )
              ); /*check if I have start codon*/
 
-          LoFBl &= aaC; /*account for masking*/
+          LoFBl &= aaSC; /*account for masking*/
        } /*Else: not an deletion*/
 
-       haveStartBl = 1;
    } /*If: have first base in gene*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -321,24 +319,21 @@ LoFFor_checkAmr(
             if(extraNtSI < 3)
                break; /*Not enough bases for codon*/
 
-            if(haveStartBl)
-            { /*If: had an start, check for LoFs*/
-               while(extraNtSI > 2)
-               { /*Loop: find early stops*/
-                  aaC =
-                    codonToAA_codonTbl(
-                       samSTPtr->seqStr[readPosSI],
-                       samSTPtr->seqStr[readPosSI + 1],
-                       samSTPtr->seqStr[readPosSI + 2]
-                    );
+            while(extraNtSI > 2)
+            { /*Loop: find early stops*/
+               aaSC =
+                 codonToAA_codonFun(
+                    samSTPtr->seqStr[readPosSI],
+                    samSTPtr->seqStr[readPosSI + 1],
+                    samSTPtr->seqStr[readPosSI + 2]
+                 );
 
-                  readPosSI += 3;
+               readPosSI += 3;
 
-                  /*check if I had an early stop*/
-                  LoFBl |= (aaC == '*');
-                  extraNtSI -= 3;
-               } /*Loop: find early stops*/
-            } /*If: had an start, check for LoFs*/
+               /*check if I had an early stop*/
+               LoFBl |= (aaSC == '*');
+               extraNtSI -= 3;
+            } /*Loop: find early stops*/
 
             break;
          /*Case: insertions*/
@@ -381,33 +376,30 @@ LoFFor_checkAmr(
                extraNtSI -= (refPosSI - endGeneSI) - 3;
                /*-3 to account for stop codon*/
 
-            if(haveStartBl)
-            { /*If: start, check for LoFs*/
-               while(extraNtSI > 2)
-               { /*Loop: check reading frame*/
-                  aaC =
-                    codonToAA_codonTbl(
-                      samSTPtr->seqStr[readPosSI],
-                      samSTPtr->seqStr[readPosSI + 1],
-                      samSTPtr->seqStr[readPosSI + 2]
-                    );
+            while(extraNtSI > 2)
+            { /*Loop: check reading frame*/
+               aaSC =
+                 codonToAA_codonFun(
+                   samSTPtr->seqStr[readPosSI],
+                   samSTPtr->seqStr[readPosSI + 1],
+                   samSTPtr->seqStr[readPosSI + 2]
+                 );
 
-                  readPosSI += 3;
-                  extraNtSI -= 3;
+               readPosSI += 3;
+               extraNtSI -= 3;
 
-                  if(extraNtSI < 3)
-                     break;  /*last codon in match/snp*/
+               if(extraNtSI < 3)
+                  break;  /*last codon in match/snp*/
 
-                  /*check if early stop*/
-                  LoFBl |= (aaC == '*');
-               } /*Loop: check reading frame*/
-            } /*If: start, check for LoFs*/
+               /*check if early stop*/
+               LoFBl |= (aaSC == '*');
+            } /*Loop: check reading frame*/
 
             /*check if last base*/
             if(refPosSI >= endGeneSI)
-               LoFBl |= ((aaC != '*') & (aaC != 'x'));
+               LoFBl |= ((aaSC != '*') & (aaSC != 'x'));
             else
-               LoFBl |= (aaC == '*');
+               LoFBl |= (aaSC == '*');
 
             break;
          /*Case: matchs and snps*/
@@ -420,7 +412,7 @@ LoFFor_checkAmr(
 
       ++cigPosSI;
 
-      if(cigPosSI >= (sint) samSTPtr->lenCigUI)
+      if(cigPosSI >= (signed int) samSTPtr->lenCigUI)
          break; /*end of sequence*/
 
       cigBaseSI = samSTPtr->cigArySI[cigPosSI];
@@ -495,12 +487,11 @@ LofRev_checkAmr(
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   int extraNtSI = 0; /*extra bases from last entry*/
-   schar aaC = 0;
-   schar LoFBl = 0;
-   schar haveEndBl = 0; /*marks have end of gene*/
+   signed int extraNtSI = 0; /*extra bases; last entry*/
+   signed char aaSC = 0;
+   signed char LoFBl = 0;
 
-   sint readStartSI = -1;
+   signed int readStartSI = -1;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun06 Sec02:
@@ -527,18 +518,17 @@ LofRev_checkAmr(
 
       else
       { /*Else: see if is not an deletion*/
-         aaC =
-            revCodonToAA_codonTbl(
+         aaSC =
+            revCodonToAA_codonFun(
                samSTPtr->seqStr[readPosSI],
                samSTPtr->seqStr[readPosSI + 1],
                samSTPtr->seqStr[readPosSI + 2]
             ); /*get last codon*/
 
-         LoFBl = ((aaC != '*') & (aaC != 'x'));
+         LoFBl = ((aaSC != '*') & (aaSC != 'x'));
          readStartSI = readPosSI;
       } /*Else: see if is not deletion*/
 
-      haveEndBl = 1;
    } /*If: have last base in gene*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -580,23 +570,20 @@ LofRev_checkAmr(
             if(extraNtSI < 3)
                break; /*not enough bases for codon*/
 
-            if(haveEndBl)
-            { /*If: had an end, check for LoFs*/
-               while(extraNtSI > 2)
-               { /*Loop: check for early stops*/
-                  aaC =
-                    revCodonToAA_codonTbl(
-                      samSTPtr->seqStr[readPosSI],
-                      samSTPtr->seqStr[readPosSI + 1],
-                      samSTPtr->seqStr[readPosSI + 2]
-                    );
+            while(extraNtSI > 2)
+            { /*Loop: check for early stops*/
+               aaSC =
+                 revCodonToAA_codonFun(
+                   samSTPtr->seqStr[readPosSI],
+                   samSTPtr->seqStr[readPosSI + 1],
+                   samSTPtr->seqStr[readPosSI + 2]
+                 );
 
-                  readPosSI += 3;
+               readPosSI += 3;
 
-                  LoFBl |= (aaC == '*'); /*have stop?*/
-                  extraNtSI -= 3;
-               } /*Loop: check for early stops*/
-            } /*If: had an end, check for LoFs*/
+               LoFBl |= (aaSC == '*'); /*have stop?*/
+               extraNtSI -= 3;
+            } /*Loop: check for early stops*/
 
             break;
          /*Case: insertions*/
@@ -640,44 +627,41 @@ LofRev_checkAmr(
                extraNtSI -= (refPosSI - endGeneSI) - 3;
                /*-3 to account for stop codon*/
 
-            if(haveEndBl)
-            { /*If: had an end, check for LoFs*/
-               while(extraNtSI > 2)
-               { /*Loop: check indel reading frame*/
-                  extraNtSI -= 3;
+             while(extraNtSI > 2)
+             { /*Loop: check indel reading frame*/
+                extraNtSI -= 3;
 
-                  if(extraNtSI < 3)
-                     break;  /*last codon for entry*/
+                if(extraNtSI < 3)
+                   break;  /*last codon for entry*/
 
-                  aaC =
-                    revCodonToAA_codonTbl(
-                      samSTPtr->seqStr[readPosSI],
-                      samSTPtr->seqStr[readPosSI + 1],
-                      samSTPtr->seqStr[readPosSI + 2]
-                    );
+                aaSC =
+                  revCodonToAA_codonFun(
+                    samSTPtr->seqStr[readPosSI],
+                    samSTPtr->seqStr[readPosSI + 1],
+                    samSTPtr->seqStr[readPosSI + 2]
+                  );
 
-                  /*check if had early stop*/
-                  if(readPosSI != readStartSI)
-                     LoFBl |= (aaC == '*');
+                /*check if had early stop*/
+                if(readPosSI != readStartSI)
+                   LoFBl |= (aaSC == '*');
 
-                  readPosSI += 3;
+                readPosSI += 3;
                } /*Loop: Check indel reading frame*/
-            } /*If: had an end, check for LoFs*/
 
             /*check if is last base*/
             if(refPosSI >= endGeneSI)
             { /*If: at end; check if have start codon*/
-               aaC =
-                  revCodonToAA_codonTbl(
+               aaSC =
+                  revCodonToAA_codonFun(
                      samSTPtr->seqStr[readPosSI],
                      samSTPtr->seqStr[readPosSI + 1],
                      samSTPtr->seqStr[readPosSI + 2]
                   );
 
-               aaC = (aaC != 'x');
-               aaC &=
+               aaSC = (aaSC != 'x');
+               aaSC &=
                  !(
-                   bactRevStart_codonTbl(
+                   bactRevStart_codonFun(
                       samSTPtr->seqStr[readPosSI],
                       samSTPtr->seqStr[readPosSI + 1],
                       samSTPtr->seqStr[readPosSI + 2]
@@ -686,19 +670,19 @@ LofRev_checkAmr(
 
                readPosSI += 3;
 
-               LoFBl |= aaC;
+               LoFBl |= aaSC;
             } /*If: at end; check if have start codon*/
 
             else
             { /*Else: check if have early stop*/
-               aaC =
-                  revCodonToAA_codonTbl(
+               aaSC =
+                  revCodonToAA_codonFun(
                      samSTPtr->seqStr[readPosSI],
                      samSTPtr->seqStr[readPosSI + 1],
                      samSTPtr->seqStr[readPosSI + 2]
                   );
 
-               LoFBl |= (aaC == '*');
+               LoFBl |= (aaSC == '*');
                readPosSI += 3;
             } /*Else: check if have early stop*/
 
@@ -713,7 +697,7 @@ LofRev_checkAmr(
 
       ++cigPosSI;
 
-      if(cigPosSI >= (sint) samSTPtr->lenCigUI)
+      if(cigPosSI >= (signed int) samSTPtr->lenCigUI)
          break; /*end of sequence*/
 
       cigBaseSI = samSTPtr->cigArySI[cigPosSI];
@@ -742,6 +726,10 @@ LofRev_checkAmr(
 |   - frameshiftBl:
 |     o 1: check for LoFs in frameshift
 |     o 0: treat frameshifts as exact matches
+|   - aaIndelBl:
+|     o 1: amino acid changes, if codon has indel not
+|          in target position, check amino acids
+|     o 0: ignore all sequences with indel in codon
 |   - errSC:
 |     o pointer to signed char to hold the error output
 | Output:
@@ -761,6 +749,7 @@ checkAmr(
    signed int numAmrSI,       /*length of amrAryST*/
    signed int *numHitsSI,     /*holds number amr hits*/
    signed char frameshiftBl,  /*1: frameshift/indel mode*/
+   signed char aaIndelBl,     /*1: check aa for indels*/
    signed char *errSC         /*for error reporting*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun07 TOC: checkAmr
@@ -781,48 +770,52 @@ checkAmr(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*For finding the amr position*/
-   uint seqPosUI = 0;
-   uint refPosUI = 0;
+   unsigned int seqPosUI = 0;
+   unsigned int refPosUI = 0;
 
    /*For processing the cigar entries*/
-   sint cigNtSI = 0;   /*number bases left in cig entry*/
-   sint siCig = 0;     /*Iterate through the cigar*/
+   signed int cigNtSI = 0;
+      /*number bases left in cigar entry*/
+   signed int siCig = 0;  /*Iterate through the cigar*/
 
    /*for recording the number of snps/ins/dels when
    `   comparing AMRs
    */
-   sint snpSI = 0;
-   sint insSI = 0;
-   sint delSI = 0;
+   signed int snpSI = 0;
+   signed int insSI = 0;
+   signed int delSI = 0;
 
    /*for keeping track of the cigar positions when
    `   comparing AMRs
    */
-   sint cigPosSI = 0;
-   sint cigCountSI = 0;
+   signed int cigPosSI = 0;
+   signed int cigCountSI = 0;
 
    /*For checking amr's*/
-   uchar *seqUStr = 0;
-   uchar *amrUStr = 0;
+   unsigned char *seqUStr = 0;
+   unsigned char *amrUStr = 0;
 
-   sint siAmr = 0;     /*iterate through the amr's list*/
-   sint siBase = 0;    /*iterate/compare amr pattern*/
-   sint siAa = 0;      /*i base for amino acid amrs*/
-   sint siMatch = 0;   /*holds the last checked base*/
-   sint amrEndSI = 0;  /*length of AMR*/
+   signed int siAmr = 0;   /*iterate through amr's list*/
+   signed int siBase = 0;  /*iterate/compare amr pattern*/
+   signed int siAa = 0;    /*i base for amino acid amrs*/
+   signed int siMatch = 0; /*holds the last checked base*/
+   signed int amrEndSI = 0;/*length of AMR*/
 
-   schar resBl = 0;    /*-1 is resitance; 0 is not*/
+   signed char resBl = 0;    /*-1 is resitance; 0 is not*/
 
    /*for gene wide frameshift processing*/
-   sint numDelSI = 0; /*number deletions in frameshift*/
-   sint numInsSI = 0; /*number insertions in frameshift*/
-   schar lofBl = 0;   /*1: had mising/early start/stop*/
+   signed int numDelSI = 0;
+      /*number deletions in frameshift*/
+   signed int numInsSI = 0;
+      /*number insertions in frameshift*/
+   signed char lofBl = 0;
+     /*1: had mising/early start/stop*/
 
    /*for aa amr check*/
-   uchar base1UC = 0;    /*base 1 in amr codon*/
-   uchar base2UC = 0;    /*base 2 in amr codon*/
-   uchar base3UC = 0;    /*base 3 in amr codon*/
-   char aaC = 0;         /*holds sequence AA at position*/
+   unsigned char base1UC = 0;    /*base 1 in amr codon*/
+   unsigned char base2UC = 0;    /*base 2 in amr codon*/
+   unsigned char base3UC = 0;    /*base 3 in amr codon*/
+   signed char aaSC = 0; /*holds sequence AA at position*/
 
    /*return values/used to build amr list*/
    struct amrHit_checkAmr *amrSTList = 0;/*amr list*/
@@ -838,7 +831,7 @@ checkAmr(
    siAmr =
       getAmr_amrST(
          amrAryST,
-         (int) samSTPtr->refStartUI,
+         (signed int) samSTPtr->refStartUI,
          numAmrSI
       ); /*Find the nearest amr to this sequence*/
 
@@ -895,7 +888,7 @@ checkAmr(
            amrAryST[siAmr].refPosUI
          + amrAryST[siAmr].lenRefSeqUI;
 
-      if(samSTPtr->refEndUI < (uint) amrEndSI)
+      if(samSTPtr->refEndUI < (unsigned int) amrEndSI)
          goto nextAmr_fun07_sec03_sub08;
 
       if(samSTPtr->readLenUI < amrAryST[siAmr].lenAmrAaUI)
@@ -907,7 +900,7 @@ checkAmr(
             eql_charCp(
                amrAryST[siAmr].geneIdStr,
                amrAryST[siAmr - 1].geneIdStr,
-               (schar) '\0'
+               (signed char) '\0'
              )
          ) frameshiftBl |= 2; /*Changing genes*/
       } /*If: frameshift checking is set up*/
@@ -972,8 +965,8 @@ checkAmr(
          &siCig,
          &cigNtSI,
          amrAryST[siAmr].refPosUI,
-         (sint *) &refPosUI,
-         (sint *) &seqPosUI
+         (signed int *) &refPosUI,
+         (signed int *) &seqPosUI
       );
 
       /*deletion at amr site means error, except for frame
@@ -1007,12 +1000,14 @@ checkAmr(
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       ++amrAryST[siAmr].numMapReadsUI;
-      seqUStr = (uchar *) &samSTPtr->seqStr[seqPosUI];
+      seqUStr =
+          (unsigned char *) &samSTPtr->seqStr[seqPosUI];
 
       /*amrUStr is needed for the final checks for both
       `   nucleotide and amino acid checks
       */
-      amrUStr = (uchar *) amrAryST[siAmr].amrSeqStr;
+      amrUStr =
+         (unsigned char *) amrAryST[siAmr].amrSeqStr;
 
       /*set variables for keeping track of cigar entries*/
       cigPosSI = siCig;
@@ -1031,8 +1026,8 @@ checkAmr(
 
       if(
             frameshiftBl
-         && amrAryST[siAmr].frameshiftBl)
-      { /*If: is frameshift pattern*/
+         && amrAryST[siAmr].frameshiftBl
+      ){ /*If: is frameshift pattern*/
          if(
               amrAryST[siAmr].wholeGeneFlagSC
             & def_geneFrameshift_amrST
@@ -1069,24 +1064,39 @@ checkAmr(
                ++cigPosSI;
                cigCountSI = samSTPtr->cigArySI[cigPosSI];
             } /*If: next cigar entry*/
+
+            if(
+                  samSTPtr->cigTypeStr[cigPosSI] != 'I'
+               && amrAryST[siAmr].mutTypeStr[0] == 'i'
+            ) goto skipFrame_fun07_sec03_sub04_cat03;
+              /*not insertion AMR*/
+
+            else if(
+                  samSTPtr->cigTypeStr[cigPosSI] != 'D'
+               && amrAryST[siAmr].mutTypeStr[0] == 'd'
+            ) goto skipFrame_fun07_sec03_sub04_cat03;
+              /*not deletion AMR*/
          } /*If: deletion or insertion*/
 
          while(
                samSTPtr->cigTypeStr[cigPosSI] == 'D' 
             || samSTPtr->cigTypeStr[cigPosSI] == 'I' 
          ){ /*Loop: count number of indels*/
-            --cigCountSI;
 
+            if(samSTPtr->cigTypeStr[cigPosSI] == 'D')
+               ++delSI;
+            else
+               ++insSI;
+
+
+            --cigCountSI;
+	
             if(cigCountSI <= 0)
             { /*If: next cigar entry*/
                ++cigPosSI;
                cigCountSI = samSTPtr->cigArySI[cigPosSI];
             } /*If: next cigar entry*/
 
-            if(samSTPtr->cigTypeStr[cigPosSI] == 'D')
-               ++delSI;
-            else
-               ++insSI;
          } /*Loop: count number of indels*/
 
          if(ab_genMath(insSI - delSI) % 3)
@@ -1109,6 +1119,9 @@ checkAmr(
       /*this treats full deletions (no insertions) as
       `   snps
       */
+
+      skipFrame_fun07_sec03_sub04_cat03:;
+
       if(amrAryST[siAmr].amrAaStr[0] != '0')
          goto checkAA_fun07_sec03_sub05_cat01;
 
@@ -1161,43 +1174,159 @@ checkAmr(
       * Fun07 Sec03 Sub05:
       *   - handle amino acid amr's
       *   o fun07 sec03 sub05 cat01:
-      *     - check if deletions are resistant
+      *     - check if cover codon + find base offset
       *   o fun07 sec03 sub05 cat02:
-      *     - move to the first base in target codon
+      *     - check if have indel in codon
       *   o fun07 sec03 sub05 cat03:
-      *     - check reverse complemnt gene snps/insertions
+      *     - move to the first base in target codon
       *   o fun07 sec03 sub05 cat04:
+      *     - check reverse complemnt gene snps/insertions
+      *   o fun07 sec03 sub05 cat05:
+      *     - check forward gene snps/insertions
+      *   o fun07 sec03 sub05 cat06:
       *     - else I do not know direction, look at snps
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun07 Sec03 Sub05 Cat01:
-      +   - check if deletions are resistant
+      +   - check if cover codon + find base offset
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       checkAA_fun07_sec03_sub05_cat01:;
 
+      /*check if have full codon coverage*/
+      if(
+           samSTPtr->refStartUI
+         > amrAryST[siAmr].codonPosUI
+      ) goto checkSnp_fun07_sec03_sub04_cat04;
+
+      else if(
+           samSTPtr->refEndUI
+         < amrAryST[siAmr].codonPosUI + 2
+      ) goto checkSnp_fun07_sec03_sub04_cat04;
+
+
+      /*find codon start*/
+      siBase =
+           amrAryST[siAmr].codonPosUI
+         - (signed int) refPosUI;
+
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun07 Sec03 Sub05 Cat02:
+      +   - check if have indel in codon
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(! aaIndelBl && *amrAryST[siAmr].mutTypeStr =='s')
+      { /*If: want to ignore codon indels*/
+
+         /*check the current base on*/
+         if(samSTPtr->cigTypeStr[siCig] == 'D')
+            goto nextAmr_fun07_sec03_sub08;
+         else if(samSTPtr->cigTypeStr[siCig] == 'I')
+            goto nextAmr_fun07_sec03_sub08;
+
+         /*check the next bases*/
+         if(siBase > -2)
+         { /*If: have at least on forward base*/
+            siMatch = siCig;
+            snpSI = cigNtSI;
+
+            if(snpSI == 0)
+            { /*If: need to move forward*/
+               ++siMatch;
+               ++snpSI;
+            } /*If: need to move forward*/
+
+            else
+               ++snpSI;
+
+            if(samSTPtr->cigTypeStr[siMatch] == 'D')
+               goto nextAmr_fun07_sec03_sub08;
+            else if(samSTPtr->cigTypeStr[siMatch] == 'I')
+               goto nextAmr_fun07_sec03_sub08;
+
+            if(siBase >= 0)
+            { /*If: have two forward bases*/
+               if(snpSI == 0)
+               { /*If: need to move forward*/
+                  ++siMatch;
+                  ++snpSI;
+               } /*If: need to move forward*/
+
+               else
+                  ++snpSI;
+
+               if(samSTPtr->cigTypeStr[siMatch] == 'D')
+                  goto nextAmr_fun07_sec03_sub08;
+               if(samSTPtr->cigTypeStr[siMatch] == 'I')
+                  goto nextAmr_fun07_sec03_sub08;
+            } /*If: have two forward bases*/
+         } /*If: have at least on forward base*/
+
+         /*check previous bases*/
+         if(siBase < 0)
+         { /*If: moving backwards*/
+
+            siMatch = siCig;
+            snpSI = samSTPtr->cigArySI[siCig] - cigNtSI;
+               /*snps left to move back for*/
+
+            if(snpSI <= 0)
+            { /*If: need to move back*/
+               --siMatch;
+               snpSI = samSTPtr->cigArySI[siMatch];
+            } /*If: need to move back*/
+
+            else
+               --snpSI;
+
+            if(samSTPtr->cigTypeStr[siMatch] == 'D')
+               goto nextAmr_fun07_sec03_sub08;
+            else if(samSTPtr->cigTypeStr[siMatch] == 'I')
+               goto nextAmr_fun07_sec03_sub08;
+
+            if(siBase < -1)
+            { /*If: moving back two bases*/
+               if(snpSI <= 0)
+               { /*If: need to move back*/
+                  --siMatch;
+                  snpSI = samSTPtr->cigArySI[siMatch];
+               } /*If: need to move back*/
+
+               else
+                  --snpSI;
+
+               if(samSTPtr->cigTypeStr[siMatch] == 'D')
+                  goto nextAmr_fun07_sec03_sub08;
+               if(samSTPtr->cigTypeStr[siMatch] == 'I')
+                  goto nextAmr_fun07_sec03_sub08;
+            } /*If: moving back two bases*/
+
+         } /*If: moving backwards*/
+
+         snpSI = 0;
+         siMatch = 0;
+      } /*If: want to ignore codon indels*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec03 Sub05 Cat03:
       +   - move to first base in target codon
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       /*should work out, even when reverse complement*/
-      seqUStr +=
-         (sint)
-         amrAryST[siAmr].codonPosUI - (int) refPosUI;
+      seqUStr += siBase;
 
       siBase = 0; /*for finding the number of
                  ` matches/snps, inss, and dels in
                  ` sequence after AA checks (sub05)
                  */
 
-      if((schar *) seqUStr < samSTPtr->seqStr)
+      if((signed char *) seqUStr < samSTPtr->seqStr)
          goto nextAmr_fun07_sec03_sub08;
          /*some cases go one base off, so incomplete*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec03 Sub05 Cat03:
+      + Fun07 Sec03 Sub05 Cat04:
       +   - check reverse complemnt gene snps/insertions
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1206,41 +1335,42 @@ checkAmr(
       ){ /*If: reverse complement gene*/
          for(
             siAa = 0;
-				siAa < (sint) amrAryST[siAmr].lenAmrAaUI;
+				siAa <
+               (signed int) amrAryST[siAmr].lenAmrAaUI;
             ++siAa 
          ){ /*Loop: check codon reading frame*/
-            if((schar *) seqUStr < samSTPtr->seqStr)
+            if((signed char *) seqUStr < samSTPtr->seqStr)
                goto nextAmr_fun07_sec03_sub08;
 
             base1UC =
-               (uchar)
+               (unsigned char)
                revNtTo2Bit[*seqUStr--];
 
-            if((schar *) seqUStr < samSTPtr->seqStr)
+            if((signed char *) seqUStr < samSTPtr->seqStr)
                goto nextAmr_fun07_sec03_sub08;
 
             base2UC =
-               (uchar)
+               (unsigned char)
                revNtTo2Bit[*seqUStr--];
 
-            if((schar *) seqUStr < samSTPtr->seqStr)
+            if((signed char *) seqUStr < samSTPtr->seqStr)
                goto nextAmr_fun07_sec03_sub08;
 
             base3UC =
-               (uchar)
+               (unsigned char)
                revNtTo2Bit[*seqUStr--];
 
-            aaC = codonTbl[base1UC][base2UC][base3UC];
+            aaSC = codonTbl[base1UC][base2UC][base3UC];
             /*2024 WHO catalog has ? marks for
             ` non-insertions/deletions; so safe for now
             */
           
-            if(aaC == 'x') /*any aa*/
+            if(aaSC == 'x') /*any aa*/
                goto nextAmr_fun07_sec03_sub08;
 
             else if(
                   amrAryST[siAmr].amrAaStr[siAa] == '?'
-               && aaC != amrAryST[siAmr].refAaStr[siAa]
+               && aaSC != amrAryST[siAmr].refAaStr[siAa]
             ){ /*Else If: amr pattern has any codon*/
 
                if(
@@ -1248,7 +1378,7 @@ checkAmr(
                   == 'm'
                ){ /*If: ref (non-amr) pattern has start*/
                   resBl =
-                     bactStartCode_codonTbl(
+                     bactStartCode_codonFun(
                         base1UC,
                         base2UC,
                         base3UC
@@ -1262,7 +1392,7 @@ checkAmr(
                } /*If: ref (non-amr) pattern has start*/
             } /*Else If: amr pattern has any codon*/
 
-            else if(aaC != amrAryST[siAmr].amrAaStr[siAa])
+            else if(aaSC != amrAryST[siAmr].amrAaStr[siAa])
                goto nextAmr_fun07_sec03_sub08;
          } /*Loop: check codon reading frame*/
 
@@ -1270,7 +1400,7 @@ checkAmr(
       } /*If: reverse complement gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec03 Sub05 Cat04:
+      + Fun07 Sec03 Sub05 Cat05:
       +   - check forward gene snps/insertions
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1279,42 +1409,46 @@ checkAmr(
       ){ /*Else If: foward gene*/
          for(
             siAa = 0;
-            siAa < (sint) amrAryST[siAmr].lenAmrAaUI;
+            siAa <
+               (signed int) amrAryST[siAmr].lenAmrAaUI;
             ++siAa 
          ){ /*Loop: check codon reading frame*/
             if(*seqUStr == '\0')
                goto nextAmr_fun07_sec03_sub08;
 
-            base1UC = (uchar) ntTo2Bit[*seqUStr++];
+            base1UC =
+              (unsigned char) ntTo2Bit[*seqUStr++];
 
             if(*seqUStr == '\0')
                goto nextAmr_fun07_sec03_sub08;
 
-            base2UC = (uchar) ntTo2Bit[*seqUStr++];
+            base2UC =
+               (unsigned char) ntTo2Bit[*seqUStr++];
 
             if(*seqUStr == '\0')
                goto nextAmr_fun07_sec03_sub08;
 
-            base3UC = (uchar) ntTo2Bit[*seqUStr++];
+            base3UC =
+              (unsigned char) ntTo2Bit[*seqUStr++];
 
-            aaC = codonTbl[base1UC][base2UC][base3UC];
+            aaSC = codonTbl[base1UC][base2UC][base3UC];
 
             /*2023 WHO catalog has ? marks for
             ` non-insertions/deletions; so am safe for now
             */
-            if(aaC == 'x') /*any aa*/
+            if(aaSC == 'x') /*any aa*/
                goto nextAmr_fun07_sec03_sub08;
 
             else if(
                   amrAryST[siAmr].amrAaStr[siAa] == '?'
-               && aaC != amrAryST[siAmr].refAaStr[siAa]
+               && aaSC != amrAryST[siAmr].refAaStr[siAa]
             ){ /*Else If: pattern supports any codon*/
                if(
                       (amrAryST[siAmr].refAaStr[siAa] |32)
                    == 'm'
                ){ /*If: ref (non-amr) pattern has start*/
                   resBl =
-                     bactStartCode_codonTbl(
+                     bactStartCode_codonFun(
                         base1UC,
                         base2UC,
                         base3UC
@@ -1328,7 +1462,7 @@ checkAmr(
                } /*If: ref (non-amr) pattern has start*/
             } /*Else If: pattern supports any codon*/
 
-            else if(aaC != amrAryST[siAmr].amrAaStr[siAa])
+            else if(aaSC != amrAryST[siAmr].amrAaStr[siAa])
                goto nextAmr_fun07_sec03_sub08;
          } /*Loop: check codon reading frame*/
 
@@ -1336,7 +1470,7 @@ checkAmr(
       } /*Else If: foward gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec03 Sub05 Cat05:
+      + Fun07 Sec03 Sub05 Cat06:
       +   - else I do not know direction, look for snps
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1361,8 +1495,9 @@ checkAmr(
 
       falsePositiveCheck_fun07_sec04_sub06_cat01:;
 
-      while(siBase < (sint) amrAryST[siAmr].lenAmrSeqUI)
-      { /*Loop: to end of amr sequence*/
+      while(
+         siBase < (signed int) amrAryST[siAmr].lenAmrSeqUI
+      ){ /*Loop: to end of amr sequence*/
          switch(samSTPtr->cigTypeStr[cigPosSI])
          { /*Switch: update cigar mutation coutner*/
             case 'M': ++snpSI; break;
@@ -1384,8 +1519,9 @@ checkAmr(
          ++siBase;
       } /*Loop: to end of the amr sequence*/
 
-      while(siBase < (sint) amrAryST[siAmr].lenRefSeqUI)
-      { /*Loop: to end of reference sequence*/
+      while(
+         siBase < (signed int) amrAryST[siAmr].lenRefSeqUI
+      ){ /*Loop: to end of reference sequence*/
          switch(samSTPtr->cigTypeStr[cigPosSI])
          { /*Switch: update cigar mutation coutner*/
             case 'M': ++snpSI; break;
@@ -1442,7 +1578,7 @@ checkAmr(
          resBl &=
             (
                  (insSI + snpSI - delSI)
-              == (sint) amrAryST[siAmr].lenAmrSeqUI
+              == (signed int) amrAryST[siAmr].lenAmrSeqUI
             ); /*make sure lengths are equal*/
       } /*If: may have an match*/
 
@@ -1567,15 +1703,15 @@ pCrossRes_checkAmr(
    signed char *drugAryStr,
    void *outFILE
 ){
-   sint siAmr = 0; /*index of amr on*/
-   sint siIndex = 0;
-   schar firstPrintBl = 1;
-   schar *drugStr = 0;
-   ulong flagsUL = 0;
+   signed int siAmr = 0; /*index of amr on*/
+   signed int siIndex = 0;
+   signed char firstPrintBl = 1;
+   signed char *drugStr = 0;
+   unsigned long flagsUL = 0;
 
    for(
       siAmr=0;
-      siAmr < (sint) def_maxDrugs_amrST;
+      siAmr < (signed int) def_maxDrugs_amrST;
       ++siAmr
    ){ /*Loop: go though all amr elements*/
       flagsUL = amrSTPtr->crossResFlagsUL[siAmr];
@@ -1693,13 +1829,13 @@ pCon_checkAmr(
 
    struct amrHit_checkAmr *tmpST = (amrHitListST);
    struct amrHit_checkAmr *lastST = 0;
-   schar matchBl = 0;
+   signed char matchBl = 0;
 
-   ulong amrFlagUL = 0;
-   sint flagOnSI = 0;
-   schar *drugStr = 0;
-   schar firstPrintBl = 0;
-   sint siAmr = 0;
+   unsigned long amrFlagUL = 0;
+   signed int flagOnSI = 0;
+   signed char *drugStr = 0;
+   signed char firstPrintBl = 0;
+   signed int siAmr = 0;
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun10 Sec02:
@@ -1742,7 +1878,7 @@ pCon_checkAmr(
             eql_charCp(
                tmpST->amrSTPtr->varIdStr,
                lastST->amrSTPtr->varIdStr,
-               (schar) '\0'
+               (signed char) '\0'
             );
 
          lastST = tmpST;
@@ -1780,7 +1916,7 @@ pCon_checkAmr(
       
       for(
          siAmr = 0;
-         siAmr < (sint) def_maxDrugs_amrST;
+         siAmr < (signed int) def_maxDrugs_amrST;
          ++siAmr
       ){ /*Loop: run through all antibiotic flags*/
          amrFlagUL = tmpST->amrSTPtr->amrFlagsUL[siAmr];
@@ -1842,11 +1978,11 @@ pCon_checkAmr(
       fprintf(
         (FILE *) outFILE,
         "\t%s\t%s\t%i\t%i\t%i",
-        tmpST->amrSTPtr->varIdStr,         /*variant id*/
-        tmpST->amrSTPtr->mutTypeStr,       /*snp/del/ins/LoF*/
+        tmpST->amrSTPtr->varIdStr,     /*variant id*/
+        tmpST->amrSTPtr->mutTypeStr,   /*snp/del/ins/LoF*/
         tmpST->amrSTPtr->gradeSC,
-        (int) tmpST->amrSTPtr->refPosUI,  /*position on ref*/
-        (int) tmpST->seqPosUI          /*position on seq*/
+        (int) tmpST->amrSTPtr->refPosUI + 1,
+        (int) tmpST->seqPosUI + 1      /*position on seq*/
       );
 
       /**************************************************\
@@ -1996,6 +2132,12 @@ pReadHead_checkAmr(
 |   - minPercTotalF:
 |     o min percent of mapped reads needed to keep an amr
 |       (compared to all reads [total depth])
+|   - minIndelSupF:
+|     o minimum percent support to keep an indel AMR
+|   - minFrameshiftF:
+|     o minimum percent support to keep a frame shift
+|   - framShiftBl:
+|     o 1: looked for frameshifts in data
 |   - totalReadsUI:
 |     o total number of reads input
 |   - amrAryST:
@@ -2014,6 +2156,9 @@ pRead_checkAmr(
    unsigned int minDepthUI,
    float minPercMapF,
    float minPercTotalF,
+   float minIndelSupF,      /*% support to keep indel*/
+   float minFrameshiftF,    /*% support for frameshift*/
+   signed char frameShiftBl,/*looked for frameshifts*/
    unsigned int totalReadsUI,
    struct amrST *amrAryST,
    unsigned int numAmrsUI,
@@ -2034,14 +2179,14 @@ pRead_checkAmr(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   uint indexUI = 0;
-   uint lastPrintIndexUI = 0;
+   unsigned int indexUI = 0;
+   unsigned int lastPrintIndexUI = 0;
    float percSupF = 0;
-   ulong amrFlagUL = 0;
-   sint flagOnSI = 0;
-   schar *drugStr = 0;
-   sint siAmr = 0;
-   schar firstPrintBl = 1;
+   unsigned long amrFlagUL = 0;
+   signed int flagOnSI = 0;
+   signed char *drugStr = 0;
+   signed int siAmr = 0;
+   signed char firstPrintBl = 1;
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun12 Sec02:
@@ -2063,7 +2208,7 @@ pRead_checkAmr(
       if(amrAryST[indexUI].numSupReadsUI < minDepthUI)
          continue; /*to few reads support the AMR*/
       
-      if(amrAryST[indexUI].numMapReadsUI == 0)
+      else if(amrAryST[indexUI].numMapReadsUI == 0)
          continue; /*to few reads mapped to AMR region*/
 
       /**************************************************\
@@ -2085,13 +2230,27 @@ pRead_checkAmr(
       if(percSupF < minPercMapF)
          continue; /*support for AMR under minimum %*/
 
+      else if(
+            amrAryST[indexUI].mutTypeStr[0] == 'd'
+         && percSupF < minIndelSupF
+      ) continue; /*removing indel*/
+      
+      else if(! frameShiftBl)
+         ; /*did not check frameshift events*/
+
+      else if(! amrAryST[indexUI].frameshiftBl)
+         ; /*not checking frameshift mutations*/
+
+      else if(percSupF < minFrameshiftF)
+         continue; /*beneath min support*/
+
        if(indexUI > 0)
        { /*If: need to check indexs*/
           if( !
               eql_charCp(
                  amrAryST[indexUI].varIdStr,
                  amrAryST[lastPrintIndexUI].varIdStr,
-                 (schar) '\0'
+                 (signed char) '\0'
               )
           ) continue; /*id already printed*/
        } /*If: need to check indexs*/
@@ -2219,7 +2378,7 @@ pRead_checkAmr(
         amrAryST[indexUI].varIdStr,   /*variant id*/
         amrAryST[indexUI].mutTypeStr, /*snp/del/ins/LoF*/
         amrAryST[indexUI].gradeSC,
-        (int) amrAryST[indexUI].refPosUI,
+        (int) amrAryST[indexUI].refPosUI + 1,
         (int) amrAryST[indexUI].numSupReadsUI,
         percSupF * 100,
         (int) amrAryST[indexUI].numMapReadsUI
@@ -2368,7 +2527,7 @@ pIdVarTbl_checkAmr(
    struct amrHit_checkAmr *amrHitListST,
    void *outFILE
 ){
-   schar uniqVarBl = 0;
+   signed char uniqVarBl = 0;
    struct amrHit_checkAmr *tmpHitST = amrHitListST;
    struct amrHit_checkAmr *lastHitST = tmpHitST;
    
@@ -2389,7 +2548,7 @@ pIdVarTbl_checkAmr(
             eql_charCp(
                lastHitST->amrSTPtr->varIdStr,
                tmpHitST->amrSTPtr->varIdStr,
-               (schar) '\0'
+               (signed char) '\0'
             );
 
          if(uniqVarBl)
@@ -2424,6 +2583,10 @@ pIdVarTbl_checkAmr(
 |   - framshiftBl:
 |     o 1: check for framshifts (LoF/frameshift AMRs)
 |     o 0: ingore frameshifts (are exact matches)
+|   - aaIndelBl:
+|     o 1: amino acid changes, if codon has indel not
+|          in target position, check amino acids
+|     o 0: ignore all sequences with indel in codon
 |   - minDepthUI:
 |     o minumum depth to keep an amr (reads only)
 |   - minPercMapF:
@@ -2432,6 +2595,10 @@ pIdVarTbl_checkAmr(
 |   - minPercTotalF:
 |     o mininimum percent of mapped reads needed to keep
 |       an amr (all possible mapped reads; reads only)
+|   - minIndelSupF:
+|     o minimum percent support to keep an indel AMR
+|   - minFrameshiftF:
+|     o minimum percent support to keep a frame shift
 |   - samFileStr:
 |     o c-string with sam file to check for AMRs
 |   - outFileStr:
@@ -2455,9 +2622,12 @@ samFindAmrs_checkAmr(
    signed char *drugAryStr, /*antibiotic names*/
    signed char readsBl,     /*1: checking reads not cons*/
    signed char frameshiftBl,/*1: check frameshifts*/
+   signed char aaIndelBl,     /*1: check aa for indels*/
    unsigned int minDepthUI, /*min depth to keep amr*/
    float minPercMapF,       /*% support to keep amr*/
    float minPercTotalF,     /*% mapped reads to keep amr*/
+   float minIndelSupF,      /*%support to keep indel amr*/
+   float minFrameshiftF,    /*% support for frameshift*/
    signed char *samFileStr, /*sam file to check*/
    signed char *outFileStr, /*output file (main)*/
    signed char *idFileStr   /*output file (ids)*/
@@ -2482,12 +2652,12 @@ samFindAmrs_checkAmr(
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *buffHeapStr = 0;
-   ulong lenBuffUL = 0;
+   signed char *buffHeapStr = 0;
+   unsigned long lenBuffUL = 0;
 
-   schar errSC = 0;
-   sint numHitsSI = 0;    /*number of amrs hits/con*/
-   uint totalReadsUI = 0; /*number of kept reads*/
+   signed char errSC = 0;
+   signed int numHitsSI = 0;   /*number of amrs hits/con*/
+   unsigned int totalReadsUI = 0; /*number of kept reads*/
 
    struct samEntry samStackST;
    struct amrHit_checkAmr *amrHitHeapList = 0;
@@ -2635,6 +2805,7 @@ samFindAmrs_checkAmr(
             numAmrSI,     /*length of amrAryST*/
             &numHitsSI,   /*number amr hits for seq*/
             frameshiftBl, /*1: check frameshifts*/
+            aaIndelBl,    /*1: allow indel in snp aa AMR*/
             &errSC        /*for error reporting*/
          );
 
@@ -2711,6 +2882,9 @@ samFindAmrs_checkAmr(
          minDepthUI,
          minPercMapF,
          minPercTotalF,
+         minIndelSupF,
+         minFrameshiftF,
+         frameshiftBl,
          totalReadsUI,
          amrAryST,
          numAmrSI,

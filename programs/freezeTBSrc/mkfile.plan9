@@ -20,7 +20,7 @@ objFiles=\
    $genLib/genMath.$O \
    $genLib/shellSort.$O \
    $genLib/strAry.$O \
-   $genBio/codonTbl.$O \
+   $genBio/codonFun.$O \
    $genBio/geneCoord.$O \
    $genBio/seqST.$O \
    $genBio/samEntry.$O \
@@ -30,6 +30,7 @@ objFiles=\
    $genBio/adjCoords.$O \
    $genBio/tbCon.$O \
    $genBio/edDist.$O \
+   $genBio/rmHomo.$O \
    $genAln/indexToCoord.$O \
    $genAln/alnSet.$O \
    $genAln/kmerFind.$O \
@@ -47,97 +48,100 @@ all: freezeTB.$O $objFiles
 	$LD -o $NAME $CFLAGS freezeTB.$O freezeTBPaths.$O $objFiles
 
 freezeTB.$O: freezeTB.c freezeTBPaths.$O $objFiles
-	$CC -o freezeTB.$O -c $CFLAGS freezeTB.c
+	$CC -o freezeTB.$O $CFLAGS freezeTB.c
 
 freezeTBPaths.$O: freezeTBPaths.c freezeTBPaths.h freezeTBDefs.h $genLib/ulCp.$O $genLib/dataTypeShortHand.h
-	$CC -o freezeTBPaths.$O -c $CFLAGS freezeTBPaths.c
+	$CC -o freezeTBPaths.$O $CFLAGS freezeTBPaths.c
 
 $genLib/base10str.$O: $genLib/base10str.c $genLib/base10str.h
-	$CC -o $genLib/base10str.$O -c $CFLAGS $genLib/base10str.c
+	$CC -o $genLib/base10str.$O $CFLAGS $genLib/base10str.c
 
 $genLib/numToStr.$O: $genLib/numToStr.c $genLib/numToStr.h
-	$CC -o $genLib/numToStr.$O -c $CFLAGS $genLib/numToStr.c
+	$CC -o $genLib/numToStr.$O $CFLAGS $genLib/numToStr.c
 
 $genLib/charCp.$O: $genLib/charCp.c $genLib/charCp.h
-	$CC -o $genLib/charCp.$O -c $CFLAGS $genLib/charCp.c
+	$CC -o $genLib/charCp.$O $CFLAGS $genLib/charCp.c
 
 $genLib/ulCp.$O: $genLib/ulCp.c $genLib/ulCp.h
-	$CC -o $genLib/ulCp.$O -c $CFLAGS $genLib/ulCp.c
+	$CC -o $genLib/ulCp.$O $CFLAGS $genLib/ulCp.c
 
 $genLib/genMath.$O: $genLib/genMath.c $genLib/genMath.h
-	$CC -o $genLib/genMath.$O -c $CFLAGS $genLib/genMath.c
+	$CC -o $genLib/genMath.$O $CFLAGS $genLib/genMath.c
 
 $genLib/shellSort.$O: $genLib/shellSort.c $genLib/shellSort.h
-	$CC -o $genLib/shellSort.$O -c $CFLAGS $genLib/shellSort.c
+	$CC -o $genLib/shellSort.$O $CFLAGS $genLib/shellSort.c
 
 $genLib/strAry.$O: $genLib/strAry.c $genLib/strAry.h $genLib/ulCp.$O
-	$CC -o $genLib/strAry.$O -c $CFLAGS $genLib/strAry.c
+	$CC -o $genLib/strAry.$O $CFLAGS $genLib/strAry.c
 
-$genBio/codonTbl.$O: $genBio/codonTbl.c $genBio/codonTbl.h $genBio/ntTo2Bit.h $genBio/revNtTo2Bit.h $genLib/dataTypeShortHand.h
-	$CC -o $genBio/codonTbl.$O -c $CFLAGS $genBio/codonTbl.c
+$genBio/codonFun.$O: $genBio/codonFun.c $genBio/codonFun.h $genBio/codonTbl.h $genBio/ntTo2Bit.h $genBio/revNtTo2Bit.h $genLib/dataTypeShortHand.h
+	$CC -o $genBio/codonFun.$O $CFLAGS $genBio/codonFun.c
 
 $genBio/seqST.$O: $genBio/seqST.c $genBio/seqST.h $genLib/ulCp.$O $genLib/dataTypeShortHand.h
-	$CC -o $genBio/seqST.$O -c $CFLAGS $genBio/seqST.c
+	$CC -o $genBio/seqST.$O $CFLAGS $genBio/seqST.c
 
 $genBio/geneCoord.$O: $genBio/geneCoord.c $genBio/geneCoord.h $genLib/ulCp.$O $genLib/base10str.$O $genLib/charCp.$O $genLib/genMath.h $genLib/dataTypeShortHand.h
-	$CC -o $genBio/geneCoord.$O -c $CFLAGS $genBio/geneCoord.c
+	$CC -o $genBio/geneCoord.$O $CFLAGS $genBio/geneCoord.c
 
 $genBio/samEntry.$O: $genBio/samEntry.c $genBio/samEntry.h $genLib/ulCp.$O $genLib/base10str.$O $genLib/numToStr.$O $genBio/ntTo5Bit.h $genLib/dataTypeShortHand.h
-	$CC -o $genBio/samEntry.$O -c $CFLAGS $genBio/samEntry.c
+	$CC -o $genBio/samEntry.$O $CFLAGS $genBio/samEntry.c
 
 $genBio/trimSam.$O: $genBio/trimSam.c $genBio/trimSam.h $genBio/samEntry.$O
-	$CC -o $genBio/trimSam.$O -c $CFLAGS $genBio/trimSam.c
+	$CC -o $genBio/trimSam.$O $CFLAGS $genBio/trimSam.c
 
 $genBio/ampDepth.$O: $genBio/ampDepth.c $genBio/ampDepth.h $genBio/samEntry.$O $genBio/geneCoord.$O $genLib/genMath.h
-	$CC -o $genBio/ampDepth.$O -c $CFLAGS $genBio/ampDepth.c
+	$CC -o $genBio/ampDepth.$O $CFLAGS $genBio/ampDepth.c
 
 $genBio/maskPrim.$O: $genBio/maskPrim.c $genBio/maskPrim.h $genBio/samEntry.$O $genLib/shellSort.$O
-	$CC -o $genBio/maskPrim.$O -c $CFLAGS $genBio/maskPrim.c
+	$CC -o $genBio/maskPrim.$O $CFLAGS $genBio/maskPrim.c
 
 $genBio/adjCoords.$O: $genBio/adjCoords.c $genBio/adjCoords.h $genBio/samEntry.$O $genBio/geneCoord.$O
-	$CC -o $genBio/adjCoords.$O -c $CFLAGS $genBio/adjCoords.c
+	$CC -o $genBio/adjCoords.$O $CFLAGS $genBio/adjCoords.c
 
 $genBio/tbCon.$O: $genBio/tbCon.c $genBio/tbCon.h $genBio/tbConDefs.h $genBio/samEntry.$O $genLib/genMath.$O
-	$CC -o $genBio/tbCon.$O -c $CFLAGS $genBio/tbCon.c
+	$CC -o $genBio/tbCon.$O $CFLAGS $genBio/tbCon.c
 
 $genBio/edDist.$O: $genBio/edDist.c $genBio/edDist.h $genBio/samEntry.$O $genBio/seqST.$O $genLib/genMath.h
-	$CC -o $genBio/edDist.$O -c $CFLAGS $genBio/edDist.c
+	$CC -o $genBio/edDist.$O $CFLAGS $genBio/edDist.c
+
+$genBio/rmHomo.$O: $genBio/rmHomo.c $genBio/rmHomo.h $genBio/samEntry.$O $genBio/seqST.$O
+   $CC -o $genBio/rmHomo.$O $CFLAGS $genBio/rmHomo.c
 
 $genAln/indexToCoord.$O: $genAln/indexToCoord.c $genAln/indexToCoord.h
-	$CC -o $genAln/indexToCoord.$O -c $CFLAGS $genAln/indexToCoord.c
+	$CC -o $genAln/indexToCoord.$O $CFLAGS $genAln/indexToCoord.c
 
 $genAln/alnSet.$O: $genAln/alnSet.c $genAln/alnSet.h $genAln/alnDefs.h $genLib/base10str.$O $genLib/dataTypeShortHand.h
-	$CC -o $genAln/alnSet.$O -c $CFLAGS $genAln/alnSet.c
+	$CC -o $genAln/alnSet.$O $CFLAGS $genAln/alnSet.c
 
 $genAln/memwater.$O: $genAln/memwater.c $genAln/memwater.h $genAln/alnSet.$O $genAln/indexToCoord.$O $genBio/seqST.$O $genLib/genMath.h
-	$CC -o $genAln/memwater.$O -c $CFLAGS $genAln/memwater.c
+	$CC -o $genAln/memwater.$O $CFLAGS $genAln/memwater.c
 
 $genAln/kmerFind.$O: $genAln/kmerFind.c $genAln/kmerFind.h $genAln/memwater.$O $genLib/shellSort.$O 
-	$CC -o $genAln/kmerFind.$O -c $CFLAGS $genAln/kmerFind.c
+	$CC -o $genAln/kmerFind.$O $CFLAGS $genAln/kmerFind.c
 
 $genClust/edClust.$O: $genClust/edClust.c $genClust/edClust.h $genClust/clustST.$O
-	$CC -o $genClust/edClust.$O -c $CFLAGS $genClust/edClust.c
+	$CC -o $genClust/edClust.$O $CFLAGS $genClust/edClust.c
 
 $genClust/clustST.$O: $genClust/clustST.c $genClust/clustST.h $genBio/samEntry.$O $genBio/tbCon.$O $genBio/edDist.$O $genLib/genMath.h
-	$CC -o $genClust/clustST.$O -c $CFLAGS $genClust/clustST.c
+	$CC -o $genClust/clustST.$O $CFLAGS $genClust/clustST.c
 
 $tbMiru/miruTbl.$O: $tbMiru/miruTbl.c $tbMiru/miruTbl.h $tbMiru/tbMiruDefs.h $genBio/samEntry.$O $genLib/charCp.$O $genLib/genMath.$O
-	$CC -o $tbMiru/miruTbl.$O -c $CFLAGS $tbMiru/miruTbl.c
+	$CC -o $tbMiru/miruTbl.$O $CFLAGS $tbMiru/miruTbl.c
 
 $tbAmr/drugAry.$O: $tbAmr/drugAry.c $tbAmr/drugAry.h
-	$CC -o $tbAmr/drugAry.$O -c $CFLAGS $tbAmr/drugAry.c
+	$CC -o $tbAmr/drugAry.$O $CFLAGS $tbAmr/drugAry.c
 
 $tbAmr/amrST.$O: $tbAmr/amrST.c $tbAmr/amrST.h $tbAmr/drugAry.$O $genLib/ulCp.$O $genLib/charCp.$O $genLib/base10str.$O $genLib/dataTypeShortHand.h
-	$CC -o $tbAmr/amrST.$O -c $CFLAGS $tbAmr/amrST.c
+	$CC -o $tbAmr/amrST.$O $CFLAGS $tbAmr/amrST.c
 
-$tbAmr/checkAmr.$O: $tbAmr/checkAmr.c $tbAmr/checkAmr.h $tbAmr/amrST.$O $genBio/samEntry.$O $genBio/codonTbl.$O $genLib/genMath.$O
-	$CC -o $tbAmr/checkAmr.$O -c $CFLAGS $tbAmr/checkAmr.c
+$tbAmr/checkAmr.$O: $tbAmr/checkAmr.c $tbAmr/checkAmr.h $tbAmr/amrST.$O $genBio/samEntry.$O $genBio/codonFun.$O $genLib/genMath.$O
+	$CC -o $tbAmr/checkAmr.$O $CFLAGS $tbAmr/checkAmr.c
 
 $tbSpol/spolFind.$O: $tbSpol/spolFind.c $tbSpol/spolFind.h $tbSpol/tbSpolDefs.h $genBio/samEntry.$O $genBio/seqST.$O $genAln/kmerFind.$O
-	$CC -o $tbSpol/spolFind.$O -c $CFLAGS $tbSpol/spolFind.c
+	$CC -o $tbSpol/spolFind.$O $CFLAGS $tbSpol/spolFind.c
 
 $tbSpol/spolST.$O: $tbSpol/spolST.c $tbSpol/spolST.h  $tbSpol/tbSpolDefs.h $genLib/ulCp.$O $genLib/charCp.$O $genLib/numToStr.$O $genLib/genMath.h $genLib/dataTypeShortHand.h
-	$CC -o $tbSpol/spolST.$O -c $CFLAGS $tbSpol/spolST.c
+	$CC -o $tbSpol/spolST.$O $CFLAGS $tbSpol/spolST.c
 
 install:
 	cp $NAME $PREFIX

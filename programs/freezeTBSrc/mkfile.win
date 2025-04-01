@@ -1,8 +1,8 @@
 LD=link
 CC=cl
-CFLAGS= /DWINDOWS /O2 /Ot /Za /Tc
+CFLAGS= /DWINDOWS /O2 /Ot /Za /c /Tc
 NAME=freezeTB.exe
-PREFIX=%appData%
+PREFIX=%appDataLocal%
 genLib=..\genLib
 genBio=..\genBio
 genClust=..\genClust
@@ -21,7 +21,7 @@ objFiles=\
    $(genLib)\genMath.$O \
    $(genLib)\shellSort.$O \
    $(genLib)\strAry.$O \
-   $(genBio)\codonTbl.$O \
+   $(genBio)\codonFun.$O \
    $(genBio)\geneCoord.$O \
    $(genBio)\seqST.$O \
    $(genBio)\samEntry.$O \
@@ -31,6 +31,7 @@ objFiles=\
    $(genBio)\adjCoords.$O \
    $(genBio)\tbCon.$O \
    $(genBio)\edDist.$O \
+   $(genBio)\rmHomo.$O \
    $(genAln)\indexToCoord.$O \
    $(genAln)\alnSet.$O \
    $(genAln)\kmerFind.$O \
@@ -77,8 +78,8 @@ $(genLib)\shellSort.$O: $(genLib)\shellSort.c $(genLib)\shellSort.h
 $(genLib)\strAry.$O: $(genLib)\strAry.c $(genLib)\strAry.h $(genLib)\ulCp.$O
 	$(CC) /Fo:$(genLib)\strAry.$O $(CFLAGS) $(genLib)\strAry.c
 
-$(genBio)\codonTbl.$O: $(genBio)\codonTbl.c $(genBio)\codonTbl.h $(genBio)\ntTo2Bit.h $(genBio)\revNtTo2Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\codonTbl.$O $(CFLAGS) $(genBio)\codonTbl.c
+$(genBio)\codonFun.$O: $(genBio)\codonFun.c $(genBio)\codonFun.h $(genBio)\codonTbl.h $(genBio)\ntTo2Bit.h $(genBio)\revNtTo2Bit.h $(genLib)\dataTypeShortHand.h
+	$(CC) /Fo:$(genBio)\codonFun.$O $(CFLAGS) $(genBio)\codonFun.c
 
 $(genBio)\seqST.$O: $(genBio)\seqST.c $(genBio)\seqST.h $(genLib)\ulCp.$O $(genLib)\dataTypeShortHand.h
 	$(CC) /Fo:$(genBio)\seqST.$O $(CFLAGS) $(genBio)\seqST.c
@@ -107,6 +108,9 @@ $(genBio)\tbCon.$O: $(genBio)\tbCon.c $(genBio)\tbCon.h $(genBio)\tbConDefs.h $(
 $(genBio)\edDist.$O: $(genBio)\edDist.c $(genBio)\edDist.h $(genBio)\samEntry.$O $(genBio)\seqST.$O $(genLib)\genMath.h
 	$(CC) /Fo:$(genBio)\edDist.$O $(CFLAGS) $(genBio)\edDist.c
 
+$(genBio)\rmHomo.$O: $(genBio)\rmHomo.c $(genBio)\rmHomo.h $(genBio)\samEntry.$O $(genBio)\seqST.$O
+	$(CC) /Fo:$(genBio)\rmHomo.$O $(CFLAGS) $(genBio)\rmHomo.c
+
 $(genAln)\indexToCoord.$O: $(genAln)\indexToCoord.c $(genAln)\indexToCoord.h
 	$(CC) /Fo:$(genAln)\indexToCoord.$O $(CFLAGS) $(genAln)\indexToCoord.c
 
@@ -134,7 +138,7 @@ $(tbAmr)\drugAry.$O: $(tbAmr)\drugAry.c $(tbAmr)\drugAry.h
 $(tbAmr)\amrST.$O: $(tbAmr)\amrST.c $(tbAmr)\amrST.h $(tbAmr)\drugAry.$O $(genLib)\ulCp.$O $(genLib)\charCp.$O $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
 	$(CC) /Fo:$(tbAmr)\amrST.$O $(CFLAGS) $(tbAmr)\amrST.c
 
-$(tbAmr)\checkAmr.$O: $(tbAmr)\checkAmr.c $(tbAmr)\checkAmr.h $(tbAmr)\amrST.$O $(genBio)\samEntry.$O $(genBio)\codonTbl.$O $(genLib)\genMath.$O
+$(tbAmr)\checkAmr.$O: $(tbAmr)\checkAmr.c $(tbAmr)\checkAmr.h $(tbAmr)\amrST.$O $(genBio)\samEntry.$O $(genBio)\codonFun.$O $(genLib)\genMath.$O
 	$(CC) /Fo:$(tbAmr)\checkAmr.$O $(CFLAGS) $(tbAmr)\checkAmr.c
 
 $(tbSpol)\spolFind.$O: $(tbSpol)\spolFind.c $(tbSpol)\spolFind.h $(tbSpol)\tbSpolDefs.h $(genBio)\samEntry.$O $(genBio)\seqST.$O $(genAln)\kmerFind.$O

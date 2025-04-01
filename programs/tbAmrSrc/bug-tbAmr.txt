@@ -3,7 +3,8 @@ b checkAmr.c:2587
 
 # First kept frameshift case (BC33)
 #b checkAmr.c:1053 if iAmr == 3059
-b checkAmr.c:982 if refPosUI == 4408199
+#b checkAmr.c:983 if refPosUI == 1917940
+b checkAmr.c:899 if amrAryST[siAmr].refPosUI == 4407850
 
 # If I had resistance
 #b checkAmr.c:1391
@@ -15,7 +16,8 @@ b checkAmr.c:982 if refPosUI == 4408199
 #r -amr-tbl ../../freezeTBFiles/who-2023.tsv -sam ~/files/testing/null-con.sam
 #r -amr-tbl ../../freezeTBFiles/amrDb.tsv -sam-con $HOME/files/testing/null-con.sam
 #r -amr-tbl ../../freezeTBFiles/amrDb.tsv -sam-con /home/reason/files/testing/bar76_problem/res/bar76-map-freezeTBOld-cons.sam
-r -amr-tbl ../whoToAmrSrc/amrDb.tsv -sam-con cons.sam
+#r -amr-tbl /usr/local/share/freezeTBFiles/amrDb.tsv -sam test.sam
+r -frameshift -frameshift-sup 0.25 -min-depth 5 -amr-tbl ../../freezeTBFiles/amrDb.tsv -sam ~/files/testing/tb/BC33.sam
   
 
 define pcross

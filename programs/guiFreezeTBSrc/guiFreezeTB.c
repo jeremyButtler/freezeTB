@@ -19,8 +19,9 @@
 |   - included libraries
 \-------------------------------------------------------*/
 
-/*little lower than cmd version because report filters*/
 #define def_amrPercSup_guiFreezeTB 0.01
+   /*little lower than cmd version because report filter*/
+#define def_mkGraph_guiFreezeTB 1 /*1 is yes*/
 
 #ifdef PLAN9
    #include <u.h>
@@ -42,7 +43,6 @@
 #include "../freezeTBSrc/freezeTBPaths.h" /*(file paths)*/
 
 /*.h files only (no .c files used)*/
-#include "../genLib/dataTypeShortHand.h"
 #include "../genBio/tbConDefs.h"
 #include "../tbAmrSrc/tbAmrDefs.h"
 #include "../tbMiruSrc/tbMiruDefs.h"
@@ -63,6 +63,7 @@
 !   o .c  #include "../genBio/maskPrim.h"
 !   o .c  #include "../genBio/ampDepth.h"
 !   o .c  #include "../genBio/adjCoords.h"
+!   o .c  #include "../genBio/rmHomo.h"
 !   o .c  #include "../tbSpolSrc/spolFind.h" 
 !   o .c  #include "../tbMiruSrc/miruTbl.h"
 !   o .c  #include "../tbAmrSrc/checkAmr.h"
@@ -81,7 +82,7 @@
 !   > general biology dependencys for task
 !
 !   o .c  #include "../genBio/geneCoord.h"
-!   o .c  #include "../genBio/codonTbl.h"
+!   o .c  #include "../genBio/codonFun.h"
 !   o .c  #include "../genBio/seqST.h"
 !   o .c  #include "../genBio/samEntry.h"
 !   o .c  #include "../genBio/edDist.h"
@@ -98,6 +99,11 @@
 !   o .c  #include "../tbSpolSrc/spolST.h"
 !   o .c  #include "../tbAmrSrc/amrST.h"
 !   o .c  #include "../tbAmrSrc/drugAry.h"
+!
+!   > .h files only
+!   o .h  #include "../genLib/dataTypeShortHand.h"
+!   o .c  #include "../genBio/codonTbl.h"
+!   o .c  #include "../genBio/kmerBit.h" from kmerFind
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -144,7 +150,7 @@ wrap_guiFreezeTB(
    signed char *errHeapStr = 0;
    signed char *errMessageHeapStr = 0;
    signed char *tmpStr = 0;
-   uint lenUI = 0;
+   unsigned int lenUI = 0;
    int retSI = 0;
 
    errHeapStr =
@@ -182,7 +188,7 @@ wrap_guiFreezeTB(
       lenUI = endStr_ulCp(errHeapStr);
 
       errMessageHeapStr =
-         malloc((lenUI + 256) * sizeof(schar));
+         malloc((lenUI + 256) * sizeof(signed char));
 
       if(! errMessageHeapStr)
       { /*If: memory error*/
@@ -210,7 +216,7 @@ wrap_guiFreezeTB(
       tmpStr +=
          cpStr_ulCp(
             tmpStr,
-            (schar *) "tk_messageBox -message \""
+            (signed char *) "tk_messageBox -message \""
       );
 
       tmpStr +=
@@ -225,7 +231,7 @@ wrap_guiFreezeTB(
       tmpStr +=
          cpStr_ulCp(
             tmpStr,
-            (schar *) "\" -title \"ERROR\""
+            (signed char *) "\" -title \"ERROR\""
       );
 
       /*launch the messgage box*/
@@ -301,10 +307,13 @@ initTK_guiFreezeTB(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint errSI = 0;
-   schar *tmpStr = 0;
-   schar *cmdHeapStr = 0;
-   schar defStr[4096]; /*for setting defaults*/
+   signed int errSI = 0;
+   signed char *tmpStr = 0;
+   signed char *cmdHeapStr = 0;
+   signed char defStr[4096]; /*for setting defaults*/
+
+	signed char *cpStr = 0;
+   signed char fileStr[4096]; /*for setting defaults*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -341,15 +350,19 @@ initTK_guiFreezeTB(
    ^   o fun03 sec03 sub03:
    ^     - read filtering variables
    ^   o fun03 sec03 sub04:
-   ^     - amr settings
+   ^     - indel clean up
    ^   o fun03 sec03 sub05:
-   ^     - lineage settings
+   ^     - amr settings
    ^   o fun03 sec03 sub06:
-   ^     - consensus settings
+   ^     - lineage settings
    ^   o fun03 sec03 sub07:
-   ^     - consensus variant print settings
+   ^     - consensus settings
    ^   o fun03 sec03 sub08:
+   ^     - consensus variant print settings
+   ^   o fun03 sec03 sub09:
    ^     - cluster settings
+   ^   o fun03 sec03 sub10:
+   ^     - output settings
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -392,7 +405,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_refFa "
+         (signed char *) "variable glob_refFa "
       );
       
    refPath_freezeTBPaths(tmpStr);
@@ -404,11 +417,27 @@ initTK_guiFreezeTB(
       tmpStr[2] = '\0';
    } /*If: file not found*/
 
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error setting up reference*/
@@ -432,7 +461,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_coordsTsv "
+         (signed char *) "variable glob_coordsTsv "
       );
       
    coordPath_freezeTBPaths(tmpStr);
@@ -444,11 +473,27 @@ initTK_guiFreezeTB(
       tmpStr[2] = '\0';
    } /*If: file not found*/
 
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -471,15 +516,29 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_amrDb "
+         (signed char *) "variable glob_amrDb "
       );
       
    amrPath_freezeTBPaths(tmpStr);
 
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
 
    if(tmpStr[0] == '\0')
@@ -510,7 +569,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_maskCoords "
+         (signed char *) "variable glob_maskCoords "
       );
       
    maskPath_freezeTBPaths(tmpStr);
@@ -522,11 +581,27 @@ initTK_guiFreezeTB(
       tmpStr[2] = '\0';
    } /*If: file not found*/
 
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -549,7 +624,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_miruDb "
+         (signed char *) "variable glob_miruDb "
       );
       
    miruPath_freezeTBPaths(tmpStr);
@@ -561,11 +636,27 @@ initTK_guiFreezeTB(
       tmpStr[2] = '\0';
    } /*If: file not found*/
 
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -588,7 +679,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_spacer "
+         (signed char *) "variable glob_spacer "
       );
       
    spolSpacerPath_freezeTBPaths(tmpStr);
@@ -600,11 +691,27 @@ initTK_guiFreezeTB(
       tmpStr[2] = '\0';
    } /*If: file not found*/
 
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -627,7 +734,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_spolDb "
+         (signed char *) "variable glob_spolDb "
       );
       
    spolLineagePath_freezeTBPaths(tmpStr);
@@ -639,11 +746,27 @@ initTK_guiFreezeTB(
       tmpStr[2] = '\0';
    } /*If: file not found*/
 
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
    errSI =
       Tcl_Eval(
          tclInterpSTPtr,
-         (char *) defStr
+         (char *) fileStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -679,7 +802,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_mapq "
+         (signed char *) "variable glob_mapq "
       );
       
    numToStr(
@@ -692,6 +815,7 @@ initTK_guiFreezeTB(
          tclInterpSTPtr,
          (char *) defStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -714,7 +838,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_medQ "
+         (signed char *) "variable glob_medQ "
       );
       
    numToStr(
@@ -727,6 +851,7 @@ initTK_guiFreezeTB(
          tclInterpSTPtr,
          (char *) defStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -749,7 +874,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_meanQ "
+         (signed char *) "variable glob_meanQ "
       );
       
    numToStr(
@@ -757,11 +882,12 @@ initTK_guiFreezeTB(
       def_minMeanQ_freezeTBDefs
    );
 
-   errSI = 
+   errSI =
       Tcl_Eval(
          tclInterpSTPtr,
          (char *) defStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -784,7 +910,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minLen "
+         (signed char *) "variable glob_minLen "
       );
 
    numToStr(
@@ -797,6 +923,7 @@ initTK_guiFreezeTB(
          tclInterpSTPtr,
          (char *) defStr
       );
+
 
    if( errSI != TCL_OK)
    { /*If: error*/
@@ -811,13 +938,138 @@ initTK_guiFreezeTB(
 
    /*****************************************************\
    * Fun03 Sec03 Sub04:
-   *   - amr settings
+   *   - indel clean up
    *   o fun03 sec03 sub04 cat01:
-   *     - minimum perc support
+   *     - indel clean up check box
+   *   o fun03 sec03 sub04 cat02:
+   *     - indel clean up homopolymer length
+   *   o fun03 sec03 sub04 cat03:
+   *     - indel cleanup indel size
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub04 Cat01:
+   +   - indel clean up check box
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_rmHomoBl "
+      );
+
+   numToStr(
+      tmpStr,
+      def_indelClean_freezeTBDefs
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nerror setting up indel clean up checkbox\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub04 Cat02:
+   +   - indel clean up homopolymer length
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_rmHomo_homoSI "
+      );
+
+   numToStr(
+      tmpStr,
+      def_minHomo_freezeTBDefs
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nerror setting indel cleanup homopolymer\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub04 Cat03:
+   +   - indel cleanup indel size
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_rmHomo_indelSI "
+      );
+
+   numToStr(
+      tmpStr,
+      def_maxIndel_freezeTBDefs
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nerror setting indel cleanup indel size\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*****************************************************\
+   * Fun03 Sec03 Sub05:
+   *   - amr settings
+   *   o fun03 sec03 sub05 cat01:
+   *     - minimum perc support
+   *   o fun03 sec03 sub05 cat02:
+   *     - minimum indel perc support
+   *   o fun03 sec03 sub05 cat03:
+   *     - frameshift support
+   *   o fun03 sec03 sub05 cat04:
+   *     - detect frameshifts
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub05 Cat01:
    +   - AMR read minimum percent support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -826,7 +1078,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_amrPercSup "
+         (signed char *) "variable glob_amrPercSup "
       );
 
    double_numToStr(
@@ -841,6 +1093,7 @@ initTK_guiFreezeTB(
          (char *) defStr
       );
 
+
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
@@ -852,21 +1105,132 @@ initTK_guiFreezeTB(
       return TCL_ERROR;
    } /*If: error*/
 
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub05 Cat02:
+   +   - AMR indel min percent support
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_amrIndelSupF "
+      );
+
+   double_numToStr(
+      tmpStr,
+      def_amrIndelSup_freezeTBDefs,
+      3
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nAMR min percent indel setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub05 Cat03:
+   +   - AMR frameshift support
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_amrFrameSupF "
+      );
+
+   double_numToStr(
+      tmpStr,
+      def_supFrameshift_freezeTBDefs,
+      3
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nAMR min percent frameshift setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub05 Cat04:
+   +   - detect frameshifts
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_frameshift "
+      );
+
+   if(def_frameshift_freezeTBDefs)
+      *tmpStr++ = '1';
+   else
+      *tmpStr++ = '0';
+   
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nAMR check frameshift setup error\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+
    /*****************************************************\
-   * Fun03 Sec03 Sub05:
+   * Fun03 Sec03 Sub06:
    *   - lineage settings
-   *   o fun03 sec03 sub05 cat01:
+   *   o fun03 sec03 sub06 cat01:
    *     - fudge factor for miru
-   *   o fun03 sec03 sub05 cat02:
+   *   o fun03 sec03 sub06 cat02:
    *     - spoligotype minimum similarty
-   *   o fun03 sec03 sub05 cat03:
+   *   o fun03 sec03 sub06 cat03:
    *     - direct repeat start setup
-   *   o fun03 sec03 sub05 cat04:
+   *   o fun03 sec03 sub06 cat04:
    *     - direct repeat end setup
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub05 Cat01:
+   + Fun03 Sec03 Sub06 Cat01:
    +   - fudge factor for miru
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -875,7 +1239,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_miruFudge "
+         (signed char *) "variable glob_miruFudge "
       );
 
    numToStr(
@@ -889,6 +1253,7 @@ initTK_guiFreezeTB(
          (char *) defStr
       );
 
+
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
@@ -901,7 +1266,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub05 Cat02:
+   + Fun03 Sec03 Sub06 Cat02:
    +   - spoligotype minimum similarty
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -910,7 +1275,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_spolSim "
+         (signed char *) "variable glob_spolSim "
       );
 
    double_numToStr(
@@ -925,6 +1290,7 @@ initTK_guiFreezeTB(
          (char *) defStr
       );
 
+
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
@@ -937,7 +1303,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub05 Cat03:
+   + Fun03 Sec03 Sub06 Cat03:
    +   - direct repeat start setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -946,7 +1312,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_drStart "
+         (signed char *) "variable glob_drStart "
       );
 
    numToStr(
@@ -972,7 +1338,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub05 Cat04:
+   + Fun03 Sec03 Sub06 Cat04:
    +   - direct repeat end setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -981,7 +1347,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_drEnd "
+         (signed char *) "variable glob_drEnd "
       );
 
    numToStr(
@@ -995,6 +1361,7 @@ initTK_guiFreezeTB(
          (char *) defStr
       );
 
+
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
@@ -1007,24 +1374,24 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*****************************************************\
-   * Fun03 Sec03 Sub06:
+   * Fun03 Sec03 Sub07:
    *   - consensus settings
-   *   o fun03 sec03 sub06 cat01:
+   *   o fun03 sec03 sub07 cat01:
    *     - minimum read depth
-   *   o fun03 sec03 sub06 cat02:
+   *   o fun03 sec03 sub07 cat02:
    *     - snp/math minimum q-score
-   *   o fun03 sec03 sub06 cat03:
+   *   o fun03 sec03 sub07 cat03:
    *     - insertion minimum q-score
-   *   o fun03 sec03 sub06 cat04:
+   *   o fun03 sec03 sub07 cat04:
    *     - snp/match min percent depth
-   *   o fun03 sec03 sub06 cat05:
+   *   o fun03 sec03 sub07 cat05:
    *     - insertion min percent depth
-   *   o fun03 sec03 sub06 cat06:
+   *   o fun03 sec03 sub07 cat06:
    *     - deletion min percent depth
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub06 Cat01:
+   + Fun03 Sec03 Sub07 Cat01:
    +   - minimum read depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1033,7 +1400,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_depth "
+         (signed char *) "variable glob_depth "
       );
 
    numToStr(
@@ -1059,7 +1426,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub06 Cat02:
+   + Fun03 Sec03 Sub07 Cat02:
    +   - snp/math minimum q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1068,7 +1435,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_snpq "
+         (signed char *) "variable glob_snpq "
       );
 
    numToStr(
@@ -1094,7 +1461,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub06 Cat03:
+   + Fun03 Sec03 Sub07 Cat03:
    +   - insertion minimum q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1103,7 +1470,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_insq "
+         (signed char *) "variable glob_insq "
       );
 
    numToStr(
@@ -1129,7 +1496,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub06 Cat04:
+   + Fun03 Sec03 Sub07 Cat04:
    +   - snp/match min percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1138,7 +1505,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_basePerc "
+         (signed char *) "variable glob_basePerc "
       );
 
    double_numToStr(
@@ -1165,7 +1532,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub06 Cat05:
+   + Fun03 Sec03 Sub07 Cat05:
    +   - insertion min percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1174,7 +1541,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_insPerc "
+         (signed char *) "variable glob_insPerc "
       );
 
    double_numToStr(
@@ -1201,7 +1568,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub06 Cat06:
+   + Fun03 Sec03 Sub07 Cat06:
    +   - deletion min percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1210,7 +1577,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_delPerc "
+         (signed char *) "variable glob_delPerc "
       );
 
    double_numToStr(
@@ -1237,20 +1604,20 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*****************************************************\
-   * Fun03 Sec03 Sub07:
+   * Fun03 Sec03 Sub08:
    *   - consensus variant print settings
-   *   o fun03 sec03 sub07 cat01:
+   *   o fun03 sec03 sub08 cat01:
    *     - read depth variant minimum
-   *   o fun03 sec03 sub07 cat02:
+   *   o fun03 sec03 sub08 cat02:
    *     - snp/match variant min percent depth
-   *   o fun03 sec03 sub07 cat03:
+   *   o fun03 sec03 sub08 cat03:
    *     - insertion variant min percent depth
-   *   o fun03 sec03 sub07 cat04:
+   *   o fun03 sec03 sub08 cat04:
    *     - deletion varaint min percent depth
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub07 Cat01:
+   + Fun03 Sec03 Sub08 Cat01:
    +   - read depth variant minimum
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1259,7 +1626,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minVarDepth "
+         (signed char *) "variable glob_minVarDepth "
       );
 
    numToStr(
@@ -1285,7 +1652,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub07 Cat03:
+   + Fun03 Sec03 Sub08 Cat03:
    +   - snp/match variant min percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1294,7 +1661,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_baseVarPerc "
+         (signed char *) "variable glob_baseVarPerc "
       );
 
    double_numToStr(
@@ -1321,7 +1688,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub07 Cat05:
+   + Fun03 Sec03 Sub08 Cat05:
    +   - insertion variant min percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1330,7 +1697,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_insVarPerc "
+         (signed char *) "variable glob_insVarPerc "
       );
 
    double_numToStr(
@@ -1357,7 +1724,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub07 Cat06:
+   + Fun03 Sec03 Sub08 Cat06:
    +   - deletion variant min percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1366,7 +1733,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_delVarPerc "
+         (signed char *) "variable glob_delVarPerc "
       );
 
    double_numToStr(
@@ -1393,40 +1760,40 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*****************************************************\
-   * Fun03 Sec03 Sub08:
+   * Fun03 Sec03 Sub09:
    *   - cluster settings
-   *   o fun03 sec03 sub08 cat01:
+   *   o fun03 sec03 sub09 cat01:
    *     - min depth clustering
-   *   o fun03 sec03 sub08 cat02:
+   *   o fun03 sec03 sub09 cat02:
    *     - min percent depth clustering
-   *   o fun03 sec03 sub08 cat03:
+   *   o fun03 sec03 sub09 cat03:
    *     - min base (snp/match) q clustering
-   *   o fun03 sec03 sub08 cat04:
+   *   o fun03 sec03 sub09 cat04:
    *     - indel length min clustering
-   *   o fun03 sec03 sub08 cat05:
+   *   o fun03 sec03 sub09 cat05:
    *     - read error rate min clustering
-   *   o fun03 sec03 sub08 cat06:
+   *   o fun03 sec03 sub09 cat06:
    *     - consensus error rate min clustering
-   *   o fun03 sec03 sub08 cat07:
+   *   o fun03 sec03 sub09 cat07:
    *     - variant to error ration (max) cluster
-   *   o fun03 sec03 sub08 cat08:
+   *   o fun03 sec03 sub09 cat08:
    *     - window variant to error ratio (max) cluster
-   *   o fun03 sec03 sub08 cat09:
+   *   o fun03 sec03 sub09 cat09:
    *     - window length cluster
-   *   o fun03 sec03 sub08 cat10:
+   *   o fun03 sec03 sub09 cat10:
    *     - read scoring length weight (cluster)
-   *   o fun03 sec03 sub08 cat11:
+   *   o fun03 sec03 sub09 cat11:
    *     - consensus similarity (max) cluster
-   *   o fun03 sec03 sub08 cat12:
+   *   o fun03 sec03 sub09 cat12:
    *     - consensus overlap (min) cluster
-   *   o fun03 sec03 sub08 cat13:
+   *   o fun03 sec03 sub09 cat13:
    *     - consensus mask perc (max) cluster
-   *   o fun03 sec03 sub08 cat14:
+   *   o fun03 sec03 sub09 cat14:
    *     - consensus max rebuilds cluster
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat01:
+   + Fun03 Sec03 Sub09 Cat01:
    +   - min depth clustering
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1435,7 +1802,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minClustDepth "
+         (signed char *) "variable glob_minClustDepth "
       );
 
    numToStr(
@@ -1461,7 +1828,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat02:
+   + Fun03 Sec03 Sub09 Cat02:
    +   - min percent depth clustering
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1470,7 +1837,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minClustPercDepth "
+         (signed char *) "variable glob_minClustPercDepth "
       );
 
    double_numToStr(
@@ -1497,7 +1864,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat03:
+   + Fun03 Sec03 Sub09 Cat03:
    +   - min base (snp/match) q clustering
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1506,7 +1873,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minClustSnpQ "
+         (signed char *) "variable glob_minClustSnpQ "
       );
 
    numToStr(
@@ -1532,7 +1899,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat04:
+   + Fun03 Sec03 Sub09 Cat04:
    +   - indel length min clustering
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1541,7 +1908,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minClustIndelLen "
+         (signed char *) "variable glob_minClustIndelLen "
       );
 
    numToStr(
@@ -1567,7 +1934,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat05:
+   + Fun03 Sec03 Sub09 Cat05:
    +   - read error rate min clustering
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1576,7 +1943,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_clustReadErr "
+         (signed char *) "variable glob_clustReadErr "
       );
 
    double_numToStr(
@@ -1603,7 +1970,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat06:
+   + Fun03 Sec03 Sub09 Cat06:
    +   - consensus error rate min clustering
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1612,7 +1979,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_clustConErr "
+         (signed char *) "variable glob_clustConErr "
       );
 
    double_numToStr(
@@ -1639,7 +2006,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat07:
+   + Fun03 Sec03 Sub09 Cat07:
    +   - variant to error ratio (max) cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1648,7 +2015,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_clustErrRatio "
+         (signed char *) "variable glob_clustErrRatio "
       );
 
    numToStr(
@@ -1674,7 +2041,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat08:
+   + Fun03 Sec03 Sub09 Cat08:
    +   - window variant to error ratio (max) cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1683,7 +2050,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_clustWinErrRatio "
+         (signed char *) "variable glob_clustWinErrRatio "
       );
 
    numToStr(
@@ -1709,7 +2076,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat09:
+   + Fun03 Sec03 Sub09 Cat09:
    +   - window length cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1718,7 +2085,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_clustWinLen "
+         (signed char *) "variable glob_clustWinLen "
       );
 
    numToStr(
@@ -1744,7 +2111,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat10:
+   + Fun03 Sec03 Sub09 Cat10:
    +   - read scoring length weight (cluster)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1753,7 +2120,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_lenWeight "
+         (signed char *) "variable glob_lenWeight "
       );
 
    numToStr(
@@ -1779,7 +2146,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat11:
+   + Fun03 Sec03 Sub09 Cat11:
    +   - consensus similarity (max) cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1788,7 +2155,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_maxClustSim "
+         (signed char *) "variable glob_maxClustSim "
       );
 
    double_numToStr(
@@ -1815,7 +2182,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat12:
+   + Fun03 Sec03 Sub09 Cat12:
    +   - consensus overlap (min) cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1824,7 +2191,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_minClustOverlap "
+         (signed char *) "variable glob_minClustOverlap "
       );
 
    double_numToStr(
@@ -1851,7 +2218,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat13:
+   + Fun03 Sec03 Sub09 Cat13:
    +   - consensus mask perc (max) cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1860,7 +2227,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_maxClustMask "
+         (signed char *) "variable glob_maxClustMask "
       );
 
    double_numToStr(
@@ -1887,7 +2254,7 @@ initTK_guiFreezeTB(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub08 Cat14:
+   + Fun03 Sec03 Sub09 Cat14:
    +   - consensus max rebuilds cluster
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1896,7 +2263,7 @@ initTK_guiFreezeTB(
    tmpStr +=
       cpLine_ulCp(
          tmpStr,
-         (schar *) "variable glob_numRebuilds "
+         (signed char *) "variable glob_numRebuilds "
       );
 
    numToStr(
@@ -1920,6 +2287,123 @@ initTK_guiFreezeTB(
 
       return TCL_ERROR;
    } /*If: error*/
+
+   /*****************************************************\
+   * Fun03 Sec03 Sub09:
+   *   - cluster settings
+   *   o fun03 sec03 sub10 cat01:
+   *     - min % ARM support for output
+   *   o fun03 sec03 sub10 cat02:
+   *     - min % ARM indel support for output
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub10 Cat01:
+   +   - min % ARM support for output
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_outSnpSup "
+      );
+
+   double_numToStr(
+      tmpStr,
+      def_amrPercSup_guiFreezeTB,
+      3
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nerror setting up output AMR support\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub10 Cat02:
+   +   - min % ARM indel support for output
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_outIndelSup "
+      );
+
+   double_numToStr(
+      tmpStr,
+      def_amrIndelSup_freezeTBDefs,
+      3
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nerror set up output AMR indel support\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub10 Cat03:
+   +   - build graph setting
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_mkGraphBl "
+      );
+
+   numToStr(
+      tmpStr,
+      def_mkGraph_guiFreezeTB
+   );
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) defStr
+      );
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s\nerror set up output AMR indel support\n",
+         Tcl_GetStringResult(tclInterpSTPtr)
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec04:
@@ -1961,8 +2445,10 @@ main(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    char **tclArgsHeapStr = 0;
-   sint tclArgsSI = 0; /*in case user input something*/
-                       /*also for error report at end*/
+   signed int tclArgsSI = 0;
+      /*in case user input something
+      `  also for error report at end
+      */
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec02:
@@ -1983,8 +2469,8 @@ main(
       goto memErr_main_sec04;
 
    cpStr_ulCp(
-      (schar *) tclArgsHeapStr[0],
-      (schar *) "freezeTB"
+      (signed char *) tclArgsHeapStr[0],
+      (signed char *) "freezeTB"
    ); /*copy gui title*/
 
 
@@ -1994,7 +2480,9 @@ main(
       goto memErr_main_sec04;
 
    if(
-     tclGuiPath_freezeTBPaths((schar *) tclArgsHeapStr[1])
+     tclGuiPath_freezeTBPaths(
+        (signed char *) tclArgsHeapStr[1]
+     )
    ){ /*If: had file error*/
       fprintf(
         stderr,

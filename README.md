@@ -19,6 +19,14 @@ freezeTB includes databases from other repositories and
 
 Here are the order of Merlin winners:
 
+- People:
+  - Tara Ness: helping in GUI disign, feedback, and
+    co-PI on project
+  - Eric Bortz: project PI, boucing ids, and general
+    encouragment
+  - Bryce Inman: GUI testing, AMR testing, and designed
+    wet lab side
+  - Abigail Seeger: GUI testing on windows
 - Taken from other sources:
   - Files in freezeTBFiles
     - The amr database (amrDb.tsv) is from the WHO 2023
@@ -40,7 +48,7 @@ Here are the order of Merlin winners:
       MIRUReader
       [https://github.com/phglab/MIRUReader](
        https://github.com/phglab/MIRUReader)
-    - spoligo-spacers.fa were from a spoligotyping program
+    - spoligo-spacers.fa were from
       - Kamerbeek J, Schouls L, Kolk A, van Agterveld M,
         van Soolingen D, Kuijper S, Bunschoten A,
         Molhuizen H, Shaw R, Goyal M, van Embden J.
@@ -57,7 +65,7 @@ Here are the order of Merlin winners:
     interface [the window])
     - [https://github.com/tcltk/tk](
        https://github.com/tcltk/tk)
-    - [https://github.com/tcltk/tk](
+    - [https://github.com/tcltk/tcl](
        https://github.com/tcltk/tcl)
 
 The stuff unique to freezeTB is under a dual license. The
@@ -167,42 +175,63 @@ sudo chmod a+x /usr/local/bin/minimap2
 
 ## Windows
 
-### Easy method
+### current method
 
-I need to build the easy way. Work in progress.
+Best way I found. It relies on visual 2022 build tools
+  being installed.
 
-### Windows method (source)
-
-This is not the method your are looking for
-
-GUI has not been tested.
-
-1. Install visual studio or at least the developer console
+- install tctlk 8.6 from magic splat
+  - [https://sourceforge.net/projects/magicsplat/files/magicsplat-tcl/](
+     https://sourceforge.net/projects/magicsplat/files/magicsplat-tcl/)
+  - download the tcl-8.616-installer-1.16.0-x64.msi file
+- Install visual studio or at least the developer console
    from visual studio
-2. Make a freezeTB directory in "C:\Program Files"
-3. Download freezeTB from git hub and unzip in Downloads
-4. Copy the freezeTBFiles directory to Documents
-   (or public)
-5. Open the developer console
-   (visual studio->view->developer console) and
-   do `cd $HOME$/Downloads/freezeTB`.
-6. Compile freezeTB with `nmake /F mkfile.win`, then close
-   the developer console
-7. In the freezeTB folder copy the freezeTB.exe in
-   "programs->freezeTBSrc" to the freezeTB folder in
-    "C:\Program Files"
-9. Copy the minimap2.exe (minimap2) file minimap2Windows
-   to your freezeTB folder in "C:\Program fIles"
-   - or compile minimap2 and copy the .exe file
-10. Copy the freezeTBGui.Rscript (freezeTBGui) file in
-    scripts to your desktop or where you want it.
-11. Make sure R is installed or if not install R or
-    Rstudio
-    [https://cran.r-project.org/bin/windows/base/](
-     https://cran.r-project.org/bin/windows/base/)
-12. Right click freezeTBGui.Rscript and select
-    "open with", then "more programs", then "R",
-    "R <version number>", "bin", "Rscript"
+   - [https://visualstudio.microsoft.com/downloads/](
+      https://visualstudio.microsoft.com/downloads/)
+   - You can either install the full visual studio
+     program or if you just want the tools go
+     to `tools for visual studio`
+     then select `build tools for visual studio`
+   - While installing it will prompt you for what options
+     you want to install, select the c++ development, it
+     should be the computer monitor picture in the upper
+     left corner
+- Double click `winInstall.bat` in the `windows` folder
+  - to install globaly; run as administratory
+   (right click->run as administrator)
+
+To uninstall; double click `winUninstall.bat` in `windows`
+  folder.
+  - to remove globaly; run as administratory
+   (right click->run as administrator)
+
+### if failed
+
+Likley because the `winInstall.bat` script could not
+  activate the developer enviroment. You can activate
+  this by opening a developer console.
+
+If it did not install, then open a developer console (run
+  as administrator for a global install)
+  (start menu->visual studio->x64 native tools command prompt).
+  Then type `"cd %homePath%\freezeTB\windows"` and hit
+  enter.  Then type `winInstall.bat` and hit enter. At this
+  point freezeTB should be installed. Type `exit` and hit
+  enter.
+
+Currently the graphing step does not work in windows due
+  to a windows error that causes Rscript to error out
+  when called by tcl. However, you can build the graphs
+  manually by opening the windows terminal.
+
+```"%PROGRAMFILES%\R\R-<R version>\bin\Rscript.exe" "%PROGRAMFILES%\freezeTB\graphAmpDepth.r" -who "%HOMEPATH%\Documents\freezeTBFiles\amrDb.tsv" -stats "%HOMEPATH%/path/to/FTB_output/<prefix>-depths.tsv -prefix "%HOMEPATH%/path/to/FTB_output/<prefix>```
+
+The <R version> needs to be filled with the version
+  number of R. You can find this by going
+  to `C:\Program Files\R`.
+
+The <prefix> is the prefix for the output files from
+  freezTB.
 
 ![
   Picture showing how to open developer console
@@ -210,11 +239,13 @@ GUI has not been tested.
 
 ### Windows Minimap2 (from source)
 
-I include a minimap2.exe compiled binary in winBin.
-  So, you do not need this. However, here are the
+I include a minimap2.exe compiled binary in the `windows`
+  folder. So, you do not need this. However, here are the
   steps if you want a more recent version of minimap2. If
   your computer's CPU is an ARM CPU, such as a snap dragon
-  CPU, you will need to compile minimap2 from source.
+  CPU, you will need to compile minimap2 from source using
+  the `-neon=1` and `-aarch64=1` flags (assuming minigw
+  has an ARM release).
 
 First install Cygwin using the setup-x86_64.exe (is a
   link):
@@ -245,7 +276,7 @@ Open a Cygwin terminal (run Cygwin). Then move into
   (`cd c:/Users/<user name>/Downloads/minimap2-master/minimap2-master`).
   - For me `cd c:/Users/Jeremy/Downloads/minimap2-master/minimap2-master`
 
-Build minimap2
+Build minimap2 (x86 [intel/amd])
   with `make CC=x86_64-w64-mingw32-gcc CFLAGS=--static`.
   You will need --static here to avoid needing .dll files.
 

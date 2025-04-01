@@ -59,6 +59,7 @@
 !   - .h  #include "../genAln/alnDefs.h"
 !   - .h  #include "../genLib/genMath.h" .h max macros
 !   - .h  #include "../genBio/ntTo5Bit.h"
+!   - .h  #include "../genBio/kmerBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

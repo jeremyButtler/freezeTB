@@ -1,10 +1,3 @@
-#b freezeTB.c:4424
-#b freezeTB.c:3997
-b edClust.c:1053
-b edClust.c:1187
-b edClust.c:1783
-#b checkAmr.c:2062 if amrAryST[indexUI].refPosUI == 4408198
-#r -sam $HOME/../shared/edClustTests/BC33.sam -prefix delete
-#r -sam del.sam -prefix delete -adj-coords
-#r -clust -sam $HOME/../shared/edClustTests/BC33.sam -prefix delete
-r -sam test.sam -err-to-var 50 -prefix delete
+b freezeTB.c:6680
+
+r -sam test.sam -prefix delete

@@ -63,6 +63,7 @@
 !   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genAln/indexToCoord.h"
 !   - .h  #include "../genBio/ntTo5Bit.h"
+!   - .h  #include "../genBio/kmerBit.h"
 !   - .h  #include "../genLib/genMath.h" .h macro only
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 

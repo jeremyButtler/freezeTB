@@ -66,6 +66,9 @@
 '     - sorts signed char array from least to greatest
 '   o fun25: dbl_shellSort
 '     - sorts a double array from least to greatest
+'   o fun26: uiTwinShort_kmerFind
+'     - sorts a unsigned int array from least to greatest
+'       and keeps it linked to a second unsigned int array
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -639,6 +642,32 @@ sc_shellSort(
 void
 dbl_shellSort(
    double *dblAry,
+   unsigned long startUL,
+   unsigned long endUL
+);
+
+/*-------------------------------------------------------\
+| Fun26: uiTwinSort_shellSort
+|   - sorts a unsigned int array from least to greatest
+|     and keeps it linked to a second unsigned int array
+| Input:
+|   - uiAry:
+|     o array to sort
+|   - uiSecAry:
+|     o second array to keep in order with uiAry
+|   - startUL:
+|     o first element to start sorting at
+|   - endUL:
+|     o last element to sort (index 0)
+| Output:
+|   - Modifies:
+|     o uiAry to be sorted form least to greatest
+|     o uiSecAry to be sorted by uiAry
+\-------------------------------------------------------*/
+void
+uiTwinSort_shellSort(
+   unsigned int *uiAry,
+   unsigned int *uiSecAry,
    unsigned long startUL,
    unsigned long endUL
 );

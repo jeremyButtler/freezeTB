@@ -4,30 +4,28 @@
 '     freezeTB
 '   o header:
 '     - guards
-'   o .c fun01: getSharePath_freezeTBPaths
-'     - returns shared path for OS
-'   o .c fun02: getHomePath_freezeTBPaths
-'     - returns home path for OS
+'   o .c fun01: checkPaths_freezeTBPaths
+'     - checks/finds if input file exits in freezeTB paths
 '   o fun03: amrPath_freezeTBPaths
 '     - finds default AMR path for freezeTB
-'   o fun04: miruPath_freezeTBPaths
+'   o fun03: miruPath_freezeTBPaths
 '     - finds default MIRU table path for freezeTB
-'   o fun05: coordPath_freezeTBPaths
+'   o fun04: coordPath_freezeTBPaths
 '     - finds default gene coordinate table path; freezeTB
-'   o fun06: spolSpacerPath_freezeTBPaths
+'   o fun05: spolSpacerPath_freezeTBPaths
 '     - finds default fasta with spoligotype spacers path
-'   o fun07: spolLineagePath_freezeTBPaths
+'   o fun06: spolLineagePath_freezeTBPaths
 '     - finds default spoligotype lineage path (freezeTB)
-'   o fun08: maskPath_freezeTBPaths
+'   o fun07: maskPath_freezeTBPaths
 '     - finds primer masking path
-'   o fun09: refPath_freezeTBPaths
+'   o fun08: refPath_freezeTBPaths
 '     - finds default reference fasta path (guifreezeTB)
+'   o fun09: guiTclPath_freezeTBPaths
+'     - path to tcl script for GUI
 '   o fun10: outputPath_freezeTBPaths
 '     - sets up an ouput file name & opens "w", the closes
-'   o fun11: guiTclPath_freezeTBPaths
-'     - path to tcl script for GUI
 '   o license:
-'     - licensing for this code (public dofun04 / mit)
+'     - licensing for this code (public dofun03 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -55,7 +53,7 @@ amrPath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun04: miruPath_freezeTBPaths
+| Fun03: miruPath_freezeTBPaths
 |   - finds default MIRU table path for freezeTB
 | Input:
 |   - amrPathStr:
@@ -71,7 +69,7 @@ miruPath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun05: coordPath_freezeTBPaths
+| Fun04: coordPath_freezeTBPaths
 |   - finds default gene coordinates table path (freezeTB)
 | Input:
 |   - amrPathStr:
@@ -87,7 +85,7 @@ coordPath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun06: spolSpacerPath_freezeTBPaths
+| Fun05: spolSpacerPath_freezeTBPaths
 |   - finds default fasta with spoligotype spacers path
 |     (freezeTB)
 | Input:
@@ -104,7 +102,7 @@ spolSpacerPath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun07: spolLineagePath_freezeTBPaths
+| Fun06: spolLineagePath_freezeTBPaths
 |   - finds default spoligotype lineage path (freezeTB)
 | Input:
 |   - amrPathStr:
@@ -120,7 +118,7 @@ spolLineagePath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun08: maskPath_freezeTBPaths
+| Fun07: maskPath_freezeTBPaths
 |   - finds primer masking path
 | Input:
 |   - amrPathStr:
@@ -136,7 +134,7 @@ maskPath_freezeTBPaths(
 );
 
 /*-------------------------------------------------------\
-| Fun09: refPath_freezeTBPaths
+| Fun08: refPath_freezeTBPaths
 |   - finds default reference fasta path (guifreezeTB)
 | Input:
 |   - refPathStr:
@@ -149,6 +147,25 @@ maskPath_freezeTBPaths(
 void
 refPath_freezeTBPaths(
    signed char *refPathStr
+);
+
+/*-------------------------------------------------------\
+| Fun09: guiTclPath_freezeTBPaths
+|   - path to tcl script for GUI
+| Input:
+|   - guiPathStr:
+|     o c-string to add tcl script path to
+| Output:
+|   - Modifies:
+|     o guiPathStr to have the default path or '\0' if
+|       could not find file
+|   - Returns:
+|     o 0 for no errors
+|     o 1 if could not open file
+\-------------------------------------------------------*/
+signed char
+tclGuiPath_freezeTBPaths(
+   signed char *guiPathStr
 );
 
 /*-------------------------------------------------------\
@@ -173,25 +190,6 @@ outputPath_freezeTBPaths(
    signed char *prefixStr,
    signed char *nameStr,
    signed char *outStr
-);
-
-/*-------------------------------------------------------\
-| Fun11: guiTclPath_freezeTBPaths
-|   - path to tcl script for GUI
-| Input:
-|   - guiPathStr:
-|     o c-string to add tcl script path to
-| Output:
-|   - Modifies:
-|     o guiPathStr to have the default path or '\0' if
-|       could not find file
-|   - Returns:
-|     o 0 for no errors
-|     o 1 if could not open file
-\-------------------------------------------------------*/
-signed char
-tclGuiPath_freezeTBPaths(
-   signed char *guiPathStr
 );
 
 #endif

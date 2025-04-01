@@ -49,7 +49,7 @@ freezeTBObjs =\
    $(genLib)genMath.$O \
    $(genLib)shellSort.$O \
    $(genLib)strAry.$O \
-   $(genBio)codonTbl.$O \
+   $(genBio)codonFun.$O \
    $(genBio)geneCoord.$O \
    $(genBio)seqST.$O \
    $(genBio)samEntry.$O \
@@ -57,6 +57,7 @@ freezeTBObjs =\
    $(genBio)ampDepth.$O \
    $(genBio)maskPrim.$O \
    $(genBio)adjCoords.$O \
+   $(genBio)rmHomo.$O \
    $(genBio)tbCon.$O \
    $(genBio)edDist.$O \
    $(genAln)indexToCoord.$O \
@@ -105,8 +106,8 @@ $(genLib)shellSort.$O: $(genLib)shellSort.c $(genLib)shellSort.h
 $(genLib)strAry.$O: $(genLib)strAry.c $(genLib)strAry.h $(genLib)ulCp.$O
 	$(CC) -o $(genLib)strAry.$O -c $(C_FLAGS) $(genLib)strAry.c
 
-$(genBio)codonTbl.$O: $(genBio)codonTbl.c $(genBio)codonTbl.h $(genBio)ntTo2Bit.h $(genBio)revNtTo2Bit.h $(genLib)dataTypeShortHand.h
-	$(CC) -o $(genBio)codonTbl.$O -c $(C_FLAGS) $(genBio)codonTbl.c
+$(genBio)codonFun.$O: $(genBio)codonFun.c $(genBio)codonFun.h $(genBio)codonTbl.h $(genBio)ntTo2Bit.h $(genBio)revNtTo2Bit.h $(genLib)dataTypeShortHand.h
+	$(CC) -o $(genBio)codonFun.$O -c $(C_FLAGS) $(genBio)codonFun.c
 
 $(genBio)seqST.$O: $(genBio)seqST.c $(genBio)seqST.h $(genLib)ulCp.$O $(genLib)dataTypeShortHand.h
 	$(CC) -o $(genBio)seqST.$O -c $(C_FLAGS) $(genBio)seqST.c
@@ -128,6 +129,9 @@ $(genBio)maskPrim.$O: $(genBio)maskPrim.c $(genBio)maskPrim.h $(genBio)samEntry.
 
 $(genBio)adjCoords.$O: $(genBio)adjCoords.c $(genBio)adjCoords.h $(genBio)samEntry.$O $(genBio)geneCoord.$O
 	$(CC) -o $(genBio)adjCoords.$O -c $(C_FLAGS) $(genBio)adjCoords.c
+
+$(genBio)rmHomo.$O: $(genBio)rmHomo.c $(genBio)rmHomo.h $(genBio)samEntry.$O $(genBio)seqST.$O
+	$(CC) -o $(genBio)rmHomo.$O -c $(C_FLAGS) $(genBio)rmHomo.c
 
 $(genBio)tbCon.$O: $(genBio)tbCon.c $(genBio)tbCon.h $(genBio)tbConDefs.h $(genBio)samEntry.$O $(genLib)genMath.$O
 	$(CC) -o $(genBio)tbCon.$O -c $(C_FLAGS) $(genBio)tbCon.c
@@ -162,7 +166,7 @@ $(tbAmr)drugAry.$O: $(tbAmr)drugAry.c $(tbAmr)drugAry.h
 $(tbAmr)amrST.$O: $(tbAmr)amrST.c $(tbAmr)amrST.h $(tbAmr)drugAry.$O $(genLib)ulCp.$O $(genLib)charCp.$O $(genLib)base10str.$O $(genLib)dataTypeShortHand.h
 	$(CC) -o $(tbAmr)amrST.$O -c $(C_FLAGS) $(tbAmr)amrST.c
 
-$(tbAmr)checkAmr.$O: $(tbAmr)checkAmr.c $(tbAmr)checkAmr.h $(tbAmr)amrST.$O $(genBio)samEntry.$O $(genBio)codonTbl.$O $(genLib)genMath.$O
+$(tbAmr)checkAmr.$O: $(tbAmr)checkAmr.c $(tbAmr)checkAmr.h $(tbAmr)amrST.$O $(genBio)samEntry.$O $(genBio)codonFun.$O $(genLib)genMath.$O
 	$(CC) -o $(tbAmr)checkAmr.$O -c $(C_FLAGS) $(tbAmr)checkAmr.c
 
 $(tbSpol)spolFind.$O: $(tbSpol)spolFind.c $(tbSpol)spolFind.h $(tbSpol)tbSpolDefs.h $(genBio)samEntry.$O $(genBio)seqST.$O $(genAln)kmerFind.$O
