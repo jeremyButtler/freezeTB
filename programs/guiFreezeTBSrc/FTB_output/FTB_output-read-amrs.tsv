@@ -1,2 +1,0 @@
-gene	drug	cross_resistance	variant_id	type	grade	ref_pos	num_supporting_reads	perc_support_reads	num_map_reads	resitance_level	resistance_additive	needs_gene	effect	who_comment	whole_gene
-rpoB	rifampicin	NA	rpoB_p.His445Asp	snp	1	761139	112	91.80	122	NA	NA	NA	missense_variant	NA	False

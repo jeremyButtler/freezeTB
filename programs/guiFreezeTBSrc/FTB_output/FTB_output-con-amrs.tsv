@@ -1,2 +1,0 @@
-Id	gene	drug	cross_resistance	variant_id	type	grade	ref_pos	seq_pos	resitance_level	resistance_additive	needs_gene	effect	who_comment	whole_gene
-NC_000962.3_760101-761571	rpoB	rifampicin	NA	rpoB_p.His445Asp	snp	1	761139	1038	NA	NA	NA	missense_variant	NA	False
