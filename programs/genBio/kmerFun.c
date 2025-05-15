@@ -145,7 +145,7 @@ seqToKmer_kmerFun(
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   return (lenSeqSI + 1) - lenKmerUC;
+   return lenSeqSI - kmerLenUC;
 
    memErr_fun01_sec04:;
       return 0;

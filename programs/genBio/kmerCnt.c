@@ -59,13 +59,14 @@
 #include "seqST.h"
 
 /*.h files only*/
-#include "../genLib/dataTypeShortHand.h"
 #include "../genLib/genMath.h" /*.h min/max macros only*/
 #include "ntTo2Bit.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   - .c  #include "../genLib/ulCp.h"
+!   - .c  #include "../genLib/fileFun.h"
+!   - .h  #include "../genLib/endin.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -183,7 +184,7 @@ setup_kmerCnt(
    ^   - variable declerations
    \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
-   uchar ucKmer = 0;
+   unsigned char ucKmer = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -205,7 +206,10 @@ setup_kmerCnt(
    \>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
    kmerCntSTPtr->forKmerArySI =
-      malloc(sizeof(sint) * (kmerCntSTPtr->maxKmersUI+1));
+      malloc(
+           (kmerCntSTPtr->maxKmersUI + 1)
+         * sizeof(signed int)
+      );
 
    if(! kmerCntSTPtr->forKmerArySI)
       goto memErr_fun03;
@@ -213,7 +217,10 @@ setup_kmerCnt(
    /*reverse kmer array*/
 
    kmerCntSTPtr->revKmerArySI =
-      malloc(sizeof(sint) * (kmerCntSTPtr->maxKmersUI+1));
+      malloc(
+           (kmerCntSTPtr->maxKmersUI+1)
+         *  sizeof(signed int)
+      );
 
    if(! kmerCntSTPtr->revKmerArySI)
       goto memErr_fun03;
@@ -388,10 +395,10 @@ mkKmerMask_kmerCnt(
       ((lenKmerUC) * def_bitsPerKmer_kmerCnt);
 
    retMaskMacUL =
-      (sizeof(ulong) << 3) - retMaskMacUL;
+      (sizeof(unsigned long) << 3) - retMaskMacUL;
 
    retMaskMacUL =
-      ((ulong) -1) >> retMaskMacUL;
+      ((unsigned long) - 1) >> retMaskMacUL;
 
    return retMaskMacUL;
 } /*mkKmerMask_kmerCnt*/
@@ -433,18 +440,20 @@ addSeq_kmerCnt(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   uchar errUC = 0;
-   ulong ulNt = 0;      /*nucleotide on*/
+   unsigned char errUC = 0;
+   signed long slNt = 0;      /*nucleotide on*/
 
    /*for getting kmers*/
-   uchar ntUC = 0;      /*nucleotide to add to kmer*/
-   ulong maskUL = 0;    /*for removing extra nt*/
+   unsigned char ntUC = 0;   /*nucleotide to add to kmer*/
+   unsigned long maskUL = 0; /*for removing extra nt*/
 
-   ulong forKmerUL = 0; /*holds forward kmer*/
-   ulong forLenUL = 0;  /*# nt since last anonymous nt*/
+   unsigned long forKmerUL = 0; /*holds forward kmer*/
+   unsigned long forLenUL = 0;
+      /*number bases since last anonymous base*/
 
-   ulong revKmerUL = 0; /*holds reverse kmer*/
-   ulong revLenUL = 0;  /*# nt since last anonymous nt*/
+   unsigned long revKmerUL = 0; /*holds reverse kmer*/
+   unsigned long revLenUL = 0;
+      /*# nt since last anonymous nt*/
 
    struct seqST *tmpSeqSTPtr = 0;
 
@@ -521,14 +530,14 @@ addSeq_kmerCnt(
    \*****************************************************/
 
    for(
-      ulNt = 0;
-      ulNt < seqSTPtr->lenSeqUL;
-      ++ulNt
+      slNt = 0;
+      slNt < seqSTPtr->seqLenSL;
+      ++slNt
    ){ /*Loop: build kmer table*/
       ntUC =
          ntTo2Bit[
-            (uchar)
-            kmerCntSTPtr->forSeqST->seqStr[ulNt]
+            (unsigned char)
+            kmerCntSTPtr->forSeqST->seqStr[slNt]
          ]; /*get foward nucleotide*/
 
       /*add nucleotide to kmer*/
@@ -557,8 +566,8 @@ addSeq_kmerCnt(
 
       ntUC =
          ntTo2Bit[
-            (uchar)
-            kmerCntSTPtr->revSeqST->seqStr[ulNt]
+            (unsigned char)
+            kmerCntSTPtr->revSeqST->seqStr[slNt]
          ]; /*get reverse nucleotide*/
 
       revKmerUL <<= def_bitsPerKmer_kmerCnt;
@@ -768,18 +777,20 @@ ntToKmerAry_kmerCnt(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   ulong ulNt = 0;      /*nucleotide on*/
+   signed long slNt = 0;      /*nucleotide on*/
    unsigned int maxKmersUI = 1;
 
    /*for getting kmers*/
-   ulong maskUL = 0;    /*for removing extra nt*/
-   ulong ulSeq = 0;     /*nucleotide on*/
+   unsigned long maskUL = 0;    /*for removing extra nt*/
+   signed long slSeq = 0;     /*nucleotide on*/
 
-   uchar ntUC = 0;   /*nucleotide to add to kmer*/
-   ulong kmerUL = 0; /*holds forward kmer*/
-   ulong lenUL = 0;  /*# nt since last anonymous nt*/
+   unsigned char ntUC = 0;   /*nucleotide to add to kmer*/
+   unsigned long kmerUL = 0; /*holds forward kmer*/
+   unsigned long lenUL = 0;
+      /*# nt since last anonymous nt*/
 
-   sint retNumKmersSI = 0; /*number kmers in sequence*/
+   signed int retNumKmersSI = 0;
+       /*number kmers in sequence*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec02:
@@ -789,18 +800,18 @@ ntToKmerAry_kmerCnt(
    maskUL = mkKmerMask_kmerCnt(lenKmerUC);
 
    for(
-      ulNt = 0;
-      ulNt < lenKmerUC;
-      ++ulNt
+      slNt = 0;
+      slNt < lenKmerUC;
+      ++slNt
    ) maxKmersUI <<= 2;
 
    for(
-      ulSeq  = 0;
-      ulSeq <= maxKmersUI;
-      ++ulSeq
+      slSeq  = 0;
+      slSeq <= maxKmersUI;
+      ++slSeq
    ){ /*Loop: blank kmer array*/
-      kmerArySI[ulSeq] = def_noKmer_kmerCnt;
-      cntArySI[ulSeq] = 0;
+      kmerArySI[slSeq] = def_noKmer_kmerCnt;
+      cntArySI[slSeq] = 0;
    } /*Loop: blank kmer array*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -809,14 +820,14 @@ ntToKmerAry_kmerCnt(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    for(
-      ulSeq  = 0;
-      ulSeq < seqSTPtr->lenSeqUL;
-      ++ulSeq
+      slSeq  = 0;
+      slSeq < seqSTPtr->seqLenSL;
+      ++slSeq
    ){ /*Loop: convert kmers*/
       ntUC =
          ntTo2Bit[
-            (uchar)
-            seqSTPtr->seqStr[ulSeq]
+            (unsigned char)
+            seqSTPtr->seqStr[slSeq]
          ]; /*get foward nucleotide*/
 
       /*add nucleotide to kmer*/
@@ -846,7 +857,7 @@ ntToKmerAry_kmerCnt(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    dualSort_kmerCnt(
-       (uint *) kmerArySI,
+       (unsigned int *) kmerArySI,
        cntArySI,
        0,
        maxKmersUI
@@ -882,16 +893,16 @@ get_kmerCnt(
    signed int *kmerArySI,        /*sequence uniqe kmers*/
    signed int *cntArySI          /*sequence kmer counts*/
 ){
-   sint forKmersSI = 0;
-   sint revKmersSI = 0;
+   signed int forKmersSI = 0;
+   signed int revKmersSI = 0;
 
-   uint uiKmer = 0;
-   uint kmerUI = 0;
+   unsigned int uiKmer = 0;
+   unsigned int kmerUI = 0;
 
    while(kmerArySI[uiKmer] >= 0)
    { /*Loop: count kmer numbers*/
       kmerUI =
-         (uint)
+         (unsigned int)
          kmerArySI[uiKmer];
 
       forKmersSI +=
@@ -966,9 +977,9 @@ faToKmerCnt_kmerCnt(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
+   signed char errSC = 0;
 
-   uint uiSeq = 0;
+   unsigned int uiSeq = 0;
    struct kmerCnt *retHeapAryST = 0;
 
    struct seqST seqStackST;
@@ -981,35 +992,19 @@ faToKmerCnt_kmerCnt(
 
    init_seqST(&seqStackST);
 
-   faFILE =
-      fopen(
-         (char *) faFileStr,
-         "r"
-      );
-
+   faFILE = fopen((char *) faFileStr, "r");
    if(! faFILE)
       goto fileErr_fun13_sec05_sub03;
 
    *numSeqUI = 0;
    uiSeq = 0;
 
-   errSC =
-      (schar)
-      getFaSeq_seqST(
-         faFILE,
-         &seqStackST
-      );   
+   errSC = getFa_seqST(faFILE, &seqStackST);   
 
    while(! errSC)
    { /*Loop: Count number of sequences in file*/
-      ++(uiSeq);
-
-      errSC =
-         (schar)
-         getFaSeq_seqST(
-            (char *) faFILE,
-            &seqStackST
-         );   
+      ++uiSeq;
+      errSC = getFa_seqST(faFILE, &seqStackST);   
    } /*Loop: Count number of sequences in file*/
 
    if(uiSeq < 1)
@@ -1054,15 +1049,8 @@ faToKmerCnt_kmerCnt(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    uiSeq = 0;
-
    fseek(faFILE, 0, SEEK_SET);
-
-   errSC =
-      (schar)
-      getFaSeq_seqST(
-         faFILE,
-         &seqStackST
-      );   
+   errSC = getFa_seqST(faFILE, &seqStackST);   
 
    while(! errSC)
    { /*Loop: Count number of sequences in file*/
@@ -1075,12 +1063,8 @@ faToKmerCnt_kmerCnt(
       if(errSC)
          goto memErr_fun13_sec05_sub02;
 
-      errSC =
-         (schar)
-         getFaSeq_seqST(
-            faFILE,
-            &seqStackST
-         ); /*already checked for errors*/
+      errSC = getFa_seqST(faFILE, &seqStackST);
+        /*already checked for errors*/
 
       ++uiSeq;
    } /*Loop: Count number of sequences in file*/

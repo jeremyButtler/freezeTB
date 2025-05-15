@@ -94,6 +94,7 @@
 
 #include "../genLib/ulCp.h"
 #include "../genLib/shellSort.h"
+#include "../genLib/fileFun.h"
 
 #include "../genBio/seqST.h"
 
@@ -101,6 +102,7 @@
 #include "memwater.h"
 
 /*.h files only (no .c files*/
+#include "../genLib/endLine.h"
 #include "../genLib/genMath.h" /*only using .h macros*/
 
 #include "alnDefs.h"
@@ -422,7 +424,7 @@ freeHeap_tblST_kmerFind(
    struct tblST_kmerFind *tblSTPtr
 ){
    if(! tblSTPtr)
-      return
+      return;
 
    freeStack_tblST_kmerFind(tblSTPtr);
    free(tblSTPtr);
@@ -771,15 +773,15 @@ addSeqToRefST_kmerFind(
          goto memErr_fun14_sec06;
    } /*If: given a sequence structure*/
 
-   refSTPtr->forSeqST->endAlnUL =
-      refSTPtr->forSeqST->lenSeqUL - 1;
+   refSTPtr->forSeqST->endAlnSL =
+      refSTPtr->forSeqST->seqLenSL - 1;
 
-   refSTPtr->forSeqST->offsetUL = 0;
+   refSTPtr->forSeqST->offsetSL = 0;
 
    longestSeqUI =
       max_genMath(
          longestSeqUI,
-         (unsigned int) refSTPtr->forSeqST->lenSeqUL
+         (unsigned int) refSTPtr->forSeqST->seqLenSL
       ); /*find the length of the longest primer*/
 
    errUC =
@@ -788,10 +790,10 @@ addSeqToRefST_kmerFind(
          refSTPtr->forSeqST
       ); /*copy the reverse complement sequence*/
 
-   refSTPtr->forSeqST->endAlnUL =
-      refSTPtr->forSeqST->lenSeqUL - 1;
+   refSTPtr->forSeqST->endAlnSL =
+      refSTPtr->forSeqST->seqLenSL - 1;
 
-   refSTPtr->forSeqST->offsetUL = 0;
+   refSTPtr->forSeqST->offsetSL = 0;
 
    if(errUC)
       goto memErr_fun14_sec06;
@@ -810,7 +812,7 @@ addSeqToRefST_kmerFind(
       revCmpIndex_alnSet(
          refSTPtr->revSeqST->seqStr,  /*sequence*/
          refSTPtr->revSeqST->qStr,    /*keep in sync*/
-         refSTPtr->revSeqST->lenSeqUL /*sequence length*/
+         refSTPtr->revSeqST->seqLenSL /*sequence length*/
       );
    } /*Else: sequence is in lookup index format*/
 
@@ -842,7 +844,7 @@ addSeqToRefST_kmerFind(
 
    refSTPtr->minKmersUI = 
       (unsigned int)
-      refSTPtr->forSeqST->lenSeqUL;
+      refSTPtr->forSeqST->seqLenSL;
 
    refSTPtr->minKmersUI -= refSTPtr->lenKmerUC;
    ++refSTPtr->minKmersUI; /*total kmers*/
@@ -851,7 +853,7 @@ addSeqToRefST_kmerFind(
    minLenSI =
       min_genMath(
          refSTPtr->lenRepSI,
-         (signed int) refSTPtr->forSeqST->lenSeqUL
+         (signed int) refSTPtr->forSeqST->seqLenSL
       ); /*find shortest length for kmer array*/
 
    /*****************************************************\
@@ -1034,7 +1036,7 @@ addSeqToRefST_kmerFind(
 
    for(
       siSeq = 0;
-      siSeq < (signed int) refSTPtr->forSeqST->lenSeqUL;
+      siSeq < (signed int) refSTPtr->forSeqST->seqLenSL;
       ++siSeq
    ){ /*Loop: copy the kmers*/
 
@@ -1113,7 +1115,7 @@ addSeqToRefST_kmerFind(
       { /*If: no anymous bases or errors*/
          ++lenRevKmerUL;
 
-         if(lenForKmerUL < refSTPtr->lenKmerUC)
+         if(lenRevKmerUL < refSTPtr->lenKmerUC)
             ;
          else
          { /*Else: have a complete kmer*/
@@ -1371,14 +1373,15 @@ tsvToAry_refST_kmerFind(
    ^   - variable declerations 
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   #define def_lenBuff_fun16 4096
-   signed char buffStr[def_lenBuff_fun16];
+   signed char *buffHeapStr = 0;
    signed char *tmpStr = 0;
 
    unsigned char pairBl = 0;
-   signed int  numSeqSI = 0;
+   signed int numSeqSI = 0;
    unsigned int longestPrimUI = 0;
       /*length of longest primer*/
+   signed long maxLineSL = 0;
+   signed long lenSL = 0; /*length of read in line*/
 
    /*structures to work with*/
    struct refST_kmerFind *retRefHeapAryST = 0;
@@ -1406,41 +1409,25 @@ tsvToAry_refST_kmerFind(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun16 Sec03:
    ^   - find number of lines in the file
-   ^   o fun16 sec03 sub01:
-   ^     - find number of lines in the file
-   ^   o fun16 sec03 sub02:
-   ^     - check for errors and move to start of file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*****************************************************\
-   * Fun16 Sec03 Sub01:
-   *   - find number of lines in the file
-   \*****************************************************/
-
-   while(fgets((char *) buffStr, def_lenBuff_fun16, tsvFILE))
-      ++numSeqSI;
-
+   numSeqSI = lineCnt_fileFun(tsvFILE, &maxLineSL);
    --numSeqSI;     /*account for the header*/
    numSeqSI <<= 1; /*acount for two sequences per line*/
-
-   /*****************************************************\
-   * Fun16 Sec03 Sub04:
-   *   - check for errors and move to start of file
-   \*****************************************************/
+   maxLineSL += 3;
 
    if(numSeqSI < 1)
       goto fileErr_fun16_sec07_sub03; /*no sequences*/
-
-   fseek(
-      tsvFILE,
-      0,
-      SEEK_SET
-   ); /*find start of file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun16 Sec04:
    ^   - allocate memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   buffHeapStr =
+      malloc((maxLineSL + 8) * sizeof(signed char));
+   if(! buffHeapStr)
+      goto memErr_fun16_sec07_sub02;
 
    retRefHeapAryST =
       malloc(numSeqSI * sizeof(struct refST_kmerFind));
@@ -1463,10 +1450,10 @@ tsvToAry_refST_kmerFind(
    } /*Loop: initialize the new structures*/
 
    if(*errSC)
-   { /*If: I had an memroy error*/
+   { /*If: I had an memory error*/
       *lenArySIPtr = numSeqSI;
       goto memErr_fun16_sec07_sub02;
-   } /*If: I had an memroy error*/
+   } /*If: I had an memory error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun16 Sec05:
@@ -1487,24 +1474,30 @@ tsvToAry_refST_kmerFind(
    *lenArySIPtr = 0;
 
    /*get past header*/
-   tmpStr =
-      (signed char *)
-      fgets(
-         (char *) buffStr,
-         def_lenBuff_fun16,
-         tsvFILE
+   lenSL =
+      getLine_fileFun(
+         tsvFILE,
+         buffHeapStr,
+         maxLineSL,
+         &lenSL
       );
 
-   while(fgets((char *) buffStr, def_lenBuff_fun16, tsvFILE))
-   { /*Loop: read in each sequence in the file*/
+   while(
+      getLine_fileFun(
+         tsvFILE,
+         buffHeapStr,
+         maxLineSL,
+         &lenSL
+      )
+   ){ /*Loop: read in each sequence in the file*/
 
        /*************************************************\
        * Fun15 Sec05 Sub02:
        *   - get primer id
        \*************************************************/
 
-       tmpStr = buffStr;
-       seqStackST.idStr = buffStr;
+       tmpStr = buffHeapStr;
+       seqStackST.idStr = buffHeapStr;
 
        while(*tmpStr > 32)
           ++tmpStr;
@@ -1512,7 +1505,7 @@ tsvToAry_refST_kmerFind(
        if(*tmpStr != '\t' && *tmpStr != ' ')
           goto fileErr_fun16_sec07_sub03; /*invalid line*/
        
-       seqStackST.lenIdUL = tmpStr - buffStr;
+       seqStackST.idLenSL = tmpStr - buffHeapStr;
 
        *tmpStr = '\0'; /*c-string for seqST*/
        ++tmpStr;
@@ -1601,7 +1594,7 @@ tsvToAry_refST_kmerFind(
        } /*If: no foward sequence (NA)*/
 
        /*find sequence length*/
-       seqStackST.lenSeqUL =
+       seqStackST.seqLenSL =
           tmpStr - seqStackST.seqStr - 1;
           /*-1 to account for tmpStr being one off*/
 
@@ -1665,7 +1658,7 @@ tsvToAry_refST_kmerFind(
        } /*If: no reverse sequence (NA)*/
 
        /*find sequence length*/
-       seqStackST.lenSeqUL = tmpStr - seqStackST.seqStr;
+       seqStackST.seqLenSL = tmpStr - seqStackST.seqStr;
           /*I did not move tmpStr past the null*/
 
        longestPrimUI =
@@ -1703,76 +1696,42 @@ tsvToAry_refST_kmerFind(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun16 Sec07:
    ^   - clean up
-   ^   o fun16 sec06 sub01:
-   ^     - success clean up
-   ^   o fun16 sec06 sub02:
-   ^     - memory error report
-   ^   o fun16 sec06 sub03:
-   ^     - file error report
-   ^   o fun16 sec06 sub04:
-   ^     - error clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*****************************************************\
-   * Fun16 Sec07 Sub01:
-   *   - success clean up
-   \*****************************************************/
-
    *errSC = 0;
-
-   fclose(tsvFILE);
-   tsvFILE = 0;
-
-   return retRefHeapAryST;
-
-   /*****************************************************\
-   * Fun16 Sec07 Sub02:
-   *   - memory error report
-   \*****************************************************/
+   goto ret_fun16_sec07_sub04;
 
    memErr_fun16_sec07_sub02:;
-
-   *errSC = def_memErr_kmerFind;
-
-   goto errCleanUp_fun16_sec07_sub04;
-
-   /*****************************************************\
-   * Fun16 Sec07 Sub03:
-   *   - file error report
-   \*****************************************************/
+      *errSC = def_memErr_kmerFind;
+      goto errCleanUp_fun16_sec07_sub04;
 
    fileErr_fun16_sec07_sub03:;
-
-   *errSC = def_fileErr_kmerFind;
-
-   goto errCleanUp_fun16_sec07_sub04;
-
-   /*****************************************************\
-   * Fun16 Sec07 Sub04:
-   *   - error clean up
-   \*****************************************************/
+      *errSC = def_fileErr_kmerFind;
+      goto errCleanUp_fun16_sec07_sub04;
 
    errCleanUp_fun16_sec07_sub04:;
+      freeHeapAry_refST_kmerFind(
+         retRefHeapAryST,
+         *lenArySIPtr
+      );
+      retRefHeapAryST = 0;
+      *lenArySIPtr = 0;
+      seqStackST.idStr = 0;
+      seqStackST.seqStr = 0;
 
-   if(tsvFILE)
-      fclose(tsvFILE);
+      freeStack_seqST(&seqStackST);
+      goto ret_fun16_sec07_sub04;
 
-   tsvFILE = 0;
+   ret_fun16_sec07_sub04:;
+      if(buffHeapStr)
+         free(buffHeapStr);
+      buffHeapStr = 0;
 
-   freeHeapAry_refST_kmerFind(
-      retRefHeapAryST,
-      *lenArySIPtr
-   );
+      if(tsvFILE)
+         fclose(tsvFILE);
+      tsvFILE = 0;
 
-   retRefHeapAryST = 0;
-   *lenArySIPtr = 0;
-
-   seqStackST.idStr = 0;
-   seqStackST.seqStr = 0;
-
-   freeStack_seqST(&seqStackST);
-
-   return 0;
+      return retRefHeapAryST;
 } /*tsvToAry_refST_kmerFind*/
 
 /*-------------------------------------------------------\
@@ -2050,7 +2009,7 @@ faToAry_refST_kmerFind(
       ++numSeqSI
    ){ /*Loop: read in each sequence in the file*/
        *errSC = 
-          getFaSeq_seqST(
+          getFa_seqST(
             faFILE,
             retRefHeapAryST[numSeqSI].forSeqST
           );
@@ -2107,20 +2066,7 @@ faToAry_refST_kmerFind(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun17 Sec06:
    ^   - clean up
-   ^   o fun17 sec06 sub01:
-   ^     - success clean up
-   ^   o fun17 sec06 sub02:
-   ^     - memory error report
-   ^   o fun17 sec06 sub03:
-   ^     - file error report
-   ^   o fun17 sec06 sub04:
-   ^     - error clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*****************************************************\
-   * Fun17 Sec06 Sub01:
-   *   - success clean up
-   \*****************************************************/
 
    *errSC = 0;
 
@@ -2129,49 +2075,28 @@ faToAry_refST_kmerFind(
 
    return retRefHeapAryST;
 
-   /*****************************************************\
-   * Fun17 Sec06 Sub02:
-   *   - memory error report
-   \*****************************************************/
-
    memErr_fun17_sec06_sub02:;
-
-   *errSC = def_memErr_kmerFind;
-
-   goto errCleanUp_fun17_sec06_sub04;
-
-   /*****************************************************\
-   * Fun17 Sec06 Sub03:
-   *   - file error report
-   \*****************************************************/
+      *errSC = def_memErr_kmerFind;
+      goto errCleanUp_fun17_sec06_sub04;
 
    fileErr_fun17_sec06_sub03:;
-
-   *errSC = def_fileErr_kmerFind;
-
-   goto errCleanUp_fun17_sec06_sub04;
-
-   /*****************************************************\
-   * Fun17 Sec06 Sub04:
-   *   - error clean up
-   \*****************************************************/
+      *errSC = def_fileErr_kmerFind;
+      goto errCleanUp_fun17_sec06_sub04;
 
    errCleanUp_fun17_sec06_sub04:;
+      if(faFILE)
+         fclose(faFILE);
+      faFILE = 0;
 
-   if(faFILE)
-      fclose(faFILE);
+      freeHeapAry_refST_kmerFind(
+         retRefHeapAryST,
+         *lenArySIPtr
+      );
 
-   faFILE = 0;
+      retRefHeapAryST = 0;
+      *lenArySIPtr = 0;
 
-   freeHeapAry_refST_kmerFind(
-      retRefHeapAryST,
-      *lenArySIPtr
-   );
-
-   retRefHeapAryST = 0;
-   *lenArySIPtr = 0;
-
-   return 0;
+      return 0;
 } /*faToAry_refST_kmerFind*/
 
 /*-------------------------------------------------------\
@@ -2269,9 +2194,9 @@ nextSeqChunk_tblST_kmerFind(
             tblSTPtr->lenLastKmerUL = 0;
       } /*Loop: build the first kmer*/
 
-      endWindowUI += tblSTPtr->ntInWinUI;
+      /*endWindowUI += tblSTPtr->ntInWinUI;
       endWindowUI -= tblSTPtr->lenKmerUC;
-      ++endWindowUI; /*index 0 to index 1*/
+      ++endWindowUI;*/ /*index 0 to index 1*/
       dupNtUI = 0;   /*first base in window*/
 
       goto firstKmers_fun18_sec04;
@@ -2326,6 +2251,7 @@ nextSeqChunk_tblST_kmerFind(
       ++dupNtUI;
    } /*Loop: copy keep kmers over*/
 
+   dupNtUI = tblSTPtr->numKmerUI - tblSTPtr->rmNtUI;
    endWindowUI = tblSTPtr->ntInWinUI;
    endWindowUI -= tblSTPtr->rmNtUI;
    endWindowUI += tblSTPtr->seqPosUL;
@@ -2337,14 +2263,22 @@ nextSeqChunk_tblST_kmerFind(
 
    firstKmers_fun18_sec04:; /*first time for sequence*/
 
-   if(endWindowUI > tblSTPtr->seqSTPtr->lenSeqUL)
+   if(endWindowUI > tblSTPtr->seqSTPtr->seqLenSL)
    { /*If: this is the last window*/
-      endWindowUI = tblSTPtr->seqSTPtr->lenSeqUL;
+      endWindowUI = tblSTPtr->seqSTPtr->seqLenSL;
       lastWinBl = 1;
    } /*If: this is the last window*/
 
-   while(tblSTPtr->seqPosUL < endWindowUI)
+   while(dupNtUI < tblSTPtr->numKmerUI)
    { /*Loop: add kmers in*/
+      if(
+            tblSTPtr->seqPosUL
+         >= (unsigned long) tblSTPtr->seqSTPtr->seqLenSL
+      ){
+          lastWinBl = 1;
+          break;
+      } /*no more sequece*/
+
       ntUC =
          (unsigned char) 
          tblSTPtr->seqSTPtr->seqStr[tblSTPtr->seqPosUL];
@@ -2672,16 +2606,16 @@ findRefInChunk_kmerFind(
    { /*If: I had enough kmers to do an alignment*/
       /*find the max score possible*/
       /*start of alignment region*/
-      tblSTPtr->seqSTPtr->offsetUL = tblSTPtr->seqPosUL;
-      tblSTPtr->seqSTPtr->offsetUL -= 
+      tblSTPtr->seqSTPtr->offsetSL = tblSTPtr->seqPosUL;
+      tblSTPtr->seqSTPtr->offsetSL -= 
          (tblSTPtr->ntInWinUI -1);
          /*-1 to account for seqPosUL being index 1*/
 
       /*find end of alignment region*/
-      tblSTPtr->seqSTPtr->endAlnUL = tblSTPtr->seqPosUL;
+      tblSTPtr->seqSTPtr->endAlnSL = tblSTPtr->seqPosUL;
 
       /*convert index 1 to index 0*/
-      --tblSTPtr->seqSTPtr->endAlnUL;
+      --tblSTPtr->seqSTPtr->endAlnSL;
 
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
       ^ Fun22 Sec04:
@@ -2703,10 +2637,10 @@ findRefInChunk_kmerFind(
             memwater(
               tblSTPtr->seqSTPtr,
               refSTPtr->revSeqST,
-              refStartUL,
-              refEndUL,
-              qryStartUL,
-              qryEndUL,
+              (signed long *) refStartUL,
+              (signed long *) refEndUL,
+              (signed long *) qryStartUL,
+              (signed long *) qryEndUL,
               alnSetPtr
             ); /*align primer to region*/
 
@@ -2720,10 +2654,10 @@ findRefInChunk_kmerFind(
             memwater(
               tblSTPtr->seqSTPtr,
               refSTPtr->forSeqST,
-              refStartUL,
-              refEndUL,
-              qryStartUL,
-              qryEndUL,
+              (signed long *) refStartUL,
+              (signed long *) refEndUL,
+              (signed long *) qryStartUL,
+              (signed long *) qryEndUL,
               alnSetPtr
             ); /*align primer to region*/
 
@@ -2737,7 +2671,7 @@ findRefInChunk_kmerFind(
       \**************************************************/
 
       matchBl &= ( -(percScoreF >= minPercScoreF) );
-      ++tblSTPtr->seqSTPtr->endAlnUL;
+      ++tblSTPtr->seqSTPtr->endAlnSL;
    } /*If: I had enough kmers to do an alignment*/
 
    else
@@ -2897,10 +2831,10 @@ waterFindPrims_kmerFind(
          memwater(
             seqSTPtr,
             refSTAry[uiPrim].forSeqST,
-            &refStartUL,
-            &refEndUL,
-            &qryStartUL,
-            &qryEndUL,
+            (signed long *) &refStartUL,
+            (signed long *) &refEndUL,
+            (signed long *) &qryStartUL,
+            (signed long *) &qryEndUL,
             alnSetPtr
          );
 
@@ -2949,10 +2883,10 @@ waterFindPrims_kmerFind(
          memwater(
             seqSTPtr,
             refSTAry[uiPrim].revSeqST,
-            &refStartUL,
-            &refEndUL,
-            &qryStartUL,
-            &qryEndUL,
+            (signed long *) &refStartUL,
+            (signed long *) &refEndUL,
+            (signed long *) &qryStartUL,
+            (signed long *) &qryEndUL,
             alnSetPtr
          );
 
@@ -3425,7 +3359,7 @@ phit_kmerFind(
 
          fprintf(
              (FILE *) outFILE,
-             "\t%0.2f\t%0.2f\t%i\t%lu\t%lu\n",
+             "\t%0.2f\t%0.2f\t%i\t%lu\t%lu%s",
              (float)
                 scoreArySL[siMate] / def_scoreAdj_alnDefs,
              (float)
@@ -3433,7 +3367,8 @@ phit_kmerFind(
                / def_scoreAdj_alnDefs,
              codeAryUI[siMate],
              primStartAryUL[siMate] + 1,
-             primEndAryUL[siMate] + 1
+             primEndAryUL[siMate] + 1,
+             str_endLine
          ); /*reverse primer mapping stats*/
 
          *oldRefStr = oldRefBreakSC;
@@ -3489,7 +3424,8 @@ phit_kmerFind(
 
          fprintf(
              (FILE *) outFILE,
-             "\tNA\tNA\tNA\tNA\tNA\n"
+             "\tNA\tNA\tNA\tNA\tNA%s",
+             str_endLine
          ); /*reverse primer mapping stats*/
       } /*Else: I have no mate primers*/
 
@@ -3547,7 +3483,8 @@ pHeaderHit_kmerFind(
 
    fprintf(
       (FILE *) outFILE,
-      "\trev_prim_start\trev_prim_end\n"
+      "\trev_prim_start\trev_prim_end%s",
+      str_endLine
    );
 } /*pHeader_kmerFind*/
 

@@ -2,24 +2,13 @@
 ' tbConDefs SOF: Start Of File
 '   - default setings and version number
 '   o sec01:
-'     - version number
-'   o sec02:
 '     - default settings
-'   o sec03:
+'   o sec02:
 '     - error return values
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Sec01:
-^   - version number
-\<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-#define def_year_tbConDefs 2024
-#define def_month_tbConDefs 8
-#define def_day_tbConDefs 7
-
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-^ Sec02:
 ^   - default settings
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -47,7 +36,7 @@
    /*rough length of one TB genome*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-^ Sec03:
+^ Sec02:
 ^   - error return values
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 

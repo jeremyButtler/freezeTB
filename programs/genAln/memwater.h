@@ -28,12 +28,12 @@ struct alnSet;
 | Input;
 |   - qrySeqSTVoidPtr:
 |     o Point to an seqST with the query sequence and
-|       index 0 coordinates to start (offsetUL)/end
-|       (endAlnUL) the alignment.
+|       index 0 coordinates to start (offsetSL)/end
+|       (endAlnSL) the alignment.
 |   - refSeqSTVoidPtr:
 |     o Point to an seqST with the reference sequence
-|       and index 0 coordinates to start (offsetUL)/end
-|       (endAlnUL) the alignment.
+|       and index 0 coordinates to start (offsetSL)/end
+|       (endAlnSL) the alignment.
 |   - refStartUL:
 |     o Pointer to unsigned long to hold the frist
 |       reference base in the alignment
@@ -61,13 +61,13 @@ struct alnSet;
 \-------------------------------------------------------*/
 signed long
 memwater(
-    struct seqST *qrySTPtr, /*query sequence and data*/
-    struct seqST *refSTPtr, /*ref sequence and data*/
-    unsigned long *refStartUL,
-    unsigned long *refEndUL,
-    unsigned long *qryStartUL,
-    unsigned long *qryEndUL,
-    struct alnSet *settings
+   struct seqST *qrySTPtr, /*query sequence and data*/
+   struct seqST *refSTPtr, /*ref sequence and data*/
+   signed long *refStartSL,
+   signed long *refEndSL,
+   signed long *qryStartSL,
+   signed long *qryEndSL,
+   struct alnSet *settings
 );
 
 #endif

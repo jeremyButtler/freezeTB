@@ -4,11 +4,13 @@
 '     the start and end of sequences in an sam file
 '   o header:
 '     - header guards
-'   o fun01 trimSeq_trimSam:
+'   o fun01 seq_trimSam:
 '     o Trim soft mask regions off end of sam entry
-'   o fun02: trimCoords_trimSam
+'   o fun02: coords_trimSam
 '     - Trim an sam file entry by coordinates
-'   o fun03 trimReads_trimSam:
+'   o fun03: ends_trimSam
+'     - trims x (user input) bases off ends of read
+'   o fun04 trimReads_trimSam:
 '     o Trims soft mask regions for all reads with a
 '       sequence in a sam file
 '   o license:
@@ -33,7 +35,7 @@ struct samEntry;
 #define def_noSeq_trimSam 32
 
 /*-------------------------------------------------------\
-| Fun01: trimSeq_trimSam
+| Fun01: seq_trimSam
 | Use:
 |  - Trims off the soft masked regions of a sam entry
 | Input:
@@ -50,12 +52,12 @@ struct samEntry;
 |    o Trims cigar, sequence, & q-score entries in samST.
 \-------------------------------------------------------*/
 signed char
-trimSeq_trimSam(
+seq_trimSam(
    struct samEntry *samST
 );
 
 /*-------------------------------------------------------\
-| Fun02: trimCoords_trimSam
+| Fun02: coords_trimSam
 |   - Trim an sam file entry by coordinates
 | Input:
 |   - samSTPtr:
@@ -74,16 +76,50 @@ trimSeq_trimSam(
 |     o 1 for coordinates out of range
 \-------------------------------------------------------*/
 signed char
-trimCoords_trimSam(
+coords_trimSam(
    struct samEntry *samSTPtr,
    signed int startSI,
    signed int endSI
 );
 
 /*-------------------------------------------------------\
-| Fun03: trimReads_trimSam
+| Fun03: ends_trimSam
+|   - trims x (user input) bases off ends of read
+| Input:
+|   - samSTPtr:
+|     o Pointer to an sam entry structure with an read to
+|       trim
+|   - startSI:
+|     o number bases to trim off the start of the read 
+|   - endSI:
+|     o number bases to trim off the end of the read
+|   - strictBl:
+|     o 3: trim extactly only both ends
+|     o 2: trim extactly endSI bases (end only)
+|     o 1: trim extactly startSI bases (start only)
+|     o 0: trim at until match is found after startSI and
+|          endSI
+| Output:
+|   - Modifies:
+|     o seqSTPtr, qStr, cigTypeStr, and cigArySI in
+|       samSTPtr to be trimmed
+|   - Returns:
+|     o 0 for no errors
+|     o def_rangeErr_trimSam for coordinates out of range
+|     o def_noSeq_trimSam if no sequence line
+\-------------------------------------------------------*/
+signed char
+ends_trimSam(
+   struct samEntry *samSTPtr,
+   signed int startSI,
+   signed int endSI,
+   signed char strictBl
+);
+
+/*-------------------------------------------------------\
+| Fun04: trimReads_trimSam
 | Use:
-|  - Goes though sam file and calls trimSeq_trimSam for each
+|  - Goes though sam file and calls seq_trimSam for each
 |    entry
 | Input:
 |  - samFILE:

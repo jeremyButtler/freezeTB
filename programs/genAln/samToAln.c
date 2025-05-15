@@ -39,12 +39,14 @@
 #include "alnSet.h"
 
 /*no .h files*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../genLib/endLine.h"
 #include "alnDefs.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../generalLib/ulCp.h"
+!   o .c  #include "../generalLib/strAry.h"
+!   o .c  #include "../generalLib/fileFun.h"
 !   o .h  #include "../generalBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -57,10 +59,6 @@
 | Input:
 |   - samSTPtr:
 |     o pointer to a sam entry struct with first header
-|   - buffStrPtr:
-|     o pointer to buffer to use in read sam file headers
-|   - lenBuffULPtr:
-|     o pointer to unsigned long with length of buffStrPtr
 |   - samFILE:
 |     o sam file to get header from
 |   - outFILE:
@@ -80,12 +78,10 @@
 signed char
 psamPg_samToAln(
    struct samEntry *samSTPtr,
-   signed char **buffStrPtr,
-   unsigned long *lenBuffULPtr,
    void *samFILE,
    void *outFILE
 ){
-   schar errSC = 0;
+   signed char errSC = 0;
 
    while(! errSC)
    { /*Loop: read in sam file entries*/
@@ -100,18 +96,13 @@ psamPg_samToAln(
 
          fprintf(
             (FILE *) outFILE,
-            "%s\n",
-            samSTPtr->extraStr
+            "%s%s",
+            samSTPtr->extraStr,
+            str_endLine
          );
       } /*If: is the program entry*/
 
-      errSC =
-         get_samEntry(
-            samSTPtr,
-            buffStrPtr,
-            lenBuffULPtr,
-            samFILE
-         ); /*get next samfile entry*/
+      errSC = get_samEntry(samSTPtr, samFILE);
    } /*Loop: read in sam file entries*/
 
    if(errSC == def_EOF_samEntry)
@@ -189,7 +180,8 @@ phead_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "#############################\n"
+      "#############################%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -199,8 +191,9 @@ phead_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "# qry: %s\n",
-      samSTPtr->qryIdStr
+      "# qry: %s%s",
+      samSTPtr->qryIdStr,
+      str_endLine
    );
 
 
@@ -224,14 +217,15 @@ phead_samToAln(
    } /*Else: no masking at start*/
 
    if(
-         samSTPtr->cigTypeStr[samSTPtr->lenCigUI - 1]=='S'
-      || samSTPtr->cigTypeStr[samSTPtr->lenCigUI - 1]=='H'
+         samSTPtr->cigTypeStr[samSTPtr->cigLenUI - 1]=='S'
+      || samSTPtr->cigTypeStr[samSTPtr->cigLenUI - 1]=='H'
    ){ /*If; masking at end*/
       fprintf(
          (FILE *) outFILE,
-         " %u\n",
+         " %u%s",
          samSTPtr->readLenUI
-          - samSTPtr->cigArySI[samSTPtr->lenCigUI - 1]
+          - samSTPtr->cigArySI[samSTPtr->cigLenUI - 1],
+         str_endLine
       );
    } /*If; masking at end*/
 
@@ -239,8 +233,9 @@ phead_samToAln(
    { /*Else: no masking at end*/
       fprintf(
          (FILE *) outFILE,
-         " %u\n",
-         samSTPtr->readLenUI
+         " %u%s",
+         samSTPtr->readLenUI,
+         str_endLine
       );
    } /*Else: no masking at end*/
 
@@ -251,15 +246,18 @@ phead_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "# ref: %s\n",
-      refIdStr
+      "# ref: %s%s",
+      refIdStr,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "#    aligned: %u to %u\n#\n",
+      "#    aligned: %u to %u%s#%s",
       samSTPtr->refStartUI + 1,
-      samSTPtr->refEndUI + 1
+      samSTPtr->refEndUI + 1,
+      str_endLine,
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -269,64 +267,75 @@ phead_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "# matches: %u\n",
-      samSTPtr->numMatchUI
+      "# matches: %u%s",
+      samSTPtr->matchCntUI,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# snps: %u\n",
-      samSTPtr->numSnpUI
+      "# snps: %u%s",
+      samSTPtr->snpCntUI,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# insertions: %u\n",
-      samSTPtr->numInsUI
+      "# insertions: %u%s",
+      samSTPtr->insCntUI,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# deletions: %u\n",
-      samSTPtr->numDelUI
+      "# deletions: %u%s",
+      samSTPtr->delCntUI,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# masked: %u\n",
-      samSTPtr->numMaskUI
+      "# masked: %u%s",
+      samSTPtr->maskCntUI,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# anonymous: %li\n",
-      numAnonSL
+      "# anonymous: %li%s",
+      numAnonSL,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# edit distance: %u\n",
-       samSTPtr->numSnpUI
-         + samSTPtr->numInsUI
-         + samSTPtr->numDelUI
+      "# edit distance: %u%s",
+       samSTPtr->snpCntUI
+         + samSTPtr->insCntUI
+         + samSTPtr->delCntUI,
+       str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# score: %li\n",
-      scoreSL
+      "# score: %li%s",
+      scoreSL,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# mean q-score: %f\n",
-      samSTPtr->meanQF
+      "# mean q-score: %f%s",
+      samSTPtr->meanQF,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "# median q-score: %f\n#\n",
-      samSTPtr->meanQF
+      "# median q-score: %f%s#%s",
+      samSTPtr->meanQF,
+      str_endLine,
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -336,32 +345,38 @@ phead_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "# Eqx legend:\n"
+      "# Eqx legend:%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "#    = is match\n"
+      "#    = is match%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "#    X is snp\n"
+      "#    X is snp%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "#    I is insertion\n"
+      "#    I is insertion%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "#    D is deletion\n"
+      "#    D is deletion%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "#    S is soft mask\n"
+      "#    S is soft mask%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -376,7 +391,9 @@ phead_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "#############################\n\n"
+      "#############################%s%s",
+      str_endLine,
+      str_endLine
    );
 } /*phead_samToAln*/
 
@@ -609,33 +626,36 @@ paln_samToAln(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
+   signed char errSC = 0;
 
-   ulong lenBuffUL = 0;
-   schar buffBl = 0; /*something is in the buffer*/
+   unsigned long lenBuffUL = 0;
+   signed char buffBl = 0; /*something is in the buffer*/
 
    /*buffers to rpint out*/
-   schar *qryHeapStr = 0;
-   schar *refHeapStr = 0;
-   schar *cigHeapStr = 0;
+   signed char *qryHeapStr = 0;
+   signed char *refHeapStr = 0;
+   signed char *cigHeapStr = 0;
 
-   ulong ulNt = 0;        /*number nucleotides in buffer*/
+   unsigned long ulNt = 0;
+      /*number nucleotides in buffer*/
 
-   ulong ulRef = 0;       /*reference base on*/
-   ulong ulQry = 0;       /*query base on*/
-   ulong qryOffsetUL = 0; /*hard masking offset*/
-   ulong ulCig = 0;       /*cigar entry on*/
+   unsigned long ulRef = 0;       /*reference base on*/
+   unsigned long ulQry = 0;       /*query base on*/
+   unsigned long qryOffsetUL = 0; /*hard masking offset*/
+   unsigned long ulCig = 0;       /*cigar entry on*/
 
-   slong scoreSL = 0;     /*for getting alingment score*/
-   slong numAnonSL = 0;   /*holds number anonymous bases*/
+   signed long scoreSL = 0;
+      /*for getting alingment score*/
+   signed long numAnonSL = 0;
+      /*holds number anonymous bases*/
 
    /*for dealing with starting softmasking*/
-   schar *tmpSeqStr = 0;
-   schar *tmpMaskStr = 0;
-   schar *tmpNoSeqStr = 0;
-   ulong *tmpPosUL = 0;
-
-   ulong diffUL = 0;      /*also for cigar entry length*/
+   signed char *tmpSeqStr = 0;
+   signed char *tmpMaskStr = 0;
+   signed char *tmpNoSeqStr = 0;
+   unsigned long *tmpPosUL = 0;
+   unsigned long diffUL = 0;
+     /*also for cigar entry length*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun04 Sec02:
@@ -646,12 +666,12 @@ paln_samToAln(
       lenBuffUL = setSTPtr->lineWrapUI;
 
    else
-      lenBuffUL= samSTPtr->readLenUI + refSTPtr->lenSeqUL;
+      lenBuffUL= samSTPtr->readLenUI + refSTPtr->seqLenSL;
 
    qryHeapStr =
       calloc(
          lenBuffUL + 9,
-         sizeof(schar)
+         sizeof(signed char)
       );
 
    if(! qryHeapStr)
@@ -661,7 +681,7 @@ paln_samToAln(
    refHeapStr =
       calloc(
          lenBuffUL + 9,
-         sizeof(schar)
+         sizeof(signed char)
       );
 
    if(! refHeapStr)
@@ -671,7 +691,7 @@ paln_samToAln(
    cigHeapStr =
       calloc(
          lenBuffUL + 9,
-         sizeof(schar)
+         sizeof(signed char)
       );
 
    if(! cigHeapStr)
@@ -843,10 +863,14 @@ paln_samToAln(
 
             fprintf(
                (FILE *) outFILE,
-               "%s\n%s\n%s\n\n",
+               "%s%s%s%s%s%s%s",
                refHeapStr,
+               str_endLine,
                qryHeapStr,
-               cigHeapStr
+               str_endLine,
+               cigHeapStr,
+               str_endLine,
+               str_endLine
             );
 
             startLine_samToAln(
@@ -868,8 +892,9 @@ paln_samToAln(
 
       if(samSTPtr->cigTypeStr[0] == 'S')
       { /*If: query has softmasking*/
-         while(ulQry < (ulong) samSTPtr->cigArySI[0])
-         { /*Loop: print out final softmasked bases*/
+         while(
+            ulQry < (unsigned long) samSTPtr->cigArySI[0]
+         ){ /*Loop: print out final softmasked bases*/
             qryHeapStr[ulNt] = samSTPtr->seqStr[ulQry];
             refHeapStr[ulNt] = refSTPtr->seqStr[ulRef];
             cigHeapStr[ulNt] = 'S';
@@ -886,10 +911,14 @@ paln_samToAln(
 
                fprintf(
                   (FILE *) outFILE,
-                  "%s\n%s\n%s\n\n",
+                  "%s%s%s%s%s%s%s",
                   refHeapStr,
+                  str_endLine,
                   qryHeapStr,
-                  cigHeapStr
+                  str_endLine,
+                  cigHeapStr,
+                  str_endLine,
+                  str_endLine
                );
 
                startLine_samToAln(
@@ -943,9 +972,9 @@ paln_samToAln(
    \*****************************************************/
 
    ulCig = (samSTPtr->cigTypeStr[0] == 'S');
-   diffUL = (ulong) samSTPtr->cigArySI[ulCig];
+   diffUL = (unsigned long) samSTPtr->cigArySI[ulCig];
 
-   while(ulCig < samSTPtr->lenCigUI)
+   while(ulCig < samSTPtr->cigLenUI)
    { /*Loop: print out alignment*/
 
       /**************************************************\
@@ -1095,10 +1124,14 @@ paln_samToAln(
 
          fprintf(
             (FILE *) outFILE,
-            "%s\n%s\n%s\n\n",
+            "%s%s%s%s%s%s%s",
             refHeapStr,
+            str_endLine,
             qryHeapStr,
-            cigHeapStr
+            str_endLine,
+            cigHeapStr,
+            str_endLine,
+            str_endLine
          );
 
          startLine_samToAln(
@@ -1120,7 +1153,8 @@ paln_samToAln(
       if(diffUL == 0)
       { /*If: moving to next cigar entry*/
          ++ulCig;
-         diffUL = (ulong) samSTPtr->cigArySI[ulCig];
+         diffUL =
+            (unsigned long) samSTPtr->cigArySI[ulCig];
       } /*If: moving to next cigar entry*/
    } /*Loop: print out alignment*/
 
@@ -1157,7 +1191,7 @@ paln_samToAln(
    *   - print query ending masked bases
    \*****************************************************/
 
-   diffUL = (ulong) samSTPtr->cigArySI[ulCig];
+   diffUL = (unsigned long) samSTPtr->cigArySI[ulCig];
 
    while(diffUL > 0)
    { /*Loop: print masked bases*/
@@ -1187,10 +1221,14 @@ paln_samToAln(
 
          fprintf(
             (FILE *) outFILE,
-            "%s\n%s\n%s\n\n",
+            "%s%s%s%s%s%s%s",
             refHeapStr,
+            str_endLine,
             qryHeapStr,
-            cigHeapStr
+            str_endLine,
+            cigHeapStr,
+            str_endLine,
+            str_endLine
          );
 
          startLine_samToAln(
@@ -1233,10 +1271,14 @@ paln_samToAln(
 
          fprintf(
             (FILE *) outFILE,
-            "%s\n%s\n%s\n\n",
+            "%s%s%s%s%s%s%s",
             refHeapStr,
+            str_endLine,
             qryHeapStr,
-            cigHeapStr
+            str_endLine,
+            cigHeapStr,
+            str_endLine,
+            str_endLine
          );
 
          startLine_samToAln(
@@ -1270,10 +1312,14 @@ paln_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "%s\n%s\n%s\n\n",
+      "%s%s%s%s%s%s%s",
       refHeapStr,
+      str_endLine,
       qryHeapStr,
-      cigHeapStr
+      str_endLine,
+      cigHeapStr,
+      str_endLine,
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1283,7 +1329,8 @@ paln_samToAln(
 
    fprintf(
       (FILE *) outFILE,
-      "\n"
+      "%s",
+      str_endLine
    ); /*print final separator*/
 
    errSC = 0;
@@ -1336,7 +1383,7 @@ paln_samToAln(
 :   act of relinquishment in perpetuity of all present and
 :   future rights to this software under copyright law.
 : 
-: THE SOFTWARE IS PROVIDED "AS IS\n",WITHOUT WARRANTY OF
+: THE SOFTWARE IS PROVIDED "AS IS",WITHOUT WARRANTY OF
 :   ANY KIND,EXPRESS OR IMPLIED,INCLUDING BUT NOT
 :   LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS
 :   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
@@ -1367,7 +1414,7 @@ paln_samToAln(
 :   shall be included in all copies or substantial
 :   portions of the Software.
 : 
-: THE SOFTWARE IS PROVIDED "AS IS\n",WITHOUT WARRANTY OF
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
 :   ANY KIND,EXPRESS OR IMPLIED,INCLUDING BUT NOT
 :   LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS
 :   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO

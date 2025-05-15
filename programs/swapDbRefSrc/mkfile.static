@@ -1,60 +1,118 @@
-LD=cc
+
 CC=cc
-CFLAGS= -O3 -static -std=c89 -Wall -Wextra
+LD=cc
+coreCFLAGS= -c -O3 -std=c89 -static -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
+CFLAGS=-DNONE
 NAME=swapDbRef
 PREFIX=/usr/local/bin
-genLib=../genLib
-genBio=../genBio
-genAln=../genAln
-tbAmr=../tbAmrSrc
 O=o.static
 
-objFiles=\
-   $(genLib)/base10str.$O \
-   $(genLib)/numToStr.$O \
-   $(genLib)/ulCp.$O \
+genFreezeTB=../genFreezeTB
+genLib=../genLib
+genBio=../genBio
+
+objFiles= \
+   $(genFreezeTB)/refSwap.$O \
    $(genLib)/charCp.$O \
-   $(genLib)/strAry.$O \
+   $(genFreezeTB)/amrST.$O \
+   $(genFreezeTB)/drugAry.$O \
+   $(genLib)/fileFun.$O \
+   $(genLib)/ulCp.$O \
    $(genBio)/samEntry.$O \
-   $(tbAmr)/amrST.$O \
-   $(tbAmr)/drugAry.$O
+   $(genLib)/strAry.$O \
+   $(genLib)/numToStr.$O \
+   $(genLib)/base10str.$O \
+   swapDbRef.$O
 
-all: swapDbRef.$O $(objFiles)
-	$(LD) -o $(NAME) $(CFLAGS) swapDbRef.$O refSwap.$O $(objFiles)
+$(NAME): swapDbRef.$O
+		$(LD) -o $(NAME) $(objFiles)
 
-swapDbRef.$O: swapDbRef.c refSwap.$O $(genLib)/charCp.$O
-	$(CC) -o swapDbRef.$O -c $(CFLAGS) swapDbRef.c
+swapDbRef.$O: \
+	swapDbRef.c \
+	$(genFreezeTB)/refSwap.$O \
+	$(genLib)/charCp.$O \
+	../ftbVersion.h
+			$(CC) -o swapDbRef.$O \
+				$(CFLAGS) $(coreCFLAGS) swapDbRef.c
 
-refSwap.$O: refSwap.c refSwap.h $(genBio)/samEntry.$O $(tbAmr)/amrST.$O
-	$(CC) -o refSwap.$O -c $(CFLAGS) refSwap.c
+$(genFreezeTB)/refSwap.$O: \
+	$(genFreezeTB)/refSwap.c \
+	$(genFreezeTB)/refSwap.h \
+	$(genFreezeTB)/amrST.$O \
+	$(genBio)/samEntry.$O
+		$(CC) -o $(genFreezeTB)/refSwap.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/refSwap.c
 
-$(genLib)/base10str.$O: $(genLib)/base10str.c $(genLib)/base10str.h
-	$(CC) -o $(genLib)/base10str.$O -c $(CFLAGS) $(genLib)/base10str.c
+$(genLib)/charCp.$O: \
+	$(genLib)/charCp.c \
+	$(genLib)/charCp.h
+		$(CC) -o $(genLib)/charCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/charCp.c
 
-$(genLib)/numToStr.$O: $(genLib)/numToStr.c $(genLib)/numToStr.h
-	$(CC) -o $(genLib)/numToStr.$O -c $(CFLAGS) $(genLib)/numToStr.c
+$(genFreezeTB)/amrST.$O: \
+	$(genFreezeTB)/amrST.c \
+	$(genFreezeTB)/amrST.h \
+	$(genFreezeTB)/drugAry.$O \
+	$(genLib)/fileFun.$O \
+	$(genLib)/charCp.$O \
+	$(genLib)/endLine.h
+		$(CC) -o $(genFreezeTB)/amrST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/amrST.c
 
-$(genLib)/charCp.$O: $(genLib)/charCp.c $(genLib)/charCp.h
-	$(CC) -o $(genLib)/charCp.$O -c $(CFLAGS) $(genLib)/charCp.c
+$(genFreezeTB)/drugAry.$O: \
+	$(genFreezeTB)/drugAry.c $(genFreezeTB)/drugAry.h
+		$(CC) -o $(genFreezeTB)/drugAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/drugAry.c
 
-$(genLib)/ulCp.$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
-	$(CC) -o $(genLib)/ulCp.$O -c $(CFLAGS) $(genLib)/ulCp.c
+$(genLib)/fileFun.$O: \
+	$(genLib)/fileFun.c \
+	$(genLib)/fileFun.h \
+	$(genLib)/ulCp.$O
+		$(CC) -o $(genLib)/fileFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/fileFun.c
 
-$(genLib)/strAry.$O: $(genLib)/strAry.c $(genLib)/strAry.h $(genLib)/ulCp.$O
-	$(CC) -o $(genLib)/strAry.$O -c $(CFLAGS) $(genLib)/strAry.c
+$(genLib)/ulCp.$O: \
+	$(genLib)/ulCp.c \
+	$(genLib)/ulCp.h
+		$(CC) -o $(genLib)/ulCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/ulCp.c
 
-$(genBio)/samEntry.$O: $(genBio)/samEntry.c $(genBio)/samEntry.h $(genLib)/strAry.$O $(genLib)/base10str.$O $(genLib)/numToStr.$O $(genBio)/ntTo5Bit.h $(genLib)/dataTypeShortHand.h
-	$(CC) -o $(genBio)/samEntry.$O -c $(CFLAGS) $(genBio)/samEntry.c
+$(genBio)/samEntry.$O: \
+	$(genBio)/samEntry.c 	$(genBio)/samEntry.h \
+	$(genLib)/fileFun.$O \
+	$(genLib)/strAry.$O \
+	$(genLib)/base10str.$O \
+	$(genLib)/numToStr.$O \
+	$(genBio)/ntTo5Bit.h \
+	$(genLib)/endLine.h
+		$(CC) -o $(genBio)/samEntry.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/samEntry.c
 
-$(tbAmr)/drugAry.$O: $(tbAmr)/drugAry.c $(tbAmr)/drugAry.h
-	$(CC) -o $(tbAmr)/drugAry.$O -c $(CFLAGS) $(tbAmr)/drugAry.c
+$(genLib)/strAry.$O: \
+	$(genLib)/strAry.c \
+	$(genLib)/strAry.h \
+	$(genLib)/ulCp.$O
+		$(CC) -o $(genLib)/strAry.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/strAry.c
 
-$(tbAmr)/amrST.$O: $(tbAmr)/amrST.c $(tbAmr)/amrST.h $(tbAmr)/drugAry.$O $(genLib)/ulCp.$O $(genLib)/charCp.$O $(genLib)/base10str.$O $(genLib)/dataTypeShortHand.h
-	$(CC) -o $(tbAmr)/amrST.$O -c $(CFLAGS) $(tbAmr)/amrST.c
+$(genLib)/numToStr.$O: \
+	$(genLib)/numToStr.c \
+	$(genLib)/numToStr.h
+		$(CC) -o $(genLib)/numToStr.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/base10str.$O: \
+	$(genLib)/base10str.c \
+	$(genLib)/base10str.h
+		$(CC) -o $(genLib)/base10str.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/base10str.c
 
 install:
-	cp $(NAME) $(PREFIX)
+	mv $(NAME) $(PREFIX)
 	chmod a+x $(PREFIX)/$(NAME)
 
 clean:
-	rm $(objFiles) swapDbRef.$O refSwap.$O;
+	rm $(objFiles)

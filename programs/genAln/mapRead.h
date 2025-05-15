@@ -47,40 +47,47 @@
 '       - makes and initializes a ref_mapRead structure
 '     o fun19: getRef_ref_mapRead
 '       - gets and stores next reference in ref_mapRead
-'   * st04: aln_mapRead
-'     o fun20: blank_aln_mapRead
+'     o fun20: getRefBin_ref_mapRead
+'       - gets a binary file with reference
+'     o fun21: writeRefBin_ref_mapRead
+'       - writes a ref_mapRead struct to a binary file
+'   * .h st04: aln_mapRead
+'     o fun22: blank_aln_mapRead
 '       - blanks an aln_mapRead struct
-'     o fun21: init_aln_mapRead
+'     o fun23: init_aln_mapRead
 '       - initializes an aln_mapRead struct
-'     o fun22: freeStack_aln_mapRead
+'     o fun24: freeStack_aln_mapRead
 '       - frees variables in an aln_mapRead struct
-'     o fun23: freeHeap_aln_mapRead
+'     o fun25: freeHeap_aln_mapRead
 '       - frees an aln_mapRead struct
-'     o fun24: setup_aln_mapRead
+'     o fun26: setup_aln_mapRead
 '       - setups (memory allocate) an aln_mapRead struct
-'     o fun25: mk_aln_mapRead
+'     o fun27: mk_aln_mapRead
 '       - makes and returns heap allocated aln_mapRead
-'   o fun26: sortKmerIndex_mapRead
+'   * .c st05: hit_mapRead
+'     - private structure to create a linked list of chain
+'       index's that I have already aligned
+'   o fun28: sortKmerIndex_mapRead
 '     - sorts kmer index array by a kmer array
-'   o .c fun27: uiFind_mapRead
+'   o .c fun29: uiFind_mapRead
 '     - finds first signed int in a range
-'   o .c fun28: findChain_chains_mapRead
+'   o .c fun30: findChain_chains_mapRead
 '     - finds kmer in range from kmerChain_mapRead return
-'   o fun29: kmerChain_mapRead
+'   o fun31: kmerChain_mapRead
 '     - merge kmers into chains (longer kmers)
-'   o .c fun30: numQryChains_mapRead
+'   o .c fun32: numQryChains_mapRead
 '     - gets the number of chains assigned to a single
 '       query kmer
-'   o fun31: mergeChains_mapRead
-'     - merges kmer chains from fun29 (kmerChain) into
+'   o fun33: mergeChains_mapRead
+'     - merges kmer chains from fun31 (kmerChain) into
 '       the chain the maximizes base count
-'   o fun32: mergeToSam_mapRead
+'   o fun34: mergeToSam_mapRead
 '     - convert output from mergeChains_map read to sam
 '       file entry (mapq is set to 0)
-'   o fun33: scoreSubAln_mapRead
+'   o fun35: scoreSubAln_mapRead
 '     - scores the aligment in samEntry and finds best
 '       sub-aligment
-'   o fun34: aln_mapRead
+'   o fun37: align_mapRead
 '     - maps read to reference
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -121,6 +128,7 @@ typedef struct chains_mapRead
    signed int *qryArySI;   /*query kmer start coords*/
    signed int *chainArySI; /*length of each chain*/
    signed int *scoreArySI; /*maximal bases in a chain*/
+   signed int *gapScoreArySI; /*score with gaps*/
       /*has best scores foun in previous round for
       `  a chain when merged with other chain; ant method?
       */
@@ -159,13 +167,21 @@ typedef struct set_mapRead
                                  */
    unsigned char lenKmersUC;    /*number kmer lengths*/
 
+   /*chain merging*/
+   signed int gapSI;   /*gap score for chain merging*/
+   signed int matchSI; /*match score for chain merging*/
+
    /*for gap filling*/
    struct alnSet *alnSetST;
+   signed char alnEndsBl; /*align softmasked ends*/
 
    /*for scoreSub_mapRead*/
    signed char subBl;     /*1: do sub-aligment score*/
    float minScoreF;       /*min % score to keep*/
+   float minMatchF;       /*min % matches to keep read*/
    float minPercLenF;     /*min % score to keep*/
+   float chainMinNtF;    /*min % bases in chainto keep*/
+   float maxLenPercF;     /*max % length between chains*/
 }set_mapRead;
 
 /*-------------------------------------------------------\
@@ -602,7 +618,74 @@ getRef_ref_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun20: blank_aln_mapRead
+| Fun20: getRefBin_ref_mapRead
+|   - gets a binary file with reference
+| Input:
+|   - refSTPtr:
+|     o ref_mapRead struct to add reference to
+|   - refFILE:
+|     o FILE pointer to binary file with reference
+|       sequence, kmers, sorted index's, minimum chain
+|       length, and kmer length
+|     o Format:
+|       1: kmer length [of one kmer] (unsigned char)
+|       2: minimum kmers in a chain (signed int)
+|       3: length of reference id (name) (signed int)
+|       4: reference id (signed char)
+|       5: length of reference sequence (signed int)
+|       6: reference sequence (signed char)
+|       7: length of kmer sequence (signed int)
+|       8: reference kmer sequence (signed int)
+|       9: sorted index's for kmer sequence (signed int)
+| Output:
+|   - Modifies:
+|     o refSTPtr to have values in refFILE
+|   - Returns:
+|     o 0 for no errors
+|     o def_memErr_mapRead for memory errors
+|     o def_noStruct_mapRead if no structure input
+|     o def_badRead_mapRead if no file input or if had
+|       file error
+\-------------------------------------------------------*/
+signed char
+getRefBin_ref_mapRead(
+   struct ref_mapRead *refSTPtr,/*gets reference*/
+   void *refFILE               /*bin file with reference*/
+);
+
+/*-------------------------------------------------------\
+| Fun21: writeRefBin_ref_mapRead
+|   - writes a ref_mapRead struct to a binary file
+| Input:
+|   - refSTPtr:
+|     o ref_mapRead struct to write
+|   - refFILE:
+|     o FILE pointer to write contents of refSTPtr to
+| Output:
+|   - Prints:
+|     o refSTPtr to file
+|       1: kmer length [of one kmer] (unsigned char)
+|       2: minimum kmers in a chain (signed int)
+|       3: length of reference id (name) (signed int)
+|       4: reference id (signed char)
+|       5: length of reference sequence (signed int)
+|       6: reference sequence (signed char)
+|       7: length of kmer sequence (signed int)
+|       8: reference kmer sequence (signed int)
+|       9: sorted index's for kmer sequence (signed int)
+|   - Returns:
+|     o 0 for no errors
+|     o def_noStruct_mapRead if refSTPtr is 0/null
+|     o def_badFile_mapRead if refFILE is 0/null
+\-------------------------------------------------------*/
+signed char
+writeRefBin_ref_mapRead(
+   struct ref_mapRead *refSTPtr,/*reference to write*/
+   void *refFILE              /*file to save refSTPtr to*/
+);
+
+/*-------------------------------------------------------\
+| Fun22: blank_aln_mapRead
 |   - blanks an aln_mapRead struct
 | Input:
 |   - alnSTPtr:
@@ -621,7 +704,7 @@ blank_aln_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun21: init_aln_mapRead
+| Fun23: init_aln_mapRead
 |   - initializes an aln_mapRead struct
 | Input:
 |   - alnSTPtr:
@@ -638,7 +721,7 @@ init_aln_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun22: freeStack_aln_mapRead
+| Fun24: freeStack_aln_mapRead
 |   - frees variables in an aln_mapRead struct
 | Input:
 |   - alnSTPtr:
@@ -655,7 +738,7 @@ freeStack_aln_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun23: freeHeap_aln_mapRead
+| Fun25: freeHeap_aln_mapRead
 |   - frees an aln_mapRead struct
 | Input:
 |   - alnSTPtr:
@@ -670,7 +753,7 @@ freeHeap_aln_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun24: setup_aln_mapRead
+| Fun26: setup_aln_mapRead
 |   - setups (memory allocate) an aln_mapRead struct
 | Input:
 |   - alnSTPtr:
@@ -691,7 +774,7 @@ setup_aln_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun25: mk_aln_mapRead
+| Fun27: mk_aln_mapRead
 |   - makes and returns heap allocated aln_mapRead struct
 | Input:
 | Output:
@@ -702,10 +785,11 @@ setup_aln_mapRead(
 \-------------------------------------------------------*/
 struct aln_mapRead *
 mk_aln_mapRead(
+   void
 );
 
 /*-------------------------------------------------------\
-| Fun26: sortKmerIndex_mapRead
+| Fun28: sortKmerIndex_mapRead
 |   - sorts kmer index array by a kmer array
 | Input:
 |   - refKmerArySI:
@@ -729,7 +813,7 @@ sortKmerIndex_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun29: kmerChain_mapRead
+| Fun31: kmerChain_mapRead
 |   - merge kmers into chains (longer kmers)
 | Input:
 |   - chainsSTPtr:
@@ -737,6 +821,8 @@ sortKmerIndex_mapRead(
 |       to
 |   - minChainLenSI:
 |     o minimum number of kmers to keep a chain
+|   - kmerUC:
+|     o length of one kmer
 |   - qryKmerArySI:
 |     o signed int array with query kmers (by position)
 |   - lenQrySI:
@@ -746,7 +832,7 @@ sortKmerIndex_mapRead(
 |   - refIndexArySI:
 |     o signed int array with refKmerArySI index's sorted
 |       by kmer
-|     o create with fun26 sortKmerIndex_mapRead
+|     o create with fun28 sortKmerIndex_mapRead
 |   - lenRefSI:
 |     o number kmers in refKmerArySI
 |   - refStartSI:
@@ -775,29 +861,34 @@ signed char
 kmerChain_mapRead(
    struct chains_mapRead *chainsSTPtr,/*gets kmer chains*/
    signed int minChainLenSI,          /*min chain length*/
+   unsigned int kmerUC,               /*length of 1 kmer*/
    signed int *qryKmerArySI,          /*query kmers*/
    signed int lenQrySI,               /*query length*/
    signed int *refKmerArySI,          /*reference kmers*/
    signed int *refIndexArySI,
-     /*sorted refernce kmer index's (fun26)*/
+     /*sorted refernce kmer index's (fun28)*/
    signed int lenRefSI,               /*number ref kmers*/
    signed int refStartSI              /*first ref base*/
 );
 
 /*-------------------------------------------------------\
-| Fun31: mergeChains_mapRead
-|   - merges kmer chains from fun29 (kmerChain) into
+| Fun33: mergeChains_mapRead
+|   - merges kmer chains from fun31 (kmerChain) into
 |     the chain the maximizes base count
 |   - not optimal solution, but also reduce complexity
 |     by not counting for gaps
 | Input:
-|   - chainAryUI:
-|     o unsigned int array with kmer chains to merge into
-|       a "best" chain
-|   - numChainsSL:
-|     o number of kmer chains in chainAryUI
-|   - penaltyF:
-|     o penalty for gap or mismatch (should be positive)
+|   - chainsSTPtr:
+|     o chains_mapRead struct pionter with chains to
+|       merge and to find "best" chain in
+|   - lenKmerUC:
+|     o size of one kmer
+|   - gapSI:
+|     o gap penalty to apply for indels between chains
+|   - matchSI:
+|     o score for match
+|   - maxLenSI:
+|     o maximum length between chains before merging
 | Output:
 |   - Modifies:
 |     o nextArySI in chains_mapRead to have best scoring
@@ -809,11 +900,15 @@ kmerChain_mapRead(
 \-------------------------------------------------------*/ 
 signed int
 mergeChains_mapRead(
-   struct chains_mapRead *chainsSTPtr  /*chains to merge*/
+   struct chains_mapRead *chainsSTPtr, /*chains to merge*/
+   unsigned char lenKmerUC,            /*size of 1 kmer*/
+   signed char gapSI,                  /*score for gaps*/
+   signed char matchSI,                /*score for match*/
+   signed int maxLenSI          /*length between chains*/
 );
 
 /*-------------------------------------------------------\
-| Fun32: mergeToSam_mapRead
+| Fun34: mergeToSam_mapRead
 |   - convert output from mergeChains_map read to sam
 |     file entry (mapq is set to 0)
 | Input:
@@ -822,6 +917,9 @@ mergeChains_mapRead(
 |       in making the alignment
 |   - indexSI:
 |     o starting index of merged chain to align
+|   - alnEndsBl:
+|     o align up to 1.5 chain lengths of the softmasked
+|       ends of reads (0 = do not align)
 |   - qrySTPtr:
 |     o seqST struct with query sequence
 |   - refSTPtr:
@@ -853,6 +951,7 @@ signed char
 mergeToSam_mapRead(
    struct chains_mapRead *chainsSTPtr,/*chains to use*/
    signed int indexSI,            /*chain index to start*/
+   signed char alnEndsBl,      /*1: map end masks*/
    struct seqST *qrySTPtr,     /*query sequence*/
    struct seqST *refSTPtr,     /*reference sequence*/
    unsigned char lenKmerUC,    /*length of one kmer*/
@@ -863,7 +962,7 @@ mergeToSam_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun33: scoreSubAln_mapRead
+| Fun35: scoreSubAln_mapRead
 |   - scores the aligment in samEntry and finds best
 |     sub-aligment
 | Input:
@@ -874,13 +973,13 @@ mergeToSam_mapRead(
 |     o modifiy alignment to best sub-alignment
 |       * 1: look for best sub-alignment
 |       * 0: do not look for sub-alignments
-|   - refSTPtr:
-|     o seqST struct pointer with reference sequence used
-|       in alignment
-|     o seqStr must be as lookup index (seqToIndex_alnSet)
 |   - qrySTPtr:
 |     o seqST struct pointer with query sequence used in
 |       alignment
+|     o seqStr must be as lookup index (seqToIndex_alnSet)
+|   - refSTPtr:
+|     o seqST struct pointer with reference sequence used
+|       in alignment
 |     o seqStr must be as lookup index (seqToIndex_alnSet)
 |   - alnSetSTPTr:
 |     o alnSet struct pointer with scoring settings
@@ -920,17 +1019,78 @@ scoreSub_mapRead(
 );
 
 /*-------------------------------------------------------\
-| Fun34: aln_mapRead
-|   - maps read to reference
+| Fun36: chainToAln_mapRead
+|   - converts chain in chains_mapRead struct to alignment
 | Input:
 |   - samSTPtr:
-|     o samEntry struct pointer to hold alignment
+|     o samEntry struct pointer to add alignment to
+|   - chainsSTPtr:
+|     o chains_mapRead struct pointer with chains to use
+|       in making the alignment
+|   - indexSI:
+|     o starting index of merged chain to align
+|   - qrySTPtr:
+|     o seqST struct with query sequence
+|   - refSTPtr:
+|     o seqST struct pointer with reference sequence
+|   - setSTPtr:
+|     o set_mapRead struct pointer with settings to use
+|   - lenKmerUC:
+|     o length of one kmer in reference/query
+|   - chainLenSI:
+|     o minimum length of a chain
+|     o used to align ends before chains, alignment size
+|       is 1.5 chains (for chainLenSI = 20, is 30 bases)
+|       * 1.5 is off the top of my head
+|   - matrixSTPtr:
+|     o directional matrix to use in alignment step
+|   - errSCPtr:
+|     o signed char pointer to hold errors
+| Output:
+|   - Modifies:
+|     o samSTPtr to have alignment (if could align)
+|     o uses matrixSTPtr for aligment step, is modified,
+|       and resized, but nothing of relavence
+|     o sets errSCPtr
+|       * 0 for no errors
+|       * def_memErr_mapRead for memory errors
+|       * def_noChains_mapRead if merged chains at index
+|         did not have enough coverage
+|       * def_noAln_mapRead if aligment was under
+|         minimum percent query length or score
+|   - Returns:
+|     o 0 for no errors
+|     o def_memErr_mapRead for memory errors
+|     o def_noChains_mapRead if merged chains at index did
+|       not have enough coverage
+|     o def_noAln_mapRead if aligment was under
+|       minimum percent query length or score
+\-------------------------------------------------------*/
+signed long
+chainToAln_mapRead(
+   struct samEntry *samSTPtr,    /*gets alignment*/
+   struct chains_mapRead *chainsSTPtr, /*chains to align*/
+   signed int indexSI,           /*chain index to align*/
+   struct seqST *qrySTPtr,       /*query sequence*/
+   struct seqST *refSTPtr,       /*reference sequence*/
+   struct set_mapRead *setSTPtr, /*alignment settings*/
+   unsigned char lenKmerUC,      /*lenght of 1 kemr*/
+   signed int chainLenSI,        /*min length of a chain*/
+   struct dirMatrix *matrixSTPtr,/*for alignment*/
+   signed char *errSCPtr         /*gets errors*/
+);
+
+/*-------------------------------------------------------\
+| Fun37: align_mapRead
+|   - maps read to reference
+| Input:
 |   - qrySTPtr:
 |     o seqST struct pointer with query sequence and id
 |   - refSTPtr:
 |     o ref_mapRead struct pointer with reference
 |       sequence, settings, and kmer arrays for alignment
-|     o setup with init_ref_mapRead and addRef_ref_mapRead
+|     o setup with init_ref_mapRead, setup_ref_mapRead,
+|       and addRef_ref_mapRead
 |   - mapIndexSIPtr:
 |     o signed int pointer to hold index of best chain
 |       (used to make mapping)
@@ -939,37 +1099,39 @@ scoreSub_mapRead(
 |       use/allocate/resize in mapping steps
 |   - setSTPtr:
 |     o set_mapRead structure with non-reference specific
-|       alignment settings
+|   - samSTPtr:
+|     o pointer to samEntry struct to hold best alignment
 |   - errSCPtr:
 |     o signed char pointer to hold any errors
 | Output:
 |   - Modifies:
-|     o samSTPtr to have alignment (everything modified)
-|       - blanked if *errSCPtr != 0
-|     o mapIndexSLPtr to have index of chain used to make
-|       alignment
+|     o samSTPtr to have highest scoring alignment
+|     o seqStr in qrySTPtr to be lookup index's, you can
+|       undo this with indexToSeq_alnSet(qrySTPtr->seqStr)
+|     o mapIndexSLPtr to have index of chain used to find
+|       the best alignment
 |     o kmerArySI in alnSTPtr to have query kmer sequence
 |     o lenSI in alnSTPtr to be length of kmerArySI
 |     o sizeSI in alnSTPtr if kmerArySI is resized
 |     o chainsSTPtr alnSTPtr to have found chains
 |     o errSCPtr to have error message
 |       * 0 for no errors
-|       * def_memErr_mapRead for no errors
+|       * def_memErr_mapRead for memory errors
 |       * def_noChains_mapRead if chould not find any
 |         chains
-|       * def_noAln_mapRead if aligment was beneath
+|       * def_noAln_mapRead if aligment was under
 |         minimum percent query length or score
 |     o matrixSTPtr in alnSTPtr to nothing usefull. Here
 |       to avoid memory allocations in alignment step
 |   - Returns:
-|     o score for alignment
+|     o score for primary alignment
 \-------------------------------------------------------*/
 signed long
 align_mapRead(
-   struct samEntry *samSTPtr,   /*gets aligment*/
    struct seqST *qrySTPtr,      /*has query sequence*/
    struct ref_mapRead *refSTPtr,/*ref kmers/settings*/
-   signed long *mapIndexSIPtr,  /*index of best chain*/
+   signed int *mapIndexSIPtr,   /*index of best chain*/
+   struct samEntry *samSTPtr,   /*gets alignments*/
    struct aln_mapRead *alnSTPtr,/*memory for query*/
    struct set_mapRead *setSTPtr,/*alignment settings*/
    signed char *errSCPtr        /*gets errors*/

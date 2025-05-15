@@ -64,17 +64,43 @@ Chapter three: do not underestimate the pixies
   - extracts amplicon sequences by coordinate
   - creates: amp_seq.fa
     - ampicon sequencees (map reads to with minimap2)
+- scripts/readLenGraph.sh:
+  - makes a read length graph out of reads that aligned
+    to the reference (includess N50, mean length, and
+    median length).
+  - you will need filtsam and minimap2 to use this script
+- scripts/gui-run.sh:
+  - this is a tcltk script that runs freezeTB without
+    integration (calls freezeTB separatly). It has an
+    issue with using mapRead, but otherwise works.
+- scripts/ftbBatch:
+  - runs freezeTB in batch mode on `fastq_pass` directory
+    output by ONT basecallers
+  - input `ftbBatch.sh output-name /path/to/fastq_pass/`
+    - or for multiple runs:
+      `ftbBatch.sh 1st 1st/fastq_pass/ 2nd 2nd/fastq_pass/ ...`
+  - output:
+    - amr-results.tsv file with all detected AMRs in all
+      barcodes
+    - spol-results.tsv file with all detected spoligotypes
+      in all barcodes
+    - freezeTB results saved to each fastq_pass's input
+      prefix
 
 ## Older progams (some functional):
 
 Chapter four: the undead awaken
 
+These are so out of date it is not worth using. Still,
+  they are examples of tcltk in R.
+
 - freezeTBGui.Rscript: gui built in R using tcltk, was
   replaced with guiFreezeTB, but might work (no idea)
 - outputGui.Rscript: runs only the output menu displayed
   by freezeTBGui.Rscript (should work)
-- oldGraphAmpDepth.r is older version of graphAmpDepth
-  that used ggplot2
+- minGui.r: minimal R tcltk example (just runs minimap2)
+  - this may not work anymore. I added some stuff for
+    file detection and it may have messed it up
 
 ## Really random stuff:
 
@@ -165,7 +191,7 @@ End of comment block ---#
 Chapter six: make your own monster
 
 A better picture of how freezeTB works might be gotten by
-  showing how it would look if I used an bash script. This
+  showing how it would look if I used a bash script. This
   is for default settings only, since it is an example and
   I want to keep the script more simple. This has not been
   tested.
@@ -173,7 +199,8 @@ A better picture of how freezeTB works might be gotten by
 You will need some programs from my bioTools repo(
   [https://github.com/jeremybuttler/bioTools](
    https://github.com/jeremybuttler/bioTools)). These
-  include ampDepth, filtsam, maskPrim, edClust, and tbCon.
+  include ampDepth, filtsam, maskPrim, edClust, tbCon,
+  rmHomo, and mapRead.
 
 ```
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -268,31 +295,23 @@ done # Loop: get user input
 #   - map and fiter reads
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-minimap2 \
-    -a \
-    -x map-ont \
-     "$dbStr/NC000962.fa" \
-     "$readsStr"\
-  > "$samStr.sam";
-
-# This program is an optional program in the gui only.
-#   The logic is that for amplicons it is faster to map
-#   to an small set of genes then it is to map to an
-#   reference. This uses the genes coordinates to adjust
-#   to the reference coordinates. Any reference gene not
-#   in the coordinates file is removed. This includes
-#   mapped genes, like those 16 sRNA genes that mapped to
-#   and *E. coli* gene or did not map
-if [[ "$adjBl" == "TRUE" ]]; then
-# If: If I need to adjust coordinates
-   adjCoords \
-      -coords "$dbDirStr/genes-NC000962.fa" \
-      -ref "$dbDirStr/NC000962.3" \
-      -sam "$samStr.sam" \
-      > "$prefixStr-map-adj.sam";
-
-   samStr="$prefixStr-map-adj";
-fi # If: If I need to adjust coordinates
+if [ "$mapStr" = "minimap2" ];
+then
+   minimap2 \
+       -a \
+       -x map-ont \
+        "$dbStr/NC000962.fa" \
+        "$readsStr"\
+     > "$samStr.sam";
+   minMapqSI = 15;
+else
+   mapRead \
+       -ref "$dbStr/NC000962.fa" \
+       "$readsStr" \
+     > "$samStr.sam";
+     # fallback read mapper
+ minMapqSI = 0;
+fi
 
 # filter out low quality reads
 filtsam \
@@ -304,8 +323,11 @@ filtsam \
     -min-mapq 15 \
     -min-mean-q 7 \
     -min-median-q 7 \
-    -sam "$samStr.sam" \
-    -out "$samStr-filt.sam";
+    -sam "$samStr.sam" |
+  rmHomo \
+     -ref "$dbStr/NC000962 \
+     -sam - \
+     -out "$samStr-filt.sam"; # also clean up indels
 
 samStr="$samStr-filt";
 
@@ -330,32 +352,12 @@ fi # If: primer masking was requested
 #   - these steps could be run in parallel
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# unfiltered read depth
-ampDepth \
-    -gene-tbl "$dbDirStr/gene-tbl.tsv" \
-    -flag "unfiltered" \
-    -sam "$unfiltSamStr" \
-    -out "$prefixStr-stats.tsv";
-
 # filtered read depth (tail is to remove the header)
 ampDepth \
     -gene-tbl "$dbDirStr/gene-tbl.tsv" \
     -flag "filtered" \
-    -sam "$samStr" |
-  tail -n+1 \
-  >> "$prefixStr-stats.tsv";
-
-# build the consensuses
-if [[ "$mixedInfectBl" -lt 1 ]]; then
-   tbCon \
-       -sam "$samStr" \
-       -out-tsv "$prefixStr-consnesuses.tsv" \
-       -out "$prefixStr-cons.sam";
-else
-   edClust \
-       -sam "$samStr" \
-       -prefix "$prefixStr" \
-fi
+    -sam "$samStr" \
+  > "$prefixStr-stats.tsv";
 
 # find AMRs
 tbAmr \
@@ -377,6 +379,20 @@ tbSpol \
     -db "$dbDirStr/spoligo-lineages.csv" \
     -sam "$samStr" \
     -out "$prefixStr-read-spoligo.tsv";
+
+# build the consensuses
+if [[ "$mixedInfectBl" -lt 1 ]]; then
+   tbCon \
+       -sam "$samStr" \
+       -out-tsv "$prefixStr-consnesuses.tsv" \
+       -min-mapq "$minMapSI" \
+       -out "$prefixStr-cons.sam";
+else
+   edClust \
+       -sam "$samStr" \
+       -min-mapq "$minMapSI" \
+       -prefix "$prefixStr" \
+fi
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec05:
@@ -416,6 +432,7 @@ if [[ "$graphBl" == "TRUE" ]]; then
       -stats $prefixStr-stats.tsv" \
       -who "$dbDirStr/who-2023.tsv" \
       -ext "$graphExtStr" \
+      -amrs ""$prefixStr-amrs.tsv" \
       -prefix "$prefixStr";
 
    # -min-len not used, but controls min amplicon length;

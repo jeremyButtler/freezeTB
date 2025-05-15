@@ -1,2 +1,0 @@
-#valgrind 2>del-grind.txt --tool=memcheck --track-origins=yes --leak-check=full --keep-debuginfo=yes -s ./tbMiru -sam $HOME/files/testing/null-con.sam -miru-tbl miruTbl.tsv
-valgrind 2>del-grind.txt --tool=memcheck --track-origins=yes --leak-check=full --keep-debuginfo=yes -s ./tbMiru -fa ../../freezeTBFiles/NC000962.fa -miru-tbl miruTbl.tsv -prim primers.tsv

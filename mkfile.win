@@ -1,8 +1,8 @@
-LD=link
-CC=cl
-CFLAGS= /O2 /Ot /Za /Tc
-PREFIX="%ProgramFiles%\freezeTB"
-DB_PREFIX="%PUBLIC%\Documents";
+LD=link.exe
+CC=cl.exe
+CFLAGS=/DNONE
+PREFIX="%localAppData%\freezeTB"
+DB_PREFIX="%localAppData%\freezeTB"
 ext=win
 O=.o.$(ext)
 
@@ -12,6 +12,7 @@ all:
 	cd ..
 
 install:
+	mkdir "$(PREFIX)"
 	move programs\guiFreezeTB\guiFreezeTB.exe "$(PREFIX)"
 	move programs\freezeTBSrc\freezeTB.exe "$(PREFIX)"
 	copy scripts\freezeTBGui.Rscript "$(PREFIX)"

@@ -19,8 +19,7 @@
 |   - included libraries
 \-------------------------------------------------------*/
 
-#define def_amrPercSup_guiFreezeTB 0.01
-   /*little lower than cmd version because report filter*/
+#define def_amrOutPercSup_guiFreezeTB 0.1
 #define def_mkGraph_guiFreezeTB 1 /*1 is yes*/
 
 #ifdef PLAN9
@@ -39,16 +38,15 @@
 #include "../genLib/numToStr.h"
 #include "../genLib/ulCp.h"
 
-#include "../freezeTBSrc/freezeTB.h"
-#include "../freezeTBSrc/freezeTBPaths.h" /*(file paths)*/
+#include "../genFreezeTB/freezeTB.h"
+#include "../genFreezeTB/freezeTBPaths.h" /*(file paths)*/
 
 /*.h files only (no .c files used)*/
+#include "../genLib/endLine.h"
 #include "../genBio/tbConDefs.h"
-#include "../tbAmrSrc/tbAmrDefs.h"
-#include "../tbMiruSrc/tbMiruDefs.h"
-#include "../tbSpolSrc/tbSpolDefs.h"
-#include "../freezeTBSrc/freezeTBDefs.h"
-
+#include "../genFreezeTB/tbMiruDefs.h"
+#include "../genFreezeTB/tbSpolDefs.h"
+#include "../genFreezeTB/freezeTBDefs.h"
 #include "../genClust/clustST.h" /*for default values*/
     /*edClust uses .c, so need both*/
 
@@ -62,11 +60,10 @@
 !   o .c  #include "../genBio/trimSam.h"
 !   o .c  #include "../genBio/maskPrim.h"
 !   o .c  #include "../genBio/ampDepth.h"
-!   o .c  #include "../genBio/adjCoords.h"
 !   o .c  #include "../genBio/rmHomo.h"
-!   o .c  #include "../tbSpolSrc/spolFind.h" 
-!   o .c  #include "../tbMiruSrc/miruTbl.h"
-!   o .c  #include "../tbAmrSrc/checkAmr.h"
+!   o .c  #include "../genFreezeTB/spolFind.h" 
+!   o .c  #include "../genFreezeTB/miruTbl.h"
+!   o .c  #include "../genFreezeTB/checkAmr.h"
 !   o .c  #include "../genBio/tbCon.h"
 !   o .c  #include "../genClust/edClust.h"
 !
@@ -78,6 +75,10 @@
 !   o .c  #include "../genLib/genMath.h"
 !   o .c  #include "../genLib/shellSort.h"
 !   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genLib/fileFun.h"
+!   o .c  #include "../genLib/endin.h"
+!   o .c  #include "../genLib/checkSum.h"
+!   o .c  #include "../genLib/inflate.h"
 !
 !   > general biology dependencys for task
 !
@@ -91,17 +92,20 @@
 !
 !   o .c  #include "../genAln/indexToCoord.h"
 !   o .c  #include "../genAln/alnSet.h"
+!   o .c  #include "../genAln/dirMatrix.h"
 !   o .c  #include "../genAln/memwater.h"
+!   o .c  #include "../genAln/needle.h"
+!   o .c  #include "../genAln/water.h"
 !   o .c  #include "../genAln/kmerFind.h"
+!   o .c  #include "../genAln/mapRead.h"
 !
 !   > other library dependencys needed for a spefic task
 !
-!   o .c  #include "../tbSpolSrc/spolST.h"
-!   o .c  #include "../tbAmrSrc/amrST.h"
-!   o .c  #include "../tbAmrSrc/drugAry.h"
+!   o .c  #include "../genFreezeTB/spolST.h"
+!   o .c  #include "../genFreezeTB/amrST.h"
+!   o .c  #include "../genFreezeTB/drugAry.h"
 !
 !   > .h files only
-!   o .h  #include "../genLib/dataTypeShortHand.h"
 !   o .c  #include "../genBio/codonTbl.h"
 !   o .c  #include "../genBio/kmerBit.h" from kmerFind
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -153,11 +157,11 @@ wrap_guiFreezeTB(
    unsigned int lenUI = 0;
    int retSI = 0;
 
-   errHeapStr =
-      run_freezeTB(
-         numArgsSI,
-         argAryStr
-      );
+   /*this is here to silence unused variable errors*/
+   if(dataTclST)
+      errHeapStr = run_freezeTB(numArgsSI, argAryStr);
+   else
+      errHeapStr = run_freezeTB(numArgsSI, argAryStr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
@@ -194,8 +198,9 @@ wrap_guiFreezeTB(
       { /*If: memory error*/
          fprintf(
             stderr,
-            "memory error printing error message %s\n",
-            errHeapStr
+            "memory error printing error message %s%s",
+            errHeapStr,
+            str_endLine
          );
 
          Tcl_Eval(
@@ -243,8 +248,9 @@ wrap_guiFreezeTB(
       ){ /*If: had error launching message box*/
          fprintf(
            stderr,
-           "failed to launch message box with %s error\n",
-           errMessageHeapStr
+           "failed to launch message box with %s error%s",
+           errMessageHeapStr,
+           str_endLine
          );
       } /*If: had error launching message box*/
 
@@ -324,7 +330,8 @@ initTK_guiFreezeTB(
    { /*If: failed to initialize tcl*/
       fprintf(
          stderr,
-         "Could not initialize interpetor for tcl\n"
+         "Could not initialize interpetor for tcl%s",
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -334,7 +341,8 @@ initTK_guiFreezeTB(
    { /*If: failed to initialize tk*/
       fprintf(
          stderr,
-         "Could not initialize interpetor for tk\n"
+         "Could not initialize interpetor for tk%s",
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -443,9 +451,10 @@ initTK_guiFreezeTB(
    { /*If: error setting up reference*/
       fprintf(
          stderr,
-         "%s\nreference variable setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
-
+         "%s%sreference variable setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -499,8 +508,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncoordinate paths setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scoordinate paths setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -552,8 +563,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nAMR database paths setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sAMR database paths setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -607,8 +620,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nmasking coordinates paths setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%smasking coordinates paths setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -662,8 +677,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nMIRU-VNTR database path setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sMIRU-VNTR database path setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -717,8 +734,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nSpoligo spacer fasta path setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sSpoligo spacer fasta path setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -772,8 +791,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nSpoligo lineage databse path setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sSpoligo lineage databse path setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -821,8 +842,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nmin mapq setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%smin mapq setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -857,8 +880,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nmin median q-score setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%smin median q-score setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -893,8 +918,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nmin mean q-score setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%smin mean q-score setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -929,8 +956,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nmin length setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%smin length setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -976,8 +1005,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nerror setting up indel clean up checkbox\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%serror setting up indel clean up checkbox%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1012,8 +1043,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nerror setting indel cleanup homopolymer\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%serror setting indel cleanup homopolymer%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1048,8 +1081,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nerror setting indel cleanup indel size\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%serror setting indel cleanup indel size%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1083,7 +1118,7 @@ initTK_guiFreezeTB(
 
    double_numToStr(
       tmpStr,
-      def_amrPercSup_guiFreezeTB,
+      def_minPercMapped_freezeTBDefs,
       3
    );
 
@@ -1098,8 +1133,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nAMR min percent mapped reads setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sAMR min percent mapped reads setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1124,19 +1161,17 @@ initTK_guiFreezeTB(
       3
    );
 
-   errSI =
-      Tcl_Eval(
-         tclInterpSTPtr,
-         (char *) defStr
-      );
+   errSI = Tcl_Eval(tclInterpSTPtr, (char *) defStr);
 
 
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nAMR min percent indel setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sAMR min percent indel setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1161,19 +1196,16 @@ initTK_guiFreezeTB(
       3
    );
 
-   errSI =
-      Tcl_Eval(
-         tclInterpSTPtr,
-         (char *) defStr
-      );
-
+   errSI = Tcl_Eval(tclInterpSTPtr, (char *) defStr);
 
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nAMR min percent frameshift setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sAMR min percent frameshift setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1196,20 +1228,17 @@ initTK_guiFreezeTB(
       *tmpStr++ = '1';
    else
       *tmpStr++ = '0';
-   
-   errSI =
-      Tcl_Eval(
-         tclInterpSTPtr,
-         (char *) defStr
-      );
+   errSI = Tcl_Eval(tclInterpSTPtr, (char *) defStr);
 
 
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nAMR check frameshift setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sAMR check frameshift setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1258,8 +1287,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nMIRU-VNTR fudge length error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sMIRU-VNTR fudge length error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1295,8 +1326,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nspoligotype min percent score error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sspoligotype min percent score error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1330,8 +1363,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nspoligoty DR start setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sspoligoty DR start setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1366,8 +1401,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nspoligoty DR end setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sspoligoty DR end setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1418,8 +1455,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nconsensus min depth setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sconsensus min depth setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1453,8 +1492,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nconsensus min base q-score setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sconsensus min base q-score setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1488,8 +1529,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nconsnesus min ins q-score setuperror\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sconsnesus min ins q-score setuperror%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1524,8 +1567,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nconsnesus min %% snp support setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sconsnesus min %% snp support setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1560,8 +1605,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nconsnesus min %% ins support setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sconsnesus min %% ins support setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1596,8 +1643,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nconsnesus min %% del support setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%sconsnesus min %% del support setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1644,8 +1693,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nvariant print min depth setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%svariant print min depth setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1679,9 +1730,11 @@ initTK_guiFreezeTB(
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
-         stderr,
-         "%s\nvariant print min base %% sup setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+        stderr,
+        "%s%svariant print min base %% sup setup error%s",
+        Tcl_GetStringResult(tclInterpSTPtr),
+        str_endLine,
+        str_endLine
       );
 
       return TCL_ERROR;
@@ -1716,8 +1769,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nvariant print min ins %% sup setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%svariant print min ins %% sup setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1752,8 +1807,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nvariant print min del %% sup setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%svariant print min del %% sup setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1820,8 +1877,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster min depth setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster min depth setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1856,8 +1915,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster min %% depth setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster min %% depth setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1891,8 +1952,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster min snp q-score setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster min snp q-score setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1926,8 +1989,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster min indel length setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster min indel length setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1962,8 +2027,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster read %% error rate setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster read %% error rate setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -1998,8 +2065,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster con %% error rate setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster con %% error rate setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2033,8 +2102,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster error ration setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster error ration setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2068,8 +2139,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster window error ration setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster window error ration setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2103,8 +2176,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster window length setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster window length setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2138,8 +2213,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster length weight setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster length weight setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2174,8 +2251,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster min con %% simularity setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster min con %% simularity setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2210,8 +2289,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster consensus %% overlap setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster consensus %% overlap setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2245,9 +2326,11 @@ initTK_guiFreezeTB(
    if( errSI != TCL_OK)
    { /*If: error*/
       fprintf(
-         stderr,
-         "%s\ncluster max con %% simularity setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+        stderr,
+        "%s%scluster max con %% simularity setup error%s",
+        Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2281,8 +2364,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\ncluster number con rebuilds setup error\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%scluster number con rebuilds setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2312,7 +2397,7 @@ initTK_guiFreezeTB(
 
    double_numToStr(
       tmpStr,
-      def_amrPercSup_guiFreezeTB,
+      def_amrOutPercSup_guiFreezeTB,
       3
    );
 
@@ -2326,8 +2411,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nerror setting up output AMR support\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%serror setting up output AMR support%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2362,8 +2449,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nerror set up output AMR indel support\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%serror set up output AMR indel support%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2397,8 +2486,10 @@ initTK_guiFreezeTB(
    { /*If: error*/
       fprintf(
          stderr,
-         "%s\nerror set up output AMR indel support\n",
-         Tcl_GetStringResult(tclInterpSTPtr)
+         "%s%serror set up output AMR indel support%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
       );
 
       return TCL_ERROR;
@@ -2426,6 +2517,7 @@ initTK_guiFreezeTB(
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 int
 main(
+   void
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Main TOC:
    '   - run freezeTB gui
@@ -2485,8 +2577,9 @@ main(
      )
    ){ /*If: had file error*/
       fprintf(
-        stderr,
-        "could not find tcl gui script for freezeTB gui\n"
+       stderr,
+       "could not find tcl gui script for freezeTB gui%s",
+       str_endLine
       );
 
       goto guiErr_main_sec04;
@@ -2501,7 +2594,7 @@ main(
       (int) tclArgsSI, /*so argAryStr is always blank*/
       tclArgsHeapStr,
       initTK_guiFreezeTB
-   ); /*TK_Main does not return, so should not happen*/
+   ); /*TK_Main does not return*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec04:
@@ -2514,7 +2607,8 @@ main(
    memErr_main_sec04:;
       fprintf(
          stderr,
-         "memory error setting up tcl arguments\n"
+         "memory error setting up tcl arguments%s",
+         str_endLine
       );
       goto clean_main_sec04;
 
@@ -2523,6 +2617,7 @@ main(
       goto clean_main_sec04;
 
    clean_main_sec04:;
+      Tcl_Finalize();
       if(tclArgsHeapStr)
       { /*If: need to free tcl input*/
          if(tclArgsHeapStr[0])

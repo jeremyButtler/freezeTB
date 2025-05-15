@@ -46,21 +46,29 @@
 #include "../genAln/alnSet.h"
 #include "../genAln/kmerFind.h"
 
-#include "miruTbl.h"
-#include "miruFx.h"
+#include "../genFreezeTB/miruTbl.h"
+#include "../genFreezeTB/miruFx.h"
 
 /*.h file only*/
-#include "../genLib/dataTypeShortHand.h"
-#include "tbMiruDefs.h"
+#include "../ftbVersion.h"
+#include "../genLib/endLine.h"
+#include "../genFreezeTB/tbMiruDefs.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/numToStr.h"
-!   o .h  #include "../genLib/genMath.h" .h max macro only
+!   o .c  #include "../genLib/genMath.h"
+!   o .c  #include "../genLib/shellSort.h"
+!   o .c  #include "../genLib/endin.h"
+!   o .c  #include "../genLib/checkSum.h"
+!   o .c  #include "../genLib/inflate.h"
+!   o .c  #include "../genAln/indexToCoord.h"
+!   o .c  #include "../genAln/memWater.h"
 !   o .h  #include "../genLib/strAry.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"
 !   o .h  #include "../genBio/kmerBit.h"
+!   o .h  #include "../genAln/alnDefs.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #define def_phelp_tbMiru 1
@@ -87,10 +95,11 @@ pversion_tbMiru(
 ){
    fprintf(
       outFILE,
-      "tbMiru version: %i-%02i-%02i\n",
-      def_year_tbMiruDefs,
-      def_month_tbMiruDefs,
-      def_day_tbMiruDefs
+      "tbMiru from freezeTB version: %i-%02i-%02i%s",
+      def_year_ftbVersion,
+      def_month_ftbVersion,
+      def_day_ftbVersion,
+      str_endLine
    );
 } /*pversion_tbMiru*/
 
@@ -125,21 +134,26 @@ phelp_tbMiru(
 
    fprintf(
       outFILE,
-      "tbMiru -sam reads.sam -miru-tbl MIRU-table.tsv\n"
+      "tbMiru -sam reads.sam -miru-tbl MIRU-table.tsv%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
       "tbMiru -sam consensuses.sam"
    );
-   fprintf(outFILE, " -miru-tbl MIRU-table.tsv\n");
+   fprintf(
+      outFILE,
+     " -miru-tbl MIRU-table.tsv%s",
+     str_endLine
+   );
 
    fprintf(
       outFILE,
       "  - Finds MIRU lineage for input reads/consensuses"
    );
 
-   fprintf(outFILE, "\n");
+   fprintf(outFILE, "%s", str_endLine);
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec02:
@@ -165,53 +179,61 @@ phelp_tbMiru(
    *   - print input header
    \**************************************************/
 
-   fprintf(outFILE, "Input:\n");
+   fprintf(outFILE, "Input:%s", str_endLine);
 
    /**************************************************\
    * Fun02 Sec02 Sub02:
    *   - input reads/sequences
    \**************************************************/
 
-   fprintf(outFILE, "  -sam reads.sam: [Required]\n");
+   fprintf(
+      outFILE,
+      "  -sam reads.sam: [Required]%s",
+      str_endLine
+   );
 
    fprintf(
      outFILE,
      "    o Sam file with mapped reads to find lineages"
    );
-   fprintf(outFILE, " for\n");
+   fprintf(outFILE, " for%s", str_endLine);
 
    fprintf(
      outFILE,
      "    o minimap2 -a ref.fasta reads.fastq > reads.sam"
    );
-   fprintf(outFILE, "\n");
+   fprintf(outFILE, "%s", str_endLine);
 
    fprintf(
      outFILE,
      "    o minimap2 -a ref.fa consensuses.fa >"
    );
-   fprintf(outFILE, " conesnuses.sam\n");
+   fprintf(outFILE, " conesnuses.sam%s", str_endLine);
 
 
    fprintf(
       outFILE,
-      "  -fq reads.fastq: [Optional; Replaces -sam]\n"
+      "  -fq reads.fastq: [Optional; Replaces -sam]%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o fastq file with reads (replaces -sam)\n"
+     "    o fastq file with reads (replaces -sam)%s",
+      str_endLine
    );
 
 
    fprintf(
        outFILE,
-       "  -fa sequence.fasta: [Optional; Replaces -sam]\n"
+       "  -fa sequence.fasta: [Optional; Replaces -sam]%s",
+      str_endLine
     );
 
    fprintf(
      outFILE,
-     "    o fasta file with sequences (replaces -sam)\n"
+     "    o fasta file with sequences (replaces -sam)%s",
+      str_endLine
    );
 
    /**************************************************\
@@ -221,42 +243,50 @@ phelp_tbMiru(
 
    fprintf(
        outFILE,
-       "  -prim primers.tsv: [Required for -fa or -fq]\n"
+       "  -prim primers.tsv: [Required for -fa or -fq]%s",
+      str_endLine
     );
 
    fprintf(
       outFILE,
-      "    o tsv file with primers (1st row is header)\n"
+      "    o tsv file with primers (1st row is header)%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o columns in tsv file:\n"
+      "    o columns in tsv file:%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "      - column 1 is primer id\n"
+      "      - column 1 is primer id%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "      - column 2 paired (Yes) or unpaired (No)\n"
+      "      - column 2 paired (Yes) or unpaired (No)%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "        primers (column 2 is not used in tbMiru)\n"
+      "        primers (column 2 is not used in tbMiru)%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "     - column 3 forward primer sequence\n"
+      "     - column 3 forward primer sequence%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "     - column 4 reverse primer sequence\n"
+      "     - column 4 reverse primer sequence%s",
+      str_endLine
    );
 
    /**************************************************\
@@ -266,18 +296,21 @@ phelp_tbMiru(
 
    fprintf(
       outFILE,
-      "  -fudge: [%i]\n",
-      def_fudgeLen_tbMiruDefs
+      "  -fudge: [%i]%s",
+      def_fudgeLen_tbMiruDefs,
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Range to fudge lengths by to call lineage\n"
+     "    o Range to fudge lengths by to call lineage%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Lineage length range is + or - fudge\n"
+     "    o Lineage length range is + or - fudge%s",
+     str_endLine
    );
 
    /**************************************************\
@@ -285,82 +318,100 @@ phelp_tbMiru(
    *   - miru table entry
    \**************************************************/
 
-   fprintf(outFILE, "  -miru-tbl: [Required]\n");
+   fprintf(
+      outFILE,
+      "  -miru-tbl: [Required]%s",
+      str_endLine
+   );
 
    fprintf(
      outFILE,
      "    o tsv with the MIRU table to find lineages"
    );
-   fprintf(outFILE, " with\n ");
+   fprintf(outFILE, " with%s ", str_endLine);
 
    fprintf(
      outFILE,
-     "   - Format: \n"
+     "   - Format: %s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "      o The first column is the lineage name\n"
+     "      o The first column is the lineage name%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "      o Remaining columns are for each primer\n"
+     "      o Remaining columns are for each primer%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "      o Header has primer name and coordinates\n"
+     "      o Header has primer name and coordinates%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "        - Primer: name.forward.len.reverse.len\n"
+     "        - Primer: name.forward.len.reverse.len%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "          i. name: Name of the primer\n"
+     "          i. name: Name of the primer%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "          ii. forward: Forward primer start\n"
+     "          ii. forward: Forward primer start%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "          iii. len: Length of forward primer\n"
+     "          iii. len: Length of forward primer%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "          iv. reverse: Reverse primer position\n"
+     "          iv. reverse: Reverse primer position%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "          v. len: Length of reverse primer\n"
+     "          v. len: Length of reverse primer%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "      o Each row (non-header) has the length \n"
+     "      o Each row (non-header) has the length %s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "        needed for a read to match an lineage;\n"
+     "        needed for a read to match an lineage;%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "        this includes the foward primer, but\n"
+     "        this includes the foward primer, but%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "        not the reverse primer\n"
+     "        not the reverse primer%s",
+     str_endLine
    );
 
    /**************************************************\
@@ -368,16 +419,18 @@ phelp_tbMiru(
    *   - out file entry
    \**************************************************/
 
-   fprintf(outFILE, "  -out: [stdout]\n");
+   fprintf(outFILE, "  -out: [stdout]%s", str_endLine);
 
    fprintf(
      outFILE,
-     "    o File to output each primers lineages to\n"
+     "    o File to output each primers lineages to%s",
+     str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Use `-` for stdout\n"
+     "    o Use `-` for stdout%s",
+     str_endLine
    );
 
    /**************************************************\
@@ -385,16 +438,22 @@ phelp_tbMiru(
    *   - out table file entry
    \**************************************************/
 
-   fprintf(outFILE, "  -out-tbl: [do not output]\n");
-
    fprintf(
-     outFILE,
-     "    o File to print filled in MIRU tsv table to\n"
+      outFILE,
+      "  -out-tbl: [do not output]%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Use `-` for stdout\n"
+     "    o File to print filled in MIRU tsv table to%s",
+     str_endLine
+   );
+
+   fprintf(
+     outFILE,
+     "    o Use `-` for stdout%s",
+     str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -402,16 +461,18 @@ phelp_tbMiru(
    ^   - print output entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   fprintf(outFILE, "Output:\n");
+   fprintf(outFILE, "Output:%s", str_endLine);
 
    fprintf(
       outFILE,
-      "  - Miru table with the number of reads that\n"
+      "  - Miru table with the number of reads that%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    mapped to each lineage and primer (-out-tbl)\n"
+      "    mapped to each lineage and primer (-out-tbl)%s",
+      str_endLine
    );
 
    fprintf(
@@ -421,7 +482,8 @@ phelp_tbMiru(
 
    fprintf(
       outFILE,
-      " primer\n"
+      " primer%s",
+      str_endLine
    );
 } /*phelp_tbMiru*/
 
@@ -485,9 +547,9 @@ input_tbMiru(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siArg = 1;
-   schar errSC = 0;
-   schar *tmpStr = 0;
+   signed int siArg = 1;
+   signed char errSC = 0;
+   signed char *tmpStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -528,60 +590,60 @@ input_tbMiru(
    { /*Loop: get user input*/
       if(
          ! eql_charCp(
-            (schar *) "-sam",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-sam",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*If: sam file input*/
          ++siArg;
          *fxFlagSC = def_samIn_tbMiru;
-         *samFileStr = (schar *) argAryStr[siArg];
+         *samFileStr = (signed char *) argAryStr[siArg];
       } /*If: sam file input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-fq",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-fq",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: fastq file input*/
          ++siArg;
          *fxFlagSC = def_fqIn_tbMiru;
-         *samFileStr = (schar *) argAryStr[siArg];
+         *samFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: fastq file input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-fa",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-fa",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: fasta file input*/
          ++siArg;
          *fxFlagSC = def_faIn_tbMiru;
-         *samFileStr = (schar *) argAryStr[siArg];
+         *samFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: fasta file input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-miru-tbl",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-miru-tbl",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: miru table file input*/
          ++siArg;
-         *miruFileStr = (schar *) argAryStr[siArg];
+         *miruFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: miru table file input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-prim",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-prim",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: miru table file input*/
          ++siArg;
-         *primFileStr = (schar *) argAryStr[siArg];
+         *primFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: miru table file input*/
 
       /**************************************************\
@@ -591,24 +653,24 @@ input_tbMiru(
 
       else if(
          ! eql_charCp(
-            (schar *) "-out",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-out",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: output file input*/
          ++siArg;
-         *outFileStr = (schar *) argAryStr[siArg];
+         *outFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: output file input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-out-tbl",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-out-tbl",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: output table file input*/
          ++siArg;
-          *tblOutFileStr = (schar *) argAryStr[siArg];
+          *tblOutFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: output table file input*/
 
       /**************************************************\
@@ -618,16 +680,16 @@ input_tbMiru(
 
       else if(
          ! eql_charCp(
-            (schar *) "-fudge",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-fudge",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: fudge length*/
          ++siArg;
-         tmpStr = (schar *) argAryStr[siArg];
+         tmpStr = (signed char *) argAryStr[siArg];
          tmpStr +=
             strToSI_base10str(
-               (schar *) argAryStr[siArg],
+               (signed char *) argAryStr[siArg],
                fudgeLenSI
             );
 
@@ -635,8 +697,9 @@ input_tbMiru(
          { /*If: non-numeric/to large*/
              fprintf(
                 stderr,
-                "-fudge %s is non-numeric or to large\n",
-                argAryStr[siArg]
+                "-fudge %s is non-numeric or to large%s",
+                argAryStr[siArg],
+                str_endLine
              );
 
              goto err_fun03_sec04_sub02;
@@ -650,9 +713,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "-h",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "-h",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: help message requested*/
           phelp_tbMiru(stdout);
@@ -661,9 +724,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "--h",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "--h",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: help message requested*/
           phelp_tbMiru(stdout);
@@ -672,9 +735,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "help",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "help",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: help message requested*/
           phelp_tbMiru(stdout);
@@ -683,9 +746,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "-help",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "-help",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: help message requested*/
           phelp_tbMiru(stdout);
@@ -694,9 +757,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "--help",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "--help",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: help message requested*/
           phelp_tbMiru(stdout);
@@ -710,9 +773,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "-v",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "-v",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: version number requested*/
           pversion_tbMiru(stdout);
@@ -721,9 +784,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "--v",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "--v",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: version number requested*/
           pversion_tbMiru(stdout);
@@ -732,9 +795,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "version",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "version",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: version number requested*/
           pversion_tbMiru(stdout);
@@ -743,9 +806,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "-version",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "-version",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: version number requested*/
           pversion_tbMiru(stdout);
@@ -754,9 +817,9 @@ input_tbMiru(
 
       else if(
           ! eql_charCp(
-             (schar *) "--version",
-             (schar *) argAryStr[siArg],
-             (schar) '\0'
+             (signed char *) "--version",
+             (signed char *) argAryStr[siArg],
+             (signed char) '\0'
           )
        ){ /*Else If: version number requested*/
           pversion_tbMiru(stdout);
@@ -772,8 +835,9 @@ input_tbMiru(
       { /*Else: invalid input*/
           fprintf(
              stderr,
-             "%s not recognized\n",
-             argAryStr[siArg]
+             "%s not recognized%s",
+             argAryStr[siArg],
+             str_endLine
           );
 
          goto err_fun03_sec04_sub02;
@@ -820,11 +884,7 @@ input_tbMiru(
 |   - Prints:
 |     o lineages or table to output file
 \-------------------------------------------------------*/
-#ifdef plan9
-char
-#else
 int
-#endif
 main(
    int numArgsSI,
    char *argAryStr[]
@@ -850,34 +910,32 @@ main(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *samFileStr = 0;
-   schar *miruFileStr = 0;
-   schar *outFileStr = 0;
-   schar *tblOutFileStr = 0;
+   signed char *samFileStr = 0;
+   signed char *miruFileStr = 0;
+   signed char *outFileStr = 0;
+   signed char *tblOutFileStr = 0;
 
-   sint fudgeLenSI = def_fudgeLen_tbMiruDefs;
+   signed int fudgeLenSI = def_fudgeLen_tbMiruDefs;
 
-   schar errSC = 0;
+   signed char errSC = 0;
 
    struct miruTbl *miruHeapST = 0;
 
    FILE *samFILE = 0;
    struct samEntry samStackST;
-   schar *buffHeapStr = 0;
-   ulong lenBuffUL = 0;
-   ulong ulEntry = 0;
+   unsigned long ulEntry = 0;
 
    /*unique to kmer find*/
-   schar *primFileStr = 0;
-   schar fxFlagSC = def_samIn_tbMiru;
-   schar *fxTypeStr = 0;
+   signed char *primFileStr = 0;
+   signed char fxFlagSC = def_samIn_tbMiru;
+   signed char *fxTypeStr = 0;
 
-   sint maxAmpLenSI = def_maxAmpLen_miruFx;
+   signed int maxAmpLenSI = def_maxAmpLen_miruFx;
    float minScorePercF = def_minPercScore_miruFx;
    float minKmerPercF = def_minKmerPerc_kmerFind;
    float percShiftF = def_percShift_kmerFind;
    float extraNtPercF = def_extraNtInWin_kmerFind;
-   uchar lenKmerUC = def_lenKmer_kmerFind;
+   unsigned char lenKmerUC = def_lenKmer_kmerFind;
 
    struct seqST seqStackST;
 
@@ -954,8 +1012,9 @@ main(
       { /*If: could not open the sam file*/
          fprintf(
             stderr,
-            "could not open -sam %s\n",
-            samFileStr
+            "could not open -sam %s%s",
+            samFileStr,
+            str_endLine
          );
 
          goto err_main_sec07_sub02;
@@ -982,21 +1041,24 @@ main(
       if(errSC == def_fileErr_tbMiruDefs)
          fprintf(
             stderr,
-            "Could not open -miru -tbl %s\n",
-            miruFileStr
+            "Could not open -miru -tbl %s%s",
+            miruFileStr,
+            str_endLine
           );
 
       else if(errSC == def_memErr_tbMiruDefs)
          fprintf(
             stderr,
-            "Ran out of memory\n"
+            "Ran out of memory%s",
+            str_endLine
          );
 
       else
          fprintf(
             stderr,
-            "Error while reading -miru-tbl %s\n",
-               miruFileStr
+            "Error while reading -miru-tbl %s%s",
+            miruFileStr,
+            str_endLine
          );
 
       goto err_main_sec07_sub02;
@@ -1024,19 +1086,14 @@ main(
    { /*If: memory error*/
       fprintf(
          stderr,
-         "memory error setting up samEntry struct\n"
+         "memory error setting up samEntry struct%s",
+         str_endLine
       );
 
       goto err_main_sec07_sub02;
    } /*If: memory error*/
 
-   errSC =
-      get_samEntry(
-         &samStackST,
-         &buffHeapStr,
-         &lenBuffUL,
-         samFILE
-      );
+   errSC = get_samEntry(&samStackST, samFILE);
 
    /*****************************************************\
    * Main Sec04 Sub02:
@@ -1069,14 +1126,7 @@ main(
       ); /*find lineages*/
 
       nextEntry_main_sec04_sub02:;
-
-      errSC =
-         get_samEntry(
-            &samStackST,
-            &buffHeapStr,
-            &lenBuffUL,
-            samFILE
-         );
+         errSC = get_samEntry(&samStackST, samFILE);
    } /*Loop: find lineages*/
 
    /*****************************************************\
@@ -1088,9 +1138,10 @@ main(
    { /*If: had an error*/
       fprintf(
          stderr,
-         "memory error read line %lu in -sam %s\n",
+         "memory error read line %lu in -sam %s%s",
          ulEntry,
-         samFileStr
+         samFileStr,
+         str_endLine
       );
 
       goto err_main_sec07_sub02;
@@ -1102,10 +1153,6 @@ main(
       fclose(samFILE);
 
    samFILE = 0;
-
-   free(buffHeapStr);
-   buffHeapStr = 0;
-   lenBuffUL = 0;
 
    goto pLineages_main_sec06_sub01;
 
@@ -1156,15 +1203,17 @@ main(
       if(errSC == def_fileErr_tbMiruDefs)
          fprintf(
             stderr,
-            "file error reading -prim %s\n",
-            primFileStr
+            "file error reading -prim %s%s",
+            primFileStr,
+            str_endLine
          );
 
       else
          fprintf(
             stderr,
-            "memory error reading -prim %s\n",
-            primFileStr
+            "memory error reading -prim %s%s",
+            primFileStr,
+            str_endLine
          );
 
       goto err_main_sec07_sub02;
@@ -1177,24 +1226,14 @@ main(
 
    if(fxFlagSC == def_fqIn_tbMiru)
    { /*If: fastq file input*/
-      errSC =
-         getFqSeq_seqST(
-            samFILE,
-            &seqStackST
-         );
-
-      fxTypeStr = (schar *) "-fq";
+      errSC = getFq_seqST(samFILE, &seqStackST);
+      fxTypeStr = (signed char *) "-fq";
    } /*If: fastq file input*/
 
    else
    { /*Else: fasta file input*/
-      errSC = 
-         getFaSeq_seqST(
-            samFILE,
-            &seqStackST
-         );
-
-      fxTypeStr = (schar *) "-fa";
+      errSC = getFa_seqST(samFILE, &seqStackST);
+      fxTypeStr = (signed char *) "-fa";
    } /*Else: fasta file input*/
 
    if(errSC)
@@ -1202,25 +1241,28 @@ main(
       if(errSC == def_EOF_seqST)
          fprintf(
             stderr,
-            "nothing in %s %s\n",
+            "nothing in %s %s%s",
             fxTypeStr,
-            samFileStr
+            samFileStr,
+            str_endLine
          );
 
       else if(errSC == def_memErr_seqST)
           fprintf(
             stderr,
-            "memory error for first entry in %s %s\n",
+            "memory error for first entry in %s %s%s",
             fxTypeStr,
-            samFileStr
+            samFileStr,
+            str_endLine
          );
 
       else
           fprintf(
             stderr,
-            "bad first entry in %s %s\n",
+            "bad first entry in %s %s%s",
             fxTypeStr,
-            samFileStr
+            samFileStr,
+            str_endLine
          );
 
       goto err_main_sec07_sub02;
@@ -1251,10 +1293,11 @@ main(
       { /*If: memory error*/
          fprintf(
             stderr,
-            "memory error on read %lu in %s %s\n",
+            "memory error on read %lu in %s %s%s",
             ulEntry,
             fxTypeStr,
-            samFileStr
+            samFileStr,
+            str_endLine
          );
 
          goto err_main_sec07_sub02;
@@ -1263,22 +1306,10 @@ main(
       /*get next sequence*/
 
       if(fxFlagSC == def_fqIn_tbMiru)
-      { /*If: fastq file input*/
-         errSC =
-            getFqSeq_seqST(
-               samFILE,
-               &seqStackST
-            );
-      } /*If: fastq file input*/
+         errSC = getFq_seqST(samFILE, &seqStackST);
 
       else
-      { /*Else: fasta file input*/
-         errSC = 
-            getFaSeq_seqST(
-               samFILE,
-               &seqStackST
-            );
-      } /*Else: fasta file input*/
+         errSC = getFa_seqST(samFILE, &seqStackST);
    } /*Loop: find lineages*/
 
    /*****************************************************\
@@ -1291,19 +1322,21 @@ main(
       if(errSC == def_memErr_seqST)
           fprintf(
             stderr,
-            "memory error for entry %lu in %s %s\n",
+            "memory error for entry %lu in %s %s%s",
             ulEntry,
             fxTypeStr,
-            samFileStr
+            samFileStr,
+            str_endLine
          );
 
       else
           fprintf(
             stderr,
-            "bad entry (number %lu) in %s %s\n",
+            "bad entry (number %lu) in %s %s%s",
             ulEntry,
             fxTypeStr,
-            samFileStr
+            samFileStr,
+            str_endLine
          );
 
       goto err_main_sec07_sub02;
@@ -1318,10 +1351,6 @@ main(
       fclose(samFILE);
 
    samFILE = 0;
-
-   free(buffHeapStr);
-   buffHeapStr = 0;
-   lenBuffUL = 0;
 
    freeHeapAry_refST_kmerFind(
       refHeapAryST,
@@ -1365,14 +1394,16 @@ main(
          if(outFileStr)
             fprintf(
                stderr,
-               "Could not write to -out-tbl %s\n",
-               outFileStr
+               "Could not write to -out-tbl %s%s",
+               outFileStr,
+               str_endLine
             );
 
          else
             fprintf(
                stderr,
-               "Could not write to stdout (-out-tbl -)\n"
+               "Could not write to stdout (-out-tbl -)%s",
+               str_endLine
             );
 
          goto err_main_sec07_sub02;
@@ -1395,14 +1426,16 @@ main(
       if(outFileStr)
          fprintf(
             stderr,
-            "Could not write to -out %s\n",
-            outFileStr
+            "Could not write to -out %s%s",
+            outFileStr,
+            str_endLine
          );
 
       else
          fprintf(
             stderr,
-            "Could not write to stdout (-out -)\n"
+            "Could not write to stdout (-out -)%s",
+            str_endLine
          );
 
       goto err_main_sec07_sub02;
@@ -1442,41 +1475,31 @@ main(
    \*****************************************************/
 
    cleanUp_main_sec07_sub03:;
+      freeStack_samEntry(&samStackST);
 
-   if(buffHeapStr)
-      free(buffHeapStr);
+      if(miruHeapST)
+         freeHeap_miruTbl(miruHeapST);
+      miruHeapST = 0;
 
-   buffHeapStr = 0;
-   lenBuffUL = 0;
+      if(! samFILE) ;
+      else if(samFILE == stdin) ;
+      else if(samFILE == stdout) ;
+      else
+         fclose(samFILE);
+      samFILE = 0;
 
-   freeStack_samEntry(&samStackST);
+      if(refHeapAryST)
+         freeHeapAry_refST_kmerFind(
+            refHeapAryST,
+            lenRefSI
+         );
+      refHeapAryST = 0;
+      lenRefSI = 0;
 
-   if(miruHeapST)
-      freeHeap_miruTbl(miruHeapST);
+      freeStack_tblST_kmerFind(&tblStackST);
+      freeStack_alnSet(&alnSetStackST);
 
-   miruHeapST = 0;
-
-   if(
-         samFILE
-      && samFILE != stdin
-      && samFILE != stdout
-   ) fclose(samFILE);
-
-   samFILE = 0;
-
-   if(refHeapAryST)
-      freeHeapAry_refST_kmerFind(
-         refHeapAryST,
-         lenRefSI
-      );
-
-   refHeapAryST = 0;
-   lenRefSI = 0;
-
-   freeStack_tblST_kmerFind(&tblStackST);
-   freeStack_alnSet(&alnSetStackST);
-
-   return errSC;
+      return errSC;
 } /*main*/
 
 /*=======================================================\

@@ -170,6 +170,7 @@ double_numToStr(
 
    endStr = &cstr[retUI - 1];
    startStr = cstr;
+   startStr += (*cstr == '-');
 
    while(startStr < endStr)
    { /*Loop: Reverse array (is bacwards)*/
@@ -228,6 +229,8 @@ double_numToStr(
                   startStr == cstr
                || *startStr == '-'
             ){ /*If: need to round up on frist digit*/
+               endBuff_fun03_sec04:;
+
                endStr = startStr + 1;
 
                while(*endStr != '\0')        
@@ -250,8 +253,16 @@ double_numToStr(
             --startStr;
          } /*Loop: round up*/
 
-         ++(*startStr); /*round up last digit*/
+         if(*startStr != '.')
+            ++(*startStr); /*round up last digit*/
+         else if(
+              startStr != cstr
+           && *startStr != '-'
+         ) *(startStr - 1) += 1; /*round up last digit*/
 
+         else
+            goto endBuff_fun03_sec04;
+         
          rounded_fun03_sec03:;
       } /*Else: need to round multiple values*/
    } /*If: need to round up*/

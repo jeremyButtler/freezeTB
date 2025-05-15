@@ -1,3 +1,4 @@
+MAKE=make
 LD=cc
 CC=cc
 CFLAGS= -O3 -std=c89 -Wall -Wextra
@@ -7,7 +8,7 @@ ext=unix
 O=.o.$(ext)
 
 all:
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C programs
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C programs
 
 install:
 	if [ ! -d "$(PREFIX)" ] ; then mkdir -p "$(PREFIX)"; fi

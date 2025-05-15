@@ -1,3 +1,3 @@
 b freezeTB.c:6680
 
-r -sam test.sam -prefix delete
+r -sam ~/files/testing/tb/BC33.sam -prefix delete

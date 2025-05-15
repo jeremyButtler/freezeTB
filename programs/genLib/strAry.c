@@ -152,11 +152,9 @@ swap_strAry(
    unsigned long firstUL,
    unsigned long secUL
 ){
-   swapDelim_ulCp(
+   swapNull_ulCp(
       get_strAry(strAry, firstUL),
-      get_strAry(strAry, secUL),
-      0,
-      '\0'
+      get_strAry(strAry, secUL)
    ); /*swap strings*/
 } /*swap_strAry*/
 

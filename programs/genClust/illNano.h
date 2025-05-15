@@ -450,10 +450,6 @@ getVarNano_illNano(
 |          cover, but their is no difference
 |     o 0: only merge when at least on read completly
 |          overlaps other
-|   - buffStrPtr:
-|     o pointer to c-string to use in reading sam file
-|   - lenBuffULPtr:
-|     o length of buffStrPtr
 |   - samFILE:
 |     o FILE pointer to sam file with reads to get
 |   - outFILE:
@@ -479,8 +475,6 @@ getNanoReads_illNano(
    signed char tranBl,       /*1: is uknown transition*/
    signed char mergeOverBl,/*1 merge incompelte overlaps*/
    struct samEntry *samSTPtr,/*sam file reading*/
-   signed char **buffStrPtr, /*buffer for file reading*/
-   unsigned long *lenBuffULPtr,/*length of buffStrPtr*/
    void *samFILE,            /*sam file with ONT reads*/
    void *outFILE             /*file to save reads to*/
 );

@@ -16,7 +16,10 @@
 
 #include <stdio.h>
 
-#include "freezeTB.h"
+#include "../genFreezeTB/freezeTB.h"
+
+/*only .h files*/
+#include "../genLib/endLine.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden Libraries:
@@ -44,6 +47,10 @@
 !   o .c  #include "../genLib/genMath.h"
 !   o .c  #include "../genLib/shellSort.h"
 !   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genLib/fileFun.h"
+!   o .c  #include "../genLib/endin.h"
+!   o .c  #include "../genLib/checkSum.h"
+!   o .c  #include "../genLib/inflate.h"
 !
 !   > general biology dependencys for task
 !
@@ -90,11 +97,8 @@ main(
    signed char *errHeapStr = 0;
    int retSI = 0;
 
-   errHeapStr =
-      run_freezeTB(
-         numArgsSI,
-         argAryStr
-      ); /*really runs freezeTB program*/
+   errHeapStr = run_freezeTB(numArgsSI, argAryStr);
+     /*really runs freezeTB program*/
 
    if(! errHeapStr)
       goto noErr_main;
@@ -103,8 +107,9 @@ main(
    { /*Else: had error*/
       fprintf(
          stderr,
-         "freezeTB error: %s\n",
-         errHeapStr
+         "freezeTB error: %s%s",
+         errHeapStr,
+         str_endLine
       );
 
       goto err_main;

@@ -8,6 +8,8 @@
 '     - Included libraries, definitions and preprocessor
 '       checks
 '   deliminator detection/making:
+'     o these should never be used outside or ulCp or
+'       should have character backups defined by -DNOUL
 '     o .h fun01: rshiftByte_ulCp
 '       - shift byte right by x bytes; over shifts go to 0
 '     o .h fun02: mkDelim_ulCp
@@ -84,10 +86,18 @@
 #define UNSINGED_LONG_COPY_H
 
 /*plan9 defines long as 32 bit, so need an extra check*/
-#ifdef PLAN9_64
-   typedef unsigned long long ulong_ulCP;   
+#ifdef NOUL
+   typedef unsigned char ulong_ulCp;
+   /*back up to make sure byte copying used, however it
+   `  will reduce the efficeny due to more operations in
+   `  bit operations for longs
+   */
 #else
-   typedef unsigned long ulong_ulCp;   
+   #ifdef PLAN9_64
+      typedef unsigned long long ulong_ulCp;   
+   #else
+      typedef unsigned long ulong_ulCp;   
+   #endif
 #endif
 
 /*ulong_ulCp shortcuts*/
@@ -427,6 +437,8 @@ cpLen_ulCp(
 |   - delimUL:
 |     o delminator to end at (as long). Use makeULDelim
 |       to build this deliminator
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o delminator (as char) to stop copying at
 | Output:
@@ -443,7 +455,6 @@ cpDelim_ulCp(
    ulong_ulCp delimUL,
    signed char delimSC
 );
-
 
 /*-------------------------------------------------------\
 | Fun11: cpStr_ulCp
@@ -540,6 +551,8 @@ cpWhite_ulCp(
 |   - delimUL:
 |     o deliminator (as ulong_ulCp (fun02)) at end of
 |       string
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o deliminator (as char) at end of string
 | Output:
@@ -564,6 +577,8 @@ lenStr_ulCp(
 |   - delimUL:
 |     o deliminator (as ulong_ulCp (fun02)) at end of
 |       string
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o deliminator (as char) at end of string
 | Output:
@@ -651,6 +666,8 @@ endWhite_ulCp(
 |   - delimUL:
 |     o delminator to end at (as long). Use makeULDelim
 |       to build this deliminator
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o delminator (as char) to stop copying at
 | Output:
@@ -744,6 +761,8 @@ rmWhite_ulCp(
 |   - delimUL:
 |     o delminator to end at (as long). Use makeULDelim
 |       to build this deliminator
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o delminator (as char) to stop copying at
 | Output:

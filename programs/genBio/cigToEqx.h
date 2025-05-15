@@ -56,6 +56,7 @@ struct seqST;
 |     o 1 for memory error
 |       - does not free strBuffPtr (you need to free)
 |       - does not free valArySI   (you need to free)
+|     o 2 if read had no sequence
 \-------------------------------------------------------*/
 signed char
 cigToEqx(

@@ -43,7 +43,9 @@
 !   o .c  #include "../genLib/charCp.h"
 !   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genLib/fileFun.h"
 !   o .c  #include "../genBio/samEntry.h"
+!   o .h  #include "../genLib/endStr.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -53,12 +55,12 @@
 | Input:
 |   - qrySTPtr:
 |     o pointer to seqST with query sequence 
-|       - qrySTPtr->offsetUL; first query base to align
-|       - qrySTPtr->endAlnUL; last query base to align
+|       - qrySTPtr->offsetSL; first query base to align
+|       - qrySTPtr->endAlnSL; last query base to align
 |   - refSTPtr:
 |     o pointer to seqST with reference sequence 
-|       - refSTPtr->offsetUL; 1st reference base to align
-|       - refSTPtr->endAlnUL; last reference base to align
+|       - refSTPtr->offsetSL; 1st reference base to align
+|       - refSTPtr->endAlnSL; last reference base to align
 |   - matrixSTPtr:
 |     o pointer to dirMatrix to use for the alingment
 |   - alnSet:
@@ -116,25 +118,23 @@ needle(
 
    /*Get start & end of query and reference sequences*/
    signed char *refSeqStr =
-      refSTPtr->seqStr + refSTPtr->offsetUL;
+      refSTPtr->seqStr + refSTPtr->offsetSL;
 
    signed char *qrySeqStr =
-      qrySTPtr->seqStr + qrySTPtr->offsetUL;
+      qrySTPtr->seqStr + qrySTPtr->offsetSL;
 
    /*Find the length of the reference and query*/
-   unsigned long lenQryUL =
-      qrySTPtr->endAlnUL - qrySTPtr->offsetUL + 1;
-
-   unsigned long lenRefUL =
-      refSTPtr->endAlnUL - refSTPtr->offsetUL + 1;
-     /*The + 1 is to account for index 0 of endAlnUL*/
-
-   unsigned long lenMatrixUL =
-      (lenRefUL + 1) * (lenQryUL + 1);
+   signed long qryLenSL =
+      qrySTPtr->endAlnSL - qrySTPtr->offsetSL + 1;
+   signed long refLenSL =
+      refSTPtr->endAlnSL - refSTPtr->offsetSL + 1;
+     /*The + 1 is to account for index 0 of endAlnSL*/
+   signed long lenMatrixSL =
+      (refLenSL + 1) * (qryLenSL + 1);
      /*+1 for the gap column and row*/
 
-   unsigned long ulRef = 0;
-   unsigned long ulQry = 0;
+   signed long slRef = 0;
+   signed long slQry = 0;
 
    /*Set up counters for the query and reference base
    `  index
@@ -162,7 +162,7 @@ needle(
    /*Direction matrix (one cell holds one direction)*/
    signed char *dirMatrixSC = 0;/*Direction matrix*/
    signed char *insDir = 0;    /*Direction above cell*/
-   unsigned long indexUL = 0;
+   signed long indexSL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
@@ -178,51 +178,51 @@ needle(
    *   - set up the directional matrix
    \*****************************************************/
 
-   if(matrixSTPtr->lenMatrixUL < lenMatrixUL)
+   if(matrixSTPtr->lenMatrixSL < lenMatrixSL)
    { /*If: need to resize the matrix*/
       free(matrixSTPtr->dirMatrixSC);
       matrixSTPtr->dirMatrixSC = 0;
-      matrixSTPtr->lenMatrixUL = 0;
+      matrixSTPtr->lenMatrixSL = 0;
 
       matrixSTPtr->dirMatrixSC =
-         malloc((lenMatrixUL + 1) * sizeof(char));
+         malloc((lenMatrixSL + 1) * sizeof(char));
 
       if(matrixSTPtr->dirMatrixSC == 0)
          goto memErr_fun01_sec05;
 
-       matrixSTPtr->lenMatrixUL = lenMatrixUL;
+       matrixSTPtr->lenMatrixSL = lenMatrixSL;
    } /*If: need to resize the matrix*/
 
    dirMatrixSC = matrixSTPtr->dirMatrixSC;
 
    blank_dirMatrix(matrixSTPtr);
 
-   matrixSTPtr->lenRefUL = lenRefUL;
-   matrixSTPtr->refOffsetUL = refSTPtr->offsetUL;
-   matrixSTPtr->refEndUL = refSTPtr->endAlnUL;
+   matrixSTPtr->refLenSL = refLenSL;
+   matrixSTPtr->refOffsetSL = refSTPtr->offsetSL;
+   matrixSTPtr->refEndSL = refSTPtr->endAlnSL;
 
-   matrixSTPtr->lenQryUL = lenQryUL;
-   matrixSTPtr->qryOffsetUL = qrySTPtr->offsetUL;
-   matrixSTPtr->qryEndUL = qrySTPtr->endAlnUL;
+   matrixSTPtr->qryLenSL = qryLenSL;
+   matrixSTPtr->qryOffsetSL = qrySTPtr->offsetSL;
+   matrixSTPtr->qryEndSL = qrySTPtr->endAlnSL;
 
    /*****************************************************\
    * Fun01 Sec02 Sub02:
    *   - set up score array
    \*****************************************************/
 
-   if(matrixSTPtr->lenScoreUL < lenRefUL + 1)
+   if(matrixSTPtr->lenScoreSL < refLenSL + 1)
    { /*If: need to make a larger score array*/
       free(matrixSTPtr->scoreArySL);
       matrixSTPtr->scoreArySL = 0;
-      matrixSTPtr->lenScoreUL = 0;
+      matrixSTPtr->lenScoreSL = 0;
       
       matrixSTPtr->scoreArySL =
-         calloc((lenRefUL + 1), sizeof(long));
+         calloc((refLenSL + 1), sizeof(long));
 
       if(! matrixSTPtr->scoreArySL)
          goto memErr_fun01_sec05;
 
-      matrixSTPtr->lenScoreUL = lenRefUL;
+      matrixSTPtr->lenScoreSL = refLenSL;
    } /*If: need to make a larger score array*/
 
    scoreArySL = matrixSTPtr->scoreArySL;
@@ -237,20 +237,26 @@ needle(
    scoreArySL[1] = settings->gapSS;
    dirMatrixSC[1] = def_mvDel_alnDefs; /*stop to start*/
 
-   for(
-      indexUL = 2;
-      indexUL <= lenRefUL;
-      ++indexUL
-   ){ /*Loop: initialize the first row*/
-      dirMatrixSC[indexUL] = def_mvDel_alnDefs;
-      scoreArySL[indexUL] = scoreArySL[indexUL - 1];
+   if(refLenSL > 1)
+   { /*If: have more than on entry*/
+      indexSL = 1;
 
-      #ifdef NOEXTEND
-         scoreArySL[indexUL] += settings->gapSS;
-      #else
-         scoreArySL[indexUL] += settings->extendSS;
-      #endif
-   } /*Loop: initialize the first row*/
+      do { /*Loop: init 1st row*/
+         dirMatrixSC[indexSL] = def_mvDel_alnDefs;
+         scoreArySL[indexSL] = scoreArySL[indexSL - 1];
+
+         #ifdef NOEXTEND
+            scoreArySL[indexSL] += settings->gapSS;
+         #else
+            scoreArySL[indexSL] += settings->extendSS;
+         #endif
+
+         ++indexSL;
+      } while(indexSL <= refLenSL); /*Loop: init 1st row*/
+   } /*If: have more than on entry*/
+
+   else
+      indexSL = 2;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec04:
@@ -286,12 +292,12 @@ needle(
    delScoreSL = scoreArySL[0];
    delScoreSL += settings->delArySS[def_mvIns_alnDefs];
 
-   dirMatrixSC[indexUL] = def_mvIns_alnDefs;
+   dirMatrixSC[indexSL] = def_mvIns_alnDefs;
 
    /*move to first base*/
-   ++indexUL;
-   refSeqStr = refSTPtr->seqStr + refSTPtr->offsetUL - 1;
-   qrySeqStr = qrySTPtr->seqStr + qrySTPtr->offsetUL;
+   ++indexSL;
+   refSeqStr = refSTPtr->seqStr + refSTPtr->offsetSL - 1;
+   qrySeqStr = qrySTPtr->seqStr + qrySTPtr->offsetSL;
 
    /*****************************************************\
    * Fun01 Sec04 Sub02:
@@ -300,15 +306,15 @@ needle(
 
    /*Starting on the first sequence row*/
    for(
-      ulQry = 0;
-      ulQry < lenQryUL;
-      ++ulQry
+      slQry = 0;
+      slQry < qryLenSL;
+      ++slQry
    ){ /*loop; compare query base against all ref bases*/
 
       for(
-         ulRef = 1;
-         ulRef <= lenRefUL;
-         ++ulRef
+         slRef = 1;
+         slRef <= refLenSL;
+         ++slRef
       ){ /*Loop; compare one query to one reference base*/
 
          /***********************************************\
@@ -318,21 +324,21 @@ needle(
 
          snpScoreSL =
             getScore_alnSet(
-               qrySeqStr[ulQry],
-               refSeqStr[ulRef],
+               qrySeqStr[slQry],
+               refSeqStr[slRef],
                settings
             ); /*Find the score for the base pairs*/
 
          snpScoreSL += nextSnpScoreSL;
-         nextSnpScoreSL = scoreArySL[ulRef];
+         nextSnpScoreSL = scoreArySL[slRef];
 
          #ifdef NOEXTEND
             insScoreSL =
-               scoreArySL[ulRef] + settings->gapSS;
+               scoreArySL[slRef] + settings->gapSS;
          #else
-            insScoreSL = scoreArySL[ulRef];
+            insScoreSL = scoreArySL[slRef];
             insScoreSL +=
-               settings->insArySS[insDir[ulRef]];
+               settings->insArySS[insDir[slRef]];
          #endif
 
          /***********************************************\
@@ -340,40 +346,37 @@ needle(
          *   - find high score
          \***********************************************/
 
-         scoreArySL[ulRef] =
-            max_genMath(
-               insScoreSL,
-               snpScoreSL
-         ); /*find if ins/snp is best (5 Op)*/
+         scoreArySL[slRef] =
+            max_genMath(insScoreSL, snpScoreSL);
+            /*find if ins/snp is best (5 Op)*/
  
-         /*find direction (4 Op)*/
-         dirMatrixSC[indexUL] =
-            scoreArySL[ulRef] > delScoreSL;
-
-         dirMatrixSC[indexUL] <<=
-            (snpScoreSL < insScoreSL);
-
-         ++dirMatrixSC[indexUL];
+         /*find direction (5 Op)*/
+         dirMatrixSC[indexSL] =
+            scoreArySL[slRef] > delScoreSL;
+         dirMatrixSC[indexSL] +=
+            (
+                 (snpScoreSL <= insScoreSL)
+               & dirMatrixSC[indexSL]
+            );
+         ++dirMatrixSC[indexSL];
 
          /*Logic:
          `   - noDel: maxSC > delSc:
          `     o 1 if deletion not max score
          `     o 0 if deletion is max score
-         `   - type: noDel << (snpSc < insSc):
-         `     o 1 << 1 = 2 if insertion is maximum
-         `     o 1 << 0 = 1 if snp is maximum
-         `     o 0 << 0 = 0 if del is max, and snp > ins
-         `     o 0 << 1 = 0 if del is max, but ins >= snp
+         `   - type: noDel + ((snpSc < insSc) & noDel):
+         `     o 1 + (1 & 1) = 2 if insertion is maximum
+         `     o 1 + (0 & 1) = 1 if snp is maximum
+         `     o 0 + (0 & 0) = 0 if del is max; snp > ins
+         `     o 0 + (1 & 0) = 0 if del is max, ins >= snp
          `   - dir: type + 1
          `     o adds 1 to change from stop to direction
          */
 
          /*finish max*/
-         scoreArySL[ulRef] =
-            max_genMath(
-               delScoreSL,
-               scoreArySL[ulRef]
-         ); /*find if del is best (5 Op)*/
+         scoreArySL[slRef] =
+            max_genMath(delScoreSL, scoreArySL[slRef]);
+            /*find if del is best (5 Op)*/
 
          /***********************************************\
          * Fun01 Sec04 Sub05:
@@ -382,14 +385,14 @@ needle(
 
          #ifdef NOEXTEND
             delScoreSL =
-               scoreArySL[ulRef] + settings->gapSS;
+               scoreArySL[slRef] + settings->gapSS;
          #else
-            delScoreSL = scoreArySL[ulRef];
+            delScoreSL = scoreArySL[slRef];
             delScoreSL +=
-               settings->delArySS[dirMatrixSC[indexUL]];
+               settings->delArySS[dirMatrixSC[indexSL]];
          #endif
 
-         ++indexUL;
+         ++indexSL;
       } /*Loop; compare one query to one reference base*/
 
       /**************************************************\
@@ -402,16 +405,17 @@ needle(
       /*set up scores*/
       #ifdef NOEXTEND
          scoreArySL[0] += settings->gapSS;
-         delScoreSL = scoreArySL[0] + settings->gapSS;
       #else
          scoreArySL[0] += settings->extendSS;
-         delScoreSL = scoreArySL[0] + settings->extendSS;
       #endif
 
-      dirMatrixSC[indexUL] = def_mvIns_alnDefs;
+      delScoreSL = scoreArySL[0] + settings->gapSS;
+         /*deletion is always extending insertion*/
 
-      insDir += ulRef;
-      ++indexUL;
+      dirMatrixSC[indexSL] = def_mvIns_alnDefs;
+
+      insDir += slRef;
+      ++indexSL;
    } /*loop; compare query base against all ref bases*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -433,11 +437,11 @@ needle(
    */
 
    matrixSTPtr->errSC = 0;
-   --indexUL; /*get off last -1*/
-   dirMatrixSC[indexUL] = def_mvStop_alnDefs;
+   --indexSL; /*account for index being one off end*/
+   dirMatrixSC[indexSL] = def_mvStop_alnDefs;
 
-   matrixSTPtr->scoreSL = scoreArySL[lenRefUL];
-   matrixSTPtr->indexUL = indexUL - 1;
+   matrixSTPtr->scoreSL = scoreArySL[refLenSL];
+   matrixSTPtr->indexSL = indexSL - 1;
 
    return matrixSTPtr->scoreSL; /*best score*/
 

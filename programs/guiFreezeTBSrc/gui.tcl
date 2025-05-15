@@ -58,7 +58,6 @@ variable glob_prefix "FTB_output" ;
 
 # read filtering settings
 variable glob_mask 0 ;    # mask primer sites
-variable glob_adjust 0 ;  # adjust mapp coordinates
 variable glob_srCheck "map-ont" ; # map setting
 
 # clustering
@@ -78,6 +77,8 @@ variable freezeTBVer "" ; # freezeTB version
 variable rVer "" ; # holds R version
 
 variable mapPath "" ; # path to minimap2
+variable glob_minimapFoundBl 0 ; # if found minimap2
+variable glob_useMinimapBl 0 ;   # if using minimap2
 variable rPath "" ; # path to Rscript
 variable graphScript "" ; # graphAmpDepth.r path
 
@@ -280,6 +281,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    #   - windows detect minimap2
    #++++++++++++++++++++++++++++++++++++++++++++++++
 
+   set glob_minimapFoundBl 1 ;
    set ::mapPath "minimap2.exe" ;
 
    ---set
@@ -290,7 +292,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    --- ; # get minimap2 version
 
    if { $status eq 0 } {
-      # got minimap2 version, nothing else to do
+      # found minimap2
    } else {
       ---set ::mapPath 
          [file join
@@ -308,7 +310,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
       --- ; # get minimap2 version
 
       if { $status eq 0 } {
-         # found minmap2; nothing else to do
+         # found minimap2 
       } else {
          ---set ::mapPath 
             [file join
@@ -325,15 +327,10 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
             ]
          --- ; # get minimap2 version
 
-            if { $status eq 0 } {
-            # if minimap2.exe is in app data path
+         if { $status eq 0 } {
+            # found minimap2
          } else {
-            ---tk_messageBox
-               -message "Could not find minimap2.exe"
-               -title "ERROR"
-            ---;
-
-            return false ;
+            set glob_minimapFoundBl 0 ;
          } ; # If: check if could not find minimap2
       } ; # see if minimap2 is in global install
    } ; # find minimap2 path
@@ -444,6 +441,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 } else {
+   set glob_minimapFoundBl 1 ;
    set ::mapPath "minimap2" ;
    set ::rPath "Rscript" ; # linux should be in path
 
@@ -464,12 +462,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
       --- ; # seeing if local minimap2 exists
 
       if { $status eq 0 } {
-         ---tk_messageBox
-            -message "minimap2 not found"
-            -title "ERROR"
-         ---;
-
-         return false ;
+         set glob_minimapFoundBl 0 ;
       } ; # If: minimap2 could not be found
    } ; # If: minimiap2 not in path or on system
 
@@ -988,7 +981,7 @@ tk::frame .main -borderwidth 2 ;
 pack .main -side left ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui02 TOC:
+# Gui02:
 #   - required input gui
 #   o gui02 sec01:
 #     - make required input frame
@@ -998,6 +991,8 @@ pack .main -side left ;
 #     - set up output directory label/button
 #   o gui02 sec04:
 #     - set up prefix entry
+#   o gui02 sec05:
+#     - read mapper checkbox
 #   o gui02 sec05:
 #     - set up run and exit button
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1116,17 +1111,38 @@ pack .main.reqIn.prefix.lab -anchor w -side top
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui02 Sec05:
+#   - read mapper checkbox
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.reqIn.mapper -borderwidth 2 ;
+pack .main.reqIn.mapper -anchor w -side top ;
+set ::glob_useMinimapBl $::glob_minimapFoundBl ;
+
+---tk::checkbutton
+   .main.reqIn.mapper.check
+   -text "use minimap2"
+   -variable ::glob_useMinimapBl ;
+---
+
+if { $::glob_minimapFoundBl eq 0 } {
+   .main.reqIn.mapper.check configure -state disabled ;
+} ; # If: need to disable (could not find minimap2)
+
+pack .main.reqIn.mapper.check -anchor w -side top
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui02 Sec06:
 #   - set up run and exit button
-#   o gui02 sec05 sub01:
+#   o gui02 sec06 sub01:
 #     - set up frame for run and exit button
-#   o gui02 sec05 sub02:
+#   o gui02 sec06 sub02:
 #     - run button
-#   o gui02 sec05 sub03:
+#   o gui02 sec06 sub03:
 #     - exit button and pack (run/exit)
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #***************************************************
-# Gui02 Sec05 Sub01:
+# Gui02 Sec06 Sub01:
 #   - set up frame for run and exit button
 #***************************************************
 
@@ -1134,36 +1150,36 @@ tk::frame .main.reqIn.runexit ;
 pack .main.reqIn.runexit -anchor w -side top ;
 
 #***************************************************
-# Gui02 Sec05 Sub02:
+# Gui02 Sec06 Sub02:
 #   - run button
-#   o gui02 sec05 sub02 cat01:
+#   o gui02 sec06 sub02 cat01:
 #     - setup + fastq file and prefix checks
-#   o gui02 sec05 sub02 cat02:
-#     - set up minimap2 output file name
-#   o gui02 sec05 sub02 cat03:
+#   o gui02 sec06 sub02 cat02:
+#     - setup log file
+#   o gui02 sec06 sub02 cat03:
 #     - run minimap2
-#   o gui02 sec05 sub02 cat04:
+#   o gui02 sec06 sub02 cat04:
 #     - add freezeTB databases
-#   o gui02 sec05 sub02 cat05:
+#   o gui02 sec06 sub02 cat05:
 #     - add freezeTB filtering settings
-#   o gui02 sec05 sub02 cat06:
+#   o gui02 sec06 sub02 cat06:
 #     - add indel cleanup settings (freezeTB)
-#   o gui02 sec05 sub02 cat07:
+#   o gui02 sec06 sub02 cat07:
 #     - add freezeTB lineage settings
-#   o gui02 sec05 sub02 cat08:
+#   o gui02 sec06 sub02 cat08:
 #     - add freezeTB tbCon consensus settings
-#   o gui02 sec05 sub02 cat09:
+#   o gui02 sec06 sub02 cat09:
 #     - add freezeTB tbCon and AMR print settings
-#   o gui02 sec05 sub02 cat10:
+#   o gui02 sec06 sub02 cat10:
 #     - add freezeTB clustering settings
-#   o gui02 sec05 sub02 cat11:
+#   o gui02 sec06 sub02 cat11:
 #     - run freezeTB
-#   o gui02 sec05 sub02 cat12:
+#   o gui02 sec06 sub02 cat12:
 #     - run output part of gui
 #***************************************************
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui02 Sec05 Sub02 Cat01:
+# Gui02 Sec06 Sub02 Cat01:
 #   - setup + fastq file and prefix checks
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1274,8 +1290,8 @@ proc setFreezeTBStatus {} {
       } ; #  no spoligotype spacer sequences
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat02:
-      #   - set up minimap2 output file name
+      # Gui02 Sec06 Sub02 Cat02:
+      #   - setup log file
       #+++++++++++++++++++++++++++++++++++++++++++++
 
       ---set
@@ -1300,84 +1316,92 @@ proc setFreezeTBStatus {} {
          [file join $prefix $glob_prefix]
       ---;
 
-      set samFile $prefix ;
-      append samFile "-map.sam" ;
-
       # set up log file (handles spaces)
       set logFile $prefix ;
       append logFile "-log.txt" ;
 
       set logFile [open $logFile a] ;
 
-      #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat03:
+      #+++++++++++++++++++++++++++++++++++++++++++++++++++
+      # Gui02 Sec06 Sub02 Cat03:
       #   - run minimap2
-      #+++++++++++++++++++++++++++++++++++++++++++++
+      #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
-      puts $logFile [concat "minmimap2: " $::mapVer] ;
+      if { $::glob_useMinimapBl ne 0 } {
+      # if using minimap2
 
-      set cmdStr " -a" ;
-      append cmdStr " -x" ;
-      append cmdStr " " $::glob_srCheck ;
-      append cmdStr " \"" $::glob_refFa "\" " ;
+         set samFile $prefix ;
+         append samFile "-map.sam" ;
 
-      foreach fqStr $::glob_fqIn {
-         append cmdStr " \"" $fqStr "\"" ;
-      } ; # Loop: guard input fastqs from spaces
+         puts $logFile [concat "minmimap2: " $::mapVer] ;
 
-      # older file  merge method
-      # set extraStr [ join $::glob_fqIn " " ] ;
+         set cmdStr " -a" ;
+         append cmdStr " -x" ;
+         append cmdStr " " $::glob_srCheck ;
+         append cmdStr " \"" $::glob_refFa "\" " ;
 
-      append cmdStr " > \"" $samFile "\"" ;
+         foreach fqStr $::glob_fqIn {
+            append cmdStr " \"" $fqStr "\"" ;
+         } ; # Loop: guard input fastqs from spaces
 
-      setMapStatus ; # dispaly running minimap2
+         # older file  merge method
+         # set extraStr [ join $::glob_fqIn " " ] ;
 
-      ---.main.reqIn.runexit.statuslab
-         configure 
-         -text "running minimap2"
-      ---;
+         append cmdStr " > \"" $samFile "\"" ;
 
-      ---puts
-         $logFile
-         [concat $::mapPath $cmdStr]
-      ---;
+         setMapStatus ; # dispaly running minimap2
 
-      wm title . "running minimap2 (freezeTB)" ;
+         ---.main.reqIn.runexit.statuslab
+            configure 
+            -text "running minimap2"
+         ---;
 
-      # run minimap2 command
-      ---set
-         status
-         [catch {eval exec $::mapPath $cmdStr}
-          result
-         ]
-      ---;
+         ---puts
+            $logFile
+            [concat $::mapPath $cmdStr]
+         ---;
 
-      if { [ string equal $::errorCode NONE ] } {
-         # using errorCode here because minimap2
-         # outputs to stderr
-      } else {
+         wm title . "running minimap2 (freezeTB)" ;
+
+         # run minimap2 command
          ---set
-            errMsgStr
-            [concat
-               "Error runing minimap2\n ERROR: "
-               $result
+            status
+            [catch {eval exec $::mapPath $cmdStr}
+             result
             ]
          ---;
 
-         ---tk_messageBox
-            -message $errMsgStr
-            -title "ERROR"
-         ---;
+         if { [ string equal $::errorCode NONE ] } {
+            # using errorCode here because minimap2
+            # outputs to stderr
+         } else {
+            ---set
+               errMsgStr
+               [concat
+                  "Error runing minimap2\n ERROR: "
+                  $result
+               ]
+            ---;
 
-         puts $logFile $errMsgStr ;
-         clost $logFile ;
+            ---tk_messageBox
+               -message $errMsgStr
+               -title "ERROR"
+            ---;
 
-         return false ;
-         # probably need 
-      } ; # Else had error
+            puts $logFile $errMsgStr ;
+            clost $logFile ;
+
+            return false ;
+            # probably need 
+         } ; # Else had error
         
+         set tbCmd [list "-sam" $samFile] ;
+      } else {
+         set tbCmd [list "-ref" $::glob_refFa ] ;
+      } ; # check if: using minimap2 or internal mapper
+
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat04:
+      # Gui02 Sec06 Sub02 Cat04:
       #   - add freezeTB databases
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1387,7 +1411,6 @@ proc setFreezeTBStatus {} {
       ---; # print freezeTB version
 
       # set up databases
-      set tbCmd [list "-sam" $samFile] ;
       lappend tbCmd "-prefix" $prefix ;
       lappend tbCmd "-amr-tbl" $::glob_amrDb ;
       lappend tbCmd "-gene-coords" ;
@@ -1423,7 +1446,7 @@ proc setFreezeTBStatus {} {
       } ; # checking if masking or not
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat05:
+      # Gui02 Sec06 Sub02 Cat05:
       #   - add freezeTB filtering settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1433,14 +1456,8 @@ proc setFreezeTBStatus {} {
       lappend tbCmd "-min-len" $::glob_minLen ;
          # put in consensus gui, but help is filter
 
-      if { $::glob_adjust ne 0 } {
-         lappend tbCmd "-adj-coords" ;
-      } else {
-         lappend tbCmd "-no-adj-coords" ;
-      } ; # check if coordinate adjusting
-
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat06:
+      # Gui02 Sec06 Sub02 Cat06:
       #   - add indel cleanup settings (freezeTB)
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1457,7 +1474,7 @@ proc setFreezeTBStatus {} {
       } ; # check if doing indel clean
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat07:
+      # Gui02 Sec06 Sub02 Cat07:
       #   - add freezeTB lineage settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1469,7 +1486,7 @@ proc setFreezeTBStatus {} {
       lappend tbCmd $::glob_spolSim ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat08:
+      # Gui02 Sec06 Sub02 Cat08:
       #   - add freezeTB tbCon consensus settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1482,7 +1499,7 @@ proc setFreezeTBStatus {} {
       lappend tbCmd "-perc-del-sup" $::glob_delPerc ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat09:
+      # Gui02 Sec06 Sub02 Cat09:
       #   - add freezeTB tbCon & AMR print settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1514,7 +1531,7 @@ proc setFreezeTBStatus {} {
       lappend tbCmd $glob_delVarPerc ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat10:
+      # Gui02 Sec06 Sub02 Cat10:
       #   - add freezeTB clustering settings
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1573,9 +1590,16 @@ proc setFreezeTBStatus {} {
       } ; # check if clustering
 
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat11:
+      # Gui02 Sec06 Sub02 Cat11:
       #   - run freezeTB
       #+++++++++++++++++++++++++++++++++++++++++++++
+
+      if { $::glob_useMinimapBl eq 0 } {
+         lappend tbCmd $::glob_fqIn ;
+         #foreach fqStr $::glob_fqIn {
+         #   append cmdStr " \"" $fqStr "\"" ;
+         #} ; # Loop: guard input fastqs from spaces
+      } ; # If: need to add fastq files to freezeTB cmd
 
       puts $logFile [concat "freezeTB " $tbCmd ] ;
       setFreezeTBStatus ;
@@ -1597,12 +1621,15 @@ proc setFreezeTBStatus {} {
          ---;
 
          puts $logFile "freezeTB error" ;
+         close $logFile ;
 
          return false;
       } ; # If had error
 
+      close $logFile ;
+
       #+++++++++++++++++++++++++++++++++++++++++++++
-      # Gui02 Sec05 Sub02 Cat12:
+      # Gui02 Sec06 Sub02 Cat12:
       #   - run output part of freezeTB
       #+++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1621,7 +1648,7 @@ proc setFreezeTBStatus {} {
    } ; # run freezeTB button
 
 #***************************************************
-# Gui02 Sec05 Sub03:
+# Gui02 Sec06 Sub03:
 #   - exit button and pack (run/exit)
 #***************************************************
 
@@ -1642,7 +1669,7 @@ tk::label .main.reqIn.runexit.statuslab -text "" ;
 ---;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui03 TOC:
+# Gui03:
 #   - menu bar for gui
 #   o gui03 sec01:
 #     - make menu frame
@@ -1945,7 +1972,7 @@ pack .main.menu.conBut -anchor w -side left
 pack .main.menu.outBut -anchor w -side left ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui04 TOC:
+# Gui04:
 #   - read filtering menu
 #   o gui04 sec01:
 #     - make read filtering frame
@@ -1964,14 +1991,12 @@ pack .main.menu.outBut -anchor w -side left ;
 #   o gui04 sec08:
 #     - masking check box + button
 #   o gui04 sec09:
-#     - adjust coordinates text box
-#   o gui04 sec10:
 #     - short read mapping check box
-#   o gui04 sec11:
+#   o gui04 sec10:
 #     - indel cleanup (rmHomo) checkbox
-#   o gui04 sec12:
+#   o gui04 sec11:
 #     - indel cleanup (rmHomo) homopolymer isze
-#   o gui04 sec13:
+#   o gui04 sec12:
 #     - indel cleanup (rmHomo) indel size
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2232,22 +2257,6 @@ pack .main.filt.mask -anchor w -side top
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui04 Sec09:
-#   - adjust coordinates text box
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-tk::frame .main.filt.adj ;
-pack .main.filt.adj -anchor w -side top ;
-
----tk::checkbutton
-   .main.filt.adj.check
-   -text "adjust coordinates"    # text for user
-   -variable glob_adjust
---- ; # if doing long or short reads
-
-pack .main.filt.adj.check -anchor w -side left ;
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Gui04 Sec10:
 #   - short read mapping check box
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2256,8 +2265,8 @@ pack .main.filt.sr -anchor w -side top
 
 ---tk::checkbutton
    .main.filt.sr.check
-   -offvalue "-x map-ont" # ONT long reads
-   -onvalue "-x sr"       # illumina short reads
+   -offvalue "map-ont" # ONT long reads
+   -onvalue "sr"       # illumina short reads
    -text "short reads"    # text for user
    -variable glob_srCheck
 --- ; # if doing long or short reads
@@ -2265,7 +2274,7 @@ pack .main.filt.sr -anchor w -side top
 pack .main.filt.sr.check -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Gui04 Sec11:
+# Gui04 Sec10:
 #   - indel cleanup (rmHomo) checkbox
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2283,7 +2292,7 @@ pack .main.filt.rmHomo -anchor w -side top
 pack .main.filt.rmHomo.check -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Gui04 Sec12:
+# Gui04 Sec11:
 #   - indel cleanup (rmHomo) homopolymer isze
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2306,7 +2315,7 @@ pack .main.filt.homoSize.entry -anchor w -side left ;
 pack .main.filt.homoSize.lab -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Gui04 Sec13:
+# Gui04 Sec12:
 #   - indel cleanup (rmHomo) indel size
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2329,7 +2338,7 @@ pack .main.filt.indelSize.entry -anchor w -side left ;
 pack .main.filt.indelSize.lab -anchor w -side left ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui05 TOC:
+# Gui05:
 #   - amr settings
 #   o gui05 sec01:
 #     - set up AMR frame
@@ -2490,7 +2499,7 @@ pack .main.amr.frameshift -anchor w -side top ;
 --- ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui06 TOC:
+# Gui06:
 #   - lineage settings
 #   o gui06 sec01:
 #     - set up lineage frame
@@ -2810,7 +2819,7 @@ pack .main.lin.spol.dr.end -anchor w -side top ;
 --- ;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui07 TOC:
+# Gui07:
 #   - consensus settings
 #   o gui07 sec01:
 #     - set up consensus frame
@@ -3831,7 +3840,7 @@ tk::frame .main.con.clust.con.numbuild
 ---
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Gui08 TOC:
+# Gui08:
 #   - set up output settings/input frame
 #   o gui08 sec01:
 #     - set up output gui frame
@@ -3985,8 +3994,10 @@ proc setAmrLab {prefixStr pathStr} {
          ---; # set color for gene has read depth
       } ; # color label based on if found all genes
    } ; # Loop: color labels by low depth
-} ; # set AMR report labels by gene depth
 
+   close $openFILE ;
+} ; # set AMR report labels by gene depth
+ 
 #**************************************************
 # Gui08 Sec02 Sub02:
 #   - function; consensus AMR report
@@ -4345,15 +4356,10 @@ proc depthGraph {prefixStr} {
          ---set status
             [catch
                {eval exec
-                  \$::rPath
-                  " "
-                  $graphStr
-                  " -stats "
-                  $tmpStr
-                  " -who "
-                  $dbStr
-                  " -prefix "
-                  $prefixStr
+                  \$::rPath " " $graphStr
+                  " -stats " $tmpStr
+                  " -who " $dbStr
+                  " -prefix " $prefixStr
                }
             ]
          ---; # run R to build graphs
@@ -4403,25 +4409,45 @@ proc coverageGraph {prefixStr} {
          image delete $::glob_coverImg ;
    } ; # If: image exists
 
+   # delete old graphs
+   if {! [image inuse $::glob_depthImg] } {
+         image delete $::glob_depthImg ;
+   } ; # If: image exists
+
    if {$::glob_mkGraphBl ne 0 } {
-      set tmpStr "\"" ;
-      append tmpStr $prefixStr "-depths.tsv\"" ;
+      set statsTsv "\"" ;
+      append statsTsv $prefixStr "-depths.tsv\"" ;
 
-      set tmpPathStr $prefixStr ;
-      append tmpPathStr "-coverage.png" ;
+      set amrTblStr "\"" ;
+      append amrTblStr $prefixStr "-read-amrs.tsv\"" ;
 
+      set coverPathStr $prefixStr ;
+      append coverPathStr "-coverage.png" ;
 
-      if { [file exists $tmpPathStr] eq 1 } {
+      set depthPathStr $prefixStr ;
+      append depthPathStr "-readDepth.png" ;
+
+      ---if {
+            ([file exists $coverPathStr] eq 1)
+         && ([file exists $depthPathStr] eq 1)
+      ---} {
          ---set
            ::glob_coverImg
-           [image create photo -file $tmpPathStr]
+           [image create photo -file $coverPathStr]
          ---;
 
          ---.main.out.cover.graph
-            configure
-            -image $::glob_coverImg
+            configure -image $::glob_coverImg
          ---;
 
+         ---set
+           ::glob_depthImg
+           [image create photo -file $depthPathStr]
+         ---;
+
+         ---.main.out.depth.graph
+            configure -image $::glob_depthImg
+         ---;
       } else {
          # using quotes incase of spaces
          set quoteStr "\"" ;
@@ -4430,12 +4456,12 @@ proc coverageGraph {prefixStr} {
 
          ---set status
             [catch
-               {exec
-                  $::rPath
-                  $::graphScript
-                  -stats $tmpStr
-                  -who $::glob_amrDb
-                  -prefix $prefixStr
+               {eval exec
+                  $::rPath " " $::graphScript
+                  " -stats " $statsTsv
+                  " -amrs " $amrTblStr
+                  " -who " $::glob_amrDb
+                  " -prefix " $prefixStr
                }
             ]
          ---; # run R to build graphs
@@ -4451,17 +4477,23 @@ proc coverageGraph {prefixStr} {
          } else {
             ---set
               ::glob_coverImg
-              [image
-                 create
-                 photo
-                 -file $tmpPathStr
-              ]
+              [ image create photo -file $coverPathStr ]
             ---;
 
             ---.main.out.cover.graph
-               configure
-               -image $::glob_coverImg
+               configure -image $::glob_coverImg
             ---;
+
+            if { [file exists $coverPathStr] eq 1 } {
+               ---set
+                 ::glob_depthImg
+                 [image create photo -file $depthPathStr]
+               ---;
+
+               ---.main.out.depth.graph
+                  configure -image $::glob_depthImg
+               ---;
+            } ; # if read depth graph was made
          } ; # Else: add image
       } ; # check if need to build graphs
     } ; # check if users wants graphs displayed
@@ -5354,7 +5386,7 @@ pack .main.out.set.run -anchor w -side top ;
       #conAmrRep $::glob_outCur ;
 
       readAmrRep $::glob_outCur ;
-      depthGraph $::glob_outCur ;
+      #depthGraph $::glob_outCur ;
       coverageGraph $::glob_outCur ;
 
       #conSpol $::glob_outCur ;

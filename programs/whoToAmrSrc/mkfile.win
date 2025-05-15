@@ -1,61 +1,119 @@
-LD=link
-CC=cl
-CFLAGS= /O2 /Ot /Za /Tc
+
+CC=cl.exe
+LD=link.exe
+coreCFLAGS= /c /O2 /Ot /Za /Tc
+CFLAGS=/DNONE
 NAME=whoToAmr.exe
-PREFIX=%appData%
-genLib=..\genLib
-genBio=..\genBio
-tbAmr=..\tbAmrSrc
+PREFIX="%localAppData%"
 O=o.win
 
-objFiles=\
+genFreezeTB=..\genFreezeTB
+genLib=..\genLib
+genBio=..\genBio
+
+objFiles= \
+   $(genFreezeTB)\whoToAmr.$O \
+   $(genFreezeTB)\genIndice.$O \
    $(genLib)\base10str.$O \
-   $(genLib)\numToStr.$O \
-   $(genLib)\ulCp.$O \
    $(genLib)\charCp.$O \
+   $(genFreezeTB)\amrST.$O \
+   $(genFreezeTB)\drugAry.$O \
+   $(genLib)\fileFun.$O \
+   $(genLib)\ulCp.$O \
    $(genLib)\genMath.$O \
    $(genBio)\codonFun.$O \
-   $(tbAmr)\drugAry.$O \
-   $(tbAmr)\amrST.$O
+   mainWhoToAmr.$O
 
-all: mainWhoToAmr.$O $(objFiles)
-	$(LD) /out:$(NAME) mainWhoToAmr.$O whoToAmr.$O genIndice.$O $(objFiles)
+$(NAME): mainWhoToAmr.$O
+		$(LD) /out:$(NAME) $(objFiles)
 
-mainWhoToAmr.$O: mainWhoToAmr.c whoToAmr.$O
-	$(CC) /Fo:mainWhoToAmr.$O $(CFLAGS) mainWhoToAmr.c
+mainWhoToAmr.$O: \
+	mainWhoToAmr.c \
+	$(genFreezeTB)\whoToAmr.$O \
+	../ftbVersion.h
+			$(CC) /Fo:mainWhoToAmr.$O \
+				$(CFLAGS) $(coreCFLAGS) mainWhoToAmr.c
 
-whoToAmr.$O: whoToAmr.c whoToAmr.h genIndice.$O $(tbAmr)\amrST.$O $(genBio)\codonFun.$O $(genLib)\genMath.$O
-	$(CC) /Fo:whoToAmr.$O $(CFLAGS) whoToAmr.c
+$(genFreezeTB)\whoToAmr.$O: \
+	$(genFreezeTB)\whoToAmr.c \
+	$(genFreezeTB)\whoToAmr.h \
+	$(genFreezeTB)\genIndice.$O \
+	$(genFreezeTB)\amrST.$O \
+	$(genBio)\codonFun.$O \
+	$(genLib)\genMath.$O \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genFreezeTB)\whoToAmr.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\whoToAmr.c
 
-genIndice.$O: genIndice.c genIndice.h $(genLib)\charCp.$O $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:genIndice.$O $(CFLAGS) genIndice.c
+$(genFreezeTB)\genIndice.$O: \
+	$(genFreezeTB)\genIndice.c \
+	$(genFreezeTB)\genIndice.h \
+	$(genLib)\base10str.$O \
+	$(genLib)\charCp.$O
+		$(CC) /Fo:$(genFreezeTB)\genIndice.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\genIndice.c
 
-$(tbAmr)\drugAry.$O: $(tbAmr)\drugAry.c $(tbAmr)\drugAry.h
-	$(CC) /Fo:$(tbAmr)\drugAry.$O $(CFLAGS) $(tbAmr)\drugAry.c
+$(genLib)\base10str.$O: \
+	$(genLib)\base10str.c \
+	$(genLib)\base10str.h
+		$(CC) /Fo:$(genLib)\base10str.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\base10str.c
 
-$(tbAmr)\amrST.$O: $(tbAmr)\amrST.c $(tbAmr)\amrST.h $(tbAmr)\drugAry.$O $(genLib)\ulCp.$O $(genLib)\charCp.$O $(genLib)\base10str.$O $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(tbAmr)\amrST.$O $(CFLAGS) $(tbAmr)\amrST.c
+$(genLib)\charCp.$O: \
+	$(genLib)\charCp.c \
+	$(genLib)\charCp.h
+		$(CC) /Fo:$(genLib)\charCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\charCp.c
 
-$(genLib)\base10str.$O: $(genLib)\base10str.c $(genLib)\base10str.h
-	$(CC) /Fo:$(genLib)\base10str.$O $(CFLAGS) $(genLib)\base10str.c
+$(genFreezeTB)\amrST.$O: \
+	$(genFreezeTB)\amrST.c \
+	$(genFreezeTB)\amrST.h \
+	$(genFreezeTB)\drugAry.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genFreezeTB)\amrST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\amrST.c
 
-$(genLib)\charCp.$O: $(genLib)\charCp.c $(genLib)\charCp.h
-	$(CC) /Fo:$(genLib)\charCp.$O $(CFLAGS) $(genLib)\charCp.c
+$(genFreezeTB)\drugAry.$O: \
+	$(genFreezeTB)\drugAry.c $(genFreezeTB)\drugAry.h
+		$(CC) /Fo:$(genFreezeTB)\drugAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\drugAry.c
 
-$(genLib)\ulCp.$O: $(genLib)\ulCp.c $(genLib)\ulCp.h
-	$(CC) /Fo:$(genLib)\ulCp.$O $(CFLAGS) $(genLib)\ulCp.c
+$(genLib)\fileFun.$O: \
+	$(genLib)\fileFun.c \
+	$(genLib)\fileFun.h \
+	$(genLib)\ulCp.$O
+		$(CC) /Fo:$(genLib)\fileFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\fileFun.c
 
-$(genLib)\numToStr.$O: $(genLib)\numToStr.c $(genLib)\numToStr.h
-	$(CC) /Fo:$(genLib)\numToStr.$O $(CFLAGS) $(genLib)\numToStr.c
+$(genLib)\ulCp.$O: \
+	$(genLib)\ulCp.c \
+	$(genLib)\ulCp.h
+		$(CC) /Fo:$(genLib)\ulCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\ulCp.c
 
-$(genLib)\genMath.$O: $(genLib)\genMath.c $(genLib)\genMath.h
-	$(CC) /Fo:$(genLib)\genMath.$O $(CFLAGS) $(genLib)\genMath.c
+$(genLib)\genMath.$O: \
+	$(genLib)\genMath.c \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genLib)\genMath.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\genMath.c
 
-$(genBio)\codonFun.$O: $(genBio)\codonFun.c $(genBio)\codonFun.h $(genBio)\codonTbl.h $(genBio)\ntTo2Bit.h $(genBio)\revNtTo2Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\codonFun.$O $(CFLAGS) $(genBio)\codonFun.c
+$(genBio)\codonFun.$O: \
+	$(genBio)\codonFun.c \
+	$(genBio)\codonFun.h \
+	$(genBio)\codonTbl.h \
+	$(genBio)\ntTo2Bit.h \
+	$(genBio)\revNtTo2Bit.h
+		$(CC) /Fo:$(genBio)\codonFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\codonFun.c
 
 install:
-	copy $(NAME) $(PREFIX)
+	move $(NAME) $(PREFIX)
 
 clean:
-	del $(objFiles) mainWhoToAmr.$O whoToAmr.$O genIndice.$O;
+	del $(objFiles)

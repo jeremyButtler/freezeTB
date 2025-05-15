@@ -37,4 +37,5 @@ clean:
 		genLib/*.o.$ext \
 		genBio/*.o.$ext \
 		genAln/*.o.$ext \
-		genClust/*.o.$ext
+		genClust/*.o.$ext \
+		genFreezeTB/*.o.$ext

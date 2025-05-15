@@ -31,19 +31,22 @@
 #include "../genLib/base10str.h"
 #include "../genLib/charCp.h"
 
-#include "checkAmr.h"
-#include "amrST.h"
+#include "../genFreezeTB/checkAmr.h"
+#include "../genFreezeTB/amrST.h"
 
 /*Only .h file*/
-#include "tbAmrDefs.h"
+#include "../genFreezeTB/tbAmrDefs.h"
+#include "../genLib/endLine.h"
+#include "../ftbVersion.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden
 !   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genLib/ulCp.h"
+!   o .c  #include "../genLib/fileFun.h"
 !   o .c  #include "../genBio/codonTbl.h"
 !   o .c  #include "../genBio/samEntry.h"
-!   o .c  #include "drugAry.h"
+!   o .c  #include "../genFreezeTB/drugAry.h"
 !   o .h  #include "../genBio/ntTo2Bit.h"
 !   o .h  #include "../genBio/revNtTo2Bit.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"
@@ -64,10 +67,11 @@ void pversion_tbAmr(
 ){
    fprintf(
        (FILE *) outFILE,
-       "tbAmr Version: %i.%02i.%02i\n",
-       def_year_tbAmrDefs,
-       def_month_tbAmrDefs,
-       def_day_tbAmrDefs
+       "tbAmr from freezeTB version: %i-%02i-%02i%s",
+       def_year_ftbVersion,
+       def_month_ftbVersion,
+       def_day_ftbVersion,
+       str_endLine
    ); /*Version of tbCon*/
 } /*pversion_tbAmr*/
 
@@ -106,12 +110,15 @@ void phelp_tbAmr(
 
    fprintf(
       (FILE *)
-      outFILE, "\nor\n"
+      outFILE, "%sor%s",
+      str_endLine,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "tbAMR -sam reads.sam -amr-tbl database.tsv\n"
+      "tbAMR -sam reads.sam -amr-tbl database.tsv%s",
+      str_endLine
    );
 
    fprintf(
@@ -119,14 +126,12 @@ void phelp_tbAmr(
       "  - Detects Anti-microbal (antibiotic) resistant"
    );
         
-   fprintf(
-      (FILE *) outFILE,
-      " genes\n"
-   );
+   fprintf((FILE *) outFILE, " genes%s", str_endLine);
 
    fprintf(
       (FILE *) outFILE,
-      "    (AMRs) in input consensuses or reads\n"
+      "    (AMRs) in input consensuses or reads%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -149,10 +154,7 @@ void phelp_tbAmr(
    *   - print input line
    \*****************************************************/
 
-    fprintf(
-       (FILE *) outFILE,
-       "Input:\n"
-    );
+    fprintf((FILE *) outFILE, "Input:%s", str_endLine);
 
    /*****************************************************\
    * Fun02 Sec02 Sub02:
@@ -161,17 +163,20 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -amr-tbl database.tsv: [Requried]\n"
+       "  -amr-tbl database.tsv: [Requried]%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o AMR database in tbAmr format\n"
+       "    o AMR database in tbAmr format%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Use whoToTbAmr to build this\n"
+       "    o Use whoToTbAmr to build this%s",
+      str_endLine
     );
 
    /*****************************************************\
@@ -190,22 +195,26 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -sam reads.sam: [Required; stdin]\n"
+       "  -sam reads.sam: [Required; stdin]%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Sam file with reads mapped to the same\n"
+       "    o Sam file with reads mapped to the same%s",
+      str_endLine
     );
 
     fprintf(
       (FILE *) outFILE,
-      "       reference (NC000962.3) as AMR database\n"
+      "       reference (NC000962.3) as AMR database%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Use \"-sam -\" for stdin\n"
+       "    o Use \"-sam -\" for stdin%s",
+      str_endLine
     );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -215,23 +224,27 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -sam-con consensus.sam: [Replaces -sam]\n"
+       "  -sam-con consensus.sam: [Replaces -sam]%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Sam file with consensuses mapped to same\n"
+       "    o Sam file with consensuses mapped to same%s",
+      str_endLine
     );
 
 
     fprintf(
       (FILE *) outFILE,
-      "      reference (NC000962.3) as AMR database\n"
+      "      reference (NC000962.3) as AMR database%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Use \"-sam-con -\" for stdin\n"
+       "    o Use \"-sam-con -\" for stdin%s",
+      str_endLine
     );
 
    /*****************************************************\
@@ -250,17 +263,20 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -out output.tsv: [Optional; stdout]\n"
+       "  -out output.tsv: [Optional; stdout]%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o File to output results to\n"
+       "    o File to output results to%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Use \"-out -\" for stdout\n"
+       "    o Use \"-out -\" for stdout%s",
+      str_endLine
     );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -270,7 +286,8 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -id-file ids.tsv: [Optional; Not used]\n"
+       "  -id-file ids.tsv: [Optional; Not used]%s",
+      str_endLine
     );
 
     fprintf(
@@ -279,7 +296,9 @@ void phelp_tbAmr(
     );
     fprintf(
        (FILE *) outFILE,
-       "\n      a variant to (read_id\\tvariant_id)\n"
+       "%s      a variant to (read_id\\tvariant_id)%s",
+       str_endLine,
+       str_endLine
     );
 
    /*****************************************************\
@@ -309,33 +328,39 @@ void phelp_tbAmr(
     if(def_checkFramshift_tbAmrDefs)
        fprintf(
           (FILE *) outFILE,
-          "  -frameshift: [Optional; Yes]\n"
+          "  -frameshift: [Optional; Yes]%s",
+      str_endLine
        );
 
    else
        fprintf(
           (FILE *) outFILE,
-          "  -frameshift: [Optional; No]\n"
+          "  -frameshift: [Optional; No]%s",
+      str_endLine
        );
 
    fprintf(
       (FILE *) outFILE,
-      "    o Check frames shifts\n"
+      "    o Check frames shifts%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "    o Without this tbAmr treats frames shifts\n"
+      "    o Without this tbAmr treats frames shifts%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "      an extact match\n"
+      "      an extact match%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "    o Turn off with: -no-frameshift\n"
+      "    o Turn off with: -no-frameshift%s",
+      str_endLine
    );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -345,14 +370,16 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -frameshift-sup %0.2f: [Optional; %0.2f]\n",
+       "  -frameshift-sup %0.2f: [Optional; %0.2f]%s",
        def_framshiftSup_tbAmrDefs,
-       def_framshiftSup_tbAmrDefs
+       def_framshiftSup_tbAmrDefs,
+       str_endLine
     );
 
    fprintf(
       (FILE *) outFILE,
-      "    o Minimum percent support to keep frameshift\n"
+      "    o Minimum percent support to keep frameshift%s",
+      str_endLine
    );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -363,23 +390,27 @@ void phelp_tbAmr(
     if(def_aaIndel_tbAmrDefs)
        fprintf(
           (FILE *) outFILE,
-          "  -aa-indel: [Optinal; Yes]\n"
+          "  -aa-indel: [Optinal; Yes]%s",
+      str_endLine
        );
     else
        fprintf(
           (FILE *) outFILE,
-          "  -aa-indel: [Optinal; No]\n"
+          "  -aa-indel: [Optinal; No]%s",
+      str_endLine
        );
 
 
     fprintf(
        (FILE *) outFILE,
-       "    o allow indels in SNP amino acid AMRs\n"
+       "    o allow indels in SNP amino acid AMRs%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Turn off with: -no-aa-indel\n"
+       "    o Turn off with: -no-aa-indel%s",
+      str_endLine
     );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -389,9 +420,10 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -min-depth %i: [Optional; %i]\n",
+       "  -min-depth %i: [Optional; %i]%s",
        def_minDepth_tbAmrDefs,
-       def_minDepth_tbAmrDefs
+       def_minDepth_tbAmrDefs,
+       str_endLine
     );
 
     fprintf(
@@ -401,7 +433,8 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "\n"
+       "%s",
+      str_endLine
     );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -411,24 +444,28 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -min-amr-map-perc %.2f: [Optional; %.2f]\n",
+       "  -min-amr-map-perc %.2f: [Optional; %.2f]%s",
        def_minPercMapped_tbAmrDefs,
-       def_minPercMapped_tbAmrDefs
+       def_minPercMapped_tbAmrDefs,
+       str_endLine
    );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Reads only; mininmum percent of mapped\n"
+       "    o Reads only; mininmum percent of mapped%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "      reads that supported the AMR needed to\n"
+       "      reads that supported the AMR needed to%s",
+      str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
-       "        keep an AMR\n"
+       "        keep an AMR%s",
+      str_endLine
     );
 
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -438,14 +475,16 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -indel-sup %.2f: [Optional; %.2f]\n",
+       "  -indel-sup %.2f: [Optional; %.2f]%s",
        def_minIndelSup_tbAmrDefs,
-       def_minIndelSup_tbAmrDefs
+       def_minIndelSup_tbAmrDefs,
+       str_endLine
    );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Minimum percent support to keep indel\n"
+       "    o Minimum percent support to keep indel%s",
+      str_endLine
     );
 
 
@@ -456,18 +495,21 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -min-total-map-perc %.2f: [Optional; %.2f]\n",
+       "  -min-total-map-perc %.2f: [Optional; %.2f]%s",
        def_minPercTotalReads_tbAmrDefs,
-       def_minPercTotalReads_tbAmrDefs
+       def_minPercTotalReads_tbAmrDefs,
+       str_endLine
    );
 
     fprintf(
        (FILE *) outFILE,
-       "    o Minimum percent of total reads\n"
+       "    o Minimum percent of total reads%s",
+      str_endLine
     );
     fprintf(
        (FILE *) outFILE,
-       "      (mapped/unmapped) needed to keep an AMR\n"
+       "      (mapped/unmapped) needed to keep an AMR%s",
+      str_endLine
     );
 
    /*****************************************************\
@@ -477,12 +519,14 @@ void phelp_tbAmr(
 
     fprintf(
        (FILE *) outFILE,
-       "  -h: print this help message and exit\n"
+       "  -h: print this help message and exit%s",
+      str_endLine
    );
 
     fprintf(
        (FILE *) outFILE,
-       "  -v: print version number and exit\n"
+       "  -v: print version number and exit%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -492,17 +536,20 @@ void phelp_tbAmr(
     
    fprintf(
       (FILE *) outFILE,
-      "Output:\n"
+      "Output:%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-       "  - Prints detected AMRs to -out\n"
+       "  - Prints detected AMRs to -out%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "  - Prints read ids with AMRs to -id-file\n"
+      "  - Prints read ids with AMRs to -id-file%s",
+      str_endLine
    );
 } /*phelp_tbAmr*/
 
@@ -720,8 +767,9 @@ input_tbAmr(
          { /*If: non-numeric or to large*/
              fprintf(
                 stderr,
-                "-min-depth %s; non-numeric/to large\n",
-                argAryStr[siArg]
+                "-min-depth %s; non-numeric/to large%s",
+                argAryStr[siArg],
+                str_endLine
              );
 
             goto err_fun03_sec04;
@@ -766,8 +814,9 @@ input_tbAmr(
          ){ /*If: input out of range*/
             fprintf(
                stderr,
-               "-indel-sup %s must be between 0 and 1\n",
-               argAryStr[siArg]
+               "-indel-sup %s must be between 0 and 1%s",
+               argAryStr[siArg],
+               str_endLine
             );
 
             goto err_fun03_sec04;
@@ -816,8 +865,9 @@ input_tbAmr(
          { /*If: non-numeric or to large*/
              fprintf(
                 stderr,
-                "-frameshift-sup %s; non-numeric\n",
-                argAryStr[siArg]
+                "-frameshift-sup %s; non-numeric%s",
+                argAryStr[siArg],
+                str_endLine
              );
 
             goto err_fun03_sec04;
@@ -829,8 +879,9 @@ input_tbAmr(
          ){ /*If: out of bounds*/
              fprintf(
                stderr,
-               "-frameshift-sup %s; not between 0 to 1\n",
-               argAryStr[siArg]
+               "-frameshift-sup %s; not between 0 to 1%s",
+               argAryStr[siArg],
+               str_endLine
              );
 
             goto err_fun03_sec04;
@@ -987,8 +1038,9 @@ input_tbAmr(
       { /*Else: invalid input*/
          fprintf(
             stderr,
-            "%s is not recognized\n",
-            argAryStr[siArg]
+            "%s is not recognized%s",
+            argAryStr[siArg],
+            str_endLine
          );
 
          goto err_fun03_sec04;
@@ -1150,8 +1202,9 @@ main(
       { /*If: could not open file*/
         fprintf(
            stderr,
-           "Could not open -sam %s\n",
-           samFileStr
+           "Could not open -sam %s%s",
+           samFileStr,
+           str_endLine
         );
 
         goto fileErr_main_sec05_sub03;
@@ -1180,8 +1233,9 @@ main(
       { /*If: could not open the file*/
         fprintf(
            stderr,
-           "Could not open -out %s\n",
-           outFileStr
+           "Could not open -out %s%s",
+           outFileStr,
+           str_endLine
         );
 
         goto fileErr_main_sec05_sub03;
@@ -1206,8 +1260,9 @@ main(
    { /*If: could not open AMR database*/
       fprintf(
          stderr,
-         "Could not open -amr-tbl %s\n",
-         amrTblStr
+         "Could not open -amr-tbl %s%s",
+         amrTblStr,
+         str_endLine
       );
 
       goto fileErr_main_sec05_sub03;
@@ -1232,8 +1287,9 @@ main(
       { /*If: had memory error*/
          fprintf(
            stderr,
-           "memory error; reading -amr-tbl %s\n",
-           amrTblStr
+           "memory error; reading -amr-tbl %s%s",
+           amrTblStr,
+           str_endLine
          );
 
          goto memErr_main_sec05_sub02;
@@ -1241,8 +1297,9 @@ main(
 
       fprintf(
         stderr,
-        "-amr-tbl %s; not tbAmr format or no data\n",
-        amrTblStr
+        "-amr-tbl %s; not tbAmr format or no data%s",
+        amrTblStr,
+        str_endLine
       );
 
       goto fileErr_main_sec05_sub03;
@@ -1277,7 +1334,8 @@ main(
      { /*If: had file error*/
         fprintf(
            stdout,
-           "memory error when checking AMRs\n"
+           "memory error when checking AMRs%s",
+           str_endLine
         );
 
         goto memErr_main_sec05_sub02;
@@ -1285,7 +1343,8 @@ main(
 
      fprintf(
         stdout,
-        "file error -out, -id-file, -sam, or -sam-con\n"
+        "file error -out, -id-file, -sam, or -sam-con%s",
+        str_endLine
      );
 
 

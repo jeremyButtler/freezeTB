@@ -1,14 +1,12 @@
 LD=link
 CC=cl
-CFLAGS= /O2 /Ot /Za /Tc
-PREFIX="%ProgramFiles%\freezeTB"
+CFLAGS= /DNONE
+PREFIX="%localAppData%"
 ext=win
 O=.o.$(ext)
 
 all:
-	cd freezeTBSrc
-	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
-	cd ..\adjCoordsSrc
+	cd adjCoordsSrc
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
 	cd ..\mkMiruTblSrc
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
@@ -22,9 +20,14 @@ all:
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
 	cd ..\whoToAmrSrc
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\freezeTBSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
+	cd ..\guiFreezeTBSrc
+	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
 	cd ..
 
 install: install-support
+	move guiFreezeTBSrc\guiFreezeTB.exe "$(PREFIX)"
 	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
 	move tbAmrSrc\tbAmr.exe $(PREFIX)
 	move tbMiruSrc\tbMiru.exe $(PREFIX)
@@ -43,4 +46,5 @@ clean:
 		genLib\*.o.$(ext) \
 		genBio\*.o.$(ext) \
 		genAln\*.o.$(ext) \
-		genClust\*.o.$(ext)
+		genClust\*.o.$(ext) \
+		genFreezeTB\*.o.$(ext)

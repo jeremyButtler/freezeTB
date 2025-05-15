@@ -46,23 +46,23 @@ struct alnSet;
 typedef struct dirMatrix
 { /*alnStruct*/
   signed char *dirMatrixSC; /*directional matrix*/
-  unsigned long lenMatrixUL;/*size of directional matrix*/
+  signed long lenMatrixSL;  /*size of directional matrix*/
 
-  signed long scoreSL;       /*best score in alignment*/
-  unsigned long indexUL;     /*index for best score*/
+  signed long scoreSL;      /*best score in alignment*/
+  signed long indexSL;      /*index for best score*/
 
-  signed long *scoreArySL;   /*score array used to score*/
-  unsigned long lenScoreUL;  /*length of score array*/
+  signed long *scoreArySL;  /*score array used to score*/
+  signed long lenScoreSL;   /*length of score array*/
 
-  unsigned long lenRefUL;    /*reference length*/
-  unsigned long refOffsetUL; /*first ref base to align*/
-  unsigned long refEndUL;    /*last ref base to align*/
+  signed long refLenSL;     /*reference length*/
+  signed long refOffsetSL;  /*first ref base to align*/
+  signed long refEndSL;     /*last ref base to align*/
 
-  unsigned long lenQryUL;    /*length of query*/
-  unsigned long qryOffsetUL; /*first query base to align*/
-  unsigned long qryEndUL;    /*last query base to align*/
+  signed long qryLenSL;     /*length of query*/
+  signed long qryOffsetSL;  /*first query base to align*/
+  signed long qryEndSL;     /*last query base to align*/
 
-  signed char errSC;         /*holds any errors*/
+  signed char errSC;        /*holds any errors*/
 }dirMatrix;
 
 /*-------------------------------------------------------\
@@ -139,7 +139,7 @@ freeHeap_dirMatrix(
 |   - matrixSTPtr
 |     o pointer to a dirMatrix structure to get alignment
 |       from
-|   - indexUL:
+|   - indexSL:
 |     o index of last base in the alignment
 |     o 0 to use index from matirxSTPtr
 |   - revBl:
@@ -166,7 +166,7 @@ freeHeap_dirMatrix(
 signed char
 getAln_dirMatrix(
    struct dirMatrix *matrixSTPtr,
-   unsigned long indexUL,
+   signed long indexSL,
    signed char revBl,
    struct seqST *qrySTPtr,
    struct seqST *refSTPtr,
@@ -182,7 +182,7 @@ getAln_dirMatrix(
 |   - matrixSTPtr
 |     o pointer to a dirMatrix structure to get alignment
 |       from
-|   - indexUL:
+|   - indexSL:
 |     o index of last base in the alignment
 |     o 0 to use index from matirxSTPtr
 |   - revBl:
@@ -235,7 +235,7 @@ getAln_dirMatrix(
 signed long
 getCig_dirMatrix(
    struct dirMatrix *matrixSTPtr,
-   unsigned long indexUL,
+   signed long indexSL,
    signed char revBl,
    struct seqST *qrySTPtr,
    struct seqST *refSTPtr,

@@ -43,8 +43,8 @@
 /*Do not change these values*/
 #define def_mvStop_alnDefs 0  /*Stop*/
 #define def_mvDel_alnDefs 1   /*Move left (deletion)*/
-#define def_mvIns_alnDefs 3   /*Move up (insertion)*/
 #define def_mvSnp_alnDefs 2   /*Move diagnol (snp/match)*/
+#define def_mvIns_alnDefs 3   /*Move up (insertion)*/
   /*so a gap can be found by & 1*/
 
 /*for matching matrix (each flag is a different bit)*/

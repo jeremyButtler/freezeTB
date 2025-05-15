@@ -61,8 +61,10 @@
 
 #include "../genLib/base10str.h"
 #include "../genLib/ulCp.h"
+#include "../genLib/fileFun.h"
 
 /*no .c files*/
+#include "../genLib/endLine.h"
 #include "alnDefs.h"
 
 /*-------------------------------------------------------\
@@ -125,7 +127,7 @@ freeHeap_alnSet(
 unsigned long
 readScoreFile_alnSet(
     struct alnSet *alnSetSTPtr, /*score matrix to change*/
-    void *scoreFILE         /*File scoring matrix scores*/
+    void *inFILE         /*File scoring matrix scores*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun07 TOC: readScoreFile_alnSet
    '  o fun07 sec01:
@@ -150,6 +152,7 @@ readScoreFile_alnSet(
 
    unsigned char colUC = 0;
    unsigned char rowUC = 0;
+   signed long lenSL = 0;
 
    buffStr[def_lenBuff_fun07 - 1] = '\0';
    buffStr[def_lenBuff_fun07 - 2] = '\0';
@@ -170,42 +173,46 @@ readScoreFile_alnSet(
    ^  - Read in line and check if comment
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   while(fgets((char *) buffStr, 1024, scoreFILE))
-   { /*While I have scores to read in*/
+   while(1)
+   { /*Loop: read in scores*/
+      lenSL =
+         getLine_fileFun(inFILE, buffStr, 1024, &lenSL);
+      if(! lenSL)
+         break;
        
-       if(buffStr[0] == '/' && buffStr[1] == '/')
-       { /*On a comment, move onto the next line*/
-           while(
-               buffStr[def_lenBuff_fun07 - 2] != '\0' &&
-               buffStr[def_lenBuff_fun07 - 2] != '\n'
-           ){ /*Loop: read in more buffer*/
-               buffStr[def_lenBuff_fun07 - 2] = '\0';
+      if(buffStr[0] == '/' && buffStr[1] == '/')
+      { /*On a comment, move onto the next line*/
+          --lenSL;
 
-               tmpStr =
-                  (signed char *)
-                  fgets(
-                     (char *) buffStr,
-                     1024,
-                     (FILE *) scoreFILE
-                  );
-           } /*Loop: read in more buffer*/
+          while(buffStr[lenSL] == '\0')
+          { /*Loop: read in more buffer*/
+             lenSL =
+                getLine_fileFun(
+                   inFILE,
+                   buffStr,
+                   1024,
+                   &lenSL
+                );
+             --lenSL;
+          } /*Loop: read in more buffer*/
 
-           /*Reset the buffer*/
-           buffStr[def_lenBuff_fun07 - 2] = '\0';
-
-           continue;
-       } /*On a comment, move onto the next line*/
+          continue;
+      } /*On a comment, move onto the next line*/
 
        /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
        ^ Fun07 Sec04:
        ^  - Convert score & add to matrix
        \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-       if(buffStr[0] == '\n')
+       if(buffStr[0] == '\r')
+           continue;                        /*Blank line*/
+       else if(buffStr[0] == '\n')
+           continue;                        /*Blank line*/
+       else if(buffStr[0] == '\0')
            continue;                        /*Blank line*/
 
        if(buffStr[0] < 64 && buffStr[2] < 64)
-           return ftell(scoreFILE);  /*Invalid character*/
+           return ftell(inFILE);  /*Invalid character*/
        
        tmpStr +=
            strToSS_base10str(
@@ -221,26 +228,21 @@ readScoreFile_alnSet(
        ); /*Add the score to the matrix*/
 
        if(tmpStr == &buffStr[3])
-           return ftell(scoreFILE);         /*No score*/
+           return ftell(inFILE);         /*No score*/
+
+       scoreSS = endLine_ulCp(buffStr);
 
        while(
-           buffStr[def_lenBuff_fun07 - 2] != '\0' &&
-           buffStr[def_lenBuff_fun07 - 2] != '\n'
-       ){ /*While have more buffer to read in*/
-           buffStr[def_lenBuff_fun07 - 2] = '\0';
-
-           tmpStr =
-              (signed char *)
-              fgets(
-                 (char *) buffStr,
-                 1024,
-                 (FILE *) scoreFILE
-              );
-       } /*While have more buffer to read in*/
-
-       /*Reset the buffer*/
-       buffStr[def_lenBuff_fun07 - 2] = '\0';
-   } /*While I have scores to read in*/
+              buffStr[lenSL] != '\n'
+           && buffStr[lenSL] != '\r'
+       ){ /*Loop: get next line*/
+          lenSL =
+             getLine_fileFun(inFILE,buffStr,1024,&lenSL);
+           if(! lenSL)
+              break;
+           --lenSL;
+       }  /*Loop: get next line*/
+   } /*Loop: read in scores*/
 
    return 0;
 } /*readScoreFile_alnSet*/
@@ -286,7 +288,7 @@ readMatchFile_alnSet(
 
    #define def_lenBuff_fun08 1024
    signed char buffStr[def_lenBuff_fun08];
-   signed char *tmpStr = 0;
+   signed long lenSL = 0;
 
    unsigned char colUC = 0;
    unsigned char rowUC = 0;
@@ -310,30 +312,34 @@ readMatchFile_alnSet(
    ^  - Read in line and check if comment
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   while(
-      fgets((char *) buffStr, 1024, (FILE *) matchFILE)
-   ){ /*While I have matchs to read in*/
+   while(1)
+   { /*While I have matchs to read in*/
+      lenSL =
+         getLine_fileFun(
+            matchFILE,
+            buffStr,
+            1024,
+            &lenSL
+          );
+       if(! lenSL)
+          goto ret_fun08_sec04;
+       --lenSL;
        
        if(buffStr[0] == '/' && buffStr[1] == '/')
        { /*On a comment, move onto the next line*/
-           tmpStr = buffStr;
 
-           while(*tmpStr == '\0')
+           while(! buffStr[lenSL])
            { /*While have more buffer to read in*/
-
-               /*avoids ignoring fget warning, but
-               `  has unused fget warning, so found a use
-               `  for tmpStr
-               */
-               tmpStr =
-                  (signed char *)
-                  fgets(
-                     (char *) buffStr,
-                     1024,
-                     (FILE *) matchFILE
+              lenSL =
+                 getLine_fileFun(
+                    matchFILE,
+                    buffStr,
+                    1024,
+                    &lenSL
                   );
-
-              tmpStr += endLine_ulCp(buffStr);
+               if(! lenSL)
+                  goto ret_fun08_sec04;
+              --lenSL;
            } /*While have more buffer to read in*/
 
            continue;
@@ -344,7 +350,11 @@ readMatchFile_alnSet(
        ^  - Convert match & add to matrix
        \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-       if(buffStr[0] == '\n')
+       if(buffStr[0] == '\r')
+           continue;                        /*Blank line*/
+       else if(buffStr[0] == '\n')
+           continue;                        /*Blank line*/
+       else if(buffStr[0] == '\0')
            continue;                        /*Blank line*/
 
        if(buffStr[4] != '1' && buffStr[4] != '0')
@@ -359,28 +369,24 @@ readMatchFile_alnSet(
        ); /*Add the match to the matrix*/
 
        while(
-           buffStr[def_lenBuff_fun08 - 2] != '\0' &&
-           buffStr[def_lenBuff_fun08 - 2] != '\n'
-       ){ /*While have more buffer to read in*/
-           buffStr[def_lenBuff_fun08 - 2] = '\0';
-
-           /*avoids ignoring fget warning, but
-           `  has unused fget warning
-           */
-           tmpStr =
-              (signed char *)
-              fgets(
-                 (char *) buffStr,
-                 1024,
-                 (FILE *) matchFILE
+              buffStr[lenSL] != '\n'
+           && buffStr[lenSL] != '\r'
+       ){ /*Loop: get next line*/
+          lenSL =
+             getLine_fileFun(
+                matchFILE,
+                buffStr,
+                1024,
+                &lenSL
               );
-       } /*While have more buffer to read in*/
-
-       /*Reset the buffer*/
-       buffStr[def_lenBuff_fun08 - 2] = '\0';
+           if(! lenSL)
+              goto ret_fun08_sec04;
+           --lenSL;
+       }  /*Loop: get next line*/
    } /*While I have matchs to read in*/
 
-   return 0;
+   ret_fun08_sec04:;
+      return 0;
 } /*readMatchFile_alnSet*/
 
 /*-------------------------------------------------------\
@@ -1805,36 +1811,42 @@ pDefMatchMatrix_alnSet(
    
    fprintf(
       (FILE *) outFILE,
-      "// default match matrix\n"
+      "// default match matrix%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "// legend:\n"
+      "// legend:%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "//   - %i is match\n",
-      def_ntEql_alnDefs
+      "//   - %i is match%s",
+      def_ntEql_alnDefs,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "//   - %i is mismatch\n",
-      def_ntNotEql_alnDefs
+      "//   - %i is mismatch%s",
+      def_ntNotEql_alnDefs,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "//   - %i is anonymous match\n",
-      def_anonMatch_alnDefs
+      "//   - %i is anonymous match%s",
+      def_anonMatch_alnDefs,
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "//   - %i flag for anonymous (alone is mismatch)\n",
-      def_anonymous_alnDefs
+      "//   - %i flag for anonymous; alone is mismatch%s",
+      def_anonymous_alnDefs,
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1881,413 +1893,1858 @@ pDefMatchMatrix_alnSet(
    *   - a as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"a a %i\n",def_AEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"a t %i\n",def_AEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"a u %i\n",def_AEqlU_alnDefs);
-   fprintf((FILE *) outFILE,"a g %i\n",def_AEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"a c %i\n",def_AEqlC_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "a a %i%s",
+      def_AEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a t %i%s",
+      def_AEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a u %i%s",
+      def_AEqlU_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a g %i%s",
+      def_AEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a c %i%s",
+      def_AEqlC_alnDefs,
+      str_endLine
+   );
 
    /*anonymous matches*/
-   fprintf((FILE *) outFILE,"a w %i\n",def_AEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"a s %i\n",def_AEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"a m %i\n",def_AEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"a k %i\n",def_AEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"a r %i\n",def_AEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"a y %i\n",def_AEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"a b %i\n",def_AEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"a d %i\n",def_AEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"a h %i\n",def_AEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"a v %i\n",def_AEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"a n %i\n",def_AEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"a x %i\n",def_AEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "a w %i%s",
+      def_AEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a s %i%s",
+      def_AEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a m %i%s",
+      def_AEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a k %i%s",
+      def_AEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a r %i%s",
+      def_AEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a y %i%s",
+      def_AEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a b %i%s",
+      def_AEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a d %i%s",
+      def_AEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a h %i%s",
+      def_AEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a v %i%s",
+      def_AEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a n %i%s",
+      def_AEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "a x %i%s",
+      def_AEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub02:
    *   - t as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"t a %i\n",def_TEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"t t %i\n",def_TEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"t u %i\n",def_TEqlU_alnDefs);
-   fprintf((FILE *) outFILE,"t g %i\n",def_TEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"t c %i\n",def_TEqlC_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "t a %i%s",
+      def_TEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t t %i%s",
+      def_TEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t u %i%s",
+      def_TEqlU_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t g %i%s",
+      def_TEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t c %i%s",
+      def_TEqlC_alnDefs,
+      str_endLine
+   );
 
    /*anonymous matches*/
-   fprintf((FILE *) outFILE,"t w %i\n",def_TEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"t s %i\n",def_TEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"t m %i\n",def_TEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"t k %i\n",def_TEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"t r %i\n",def_TEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"t y %i\n",def_TEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"t b %i\n",def_TEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"t d %i\n",def_TEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"t h %i\n",def_TEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"t v %i\n",def_TEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"t n %i\n",def_TEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"t x %i\n",def_TEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "t w %i%s",
+      def_TEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t s %i%s",
+      def_TEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t m %i%s",
+      def_TEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t k %i%s",
+      def_TEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t r %i%s",
+      def_TEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t y %i%s",
+      def_TEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t b %i%s",
+      def_TEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t d %i%s",
+      def_TEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t h %i%s",
+      def_TEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t v %i%s",
+      def_TEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t n %i%s",
+      def_TEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "t x %i%s",
+      def_TEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub03:
    *   - u (t) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"u a %i\n",def_UEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"u g %i\n",def_UEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"u c %i\n",def_UEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"u t %i\n",def_UEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"u u %i\n",def_UEqlU_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "u a %i%s",
+      def_UEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u g %i%s",
+      def_UEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u c %i%s",
+      def_UEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u t %i%s",
+      def_UEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u u %i%s",
+      def_UEqlU_alnDefs,
+      str_endLine
+   );
 
    /*Set u & t to same scores (U is RNA version of T)*/
-   fprintf((FILE *) outFILE,"u w %i\n",def_UEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"u s %i\n",def_UEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"u m %i\n",def_UEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"u k %i\n",def_UEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"u r %i\n",def_UEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"u y %i\n",def_UEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"u b %i\n",def_UEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"u d %i\n",def_UEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"u h %i\n",def_UEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"u v %i\n",def_UEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"u n %i\n",def_UEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"u x %i\n",def_UEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "u w %i%s",
+      def_UEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u s %i%s",
+      def_UEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u m %i%s",
+      def_UEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u k %i%s",
+      def_UEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u r %i%s",
+      def_UEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u y %i%s",
+      def_UEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u b %i%s",
+      def_UEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u d %i%s",
+      def_UEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u h %i%s",
+      def_UEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u v %i%s",
+      def_UEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u n %i%s",
+      def_UEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "u x %i%s",
+      def_UEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub04:
    *   - g as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"g a %i\n",def_GEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"g t %i\n",def_GEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"g u %i\n",def_GEqlU_alnDefs);
-   fprintf((FILE *) outFILE,"g g %i\n",def_GEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"g c %i\n",def_GEqlC_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "g a %i%s",
+      def_GEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g t %i%s",
+      def_GEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g u %i%s",
+      def_GEqlU_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g g %i%s",
+      def_GEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g c %i%s",
+      def_GEqlC_alnDefs,
+      str_endLine
+   );
 
    /*anonymous matches*/
-   fprintf((FILE *) outFILE,"g w %i\n",def_GEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"g s %i\n",def_GEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"g m %i\n",def_GEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"g k %i\n",def_GEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"g r %i\n",def_GEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"g y %i\n",def_GEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"g b %i\n",def_GEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"g d %i\n",def_GEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"g h %i\n",def_GEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"g v %i\n",def_GEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"g n %i\n",def_GEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"g x %i\n",def_GEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "g w %i%s",
+      def_GEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g s %i%s",
+      def_GEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g m %i%s",
+      def_GEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g k %i%s",
+      def_GEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g r %i%s",
+      def_GEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g y %i%s",
+      def_GEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g b %i%s",
+      def_GEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g d %i%s",
+      def_GEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g h %i%s",
+      def_GEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g v %i%s",
+      def_GEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g n %i%s",
+      def_GEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "g x %i%s",
+      def_GEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub05:
    *   - c as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"c a %i\n",def_CEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"c t %i\n",def_CEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"c u %i\n",def_CEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"c g %i\n",def_CEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"c c %i\n",def_CEqlC_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "c a %i%s",
+      def_CEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c t %i%s",
+      def_CEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c u %i%s",
+      def_CEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c g %i%s",
+      def_CEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c c %i%s",
+      def_CEqlC_alnDefs,
+      str_endLine
+   );
 
    /*anonymous matches*/
-   fprintf((FILE *) outFILE,"c w %i\n",def_CEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"c s %i\n",def_CEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"c m %i\n",def_CEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"c k %i\n",def_CEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"c r %i\n",def_CEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"c y %i\n",def_CEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"c b %i\n",def_CEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"c d %i\n",def_CEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"c h %i\n",def_CEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"c v %i\n",def_CEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"c n %i\n",def_CEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"c x %i\n",def_CEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "c w %i%s",
+      def_CEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c s %i%s",
+      def_CEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c m %i%s",
+      def_CEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c k %i%s",
+      def_CEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c r %i%s",
+      def_CEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c y %i%s",
+      def_CEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c b %i%s",
+      def_CEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c d %i%s",
+      def_CEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c h %i%s",
+      def_CEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c v %i%s",
+      def_CEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c n %i%s",
+      def_CEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "c x %i%s",
+      def_CEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub06:
    *   - w (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"w a %i\n",def_WEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"w c %i\n",def_WEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"w g %i\n",def_WEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"w t %i\n",def_WEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"w u %i\n",def_WEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "w a %i%s",
+      def_WEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w c %i%s",
+      def_WEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w g %i%s",
+      def_WEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w t %i%s",
+      def_WEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w u %i%s",
+      def_WEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"w w %i\n",def_WEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"w s %i\n",def_WEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"w m %i\n",def_WEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"w k %i\n",def_WEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"w r %i\n",def_WEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"w y %i\n",def_WEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"w b %i\n",def_WEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"w d %i\n",def_WEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"w h %i\n",def_WEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"w v %i\n",def_WEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"w n %i\n",def_WEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"w x %i\n",def_WEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "w w %i%s",
+      def_WEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w s %i%s",
+      def_WEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w m %i%s",
+      def_WEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w k %i%s",
+      def_WEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w r %i%s",
+      def_WEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w y %i%s",
+      def_WEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w b %i%s",
+      def_WEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w d %i%s",
+      def_WEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w h %i%s",
+      def_WEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w v %i%s",
+      def_WEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w n %i%s",
+      def_WEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "w x %i%s",
+      def_WEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub07:
    *   - s (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"s a %i\n",def_SEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"s c %i\n",def_SEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"s g %i\n",def_SEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"s t %i\n",def_SEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"s u %i\n",def_SEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "s a %i%s",
+      def_SEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s c %i%s",
+      def_SEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s g %i%s",
+      def_SEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s t %i%s",
+      def_SEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s u %i%s",
+      def_SEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"s w %i\n",def_SEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"s s %i\n",def_SEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"s m %i\n",def_SEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"s k %i\n",def_SEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"s r %i\n",def_SEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"s y %i\n",def_SEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"s b %i\n",def_SEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"s d %i\n",def_SEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"s h %i\n",def_SEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"s v %i\n",def_SEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"s n %i\n",def_SEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"s x %i\n",def_SEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "s w %i%s",
+      def_SEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s s %i%s",
+      def_SEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s m %i%s",
+      def_SEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s k %i%s",
+      def_SEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s r %i%s",
+      def_SEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s y %i%s",
+      def_SEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s b %i%s",
+      def_SEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s d %i%s",
+      def_SEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s h %i%s",
+      def_SEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s v %i%s",
+      def_SEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s n %i%s",
+      def_SEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "s x %i%s",
+      def_SEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub08:
    *   - m (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"m a %i\n",def_MEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"m c %i\n",def_MEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"m g %i\n",def_MEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"m t %i\n",def_MEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"m u %i\n",def_MEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "m a %i%s",
+      def_MEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m c %i%s",
+      def_MEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m g %i%s",
+      def_MEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m t %i%s",
+      def_MEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m u %i%s",
+      def_MEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"m w %i\n",def_MEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"m s %i\n",def_MEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"m m %i\n",def_MEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"m k %i\n",def_MEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"m r %i\n",def_MEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"m y %i\n",def_MEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"m b %i\n",def_MEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"m d %i\n",def_MEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"m h %i\n",def_MEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"m v %i\n",def_MEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"m n %i\n",def_MEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"m x %i\n",def_MEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "m w %i%s",
+      def_MEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m s %i%s",
+      def_MEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m m %i%s",
+      def_MEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m k %i%s",
+      def_MEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m r %i%s",
+      def_MEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m y %i%s",
+      def_MEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m b %i%s",
+      def_MEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m d %i%s",
+      def_MEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m h %i%s",
+      def_MEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m v %i%s",
+      def_MEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m n %i%s",
+      def_MEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "m x %i%s",
+      def_MEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub09:
    *   - k (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"k a %i\n",def_KEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"k c %i\n",def_KEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"k g %i\n",def_KEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"k t %i\n",def_KEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"k u %i\n",def_KEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "k a %i%s",
+      def_KEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k c %i%s",
+      def_KEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k g %i%s",
+      def_KEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k t %i%s",
+      def_KEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k u %i%s",
+      def_KEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"k w %i\n",def_KEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"k s %i\n",def_KEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"k m %i\n",def_KEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"k k %i\n",def_KEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"k r %i\n",def_KEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"k y %i\n",def_KEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"k b %i\n",def_KEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"k d %i\n",def_KEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"k h %i\n",def_KEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"k v %i\n",def_KEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"k n %i\n",def_KEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"k x %i\n",def_KEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "k w %i%s",
+      def_KEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k s %i%s",
+      def_KEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k m %i%s",
+      def_KEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k k %i%s",
+      def_KEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k r %i%s",
+      def_KEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k y %i%s",
+      def_KEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k b %i%s",
+      def_KEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k d %i%s",
+      def_KEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k h %i%s",
+      def_KEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k v %i%s",
+      def_KEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k n %i%s",
+      def_KEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "k x %i%s",
+      def_KEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub10:
    *   - r (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"r a %i\n",def_REqlA_alnDefs);
-   fprintf((FILE *) outFILE,"r c %i\n",def_REqlC_alnDefs);
-   fprintf((FILE *) outFILE,"r g %i\n",def_REqlG_alnDefs);
-   fprintf((FILE *) outFILE,"r t %i\n",def_REqlT_alnDefs);
-   fprintf((FILE *) outFILE,"r u %i\n",def_REqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "r a %i%s",
+      def_REqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r c %i%s",
+      def_REqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r g %i%s",
+      def_REqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r t %i%s",
+      def_REqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r u %i%s",
+      def_REqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"r w %i\n",def_REqlW_alnDefs);
-   fprintf((FILE *) outFILE,"r s %i\n",def_REqlS_alnDefs);
-   fprintf((FILE *) outFILE,"r m %i\n",def_REqlM_alnDefs);
-   fprintf((FILE *) outFILE,"r k %i\n",def_REqlK_alnDefs);
-   fprintf((FILE *) outFILE,"r r %i\n",def_REqlR_alnDefs);
-   fprintf((FILE *) outFILE,"r y %i\n",def_REqlY_alnDefs);
-   fprintf((FILE *) outFILE,"r b %i\n",def_REqlB_alnDefs);
-   fprintf((FILE *) outFILE,"r d %i\n",def_REqlD_alnDefs);
-   fprintf((FILE *) outFILE,"r h %i\n",def_REqlH_alnDefs);
-   fprintf((FILE *) outFILE,"r v %i\n",def_REqlV_alnDefs);
-   fprintf((FILE *) outFILE,"r n %i\n",def_REqlN_alnDefs);
-   fprintf((FILE *) outFILE,"r x %i\n",def_REqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "r w %i%s",
+      def_REqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r s %i%s",
+      def_REqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r m %i%s",
+      def_REqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r k %i%s",
+      def_REqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r r %i%s",
+      def_REqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r y %i%s",
+      def_REqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r b %i%s",
+      def_REqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r d %i%s",
+      def_REqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r h %i%s",
+      def_REqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r v %i%s",
+      def_REqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r n %i%s",
+      def_REqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "r x %i%s",
+      def_REqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub11:
    *   - y (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"y a %i\n",def_YEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"y c %i\n",def_YEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"y g %i\n",def_YEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"y t %i\n",def_YEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"y u %i\n",def_YEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "y a %i%s",
+      def_YEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y c %i%s",
+      def_YEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y g %i%s",
+      def_YEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y t %i%s",
+      def_YEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y u %i%s",
+      def_YEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"y w %i\n",def_YEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"y s %i\n",def_YEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"y m %i\n",def_YEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"y k %i\n",def_YEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"y r %i\n",def_YEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"y y %i\n",def_YEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"y b %i\n",def_YEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"y d %i\n",def_YEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"y h %i\n",def_YEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"y v %i\n",def_YEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"y n %i\n",def_YEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"y x %i\n",def_YEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "y w %i%s",
+      def_YEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y s %i%s",
+      def_YEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y m %i%s",
+      def_YEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y k %i%s",
+      def_YEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y r %i%s",
+      def_YEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y y %i%s",
+      def_YEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y b %i%s",
+      def_YEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y d %i%s",
+      def_YEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y h %i%s",
+      def_YEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y v %i%s",
+      def_YEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y n %i%s",
+      def_YEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "y x %i%s",
+      def_YEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub12:
    *   - b (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"b a %i\n",def_BEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"b c %i\n",def_BEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"b g %i\n",def_BEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"b t %i\n",def_BEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"b u %i\n",def_BEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "b a %i%s",
+      def_BEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b c %i%s",
+      def_BEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b g %i%s",
+      def_BEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b t %i%s",
+      def_BEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b u %i%s",
+      def_BEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"b w %i\n",def_BEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"b s %i\n",def_BEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"b m %i\n",def_BEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"b k %i\n",def_BEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"b r %i\n",def_BEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"b y %i\n",def_BEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"b b %i\n",def_BEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"b d %i\n",def_BEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"b h %i\n",def_BEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"b v %i\n",def_BEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"b n %i\n",def_BEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"b x %i\n",def_BEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "b w %i%s",
+      def_BEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b s %i%s",
+      def_BEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b m %i%s",
+      def_BEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b k %i%s",
+      def_BEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b r %i%s",
+      def_BEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b y %i%s",
+      def_BEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b b %i%s",
+      def_BEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b d %i%s",
+      def_BEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b h %i%s",
+      def_BEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b v %i%s",
+      def_BEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b n %i%s",
+      def_BEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "b x %i%s",
+      def_BEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub13:
    *   - d (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"d a %i\n",def_DEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"d c %i\n",def_DEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"d g %i\n",def_DEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"d t %i\n",def_DEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"d u %i\n",def_DEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "d a %i%s",
+      def_DEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d c %i%s",
+      def_DEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d g %i%s",
+      def_DEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d t %i%s",
+      def_DEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d u %i%s",
+      def_DEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"d w %i\n",def_DEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"d s %i\n",def_DEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"d m %i\n",def_DEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"d k %i\n",def_DEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"d r %i\n",def_DEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"d y %i\n",def_DEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"d b %i\n",def_DEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"d d %i\n",def_DEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"d h %i\n",def_DEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"d v %i\n",def_DEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"d n %i\n",def_DEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"d x %i\n",def_DEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "d w %i%s",
+      def_DEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d s %i%s",
+      def_DEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d m %i%s",
+      def_DEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d k %i%s",
+      def_DEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d r %i%s",
+      def_DEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d y %i%s",
+      def_DEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d b %i%s",
+      def_DEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d d %i%s",
+      def_DEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d h %i%s",
+      def_DEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d v %i%s",
+      def_DEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d n %i%s",
+      def_DEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "d x %i%s",
+      def_DEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub14:
    *   - h (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"h a %i\n",def_HEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"h c %i\n",def_HEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"h g %i\n",def_HEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"h t %i\n",def_HEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"h u %i\n",def_HEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "h a %i%s",
+      def_HEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h c %i%s",
+      def_HEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h g %i%s",
+      def_HEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h t %i%s",
+      def_HEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h u %i%s",
+      def_HEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"h w %i\n",def_HEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"h s %i\n",def_HEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"h m %i\n",def_HEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"h k %i\n",def_HEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"h r %i\n",def_HEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"h y %i\n",def_HEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"h b %i\n",def_HEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"h d %i\n",def_HEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"h h %i\n",def_HEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"h v %i\n",def_HEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"h n %i\n",def_HEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"h x %i\n",def_HEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "h w %i%s",
+      def_HEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h s %i%s",
+      def_HEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h m %i%s",
+      def_HEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h k %i%s",
+      def_HEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h r %i%s",
+      def_HEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h y %i%s",
+      def_HEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h b %i%s",
+      def_HEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h d %i%s",
+      def_HEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h h %i%s",
+      def_HEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h v %i%s",
+      def_HEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h n %i%s",
+      def_HEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "h x %i%s",
+      def_HEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub15:
    *   - v (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"v a %i\n",def_VEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"v c %i\n",def_VEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"v g %i\n",def_VEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"v t %i\n",def_VEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"v u %i\n",def_VEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "v a %i%s",
+      def_VEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v c %i%s",
+      def_VEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v g %i%s",
+      def_VEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v t %i%s",
+      def_VEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v u %i%s",
+      def_VEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"v w %i\n",def_VEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"v s %i\n",def_VEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"v m %i\n",def_VEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"v k %i\n",def_VEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"v r %i\n",def_VEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"v y %i\n",def_VEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"v b %i\n",def_VEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"v d %i\n",def_VEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"v h %i\n",def_VEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"v v %i\n",def_VEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"v n %i\n",def_VEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"v x %i\n",def_VEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "v w %i%s",
+      def_VEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v s %i%s",
+      def_VEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v m %i%s",
+      def_VEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v k %i%s",
+      def_VEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v r %i%s",
+      def_VEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v y %i%s",
+      def_VEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v b %i%s",
+      def_VEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v d %i%s",
+      def_VEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v h %i%s",
+      def_VEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v v %i%s",
+      def_VEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v n %i%s",
+      def_VEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "v x %i%s",
+      def_VEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub16:
    *   - n (anonymous) as first base
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"n a %i\n",def_NEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"n c %i\n",def_NEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"n g %i\n",def_NEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"n t %i\n",def_NEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"n u %i\n",def_NEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "n a %i%s",
+      def_NEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n c %i%s",
+      def_NEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n g %i%s",
+      def_NEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n t %i%s",
+      def_NEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n u %i%s",
+      def_NEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"n w %i\n",def_NEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"n s %i\n",def_NEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"n m %i\n",def_NEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"n k %i\n",def_NEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"n r %i\n",def_NEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"n y %i\n",def_NEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"n b %i\n",def_NEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"n d %i\n",def_NEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"n h %i\n",def_NEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"n v %i\n",def_NEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"n n %i\n",def_NEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"n x %i\n",def_NEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "n w %i%s",
+      def_NEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n s %i%s",
+      def_NEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n m %i%s",
+      def_NEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n k %i%s",
+      def_NEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n r %i%s",
+      def_NEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n y %i%s",
+      def_NEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n b %i%s",
+      def_NEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n d %i%s",
+      def_NEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n h %i%s",
+      def_NEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n v %i%s",
+      def_NEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n n %i%s",
+      def_NEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "n x %i%s",
+      def_NEqlX_alnDefs,
+      str_endLine
+   );
 
    /*****************************************************\
    * Fun15 Sec02 Sub17:
    *   - x (anonymous) as first base (technically aa)
    \*****************************************************/
 
-   fprintf((FILE *) outFILE,"x a %i\n",def_XEqlA_alnDefs);
-   fprintf((FILE *) outFILE,"x c %i\n",def_XEqlC_alnDefs);
-   fprintf((FILE *) outFILE,"x g %i\n",def_XEqlG_alnDefs);
-   fprintf((FILE *) outFILE,"x t %i\n",def_XEqlT_alnDefs);
-   fprintf((FILE *) outFILE,"x u %i\n",def_XEqlT_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "x a %i%s",
+      def_XEqlA_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x c %i%s",
+      def_XEqlC_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x g %i%s",
+      def_XEqlG_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x t %i%s",
+      def_XEqlT_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x u %i%s",
+      def_XEqlT_alnDefs,
+      str_endLine
+   );
 
-   fprintf((FILE *) outFILE,"x w %i\n",def_XEqlW_alnDefs);
-   fprintf((FILE *) outFILE,"x s %i\n",def_XEqlS_alnDefs);
-   fprintf((FILE *) outFILE,"x m %i\n",def_XEqlM_alnDefs);
-   fprintf((FILE *) outFILE,"x k %i\n",def_XEqlK_alnDefs);
-   fprintf((FILE *) outFILE,"x r %i\n",def_XEqlR_alnDefs);
-   fprintf((FILE *) outFILE,"x y %i\n",def_XEqlY_alnDefs);
-   fprintf((FILE *) outFILE,"x b %i\n",def_XEqlB_alnDefs);
-   fprintf((FILE *) outFILE,"x d %i\n",def_XEqlD_alnDefs);
-   fprintf((FILE *) outFILE,"x h %i\n",def_XEqlH_alnDefs);
-   fprintf((FILE *) outFILE,"x v %i\n",def_XEqlV_alnDefs);
-   fprintf((FILE *) outFILE,"x n %i\n",def_XEqlN_alnDefs);
-   fprintf((FILE *) outFILE,"x x %i\n",def_XEqlX_alnDefs);
+   fprintf(
+      (FILE *) outFILE,
+      "x w %i%s",
+      def_XEqlW_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x s %i%s",
+      def_XEqlS_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x m %i%s",
+      def_XEqlM_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x k %i%s",
+      def_XEqlK_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x r %i%s",
+      def_XEqlR_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x y %i%s",
+      def_XEqlY_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x b %i%s",
+      def_XEqlB_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x d %i%s",
+      def_XEqlD_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x h %i%s",
+      def_XEqlH_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x v %i%s",
+      def_XEqlV_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x n %i%s",
+      def_XEqlN_alnDefs,
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "x x %i%s",
+      def_XEqlX_alnDefs,
+      str_endLine
+   );
 } /*pDefMatchMatrix_alnSet*/
 
 /*=======================================================\
@@ -2319,7 +3776,7 @@ pDefMatchMatrix_alnSet(
 :   act of relinquishment in perpetuity of all present and
 :   future rights to this software under copyright law.
 : 
-: THE SOFTWARE IS PROVIDED "AS IS\n",WITHOUT WARRANTY OF
+: THE SOFTWARE IS PROVIDED "AS IS",WITHOUT WARRANTY OF
 :   ANY KIND,EXPRESS OR IMPLIED,INCLUDING BUT NOT
 :   LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS
 :   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
@@ -2350,7 +3807,7 @@ pDefMatchMatrix_alnSet(
 :   shall be included in all copies or substantial
 :   portions of the Software.
 : 
-: THE SOFTWARE IS PROVIDED "AS IS\n",WITHOUT WARRANTY OF
+: THE SOFTWARE IS PROVIDED "AS IS",WITHOUT WARRANTY OF
 :   ANY KIND,EXPRESS OR IMPLIED,INCLUDING BUT NOT
 :   LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS
 :   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO

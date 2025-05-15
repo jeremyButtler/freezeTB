@@ -25,109 +25,65 @@
 /*kmer scan defaults*/
 #define def_minLen_defsMapRead 0
 #define def_secLen_defsMapRead 100
-#define def_thirdLen_defsMapRead 800
-#define def_fourthLen_defsMapRead 3000
-#define def_fifthLen_defsMapRead 12000
-#define def_sixthLen_defsMapRead 50000
-#define def_finalLen_defsMapRead 200000
+#define def_thirdLen_defsMapRead 1000
 
-#define def_minKmer_defsMapRead 5 
-#define def_secKmer_defsMapRead 6 
-#define def_thirdKmer_defsMapRead 7
-#define def_fourthKmer_defsMapRead 8
-#define def_fifthKmer_defsMapRead 9
-#define def_sixthKmer_defsMapRead 10
-#define def_finalKmer_defsMapRead 11
+#define def_minKmer_defsMapRead 5
+#define def_secKmer_defsMapRead 10
+#define def_thirdKmer_defsMapRead 13
 
-#define def_minPerc_defsMapRead 0.7f
-#define def_secPerc_defsMapRead 0.7f
-#define def_thirdPerc_defsMapRead 0.8f
-#define def_fourthPerc_defsMapRead 0.8f
-#define def_fifthPerc_defsMapRead 0.8f
-#define def_sixthPerc_defsMapRead 0.9f
-#define def_finalPerc_defsMapRead 0.9f
-
-#define def_minChain_defsMapRead 2
-#define def_secChain_defsMapRead 15
-#define def_thirdChain_defsMapRead 15
-#define def_fourthChain_defsMapRead 20
-#define def_fifthChain_defsMapRead 20
-#define def_sixthChain_defsMapRead 25
-#define def_finalChain_defsMapRead 25
+#define def_minChain_defsMapRead 1
+#define def_secChain_defsMapRead 1
+#define def_thirdChain_defsMapRead 1
 
 
 /* What these defaults mean:
-` - as a rule of thumb I am trying to keep the kmer
-`   space double the maximum widnow size, that way
-`   there is plenty of empty room
-` - for the minimum length I want more sparcity, since
-`   there are even less kmers
-` - after 11mers, the kmer space gets massive and I need
-`   16mb (unless used hash method), so best to limit,
-`   - > 1mb reads are rare, so reasnable limit
-` - the percent kmer values are just a random guess
-` - min: < 100
+` - my logic is keep is small for small references, then
+`   expand it large for larger references
+` - one: reference is < 100 bases
 `   - 5mers; kmer space is 1024
-`   - max window 250 - 3
-`   - need at least 70% matching kmers to do aligment
-`   - chains are at least 2 kmers (6 bases) long
-` - two: 100 to 799:
-`   - 6mers, which have kmer space of 4098
-`   - maximum window length 2000 - 3
-`   - need at least 70% matching kmers to do aligment
-`   - chains are at least 15 kmers (20 bases) long
-` - third: 880 to 2999:
-`   - 7mers; kmer space is ~ 16000
-`   - max window 7500 - 3
-`   - need at least 80% matching kmers to do aligment
-`   - chains are at least 15 kmers (21 bases) long
-` - fourth: 3000 to 11999:
-`   - 8mers; kmer space is ~ 64000
-`   - max window lenth 30000 - 3
-`   - need at least 80% matching kmers to do aligment
-`   - chains are at least 20 kmers (27 bases) long
-` - fifth: 12000 to 49999:
-`   - 9mers; kmer space is ~ 256000
-`   - max window length 175000 - 3
-`   - need at least 80% matching kmers to do aligment
-`   - chains are at least 20 kmers (28 bases) long
-` - sixth: 50000 to 199999
-`   - 10mers kmer space is ~ 1000000
-`   - max window length 500000 - 3
-`   - need at least 90% matching kmers to do aligment
-`   - chains are at least 25 kmers (34 bases) long
-` - last: > 199999
-`   - 11mers kmer space is ~ 4000000
-`   - no max window length
-`   - need at least 90% matching kmers to do aligment
-`   - chains are at least 25 kmers (35 bases) long
+`   - chains are one kmer long
+` - two: reference is between 100 to 1000 bases
+`   - 10mers, which should reduce matches, but might still
+`     hit regions with high matches
+`   - chains are at least 1 kmer (10 bases) long
+` - third: reference is over 1000 bases
+`   - 13mers (bit slower, but probably better job)
+`   - chains are at least 1 kmer (13 bases) long
 */
-
-#define def_percExtraNt_defsMapRead 1.5f
-   /*this is (query length) + 150% * (query length)=250%*/
-#define def_percShift_defsMapRead 1.25f
-   /*shift window by 1.25 query length
-   `   works well because have 2.5 query lengths for my
-   `   window
-   */
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Sec02:
 ^   - chaining and scoring variables
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-#define def_minScore_defsMapRead 0.9f
+#define def_minScore_defsMapRead 0.4f
     /*min % score to keep alignment*/
-#define def_minPercLen_defsMapRead 0.75f
+#define def_minMatch_defsMapRead 0.0f
+   /*at least 80% matches to keep read*/
+#define def_minPercLen_defsMapRead 0.2f
     /*min % of query length mapped*/
+#define def_chainMinLen_defsMapRead 0.20f
+   /*min % query bases in merged chain*/
+#define def_maxPercLen_defsMapRead 0.25f
+    /*maximum gap length in percent query length to merge
+    `  chains at
+    */
 
+#define def_alnEnd_defsMapRead 0
+   /*1: is align softmasked ends
+   `  gets stuff at end, but that is sometimes just
+   `  nosie, so better to leave off
+   */
 #define def_subAln_defsMapRead 1 /*keep best sub-aln*/
-#define def_winNumScan_defsMapRead 2
-   /*number windows to check before trying alignment*/
+#define def_chainGap_defsMapRead 0
+  /*gap score for chaining step (0 is do not apply)*/
+#define def_chainMatch_defsMapRead 5
+  /*match score for chaining step*/
 
 /*the Needleman/Waterman matrix's can be more complex,
 `  however, in this case keep same as core.
 `  Also, their scores are only used in gap filling,
-`  not in the final score
+`  not in the final score, see alnDefs for the defaults
 */
+
 #endif

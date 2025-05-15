@@ -1,245 +1,497 @@
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# mkfile.win SOF: Start Of File
-#   - builds guiFreezeTB for windows
-#   o sec01:
-#     - core variables
-#   o sec02:
-#     - library detection (C_INCLUDE and LDFLAGS)
-#   o sec03:
-#     - set up file paths
-#   o sec04:
-#     - set up object files
-#   o sec05:
-#     - compile commands
-#   o sec06:
-#     - install and clean commands
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CC=cl.exe
+LD=link.exe
+coreCFLAGS= /c /O2 /Ot /Za /Tc
+CFLAGS=/DWINDOWS /DUNIX_BREAK
+NAME=guiFreezeTB.exe
+PREFIX="%localAppData%"
+O=o.win
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec01:
-#   - core variables
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-CC=cl
-LD=link
-
-NAME = guiFreezeTB.exe
-CFLAGS = /DWINDOWS /Ot /O2 /Za /c /Tc
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec02:
-#   - library detection (C_INCLUDE and LDFLAGS)
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 !IF [cmd /C IF EXIST "%programFiles%\Tcl90\lib\tk90t.lib" exit 1]
-C_INCLUDE_PATH = \
-      /I "%programFiles%\Tcl90\include"
-LDFLAGS = \
-	"%programFiles%\Tcl90\lib\tk90t.lib" \
-	"%programFiles%\Tcl90\lib\tcl90t.lib"
+tclTkInclude = /I "%programFiles%\Tcl90\include"
+tclTkLib = "%programFiles%\Tcl90\lib\tk90t.lib" "%programFiles%\Tcl90\lib\tcl90t.lib"
+!MESSAGE found tcltk 9.0.x in "%programFiles%"
 
-!MESSAGE found tcltk 9.0.x in "C:\Program Files"
+!ELSEIF [cmd /C IF EXIST "%programFiles%\Tcl90\lib\tcl9tk90.lib" exit 1]
+tclTkInclude = /I "%programFiles%\Tcl90\include"
+tclTkLib = "%programFiles%\Tcl90\lib\tcl9tk90.lib" "%programFiles%\Tcl90\lib\tcl90.lib"
+!MESSAGE found tcltk 9.0.x in "%programFiles%
 
 !ELSEIF [cmd /C IF EXIST "%programFiles%\Tcl86\lib\tk86t.lib" exit 1]
-C_INCLUDE_PATH = \
-      /I "%programFiles%\Tcl86\include"
-LDFLAGS = \
-	"%programFiles%\Tcl86\lib\tk86t.lib" \
-	"%programFiles%\Tcl86\lib\tcl86t.lib"
-!MESSAGE found tcltk 8.6.x in "C:\Program Files"
+tclTkInclude = /I "%programFiles%\Tcl86\include"
+tclTkLib = "%programFiles%\Tcl86\lib\tk86t.lib" "%programFiles%\Tcl86\lib\tcl86t.lib"
+!MESSAGE found tcltk 8.6.x in "%programFiles%"
+
+!ELSEIF [cmd /C IF EXIST "%programFiles%\Tcl86\lib\tcl8tk86.lib" exit 1]
+tclTkInclude = /I "%programFiles%\Tcl86\include"
+tclTkLib = "%programFiles%\Tcl86\lib\tcl8tk86.lib" "%programFiles%\Tcl86\lib\tcl86.lib"
+!MESSAGE found tcltk 8.6.x in "%programFiles%"
 
 !ELSEIF [cmd /C IF EXIST "%localAppData%\Apps\Tcl90\lib\tk90t.lib" exit 1]
-C_INCLUDE_PATH = \
-      /I "%localAppData%\Apps\Tcl90\include"
-LDFLAGS = \
-	"%localAppData%\Apps\Tcl90\lib\tk90t.lib" \
-	"%localAppData%\Apps\Tcl90\lib\tcl90t.lib"
-!MESSAGE found tcltk 9.0.x is in "C:\User\<user>\appData\local\Apps"
+tclTkInclude = /I "%localAppData%\Apps\Tcl90\include"
+tclTkLib = "%localAppData%\Apps\Tcl90\lib\tk90t.lib" "%localAppData%\Apps\Tcl90\lib\tcl90t.lib"
+!MESSAGE found tcltk 9.0.x in "%localAppData%\Apps"
+
+!ELSEIF [cmd /C IF EXIST "%localAppData%\Apps\Tcl90\lib\tcl9tk90.lib" exit 1]
+tclTkInclude = /I "%localAppData%\Apps\Tcl90\include"
+tclTkLib = "%localAppData%\Apps\Tcl90\lib\tcl9tk90.lib" "%localAppData%\Apps\Tcl90\lib\tcl90.lib"
+!MESSAGE found tcltk 9.0.x in "%localAppData%\Apps"
 
 !ELSEIF [cmd /C IF EXIST "%localAppData%\Apps\Tcl86\lib\tk86t.lib" exit 1]
-C_INCLUDE_PATH = \
-      /I "%localAppData%\Apps\Tcl86\include"
+tclTkInclude = /I "%localAppData%\Apps\Tcl86\include"
+tclTkLib = "%localAppData%\Apps\Tcl86\lib\tk86t.lib" "%localAppData%\Apps\Tcl86\lib\tcl86t.lib"
+!MESSAGE found tcltk 8.6.x is in "%localAppData%\Apps"
 
-LDFLAGS = \
-	"%localAppData%\Apps\Tcl86\lib\tk86t.lib" \
-	"%localAppData%\Apps\Tcl86\lib\tcl86t.lib"
-!MESSAGE found tcltk 8.6.x is in "C:\User\<user>\appData\local\Apps"
+!ELSEIF [cmd /C IF EXIST "%localAppData%\Apps\Tcl86\lib\tcl8tk86.lib" exit 1]
+tclTkInclude = /I "%localAppData%\Apps\Tcl86\include"
+tclTkLib = "%localAppData%\Apps\Tcl86\lib\tcl8tk86.lib" "%localAppData%\Apps\Tcl86\lib\tcl86.lib"
+!MESSAGE found tcltk 8.6.x is in "%localAppData%\Apps"
+
 !ELSE
 !ERROR could not find tcltk
 !ENDIF
+  
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec03:
-#   - set up file paths
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+genFreezeTB=..\genFreezeTB
 genLib=..\genLib
 genBio=..\genBio
-genClust=..\genClust
 genAln=..\genAln
-tbMiru=..\tbMiruSrc
-tbCon=..\tbConSrc
-tbAmr=..\tbAmrSrc
-tbSpol=..\tbSpolSrc
-freezeTB=..\freezeTBSrc
-O=o.win
+genClust=..\genClust
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec04:
-#   - set up object files
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+objFiles= \
+   $(genFreezeTB)\freezeTB.$O \
+   $(genFreezeTB)\freezeTBPaths.$O \
+   $(genLib)\ulCp.$O \
+   $(genFreezeTB)\checkAmr.$O \
+   $(genFreezeTB)\amrST.$O \
+   $(genFreezeTB)\drugAry.$O \
+   $(genLib)\fileFun.$O \
+   $(genLib)\charCp.$O \
+   $(genBio)\samEntry.$O \
+   $(genLib)\strAry.$O \
+   $(genLib)\numToStr.$O \
+   $(genLib)\base10str.$O \
+   $(genBio)\codonFun.$O \
+   $(genLib)\genMath.$O \
+   $(genFreezeTB)\miruTbl.$O \
+   $(genFreezeTB)\spolFind.$O \
+   $(genFreezeTB)\spolST.$O \
+   $(genBio)\seqST.$O \
+   $(genAln)\kmerFind.$O \
+   $(genAln)\memwater.$O \
+   $(genAln)\alnSet.$O \
+   $(genAln)\indexToCoord.$O \
+   $(genLib)\shellSort.$O \
+   $(genBio)\trimSam.$O \
+   $(genBio)\maskPrim.$O \
+   $(genBio)\ampDepth.$O \
+   $(genBio)\geneCoord.$O \
+   $(genBio)\adjCoords.$O \
+   $(genBio)\rmHomo.$O \
+   $(genClust)\edClust.$O \
+   $(genClust)\clustST.$O \
+   $(genBio)\tbCon.$O \
+   $(genBio)\edDist.$O \
+   $(genAln)\mapRead.$O \
+   $(genAln)\needle.$O \
+   $(genAln)\dirMatrix.$O \
+   $(genAln)\water.$O \
+   $(genBio)\kmerFun.$O \
+   $(genBio)\gzSeqST.$O \
+   $(genLib)\inflate.$O \
+   $(genLib)\checkSum.$O \
+   $(genLib)\endin.$O \
+   guiFreezeTB.$O
 
-objFiles = \
-   $(freezeTB)\freezeTBPaths.$(O) \
-   $(freezeTB)\freezeTB.$(O) \
-   guiFreezeTB.c.$(O)
+$(NAME): guiFreezeTB.$O
+		$(LD) $(tclTkLib)  /out:$(NAME) $(objFiles)
 
-freezeTBObjs =\
-   $(genLib)\base10str.$(O) \
-   $(genLib)\numToStr.$(O) \
-   $(genLib)\ulCp.$(O) \
-   $(genLib)\charCp.$(O) \
-   $(genLib)\genMath.$(O) \
-   $(genLib)\shellSort.$(O) \
-   $(genLib)\strAry.$(O) \
-   $(genBio)\codonFun.$(O) \
-   $(genBio)\geneCoord.$(O) \
-   $(genBio)\seqST.$(O) \
-   $(genBio)\samEntry.$(O) \
-   $(genBio)\trimSam.$(O) \
-   $(genBio)\ampDepth.$(O) \
-   $(genBio)\maskPrim.$(O) \
-   $(genBio)\adjCoords.$(O) \
-   $(genBio)\rmHomo.$(O) \
-   $(genBio)\tbCon.$(O) \
-   $(genBio)\edDist.$(O) \
-   $(genAln)\indexToCoord.$(O) \
-   $(genAln)\alnSet.$(O) \
-   $(genAln)\kmerFind.$(O) \
-   $(genAln)\memwater.$(O) \
-   $(genClust)\clustST.$(O) \
-   $(genClust)\edClust.$(O) \
-   $(tbMiru)\miruTbl.$(O) \
-   $(tbAmr)\checkAmr.$(O) \
-   $(tbAmr)\amrST.$(O) \
-   $(tbAmr)\drugAry.$(O) \
-   $(tbSpol)\spolST.$(O) \
-   $(tbSpol)\spolFind.$(O) \
+guiFreezeTB.$O: \
+	guiFreezeTB.c \
+	$(genFreezeTB)\freezeTB.$O
+   		$(CC) $(tclTkInclude) /Fo:guiFreezeTB.$O \
+   			$(CFLAGS) $(coreCFLAGS) guiFreezeTB.c
+$(genFreezeTB)\freezeTB.$O: \
+	$(genFreezeTB)\freezeTB.c \
+	$(genFreezeTB)\freezeTB.h \
+	$(genFreezeTB)\checkAmr.$O \
+	$(genFreezeTB)\miruTbl.$O \
+	$(genFreezeTB)\spolFind.$O \
+	$(genFreezeTB)\freezeTBPaths.$O \
+	$(genAln)\mapRead.$O \
+	$(genBio)\gzSeqST.$O \
+	$(genBio)\trimSam.$O \
+	$(genBio)\maskPrim.$O \
+	$(genBio)\ampDepth.$O \
+	$(genBio)\adjCoords.$O \
+	$(genBio)\rmHomo.$O \
+	$(genBio)\tbCon.$O \
+	$(genClust)\edClust.$O \
+	$(genFreezeTB)\freezeTBDefs.h \
+	$(genFreezeTB)\tbAmrDefs.h \
+	$(genFreezeTB)\tbMiruDefs.h \
+	$(genFreezeTB)\tbSpolDefs.h \
+	$(genBio)\tbConDefs.h \
+	$(genLib)\charCp.h \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h \
+	..\ftbVersion.h
+		$(CC) /Fo:$(genFreezeTB)\freezeTB.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\freezeTB.c
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec05:
-#   - compile commands
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$(genFreezeTB)\freezeTBPaths.$O: \
+	$(genFreezeTB)\freezeTBPaths.c \
+	$(genFreezeTB)\freezeTBPaths.h \
+	$(genLib)\ulCp.$O
+		$(CC) \
+			/Fo:$(genFreezeTB)\freezeTBPaths.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\freezeTBPaths.c
 
-all: guiFreezeTB.c.$(O)
-	$(LD) /out:$(NAME) $(LDFLAGS) $(objFiles) $(freezeTBObjs)
+$(genLib)\ulCp.$O: \
+	$(genLib)\ulCp.c \
+	$(genLib)\ulCp.h
+		$(CC) /Fo:$(genLib)\ulCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\ulCp.c
 
-guiFreezeTB.c.$(O): guiFreezeTB.c $(genLib)\ulCp.$(O) $(genLib)\numToStr.$(O) $(freezeTB)\freezeTB.$(O)
-	$(CC) /Fo:guiFreezeTB.c.$(O) $(C_INCLUDE_PATH) $(CFLAGS) guiFreezeTB.c
+$(genFreezeTB)\checkAmr.$O: \
+	$(genFreezeTB)\checkAmr.c \
+	$(genFreezeTB)\checkAmr.h \
+	$(genFreezeTB)\amrST.$O \
+	$(genBio)\samEntry.$O \
+	$(genBio)\codonFun.$O \
+	$(genLib)\genMath.$O
+		$(CC) /Fo:$(genFreezeTB)\checkAmr.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\checkAmr.c
 
-$(freezeTB)\freezeTB.$(O): $(freezeTB)\freezeTB.c $(freezeTB)\freezeTBPaths.$(O) $(freezeTBObjs)
-	$(CC) /Fo:$(freezeTB)\freezeTB.$(O) $(CFLAGS) $(freezeTB)\freezeTB.c
+$(genFreezeTB)\amrST.$O: \
+	$(genFreezeTB)\amrST.c \
+	$(genFreezeTB)\amrST.h \
+	$(genFreezeTB)\drugAry.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genFreezeTB)\amrST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\amrST.c
 
-$(freezeTB)\freezeTBPaths.$(O): $(freezeTB)\freezeTBPaths.c $(freezeTB)\freezeTBPaths.h $(freezeTB)\freezeTBDefs.h $(genLib)\ulCp.$(O) $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(freezeTB)\freezeTBPaths.$(O) $(CFLAGS) $(freezeTB)\freezeTBPaths.c
+$(genFreezeTB)\drugAry.$O: \
+	$(genFreezeTB)\drugAry.c $(genFreezeTB)\drugAry.h
+		$(CC) /Fo:$(genFreezeTB)\drugAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\drugAry.c
 
-$(genLib)\base10str.$(O): $(genLib)\base10str.c $(genLib)\base10str.h
-	$(CC) /Fo:$(genLib)\base10str.$(O) $(CFLAGS) $(genLib)\base10str.c
+$(genLib)\fileFun.$O: \
+	$(genLib)\fileFun.c \
+	$(genLib)\fileFun.h \
+	$(genLib)\ulCp.$O
+		$(CC) /Fo:$(genLib)\fileFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\fileFun.c
 
-$(genLib)\numToStr.$(O): $(genLib)\numToStr.c $(genLib)\numToStr.h
-	$(CC) /Fo:$(genLib)\numToStr.$(O) $(CFLAGS) $(genLib)\numToStr.c
+$(genLib)\charCp.$O: \
+	$(genLib)\charCp.c \
+	$(genLib)\charCp.h
+		$(CC) /Fo:$(genLib)\charCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\charCp.c
 
-$(genLib)\charCp.$(O): $(genLib)\charCp.c $(genLib)\charCp.h
-	$(CC) /Fo:$(genLib)\charCp.$(O) $(CFLAGS) $(genLib)\charCp.c
+$(genBio)\samEntry.$O: \
+	$(genBio)\samEntry.c 	$(genBio)\samEntry.h \
+	$(genLib)\fileFun.$O \
+	$(genLib)\strAry.$O \
+	$(genLib)\base10str.$O \
+	$(genLib)\numToStr.$O \
+	$(genBio)\ntTo5Bit.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genBio)\samEntry.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\samEntry.c
 
-$(genLib)\ulCp.$(O): $(genLib)\ulCp.c $(genLib)\ulCp.h
-	$(CC) /Fo:$(genLib)\ulCp.$(O) $(CFLAGS) $(genLib)\ulCp.c
+$(genLib)\strAry.$O: \
+	$(genLib)\strAry.c \
+	$(genLib)\strAry.h \
+	$(genLib)\ulCp.$O
+		$(CC) /Fo:$(genLib)\strAry.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\strAry.c
 
-$(genLib)\genMath.$(O): $(genLib)\genMath.c $(genLib)\genMath.h
-	$(CC) /Fo:$(genLib)\genMath.$(O) $(CFLAGS) $(genLib)\genMath.c
+$(genLib)\numToStr.$O: \
+	$(genLib)\numToStr.c \
+	$(genLib)\numToStr.h
+		$(CC) /Fo:$(genLib)\numToStr.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\numToStr.c
 
-$(genLib)\shellSort.$(O): $(genLib)\shellSort.c $(genLib)\shellSort.h
-	$(CC) /Fo:$(genLib)\shellSort.$(O) $(CFLAGS) $(genLib)\shellSort.c
+$(genLib)\base10str.$O: \
+	$(genLib)\base10str.c \
+	$(genLib)\base10str.h
+		$(CC) /Fo:$(genLib)\base10str.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\base10str.c
 
-$(genLib)\strAry.$(O): $(genLib)\strAry.c $(genLib)\strAry.h $(genLib)\ulCp.$(O)
-	$(CC) /Fo:$(genLib)\strAry.$(O) $(CFLAGS) $(genLib)\strAry.c
+$(genBio)\codonFun.$O: \
+	$(genBio)\codonFun.c \
+	$(genBio)\codonFun.h \
+	$(genBio)\codonTbl.h \
+	$(genBio)\ntTo2Bit.h \
+	$(genBio)\revNtTo2Bit.h
+		$(CC) /Fo:$(genBio)\codonFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\codonFun.c
 
-$(genBio)\codonFun.$(O): $(genBio)\codonFun.c $(genBio)\codonFun.h $(genBio)\codonTbl.h $(genBio)\ntTo2Bit.h $(genBio)\revNtTo2Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\codonFun.$(O) $(CFLAGS) $(genBio)\codonFun.c
+$(genLib)\genMath.$O: \
+	$(genLib)\genMath.c \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genLib)\genMath.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\genMath.c
 
-$(genBio)\seqST.$(O): $(genBio)\seqST.c $(genBio)\seqST.h $(genLib)\ulCp.$(O) $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\seqST.$(O) $(CFLAGS) $(genBio)\seqST.c
+$(genFreezeTB)\miruTbl.$O: \
+	$(genFreezeTB)\miruTbl.c \
+	$(genFreezeTB)\miruTbl.h \
+	$(genBio)\samEntry.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\genMath.h \
+	$(genFreezeTB)\tbMiruDefs.h
+		$(CC) /Fo:$(genFreezeTB)\miruTbl.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\miruTbl.c
 
-$(genBio)\geneCoord.$(O): $(genBio)\geneCoord.c $(genBio)\geneCoord.h $(genLib)\ulCp.$(O) $(genLib)\base10str.$(O) $(genLib)\charCp.$(O) $(genLib)\genMath.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\geneCoord.$(O) $(CFLAGS) $(genBio)\geneCoord.c
+$(genFreezeTB)\spolFind.$O: \
+	$(genFreezeTB)\spolFind.c \
+	$(genFreezeTB)\spolFind.h \
+	$(genFreezeTB)\spolST.$O \
+	$(genBio)\seqST.$O \
+	$(genBio)\samEntry.$O \
+	$(genAln)\kmerFind.$O
+		$(CC) /Fo:$(genFreezeTB)\spolFind.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\spolFind.c
 
-$(genBio)\samEntry.$(O): $(genBio)\samEntry.c $(genBio)\samEntry.h $(genLib)\ulCp.$(O) $(genLib)\base10str.$(O) $(genLib)\numToStr.$(O) $(genBio)\ntTo5Bit.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genBio)\samEntry.$(O) $(CFLAGS) $(genBio)\samEntry.c
+$(genFreezeTB)\spolST.$O: \
+	$(genFreezeTB)\spolST.c \
+	$(genFreezeTB)\spolST.h \
+	$(genLib)\numToStr.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h \
+	$(genFreezeTB)\tbSpolDefs.h
+		$(CC) /Fo:$(genFreezeTB)\spolST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\spolST.c
 
-$(genBio)\trimSam.$(O): $(genBio)\trimSam.c $(genBio)\trimSam.h $(genBio)\samEntry.$(O)
-	$(CC) /Fo:$(genBio)\trimSam.$(O) $(CFLAGS) $(genBio)\trimSam.c
+$(genBio)\seqST.$O: \
+	$(genBio)\seqST.c \
+	$(genBio)\seqST.h \
+	$(genLib)\fileFun.$O
+		$(CC) /Fo:$(genBio)\seqST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\seqST.c
 
-$(genBio)\ampDepth.$(O): $(genBio)\ampDepth.c $(genBio)\ampDepth.h $(genBio)\samEntry.$(O) $(genBio)\geneCoord.$(O) $(genLib)\genMath.h
-	$(CC) /Fo:$(genBio)\ampDepth.$(O) $(CFLAGS) $(genBio)\ampDepth.c
+$(genAln)\kmerFind.$O: \
+	$(genAln)\kmerFind.c \
+	$(genAln)\memwater.$O \
+	$(genLib)\shellSort.$O \
+	$(genLib)\genMath.h \
+	$(genBio)\kmerBit.h
+		$(CC) /Fo:$(genAln)\kmerFind.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\kmerFind.c
 
-$(genBio)\maskPrim.$(O): $(genBio)\maskPrim.c $(genBio)\maskPrim.h $(genBio)\samEntry.$(O) $(genLib)\shellSort.$(O)
-	$(CC) /Fo:$(genBio)\maskPrim.$(O) $(CFLAGS) $(genBio)\maskPrim.c
+$(genAln)\memwater.$O: \
+	$(genAln)\memwater.c \
+	$(genAln)\alnSet.$O \
+	$(genAln)\indexToCoord.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\memwater.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\memwater.c
 
-$(genBio)\adjCoords.$(O): $(genBio)\adjCoords.c $(genBio)\adjCoords.h $(genBio)\samEntry.$(O) $(genBio)\geneCoord.$(O)
-	$(CC) /Fo:$(genBio)\adjCoords.$(O) $(CFLAGS) $(genBio)\adjCoords.c
+$(genAln)\alnSet.$O: \
+	$(genAln)\alnSet.c \
+	$(genAln)\alnDefs.h \
+	$(genLib)\fileFun.$O \
+	$(genLib)\ulCp.$O \
+	$(genLib)\base10str.$O \
+	$(genAln)\alnDefs.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genAln)\alnSet.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\alnSet.c
 
-$(genBio)\rmHomo.$O: $(genBio)\rmHomo.c $(genBio)\rmHomo.h $(genBio)\samEntry.$O $(genBio)\seqST.$O
-	$(CC) /Fo:$(genBio)\rmHomo.$O $(CFLAGS) $(genBio)\rmHomo.c
+$(genAln)\indexToCoord.$O: \
+	$(genAln)\indexToCoord.c \
+	$(genAln)\indexToCoord.h
+		$(CC) /Fo:$(genAln)\indexToCoord.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAln)\indexToCoord.c
 
-$(genBio)\tbCon.$(O): $(genBio)\tbCon.c $(genBio)\tbCon.h $(genBio)\tbConDefs.h $(genBio)\samEntry.$(O) $(genLib)\genMath.$(O)
-	$(CC) /Fo:$(genBio)\tbCon.$(O) $(CFLAGS) $(genBio)\tbCon.c
+$(genLib)\shellSort.$O: \
+	$(genLib)\shellSort.c \
+	$(genLib)\shellSort.h
+		$(CC) /Fo:$(genLib)\shellSort.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\shellSort.c
 
-$(genBio)\edDist.$(O): $(genBio)\edDist.c $(genBio)\edDist.h $(genBio)\samEntry.$(O) $(genBio)\seqST.$(O) $(genLib)\genMath.h
-	$(CC) /Fo:$(genBio)\edDist.$(O) $(CFLAGS) $(genBio)\edDist.c
+$(genBio)\trimSam.$O: \
+	$(genBio)\trimSam.c \
+	$(genBio)\trimSam.h \
+	$(genBio)\samEntry.$O
+		$(CC) /Fo:$(genBio)\trimSam.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\trimSam.c
 
-$(genAln)\indexToCoord.$(O): $(genAln)\indexToCoord.c $(genAln)\indexToCoord.h
-	$(CC) /Fo:$(genAln)\indexToCoord.$(O) $(CFLAGS) $(genAln)\indexToCoord.c
+$(genBio)\maskPrim.$O: \
+	$(genBio)\maskPrim.c \
+	$(genBio)\maskPrim.h \
+	$(genBio)\samEntry.$O \
+	$(genLib)\shellSort.$O
+		$(CC) /Fo:$(genBio)\maskPrim.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\maskPrim.c
 
-$(genAln)\alnSet.$(O): $(genAln)\alnSet.c $(genAln)\alnSet.h $(genAln)\alnDefs.h $(genLib)\base10str.$(O) $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(genAln)\alnSet.$(O) $(CFLAGS) $(genAln)\alnSet.c
+$(genBio)\ampDepth.$O: \
+	$(genBio)\ampDepth.c \
+	$(genBio)\ampDepth.h \
+	$(genBio)\geneCoord.$O \
+	$(genBio)\samEntry.$O
+		$(CC) /Fo:$(genBio)\ampDepth.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\ampDepth.c
 
-$(genAln)\memwater.$(O): $(genAln)\memwater.c $(genAln)\memwater.h $(genAln)\alnSet.$(O) $(genAln)\indexToCoord.$(O) $(genBio)\seqST.$(O) $(genLib)\genMath.h
-	$(CC) /Fo:$(genAln)\memwater.$(O) $(CFLAGS) $(genAln)\memwater.c
+$(genBio)\geneCoord.$O: \
+	$(genBio)\geneCoord.c \
+	$(genBio)\geneCoord.h \
+	$(genLib)\fileFun.$O \
+	$(genLib)\base10str.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\genMath.h
+	$(CC) /Fo:$(genBio)\geneCoord.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genBio)\geneCoord.c
 
-$(genAln)\kmerFind.$(O): $(genAln)\kmerFind.c $(genAln)\kmerFind.h $(genAln)\memwater.$(O) $(genLib)\shellSort.$(O) 
-	$(CC) /Fo:$(genAln)\kmerFind.$(O) $(CFLAGS) $(genAln)\kmerFind.c
+$(genBio)\adjCoords.$O: \
+	$(genBio)\adjCoords.c \
+	$(genBio)\adjCoords.h \
+	$(genBio)\geneCoord.$O \
+	$(genBio)\samEntry.$O
+		$(CC) /Fo:$(genBio)\adjCoords.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genBio)\adjCoords.c
 
-$(genClust)\edClust.$(O): $(genClust)\edClust.c $(genClust)\edClust.h $(genClust)\clustST.$(O)
-	$(CC) /Fo:$(genClust)\edClust.$(O) $(CFLAGS) $(genClust)\edClust.c
+$(genBio)\rmHomo.$O: \
+	$(genBio)\rmHomo.c \
+	$(genBio)\rmHomo.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\seqST.$O
+		$(CC) /Fo:$(genBio)\rmHomo.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\rmHomo.c
 
-$(genClust)\clustST.$(O): $(genClust)\clustST.c $(genClust)\clustST.h $(genBio)\samEntry.$(O) $(genBio)\tbCon.$(O) $(genBio)\edDist.$(O) $(genLib)\genMath.h
-	$(CC) /Fo:$(genClust)\clustST.$(O) $(CFLAGS) $(genClust)\clustST.c
+$(genClust)\edClust.$O: \
+	$(genClust)\edClust.c \
+	$(genClust)\edClust.h \
+	$(genClust)\clustST.$O
+		$(CC) /Fo:$(genClust)\edClust.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genClust)\edClust.c
 
-$(tbMiru)\miruTbl.$(O): $(tbMiru)\miruTbl.c $(tbMiru)\miruTbl.h $(tbMiru)\tbMiruDefs.h $(genBio)\samEntry.$(O) $(genLib)\charCp.$(O) $(genLib)\genMath.$(O)
-	$(CC) /Fo:$(tbMiru)\miruTbl.$(O) $(CFLAGS) $(tbMiru)\miruTbl.c
 
-$(tbAmr)\drugAry.$(O): $(tbAmr)\drugAry.c $(tbAmr)\drugAry.h
-	$(CC) /Fo:$(tbAmr)\drugAry.$(O) $(CFLAGS) $(tbAmr)\drugAry.c
+$(genClust)\clustST.$O: \
+	$(genClust)\clustST.c \
+	$(genClust)\clustST.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\tbCon.$O \
+	$(genBio)\edDist.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genClust)\clustST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genClust)\clustST.c
 
-$(tbAmr)\amrST.$(O): $(tbAmr)\amrST.c $(tbAmr)\amrST.h $(tbAmr)\drugAry.$(O) $(genLib)\ulCp.$(O) $(genLib)\charCp.$(O) $(genLib)\base10str.$(O) $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(tbAmr)\amrST.$(O) $(CFLAGS) $(tbAmr)\amrST.c
 
-$(tbAmr)\checkAmr.$(O): $(tbAmr)\checkAmr.c $(tbAmr)\checkAmr.h $(tbAmr)\amrST.$(O) $(genBio)\samEntry.$(O) $(genBio)\codonFun.$(O) $(genLib)\genMath.$(O)
-	$(CC) /Fo:$(tbAmr)\checkAmr.$(O) $(CFLAGS) $(tbAmr)\checkAmr.c
+$(genBio)\tbCon.$O: \
+	$(genBio)\tbCon.c \
+	$(genBio)\tbCon.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\tbConDefs.h \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genBio)\tbCon.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\tbCon.c
 
-$(tbSpol)\spolFind.$(O): $(tbSpol)\spolFind.c $(tbSpol)\spolFind.h $(tbSpol)\tbSpolDefs.h $(genBio)\samEntry.$(O) $(genBio)\seqST.$(O) $(genAln)\kmerFind.$(O)
-	$(CC) /Fo:$(tbSpol)\spolFind.$(O) $(CFLAGS) $(tbSpol)\spolFind.c
+$(genBio)\edDist.$O: \
+	$(genBio)\edDist.c \
+	$(genBio)\edDist.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genBio)\edDist.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genBio)\edDist.c
 
-$(tbSpol)\spolST.$(O): $(tbSpol)\spolST.c $(tbSpol)\spolST.h  $(tbSpol)\tbSpolDefs.h $(genLib)\ulCp.$(O) $(genLib)\charCp.$(O) $(genLib)\numToStr.$(O) $(genLib)\genMath.h $(genLib)\dataTypeShortHand.h
-	$(CC) /Fo:$(tbSpol)\spolST.$(O) $(CFLAGS) $(tbSpol)\spolST.c
+$(genAln)\mapRead.$O: \
+	$(genAln)\mapRead.c \
+	$(genAln)\mapRead.h \
+	$(genAln)\needle.$O \
+	$(genAln)\water.$O \
+	$(genAln)\dirMatrix.$O \
+	$(genBio)\kmerFun.$O \
+	$(genLib)\shellSort.$O \
+	$(genAln)\defsMapRead.h  \
+	$(genLib)\genMath.h
+	 	$(CC) /Fo:$(genAln)\mapRead.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\mapRead.c
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec06:
-#   - install and clean commands
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$(genAln)\needle.$O: \
+	$(genAln)\needle.c \
+	$(genAln)\dirMatrix.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\needle.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\needle.c
+
+$(genAln)\dirMatrix.$O: \
+	$(genAln)\dirMatrix.c \
+	$(genAln)\alnSet.$O \
+	$(genAln)\indexToCoord.$O \
+	$(genBio)\samEntry.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\charCp.$O
+		$(CC) /Fo:$(genAln)\dirMatrix.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAln)\dirMatrix.c
+
+$(genAln)\water.$O: $(genAln)\water.c \
+	$(genAln)\dirMatrix.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\water.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\water.c
+
+$(genBio)\kmerFun.$O: \
+	$(genBio)\kmerFun.c \
+	$(genBio)\kmerFun.h \
+	$(genBio)\kmerBit.h
+		$(CC) /Fo:$(genBio)\kmerFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\kmerFun.c
+
+$(genBio)\gzSeqST.$O: \
+	$(genBio)\gzSeqST.c \
+	$(genBio)\gzSeqST.h \
+	$(genBio)\seqST.$O \
+ 	$(genLib)\inflate.$O
+		$(CC) /Fo:$(genBio)\gzSeqST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\gzSeqST.c
+
+$(genLib)\inflate.$O: \
+	$(genLib)\inflate.c \
+	$(genLib)\inflate.h \
+	$(genLib)\checkSum.$O \
+	$(genLib)\ulCp.$O \
+	$(genLib)\genMath.$O \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genLib)\inflate.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\inflate.c
+
+$(genLib)\checkSum.$O: \
+	$(genLib)\checkSum.c \
+	$(genLib)\checkSum.h \
+	$(genLib)\endin.$O
+	$(CC) /Fo:$(genLib)\checkSum.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genLib)\checkSum.c
+
+$(genLib)\endin.$O: \
+	$(genLib)\endin.c \
+	$(genLib)\endin.h
+		$(CC) /Fo:$(genLib)\endin.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\endin.c
 
 install:
-	move $(NAME) $(PREFIX);
+	move $(NAME) $(PREFIX)
 
 clean:
-	del $(objFiles) $(freezeTBObjs);
+	del $(objFiles)

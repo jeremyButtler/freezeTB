@@ -73,7 +73,7 @@
 #include "samEntry.h"
 
 /*.h files only (no .c file or not using .c file*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../genLib/endLine.h"
 #include "../genLib/genMath.h" /*only using .h max macro*/
 #include "tbConDefs.h"
 
@@ -81,6 +81,7 @@
 ! Hidden libraries
 !   o .c  #include "../genLib/base10str.h"
 !   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genLib/fileFun.h"
 !   o .h  #include "ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -115,6 +116,7 @@ init_insBase_tbCon(
 \-------------------------------------------------------*/
 struct ins_tbCon *
 mkIns_tbCon(
+   void
 ){
    struct ins_tbCon *retMacST =
       malloc(sizeof(struct ins_tbCon));
@@ -212,6 +214,7 @@ init_conNt_tbCon(
 \-------------------------------------------------------*/
 struct conNt_tbCon *
 mk_conBase_tbCon(
+   void
 ){
    struct conNt_tbCon *retST =
       malloc(sizeof(struct conNt_tbCon));
@@ -358,7 +361,7 @@ void
 freeStack_set_tbCon(
    struct set_tbCon *setSTPtr
 ){
-   setSTPtr = setSTPtr;
+   init_set_tbCon(setSTPtr);
 } /*freeStack_set_tbCon*/
 
 /*-------------------------------------------------------\
@@ -410,18 +413,18 @@ addRead_tbCon(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;        /*err reporting at end*/
+   signed char errSC = 0;        /*err reporting at end*/
 
    /*For loops*/
-   uint uiCig = 0;         /*for iterating throug cigars*/
-   uint uiBase = 0;        /*for iterating through bases*/
-   uint uiRef = 0;         /*position at in the reference*/
-   uint endCigUI = 0;      /*end of cigar entry*/
+   unsigned int uiCig = 0;    /*iterating throug cigars*/
+   unsigned int uiBase = 0;   /*iterating through bases*/
+   unsigned int uiRef = 0;    /*position at in reference*/
+   unsigned int endCigUI = 0; /*end of cigar entry*/
 
    /*For adding insertions to the consensus*/
-   sint siIns = 0;         /*position at in insertion*/
-   sint lenInsSI = 0;      /*length of found ins*/
-   schar *insHeapStr  = 0; /*memory to hold insertion*/
+   signed int siIns = 0;      /*position at in insertion*/
+   signed int lenInsSI = 0;   /*length of found ins*/
+   signed char *insHeapStr  = 0;/*memory to hold ins*/
 
    /*for adding insertions or looking for insertions*/
    struct ins_tbCon *insST = 0;
@@ -539,11 +542,8 @@ addRead_tbCon(
    uiBase = 0;
    uiRef = samSTPtr->refStartUI;
 
-   for(
-      uiCig = 0;
-      uiCig < samSTPtr->lenCigUI;
-      ++uiCig
-   ){ /*Loop: add bases to the consensus*/
+   for(uiCig = 0; uiCig < samSTPtr->cigLenUI; ++uiCig)
+   { /*Loop: add bases to the consensus*/
 
       switch(samSTPtr->cigTypeStr[uiCig])
       { /*Switch: Check the cigar entry type*/
@@ -981,16 +981,17 @@ collapse_tbCon(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siFrag = 0;
-   uint uiRef = 0;     /*ref base on*/
-   uint uiEndRef = 0;  /*last base in amplicon/fragment*/
-   uint lenFragUI = 0; /*length of fragment/amplicon*/
-   uint uiBase = 0;    /*position on fragment (base on)*/
+   signed int siFrag = 0;
+   unsigned int uiRef = 0;   /*ref base on*/
+   unsigned int uiEndRef = 0;/*last base amplicon/fragment*/
+   unsigned int lenFragUI = 0;/*length fragment/amplicon*/
+   unsigned int uiBase = 0; /*fragment position; base on*/
 
-   uint uiCig = 0;     /*cigar entry on*/
-   uint lenCigUI = 0;
-   schar lastCigSC = '0';
-   uint extraInsUI = 0; /*max extra bases from ins's*/
+   unsigned int uiCig = 0;     /*cigar entry on*/
+   unsigned int cigLenUI = 0;
+   signed char lastCigSC = '0';
+   unsigned int extraInsUI = 0;
+      /*max extra bases from ins's*/
 
    /*General support*/
    float snpPerSupF = 0;
@@ -998,14 +999,15 @@ collapse_tbCon(
    float delPerSupF = 0;
 
    /*Support for a particler snp/match*/
-   uint nonMaskBaseUI = 0; /*number of non-anonymous*/
+   unsigned int nonMaskBaseUI = 0;
+      /*number of non-anonymous bases*/
    float aPercSupF = 0;
    float tPercSupF = 0;
    float cPercSupF = 0;
    float gPercSupF = 0;
 
    /*Find the most supported insertion*/
-   int keptReadsSI = 0;
+   signed int keptReadsSI = 0;
    struct ins_tbCon *curInsST = 0;
    struct ins_tbCon *bestInsST = 0;
 
@@ -1050,7 +1052,7 @@ collapse_tbCon(
       /*Find the length*/
       lenFragUI = uiRef - uiEndRef;
 
-      if(lenFragUI < (uint) settings->minLenSI)
+      if(lenFragUI < (unsigned int) settings->minLenSI)
       { /*If: This is beneath the min length to keep*/
          uiRef = uiEndRef;
          continue;
@@ -1221,7 +1223,7 @@ collapse_tbCon(
 
          if(insPerSupF >= settings->minPercInsF)
          { /*If: I have an insertion*/
-            lenCigUI += (lastCigSC != 'I');
+            cigLenUI += (lastCigSC != 'I');
             lastCigSC = 'I';
 
             bestInsST = conNtAryST[uiEndRef].insList;
@@ -1249,20 +1251,20 @@ collapse_tbCon(
 
          if(snpPerSupF >= settings->minPercSnpF)
          { /*If: I am keeping an mathc/snp*/
-            lenCigUI += (lastCigSC != 'M');
+            cigLenUI += (lastCigSC != 'M');
             lastCigSC = 'M';
          } /*If: I am keeping an mathc/snp*/
 
          else if(delPerSupF >= settings->minPercDelF)
          { /*Else If: I am keeping an deletion*/
-            lenCigUI += (lastCigSC != 'D');
+            cigLenUI += (lastCigSC != 'D');
             lastCigSC = 'D';
          } /*Else If: I am keeping an deletion*/
 
          /*For the cigar a mask is same as an snp/match*/
          else
          { /*Else: I am masking (snp/match case)*/
-            lenCigUI += (lastCigSC != 'M');
+            cigLenUI += (lastCigSC != 'M');
             lastCigSC = 'M';
          } /*Else: I am masking (snp/match case)*/
       } /*Loop: Find the memory for the fragment*/
@@ -1276,7 +1278,7 @@ collapse_tbCon(
       lenFragUI = uiEndRef - uiRef;
       ++lenFragUI; /*convert to index 1*/
 
-      if(lenFragUI < (uint) settings->minLenSI)
+      if(lenFragUI < (unsigned int) settings->minLenSI)
       { /*If: This is beneath the min length to keep*/
          uiRef = uiEndRef;
          continue;
@@ -1306,37 +1308,37 @@ collapse_tbCon(
       +   - make the query id
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      retSamST[siFrag].lenQryIdUC =
+      retSamST[siFrag].qryIdLenUC =
          cpStr_ulCp(
              retSamST[siFrag].qryIdStr,
              refIdStr
          );
 
       retSamST[siFrag].qryIdStr[
-         retSamST[siFrag].lenQryIdUC
+         retSamST[siFrag].qryIdLenUC
       ] = '_';
 
-      ++retSamST[siFrag].lenQryIdUC;
+      ++retSamST[siFrag].qryIdLenUC;
 
-      retSamST[siFrag].lenQryIdUC +=
+      retSamST[siFrag].qryIdLenUC +=
          numToStr(
             &retSamST[siFrag].qryIdStr[
-               retSamST[siFrag].lenQryIdUC
+               retSamST[siFrag].qryIdLenUC
             ],
          uiRef
       );
 
       retSamST[siFrag].qryIdStr[
-         retSamST[siFrag].lenQryIdUC
+         retSamST[siFrag].qryIdLenUC
       ] = '-';
 
-      ++retSamST[siFrag].lenQryIdUC;
+      ++retSamST[siFrag].qryIdLenUC;
 
-      retSamST[siFrag].lenQryIdUC +=
-         (uchar)
+      retSamST[siFrag].qryIdLenUC +=
+         (unsigned char)
          numToStr(
             &retSamST[siFrag].qryIdStr[
-               retSamST[siFrag].lenQryIdUC
+               retSamST[siFrag].qryIdLenUC
             ],
             uiEndRef
          ); /*Copy the ending position*/
@@ -1347,7 +1349,7 @@ collapse_tbCon(
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       /*Copy the reference id*/
-      retSamST[siFrag].lenRefIdUC =
+      retSamST[siFrag].refIdLenUC =
          cpDelim_ulCp(
             retSamST[siFrag].refIdStr,
             refIdStr,
@@ -1362,7 +1364,7 @@ collapse_tbCon(
 
       retSamST[siFrag].rNextStr[0] = '*';
       retSamST[siFrag].rNextStr[1] = '\0';
-      retSamST[siFrag].lenRNextUC = 1;
+      retSamST[siFrag].rnextLenUC = 1;
 
       /*The flag is already set up*/
       /*Not sure what to put for mapping quality, so using
@@ -1387,17 +1389,19 @@ collapse_tbCon(
       lenFragUI += extraInsUI;
 
       /*Make the sequence buffer*/
-      if(retSamST[siFrag].lenSeqBuffUI < lenFragUI + 1)
+      if(retSamST[siFrag].seqSizeUI < lenFragUI + 1)
       { /*If: I need to expand memory*/
          free(retSamST[siFrag].seqStr);
 
          retSamST[siFrag].seqStr =
-            malloc((lenFragUI + 9) * (sizeof(schar)));
+            malloc(
+               (lenFragUI + 9) * (sizeof(signed char))
+            );
 
          if(! retSamST[siFrag].seqStr)
             goto memErr_fun13_sec06_sub02;
 
-         retSamST[siFrag].lenSeqBuffUI = lenFragUI;
+         retSamST[siFrag].seqSizeUI = lenFragUI;
       } /*If: I need to expand memory*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1410,14 +1414,14 @@ collapse_tbCon(
       */
       retSamST[siFrag].qStr[0] = '*';
       retSamST[siFrag].qStr[1] = '\0';
-      retSamST[siFrag].lenQBuffUI = 2;
+      retSamST[siFrag].qSizeUI = 2;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun13 Sec04 Sub03 Cat07:
       +   - allocate memory for the cigar types buffer
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      if(retSamST[siFrag].lenCigBuffUI < lenCigUI + 1)
+      if(retSamST[siFrag].cigSizeUI < cigLenUI + 1)
       { /*If: I need to allocate memory for cigar buff*/
           if(retSamST->cigTypeStr)
              free(retSamST->cigTypeStr);
@@ -1425,12 +1429,14 @@ collapse_tbCon(
 
           /*Make the cigar types buffer*/
           retSamST[siFrag].cigTypeStr =
-             malloc((lenCigUI + 9) * sizeof(schar));
+             malloc(
+                (cigLenUI + 9) * sizeof(signed char)
+             );
 
           if(!retSamST[siFrag].cigTypeStr)
              goto memErr_fun13_sec06_sub02;
 
-          retSamST[siFrag].lenCigBuffUI = lenCigUI;
+          retSamST[siFrag].cigSizeUI = cigLenUI;
 
 
           if(retSamST->cigArySI)
@@ -1438,7 +1444,7 @@ collapse_tbCon(
           retSamST->cigArySI = 0;
 
           retSamST[siFrag].cigArySI =
-             malloc((lenCigUI + 9) * sizeof(sint));
+             malloc((cigLenUI + 9) * sizeof(signed int));
 
           if(!retSamST[siFrag].cigArySI)
              goto memErr_fun13_sec06_sub02;
@@ -1589,7 +1595,7 @@ collapse_tbCon(
                retSamST[siFrag].cigArySI[uiCig] +=
                   bestInsST->lenInsSI;
 
-               retSamST[siFrag].numInsUI +=
+               retSamST[siFrag].insCntUI +=
                   bestInsST->lenInsSI;
             } /*If: keeping insertion*/
          } /*If: an Insertion is supported here*/
@@ -1611,8 +1617,10 @@ collapse_tbCon(
          +     support for each base type
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
-         if(nonMaskBaseUI < (uint) settings->minDepthSI)
-            goto maskPos_fun13_sec05_sub05;
+         if(
+              nonMaskBaseUI
+            < (unsigned int) settings->minDepthSI
+         ) goto maskPos_fun13_sec05_sub05;
 
          else if(snpPerSupF >= settings->minPercSnpF)
          { /*If: snps were the best choice*/
@@ -1655,7 +1663,7 @@ collapse_tbCon(
                if(aPercSupF >= settings->minPercSnpF)
                { /*If: this was an A*/
                   retSamST[siFrag].seqStr[uiBase] = 'A';
-                  ++retSamST[siFrag].numMatchUI;
+                  ++retSamST[siFrag].matchCntUI;
                } /*If: this was an A*/
 
                else
@@ -1663,7 +1671,7 @@ collapse_tbCon(
                   retSamST[siFrag].seqStr[uiBase] =
                      settings->maskSC;
 
-                  ++retSamST[siFrag].numMaskUI;
+                  ++retSamST[siFrag].maskCntUI;
                } /*Else: not enough support to call*/
             } /*If: A has the most support*/
 
@@ -1675,7 +1683,7 @@ collapse_tbCon(
                if(tPercSupF >= settings->minPercSnpF)
                { /*If: this was an T*/
                   retSamST[siFrag].seqStr[uiBase] = 'T';
-                  ++retSamST[siFrag].numMatchUI;
+                  ++retSamST[siFrag].matchCntUI;
                } /*If: this was an T*/
 
                else
@@ -1683,7 +1691,7 @@ collapse_tbCon(
                   retSamST[siFrag].seqStr[uiBase] =
                      settings->maskSC;
 
-                  ++retSamST[siFrag].numMaskUI;
+                  ++retSamST[siFrag].maskCntUI;
                } /*Else: not enough support to call*/
             } /*Else If: T has the most support*/
 
@@ -1693,7 +1701,7 @@ collapse_tbCon(
                if(cPercSupF >= settings->minPercSnpF)
                { /*If: this was an C*/
                   retSamST[siFrag].seqStr[uiBase] = 'C';
-                  ++retSamST[siFrag].numMatchUI;
+                  ++retSamST[siFrag].matchCntUI;
                } /*If: this was an C*/
 
                else
@@ -1701,7 +1709,7 @@ collapse_tbCon(
                   retSamST[siFrag].seqStr[uiBase] =
                      settings->maskSC;
 
-                  ++retSamST[siFrag].numMaskUI;
+                  ++retSamST[siFrag].maskCntUI;
                } /*Else: not enough support to call*/
             } /*Else If: C has the most support*/
 
@@ -1711,7 +1719,7 @@ collapse_tbCon(
                if(gPercSupF >= settings->minPercSnpF)
                { /*If: this was an G*/
                   retSamST[siFrag].seqStr[uiBase] = 'G';
-                  ++retSamST[siFrag].numMatchUI;
+                  ++retSamST[siFrag].matchCntUI;
                } /*If: this was an G*/
 
                else
@@ -1719,7 +1727,7 @@ collapse_tbCon(
                   retSamST[siFrag].seqStr[uiBase] =
                      settings->maskSC;
 
-                  ++retSamST[siFrag].numMaskUI;
+                  ++retSamST[siFrag].maskCntUI;
                } /*Else: not enough support to call*/
             } /*Else If: G has the most support*/
 
@@ -1748,7 +1756,7 @@ collapse_tbCon(
             } /*If: This is a new cigar entry*/
 
             ++(retSamST[siFrag].cigArySI[uiCig]);
-            ++retSamST[siFrag].numDelUI;
+            ++retSamST[siFrag].delCntUI;
          } /*Else if: there was a deletion*/
 
          /***********************************************\
@@ -1778,14 +1786,14 @@ collapse_tbCon(
 
             ++uiBase;
             ++retSamST[siFrag].cigArySI[uiCig];
-            ++retSamST[siFrag].numMaskUI;
+            ++retSamST[siFrag].maskCntUI;
          } /*Else: I have no support, assume mask snp*/
 
          ++uiRef;
       } /*Loop: Collapse the fragment*/
 
       retSamST[siFrag].readLenUI = uiBase;
-      retSamST[siFrag].lenCigUI = uiCig + 1;
+      retSamST[siFrag].cigLenUI = uiCig + 1;
          /*The read length is at index 1, but the cigar is
          `   at index 0, so needs a + 1
          */
@@ -1873,7 +1881,7 @@ collapse_tbCon(
 |     o length of the conNt_tbCon array
 |   - refIdStr:
 |     o c-string with referernce sequence name
-|   - numMaskUIPtr:
+|   - maskCntUIPtr:
 |     o pointer to unsigned int to have number of bases
 |       masked in consensus
 |   - settings:
@@ -1885,7 +1893,7 @@ collapse_tbCon(
 |   - Modifies:
 |     o lenSamST to hold the returned samEntry arrray
 |       length
-|     o numMaskUIPtr to have number of masked bases
+|     o maskCntUIPtr to have number of masked bases
 |     o errSC:
 |       - 0 for no errors
 |       - def_noSeq_tbConDefs if could not build consensus
@@ -1902,7 +1910,7 @@ noFragCollapse_tbCon(
    struct conNt_tbCon conNtAryST[], /*to collapse*/
    unsigned int lenConAryUI,   /*length of consensus*/
    signed char *refIdStr,      /*name of reference seq*/
-   unsigned int *numMaskUIPtr, /*# bases masked*/
+   unsigned int *maskCntUIPtr, /*# bases masked*/
    struct set_tbCon *settings, /*settings for collapsing*/
    signed char *errSC          /*error reports*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -1928,14 +1936,15 @@ noFragCollapse_tbCon(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   uint uiRef = 0;     /*ref base on*/
-   uint lenFragUI = 0; /*length of fragment/amplicon*/
-   uint uiBase = 0;    /*position on fragment (base on)*/
+   unsigned int uiRef = 0;    /*ref base on*/
+   unsigned int lenFragUI = 0;/*fragment/amplicon length*/
+   unsigned int uiBase = 0; /*fragment position; base on*/
 
-   uint uiCig = 0;     /*cigar entry on*/
-   uint lenCigUI = 0;
-   schar lastCigSC = '0';
-   uint extraInsUI = 0; /*max extra bases from ins's*/
+   unsigned int uiCig = 0;     /*cigar entry on*/
+   unsigned int cigLenUI = 0;
+   signed char lastCigSC = '0';
+   unsigned int extraInsUI = 0;
+      /*max extra bases from ins's*/
 
    /*General support*/
    float snpPerSupF = 0;
@@ -1943,28 +1952,29 @@ noFragCollapse_tbCon(
    float delPerSupF = 0;
 
    /*Support for a particler snp/match*/
-   uint nonMaskBaseUI = 0; /*number of non-anonymous*/
+   unsigned int nonMaskBaseUI = 0;
+      /*number of non-anonymous bases*/
    float aPercSupF = 0;
    float tPercSupF = 0;
    float cPercSupF = 0;
    float gPercSupF = 0;
 
    /*Find the most supported insertion*/
-   int keptReadsSI = 0;
+   signed int keptReadsSI = 0;
    struct ins_tbCon *curInsST = 0;
    struct ins_tbCon *bestInsST = 0;
 
    struct samEntry *retSamST = 0;
 
-   sint startSI = -1;
-   sint endSI = 0;
+   signed int startSI = -1;
+   signed int endSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun14 Sec02:
    ^   - allocate memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   *numMaskUIPtr = 0;
+   *maskCntUIPtr = 0;
 
    retSamST = malloc(sizeof(struct samEntry));
 
@@ -2013,17 +2023,17 @@ noFragCollapse_tbCon(
          ) continue;
 
          else
-            startSI = (sint) uiRef;
+            startSI = (signed int) uiRef;
       } /*If: have not found the start yet*/
 
       if(
            conNtAryST[uiRef].ntKeptSI
          >= settings->minDepthSI
-      ) endSI = (sint) uiRef; /*find last base*/
+      ) endSI = (signed int) uiRef; /*find last base*/
 
       else
       { /*Else: low read depth*/
-         lenCigUI += (lastCigSC != 'M');
+         cigLenUI += (lastCigSC != 'M');
          lastCigSC = 'M';
       } /*Else: low read depth*/
 
@@ -2083,7 +2093,7 @@ noFragCollapse_tbCon(
 
       if(insPerSupF >= settings->minPercInsF)
       { /*If: I have an insertion*/
-         lenCigUI += (lastCigSC != 'I');
+         cigLenUI += (lastCigSC != 'I');
          lastCigSC = 'I';
 
          bestInsST = conNtAryST[uiRef].insList;
@@ -2111,20 +2121,20 @@ noFragCollapse_tbCon(
 
       if(snpPerSupF >= settings->minPercSnpF)
       { /*If: I am keeping an mathc/snp*/
-         lenCigUI += (lastCigSC != 'M');
+         cigLenUI += (lastCigSC != 'M');
          lastCigSC = 'M';
       } /*If: I am keeping an mathc/snp*/
 
       else if(delPerSupF >= settings->minPercDelF)
       { /*Else If: I am keeping an deletion*/
-         lenCigUI += (lastCigSC != 'D');
+         cigLenUI += (lastCigSC != 'D');
          lastCigSC = 'D';
       } /*Else If: I am keeping an deletion*/
 
       /*For the cigar a mask is same as an snp/match*/
       else
       { /*Else: I am masking (snp/match case)*/
-         lenCigUI += (lastCigSC != 'M');
+         cigLenUI += (lastCigSC != 'M');
          lastCigSC = 'M';
       } /*Else: I am masking (snp/match case)*/
    } /*Loop: find memory usage*/
@@ -2141,7 +2151,7 @@ noFragCollapse_tbCon(
    /*will add in extra insertion nucleotides later*/
    ++lenFragUI; /*convert to index 1*/
 
-   if(lenFragUI < (uint) settings->minLenSI)
+   if(lenFragUI < (unsigned int) settings->minLenSI)
       goto noConErr_fun14_sec06_sub03; /*to small*/
 
    /*****************************************************\
@@ -2168,30 +2178,30 @@ noFragCollapse_tbCon(
    +   - make the query id
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   retSamST->lenQryIdUC =
+   retSamST->qryIdLenUC =
       cpStr_ulCp(
           retSamST->qryIdStr,
           refIdStr
       ); /*get reference id*/
 
-   retSamST->qryIdStr[retSamST->lenQryIdUC] = '_';
-   ++retSamST->lenQryIdUC;
+   retSamST->qryIdStr[retSamST->qryIdLenUC] = '_';
+   ++retSamST->qryIdLenUC;
 
-   retSamST->lenQryIdUC +=
-      (uchar)
+   retSamST->qryIdLenUC +=
+      (unsigned char)
       numToStr(
-         &retSamST->qryIdStr[retSamST->lenQryIdUC],
-         (uint) startSI
+         &retSamST->qryIdStr[retSamST->qryIdLenUC],
+         (unsigned int) startSI
       ); /*add starting coordinate*/
 
-   retSamST->qryIdStr[retSamST->lenQryIdUC] = '-';
-   ++retSamST->lenQryIdUC;
+   retSamST->qryIdStr[retSamST->qryIdLenUC] = '-';
+   ++retSamST->qryIdLenUC;
 
-   retSamST->lenQryIdUC +=
-      (uchar)
+   retSamST->qryIdLenUC +=
+      (unsigned char)
       numToStr(
-         &retSamST->qryIdStr[retSamST->lenQryIdUC],
-         (uint) endSI
+         &retSamST->qryIdStr[retSamST->qryIdLenUC],
+         (unsigned int) endSI
       ); /*Copy the ending position*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2200,7 +2210,7 @@ noFragCollapse_tbCon(
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    /*Copy the reference id*/
-   retSamST->lenRefIdUC =
+   retSamST->refIdLenUC =
       cpDelim_ulCp(
          retSamST->refIdStr,
          refIdStr,
@@ -2215,7 +2225,7 @@ noFragCollapse_tbCon(
 
    retSamST->rNextStr[0] = '*';
    retSamST->rNextStr[1] = '\0';
-   retSamST->lenRNextUC = 1;
+   retSamST->rnextLenUC = 1;
 
    /*The flag is already set up*/
    /*Not sure what to put for mapping quality, so using
@@ -2240,17 +2250,19 @@ noFragCollapse_tbCon(
    lenFragUI += extraInsUI;
 
    /*Make the sequence buffer*/
-   if(retSamST->lenSeqBuffUI < lenFragUI + 1)
+   if(retSamST->seqSizeUI < lenFragUI + 1)
    { /*If: I need to expand memory*/
       free(retSamST->seqStr);
 
       retSamST->seqStr =
-         malloc((lenFragUI + 9) * (sizeof(schar)));
+         malloc(
+            (lenFragUI + 9) * (sizeof(signed char))
+         );
 
       if(! retSamST->seqStr)
          goto memErr_fun14_sec06_sub02;
 
-      retSamST->lenSeqBuffUI = lenFragUI;
+      retSamST->seqSizeUI = lenFragUI;
    } /*If: I need to expand memory*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2263,14 +2275,14 @@ noFragCollapse_tbCon(
    */
    retSamST->qStr[0] = '*';
    retSamST->qStr[1] = '\0';
-   retSamST->lenQBuffUI = 2;
+   retSamST->qSizeUI = 2;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun14 Sec04 Sub02 Cat07:
    +   - allocate memory for the cigar types buffer
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   if(retSamST->lenCigBuffUI < lenCigUI + 1)
+   if(retSamST->cigSizeUI < cigLenUI + 1)
    { /*If: I need to allocate memory for cigar buff*/
        if(retSamST->cigTypeStr)
           free(retSamST->cigTypeStr);
@@ -2278,12 +2290,14 @@ noFragCollapse_tbCon(
 
        /*Make the cigar types buffer*/
        retSamST->cigTypeStr =
-          malloc((lenCigUI + 9) * sizeof(schar));
+          malloc(
+             (cigLenUI + 9) * sizeof(signed char)
+          );
 
        if(!retSamST->cigTypeStr)
           goto memErr_fun14_sec06_sub02;
 
-       retSamST->lenCigBuffUI = lenCigUI;
+       retSamST->cigSizeUI = cigLenUI;
 
 
        if(retSamST->cigArySI)
@@ -2291,7 +2305,7 @@ noFragCollapse_tbCon(
        retSamST->cigArySI = 0;
 
        retSamST->cigArySI =
-          malloc((lenCigUI + 9) * sizeof(sint));
+          malloc((cigLenUI + 9) * sizeof(signed int));
 
        if(!retSamST->cigArySI)
           goto memErr_fun14_sec06_sub02;
@@ -2340,7 +2354,7 @@ noFragCollapse_tbCon(
       ){ /*If: low read depth*/
 
          retSamST->seqStr[uiBase] = settings->maskSC;
-         ++(*numMaskUIPtr);
+         ++(*maskCntUIPtr);
 
          ++uiBase;
          ++startSI;
@@ -2358,7 +2372,7 @@ noFragCollapse_tbCon(
          } /*If: need to add a new cigar entry*/
 
          ++retSamST->cigArySI[uiCig];
-         ++retSamST->numMaskUI;
+         ++retSamST->maskCntUI;
 
          continue;
       } /*If: low read depth*/
@@ -2478,7 +2492,7 @@ noFragCollapse_tbCon(
             retSamST->cigArySI[uiCig] +=
                bestInsST->lenInsSI;
 
-            retSamST->numInsUI +=
+            retSamST->insCntUI +=
                bestInsST->lenInsSI;
          } /*If: keeping insertion*/
       } /*If: an Insertion is supported here*/
@@ -2500,8 +2514,10 @@ noFragCollapse_tbCon(
       +     support for each base type
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      if(nonMaskBaseUI < (uint) settings->minDepthSI)
-         goto maskPos_fun14_sec05_sub05;
+      if(
+           nonMaskBaseUI
+         < (unsigned int) settings->minDepthSI
+      ) goto maskPos_fun14_sec05_sub05;
 
       else if(snpPerSupF >= settings->minPercSnpF)
       { /*If: snps were the best choice*/
@@ -2544,14 +2560,14 @@ noFragCollapse_tbCon(
             if(aPercSupF >= settings->minPercSnpF)
             { /*If: this was an A*/
                retSamST->seqStr[uiBase] = 'A';
-               ++retSamST->numMatchUI;
+               ++retSamST->matchCntUI;
             } /*If: this was an A*/
 
             else
             { /*Else: not enough support to call*/
                retSamST->seqStr[uiBase] =settings->maskSC;
-               ++(*numMaskUIPtr);
-               ++retSamST->numMaskUI;
+               ++(*maskCntUIPtr);
+               ++retSamST->maskCntUI;
             } /*Else: not enough support to call*/
          } /*If: A has the most support*/
 
@@ -2563,14 +2579,14 @@ noFragCollapse_tbCon(
             if(tPercSupF >= settings->minPercSnpF)
             { /*If: this was an T*/
                retSamST->seqStr[uiBase] = 'T';
-               ++retSamST->numMatchUI;
+               ++retSamST->matchCntUI;
             } /*If: this was an T*/
 
             else
             { /*Else: not enough support to call*/
                retSamST->seqStr[uiBase] =settings->maskSC;
-               ++(*numMaskUIPtr);
-               ++retSamST->numMaskUI;
+               ++(*maskCntUIPtr);
+               ++retSamST->maskCntUI;
             } /*Else: not enough support to call*/
          } /*Else If: T has the most support*/
 
@@ -2580,14 +2596,14 @@ noFragCollapse_tbCon(
             if(cPercSupF >= settings->minPercSnpF)
             { /*If: this was an C*/
                retSamST->seqStr[uiBase] = 'C';
-               ++retSamST->numMatchUI;
+               ++retSamST->matchCntUI;
             } /*If: this was an C*/
 
             else
             { /*Else: not enough support to call*/
                retSamST->seqStr[uiBase] =settings->maskSC;
-               ++(*numMaskUIPtr);
-               ++retSamST->numMaskUI;
+               ++(*maskCntUIPtr);
+               ++retSamST->maskCntUI;
             } /*Else: not enough support to call*/
          } /*Else If: C has the most support*/
 
@@ -2597,14 +2613,14 @@ noFragCollapse_tbCon(
             if(gPercSupF >= settings->minPercSnpF)
             { /*If: this was an G*/
                retSamST->seqStr[uiBase] = 'G';
-               ++retSamST->numMatchUI;
+               ++retSamST->matchCntUI;
             } /*If: this was an G*/
 
             else
             { /*Else: not enough support to call*/
                retSamST->seqStr[uiBase] =settings->maskSC;
-               ++(*numMaskUIPtr);
-               ++retSamST->numMaskUI;
+               ++(*maskCntUIPtr);
+               ++retSamST->maskCntUI;
             } /*Else: not enough support to call*/
          } /*Else If: G has the most support*/
 
@@ -2633,7 +2649,7 @@ noFragCollapse_tbCon(
          } /*If: This is a new cigar entry*/
 
          ++(retSamST->cigArySI[uiCig]);
-         ++retSamST->numDelUI;
+         ++retSamST->delCntUI;
       } /*Else if: there was a deletion*/
 
       /***********************************************\
@@ -2659,11 +2675,11 @@ noFragCollapse_tbCon(
          } /*If: new cigar entry*/
 
          retSamST->seqStr[uiBase] = settings->maskSC;
-         ++(*numMaskUIPtr);
+         ++(*maskCntUIPtr);
 
          ++uiBase;
          ++retSamST->cigArySI[uiCig];
-         ++retSamST->numMaskUI;
+         ++retSamST->maskCntUI;
       } /*Else: I have no support, assume mask snp*/
 
       ++startSI;
@@ -2688,7 +2704,7 @@ noFragCollapse_tbCon(
    \*****************************************************/
 
    retSamST->readLenUI = uiBase;
-   retSamST->lenCigUI = uiCig + 1;
+   retSamST->cigLenUI = uiCig + 1;
    *errSC = 0;
    goto ret_fun14_sec06_sub06;
 
@@ -2750,6 +2766,7 @@ noFragCollapse_tbCon(
 |   - Returns:
 |     o 0 for success
 |     o def_fileErr_tbConDefs for file errors
+|     o def_noMap_tbConDefs if conNtAryST is null or 0
 \-------------------------------------------------------*/
 char
 pvar_tbCon(
@@ -2772,16 +2789,17 @@ pvar_tbCon(
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0; /*for error reporting*/
-   uint uiBase = 0;
+   signed char errSC = 0; /*for error reporting*/
+   unsigned int uiBase = 0;
    struct ins_tbCon *insST = 0;
 
-   uint nonMaskBaseUI = 0; /*number of non-anonymous*/
-   uint maskedBasesUI = 0; /*number of non-anonymous*/
+   unsigned int nonMaskBaseUI = 0;
+      /*number of non-anonymous bases*/
+   unsigned int maskedBasesUI = 0; /*number masked bases*/
    float percSupF = 0;
 
-   sint leastSupInsSI = 0;
-   sint insTotalSI = 0;
+   signed int leastSupInsSI = 0;
+   signed int insTotalSI = 0;
 
    FILE *outFILE = 0;
 
@@ -2790,11 +2808,10 @@ pvar_tbCon(
    ^   - Print out the header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(
-         ! outStr
-      || *outStr == '*'
-   ) outFILE = stdout;
-
+   if(! outStr)
+      outFILE = stdout;
+   else if(*outStr == '*')
+      outFILE = stdout;
    else
    { /*Else: I need to open a file*/
       outFILE =
@@ -2814,9 +2831,13 @@ pvar_tbCon(
    );
 
    fprintf(
-     outFILE,
-     "\tpercSupport\tmasked\tkeptBases\ttotalBases\n"
+       outFILE,
+       "\tpercSupport\tmasked\tkeptBases\ttotalBases%s",
+       str_endLine
    );
+
+   if(! conNtAryST)
+      goto noFile_fun15_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec03:
@@ -2879,14 +2900,15 @@ pvar_tbCon(
 
          fprintf(
             outFILE,
-            "%s\t%i\tins\t%s\t%i\t%f\tNA\t%i\t%i\n",
+            "%s\t%i\tins\t%s\t%i\t%f\tNA\t%i\t%i%s",
             refIdStr,
             uiBase,
             insST->insStr,
             insST->numHitsSI,
             percSupF,
             leastSupInsSI,
-            insTotalSI
+            insTotalSI,
+            str_endLine
          );
 
          insST = insST->nextIns;
@@ -2925,14 +2947,15 @@ pvar_tbCon(
       { /*If: I had enough support to print out A*/
          fprintf(
             outFILE,
-            "%s\t%i\tbase\tA\t%i\t%f\t%u\t%i\t%i\n",
+            "%s\t%i\tbase\tA\t%i\t%f\t%u\t%i\t%i%s",
             refIdStr,
             uiBase + 1,
             conNtAryST[uiBase].numASI,
             percSupF,
             maskedBasesUI,
             conNtAryST[uiBase].ntKeptSI,
-            conNtAryST[uiBase].totalNtSI
+            conNtAryST[uiBase].totalNtSI,
+            str_endLine
          );
       } /*If: I had enough support to print out A*/
 
@@ -2953,14 +2976,15 @@ pvar_tbCon(
       { /*If: I had enough support to print an T*/
          fprintf(
             outFILE,
-            "%s\t%i\tbase\tT\t%i\t%f\t%u\t%i\t%i\n",
+            "%s\t%i\tbase\tT\t%i\t%f\t%u\t%i\t%i%s",
             refIdStr,
             uiBase + 1,
             conNtAryST[uiBase].numTSI,
             percSupF,
             maskedBasesUI,
             conNtAryST[uiBase].ntKeptSI,
-            conNtAryST[uiBase].totalNtSI
+            conNtAryST[uiBase].totalNtSI,
+            str_endLine
          );
       } /*If: I had enough support to print an T*/
 
@@ -2981,14 +3005,15 @@ pvar_tbCon(
       { /*If: I had enough support to print an C*/
          fprintf(
             outFILE,
-            "%s\t%i\tbase\tC\t%i\t%f\t%u\t%i\t%u\n",
+            "%s\t%i\tbase\tC\t%i\t%f\t%u\t%i\t%u%s",
             refIdStr,
             uiBase + 1,
             conNtAryST[uiBase].numCSI,
             percSupF,
             maskedBasesUI,
             conNtAryST[uiBase].ntKeptSI,
-            conNtAryST[uiBase].totalNtSI
+            conNtAryST[uiBase].totalNtSI,
+            str_endLine
          );
       } /*If: I had enough support to print an C*/
 
@@ -3009,14 +3034,15 @@ pvar_tbCon(
       { /*If: I had enough support to print an G*/
          fprintf(
             outFILE,
-            "%s\t%i\tbase\tG\t%i\t%f\t%u\t%i\t%u\n",
+            "%s\t%i\tbase\tG\t%i\t%f\t%u\t%i\t%u%s",
             refIdStr,
             uiBase + 1,
             conNtAryST[uiBase].numGSI,
             percSupF,
             maskedBasesUI,
             conNtAryST[uiBase].ntKeptSI,
-            conNtAryST[uiBase].totalNtSI
+            conNtAryST[uiBase].totalNtSI,
+            str_endLine
          );
       } /*If: I had enough support to print an G*/
 
@@ -3037,14 +3063,15 @@ pvar_tbCon(
          if(percSupF >= settings->printMinSupDelF)
             fprintf(
                outFILE,
-               "%s\t%i\tdel\tdel\t%i\t%f\t%u\t%i\t%u\n",
+               "%s\t%i\tdel\tdel\t%i\t%f\t%u\t%i\t%u%s",
                refIdStr,
                uiBase + 1,
                conNtAryST[uiBase].numDelSI,
                percSupF,
                maskedBasesUI,
                conNtAryST[uiBase].ntKeptSI,
-               conNtAryST[uiBase].totalNtSI
+               conNtAryST[uiBase].totalNtSI,
+               str_endLine
             );
       } /*If: The a base has enough depth*/
    } /*Loop: Print out the consensus*/
@@ -3057,18 +3084,20 @@ pvar_tbCon(
    errSC = 0;
    goto cleanUp_fun15_sec04;
 
+   noFile_fun15_sec04:;
+      errSC = def_noMap_tbConDefs;
+      goto cleanUp_fun15_sec04;
+
    fileErr_fun15_sec04:;
-   errSC = def_fileErr_tbConDefs;
-   goto cleanUp_fun15_sec04;
+      errSC = def_fileErr_tbConDefs;
+      goto cleanUp_fun15_sec04;
 
    cleanUp_fun15_sec04:;
+      if(outFILE != stdout)
+         fclose(outFILE);
+      outFILE = 0;
 
-   if(outFILE != stdout)
-      fclose(outFILE);
-
-   outFILE = 0;
-
-   return errSC;
+      return errSC;
 } /*pConBasAry*/
 
 /*=======================================================\

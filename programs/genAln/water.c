@@ -49,7 +49,9 @@
 !   o .c  #include "../genLib/charCp.h"
 !   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genLib/strAry.h"
+!   o .c  #include "../genLib/fileFun.h"
 !   o .c  #include "../genBio/samEntry.h"
+!   o .h  #include "../genLib/endStr.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,12 +61,12 @@
 | Input:
 |   - qrySTPtr:
 |     o pointer to seqST with query sequence 
-|       - qrySTPtr->offsetUL; first query base to align
-|       - qrySTPtr->endAlnUL; last query base to align
+|       - qrySTPtr->offsetSL; first query base to align
+|       - qrySTPtr->endAlnSL; last query base to align
 |   - refSTPtr:
 |     o pointer to seqST with reference sequence 
-|       - refSTPtr->offsetUL; 1st reference base to align
-|       - refSTPtr->endAlnUL; last reference base to align
+|       - refSTPtr->offsetSL; 1st reference base to align
+|       - refSTPtr->endAlnSL; last reference base to align
 |   - matrixSTPtr:
 |     o pointer to dirMatrix to use for the alingment
 |   - alnSet:
@@ -73,11 +75,11 @@
 |  - Modifies:
 |    o errSC in matrixSTPtr to def_memErr_water for
 |      memory errors
-|    o allocates memory for dirMatrixSC and scoreAryUL
+|    o allocates memory for dirMatrixSC and scoreArySL
 |      if they are to small
-|    o updates lenMatrixUL and lenScoreUL if dirMatrixSC
-|      or scoreAryUL are resized
-|    o sets errSC in matrixSTPtr to def_memErr_needle if
+|    o updates lenMatrixSL and lenScoreSL if dirMatrixSC
+|      or scoreArySL are resized
+|    o sets errSC in matrixSTPtr to def_memErr_water if
 |      had memory errors
 |  - Returns:
 |    o score for alignment
@@ -122,25 +124,25 @@ water(
 
    /*Get start & end of query and reference sequences*/
    signed char *refSeqStr =
-      refSTPtr->seqStr + refSTPtr->offsetUL;
+      refSTPtr->seqStr + refSTPtr->offsetSL;
 
    signed char *qrySeqStr =
-      qrySTPtr->seqStr + qrySTPtr->offsetUL;
+      qrySTPtr->seqStr + qrySTPtr->offsetSL;
 
    /*Find the length of the reference and query*/
-   unsigned long lenQryUL =
-      qrySTPtr->endAlnUL - qrySTPtr->offsetUL + 1;
+   signed long qryLenSL =
+      qrySTPtr->endAlnSL - qrySTPtr->offsetSL + 1;
 
-   unsigned long lenRefUL =
-      refSTPtr->endAlnUL - refSTPtr->offsetUL + 1;
-     /*The + 1 is to account for index 0 of endAlnUL*/
+   signed long refLenSL =
+      refSTPtr->endAlnSL - refSTPtr->offsetSL + 1;
+     /*The + 1 is to account for index 0 of endAlnSL*/
 
-   unsigned long lenMatrixUL =
-     (lenRefUL + 1) * (lenQryUL + 1);
+   signed long lenMatrixSL =
+     (refLenSL + 1) * (qryLenSL + 1);
      /*+1 for the gap column and row*/
 
-   unsigned long ulRef = 0;
-   unsigned long ulQry = 0;
+   signed long slRef = 0;
+   signed long slQry = 0;
 
    /*Set up counters for the query and reference base
    `  index
@@ -168,7 +170,7 @@ water(
    /*Direction matrix (one cell holds one direction)*/
    signed char *dirMatrixSC = 0;/*Direction matrix*/
    signed char *insDir = 0;    /*Direction above cell*/
-   unsigned long indexUL = 0;
+   signed long indexSL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
@@ -184,51 +186,51 @@ water(
    *   - set up the directional matrix
    \*****************************************************/
 
-   if(matrixSTPtr->lenMatrixUL < lenMatrixUL)
+   if(matrixSTPtr->lenMatrixSL < lenMatrixSL)
    { /*If: need to resize the matrix*/
       free(matrixSTPtr->dirMatrixSC);
       matrixSTPtr->dirMatrixSC = 0;
-      matrixSTPtr->lenMatrixUL = 0;
+      matrixSTPtr->lenMatrixSL = 0;
 
       matrixSTPtr->dirMatrixSC =
-         malloc((lenMatrixUL + 1) * sizeof(char));
+         malloc((lenMatrixSL + 1) * sizeof(char));
 
       if(matrixSTPtr->dirMatrixSC == 0)
          goto memErr_fun01_sec05;
 
-       matrixSTPtr->lenMatrixUL = lenMatrixUL;
+       matrixSTPtr->lenMatrixSL = lenMatrixSL;
    } /*If: need to resize the matrix*/
 
    dirMatrixSC = matrixSTPtr->dirMatrixSC;
 
    blank_dirMatrix(matrixSTPtr);
 
-   matrixSTPtr->lenRefUL = lenRefUL;
-   matrixSTPtr->refOffsetUL = refSTPtr->offsetUL;
-   matrixSTPtr->refEndUL = refSTPtr->endAlnUL;
+   matrixSTPtr->refLenSL = refLenSL;
+   matrixSTPtr->refOffsetSL = refSTPtr->offsetSL;
+   matrixSTPtr->refEndSL = refSTPtr->endAlnSL;
 
-   matrixSTPtr->lenQryUL = lenQryUL;
-   matrixSTPtr->qryOffsetUL = qrySTPtr->offsetUL;
-   matrixSTPtr->qryEndUL = qrySTPtr->endAlnUL;
+   matrixSTPtr->qryLenSL = qryLenSL;
+   matrixSTPtr->qryOffsetSL = qrySTPtr->offsetSL;
+   matrixSTPtr->qryEndSL = qrySTPtr->endAlnSL;
 
    /*****************************************************\
    * Fun01 Sec02 Sub02:
    *   - set up score array
    \*****************************************************/
 
-   if(matrixSTPtr->lenScoreUL < lenRefUL + 1)
+   if(matrixSTPtr->lenScoreSL < refLenSL + 1)
    { /*If: need to make a larger score array*/
       free(matrixSTPtr->scoreArySL);
       matrixSTPtr->scoreArySL = 0;
-      matrixSTPtr->lenScoreUL = 0;
+      matrixSTPtr->lenScoreSL = 0;
       
       matrixSTPtr->scoreArySL =
-         calloc((lenRefUL + 1), sizeof(long));
+         calloc((refLenSL + 1), sizeof(long));
 
       if(! matrixSTPtr->scoreArySL)
          goto memErr_fun01_sec05;
 
-      matrixSTPtr->lenScoreUL = lenRefUL;
+      matrixSTPtr->lenScoreSL = refLenSL;
    } /*If: need to make a larger score array*/
 
    scoreArySL = matrixSTPtr->scoreArySL;
@@ -239,12 +241,12 @@ water(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    for(
-      indexUL = 0;
-      indexUL <= lenRefUL;
-      ++indexUL
+      indexSL = 0;
+      indexSL <= refLenSL;
+      ++indexSL
    ){ /*Loop: initialize the first row*/
-      dirMatrixSC[indexUL] = def_mvStop_alnDefs;
-      scoreArySL[indexUL] = 0;
+      dirMatrixSC[indexSL] = def_mvStop_alnDefs;
+      scoreArySL[indexSL] = 0;
    } /*Loop: initialize the first row*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -279,12 +281,12 @@ water(
    /*set up scores*/
    delScoreSL = 0;
    nextSnpScoreSL = 0;
-   dirMatrixSC[indexUL] = def_mvStop_alnDefs;
+   dirMatrixSC[indexSL] = def_mvStop_alnDefs;
 
    /*move to first base*/
-   ++indexUL;
-   refSeqStr = refSTPtr->seqStr + refSTPtr->offsetUL - 1;
-   qrySeqStr = qrySTPtr->seqStr + qrySTPtr->offsetUL;
+   ++indexSL;
+   refSeqStr = refSTPtr->seqStr + refSTPtr->offsetSL - 1;
+   qrySeqStr = qrySTPtr->seqStr + qrySTPtr->offsetSL;
 
    /*****************************************************\
    * Fun01 Sec04 Sub02:
@@ -293,15 +295,15 @@ water(
 
    /*Starting on the first sequence row*/
    for(
-      ulQry = 0;
-      ulQry < lenQryUL;
-      ++ulQry
+      slQry = 0;
+      slQry < qryLenSL;
+      ++slQry
    ){ /*loop; compare query base against all ref bases*/
 
       for(
-         ulRef = 1;
-         ulRef <= lenRefUL;
-         ++ulRef
+         slRef = 1;
+         slRef <= refLenSL;
+         ++slRef
       ){ /*Loop; compare one query to one reference base*/
 
          /***********************************************\
@@ -311,21 +313,21 @@ water(
 
          snpScoreSL =
             getScore_alnSet(
-               qrySeqStr[ulQry],
-               refSeqStr[ulRef],
+               qrySeqStr[slQry],
+               refSeqStr[slRef],
                settings
             ); /*Find the score for the base pairs*/
 
          snpScoreSL += nextSnpScoreSL;
-         nextSnpScoreSL = scoreArySL[ulRef];
+         nextSnpScoreSL = scoreArySL[slRef];
 
          #ifdef NOEXTEND
             insScoreSL =
-               scoreArySL[ulRef] + settings->gapSS;
+               scoreArySL[slRef] + settings->gapSS;
          #else
-            insScoreSL = scoreArySL[ulRef];
+            insScoreSL = scoreArySL[slRef];
             insScoreSL +=
-               settings->insArySS[insDir[ulRef]];
+               settings->insArySS[insDir[slRef]];
          #endif
 
          /***********************************************\
@@ -333,39 +335,40 @@ water(
          *   - find high score
          \***********************************************/
 
-         scoreArySL[ulRef] =
+         scoreArySL[slRef] =
             max_genMath(
                insScoreSL,
                snpScoreSL
          ); /*find if ins/snp is best (5 Op)*/
  
-         /*find direction (4 Op)*/
-         dirMatrixSC[indexUL] =
-            scoreArySL[ulRef] > delScoreSL;
-
-         dirMatrixSC[indexUL] <<=
-            (snpScoreSL < insScoreSL);
-
-         ++dirMatrixSC[indexUL];
+         /*find direction (5 Op)*/
+         dirMatrixSC[indexSL] =
+            scoreArySL[slRef] > delScoreSL;
+         dirMatrixSC[indexSL] +=
+            (
+                 (snpScoreSL <= insScoreSL)
+               & dirMatrixSC[indexSL]
+            );
+         ++dirMatrixSC[indexSL];
 
          /*Logic:
          `   - noDel: maxSC > delSc:
          `     o 1 if deletion not max score
          `     o 0 if deletion is max score
-         `   - type: noDel << (snpSc < insSc):
-         `     o 1 << 1 = 2 if insertion is maximum
-         `     o 1 << 0 = 1 if snp is maximum
-         `     o 0 << 0 = 0 if del is max, and snp > ins
-         `     o 0 << 1 = 0 if del is max, but ins >= snp
+         `   - type: noDel + ((snpSc < insSc) & noDel):
+         `     o 1 + (1 & 1) = 2 if insertion is maximum
+         `     o 1 + (0 & 1) = 1 if snp is maximum
+         `     o 0 + (0 & 0) = 0 if del is max; snp > ins
+         `     o 0 + (1 & 0) = 0 if del is max, ins >= snp
          `   - dir: type + 1
          `     o adds 1 to change from stop to direction
          */
 
          /*finish max*/
-         scoreArySL[ulRef] =
+         scoreArySL[slRef] =
             max_genMath(
                delScoreSL,
-               scoreArySL[ulRef]
+               scoreArySL[slRef]
          ); /*find if del is best (5 Op)*/
 
          /***********************************************\
@@ -373,17 +376,17 @@ water(
          *   - check if keep score (score > 0)
          \***********************************************/
 
-         if(scoreArySL[ulRef] <= 0)
+         if(scoreArySL[slRef] <= 0)
          {
-            dirMatrixSC[indexUL] = 0;
-            scoreArySL[ulRef] = 0;
+            dirMatrixSC[indexSL] = 0;
+            scoreArySL[slRef] = 0;
          }
 
          /*check if have negative or positive score*/
          /*no branched version is slower here
-         keepSL = (signed long) -(scoreArySL[ulRef] > 0);
-         dirMatrixSC[indexUL] &= keepSL;
-         scoreArySL[ulRef] &= keepSL;
+         keepSL = (signed long) -(scoreArySL[slRef] > 0);
+         dirMatrixSC[indexSL] &= keepSL;
+         scoreArySL[slRef] &= keepSL;
          */
 
          /***********************************************\
@@ -393,11 +396,11 @@ water(
 
          #ifdef NOEXTEND
             delScoreSL =
-               scoreArySL[ulRef] + settings->gapSS;
+               scoreArySL[slRef] + settings->gapSS;
          #else
-            delScoreSL = scoreArySL[ulRef];
+            delScoreSL = scoreArySL[slRef];
             delScoreSL +=
-               settings->delArySS[dirMatrixSC[indexUL]];
+               settings->delArySS[dirMatrixSC[indexSL]];
          #endif
 
          /***********************************************\
@@ -411,13 +414,13 @@ water(
          */
          if(
              matrixSTPtr->scoreSL
-           < scoreArySL[ulRef]
+           < scoreArySL[slRef]
          ){ /*if have a new best score*/
-            matrixSTPtr->scoreSL = scoreArySL[ulRef];
-            matrixSTPtr->indexUL = indexUL;
+            matrixSTPtr->scoreSL = scoreArySL[slRef];
+            matrixSTPtr->indexSL = indexSL;
          } /*if have a new best score*/
 
-         ++indexUL;
+         ++indexSL;
       } /*Loop; compare one query to one reference base*/
 
       /**************************************************\
@@ -428,10 +431,10 @@ water(
       delScoreSL = 0;
       nextSnpScoreSL = 0; /*indel column is always 0*/
 
-      insDir += ulRef;
-      dirMatrixSC[indexUL] = def_mvStop_alnDefs;
+      insDir += slRef;
+      dirMatrixSC[indexSL] = def_mvStop_alnDefs;
 
-      ++indexUL;
+      ++indexSL;
    } /*loop; compare query base against all ref bases*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -453,8 +456,8 @@ water(
    */
 
    matrixSTPtr->errSC = 0;
-   --indexUL; /*get off last -1*/
-   dirMatrixSC[indexUL] = def_mvStop_alnDefs;
+   --indexSL; /*get off last -1*/
+   dirMatrixSC[indexSL] = def_mvStop_alnDefs;
    return matrixSTPtr->scoreSL; /*best score*/
 
    /*****************************************************\

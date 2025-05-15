@@ -31,6 +31,8 @@
 
 #include <stdio.h>
 
+#include "../genLib/fileFun.h"
+
 #include "../genBio/samEntry.h"
 #include "../genBio/tbCon.h"
 #include "../genBio/edDist.h"
@@ -38,9 +40,8 @@
 #include "clustST.h"
 
 /*.h files only (no .c files)*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../genLib/endLine.h"
 #include "../genLib/genMath.h" /*only using .h min macro*/
-
 #include "../genBio/tbConDefs.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
@@ -103,10 +104,10 @@ getBestRead_edClust(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
-   sint bestScoreSI = 0;
-   slong entrySL = 0;
-   slong bestIndexSL = 0;
+   signed char errSC = 0;
+   signed int bestScoreSI = 0;
+   signed long entrySL = 0;
+   signed long bestIndexSL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
@@ -121,7 +122,7 @@ getBestRead_edClust(
 
    for(
       entrySL = 0;
-      entrySL < (slong) indexSTPtr->lenSamUL;
+      entrySL < (signed long) indexSTPtr->lenSamUL;
       ++entrySL
    ){ /*Loop: find best score*/
 
@@ -192,12 +193,7 @@ getBestRead_edClust(
 
 
    ret_fun01_sec04:;
-      fseek(
-         samFILE,
-         0,
-         SEEK_SET
-      );
-
+      fseek(samFILE, 0, SEEK_SET);
       return bestIndexSL;
 } /*getBestRead_edClust*/
 
@@ -266,10 +262,10 @@ depthProf_edClust(
    ^   - varaible declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
+   signed char errSC = 0;
 
-   ulong offsetUL = 0;
-   ulong lineUL = 0;
+   unsigned long offsetUL = 0;
+   unsigned long lineUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec02:
@@ -288,18 +284,14 @@ depthProf_edClust(
       resEdDistSTPtr->depthAryUI =
          calloc(
             refSTPtr->readLenUI + 9,
-            sizeof(uint)
+            sizeof(unsigned int)
          ); /*allocate memory for depth array*/
 
       if(! resEdDistSTPtr->depthAryUI)
          goto memErr_fun02_sec04;
    } /*If: need more memory*/
 
-   fseek(
-      samFILE,
-      0,
-      SEEK_SET
-   );
+   fseek(samFILE, 0, SEEK_SET);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec03:
@@ -497,17 +489,17 @@ findNumMap_edClust(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
-   slong distSL = 0;
-   slong lineSL = 0;
+   signed char errSC = 0;
+   signed long distSL = 0;
+   signed long lineSL = 0;
 
    struct conNt_tbCon *conHeapAryST = 0;
-   uint firstBaseUI = 0;   /*offset for start*/
-   uint lastBaseUI = 0; /*offset for start*/
+   unsigned int firstBaseUI = 0;   /*offset for start*/
+   unsigned int lastBaseUI = 0; /*offset for start*/
 
    float errRateF = 0;
 
-   ulong offsetUL = 0;
+   unsigned long offsetUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -529,7 +521,7 @@ findNumMap_edClust(
 
    for(
       distSL = 0;
-      distSL < (slong) *lenConUI;
+      distSL < (signed long) *lenConUI;
       ++distSL
    ) init_conNt_tbCon(&conHeapAryST[distSL]);
      /*initialize conensus array*/
@@ -595,7 +587,7 @@ findNumMap_edClust(
 
    for(
       lineSL = 0;
-      lineSL < (slong) indexSTPtr->lenSamUL;
+      lineSL < (signed long) indexSTPtr->lenSamUL;
       ++lineSL
    ){ /*Loop: find number of matches*/
       if(indexSTPtr->clustArySI[lineSL] == 0) ;
@@ -653,7 +645,7 @@ findNumMap_edClust(
       errSC =
          getRead_clustST(
             samSTPtr,
-            (ulong) lineSL,
+            (unsigned long) lineSL,
             offsetUL,
             indexSTPtr,
             buffStr,
@@ -832,10 +824,11 @@ getMaxDepth_edClust(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   uint startUI = (uint) -1; /*maximum value for uint*/
-   uint endUI = 0;
-   ulong numReadsUL = 0;
-   ulong indexUL = 0;
+   unsigned int startUI = (unsigned int) -1;
+      /*maximum value for unsigned int*/
+   unsigned int endUI = 0;
+   unsigned long numReadsUL = 0;
+   unsigned long indexUL = 0;
 
    float percOverlapF = 0;
 
@@ -847,7 +840,8 @@ getMaxDepth_edClust(
    while(conListSTPtr)
    { /*Loop: while have clusters*/
 
-      startUI = (uint) -1; /*maximum value for uint*/
+      startUI = (unsigned int) -1;
+         /*maximum value for unsigned int*/
       endUI = 0;
       numReadsUL = 0;
 
@@ -1014,23 +1008,27 @@ cluster_edClust(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;         /*for error checking*/
+   signed char errSC = 0;         /*for error checking*/
 
-   slong numReadsSL = 0;    /*number of reads left*/
-   slong lastReadsSL = 0;   /*last number of reads left*/
-   ulong clustReadsUL = 0;  /*number reads clustered*/
-   slong depthSL = 0;       /*read depth for cluster*/
+   signed long numReadsSL = 0;    /*number of reads left*/
+   signed long lastReadsSL = 0;
+      /*last number of reads left*/
+   unsigned long clustReadsUL = 0;
+      /*number reads clustered*/
+   signed long depthSL = 0;     /*read depth for cluster*/
     
-   uchar ucCon = 0;    /*iterator for consensus building*/
+   unsigned char ucCon = 0;
+      /*iterator for consensus building*/
 
    struct samEntry bestSamStackST;/*read to cluster with*/
-   slong bestIndexSL = 0;         /*index of best read*/
+   signed long bestIndexSL = 0;
+      /*index of best read*/
 
    struct samEntry *conSamHeapST = 0; /*for consensus*/
 
    struct conNt_tbCon *conHeapAryST = 0;
-   uint lenConUI = 0;
-   uint numMaskUI = 0; /*throw away*/
+   unsigned int lenConUI = 0;
+   unsigned int numMaskUI = 0; /*throw away*/
 
    struct con_clustST *retHeapST = 0;
    struct con_clustST *conNodeST = 0;
@@ -1064,7 +1062,8 @@ cluster_edClust(
    ^   - set up index array (and score)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   numReadsSL = getNumLines_clustST(samFILE);
+   numReadsSL = lineCnt_fileFun(samFILE, &bestIndexSL);
+   bestIndexSL = 0;
 
    if(! numReadsSL)
       goto fileErr_fun05_sec07_sub03;
@@ -1075,7 +1074,8 @@ cluster_edClust(
          clustSetSTPtr,  /*has settings for indexing*/
          samSTPtr,       /*for reading sam file*/
          buffStrPtr,     /*for reading sam file*/
-         lenBuffULPtr,   /*length of buffStrPtr*/
+         (signed long *) lenBuffULPtr,
+            /*length of buffStrPtr*/
          samFILE 
       );
 
@@ -1084,7 +1084,7 @@ cluster_edClust(
 
    if(
         (*indexSTPtr)->keptSL
-      < (slong) clustSetSTPtr->minDepthUI
+      < (signed long) clustSetSTPtr->minDepthUI
    ) goto lowReads_fun05_sec07_sub04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1117,16 +1117,20 @@ cluster_edClust(
    if(logFILE)
       fprintf(
          logFILE,
-         "kept reads: %li\n\nClusters:\n",
-         numReadsSL
+         "kept reads: %li%s%sClusters:%s",
+         numReadsSL,
+         str_endLine,
+         str_endLine,
+         str_endLine
       );
 
    if(clustSetSTPtr->repIntervalSL > 0)
    { /*If: user wanted logging*/
       fprintf(
          stderr,
-         "kept reads: %li\n",
-         numReadsSL
+         "kept reads: %li%s",
+         numReadsSL,
+         str_endLine
       ); /*If reporting read counts*/
 
       fflush(stderr);
@@ -1145,8 +1149,9 @@ cluster_edClust(
          ){ /*If: logging interval*/
             fprintf(
                stderr,
-               "Reads left: %li\n",
-               numReadsSL
+               "Reads left: %li%s",
+               numReadsSL,
+               str_endLine
             ); /*update on how many reads left*/
 
             lastReadsSL = numReadsSL;
@@ -1176,7 +1181,9 @@ cluster_edClust(
          { /*Else If: memory error for best read*/
             fprintf(
                (FILE *) logFILE,
-               "\nmemory error getting best read\n"
+               "%smemory error getting best read%s",
+               str_endLine,
+               str_endLine
             );
 
             goto memErr_fun05_sec07_sub02;
@@ -1215,7 +1222,9 @@ cluster_edClust(
       { /*If: memory error*/
          fprintf(
                (FILE *) logFILE,
-               "\nerror mapping reads to best read\n"
+               "%serror mapping reads to best read%s",
+               str_endLine,
+               str_endLine
             );
 
          goto memErr_fun05_sec07_sub02;
@@ -1224,7 +1233,7 @@ cluster_edClust(
       if(depthSL == def_fileErr_edClust)
          goto fileErr_fun05_sec07_sub03;
 
-      if(depthSL < (sint) clustSetSTPtr->minDepthUI)
+      if(depthSL < (signed int) clustSetSTPtr->minDepthUI)
       { /*If: read depth to low*/
          (*indexSTPtr)->clustArySI[bestIndexSL] =
             def_discard_clustST;/*mark as discarded read*/
@@ -1283,7 +1292,9 @@ cluster_edClust(
 
             fprintf(
                   (FILE *) logFILE,
-                  "\nerror building consensus\n"
+                  "%serror building consensus%s",
+                  str_endLine,
+                  str_endLine
                );
 
             goto memErr_fun05_sec07_sub02;
@@ -1332,14 +1343,18 @@ cluster_edClust(
          { /*If: memory error*/
             fprintf(
                   (FILE *) logFILE,
-                  "\nerror mapping reads to consensus\n"
+                  "%serror mapping reads to consensus%s",
+                  str_endLine,
+                  str_endLine
                );
 
             goto memErr_fun05_sec07_sub02;
          } /*If: memory error*/
 
-         if(depthSL < (sint) clustSetSTPtr->minDepthUI)
-         { /*If: read depth to low*/
+         if(
+              depthSL
+            < (signed int) clustSetSTPtr->minDepthUI
+         ){ /*If: read depth to low*/
             errSC = def_noCon_clustST;
             break;
          } /*If: read depth to low*/
@@ -1356,7 +1371,10 @@ cluster_edClust(
 
       if(
             errSC == def_noCon_clustST
-         || depthSL < (sint) clustSetSTPtr->minDepthUI
+         || (
+                depthSL
+              < (signed int) clustSetSTPtr->minDepthUI
+            )
       ){ /*If: could not build consensus or low depth*/
          (*indexSTPtr)->clustArySI[bestIndexSL] =
             def_discard_clustST;/*mark as discarded read*/
@@ -1378,7 +1396,7 @@ cluster_edClust(
          mk_con_clustST(
             conSamHeapST,
             clustSetSTPtr->clustSI,
-            (ulong) depthSL
+            (unsigned long) depthSL
          ); /*build node con_clustST node for consensus*/
 
       conNodeST->startUI = clustSetSTPtr->startUI;
@@ -1388,7 +1406,9 @@ cluster_edClust(
       { /*If: memory error*/
          fprintf(
                (FILE *) logFILE,
-               "\nerror making consensus struct\n"
+               "%serror making consensus struct%s",
+               str_endLine,
+               str_endLine
             );
 
          goto memErr_fun05_sec07_sub02;
@@ -1401,10 +1421,11 @@ cluster_edClust(
       if(logFILE)
          fprintf(
             logFILE,
-            "   clust %i: %lu reads\t%s\n",
+            "   clust %i: %lu reads\t%s%s",
             clustSetSTPtr->clustSI,
             depthSL,
-            bestSamStackST.qryIdStr
+            bestSamStackST.qryIdStr,
+            str_endLine
          );
 
       if(! retHeapST)
@@ -1472,11 +1493,12 @@ cluster_edClust(
          if(logFILE)
             fprintf(
               logFILE,
-              "   clust %i->%i: clust %i has %lu reads\n",
+              "   clust %i->%i: clust %i has %lu reads%s",
               clustSetSTPtr->clustSI,
               cmpNodeST->clustSI,
               cmpNodeST->clustSI,
-              cmpNodeST->numReadsUL
+              cmpNodeST->numReadsUL,
+              str_endLine
             );
 
          /***********************************************\
@@ -1503,7 +1525,9 @@ cluster_edClust(
          { /*If: memory error*/
             fprintf(
                   (FILE *) logFILE,
-                  "\nerror rebuilding con after clust\n"
+                  "%serror rebuilding con after clust%s",
+                  str_endLine,
+                  str_endLine
                );
 
             goto memErr_fun05_sec07_sub02;
@@ -1537,14 +1561,18 @@ cluster_edClust(
 
    fprintf(
       (FILE *) logFILE,
-      "\nOverlap Merging:\n"
+      "%sOverlap Merging:%s",
+      str_endLine,
+      str_endLine
    );
 
    if(! retHeapST)
    { /*If: no consensus detected*/
       fprintf(
          (FILE *) logFILE,
-         "\nNo clusters found\n"
+         "%sNo clusters found%s",
+         str_endLine,
+         str_endLine
       );
 
       goto lowReads_fun05_sec07_sub04;
@@ -1594,8 +1622,8 @@ cluster_edClust(
       ) goto nextCon_fun05_sec05;
         /*not enough overlap*/
 
-      lenConUI = (uint) conNodeST->clustSI;
-      numMaskUI = (uint) cmpNodeST->clustSI;
+      lenConUI = (unsigned int) conNodeST->clustSI;
+      numMaskUI = (unsigned int) cmpNodeST->clustSI;
 
       depthSL =
          cmpCons_clustST(
@@ -1610,17 +1638,20 @@ cluster_edClust(
          if(depthSL)
          { /*If: merged clusters*/
 
-            if(lenConUI == (uint) cmpNodeST->clustSI)
-               lenConUI = numMaskUI;
+            if(
+                   lenConUI
+                == (unsigned int) cmpNodeST->clustSI
+            ) lenConUI = numMaskUI;
 
             if(logFILE)
              fprintf(
               logFILE,
-              "   clust %u->%i: clust %i has %lu reads\n",
+              "   clust %u->%i: clust %i has %lu reads%s",
               lenConUI,
               cmpNodeST->clustSI,
               cmpNodeST->clustSI,
-              cmpNodeST->numReadsUL
+              cmpNodeST->numReadsUL,
+              str_endLine
              );
 
             lastNodeST->nextST =
@@ -1663,7 +1694,9 @@ cluster_edClust(
 
    fprintf(
       (FILE *) logFILE,
-      "\nDepths:\n"
+      "%sDepths:%s",
+      str_endLine,
+      str_endLine
    );
 
    if(clustSetSTPtr->minPercDepthF > 0)
@@ -1692,9 +1725,10 @@ cluster_edClust(
 
             fprintf(
                (FILE *) logFILE,
-               "   clust %i; low read depth (%%%0.4f)\n",
+               "   clust %i; low read depth (%%%0.4f)%s",
                cmpNodeST->clustSI,
-               qryPercOverlapF
+               qryPercOverlapF,
+               str_endLine
             );
                
             if(cmpNodeST == retHeapST)
@@ -1718,11 +1752,12 @@ cluster_edClust(
          { /*Else: keeping cluster*/
           fprintf(
            (FILE *) logFILE,
-           "   clust %i has %lu of %lu (%0.4f%%) reads\n",
+           "   clust %i has %lu of %lu (%0.4f%%) reads%s",
            cmpNodeST->clustSI,
            cmpNodeST->numReadsUL,
            cmpNodeST->maxReadsUL,
-           qryPercOverlapF * 100
+           qryPercOverlapF * 100,
+           str_endLine
           );
 
             lastNodeST = cmpNodeST;
@@ -1757,25 +1792,28 @@ cluster_edClust(
    { /*If: logging*/
       fprintf(
          logFILE,
-         "\nkept reads: %li\n",
-         (*indexSTPtr)->keptSL
-         
+         "%skept reads: %li%s",
+         str_endLine,
+         (*indexSTPtr)->keptSL,
+         str_endLine
       );
 
       fprintf(
          logFILE,
-         "clustered reads: %lu\n",
-         clustReadsUL
+         "clustered reads: %lu%s",
+         clustReadsUL,
+         str_endLine
       );
 
       fprintf(
          logFILE,
-         "percent clustered:%0.2f\n",
+         "percent clustered:%0.2f%s",
          100
            * (
                 (float) clustReadsUL
               / (float) (*indexSTPtr)->keptSL
-            )
+            ),
+         str_endLine
       );
 
       fflush(logFILE);
@@ -1783,25 +1821,28 @@ cluster_edClust(
 
    fprintf(
       stderr,
-      "\nkept reads: %li\n",
-      (*indexSTPtr)->keptSL
-      
+      "%skept reads: %li%s",
+      str_endLine, 
+      (*indexSTPtr)->keptSL,
+      str_endLine
    );
 
    fprintf(
       stderr,
-      "clustered reads: %lu\n",
-      clustReadsUL
+      "clustered reads: %lu%s",
+      clustReadsUL,
+      str_endLine
    );
 
    fprintf(
       stderr,
-      "percent clustered:%0.2f\n",
+      "percent clustered:%0.2f%s",
       100
         * (
              (float) clustReadsUL
            / (float) (*indexSTPtr)->keptSL
-         )
+         ),
+      str_endLine
    );
 
    fflush(stderr);
@@ -1818,8 +1859,9 @@ cluster_edClust(
       if(logFILE)
          fprintf(
             logFILE,
-            "memory error when (%li) reads left\n",
-            numReadsSL
+            "memory error when (%li) reads left%s",
+            numReadsSL,
+            str_endLine
          );
 
       *errSCPtr = def_memErr_edClust;
@@ -1836,8 +1878,9 @@ cluster_edClust(
       if(logFILE)
          fprintf(
             logFILE,
-            "file error when (%li) reads left\n",
-            numReadsSL
+            "file error when (%li) reads left%s",
+            numReadsSL,
+            str_endLine
          );
 
       goto errCleanup_fun05_sec07_sub05;
@@ -1853,8 +1896,9 @@ cluster_edClust(
       if(logFILE)
          fprintf(
            logFILE,
-           "to few reads (%lu) after filter to cluster\n",
-           (*indexSTPtr)->keptSL
+           "to few reads (%lu) after filter to cluster%s",
+           (*indexSTPtr)->keptSL,
+           str_endLine
          );
 
       goto errCleanup_fun05_sec07_sub05;

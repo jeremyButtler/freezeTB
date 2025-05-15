@@ -30,8 +30,6 @@
 '   o fun09: cpQEntry_samEntry
 '     - Copies q-scores from a string into a samEntry
 '       structure
-'   o fun10: getLine_samEntry
-'     - reads in a single line from a sam file
 '   o fun11: lineTo_samEntry
 '     - adds a sam file line to a samEntry struct
 '   o fun12: get_samEntry
@@ -105,31 +103,31 @@ typedef struct samEntry
 { /*samEntry*/
     /*Buffers for storing strings*/
     signed char qryIdStr[128]; /*Holds query id/name*/
-    unsigned char lenQryIdUC;  /*Length of query id/name*/
+    unsigned char qryIdLenUC;  /*Length of query id/name*/
 
     signed char refIdStr[128]; /*Holds reference id/name*/
-    unsigned char lenRefIdUC;  /*Length of ref id/name*/
+    unsigned char refIdLenUC;  /*Length of ref id/name*/
 
-    signed char *cigTypeStr;   /*Holds cigar type entry*/
-    signed int *cigArySI;      /*Holds the cigar number*/
-    unsigned int lenCigUI;     /*Length of cigar entry*/
-    unsigned int lenCigBuffUI;/*# bytes malloc to cigStr*/
+    signed char *cigTypeStr;  /*Holds cigar type entry*/
+    signed int *cigArySI;     /*Holds the cigar number*/
+    unsigned int cigLenUI;    /*Length of cigar entry*/
+    unsigned int cigSizeUI;   /*# bytes malloc to cigStr*/
 
     signed char rNextStr[128]; /*Holds rNext entry*/
-    unsigned char lenRNextUC;  /*Length of rNextStr*/
+    unsigned char rnextLenUC;  /*Length of rNextStr*/
 
     /*The sequence and q-scores entries have lengths
     ` stored in readLenUI
     */
     signed char *seqStr;       /*Holds sequence entry*/
-    unsigned int lenSeqBuffUI;/*bytes malloc seqStr/qStr*/
+    unsigned int seqSizeUI;    /*bytes malloc seqStr*/
 
     signed char *qStr;         /*Holds the q-score entry*/
-    unsigned int lenQBuffUI;   /*number q-score entries*/
+    unsigned int qSizeUI;      /*number q-score entries*/
 
     signed char *extraStr;     /*Extra (columns 12-end)*/
-    unsigned int lenExtraUI;   /*Length of extraStr*/
-    unsigned int lenExtraBuffUI;/*# bytes malloc to qStr*/
+    unsigned int extraLenUI;   /*Length of extraStr*/
+    unsigned int extraSizeUI;/*# bytes malloc to qStr*/
 
     /*Flags/single numeric values in the sam entry*/
     unsigned char mapqUC;  /*Holds mapping quality*/
@@ -148,11 +146,11 @@ typedef struct samEntry
     unsigned int readLenUI;   /*Holds read length*/
     unsigned int alnReadLenUI;/*Number ref bases aligned*/
 
-    unsigned int numMatchUI;/*Holds number of matches*/
-    unsigned int numSnpUI;  /*Holds number of mismatches*/
-    unsigned int numInsUI;  /*Holds number of insertions*/
-    unsigned int numDelUI;  /*number of deletions*/
-    unsigned int numMaskUI; /*number soft masked bases*/
+    unsigned int matchCntUI;/*Holds number of matches*/
+    unsigned int snpCntUI;  /*Holds number of mismatches*/
+    unsigned int insCntUI;  /*Holds number of insertions*/
+    unsigned int delCntUI;  /*number of deletions*/
+    unsigned int maskCntUI; /*number soft masked bases*/
 
     /*These variables are used in finding the q-scores*/
     unsigned int qHistUI[def_maxQ_samEntry + 8];
@@ -262,7 +260,7 @@ freeHeap_samEntry(
 );
 
 /*-------------------------------------------------------\
-| Fun06: makeSamEntry
+| Fun06: mk_samEntry
 |   - Makes an heap allocated samEntry structure
 | Input:
 | Output:
@@ -271,7 +269,9 @@ freeHeap_samEntry(
 |     o 0 if had an memory error
 \-------------------------------------------------------*/
 struct samEntry *
-makeSamEntry();
+mk_samEntry(
+   void
+);
 
 /*-------------------------------------------------------\
 | Fun07: qhistToMed_samEntry
@@ -340,34 +340,6 @@ cpQEntry_samEntry(
 );
 
 /*-------------------------------------------------------\
-| Fun10: getLine_samEntry
-|  - reads in a single line from a sam file
-| Input:
-|  - buffStr:
-|    o buffer to read the sam file line temporarly into.
-|      this is resized if needed. You can input NULL to
-|      create a new buffer.
-|  - lenBuffUL:
-|    o length of buffStr (updated if buffStr is resized)
-|  - samFILE:
-|    o sam file to read a line from.
-| Output:
-|  - Modifies:
-|    o buffStr to hold a sam file line (resized if needed)
-|    o lenBuffUL to hold the resized length of buffStr
-|  - Returns:
-|    o 0 for success
-|    o def_EOF_samEntry for EOF (End Of File)
-|    o def_memErr_samEntry for memory errors
-\-------------------------------------------------------*/
-signed char
-getLine_samEntry(
-   signed char **buffStr,
-   unsigned long *lenBuffUL,
-   void *samFILE
-);
-
-/*-------------------------------------------------------\
 | Fun11: lineTo_samEntry
 |  - adds a sam file line to a samEntry struct
 | Input:
@@ -422,8 +394,6 @@ lineTo_samEntry(
 signed char
 get_samEntry(
    struct samEntry *samSTPtr,
-   signed char **buffStr,
-   unsigned long *lenBuffUL,
    void *samFILE
 );
 
@@ -452,7 +422,7 @@ get_samEntry(
 | Output:
 |   - Modifies:
 |     o siCig to point to the next open cigar entry
-|       - will be > samSTPtr->lenCigUI when the sequence
+|       - will be > samSTPtr->cigLenUI when the sequence
 |         does not end at at targPosSI
 |     o cigNtSI to have the number of bases remianing
 |       in the current siCig entry
@@ -493,39 +463,23 @@ swap_samEntry(
 
 /*-------------------------------------------------------\
 | Fun15: p_samEntry
-|   - Prints the sam file entry to a file. This does not
+|   - prints the sam file entry to a file. This does not
 |     print any extra stats that were found.
 | Input:
 |   - samST
 |     o Pointer to samEntry struct with sam entry to print
-|   - buffStr:
-|     o Pointer to c-string buffer to temporarly hold the
-|       cigar entry (speeds things up)
-|   - lenBuffUL:
-|     o Current length of buffer, adjusted if buffStr is
-|       expanded
-|   - pNoNewLineBl:
+|  - pNoNewLineBl:
 |     o 1: do not print a new line after; you will do this
 |     o 0: end of sam entry, print a new line
 |   - outFILE:
 |     o File to print the sam entry to
 | Output:
-|   - Prints:
-|     o Sam file entry in samST to outFILE.
-|   - Modifies:
-|     o inceases the size of buffStr, if is not 8x the
-|       cigar length
-|     o Sets lenBuffUL to the new buffStr size when
-|       buffStr is resized
-|   - Returns:
-|     o 0 for no problems
-|     o def_memErr_samEntry for memory errors
+|  - Prints:
+|    o sam file entry in samST to outFILE.
 \-------------------------------------------------------*/
-signed char
+void
 p_samEntry(
    struct samEntry *samSTPtr,
-   signed char **buffStr,
-   unsigned long *lenBuffUL,
    signed char pNoNewLineBl,
    void *outFILE
 );
@@ -619,16 +573,10 @@ revCmp_samEntry(
 | Input:
 |   - samSTPtr:
 |     o pointer to samEntry struct to get header with
-|   - buffStrPtr:
-|     o pointer to c-string to use in reading sam file
-|   - lenULPtr:
-|     o pointer to unsiged long with buffStrPtr size
 |   - samFILE:
 |     o sam file to get header from
 | Output:
 |   - Modifies:
-|     o buffStrPtr to have 1st read + resized if needed
-|     o lenULPtr to have resized buffStrPtr size
 |     o samSTPtr to have entry after header
 |     o samFILE to point to second read entry
 |   - Returns:
@@ -638,8 +586,6 @@ revCmp_samEntry(
 signed char *
 getHead_samEntry(
    struct samEntry *samSTPtr,
-   signed char **buffSTPtr,
-   unsigned long *lenULPtr,
    void *samFILE
 );
 
@@ -758,11 +704,6 @@ realloc_refs_samEntry(
 |   - samSTPtr:
 |     o pointer to samEntry struct to hold line after
 |       last reference (used for reading sam file)
-|   - buffStrPtr:
-|     o pointer to c-string to hold the line after the
-|       last reference id
-|   - lenBuffULPtr:
-|     o pointer to unsigned long with length of buffStrPtr
 |   - samFILE:
 |     o FILE pointer to sam file header
 |   - outFILE:
@@ -774,9 +715,7 @@ realloc_refs_samEntry(
 | Output:
 |   - Modifies:
 |     o refSTPtr to have reference length and ids
-|     o buffStrPtr to have first read
 |     o samSTPtr to have first read
-|     o lenBuffULPtr to have buffStrPtr size (if changed)
 |     o samFILE to point to first read after header
 |     o outFILE to have header (or not use if 0)
 |     o headStrPtr to have non-reference headers
@@ -790,8 +729,6 @@ signed char
 getRefLen_samEntry(
    struct refs_samEntry *refSTPtr,/*holds ref lengths*/
    struct samEntry *samSTPtr,    /*for reading sam*/
-   signed char **buffStrPtr,     /*buffer for file io*/
-   unsigned long *lenBuffULPtr,  /*size of buffSTPtr*/
    void *samFILE,                /*sam file with lengths*/
    void *outFILE,                /*print headers to*/
    signed char **headStrPtr,     /*holds non-ref header*/

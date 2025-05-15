@@ -33,14 +33,14 @@
 
 #include <stdio.h>
 
-#include "../genBio/samEntry.h"
-#include "../tbAmrSrc/amrST.h"
 #include "../genLib/charCp.h"
-
-#include "refSwap.h"
+#include "../genBio/samEntry.h"
+#include "../genFreezeTB/amrST.h"
+#include "../genFreezeTB/refSwap.h"
 
 /*.h files only*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../genLib/endLine.h"
+#include "../ftbVersion.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
@@ -48,13 +48,9 @@
 !   - .c  #include "../genLib/numToStr.h"
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/strAry.h"
-!   - .c  #include "../tbAmr/drugAry.h"
+!   - .c  #include "../genFreezeTB/drugAry.h"
 !   - .h  #include "../genLib/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-#define def_year_swapDbRef 2024
-#define def_month_swapDbRef 8
-#define def_day_swapDbRef 14
 
 /*-------------------------------------------------------\
 | Fun01: pversion_swapDbRef
@@ -72,10 +68,11 @@ pversion_swapDbRef(
 ){
    fprintf(
       (FILE *) outFILE,
-      "swapDbRef version: %i-%02i-%02i\n",
-      def_year_swapDbRef,
-      def_month_swapDbRef,
-      def_day_swapDbRef
+      "swapDbRef from freezeTB version: %i-%02i-%02i%s",
+      def_year_ftbVersion,
+      def_month_ftbVersion,
+      def_day_ftbVersion,
+      str_endLine
    );
 } /*pversion_swapDbRef*/
 
@@ -194,8 +191,8 @@ getInput_swapDbRef(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siArg = 1;
-   schar errSC = 0;
+   signed int siArg = 1;
+   signed char errSC = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -232,24 +229,24 @@ getInput_swapDbRef(
    { /*Loop: get user input*/
       if(
          ! eql_charCp(
-            (schar *) "-amr",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-amr",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*If: this is the amr database file*/
          ++siArg;
-         *dbFileStr = (schar *) argsAryStr[siArg];
+         *dbFileStr = (signed char *) argsAryStr[siArg];
       } /*If: this is the amr database file*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-sam",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-sam",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: this is the reference sam file*/
          ++siArg;
-         *samFileStr = (schar *) argsAryStr[siArg];
+         *samFileStr = (signed char *) argsAryStr[siArg];
       } /*Else If: this is the reference sam file*/
 
       /**************************************************\
@@ -259,9 +256,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "-h",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-h",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: user asked for help*/
          phelp_swapDbRef(stdout);
@@ -270,9 +267,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "--h",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--h",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: user asked for help*/
          phelp_swapDbRef(stdout);
@@ -281,9 +278,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "help",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "help",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: user asked for help*/
          phelp_swapDbRef(stdout);
@@ -292,9 +289,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "-help",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-help",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: user asked for help*/
          phelp_swapDbRef(stdout);
@@ -303,9 +300,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "--help",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--help",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: user asked for help*/
          phelp_swapDbRef(stdout);
@@ -319,9 +316,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "-v",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-v",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: version number request*/
          pversion_swapDbRef(stdout);
@@ -330,9 +327,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "--v",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--v",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: version number request*/
          pversion_swapDbRef(stdout);
@@ -341,9 +338,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "version",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "version",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: version number request*/
          pversion_swapDbRef(stdout);
@@ -352,9 +349,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "-version",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-version",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: version number request*/
          pversion_swapDbRef(stdout);
@@ -363,9 +360,9 @@ getInput_swapDbRef(
 
       else if(
          ! eql_charCp(
-            (schar *) "--version",
-            (schar *) argsAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--version",
+            (signed char *) argsAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: version number request*/
          pversion_swapDbRef(stdout);
@@ -444,24 +441,21 @@ main(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *amrDbFileStr = 0;
-   schar *samFileStr = 0;
+   signed char *amrDbFileStr = 0;
+   signed char *samFileStr = 0;
 
-   schar errSC = 0;
+   signed char errSC = 0;
 
    struct samEntry samStackST;
-   schar *buffHeapStr = 0;
-   ulong lenBuffUL = 0;
-
    FILE *samFILE = 0;
 
    struct amrST *amrHeapAryST = 0;
-   uint numAmrsUI = 0;
-   uint numCnvtAmrsUI = 0;
+   unsigned int numAmrsUI = 0;
+   unsigned int numCnvtAmrsUI = 0;
 
-   schar *drugHeapAryStr = 0;
-   uint numDrugsUI = 0;
-   uint maxDrugsUI = 0;
+   signed char *drugHeapAryStr = 0;
+   unsigned int numDrugsUI = 0;
+   unsigned int maxDrugsUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec02:
@@ -515,8 +509,8 @@ main(
          amrDbFileStr,
          &numAmrsUI,
          &drugHeapAryStr,
-         (sint *) &numDrugsUI,
-         (sint *) &maxDrugsUI,
+         (signed int *) &numDrugsUI,
+         (signed int *) &maxDrugsUI,
          &errSC
       );
 
@@ -584,13 +578,7 @@ main(
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    do{ /*Loop: read in reference sequence in sam file*/
-      errSC =
-        get_samEntry(
-           &samStackST,
-           &buffHeapStr,
-           &lenBuffUL,
-           samFILE
-      );
+      errSC = get_samEntry(&samStackST, samFILE);
 
       if(errSC > 1)
       { /*If: I had an error*/
@@ -623,7 +611,7 @@ main(
          numCnvtAmrsUI,
          drugHeapAryStr,
          numDrugsUI - 1,
-         (schar *) "-"    /*print to stdout*/
+         (signed char *) "-"    /*print to stdout*/
       ); /*print the converted database*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -635,43 +623,31 @@ main(
    goto cleanUp_main_sec05;
    
    memErr_main_sec05:;
-   errSC = 1;
-   goto cleanUp_main_sec05;
+      errSC = 1;
+      goto cleanUp_main_sec05;
 
    fileErr_main_sec05:;
-   errSC = 2;
-   goto cleanUp_main_sec05;
+      errSC = 2;
+      goto cleanUp_main_sec05;
 
    cleanUp_main_sec05:;
+      if(! samFILE) ;
+      else if(samFILE == stdin) ;
+      else if(samFILE == stdout) ;
+      else if(samFILE == stderr) ;
+      else
+         fclose(samFILE);
+      samFILE = 0;
 
-   if(
-         samFILE
-      && samFILE != stdin
-      && samFILE != stdout
-   ) fclose(samFILE);
+      if(drugHeapAryStr)
+         free(drugHeapAryStr);
+      drugHeapAryStr = 0;
 
-   samFILE = 0;
+      freeStack_samEntry(&samStackST);
+      freeHeapAry_amrST(amrHeapAryST, numAmrsUI);
+      amrHeapAryST = 0;
 
-   if(buffHeapStr)
-     free(buffHeapStr);
-
-   buffHeapStr = 0;
-
-   if(drugHeapAryStr)
-      free(drugHeapAryStr);
-
-   drugHeapAryStr = 0;
-
-   freeStack_samEntry(&samStackST);
-
-   freeHeapAry_amrST(
-      amrHeapAryST,
-      numAmrsUI
-   );
-
-   amrHeapAryST = 0;
-
-   return (int) errSC;
+      return (int) errSC;
 } /*main*/
 
 /*=======================================================\

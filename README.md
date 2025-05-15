@@ -17,6 +17,15 @@ freezeTB includes databases from other repositories and
   those cases the licensing will be under the owner's
   repository.
 
+All code that is unique to freezeTB is under a dual
+  license. The primary license is Unlicense. However, not
+  all companies/countries like or will even respect the
+  Unlicense. So, in those cases or cases were the
+  Unlicense is not wanted/allowed, the freezeTB unique
+  code is under the MIT license.
+
+# Thanks
+
 Here are the order of Merlin winners:
 
 - People:
@@ -27,6 +36,7 @@ Here are the order of Merlin winners:
   - Bryce Inman: GUI testing, AMR testing, and designed
     wet lab side
   - Abigail Seeger: GUI testing on windows
+  - My dad for listening and giving feedback
 - Taken from other sources:
   - Files in freezeTBFiles
     - The amr database (amrDb.tsv) is from the WHO 2023
@@ -58,7 +68,7 @@ Here are the order of Merlin winners:
         Apr;35(4):907-14.
         doi: 10.1128/jcm.35.4.907-914.1997.
         PMID: 9157152; PMCID: PMC229700.
-  - For windows I compiled a minimap2 (MIT) binaries
+  - minimap2: speeds everything up
     - [https://github.com/lh3/minimap2](
        https://github.com/lh3/minimap2)
   - I used tcltk to make the GUI (graphical user
@@ -68,21 +78,10 @@ Here are the order of Merlin winners:
     - [https://github.com/tcltk/tcl](
        https://github.com/tcltk/tcl)
 
-The stuff unique to freezeTB is under a dual license. The
-  primary license is Unlicense. However, not all
-  companies/countries like or will even respect the
-  Unlicense. So, in those cases or cases were the
-  Unlicense is not wanted/allowed, freezeTB is under the
-  MIT license.
-
 - Unique to freezeTB:
   - Everything in programs
-    - This is the reason Norbert, I mean freezeTB, can fly
-      on Windows.
   - The icon
   - Everything in scripts
-  - The terrible guides (guides folder)
-  - The scripts in benchmark
 
 # Install
 
@@ -91,12 +90,13 @@ The stuff unique to freezeTB is under a dual license. The
 For Linux I am assuming you are using a Debian based
   distribution, such as Ubuntu. However, I have not been
   able to get the GUI (graphical user interface) compiled
-  on Ubuntu (some linking issue). But, I have on void
-  Linux.
+  on Ubuntu (some linking issue).
 
-1. Install minimap2: `sudo apt-get install minimap2;`
-2. Install R: `sudo apt-get install r-base;`
-3. Instlal: tcltk:`sudo apt-get install tcl-dev tk-dev`
+1. Install R: `sudo apt-get install r-base;`
+2. Install: tcltk:`sudo apt-get install tcl-dev tk-dev`
+3. You may need to install `gcc` and `make`
+4. Recommended minimap2: `sudo apt-get install minimap2;`
+   - Otherwise freezeTB is slow
 
 ```
 cd ~/Downloads
@@ -104,6 +104,17 @@ git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
 make -f mkfile.unix
 sudo make -f mkfile.unix install
+```
+
+You can change the make variable to use gmake with the
+ `MAKE=gmake` command. This is only needed on on a bsd,
+  were the default make is bsd make. Otherwise the GUI can
+  not locate tcltk. I could not get the POSIX solution
+  working on Mac.
+
+```
+make MAKE=gmake -f mkfile.unix
+sudo make MAKE=gmake -f mkfile.unix install
 ```
 
 ## Mac
@@ -116,7 +127,7 @@ You can install freezTB in multiple ways. The easiest way
 
 Download freezeTB from github and then use the
   `macInstall` script to install dependencies and
-  freezeTB.
+  freezeTB. This will auto install minimap2 for you.
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.
@@ -137,7 +148,8 @@ Enter your password when prompted.
 2. Install X11 (xquartz) `brew install xquartz`
 3. Install tcltk `brew install tcl-tk`
 4. Install R `brew install R`
-5. Install minimap2 `brew install minimap2`
+5. Recommended minimap2 `brew install minimap2`
+   - Otherwise freezeTB is slow
 
 Then you can install freezeTB:
 
@@ -175,6 +187,11 @@ sudo chmod a+x /usr/local/bin/minimap2
 
 ## Windows
 
+I have setup my install script to find the tcltk libraries
+  installed by magic splat. Sadly, there is no support
+  for ARM (snapdragon CPUs). So, you can only use the
+  command line version on ARM Windows.
+
 ### current method
 
 Best way I found. It relies on visual 2022 build tools
@@ -204,6 +221,12 @@ To uninstall; double click `winUninstall.bat` in `windows`
   folder.
   - to remove globaly; run as administratory
    (right click->run as administrator)
+
+If you are on an ARM CPU, open a developer console (see if
+  failed). Then `cd "%homePath%\Downloads\freezeTB\programs\freezeTBSrc\`.
+  After that do `nmake /F mkfile.win`. Copy
+  the `freezeTB.exe` to a convient location. This will
+  give you the command line freezeTB program.
 
 ### if failed
 
@@ -237,12 +260,13 @@ The <prefix> is the prefix for the output files from
   Picture showing how to open developer console
 ](windows10devConsole.png)
 
-### Windows Minimap2 (from source)
+### Windows Minimap2
 
-I include a minimap2.exe compiled binary in the `windows`
-  folder. So, you do not need this. However, here are the
-  steps if you want a more recent version of minimap2. If
-  your computer's CPU is an ARM CPU, such as a snap dragon
+I do not include a minimap2.exe compiled binary in
+  the `windows` folder to avoid any weird issues. So, if
+  you want minimap2, you will have to build it your self.
+
+If your computer's CPU is an ARM CPU, such as a snapdragon
   CPU, you will need to compile minimap2 from source using
   the `-neon=1` and `-aarch64=1` flags (assuming minigw
   has an ARM release).

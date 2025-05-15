@@ -33,13 +33,11 @@ struct geneCoord;
 |   - samSTPtr:
 |     o pointer to an samEntry structure with a read to
 |       add to the histogram
-|   - geneCoordSTPtr:
-|     o pointer to an array of geneCoord structures with
-|       gene coordinates for each gene of interest
-|   - startSeqUI:
-|     o first base in target region of reference 
-|   - endSeqUI:
-|     o last base in target region of reference
+|   - coordsSTPtr:
+|     o geneCoord struct pointer with gene/target
+|       coordinates want to extract
+|   - numGenesSI:
+|     o number of genes in coordsSTPtr (index 1)
 |   - numOffTargSI:
 |     o number of reads not mapping to a gene coordiante,
 |       but are mapped to the genome
@@ -51,10 +49,10 @@ struct geneCoord;
 void
 addRead_ampDepth(
    struct samEntry *samSTPtr,
-   unsigned int startSeqUI,  /*first reference coorinate*/
-   unsigned int endSeqUI,    /*last reference coordinate*/
-   signed int *depthArySI,
-   signed int *numOffTargSI
+   struct geneCoord *coordsSTPtr, /*list of genes*/
+   signed int numGenesSI,   /*number genes in list*/
+   signed int *depthArySI,  /*depth array to update*/
+   signed int *numOffTargSI /*number reads not in list*/
 );
 
 /*-------------------------------------------------------\

@@ -331,10 +331,6 @@ addReadToDepth_edDist(
 |     o pointer to res_edDist struct to have depth profile
 |   - samSTPtr:
 |     o for reading each line in the sam file
-|   - buffStrPtr:
-|     o pointer to c-string with buffer for reading file
-|   - lenBuffULPtr:
-|     o pointer to unsigned long to hold buffStrPtr size
 |   - samFILE:
 |     o sam file to scan
 | Output:
@@ -357,8 +353,6 @@ mkDepthProfile_edDist(
    float minOverlapF,         /*min % overlap*/
    struct res_edDist *resSTPtr,/*has depth array*/
    struct samEntry *samSTPtr, /*for reading sam file*/
-   signed char **buffStrPtr,  /*for reading sam file*/
-   unsigned long *lenBuffULPtr, /*size of buffStrPtr*/
    void *samFILE
 );
 

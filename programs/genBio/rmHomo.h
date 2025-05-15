@@ -36,6 +36,10 @@ struct samEntry;
 |   - maskSC:
 |     o base to mask deletions with
 |     o if 0 if(! maskSC), then uses reference base
+|   - scanBl:
+|     o scan both neighboring bases next to indel to
+|       see if the indel is next to or in middle of large
+|       homopolymer
 |   - seqBuffStrPtr:
 |     o c-string pointer to buffer to use in copy sequence
 |     o size to avoid reallocation of buffer
@@ -68,6 +72,7 @@ indel_rmHomo(
    signed int minHomoSI,     /*min homoplymer length*/
    signed int maxIndelSI,    /*indel to large to remove*/
    signed char maskSC,       /*base to mask dels with*/
+   signed char scanBl,       /*scan neighbor bases*/
    signed char **seqBuffStrPtr, /*sequence buffer*/
    unsigned int *sizeSeqUIPtr,  /*size of seqBuffStrPtr*/
    signed char **qBuffStrPtr,   /*q-score buffer*/

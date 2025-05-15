@@ -41,12 +41,13 @@
 #include "../genAln/alnSet.h"
 #include "../genAln/kmerFind.h"
 
-#include "spolST.h"
-#include "spolFind.h"
+#include "../genFreezeTB/spolST.h"
+#include "../genFreezeTB/spolFind.h"
 
 /*.h files only*/
-#include "../genLib/dataTypeShortHand.h"
-#include "tbSpolDefs.h"
+#include "../genLib/endLine.h"
+#include "../genFreezeTB/tbSpolDefs.h"
+#include "../ftbVersion.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
@@ -54,6 +55,9 @@
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/shellSort.h"
 !   - .c  #include "../genLib/strAry.h"
+!   - .c  #include "../genLib/endin.h"
+!   - .c  #include "../genLib/checkSum.h"
+!   - .c  #include "../genLib/inflate.h"
 !   - .c  #include "../genAln/memwater.h"
 !   - .c  #include "../genAln/indexToCoord.h"
 !   - .h  #include "../genAln/alnDefs.h"
@@ -78,10 +82,11 @@ pversion_tbSpol(
 ){
    fprintf(
       (FILE *) outFILE,
-      "tbSpoligo version: %i-%02i-%02i\n",
-      def_year_tbSpolDefs,
-      def_month_tbSpolDefs,
-      def_day_tbSpolDefs
+      "tbSpol from freezeTB version: %i-%02i-%02i%s",
+      def_year_ftbVersion,
+      def_month_ftbVersion,
+      def_day_ftbVersion,
+      str_endLine
    );
 } /*pVersion_tbSpol*/
 
@@ -125,17 +130,20 @@ phelp_tbSpol(
 
    fprintf(
       outFILE,
-      "tbSpol -spoligo spacers.fa -sam consensus.sam\n"
+      "tbSpol -spoligo spacers.fa -sam consensus.sam%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "or tbSpol -spoligo spacers.fa -fa consensus.fa\n"
+     "or tbSpol -spoligo spacers.fa -fa consensus.fa%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "  - Finds spoligotype of an sequence\n"
+      "  - Finds spoligotype of an sequence%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -168,7 +176,7 @@ phelp_tbSpol(
    *   - Print input header
    \*****************************************************/
 
-   fprintf(outFILE, "Input:\n");
+   fprintf(outFILE, "Input:%s", str_endLine);
 
    /*****************************************************\
    * Fun02 Sec04 Sub02:
@@ -177,12 +185,14 @@ phelp_tbSpol(
 
    fprintf(
       outFILE,
-      "  -spoligo: [Required]\n"
+      "  -spoligo: [Required]%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o Fasta file with spoligotype references\n"
+      "    o Fasta file with spoligotype references%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -193,62 +203,74 @@ phelp_tbSpol(
    if(def_seqIn_tbSpolDefs == def_samFile_tbSpolDefs)
       fprintf(
          outFILE,
-         "  -sam mappings.sam: [Requried; stdin]\n"
+         "  -sam mappings.sam: [Requried; stdin]%s",
+      str_endLine
       );
    else if(def_seqIn_tbSpolDefs == def_faFile_tbSpolDefs)
       fprintf(
          outFILE,
-         "  -fa reads.fa: [Required; stdin]\n"
+         "  -fa reads.fa: [Required; stdin]%s",
+      str_endLine
       );
    else if(def_seqIn_tbSpolDefs == def_fqFile_tbSpolDefs)
       fprintf(
          outFILE,
-         "  -fq reads.fq: [Required; stdin]\n"
+         "  -fq reads.fq: [Required; stdin]%s",
+      str_endLine
       );
    else
       fprintf(
          outFILE,
-         "  -sam file.sam: [Required; stdin]\n"
+         "  -sam file.sam: [Required; stdin]%s",
+      str_endLine
       );
 
    fprintf(
       outFILE,
-      "    o File with sequences to spoligotype\n"
+      "    o File with sequences to spoligotype%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o Make sure your sequence(s) cover the\n"
+      "    o Make sure your sequence(s) cover the%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "      entire direct repeat region\n"
+      "      entire direct repeat region%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o Use \"-option -\" to use stdin input\n"
+      "    o Use \"-option -\" to use stdin input%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o Options\n"
+      "    o Options%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "        -sam: Use an sam file\n"
+      "        -sam: Use an sam file%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "        -fa: use an fasta file (slow)\n"
+      "        -fa: use an fasta file (slow)%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "        -fq: use an fastq file (slow)\n"
+      "        -fq: use an fastq file (slow)%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -256,16 +278,18 @@ phelp_tbSpol(
    *   - Print database input
    \*****************************************************/
 
-   fprintf(outFILE, "  -db: [None]\n");
+   fprintf(outFILE, "  -db: [None]%s", str_endLine);
 
    fprintf(
       outFILE,
-      "    o Database (csv file) to look up lineages in\n"
+      "    o Database (csv file) to look up lineages in%s",
+      str_endLine
    );
 
    fprintf(
-     outFILE,
-     "    o Strain,barcode,ignored,lineage,sit,countries\n"
+    outFILE,
+    "    o Strain,barcode,ignored,lineage,sit,countries%s",
+     str_endLine
    );
 
    /*****************************************************\
@@ -273,11 +297,12 @@ phelp_tbSpol(
    *   - Print output file
    \*****************************************************/
 
-   fprintf(outFILE, "  -out: [stdout]\n");
+   fprintf(outFILE, "  -out: [stdout]%s", str_endLine);
 
    fprintf(
      outFILE,
-     "    o File to output results to (- is stdout)\n"
+     "    o File to output results to (- is stdout)%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -287,34 +312,40 @@ phelp_tbSpol(
 
    fprintf(
       outFILE,
-      "  -dr-start: [%i]\n",
-      def_DRStart_tbSpolDefs
+      "  -dr-start: [%i]%s",
+      def_DRStart_tbSpolDefs,
+      str_endLine
    );
 
    fprintf(
     outFILE,
-    "    o First direct repeat region base in reference\n"
+    "    o First direct repeat region base in reference%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o -sam: to align spacers to DR region only\n"
+     "    o -sam: to align spacers to DR region only%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "  -dr-end: [%i]\n",
-      def_DREnd_tbSpolDefs
+      "  -dr-end: [%i]%s",
+      def_DREnd_tbSpolDefs,
+      str_endLine
    );
 
    fprintf(
     outFILE,
-    "    o Last direct repeat region base in reference\n"
+    "    o Last direct repeat region base in reference%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o -sam: to align spacers to DR region only\n"
+     "    o -sam: to align spacers to DR region only%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -324,39 +355,46 @@ phelp_tbSpol(
 
    fprintf(
       outFILE,
-      "  -min-score: [%.2f]\n",
-      def_minPercScore_tbSpolDefs
+      "  -min-score: [%.2f]%s",
+      def_minPercScore_tbSpolDefs,
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Minimim percentage of score to count an hit\n"
+     "    o Minimim percentage of score to count an hit%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Scores: match = 5, snp = -4, indel = -10\n"
+     "    o Scores: match = 5, snp = -4, indel = -10%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "  -min-kmer-perc: [%f]\n",
-      def_minKmerPerc_tbSpolDefs
+      "  -min-kmer-perc: [%f]%s",
+      def_minKmerPerc_tbSpolDefs,
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o Minimum percent of kmers needed to do an\n"
+     "    o Minimum percent of kmers needed to do an%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "      waterman alignment on an window for -fast\n"
+     "      waterman alignment on an window for -fast%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "    o 50%% is 10 or more kmers for spoligotypes\n"
+     "    o 50%% is 10 or more kmers for spoligotypes%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -368,7 +406,8 @@ phelp_tbSpol(
    { /*If: I fast kmer is default method*/
       fprintf(
          outFILE,
-         "  -fast: [Default]\n"
+         "  -fast: [Default]%s",
+      str_endLine
       );
    } /*If: I fast kmer is default method*/
 
@@ -376,35 +415,41 @@ phelp_tbSpol(
    { /*Else: I slow is default method*/
       fprintf(
          outFILE,
-         "  -fast: [No]\n"
+         "  -fast: [No]%s",
+      str_endLine
       );
    } /*Else: I slow is default method*/
 
    fprintf(
      outFILE,
-     "    o Use kmers to narrow down possible\n"
+     "    o Use kmers to narrow down possible%s",
+      str_endLine
    );
 
    fprintf(
      outFILE,
-     "      spoligotype locations (faster)\n"
+     "      spoligotype locations (faster)%s",
+      str_endLine
    );
 
    if(! def_fastSearch_tbSpolDefs)
       fprintf(
          outFILE,
-         "  -slow: [Default]\n"
+         "  -slow: [Default]%s",
+      str_endLine
       );
 
    else
       fprintf(
          outFILE,
-         "  -slow: [No]\n"
+         "  -slow: [No]%s",
+      str_endLine
       );
 
    fprintf(
      outFILE,
-     "    o Uses an Waterman alignment to map spacers\n"
+     "    o Uses an Waterman alignment to map spacers%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -416,35 +461,41 @@ phelp_tbSpol(
       || def_conFrag_tbSpolDefs
    ) fprintf(
          outFILE,
-         "  -frag: [Yes]\n"
+         "  -frag: [Yes]%s",
+      str_endLine
       );
 
     else 
       fprintf(
          outFILE,
-         "  -frag: [No]\n"
+         "  -frag: [No]%s",
+      str_endLine
       );
 
    fprintf(
      outFILE,
-     "    o search for fragments (not full genomes)\n"
+     "    o search for fragments (not full genomes)%s",
+      str_endLine
    );
 
    if(def_conFrag_tbSpolDefs)
       fprintf(
          outFILE,
-         "  -con-frag: [Yes]\n"
+         "  -con-frag: [Yes]%s",
+      str_endLine
       );
 
    else
       fprintf(
          outFILE,
-         "  -con-frag: [No]\n"
+         "  -con-frag: [No]%s",
+      str_endLine
       );
 
    fprintf(
      outFILE,
-     "    o fragments are in an conensus\n"
+     "    o fragments are in an conensus%s",
+      str_endLine
    );
    
    if(! def_conFrag_tbSpolDefs
@@ -452,36 +503,42 @@ phelp_tbSpol(
    )
       fprintf(
          outFILE,
-         "  -read-frag: [Yes]\n"
+         "  -read-frag: [Yes]%s",
+      str_endLine
       );
 
    else
       fprintf(
          outFILE,
-         "  -read-frag: [No]\n"
+         "  -read-frag: [No]%s",
+      str_endLine
       );
 
    fprintf(
      outFILE,
-     "    o fragments are in reads\n"
+     "    o fragments are in reads%s",
+      str_endLine
    );
 
    if(! def_frag_tbSpolDefs
       && ! def_conFrag_tbSpolDefs
    ) fprintf(
          outFILE,
-         "  -no-frag: [Yes]\n"
+         "  -no-frag: [Yes]%s",
+      str_endLine
       );
 
    else
       fprintf(
          outFILE,
-         "  -no-frag: [No]\n"
+         "  -no-frag: [No]%s",
+      str_endLine
       );
 
    fprintf(
      outFILE,
-     "    o reads/consensus have full direct repeat\n"
+     "    o reads/consensus have full direct repeat%s",
+      str_endLine
    );
    
    /*****************************************************\
@@ -489,19 +546,29 @@ phelp_tbSpol(
    *   - Print help/verson command
    \*****************************************************/
 
-   fprintf(outFILE, "  -h: print this help message\n");
-   fprintf(outFILE, "  -v: print the version number\n");
+   fprintf(
+      outFILE,
+      "  -h: print this help message%s",
+      str_endLine
+   );
+
+   fprintf(
+      outFILE,
+      "  -v: print the version number%s",
+      str_endLine
+   );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec05:
    ^   - Print output
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   fprintf(outFILE, "Output:\n");
+   fprintf(outFILE, "Output:%s", str_endLine);
 
    fprintf(
       outFILE,
-      "  - Prints sequence name and spoligotype barcode\n"
+      "  - Prints sequence name and spoligotype barcode%s",
+      str_endLine
    );
 
    fprintf(
@@ -510,7 +577,7 @@ phelp_tbSpol(
 
    );
 
-   fprintf(outFILE, "\\tSIT\\tcountries\n");
+   fprintf(outFILE, "\\tSIT\\tcountries%s", str_endLine);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec06:
@@ -617,9 +684,9 @@ input_tbSpol(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siArg = 1;
-   schar *tmpStr = 0;
-   schar errSC = 0;
+   signed int siArg = 1;
+   signed char *tmpStr = 0;
+   signed char errSC = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -662,35 +729,35 @@ input_tbSpol(
    { /*Loop: get user input*/
       if(
          ! eql_charCp(
-            (schar *) "-spoligo",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-spoligo",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*If: an fasta file with spoligotypes*/
          ++siArg;
-         *refFileStr = (schar *) argAryStr[siArg];
+         *refFileStr = (signed char *) argAryStr[siArg];
       } /*If: an fasta file with spoligotypes*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-db",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-db",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: the lineage database was input*/
          ++siArg;
-         *spoliogDbStr = (schar *) argAryStr[siArg];
+         *spoliogDbStr = (signed char *) argAryStr[siArg];
       } /*Else If: the lineage database was input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-out",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-out",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: an fastq file was input*/
          ++siArg;
-         *outFileStr = (schar *) argAryStr[siArg];
+         *outFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: an fastq file was input*/
 
       /**************************************************\
@@ -700,54 +767,54 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-fq",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-fq",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: an fastq file was input*/
          *seqTypeFlag = def_fqFile_tbSpolDefs;
 
          ++siArg;
-         *seqFileStr = (schar *) argAryStr[siArg];
+         *seqFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: an fastq file was input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-fa",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-fa",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: an fastq file was input*/
          *seqTypeFlag = def_faFile_tbSpolDefs;
 
          ++siArg;
-         *seqFileStr = (schar *) argAryStr[siArg];
+         *seqFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: an fastq file was input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-sam",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-sam",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: an sam file was input*/
          *seqTypeFlag = def_samFile_tbSpolDefs;
 
          ++siArg;
-         *seqFileStr = (schar *) argAryStr[siArg];
+         *seqFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: an sam file was input*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-sam-con",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-sam-con",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: sam file of an consensus was input*/
          *seqTypeFlag = def_samConFile_tbSpolDefs;
 
          ++siArg;
-         *seqFileStr = (schar *) argAryStr[siArg];
+         *seqFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: sam file of an consensus was input*/
 
       /**************************************************\
@@ -757,17 +824,17 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-dr-start",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-dr-start",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: the direct repeat start is input*/
          ++siArg;
-         tmpStr = (schar *) argAryStr[siArg];
+         tmpStr = (signed char *) argAryStr[siArg];
 
          tmpStr +=
             strToSI_base10str(
-               (schar *) argAryStr[siArg],
+               (signed char *) argAryStr[siArg],
                dirStartSI
             );
 
@@ -775,8 +842,9 @@ input_tbSpol(
          { /*If: non-numeric*/
             fprintf(
                stderr,
-               "-dr-start %s; non-numeric or to large\n",
-               argAryStr[siArg]
+               "-dr-start %s; non-numeric or to large%s",
+               argAryStr[siArg],
+               str_endLine
             );
 
              goto err_fun03_sec04;
@@ -785,17 +853,17 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-dr-end",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-dr-end",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: the direct repeat start is input*/
          ++siArg;
-         tmpStr = (schar *) argAryStr[siArg];
+         tmpStr = (signed char *) argAryStr[siArg];
 
          tmpStr +=
             strToSI_base10str(
-               (schar *) argAryStr[siArg],
+               (signed char *) argAryStr[siArg],
                dirEndSI
             );
 
@@ -803,8 +871,9 @@ input_tbSpol(
          { /*If: non-numeric*/
             fprintf(
                stderr,
-               "-dr-end %s; non-numeric or to large\n",
-               argAryStr[siArg]
+               "-dr-end %s; non-numeric or to large%s",
+               argAryStr[siArg],
+               str_endLine
             );
 
              goto err_fun03_sec04;
@@ -813,9 +882,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-min-score",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-min-score",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: min score to keep an spoligotype*/
          ++siArg;
@@ -824,9 +893,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-min-perc-kmer",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-min-perc-kmer",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: Min kmers for fast method selected*/
          ++siArg;
@@ -841,30 +910,30 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-fast",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-fast",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
       )) *fastTypingBl = 1;
 
       else if(
          ! eql_charCp(
-            (schar *) "-slow",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-slow",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
       )) *fastTypingBl = 0;
 
       else if(
          ! eql_charCp(
-            (schar *) "-frag",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-frag",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
       )) *fragBl = 1;
 
       else if(
          ! eql_charCp(
-            (schar *) "-con-frag",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-con-frag",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: consensus is in fragments*/
          *conFragBl = 1; /*using consensuses*/
@@ -873,9 +942,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-read-frag",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-read-frag",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: sequence is in fragments*/
          *conFragBl = 0; /*using consensuses*/
@@ -884,9 +953,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-no-frag",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-no-frag",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: sequence is in fragments*/
          *fragBl = 0;
@@ -900,9 +969,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-h",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-h",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted help message*/
          phelp_tbSpol(stdout);
@@ -911,9 +980,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "--h",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--h",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted help message*/
          phelp_tbSpol(stdout);
@@ -922,9 +991,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "help",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted help message*/
          phelp_tbSpol(stdout);
@@ -933,9 +1002,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-help",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted help message*/
          phelp_tbSpol(stdout);
@@ -944,9 +1013,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "--help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--help",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted help message*/
          phelp_tbSpol(stdout);
@@ -960,9 +1029,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-v",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-v",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted version number*/
          pversion_tbSpol(stdout);
@@ -971,9 +1040,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "--v",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--v",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted version number*/
          pversion_tbSpol(stdout);
@@ -982,9 +1051,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "version",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted version number*/
          pversion_tbSpol(stdout);
@@ -993,9 +1062,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "-version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-version",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted version number*/
          pversion_tbSpol(stdout);
@@ -1004,9 +1073,9 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (schar *) "--version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--version",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
          )
       ){ /*Else If: wanted version number*/
          pversion_tbSpol(stdout);
@@ -1022,8 +1091,9 @@ input_tbSpol(
       { /*Else: invalid input*/
          fprintf(
             stderr,
-            "%s is not recongnized\n",
-            argAryStr[siArg]
+            "%s is not recongnized%s",
+            argAryStr[siArg],
+            str_endLine
           );
 
          goto err_fun03_sec04;
@@ -1097,30 +1167,32 @@ main(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siArg = 0;
-   schar errSC = 0;
+   signed int siArg = 0;
+   signed char errSC = 0;
    #define def_numSpol_tbSpolDefs 64
-   uint codeAryUI[def_numSpol_tbSpolDefs + 1];
+   unsigned int codeAryUI[def_numSpol_tbSpolDefs + 1];
       /*holds barcode for spoligo*/
 
-   schar *seqFileStr = 0;    /*sequences to type*/
-   schar *spoligoFileStr = 0;/*spoligotype Sequences*/
-   schar *spoligoDbStr = 0;  /*Database of lineages*/
-   schar *outFileStr = 0;    /*file to output to*/
+   signed char *seqFileStr = 0;   /*sequences to type*/
+   signed char *spoligoFileStr = 0;
+      /*spoligotype Sequences*/
+   signed char *spoligoDbStr = 0; /*Database of lineages*/
+   signed char *outFileStr = 0;   /*file to output to*/
 
-   sint drStartSI = def_DRStart_tbSpolDefs;
-   sint drEndSI = def_DREnd_tbSpolDefs;
+   signed int drStartSI = def_DRStart_tbSpolDefs;
+   signed int drEndSI = def_DREnd_tbSpolDefs;
 
    /*Type of sequence file input*/
-   schar seqTypeFlagSC = def_seqIn_tbSpolDefs;
+   signed char seqTypeFlagSC = def_seqIn_tbSpolDefs;
 
-   schar fragCheckBl = def_frag_tbSpolDefs;
+   signed char fragCheckBl = def_frag_tbSpolDefs;
      /*do fragmentation checks*/
 
-   schar conFragBl = def_conFrag_tbSpolDefs;
+   signed char conFragBl = def_conFrag_tbSpolDefs;
       /*consensus fragment mode*/
 
-   uint numSupReadsUI = 0; /*number reads with an spacer*/
+   unsigned int numSupReadsUI = 0;
+     /*number reads with an spacer*/
 
    float minPercScoreF = def_minPercScore_tbSpolDefs;
 
@@ -1128,22 +1200,21 @@ main(
    float minKmerPercF = def_minKmerPerc_tbSpolDefs;
    float percShiftF = def_percShift_tbSpolDefs;
    float percExtraNtInWinF = def_extraNtInWin_tbSpolDefs;
-   uchar lenKmerUC = def_lenKmer_tbSpolDefs;
-   schar fastBl = def_fastSearch_tbSpolDefs;
+   unsigned char lenKmerUC = def_lenKmer_tbSpolDefs;
+   signed char fastBl = def_fastSearch_tbSpolDefs;
 
    struct seqST *slowRefHeapAryST= 0;/*ref sequences*/
-   sint numSpacersSI = 0;
+   signed int numSpacersSI = 0;
 
    struct seqST seqStackST;      /*Sequences to check*/
    struct alnSet alnSetStackST;  /*Settings*/
 
    struct samEntry samStackST;   /*Sequences to check*/
-   schar *buffHeapStr = 0;
-   ulong lenBuffUL = 0;
 
    /*Varaibles dealng with the spoligo lineage database*/
    struct spolST *spolDbHeapAryST = 0;
-   sint numLineagesSI = 0; /*Number lineages in database*/
+   signed int numLineagesSI = 0;
+      /*Number lineages in database*/
 
    /*kmer finding of spoligotype variables*/
    struct tblST_kmerFind kmerTblStackST;
@@ -1212,7 +1283,7 @@ main(
 
    if(errSC)
    { /*If: I had an memory error*/
-      fprintf(stderr, "Ran out of memory\n");
+      fprintf(stderr, "Ran out of memory%s", str_endLine);
       goto err_main_sec06_sub02;
    } /*If: I had an memory error*/
 
@@ -1224,7 +1295,7 @@ main(
 
    if(errSC)
    { /*If: I had an memory error*/
-      fprintf(stderr, "Ran out of memory\n");
+      fprintf(stderr, "Ran out of memory%s", str_endLine);
       goto err_main_sec06_sub02;
    } /*If: I had an memory error*/
 
@@ -1251,8 +1322,9 @@ main(
    { /*If: The spoligotype file could not be opened*/
       fprintf(
          stderr,
-         "Unable to open -spoligo %s\n",
-         spoligoFileStr
+         "Unable to open -spoligo %s%s",
+         spoligoFileStr,
+         str_endLine
       );
 
       goto err_main_sec06_sub02;
@@ -1281,8 +1353,9 @@ main(
       { /*If: The output file could not be opened*/
          fprintf(
             stderr,
-            "Unable to open -out %s\n",
-            outFileStr
+            "Unable to open -out %s%s",
+            outFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
@@ -1309,21 +1382,43 @@ main(
       { /*If: The input file could not be opened*/
          fprintf(
             stderr,
-            "Unable to open - %s\n",
-            seqFileStr
+            "Unable to open - %s%s",
+            seqFileStr,
+            str_endLine
          );
 
          if(seqTypeFlagSC == def_fqFile_tbSpolDefs)
-            fprintf(stderr, "-fq %s\n", seqFileStr);
+            fprintf(
+               stderr,
+               "-fq %s%s",
+               seqFileStr,
+               str_endLine
+            );
 
-         if(seqTypeFlagSC == def_faFile_tbSpolDefs)
-            fprintf(stderr, "-fa %s\n", seqFileStr);
+         else if(seqTypeFlagSC == def_faFile_tbSpolDefs)
+            fprintf(
+               stderr,
+               "-fa %s%s",
+               seqFileStr,
+               str_endLine
+            );
 
-         if(seqTypeFlagSC == def_samFile_tbSpolDefs)
-            fprintf(stderr, "-sam %s\n", seqFileStr);
+         else if(seqTypeFlagSC == def_samFile_tbSpolDefs)
+            fprintf(
+               stderr,
+               "-sam %s%s",
+               seqFileStr,
+               str_endLine
+            );
 
-         if(seqTypeFlagSC == def_samConFile_tbSpolDefs)
-            fprintf(stderr, "-sam-con %s\n", seqFileStr);
+         else if(
+            seqTypeFlagSC == def_samConFile_tbSpolDefs
+         ) fprintf(
+              stderr,
+              "-sam-con %s%s",
+              seqFileStr,
+              str_endLine
+           );
 
          goto err_main_sec06_sub02;
       } /*If: The input file could not be opened*/
@@ -1366,8 +1461,9 @@ main(
       { /*If: I had an file error*/
          fprintf(
             stderr,
-            "-spoligo %s has a non-fasta entry\n",
-            spoligoFileStr
+            "-spoligo %s has a non-fasta entry%s",
+            spoligoFileStr,
+            str_endLine
         );
       } /*If: I had an file error*/
 
@@ -1375,7 +1471,8 @@ main(
       { /*Else: This is an memory error*/
          fprintf(
             stderr,
-            "Ran out of memory getting spoligo seq\n"
+            "Ran out of memory getting spoligo seq%s",
+            str_endLine
         );
       } /*Else: This is an memory error*/
 
@@ -1402,8 +1499,9 @@ main(
          { /*If: I had an file error*/
             fprintf(
                stderr,
-               "Could not open -db %s\n",
-               spoligoDbStr
+               "Could not open -db %s%s",
+               spoligoDbStr,
+               str_endLine
             );
          } /*If: I had an file error*/
 
@@ -1411,8 +1509,9 @@ main(
          { /*Else: I had an memory error*/
             fprintf(
                stderr,
-               "Ran out of memory reading -db %s\n",
-               spoligoDbStr
+               "Ran out of memory reading -db %s%s",
+               spoligoDbStr,
+               str_endLine
             );
          } /*Else: I had an memory error*/
 
@@ -1465,23 +1564,11 @@ main(
         seqTypeFlagSC
       & (def_fqFile_tbSpolDefs | def_faFile_tbSpolDefs)
    ){ /*If: I am checking an fastq file*/
-      if(seqTypeFlagSC == def_fqFile_tbSpolDefs)
-      { /*If: fastq file input*/
-         errSC =
-           getFqSeq_seqST(
-              inFILE,
-              &seqStackST
-           );
-      } /*If: fastq file input*/
 
+      if(seqTypeFlagSC == def_fqFile_tbSpolDefs)
+         errSC = getFq_seqST(inFILE, &seqStackST);
       else
-      { /*Else: fasta file input*/
-         errSC =
-            getFaSeq_seqST(
-               inFILE,
-               &seqStackST
-            );
-      } /*Else: fasta file input*/
+         errSC = getFa_seqST(inFILE, &seqStackST);
 
       siArg = 1;
 
@@ -1525,7 +1612,11 @@ main(
 
          if(errSC & def_memErr_tbSpolDefs)
          { /*If: I had an memory error*/
-            fprintf(stderr, "Ran out of memory\n");
+            fprintf(
+               stderr,
+               "Ran out of memory%s",
+               str_endLine
+            );
             goto err_main_sec06_sub02;
          } /*If: I had an memory error*/
 
@@ -1556,22 +1647,10 @@ main(
          ++siArg;
 
          if(seqTypeFlagSC == def_fqFile_tbSpolDefs)
-         { /*If: fastq file input*/
-            errSC =
-              getFqSeq_seqST(
-                 inFILE,
-                 &seqStackST
-              );
-         } /*If: fastq file input*/
+            errSC = getFq_seqST(inFILE, &seqStackST);
 
          else
-         { /*Else: fasta file input*/
-            errSC =
-               getFaSeq_seqST(
-                  inFILE,
-                  &seqStackST
-               );
-         } /*Else: fasta file input*/
+            errSC = getFa_seqST(inFILE, &seqStackST);
       } /*Loop: Check read read for spoligotypes*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1585,9 +1664,10 @@ main(
          { /*If: it was an fastq file error*/
             fprintf(
                stderr,
-               "Invalid entry %i in -fq %s\n",
+               "Invalid entry %i in -fq %s%s",
                siArg,
-               seqFileStr
+               seqFileStr,
+               str_endLine
             );
          } /*If: it was an fastq file error*/
 
@@ -1595,9 +1675,10 @@ main(
          { /*Else: it was an fasta file error*/
             fprintf(
                stderr,
-               "Invalid entry %i in -fa %s\n",
+               "Invalid entry %i in -fa %s%s",
                siArg,
-               seqFileStr
+               seqFileStr,
+               str_endLine
             );
          } /*Else: it was an fasta file error*/
 
@@ -1627,14 +1708,7 @@ main(
 
    else
    { /*Else: I am checking an sam file for spoligotypes*/
-      errSC =
-         get_samEntry(
-            &samStackST,
-            &buffHeapStr,
-            &lenBuffUL,
-            inFILE
-         );
-
+      errSC = get_samEntry(&samStackST, inFILE);
       siArg = 0;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1715,14 +1789,7 @@ main(
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
          nextSamEntry_main_sec04_sub03_cat02:;
-
-         errSC =
-            get_samEntry(
-               &samStackST,
-               &buffHeapStr,
-               &lenBuffUL,
-               inFILE
-            );
+            errSC = get_samEntry(&samStackST, inFILE);
       } /*Loop: Check read read for spoligotypes*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1734,9 +1801,10 @@ main(
       { /*If: I had an error*/
          fprintf(
             stderr,
-            "Invalid entry %i in -sam %s\n",
+            "Invalid entry %i in -sam %s%s",
             siArg,
-            seqFileStr
+            seqFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
@@ -1777,88 +1845,51 @@ main(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec06:
    ^   - Clean up
-   ^   o main sec06 sub01:
-   ^     - no error clean up
-   ^   o main sec06 sub02:
-   ^     - handle errors
-   ^   o main sec06 sub03:
-   ^     - clean up (general)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*****************************************************\
-   * Main Sec06 Sub01:
-   *   - no error clean up
-   \*****************************************************/
 
    errSC = 0;
    goto cleanUp_main_sec06_sub03;
 
-   /*****************************************************\
-   * Main Sec06 Sub02:
-   *   - handle errors
-   \*****************************************************/
-
    err_main_sec06_sub02:;
-   errSC = 1;
-   goto cleanUp_main_sec06_sub03;
-
-   /*****************************************************\
-   * Main Sec06 Sub03:
-   *   - general cleanup
-   \*****************************************************/
+      errSC = 1;
+      goto cleanUp_main_sec06_sub03;
 
    cleanUp_main_sec06_sub03:;
 
-   /*check if did an slow waterman or fast kmer*/
-   if(slowRefHeapAryST)
-      freeHeapAry_seqST(
-         slowRefHeapAryST,
-         numSpacersSI
-      );
-
-   slowRefHeapAryST = 0;
-
-   if(fastRefHeapAryST)
-      freeHeapAry_refST_kmerFind(
-         fastRefHeapAryST,
-         numSpacersSI
-      );
-
-   fastRefHeapAryST = 0;
-
-   if(spolDbHeapAryST)
-      freeHeapAry_spolST(
-         spolDbHeapAryST,
-         numLineagesSI
-      );
-
-   spolDbHeapAryST = 0;
-
-   freeStack_samEntry(&samStackST);
-   freeStack_seqST(&seqStackST);
-   freeStack_alnSet(&alnSetStackST);
-   freeStack_tblST_kmerFind(&kmerTblStackST);
-
-   if(buffHeapStr)
-      free(buffHeapStr);
-
-   buffHeapStr = 0;
-
-   if(
-         inFILE
-      && inFILE != stdin
-      && inFILE != stdout
-   ) fclose(inFILE);
-
-   inFILE = 0;
-
-   if(
-         outFILE
-      && outFILE != stdout
-      && outFILE != stdout
-   ) fclose(outFILE);
-
-   outFILE = 0;
-
-   return errSC;
+      /*check if did an slow waterman or fast kmer*/
+      if(slowRefHeapAryST)
+        freeHeapAry_seqST(slowRefHeapAryST, numSpacersSI);
+      slowRefHeapAryST = 0;
+   
+      if(fastRefHeapAryST)
+         freeHeapAry_refST_kmerFind(
+            fastRefHeapAryST,
+            numSpacersSI
+         );
+      fastRefHeapAryST = 0;
+   
+      if(spolDbHeapAryST)
+        freeHeapAry_spolST(spolDbHeapAryST, numLineagesSI);
+      spolDbHeapAryST = 0;
+   
+      freeStack_samEntry(&samStackST);
+      freeStack_seqST(&seqStackST);
+      freeStack_alnSet(&alnSetStackST);
+      freeStack_tblST_kmerFind(&kmerTblStackST);
+   
+      if(! inFILE) ;
+      else if(inFILE == stdin) ;
+      else if(inFILE == stdout) ;
+      else
+         fclose(inFILE);
+      inFILE = 0;
+   
+      if(! outFILE) ;
+      else if(outFILE == stdout) ;
+      else if(outFILE == stdout) ;
+      else
+         fclose(outFILE);
+      outFILE = 0;
+   
+      return errSC;
 } /*main*/

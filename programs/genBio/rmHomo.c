@@ -32,7 +32,9 @@
 !   - .c  #include "../genLib/base10str.h"
 !   - .c  #include "../genLib/numToStr.h"
 !   - .c  #include "../genLib/strAry.h"
-!   - .h  #include "../genLib/ntTo5Bit.h"
+!   - .c  #include "../genLib/fileFun.h"
+!   - .h  #include "../genLib/endLine.h"
+!   - .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -52,6 +54,10 @@
 |   - maskSC:
 |     o base to mask deletions with
 |     o if 0 if(! maskSC), then uses reference base
+|   - scanBl:
+|     o scan both neighboring bases next to indel to
+|       see if the indel is next to or in middle of large
+|       homopolymer
 |   - seqBuffStrPtr:
 |     o c-string pointer to buffer to use in copy sequence
 |     o size to avoid reallocation of buffer
@@ -84,6 +90,7 @@ indel_rmHomo(
    signed int minHomoSI,     /*min homoplymer length*/
    signed int maxIndelSI,    /*indel to large to remove*/
    signed char maskSC,       /*base to mask dels with*/
+   signed char scanBl,       /*scan neighbor bases*/
    signed char **seqBuffStrPtr, /*sequence buffer*/
    unsigned int *sizeSeqUIPtr,  /*size of seqBuffStrPtr*/
    signed char **qBuffStrPtr,   /*q-score buffer*/
@@ -118,6 +125,12 @@ indel_rmHomo(
    unsigned int tmpPosUI = 0;
    unsigned int lenHomoUI = 0;
 
+   /*for finding homopolymer around base*/
+   unsigned int lenForHomoUI = 0;
+   unsigned int lenBackHomoUI = 0;
+   signed char forSC = 0;
+   signed char backSC = 0;
+
    unsigned int lenBuffUI = 0;
    signed char qBl = 0; /*1: have q-score entry*/
 
@@ -138,7 +151,7 @@ indel_rmHomo(
    \*****************************************************/
 
    lenBuffUI = samSTPtr->readLenUI;
-   lenBuffUI += samSTPtr->numDelUI;
+   lenBuffUI += samSTPtr->delCntUI;
       /*deletions mean adding in a base, so need to have
       `  some extra room
       */
@@ -181,7 +194,7 @@ indel_rmHomo(
       qBl = 1;
    else if(
          samSTPtr->qStr[0] == '*'
-      && samSTPtr->qStr[0] == '\0'
+      && samSTPtr->qStr[1] == '\0'
    ) ; /*no q-score entry*/
 
    else
@@ -233,7 +246,7 @@ indel_rmHomo(
 
    for(
       cpCigUI = 0;
-      cpCigUI < samSTPtr->lenCigUI;
+      cpCigUI < samSTPtr->cigLenUI;
       ++cpCigUI
    ){ /*Loop: remove indels*/
 
@@ -248,7 +261,6 @@ indel_rmHomo(
          || samSTPtr->cigTypeStr[uiCig] == 'X'
          || samSTPtr->cigTypeStr[uiCig] == 'S'
       ){ /*If: non-indel mutation*/
-      
          if(samSTPtr->cigTypeStr[uiCig] != 'S')
             refPosUI += samSTPtr->cigArySI[uiCig];
 
@@ -272,7 +284,6 @@ indel_rmHomo(
          ++uiCig;
 
          continue;
-
       }  /*If: non-indel mutation*/
 
       /**************************************************\
@@ -290,8 +301,22 @@ indel_rmHomo(
 
       /**************************************************\
       * Fun01 Sec03 Sub03:
-      *  - find homopolymer length
+      *   - find homopolymer length
+      *   o fun01 sec03 sub03 cat01
+      *     - find strict homopolyer length
+      *   o fun01 sec03 sub03 cat02
+      *     - find length of neighbor homopolymers
       \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun01 Sec03 Sub03 Cat01
+      +   - find strict homopolyer length
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(samSTPtr->cigArySI[uiCig] > maxIndelSI)
+         goto keepIndel_fun01_sec03_sub04;
+         /*indel is to large to remove*/
+
 
       lenHomoUI = 1;
 
@@ -323,15 +348,68 @@ indel_rmHomo(
          } /*Loop: find end of homopolymer*/
       } /*If: have previous bases (homopolymer?)*/
 
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun01 Sec03 Sub03 Cat02
+      +   - find length of neighbor homopolymers
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(! scanBl)
+         ;
+      else if(lenHomoUI < (unsigned int) minHomoSI)
+      { /*Else If: homopolymer will be to small*/
+         lenForHomoUI = 0;
+         lenBackHomoUI = 0;
+         forSC = 0; 
+         backSC = -1; /*never want these to match*/
+
+         if(refStr[refPosUI] != '\0')
+         { /*If: have next bases (potentail homopolymer)*/
+            tmpPosUI = refPosUI + 1;
+            forSC = refStr[tmpPosUI];
+            ++tmpPosUI;
+
+            while(refStr[tmpPosUI] == forSC)
+            { /*Loop: find end of homopolymer*/
+               ++lenForHomoUI;
+               ++tmpPosUI;
+            } /*Loop: find end of homopolymer*/
+         } /*If: have next bases (potentail homopolymer)*/
+
+         if(refPosUI > 0)
+         { /*If: have previous bases (homopolymer?)*/
+            tmpPosUI = refPosUI - 1;
+            backSC = refStr[tmpPosUI];
+            --tmpPosUI;
+
+            while(refStr[tmpPosUI] == backSC)
+            { /*Loop: find end of homopolymer*/
+               ++lenBackHomoUI;
+
+               if(! tmpPosUI)
+                  break;
+
+               --tmpPosUI;
+            } /*Loop: find end of homopolymer*/
+         } /*If: have previous bases (homopolymer?)*/
+
+         if(forSC == backSC)
+            lenForHomoUI += lenBackHomoUI;
+         else if(lenForHomoUI < lenBackHomoUI)
+            lenForHomoUI = lenBackHomoUI;
+
+         if(lenHomoUI < lenForHomoUI)
+            lenHomoUI = lenForHomoUI;
+      } /*Else If: homopolymer will be to small*/
+
       /**************************************************\
       * Fun01 Sec03 Sub04:
       *  - check if discarding indel
       \**************************************************/
 
-      if(
-            lenHomoUI < (unsigned int) minHomoSI
-         || samSTPtr->cigArySI[uiCig] > maxIndelSI
-      ){ /*If: indel is to large or homoplymer to small*/
+      if(lenHomoUI < (unsigned int) minHomoSI)
+      { /*If: homoplymer to small*/
+         keepIndel_fun01_sec03_sub04:;
+
          if(samSTPtr->cigTypeStr[uiCig] == 'I')
          { /*If: need to copy insertion*/
 
@@ -351,7 +429,7 @@ indel_rmHomo(
 
          ++uiCig; /*keep cigar entry*/
          continue;
-      }  /*If: indel is to large or homoplymer to small*/
+      } /*If: homoplymer to small*/
  
       /**************************************************\
       * Fun01 Sec03 Sub05:
@@ -387,8 +465,8 @@ indel_rmHomo(
                   refStr[refPosUI++];
          } /*Loop: add reference bases in (remove del)*/
 
-         samSTPtr->numDelUI -= samSTPtr->cigArySI[uiCig];
-         samSTPtr->numMatchUI +=
+         samSTPtr->delCntUI -= samSTPtr->cigArySI[uiCig];
+         samSTPtr->matchCntUI +=
             samSTPtr->cigArySI[uiCig];
          samSTPtr->readLenUI += samSTPtr->cigArySI[uiCig];
 
@@ -408,7 +486,7 @@ indel_rmHomo(
 
       else
       { /*Else: insertion*/
-         samSTPtr->numInsUI -= samSTPtr->cigArySI[uiCig];
+         samSTPtr->insCntUI -= samSTPtr->cigArySI[uiCig];
          samSTPtr->readLenUI -= samSTPtr->cigArySI[uiCig];
 
          tmpPosUI = seqPosUI;
@@ -452,39 +530,36 @@ indel_rmHomo(
    *   - merge duplicate cigar entries
    \*****************************************************/
 
-   samSTPtr->lenCigUI = uiCig;
+   samSTPtr->cigLenUI = uiCig;
    uiCig = 0;
 
    for(
-     cpCigUI = 0;
-     cpCigUI < samSTPtr->lenCigUI;
+     cpCigUI = 1;
+     cpCigUI < samSTPtr->cigLenUI;
      ++cpCigUI
    ){ /*Loop: merge duplicate cigar entries*/
-      samSTPtr->cigTypeStr[uiCig] =
-         samSTPtr->cigTypeStr[cpCigUI];
-      samSTPtr->cigArySI[uiCig] =
-         samSTPtr->cigArySI[cpCigUI];
-
-      if(! cpCigUI)
-      { /*If: first cigar entry*/
-         ++uiCig;
-         continue;
-      } /*If: first cigar entry*/
-
       if(
-            samSTPtr->cigTypeStr[uiCig - 1]
-         == samSTPtr->cigTypeStr[uiCig]
+            samSTPtr->cigTypeStr[uiCig]
+         == samSTPtr->cigTypeStr[cpCigUI]
       ){ /*If: can merge cigar entries*/
-         samSTPtr->cigArySI[uiCig - 1] +=
-            samSTPtr->cigArySI[uiCig];
+         samSTPtr->cigArySI[uiCig] +=
+            samSTPtr->cigArySI[cpCigUI];
       }  /*If: can merge cigar entries*/
 
       else
+      { /*Else: moving to next cigar entry*/
          ++uiCig;
+         samSTPtr->cigTypeStr[uiCig] =
+            samSTPtr->cigTypeStr[cpCigUI];
+         samSTPtr->cigArySI[uiCig] =
+            samSTPtr->cigArySI[cpCigUI];
+      } /*Else: moving to next cigar entry*/
    }  /*Loop: merge duplicate cigar entries*/
 
-   samSTPtr->lenCigUI = uiCig;
+   ++uiCig;
+   samSTPtr->cigLenUI = uiCig;
    samSTPtr->cigArySI[uiCig] = '\0';
+   samSTPtr->cigTypeStr[uiCig] = '\0';
 
    /*****************************************************\
    * Fun01 Sec04 Sub02:
@@ -494,7 +569,7 @@ indel_rmHomo(
    (*seqBuffStrPtr)[dupPosUI] = '\0';
    (*qBuffStrPtr)[dupPosUI] = '\0';
 
-   if(samSTPtr->lenSeqBuffUI < lenBuffUI)
+   if(samSTPtr->seqSizeUI < lenBuffUI)
    { /*If: new sequence buffer is larger*/
       free(samSTPtr->seqStr);
       samSTPtr->seqStr = 0;
@@ -504,7 +579,7 @@ indel_rmHomo(
       if(! samSTPtr->seqStr)
          goto memErr_fun01_sec05;
 
-      samSTPtr->lenSeqBuffUI = lenBuffUI - 8;
+      samSTPtr->seqSizeUI = lenBuffUI - 8;
    } /*If: new sequence buffer is larger*/
 
    cpLen_ulCp(
@@ -515,7 +590,7 @@ indel_rmHomo(
 
    if(qBl)
    { /*If: have q-score entry*/
-      if(samSTPtr->lenQBuffUI < lenBuffUI)
+      if(samSTPtr->qSizeUI < lenBuffUI)
       { /*If: current q-score buffer is larger*/
          free(samSTPtr->qStr);
 
@@ -524,7 +599,7 @@ indel_rmHomo(
          if(! samSTPtr->qStr)
             goto memErr_fun01_sec05;
 
-         samSTPtr->lenQBuffUI = lenBuffUI - 8;
+         samSTPtr->qSizeUI = lenBuffUI - 8;
       } /*If: current q-score buffer is larger*/
 
       cpLen_ulCp(

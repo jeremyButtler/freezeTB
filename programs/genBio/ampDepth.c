@@ -35,7 +35,7 @@
 #include "samEntry.h"
 
 /*No .c files*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../genLib/endLine.h"
 #include "../genLib/genMath.h" /*using .h macros*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
@@ -45,6 +45,7 @@
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/charCp.h"
 !   - .c  #include "../genLib/strAry.h"
+!   - .c  #include "../genLib/fileFun.h"
 !   - .h  #include "ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -55,10 +56,11 @@
 |   - samSTPtr:
 |     o pointer to an samEntry structure with a read to
 |       add to the histogram
-|   - startSeqUI:
-|     o first base in target region of reference 
-|   - endSeqUI:
-|     o last base in target region of reference
+|   - coordsSTPtr:
+|     o geneCoord struct pointer with gene/target
+|       coordinates want to extract
+|   - numGenesSI:
+|     o number of genes in coordsSTPtr (index 1)
 |   - depthArySI:
 |     o histogram (int array) to add each base to
 |   - numOffTargSI:
@@ -72,30 +74,54 @@
 void
 addRead_ampDepth(
    struct samEntry *samSTPtr,
-   unsigned int startSeqUI,  /*first reference coorinate*/
-   unsigned int endSeqUI,    /*last reference coordinate*/
-   signed int *depthArySI,
-   signed int *numOffTargSI
+   struct geneCoord *coordsSTPtr, /*list of genes*/
+   signed int numGenesSI,   /*number genes in list*/
+   signed int *depthArySI,  /*depth array to update*/
+   signed int *numOffTargSI /*number reads not in list*/
 ){
-   sint siBase = 0;
+   signed int siBase = 0;
+   signed int siIndex = 0;
+   signed int endSI = 0;
 
-   if(samSTPtr->refStartUI > (uint) endSeqUI)
-   { /*If: the read has an offtarget section*/
-        ++(*numOffTargSI);
-        return;
-   } /*If: the read has an offtarget section*/
+   siIndex =
+      findRange_geneCoord(
+         coordsSTPtr,
+         samSTPtr->refStartUI,
+         samSTPtr->refEndUI,
+         numGenesSI
+      );
 
-   if(samSTPtr->refEndUI < (uint) startSeqUI)
-   { /*If: the read has an offtarget section*/
-        ++(*numOffTargSI);
-        return;
-   } /*If: the read has an offtarget section*/
+   if(siIndex < 0)
+      ++*numOffTargSI;
+   else
+   { /*Else: gene has some on target coordiantes*/
+      addBases_fun01:;
+      siBase =
+         max_genMath(
+             (signed int) samSTPtr->refStartUI,
+             (signed int) coordsSTPtr->startAryUI[siIndex]
+         );
 
-   for(
-      siBase = (sint) samSTPtr->refStartUI;
-      siBase < (sint) samSTPtr->refEndUI;
-      ++siBase
-   ) ++depthArySI[siBase];
+      endSI =
+         min_genMath(
+             (signed int) samSTPtr->refEndUI,
+             (signed int) coordsSTPtr->endAryUI[siIndex]
+         );
+
+      while(siBase <= endSI)
+         ++depthArySI[siBase++];
+
+
+      /*see if read has muttiple genes*/
+      ++siIndex;
+
+      if(siIndex >= numGenesSI)
+         ; /*end of genes list*/
+      else if(
+           samSTPtr->refEndUI
+         > coordsSTPtr->startAryUI[siIndex]
+      ) goto addBases_fun01; /*have another gene*/
+   } /*Else: gene has some on target coordiantes*/
 } /*addBaseToAmDepth*/
 
 /*-------------------------------------------------------\
@@ -123,7 +149,11 @@ phead_ampDepth(
    fprintf((FILE *) outFILE, "\tfirstBaseDepth");
    fprintf((FILE *) outFILE, "\tlastBaseDepth");
    fprintf((FILE *) outFILE, "\tavgDepth\tminDepth");
-   fprintf((FILE *) outFILE, "\tmaxDepth\n");
+   fprintf(
+      (FILE *) outFILE,
+      "\tmaxDepth%s",
+      str_endLine
+   );
 } /*phead_ampDepth*/
 
 /*-------------------------------------------------------\
@@ -179,30 +209,30 @@ phist_ampDepth(
    ^  - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    sint mapStartSI = 0;
-    sint tmpStartSI = 0;
+    signed int mapStartSI = 0;
+    signed int tmpStartSI = 0;
 
-    sint ampNumSI = -1;
-    sint geneIndexSI = 0;
-    sint tmpSI = 0;
+    signed int ampNumSI = -1;
+    signed int geneIndexSI = 0;
+    signed int tmpSI = 0;
 
-    sint readsAtStartSI = 0;
-    sint readsAtEndSI = 0;
+    signed int readsAtStartSI = 0;
+    signed int readsAtEndSI = 0;
 
     /*Stats for individual genes*/
-    sint maxReadsSI = 0;
-    sint minReadsSI = 0;
-    slong avgDepthSL = 0;
+    signed int maxReadsSI = 0;
+    signed int minReadsSI = 0;
+    signed long avgDepthSL = 0;
 
     /*Stats for the amplicon*/
-    sint ampStartSI = 0;
-    sint ampEndSI = 0;
-    sint ampGeneEndSI = 0;
-    sint ampGeneStartSI = 0;
+    signed int ampStartSI = 0;
+    signed int ampEndSI = 0;
+    signed int ampGeneEndSI = 0;
+    signed int ampGeneStartSI = 0;
 
-    slong ampAvgDepthSL = 0;
-    sint ampMaxReadsSI = 0;
-    sint ampMinReadSI = 0;
+    signed long ampAvgDepthSL = 0;
+    signed int ampMaxReadsSI = 0;
+    signed int ampMinReadSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -226,12 +256,15 @@ phist_ampDepth(
 
    while(
          mapStartSI
-      <= (sint) geneCoordSTPtr->endAryUI[numGenesSI] + 1
+      <= (signed int)
+         geneCoordSTPtr->endAryUI[numGenesSI] + 1
    ){ /*Loop: Get the gene positions that mapped*/
       ++mapStartSI;
 
-      if(mapStartSI <(sint) geneCoordSTPtr->startAryUI[0])
-         continue;
+      if(
+           mapStartSI
+         < (signed int) geneCoordSTPtr->startAryUI[0]
+      ) continue;
 
       geneIndexSI = 
          findStart_geneCoord(
@@ -271,7 +304,7 @@ phist_ampDepth(
       ){ /*Loop: Find end of region*/
           ampGeneEndSI +=
             (    ampEndSI
-               > (sint)
+               > (signed int)
                  geneCoordSTPtr->endAryUI[ampGeneEndSI]
             );
 
@@ -319,7 +352,8 @@ phist_ampDepth(
 
       while(
             mapStartSI
-         <= (sint) geneCoordSTPtr->endAryUI[geneIndexSI]
+         <= (signed int)
+            geneCoordSTPtr->endAryUI[geneIndexSI]
       ){ /*Loop: Check if gene is complete*/
           if(histArySI[mapStartSI] < minDepthSI) break;
 
@@ -370,19 +404,19 @@ phist_ampDepth(
 
       fprintf(
          (FILE *) outFILE,
-         "\t%s\t%u\t%u\t%i\t%i\t%i\t%i\t%li\t%i\t%i\n",
+         "\t%s\t%u\t%u\t%i\t%i\t%i\t%i\t%li\t%i\t%i%s",
          geneCoordSTPtr->idStrAry[geneIndexSI],
          geneCoordSTPtr->startAryUI[geneIndexSI] + 1,
          geneCoordSTPtr->endAryUI[geneIndexSI] + 1,
-         (sint)
+         (signed int)
              max_genMath(
-                (sint)
+                (signed int)
                   geneCoordSTPtr->startAryUI[geneIndexSI],
                 ampStartSI
              ) + 1, /*first gene base in amplicon*/
-         (sint)
+         (signed int)
              min_genMath(
-                (sint)
+                (signed int)
                    geneCoordSTPtr->endAryUI[geneIndexSI],
                 ampEndSI
              ) + 1, /*last gene base in amplicon*/
@@ -390,7 +424,8 @@ phist_ampDepth(
          readsAtEndSI,
          avgDepthSL,
          minReadsSI,
-         maxReadsSI
+         maxReadsSI,
+         str_endLine
       );
 
       if(histArySI[mapStartSI] > minDepthSI)
@@ -401,7 +436,7 @@ phist_ampDepth(
          /*Make sure I am on the next gene*/
          while(
               mapStartSI
-            < (sint)
+            < (signed int)
               geneCoordSTPtr->startAryUI[geneIndexSI]
          ){ /*Loop: Move to next gene*/
             if(histArySI[mapStartSI] < minDepthSI)
@@ -443,10 +478,11 @@ phist_ampDepth(
 
    fprintf(
       (FILE *) outFILE,
-      "\t%i\t%i\t%i\n",
+      "\t%i\t%i\t%i%s",
       offTargSI,
       offTargSI,
-      offTargSI
+      offTargSI,
+      str_endLine
    );
 
    ++ampNumSI;
@@ -470,10 +506,11 @@ phist_ampDepth(
 
    fprintf(
       (FILE *) outFILE,
-      "\t%i\t%i\t%i\n",
+      "\t%i\t%i\t%i%s",
       noMapSI,
       noMapSI,
-      noMapSI
+      noMapSI,
+      str_endLine
    );
 } /*phist_ampDepth*/
 

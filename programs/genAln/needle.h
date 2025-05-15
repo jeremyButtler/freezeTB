@@ -32,12 +32,12 @@ struct dirMatrix;
 | Input:
 |   - qrySTPtr:
 |     o pointer to seqST with query sequence 
-|       - qrySTPtr->offsetUL; first query base to align
-|       - qrySTPtr->endAlnUL; last query base to align
+|       - qrySTPtr->offsetSL; first query base to align
+|       - qrySTPtr->endAlnSL; last query base to align
 |   - refSTPtr:
 |     o pointer to seqST with reference sequence 
-|       - refSTPtr->offsetUL; 1st reference base to align
-|       - refSTPtr->endAlnUL; last reference base to align
+|       - refSTPtr->offsetSL; 1st reference base to align
+|       - refSTPtr->endAlnSL; last reference base to align
 |   - matrixSTPtr:
 |     o pointer to dirMatrix to use for the alingment
 |   - alnSet:

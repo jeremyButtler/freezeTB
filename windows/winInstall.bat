@@ -29,15 +29,24 @@ if defined FOUND (
 cd %guiDir%
 nmake /F mkfile.win
 nmake /F mkfile.win clean
+
+if exist ..\..\windows\freezeTB\guiFreezeTB.exe (
+   del ..\..\windows\freezeTB\guiFreezeTB.exe
+) 
+
 move guiFreezeTB.exe ..\..\windows\freezeTB\
 cd ..\..\windows
 
-:: install locally
+:: The if statment is to detect if I can to install
+::   globally or if I need to install localy
 
 copy /y nul "%programFiles%\2025-02-11--test-file.txt"
 if exist "%programFiles%\2025-02-11--test-file.txt" (
    del "%programFiles%\2025-02-11--test-file.txt"
    xcopy freezeTB "%programFiles%\freezeTB" /E /I
+   xcopy ..\freezeTBFiles "%programFiles%\freezeTB\freezeTBFiles" /E /I
+   xcopy ..\scripts\graphAmpDepth.r "%programFiles%\freezeTB\graphAmpDepth.r" /I
+   xcopy ..\FTB-icon.ico "%programFiles%\freezeTB\FTB-icon.ico" /I
 
    echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
    echo sLinkFile = "%userprofile%\Desktop\freezeTB.lnk" >> CreateShortcut.vbs
@@ -50,6 +59,9 @@ if exist "%programFiles%\2025-02-11--test-file.txt" (
    del CreateShortcut.vbs
 ) else (
    xcopy freezeTB "%localAppData%\freezeTB" /E /I
+   xcopy ..\freezeTBFiles "%localAppData%\freezeTB\freezeTBFiles" /E /I
+   xcopy ..\scripts\graphAmpDepth.r "%localAppData%\freezeTB\graphAmpDepth.r" /I
+   xcopy ..\FTB-icon.ico "%localAppData%\freezeTB\FTB-icon.ico" /I
 
    echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
    echo sLinkFile = "%userprofile%\Desktop\freezeTB.lnk" >> CreateShortcut.vbs
@@ -65,8 +77,8 @@ if exist "%programFiles%\2025-02-11--test-file.txt" (
 :: the icon/shortcut trick was from
 ::   https://stackoverflow.com/questions/30028709/how-do-i-create-a-shortcut-via-command-line-in-windows
 
-:: for xcopoy /E for directory copy
-:: for xcopoy /I forces directory copy (skip asking user)
+:: for xcopy /E for directory copy
+:: for xcopy /I forces directory copy (skip asking user)
 
 
 goto :exit

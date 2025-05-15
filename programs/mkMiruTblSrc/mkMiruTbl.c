@@ -35,25 +35,22 @@
 
 #include "../genLib/ulCp.h"
 #include "../genLib/charCp.h"
+#include "../genLib/fileFun.h"
 #include "../genBio/seqST.h"
 #include "../genAln/memwater.h"
 #include "../genAln/alnSet.h"
 
 /*.h files only*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../ftbVersion.h"
+#include "../genLib/endLine.h"
 #include "../genAln/alnDefs.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden files
 !   o .c  #include "../genLib/base10str.h"
-!   o .h  #include "../genLib/genMath.h"
+!   o .c  #include "../genLib/genMath.h"
 !   o .c  #include "../genAln/indexToCoord.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-/*version numbers*/
-#define def_year_mkMiruTbl 2024
-#define def_month_mkMiruTbl 8
-#define def_day_mkMiruTbl 8
 
 /*maximum score for an base*/
 #define def_minPercScore_mkMiruTbl 0.82f
@@ -78,10 +75,11 @@ pversion_mkMiruTbl(
 ){
    fprintf(
       outFILE,
-      "mkMiruTbl version: %i-%02i-%02i\n",
-      def_year_mkMiruTbl,
-      def_month_mkMiruTbl,
-      def_day_mkMiruTbl
+      "mkMiruTbl version: %i-%02i-%02i%s",
+      def_year_ftbVersion,
+      def_month_ftbVersion,
+      def_day_ftbVersion,
+      str_endLine
    );
 } /*pversion_mkMiruTbl*/
 
@@ -121,7 +119,8 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "table.tsv\n"
+      "table.tsv%s",
+      str_endLine
    );
 
    fprintf(
@@ -131,7 +130,9 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "\n    MIRU lineages\n"
+      "%s    MIRU lineages%s",
+      str_endLine,
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -158,7 +159,8 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "Input:\n"
+      "Input:%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -168,12 +170,14 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "  -ref: [Required]\n"
+      "  -ref: [Required]%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o Fasta with reference to map primers to\n"
+      "    o Fasta with reference to map primers to%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -183,22 +187,26 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "  -prim: [Required]\n"
+      "  -prim: [Required]%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o Fasta with primers to get coordinates of\n"
+      "    o Fasta with primers to get coordinates of%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "    o The reverse primer must always come right\n"
+      "    o The reverse primer must always come right%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "      after the forward primer\n"
+      "      after the forward primer%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -208,7 +216,8 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "  -miru-tbl: [Required]\n"
+      "  -miru-tbl: [Required]%s",
+      str_endLine
    );
 
    fprintf(
@@ -216,7 +225,7 @@ phelp_mkMiruTbl(
       "    o Tsv file with the MIRU table to add"
    );
 
-   fprintf(outFILE, " coordinates to\n");
+   fprintf(outFILE, " coordinates to%s", str_endLine);
 
    /*****************************************************\
    * Fun02 Sec02 Sub05:
@@ -225,8 +234,9 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "  -min-perc-score: [%.2f]\n",
-      def_minPercScore_mkMiruTbl
+      "  -min-perc-score: [%.2f]%s",
+      def_minPercScore_mkMiruTbl,
+      str_endLine
    );
 
    fprintf(
@@ -234,7 +244,7 @@ phelp_mkMiruTbl(
       "    o Minimum percent of max score needed to keep"
    );
 
-   fprintf(outFILE, " primer\n");
+   fprintf(outFILE, " primer%s", str_endLine);
 
    /*****************************************************\
    * Fun02 Sec02 Sub06:
@@ -243,12 +253,14 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "  -h: Print this help message\n"
+      "  -h: Print this help message%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "  -v: Print the version number\n"
+      "  -v: Print the version number%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -258,16 +270,19 @@ phelp_mkMiruTbl(
 
    fprintf(
       outFILE,
-      "Output:\n"
+      "Output:%s",
+      str_endLine
    );
 
    fprintf(
       outFILE,
-      "  - Prints the MIRU table with the added primer\n"
+      "  - Prints the MIRU table with the added primer%s",
+      str_endLine
    );
    fprintf(
       outFILE,
-      "    coordinates (in header) to stdout\n"
+      "    coordinates (in header) to stdout%s",
+      str_endLine
    );
 } /*Print out the version number*/
 
@@ -321,8 +336,8 @@ input_mkMiruTbl(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sint siArg = 1;
-   schar errSC = 0;
+   signed int siArg = 1;
+   signed char errSC = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -359,42 +374,42 @@ input_mkMiruTbl(
    { /*Loop: Get the user input*/
       if(
          ! eql_charCp(
-            (schar *) "-ref",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-ref",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*If: reference file*/
          ++siArg;
-         *refFileStr = (schar *) argAryStr[siArg]; 
+         *refFileStr = (signed char *) argAryStr[siArg]; 
       } /*If: reference file*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-prim",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-prim",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: is primer file*/
          ++siArg;
-         *primFileStr = (schar *) argAryStr[siArg]; 
+         *primFileStr = (signed char *) argAryStr[siArg]; 
       } /*Else If: is primer file*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-miru-tbl",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-miru-tbl",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: is miru table to add coordinates to*/
          ++siArg;
-         *tblFileStr = (schar *) argAryStr[siArg]; 
+         *tblFileStr = (signed char *) argAryStr[siArg]; 
       } /*Else If: is miru table to add coordinates to*/
 
       else if(
          ! eql_charCp(
-            (schar *) "-min-perc-score",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-min-perc-score",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: is minimum score to keep alignment*/
          ++siArg;
@@ -408,9 +423,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "-h",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-h",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: help message*/
          phelp_mkMiruTbl(stdout);
@@ -419,9 +434,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "--h",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--h",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: help message*/
          phelp_mkMiruTbl(stdout);
@@ -430,9 +445,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "help",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: help message*/
          phelp_mkMiruTbl(stdout);
@@ -441,9 +456,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "-help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-help",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: help message*/
          phelp_mkMiruTbl(stdout);
@@ -452,9 +467,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "--help",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--help",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: help message*/
          phelp_mkMiruTbl(stdout);
@@ -468,9 +483,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "-v",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-v",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: version number*/
          pversion_mkMiruTbl(stdout);
@@ -479,9 +494,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "--v",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--v",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: version number*/
          pversion_mkMiruTbl(stdout);
@@ -490,9 +505,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "version",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: version number*/
          pversion_mkMiruTbl(stdout);
@@ -501,9 +516,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "-version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "-version",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: version number*/
          pversion_mkMiruTbl(stdout);
@@ -512,9 +527,9 @@ input_mkMiruTbl(
 
       else if(
          ! eql_charCp(
-            (schar *) "--version",
-            (schar *) argAryStr[siArg],
-            (schar) '\0'
+            (signed char *) "--version",
+            (signed char *) argAryStr[siArg],
+            (signed) '\0'
          )
       ){ /*Else If: version number*/
          pversion_mkMiruTbl(stdout);
@@ -530,8 +545,9 @@ input_mkMiruTbl(
       { /*Else: invalid input*/
          fprintf(
             stderr,
-            "%s is not recognized\n",
-            argAryStr[siArg]
+            "%s is not recognized%s",
+            argAryStr[siArg],
+            str_endLine
          );
 
          goto err_fun03_sec04;
@@ -574,11 +590,7 @@ input_mkMiruTbl(
 |   - Prints the MIRU table with the primer coordiantes
 |     added in
 \-------------------------------------------------------*/
-#ifdef PLAN9
-char
-#else
 int
-#endif
 main(
    int numArgsSI,
    char *argAryStr[]
@@ -604,33 +616,37 @@ main(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *refFileStr = 0;  /*path to reference file*/
-   schar *primFileStr = 0; /*path to primers*/
-   schar *tblFileStr = 0;  /*path to miru table*/
+   signed char *refFileStr = 0; /*path to reference file*/
+   signed char *primFileStr = 0;/*path to primers*/
+   signed char *tblFileStr = 0; /*path to miru table*/
    float minPercScoreF = def_minPercScore_mkMiruTbl;
 
    struct seqST refSTStack;
-   schar errSC = 0;
+   signed char errSC = 0;
 
    struct seqST *seqSTHeapAry = 0;
-   sint numPrimSI = 0;
-   sint siPrim = 0;
+   signed int numPrimSI = 0;
+   signed int siPrim = 0;
 
-   slong scoreSL = 0;
+   signed long scoreSL = 0;
    float percScoreF = 0;
-   ulong startAlnUL = 0;
-   ulong endAlnUL = 0;
-   ulong discardUL = 0;
-   ulong ignoreUL = 0;
+   signed long startAlnSL = 0;
+   signed long endAlnSL = 0;
+   signed long discardSL = 0;
+   signed long ignoreSL = 0;
 
    struct alnSet alnSetSTStack;
-   schar *buffHeapStr = 0;/*buffer for reading files*/
-   schar *posBuffStr = 0; /*position in buffHeapStr*/
-   schar *pBuffStr = 0;  /*position to print in buffHeap*/
-   sint lenBuffSI = 0;
-   ulong oldByteCountUL = 0;
-   ulong numBytesUL = 0;
-   schar revCmpBl = 0; /*try reverse complement primer*/
+   signed char *buffHeapStr = 0;
+      /*buffer for reading files*/
+   signed char *posBuffStr = 0;
+      /*position in buffHeapStr*/
+   signed char *pBuffStr = 0;
+      /*position to print in buffHeap*/
+   signed long lenBuffSL = 0;
+   signed long bytesSL = 0;
+   signed long numBytesSL = 0;
+   signed char revCmpBl = 0;
+      /*try reverse complement primer*/
 
    FILE *inFILE = 0;
 
@@ -676,18 +692,14 @@ main(
    *   - check if reference file exits
    \*****************************************************/
 
-   inFILE =
-      fopen(
-         (char *) refFileStr,
-         "r"
-      );
-
+   inFILE = fopen((char *) refFileStr, "r");
    if(! inFILE)
    { /*If: could not open the primer file*/
       fprintf(
          stderr,
-         "could not open -ref %s\n",
-         refFileStr
+         "could not open -ref %s%s",
+         refFileStr,
+         str_endLine
       );
 
       goto err_main_sec06_sub02;
@@ -701,18 +713,14 @@ main(
    *   - check if primer file exits
    \*****************************************************/
 
-   inFILE =
-      fopen(
-         (char *) primFileStr,
-         "r"
-      );
-
+   inFILE = fopen((char *) primFileStr, "r");
    if(! inFILE)
    { /*If: could not open the primer file*/
       fprintf(
          stderr,
-         "could not open -prim %s\n",
-         primFileStr
+         "could not open -prim %s%s",
+         primFileStr,
+         str_endLine
       );
 
       goto err_main_sec06_sub02;
@@ -726,18 +734,15 @@ main(
    *   - check if MIRU table file exits
    \*****************************************************/
 
-   inFILE =
-       fopen(
-          (char *) tblFileStr,
-          "r"
-       );
+   inFILE = fopen((char *) tblFileStr, "r");
 
    if(! inFILE)
    { /*If: could not open the primer file*/
       fprintf(
          stderr,
-         "could not open -miru-tbl %s\n",
-         tblFileStr
+         "could not open -miru-tbl %s%s",
+         tblFileStr,
+         str_endLine
       );
 
       goto err_main_sec06_sub02;
@@ -760,28 +765,19 @@ main(
    *   - read in reference sequence
    \*****************************************************/
 
-   inFILE =
-      fopen(
-         (char *) refFileStr,
-         "r"
-      );
+   inFILE = fopen( (char *) refFileStr, "r");
+   errSC = getFa_seqST(inFILE, &refSTStack);
 
-   errSC = 
-     getFaSeq_seqST(
-        inFILE,
-        &refSTStack
-     );
-
-   if(
-          errSC
-       && errSC != def_EOF_seqST
-   ){ /*If: error*/
+   if(errSC == def_EOF_seqST) ;
+   else if(errSC)
+   { /*Else If: error*/
       if(errSC & def_fileErr_seqST)
       { /*If: invalid fasta file*/
          fprintf(
             stderr,
-            "-ref %s is not a fasta file\n",
-            refFileStr
+            "-ref %s is not a fasta file%s",
+            refFileStr,
+            str_endLine
          );
       } /*If: invalid fasta file*/
 
@@ -789,13 +785,14 @@ main(
       { /*Else: memory error*/
          fprintf(
             stderr,
-            "memory error while reading -ref %s\n",
-            refFileStr
+            "memory error while reading -ref %s%s",
+            refFileStr,
+            str_endLine
          );
       } /*Else: memory error*/
 
       goto err_main_sec06_sub02;
-   } /*If: error*/
+   } /*Else If: error*/
 
    seqToIndex_alnSet(refSTStack.seqStr); /*for alingment*/
 
@@ -816,39 +813,18 @@ main(
    +   - find number of primers in primer fasta
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   inFILE =
-      fopen(
-         (char *) primFileStr,
-         "r"
-      );
-
+   inFILE = fopen((char *) primFileStr, "r");
    seqSTHeapAry = malloc(sizeof(seqST));
 
    if(! seqSTHeapAry)
-   { /*If: I had memory error*/
-      fprintf(
-         stderr,
-         "Memory error\n"
-      );
-   } /*If: I had memory error*/
-   
+      fprintf(stderr, "Memory error%s", str_endLine);
    init_seqST(seqSTHeapAry);
-
-   errSC = 
-     getFaSeq_seqST(
-        inFILE,
-        seqSTHeapAry
-     );
+   errSC = getFa_seqST(inFILE, seqSTHeapAry);
 
    while(! errSC)
    { /*Loop: find number of primers in*/
       ++numPrimSI;
-
-      errSC = 
-        getFaSeq_seqST(
-           inFILE,
-           seqSTHeapAry
-        );
+      errSC = getFa_seqST(inFILE, seqSTHeapAry);
    } /*Loop: find number of primers in*/
 
    if(errSC != def_EOF_seqST)
@@ -857,9 +833,10 @@ main(
       { /*If: invalid fasta file*/
          fprintf(
             stderr,
-            "entry %i in -prim %s is not a fasta entry\n",
+            "entry %i in -prim %s is not a fasta entry%s",
             numPrimSI,
-            primFileStr
+            primFileStr,
+            str_endLine
          );
       } /*If: invalid fasta file*/
 
@@ -867,9 +844,10 @@ main(
       { /*Else: memory error*/
          fprintf(
             stderr,
-            "memory error on entry %i in -prim %s\n",
+            "memory error on entry %i in -prim %s%s",
             numPrimSI,
-            primFileStr
+            primFileStr,
+            str_endLine
          );
       } /*Else: memory error*/
 
@@ -881,12 +859,7 @@ main(
    +   - read in primers
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fseek(
-      inFILE,
-      0,
-      SEEK_SET
-   );
-
+   fseek(inFILE, 0, SEEK_SET);
    freeHeap_seqST(seqSTHeapAry);
    seqSTHeapAry = 0;
 
@@ -894,33 +867,23 @@ main(
       malloc(numPrimSI * sizeof(struct seqST));
 
    if(! seqSTHeapAry)
-   { /*If: I had memory error*/
-      fprintf(
-         stderr,
-         "Memory error\n"
-      );
-   } /*If: I had memory error*/
+      fprintf(stderr, "Memory error%s", str_endLine);
 
-   for(
-      siPrim = 0;
-      siPrim < numPrimSI;
-      ++siPrim
-   ){ /*Loop: get primer sequences*/
+   for(siPrim = 0; siPrim < numPrimSI; ++siPrim)
+   { /*Loop: get primer sequences*/
       init_seqST(&seqSTHeapAry[siPrim]);
 
       errSC = 
-        getFaSeq_seqST(
-           inFILE,
-           &seqSTHeapAry[siPrim]
-        );
+        getFa_seqST(inFILE, &seqSTHeapAry[siPrim]);
 
       if(errSC > 1)
       { /*If: I had an memory error*/
          fprintf(
             stderr,
-            "memory error on entry %i in -prim %s\n",
+            "memory error on entry %i in -prim %s%s",
             siPrim,
-            primFileStr
+            primFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
@@ -944,11 +907,8 @@ main(
    *   - start loop and align the foward primer
    \*****************************************************/
 
-   for(
-      siPrim = 0;
-      siPrim + 1 < numPrimSI;
-      siPrim += 2
-   ){ /*Loop: align primer sequences*/
+   for(siPrim = 0; siPrim + 1 < numPrimSI; siPrim += 2)
+   { /*Loop: align primer sequences*/
       alnFor_main_sec04_sub01:;
 
       seqToIndex_alnSet(seqSTHeapAry[siPrim].seqStr);
@@ -957,10 +917,10 @@ main(
          memwater(
             &refSTStack,          /*reference sequence*/
             &seqSTHeapAry[siPrim],/*primer sequence*/
-            &discardUL,      /*position of ref on primer*/
-            &ignoreUL,       /*position of ref on primer*/
-            &startAlnUL,
-            &endAlnUL,
+            &discardSL,      /*position of ref on primer*/
+            &ignoreSL,       /*position of ref on primer*/
+            &startAlnSL,
+            &endAlnSL,
             &alnSetSTStack
          ); /*Aling the forward primer*/
 
@@ -968,9 +928,10 @@ main(
       { /*If: I had an memory error*/
          fprintf(
             stderr,
-            "memory error aligning primer %i: -prim %s\n",
+            "memory error aligning primer %i: -prim %s%s",
             siPrim,
-            primFileStr
+            primFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
@@ -978,16 +939,17 @@ main(
 
       percScoreF =
          (float)
-         maxScore_alnDefs(seqSTHeapAry[siPrim].lenSeqUL);
+         maxScore_alnDefs(seqSTHeapAry[siPrim].seqLenSL);
 
       percScoreF = ((float) scoreSL) / percScoreF;
 
       fprintf(
         stderr,
-        "primer number %i; forward\t%s\t%% match: %.2f\n",
+        "primer number %i; forward\t%s\t%% match: %.2f%s",
         siPrim >> 1,
-        seqSTHeapAry[siPrim].idStr + 1,
-        percScoreF * 100
+        seqSTHeapAry[siPrim].idStr,
+        percScoreF * 100,
+        str_endLine
       );
 
       if(percScoreF < minPercScoreF)
@@ -1005,23 +967,25 @@ main(
              
          fprintf(
             stderr,
-            "Unable to align primer %i, foward: %s\n",
+            "Unable to align primer %i, foward: %s%s",
             siPrim >> 1,
-            seqSTHeapAry[siPrim].idStr
+            seqSTHeapAry[siPrim].idStr,
+            str_endLine
          );
 
          fprintf(
             stderr,
-            " in -prim %s\n",
-            primFileStr
+            " in -prim %s%s",
+            primFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
       } /*If: could not map this primer*/
 
       /*add in the primer coordinates*/
-      seqSTHeapAry[siPrim].offsetUL = startAlnUL;
-      seqSTHeapAry[siPrim].endAlnUL = endAlnUL;
+      seqSTHeapAry[siPrim].offsetSL = startAlnSL;
+      seqSTHeapAry[siPrim].endAlnSL = endAlnSL;
       revCmpBl = 0;
 
       /**************************************************\
@@ -1038,10 +1002,10 @@ main(
          memwater(
             &refSTStack,            /*reference sequence*/
             &seqSTHeapAry[siPrim+1],/*primer sequence*/
-            &discardUL,      /*position of ref on primer*/
-            &ignoreUL,       /*position of ref on primer*/
-            &startAlnUL,
-            &endAlnUL,
+            &discardSL,      /*position of ref on primer*/
+            &ignoreSL,       /*position of ref on primer*/
+            &startAlnSL,
+            &endAlnSL,
             &alnSetSTStack
          ); /*Aling the forward primer*/
 
@@ -1049,9 +1013,10 @@ main(
       { /*If: memory error*/
          fprintf(
             stderr,
-            "memory error aligning primer %i: -prim %s\n",
+            "memory error aligning primer %i: -prim %s%s",
             siPrim + 1,
-            primFileStr
+            primFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
@@ -1060,17 +1025,18 @@ main(
       percScoreF=
          (float)
           maxScore_alnDefs(
-             seqSTHeapAry[siPrim + 1].lenSeqUL
+             seqSTHeapAry[siPrim + 1].seqLenSL
          );
 
       percScoreF = ((float) scoreSL) / percScoreF;
 
       fprintf(
         stderr,
-        "primer number %i; reverse\t%s\t%% match: %.2f\n",
+        "primer number %i; reverse\t%s\t%% match: %.2f%s",
         siPrim >> 1,
         seqSTHeapAry[siPrim + 1].idStr + 1,
-        percScoreF * 100
+        percScoreF * 100,
+        str_endLine
       );
 
       if(percScoreF < minPercScoreF)
@@ -1088,23 +1054,25 @@ main(
 
          fprintf(
             stderr,
-            "unable to align primer %i, reverse: %s\n",
+            "unable to align primer %i, reverse: %s%s",
             siPrim + 1,
-            seqSTHeapAry[siPrim + 1].idStr
+            seqSTHeapAry[siPrim + 1].idStr,
+            str_endLine
          );
 
          fprintf(
             stderr,
-            " in -prim %s\n",
-            primFileStr
+            " in -prim %s%s",
+            primFileStr,
+            str_endLine
          );
 
          goto err_main_sec06_sub02;
       } /*If: could not map this primer*/
 
       /*primer coordinates*/
-      seqSTHeapAry[siPrim + 1].offsetUL = startAlnUL;
-      seqSTHeapAry[siPrim + 1].endAlnUL = endAlnUL;
+      seqSTHeapAry[siPrim + 1].offsetSL = startAlnSL;
+      seqSTHeapAry[siPrim + 1].endAlnSL = endAlnSL;
       revCmpBl = 0;
    } /*Loop: align primer sequences*/
 
@@ -1131,111 +1099,22 @@ main(
    *   - set up buffer memory and open miru table
    \*****************************************************/
 
-   lenBuffSI = 1 << 10; /*~ 2000 characters*/
+   inFILE = fopen( (char *) tblFileStr, "r");
 
-   buffHeapStr = malloc((lenBuffSI + 9) * sizeof(char));
-
-   if(! buffHeapStr)
-   { /*If: I had an memory error*/
-      fprintf(
-         stderr,
-         "Memory error after primer step\n"
-       );
-
-      goto err_main_sec06_sub02;
-   } /*If: I had an memory error*/
-
-   inFILE =
-      fopen(
-         (char *) tblFileStr,
-         "r"
-       );
-
-   /*****************************************************\
-   * Main Sec05 Sub02:
-   *   - see if can get first line in one read
-   \*****************************************************/
-
-   numBytesUL =
-      fread(
-         (char *) buffHeapStr,
-         sizeof(char),
-         lenBuffSI,
-         inFILE
-      ); /*read in frist line*/
-
-   if(! numBytesUL)
-   { /*If: file does not have an new line*/
-      fprintf(
-         stderr,
-         "-miru-tbl %s\n has no lines\n",
-         tblFileStr
+   numBytesSL =
+      getFullLine_fileFun(
+         inFILE,
+         &buffHeapStr,
+         &lenBuffSL,
+         &bytesSL,
+         0
       );
 
-      goto err_main_sec06_sub02;
-   } /*If: file does not have an new line*/
-
-   buffHeapStr[numBytesUL] = '\0';
-   posBuffStr = buffHeapStr;
-   posBuffStr += endLineUnix_ulCp(buffHeapStr);
-
-   /*****************************************************\
-   * Main Sec05 Sub03:
-   *   - make sure have entire frist line
-   \*****************************************************/
-
-   while(*posBuffStr != '\n')
-   { /*Loop: read in first line*/
-      lenBuffSI <<= 1;
-
-      posBuffStr =
-         realloc(
-            buffHeapStr,
-            (lenBuffSI + 1) * sizeof(schar)
-         ); /*resize buffer*/
-
-      if(! posBuffStr)
-      { /*If: memory error*/
-         fprintf(
-            stderr,
-            "memory error reading -miru-tbl %s\n",
-            tblFileStr
-         );
-
-         goto err_main_sec06_sub02;
-      } /*If: memory error*/
-
-      buffHeapStr = posBuffStr;
-      posBuffStr += numBytesUL;
-
-      oldByteCountUL = numBytesUL;
-
-      numBytesUL +=
-         fread(
-            (char *) posBuffStr,
-            sizeof(char),
-            (lenBuffSI >> 1),
-            inFILE
-         );
-
-      buffHeapStr[numBytesUL] = '\0';
-
-      if(oldByteCountUL == numBytesUL)
-      { /*If: file does not have an new line*/
-         fprintf(
-            stderr,
-            "-miru-tbl %s\n has no newline\n",
-            tblFileStr
-         );
-
-         goto err_main_sec06_sub02;
-      } /*If: file does not have an new line*/
-
-      buffHeapStr[numBytesUL] = '\0';
-      posBuffStr = buffHeapStr;
-      posBuffStr += endLineUnix_ulCp(buffHeapStr);
-   } /*Loop: Read in the first line*/
-
+   if(numBytesSL < 0)
+      goto memErr_main_sec06;
+   else if(! numBytesSL)
+      goto emptyTbl_main_sec06;
+   
    /*****************************************************\
    * Main Sec05 Sub04:
    *   - add primer coordinates to primer names
@@ -1269,12 +1148,8 @@ main(
    } /*Else: file does not have an new line*/
 
    *(posBuffStr - 1) = '\0';
-
-   fprintf(
-      stdout,
-      "%s\t",
-      pBuffStr
-   ); /*print frist columns header*/
+   fprintf(stdout, "%s\t", pBuffStr);
+      /*print frist columns header*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Main Sec05 Sub02 Cat02:
@@ -1298,17 +1173,17 @@ main(
       *(posBuffStr - 1) = '\0';
 
       if(
-           seqSTHeapAry[siPrim].offsetUL
-         < seqSTHeapAry[siPrim + 1].endAlnUL
+           seqSTHeapAry[siPrim].offsetSL
+         < seqSTHeapAry[siPrim + 1].endAlnSL
       ){/*If: primers order is forward and reverse*/
          fprintf(      
             stdout,
             "%s.%lu.%lu.%lu.%lu\t",
             pBuffStr,
-            seqSTHeapAry[siPrim].offsetUL,
-            seqSTHeapAry[siPrim].lenSeqUL,
-            seqSTHeapAry[siPrim + 1].endAlnUL,
-            seqSTHeapAry[siPrim + 1].lenSeqUL
+            seqSTHeapAry[siPrim].offsetSL,
+            seqSTHeapAry[siPrim].seqLenSL,
+            seqSTHeapAry[siPrim + 1].endAlnSL,
+            seqSTHeapAry[siPrim + 1].seqLenSL
          );
       }/*If: primers order is forward and reverse*/
 
@@ -1318,10 +1193,10 @@ main(
             stdout,
             "%s.%lu.%lu.%lu.%lu\t",
             pBuffStr,
-            seqSTHeapAry[siPrim + 1].offsetUL,
-            seqSTHeapAry[siPrim + 1].lenSeqUL,
-            seqSTHeapAry[siPrim].endAlnUL,
-            seqSTHeapAry[siPrim].lenSeqUL
+            seqSTHeapAry[siPrim + 1].offsetSL,
+            seqSTHeapAry[siPrim + 1].seqLenSL,
+            seqSTHeapAry[siPrim].endAlnSL,
+            seqSTHeapAry[siPrim].seqLenSL
          );
       }/*Else: primers are backwards*/
 
@@ -1331,17 +1206,17 @@ main(
    *(posBuffStr - 1) = '\0';
 
    if(
-        seqSTHeapAry[siPrim].offsetUL
-      < seqSTHeapAry[siPrim + 1].endAlnUL
+        seqSTHeapAry[siPrim].offsetSL
+      < seqSTHeapAry[siPrim + 1].endAlnSL
    ){/*If: primers orderr is forward and reverse*/
       fprintf(      
          stdout,
          "%s.%lu.%lu.%lu.%lu\n%s",
          pBuffStr,
-         seqSTHeapAry[siPrim].offsetUL,
-         seqSTHeapAry[siPrim].lenSeqUL,
-         seqSTHeapAry[siPrim + 1].endAlnUL,
-         seqSTHeapAry[siPrim + 1].lenSeqUL,
+         seqSTHeapAry[siPrim].offsetSL,
+         seqSTHeapAry[siPrim].seqLenSL,
+         seqSTHeapAry[siPrim + 1].endAlnSL,
+         seqSTHeapAry[siPrim + 1].seqLenSL,
          posBuffStr
       );
    }/*If: primers orderr is forward and reverse*/
@@ -1352,10 +1227,10 @@ main(
          stdout,
          "%s.%lu.%lu.%lu.%lu\n%s",
          pBuffStr,
-         seqSTHeapAry[siPrim + 1].offsetUL,
-         seqSTHeapAry[siPrim + 1].lenSeqUL,
-         seqSTHeapAry[siPrim].endAlnUL,
-         seqSTHeapAry[siPrim].lenSeqUL,
+         seqSTHeapAry[siPrim + 1].offsetSL,
+         seqSTHeapAry[siPrim + 1].seqLenSL,
+         seqSTHeapAry[siPrim].endAlnSL,
+         seqSTHeapAry[siPrim].seqLenSL,
          posBuffStr
       );
    }/*Else: primers are backwards*/
@@ -1365,31 +1240,15 @@ main(
    *   - print out rest of file
    \*****************************************************/
 
-   numBytesUL = 
-     fread(
-        buffHeapStr,
-        sizeof(char),
-        lenBuffSI,
-        inFILE
-     );
+   numBytesSL = 
+     fread(buffHeapStr, sizeof(char), lenBuffSL, inFILE);
 
-   while(numBytesUL)
+   while(numBytesSL)
    { /*Loop: read in file*/
-      buffHeapStr[numBytesUL] = '\0';
-
-      fprintf(
-         stdout,
-         "%s",
-         buffHeapStr
-      );
-
-      numBytesUL = 
-        fread(
-           buffHeapStr,
-           sizeof(char),
-           lenBuffSI,
-           inFILE
-        );
+      buffHeapStr[numBytesSL] = '\0';
+      fprintf(stdout, "%s", buffHeapStr);
+      numBytesSL = 
+        fread(buffHeapStr,sizeof(char),lenBuffSL,inFILE);
    } /*Loop: read in file*/
 
    free(buffHeapStr);
@@ -1397,14 +1256,9 @@ main(
 
    if(inFILE != stdin)
       fclose(inFILE);
-
    inFILE = 0;
 
-   freeHeapAry_seqST(
-      seqSTHeapAry,
-      numPrimSI
-   );
-
+   freeHeapAry_seqST(seqSTHeapAry, numPrimSI);
    seqSTHeapAry = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1426,48 +1280,44 @@ main(
    errSC = 0;
    goto cleanUp_main_sec06_sub03;
 
-   /*****************************************************\
-   * Main Sec06 Sub02:
-   *   - error clean up
-   \*****************************************************/
-
    err_main_sec06_sub02:;
-   errSC = 1;
-   goto cleanUp_main_sec06_sub03;
+      errSC = 1;
+      goto cleanUp_main_sec06_sub03;
 
-   /*****************************************************\
-   * Main Sec06 Sub03:
-   *   - general clean up (error or no error)
-   \*****************************************************/
+   memErr_main_sec06:;
+      errSC = 2;
+      fprintf(stderr, "memory error%s", str_endLine);
+      goto cleanUp_main_sec06_sub03;
+
+   emptyTbl_main_sec06:;
+      errSC = 3;
+      fprintf(
+         stderr,
+         "nothing in -miru-tbl%s",
+         str_endLine
+      );
+      goto cleanUp_main_sec06_sub03;
 
    cleanUp_main_sec06_sub03:;
+      if(buffHeapStr)
+         free(buffHeapStr);
+      buffHeapStr = 0;
 
-   if(buffHeapStr)
-      free(buffHeapStr);
+      if(seqSTHeapAry)
+         freeHeapAry_seqST(seqSTHeapAry, numPrimSI);
+      seqSTHeapAry = 0;
 
-   buffHeapStr = 0;
+      freeStack_seqST(&refSTStack);
+      freeStack_alnSet(&alnSetSTStack);
 
-   if(seqSTHeapAry)
-      freeHeapAry_seqST(
-         seqSTHeapAry,
-         numPrimSI
-      );
+      if(! inFILE) ;
+      else if(inFILE == stdin) ;
+      else if(inFILE == stdout) ;
+      else
+         fclose(inFILE);
+      inFILE = 0;
 
-   seqSTHeapAry = 0;
-
-   freeStack_seqST(&refSTStack);
-   freeStack_alnSet(&alnSetSTStack);
-
-
-   if(
-         inFILE
-      && inFILE != stdin
-      && inFILE != stdout
-   ) fclose(inFILE);
-
-   inFILE = 0;
-
-   return errSC;
+      return errSC;
 } /*main*/
 
 /*=======================================================\

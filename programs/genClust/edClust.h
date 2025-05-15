@@ -266,44 +266,6 @@ cluster_edClust(
    signed char *errSCPtr
 );
 
-/*-------------------------------------------------------\
-| Fun09: plist_con_clustST
-|   - print the clusters consensuses in a con_clustST list
-| Input:
-|   - conSTPtr:
-|     o pointer to con_clustST struct list with
-|       consensuses to print
-|   - headerStr:
-|     o c-string with header to print 
-|   - pgHeadStr:
-|     o c-string with program header to print 
-|   - buffStrPtr:
-|     o to c-string to print consensuses with
-|   - lenBuffULPtr:
-|     o pointer to unsigned long with current length of
-|       buffer
-|   - outFILE:
-|     o file to print consensuses to
-| Output:
-|   - Modifies:
-|     o buffStrPtr to be resized if needed
-|     o lenBuffULPtr to have current buffer size
-|   - Prints:
-|     o headers and consensus to outFILE as a sam file
-|   - Returns:
-|     o 0 for no errors
-|     o def_memErr_edClust for memeory errors
-\-------------------------------------------------------*/
-signed char
-plist_con_clustST(
-   struct con_clustST *conSTPtr, /*consensuses to print*/
-   signed char *headerStr,       /*sam file header*/
-   signed char *pgHeadStr,       /*program header*/
-   signed char **buffStrPtr,     /*for printing*/
-   unsigned long *lenBuffULPtr,  /*size of buffStrPtr*/
-   void *outFILE                 /*file to print to*/
-);
-
 #endif
 
 /*=======================================================\

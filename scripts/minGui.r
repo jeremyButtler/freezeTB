@@ -350,13 +350,12 @@ function(
 
       while(siElm <= lenSI)
       { # Loop: remove directories
-         if(dir.exists(fileMacStr[siElm]){
+         if( dir.exists(fileMacStr[siElm]) ){
             fileMacStr = fileMacStr[- 1];
             lenSI = lenSI - 1;
          } else{
             siElm = siElm + 1;
          } # check if is a directory (not a file)
-
       } # Loop: remove directories
 
       if(length(fileMacStr) < 1)
@@ -1218,12 +1217,7 @@ showTab1();
 #   input and avoids Rscript making and then rushing to
 #   finish the script before the user input anything.
 while(
-   as.numeric(
-      tkwinfo(
-         "exists",
-         guiTK
-      )
-    )
+   as.numeric(tkwinfo( "exists", guiTK))
 ) Sys.sleep(0.2);
 
 #q("no");

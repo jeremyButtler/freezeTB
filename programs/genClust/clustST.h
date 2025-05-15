@@ -66,8 +66,6 @@
 '     o fun18: swap_con_clustST
 '       - swaps to con_clustST structs (except nextST ptr)
 '   - TOF05: build/use index_clustST struct (consensus to)
-'     o fun19: getNumLines_clustST
-'       - finds number of lines in a file
 '     o fun20: mk_index_clustST
 '       - get read scores for a sam file
 '     o fun21: getRead_clustST
@@ -630,23 +628,6 @@ swap_con_clustST(
 );
 
 /*-------------------------------------------------------\
-| Fun19: getNumLines_clustST
-|   - finds number of lines in a file
-| Input:
-|   - inFILE:
-|     o file to find number of lines in
-| Output:
-|   - Modifies:
-|     o inFILE to point to start of file
-|   - Returns:
-|     o number of lines in file
-\-------------------------------------------------------*/
-unsigned long
-getNumLines_clustST(
-   void *inFILE
-);
-
-/*-------------------------------------------------------\
 | Fun20: mk_index_clustST
 |   - get read scores for a sam file
 | Input:
@@ -686,7 +667,7 @@ mk_index_clustST(
    struct set_clustST *clustSetSTPtr,
    struct samEntry *samSTPtr,
    signed char **buffStrPtr,
-   unsigned long *lenBuffUL,
+   signed long *lenBuffSL,
    void *samFILE
 );
 
@@ -832,11 +813,6 @@ cmpCons_clustST(
 |   - pgHeadStr:
 |     o c-string with program header to print (null = no
 |       header)
-|   - buffStrPtr:
-|     o to c-string to print consensuses with
-|   - lenBuffULPtr:
-|     o pointer to unsigned long with current length of
-|       buffer
 |   - outFILE:
 |     o file to print consensuses to
 | Output:
@@ -854,8 +830,6 @@ plist_con_clustST(
    struct con_clustST *conSTPtr, /*consensuses to print*/
    signed char *headerStr,       /*sam file header*/
    signed char *pgHeadStr,       /*program header*/
-   signed char **buffStrPtr,     /*for printing*/
-   unsigned long *lenBuffULPtr,  /*size of buffStrPtr*/
    void *outFILE                 /*file to print to*/
 );
 

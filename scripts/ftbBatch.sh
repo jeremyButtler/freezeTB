@@ -34,18 +34,22 @@ outDirStr="";
 outPrefixStr="";
 barStr="";
 rBl=1;
+mapReadBl=0;
 
 helpStr="$(basename "$0") prefix directory...
    - runs freezeTB on all barcodes in a directory
 Input:
+   -mapRead to use mapRead (FTB internal read mapper)
+     instead of minimap2
+     o this must be the first item input
    - order is always prefix, followed by the directory
      running, you can input multiple directories and
      prefix's
-     - ex: prefix1 directory1 prefix2 directory2...
+     o ex: prefix1 directory1 prefix2 directory2...
    - prefix: what to call output
    - directory: directory with barcode folders to run
      freezeTB on
-     - ex fastq_pass directory from guppy
+     o ex fastq_pass directory from guppy
 Output:
    - makes a folder with freezeTB's output for each
      barcode
@@ -71,6 +75,8 @@ then
    printf "%s\n" "$helpStr";
    exit;
 fi # If: nothing input
+
+if [ $1 = "-mapRead" ]; then mapReadBl=1; shift; fi;
 
 printf \
     "prefix\tbarcode\tdrug...\n" \
@@ -169,19 +175,26 @@ do # Loop: get directories to process
          mkdir "$outDirStr";
       fi # If need to make directory for this barcode
 
-      if [ ! -f "$outPrefixStr-map.sam" ];
-      then # If: need to remap reads
-         minimap2 \
-            -a \
-            --eqx \
-            /usr/local/share/freezeTBFiles/NC000962.fa \
-            "$strBar/"*.fastq* \
-          > "$outPrefixStr-map.sam";
-      fi # If: need to remap reads
+      if [ $mapReadBl -eq 0 ];
+      then # if: using minimap2
+         if [ ! -f "$outPrefixStr-map.sam" ];
+         then # If: need to remap reads
+            minimap2 \
+               -a \
+               --eqx \
+               /usr/local/share/freezeTBFiles/NC000962.fa\
+               "$strBar/"*.fastq* \
+             > "$outPrefixStr-map.sam";
+         fi # If: need to remap reads
 
-      freezeTB \
-         -sam "$outPrefixStr-map.sam" \
-         -prefix "$outPrefixStr-map-FTB";
+         freezeTB \
+            -sam "$outPrefixStr-map.sam" \
+            -prefix "$outPrefixStr-map-FTB";
+      else
+         freezeTB \
+            -prefix "$outPrefixStr-map-FTB" \
+            "$strBar/"*.fastq*;
+      fi; # check if using mapRead or minimap2
 
       drugStr="$(
          awk \

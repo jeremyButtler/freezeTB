@@ -38,6 +38,8 @@
 !   o std #include <stdio.h>
 !   o .c  #include "../genLib/base10str.h"
 !   o .c  #include "../genLib/ulCp.h"
+!   o .c  #include "../genLib/fileFun.h"
+!   o .h  #include "../genLib/endLine.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
@@ -47,22 +49,22 @@
 | Input;
 |   - qrySeqSTVoidPtr:
 |     o Point to an seqST with the query sequence and
-|       index 0 coordinates to start (offsetUL)/end
-|       (endAlnUL) the alignment.
+|       index 0 coordinates to start (offsetSL)/end
+|       (endAlnSL) the alignment.
 |   - refSeqSTVoidPtr:
 |     o Point to an seqST with the reference sequence
-|       and index 0 coordinates to start (offsetUL)/end
-|       (endAlnUL) the alignment.
-|   - refStartUL:
+|       and index 0 coordinates to start (offsetSL)/end
+|       (endAlnSL) the alignment.
+|   - refStartSL:
 |     o Pointer to unsigned long to hold the frist
 |       reference base in the alignment
-|   - refEndUL:
+|   - refEndSL:
 |     o Pointer to unsigned long to hold the last
 |       reference base in the alignment
-|   - qryStartUL:
+|   - qryStartSL:
 |     o Pointer to unsigned long to hold the frist query 
 |       base in the alignment
-|   - qryEndUL:
+|   - qryEndSL:
 |     o Pointer to unsigned long to hold the last query
 |       base in the alignment
 |   - alnSetVoidPtr:
@@ -70,10 +72,10 @@
 |       gap extend, and scoring matrix for the alingment
 | Output:
 |  - Modifies:
-|    o refStartUL to have 1st reference base in alignment
-|    o refEndUL to have last reference base in alignment
-|    o qryStartUL to have first query base in alignment
-|    o qryEndUL to have last query base in alignment
+|    o refStartSL to have 1st reference base in alignment
+|    o refEndSL to have last reference base in alignment
+|    o qryStartSL to have first query base in alignment
+|    o qryEndSL to have last query base in alignment
 |  - Returns:
 |    o score for aligment
 |    o negative number for memory errors
@@ -82,10 +84,10 @@ signed long
 memwater(
    struct seqST *qrySTPtr, /*query sequence and data*/
    struct seqST *refSTPtr, /*ref sequence and data*/
-   unsigned long *refStartUL,
-   unsigned long *refEndUL,
-   unsigned long *qryStartUL,
-   unsigned long *qryEndUL,
+   signed long *refStartSL,
+   signed long *refEndSL,
+   signed long *qryStartSL,
+   signed long *qryEndSL,
    struct alnSet *settings
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun01 TOC: memwaterAln
@@ -123,22 +125,22 @@ memwater(
    \*****************************************************/
 
    signed long scoreSL = 0;     /*score to return*/
-   unsigned long bestStartUL = 0; /*best starting index*/
-   unsigned long bestEndUL = 0;   /*best ending index*/
+   signed long bestStartSL = 0; /*best starting index*/
+   signed long bestEndSL = 0;   /*best ending index*/
 
    /*Get start & end of query and reference sequences*/
    signed char *refSeqStr = 0;
    signed char *qrySeqStr = 0;
 
-   unsigned long lenRefUL =
-      refSTPtr->endAlnUL - refSTPtr->offsetUL + 1;
+   signed long lenRefSL =
+      refSTPtr->endAlnSL - refSTPtr->offsetSL + 1;
 
-   unsigned long lenQryUL =
-      qrySTPtr->endAlnUL - qrySTPtr->offsetUL + 1;
+   signed long lenQrySL =
+      qrySTPtr->endAlnSL - qrySTPtr->offsetSL + 1;
 
    /*Iterators for loops*/
-   unsigned long ulRef = 0;
-   unsigned long ulQry = 0;
+   signed long slRef = 0;
+   signed long slQry = 0;
 
    /*****************************************************\
    * Fun01 Sec01 Sub02:
@@ -160,11 +162,11 @@ memwater(
    signed char *dirRowHeapSC = 0;  /*Holds directions*/
 
    /*Keeping track of alignment starting positions*/
-   unsigned long indexUL = 0;    /*index at in matrix*/
-   unsigned long snpIndexUL = 0; /*last snp index*/
-   unsigned long tmpIndexUL = 0; /*for getting snp index*/
+   signed long indexSL = 0;    /*index at in matrix*/
+   signed long snpIndexSL = 0; /*last snp index*/
+   signed long tmpIndexSL = 0; /*for getting snp index*/
 
-   unsigned long *indexHeapUL=0; /*row; starting indexes*/
+   signed long *indexHeapSL=0; /*row; starting indexes*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec02:
@@ -181,21 +183,13 @@ memwater(
    \****************************************************/
 
    dirRowHeapSC =
-      calloc(
-         (lenRefUL + 1),
-         sizeof(signed char)
-      );
-
+      calloc((lenRefSL + 1), sizeof(signed char));
    if(dirRowHeapSC == 0)
       goto memErr_fun01_sec05_sub03;
 
    scoreHeapArySL =
-      calloc(
-         (lenRefUL + 1),
-          sizeof(signed long)
-      );
-   /*+ 1 is for the indel column*/
-
+      calloc((lenRefSL + 1), sizeof(signed long));
+      /*+ 1 is for the indel column*/
    if(scoreHeapArySL == 0)
       goto memErr_fun01_sec05_sub03;
 
@@ -205,13 +199,9 @@ memwater(
    \*****************************************************/
 
    /*Set up the first row of starting indexes*/
-   indexHeapUL =
-      calloc(
-         (lenRefUL + 1),
-         sizeof(unsigned long)
-      );
-
-   if(indexHeapUL == 0)
+   indexHeapSL =
+      calloc((lenRefSL + 1), sizeof(unsigned long));
+   if(indexHeapSL == 0)
       goto memErr_fun01_sec05_sub03;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -220,13 +210,13 @@ memwater(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    for(
-      indexUL = 0;
-      indexUL <= lenRefUL;
-      ++indexUL
+      indexSL = 0;
+      indexSL <= lenRefSL;
+      ++indexSL
    ){ /*loop; till have initalized the first row*/
-      dirRowHeapSC[indexUL] = def_mvStop_alnDefs;
-      indexHeapUL[indexUL] = indexUL + 1;
-      scoreHeapArySL[indexUL] = 0;
+      dirRowHeapSC[indexSL] = def_mvStop_alnDefs;
+      indexHeapSL[indexSL] = indexSL + 1;
+      scoreHeapArySL[indexSL] = 0;
    } /*loop; till have initalized the first row*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -254,17 +244,17 @@ memwater(
    \*****************************************************/
 
    /*Move the row of starting indexes to the last row*/
-   indexHeapUL[0] = indexUL;
+   indexHeapSL[0] = indexSL;
 
    /*These are always negative*/
    delScoreSL = 0;
    nextSnpScoreSL = 0;
-   snpIndexUL = indexHeapUL[0];
+   snpIndexSL = indexHeapSL[0];
 
    /*incurment to frist base*/
-   ++indexUL;
-   qrySeqStr = qrySTPtr->seqStr + qrySTPtr->offsetUL;
-   refSeqStr = refSTPtr->seqStr + refSTPtr->offsetUL - 1;
+   ++indexSL;
+   qrySeqStr = qrySTPtr->seqStr + qrySTPtr->offsetSL;
+   refSeqStr = refSTPtr->seqStr + refSTPtr->offsetSL - 1;
       /*offseting reference by 1 to account for the gap
       `  column
       */
@@ -276,35 +266,35 @@ memwater(
 
    /*Starting on the first sequence row*/
    for(
-      ulQry = 0;
-      ulQry < lenQryUL;
-      ++ulQry
+      slQry = 0;
+      slQry < lenQrySL;
+      ++slQry
    ){ /*loop; compare query base against all ref bases*/
 
       for(
-         ulRef = 1;
-         ulRef <= lenRefUL;
-         ++ulRef
+         slRef = 1;
+         slRef <= lenRefSL;
+         ++slRef
       ){ /*loop; compare one query to one reference base*/
 
          snpScoreSL =
             getScore_alnSet(
-               qrySeqStr[ulQry],
-               refSeqStr[ulRef],
+               qrySeqStr[slQry],
+               refSeqStr[slRef],
                settings
             ); /*find the score for the base pairs*/
 
          snpScoreSL += nextSnpScoreSL;
-         nextSnpScoreSL = scoreHeapArySL[ulRef];
+         nextSnpScoreSL = scoreHeapArySL[slRef];
 
          /*insertion score*/
          #ifdef NOEXTEND
             insScoreSL =
-               scoreHeapArySL[ulRef] + settings->gapSS;
+               scoreHeapArySL[slRef] + settings->gapSS;
          #else
-            insScoreSL = scoreHeapArySL[ulRef];
+            insScoreSL = scoreHeapArySL[slRef];
             insScoreSL +=
-               settings->insArySS[dirRowHeapSC[ulRef]];
+               settings->insArySS[dirRowHeapSC[slRef]];
          #endif
 
          /***********************************************\
@@ -312,46 +302,60 @@ memwater(
          *   - find high score
          \***********************************************/
 
-         scoreHeapArySL[ulRef] =
+         scoreHeapArySL[slRef] =
             max_genMath(
                insScoreSL,
                snpScoreSL
          ); /*find if ins/snp is best (5 Op)*/
 
-         tmpIndexUL = indexHeapUL[ulRef];
+         tmpIndexSL = indexHeapSL[slRef];
 
-         indexHeapUL[ulRef] =
+         indexHeapSL[slRef] =
             ifmax_genMath(
                insScoreSL,
                snpScoreSL,
-               indexHeapUL[ulRef], /*insertion index*/
-               snpIndexUL          /*snp index*/
+               indexHeapSL[slRef], /*insertion index*/
+               snpIndexSL          /*snp index*/
             ); /*get index of high score*/
 
-         snpIndexUL = tmpIndexUL;
+         snpIndexSL = tmpIndexSL;
 
-         /*find direction (4 Op)*/
-         dirRowHeapSC[ulRef] =
-            scoreHeapArySL[ulRef] > delScoreSL;
+         /*find direction (5 Op)*/
+         dirRowHeapSC[slRef] =
+            scoreHeapArySL[slRef] > delScoreSL;
+         dirRowHeapSC[slRef] +=
+            (
+                 (snpScoreSL <= insScoreSL)
+               & dirRowHeapSC[slRef]
+            );
+         ++dirRowHeapSC[slRef];
 
-         dirRowHeapSC[ulRef] <<=
-            (snpScoreSL < insScoreSL);
-
-         ++dirRowHeapSC[ulRef];
+         /*Logic:
+         `   - noDel: maxSC > delSc:
+         `     o 1 if deletion not max score
+         `     o 0 if deletion is max score
+         `   - type: noDel + ((snpSc < insSc) & noDel):
+         `     o 1 + (1 & 1) = 2 if insertion is maximum
+         `     o 1 + (0 & 1) = 1 if snp is maximum
+         `     o 0 + (0 & 0) = 0 if del is max; snp > ins
+         `     o 0 + (1 & 0) = 0 if del is max, ins >= snp
+         `   - dir: type + 1
+         `     o adds 1 to change from stop to direction
+         */
 
          /*finish finding max's*/
-         indexHeapUL[ulRef] =
+         indexHeapSL[slRef] =
             ifmax_genMath(
                delScoreSL,
-               scoreHeapArySL[ulRef],
-               indexHeapUL[ulRef - 1],    /*del index*/
-               indexHeapUL[ulRef]         /*current best*/
+               scoreHeapArySL[slRef],
+               indexHeapSL[slRef - 1],    /*del index*/
+               indexHeapSL[slRef]         /*current best*/
             ); /*get index of high score*/
 
-         scoreHeapArySL[ulRef] =
+         scoreHeapArySL[slRef] =
             max_genMath(
                delScoreSL,
-               scoreHeapArySL[ulRef]
+               scoreHeapArySL[slRef]
          ); /*find if del is best (5 Op)*/
             
          /***********************************************\
@@ -359,22 +363,22 @@ memwater(
          *   - check if keep score (score > 0)
          \***********************************************/
 
-         if(scoreHeapArySL[ulRef] <= 0)
+         if(scoreHeapArySL[slRef] <= 0)
          {
-            dirRowHeapSC[ulRef] = 0;
-            scoreHeapArySL[ulRef] = 0;
-            indexHeapUL[ulRef] = indexUL + 1;
+            dirRowHeapSC[slRef] = 0;
+            scoreHeapArySL[slRef] = 0;
+            indexHeapSL[slRef] = indexSL + 1;
             /*always one off for new index's*/
          }
 
          /* branchless method is slower here
          keepSL =
-             (signed long) -(scoreHeapArySL[ulRef] > 0);
-         dirRowHeapSC[ulRef] &= keepSL;
-         scoreHeapArySL[ulRef] &= keepSL;
+             (signed long) -(scoreHeapArySL[slRef] > 0);
+         dirRowHeapSC[slRef] &= keepSL;
+         scoreHeapArySL[slRef] &= keepSL;
 
-         indexHeapUL[ulRef] &= keepSL;
-         indexHeapUL[ulRef] |= ( indexUL & (~keepSL) );
+         indexHeapSL[slRef] &= keepSL;
+         indexHeapSL[slRef] |= ( indexSL & (~keepSL) );
          */
 
          /***********************************************\
@@ -384,11 +388,11 @@ memwater(
 
          #ifdef NOEXTEND
             delScoreSL =
-               scoreHeapArySL[ulRef] + settings->gapSS;
+               scoreHeapArySL[slRef] + settings->gapSS;
          #else
-            delScoreSL = scoreHeapArySL[ulRef];
+            delScoreSL = scoreHeapArySL[slRef];
             delScoreSL +=
-               settings->delArySS[dirRowHeapSC[ulRef]];
+               settings->delArySS[dirRowHeapSC[slRef]];
          #endif
 
          /***********************************************\
@@ -396,14 +400,14 @@ memwater(
          *   - check if have new high score
          \***********************************************/
 
-         if(scoreSL < scoreHeapArySL[ulRef])
+         if(scoreSL < scoreHeapArySL[slRef])
          { /*If: this is the best score*/
-            scoreSL = scoreHeapArySL[ulRef];
-            bestStartUL = indexHeapUL[ulRef];
-            bestEndUL = indexUL;
+            scoreSL = scoreHeapArySL[slRef];
+            bestStartSL = indexHeapSL[slRef];
+            bestEndSL = indexSL;
          } /*If: this was an snp or match*/
 
-         ++indexUL;
+         ++indexSL;
       } /*loop; compare one query to one reference base*/
 
      /***************************************************\
@@ -415,10 +419,10 @@ memwater(
 	  nextSnpScoreSL = 0;
      delScoreSL = 0;
 
-     indexHeapUL[0] = indexUL; /*next index*/
-     snpIndexUL = indexHeapUL[0];
+     indexHeapSL[0] = indexSL; /*next index*/
+     snpIndexSL = indexHeapSL[0];
 
-     ++indexUL; /*Set index for the next base pair*/
+     ++indexSL; /*Set index for the next base pair*/
    } /*loop; compare query base against all ref bases*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -439,35 +443,35 @@ memwater(
    *  - get coordinates
    \*****************************************************/
 
-   *refStartUL =
+   *refStartSL =
       refCoord_indexToCoord(
-         lenRefUL,
-         bestStartUL
+         lenRefSL,
+         bestStartSL
       ); /*Convert the starting index to coordinates*/
 
-   *qryStartUL =
+   *qryStartSL =
       qryCoord_indexToCoord(
-         lenRefUL,
-         bestStartUL
+         lenRefSL,
+         bestStartSL
       ); /*Convert the starting index to coordinates*/
 
-   *refStartUL += refSTPtr->offsetUL;
-   *qryStartUL += qrySTPtr->offsetUL;
+   *refStartSL += refSTPtr->offsetSL;
+   *qryStartSL += qrySTPtr->offsetSL;
 
-   *refEndUL =
+   *refEndSL =
       refCoord_indexToCoord(
-         lenRefUL,
-         bestEndUL
+         lenRefSL,
+         bestEndSL
       ); /*Convert ending index to coordinates*/
 
-   *qryEndUL =
+   *qryEndSL =
       qryCoord_indexToCoord(
-         lenRefUL,
-         bestEndUL
+         lenRefSL,
+         bestEndSL
       ); /*Convert ending index to coordinates*/
 
-   *refEndUL += refSTPtr->offsetUL;
-   *qryEndUL += qrySTPtr->offsetUL;
+   *refEndSL += refSTPtr->offsetSL;
+   *qryEndSL += qrySTPtr->offsetSL;
 
    /*****************************************************\
    * Fun01 Sec05 Sub02:
@@ -497,8 +501,8 @@ memwater(
       free(scoreHeapArySL);
       scoreHeapArySL = 0;
 
-      free(indexHeapUL);
-      indexHeapUL = 0;
+      free(indexHeapSL);
+      indexHeapSL = 0;
 
       return scoreSL;
 } /*memwater*/

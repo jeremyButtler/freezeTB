@@ -28,13 +28,15 @@
 '   o fun08: findStart_geneCoord
 '     - Does a binary search by starting coordinate for a
 '       potentail gene in a geneCoord structure
-'   o fun09: sortName_geneCoord
+'   o fun09: findRange_geneCoord
+'     - finds start of range read coordinate may be in
+'   o fun10: sortName_geneCoord
 '     - Sorts the arrays in a genesCoord structure by
 '       gene name
-'   o fun10: findName_geneCoord
+'   o fun11: findName_geneCoord
 '     - Does a binary search to find an gene name in an
 '       gene geneCoord structer (must be sorted by name)
-'   o fun11: getCoords_geneCoord
+'   o fun12: getCoords_geneCoord
 '     - Gets the gene coordinates from an gene coordinates
 '       table
 '   o license:
@@ -215,7 +217,33 @@ findStart_geneCoord(
 );
 
 /*-------------------------------------------------------\
-| Fun09: sortName_geneCoord
+| Fun09: findRange_geneCoord
+|  - finds start of range read coordinate may be in
+| Input:
+|  - geneCoordST:
+|    o Pointer to geneCoord structure with starting gene
+|      coordinates to search
+|  - startUI:
+|    o starting coordinate (query) to search for
+|  - endUI:
+|    o ending coordinate (query) to search for
+|  - numGenesUI:
+|    o Number of genes in geneCoordST (index 1)
+| Output:
+|  - Returns:
+|    o index of gene that overlaps with startUI and endUI
+|    o -1 if there was no gene
+\-------------------------------------------------------*/
+signed int
+findRange_geneCoord(
+   struct geneCoord *geneST,
+   unsigned int startUI,
+   unsigned int endUI,
+   signed int numGenesSI
+);
+
+/*-------------------------------------------------------\
+| Fun10: sortName_geneCoord
 |  - Sorts the arrays in a genesCoord structure by
 |    gene name
 | Input:
@@ -239,7 +267,7 @@ sortName_geneCoord(
 );
 
 /*-------------------------------------------------------\
-| Fun10: findName_geneCoord
+| Fun11: findName_geneCoord
 |  - Does a binary search to find an gene name in an gene
 |    geneCoord structer (must be sorted by name)
 | Input:
@@ -263,7 +291,7 @@ findName_geneCoord(
 );
 
 /*-------------------------------------------------------\
-| Fun11: getCoords_geneCoord
+| Fun12: getCoords_geneCoord
 |  - Gets the gene coordinates from a gene table (tsv)
 | Input:
 |  - geneTblFileStr:

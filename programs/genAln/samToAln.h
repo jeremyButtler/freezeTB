@@ -34,10 +34,6 @@ struct alnSet;
 | Input:
 |   - samSTPtr:
 |     o pointer to a sam entry struct with first header
-|   - buffStrPtr:
-|     o pointer to buffer to use in read sam file headers
-|   - lenBuffULPtr:
-|     o pointer to unsigned long with length of buffStrPtr
 |   - samFILE:
 |     o sam file to get header from
 |   - outFILE:
@@ -57,8 +53,6 @@ struct alnSet;
 signed char
 psamPg_samToAln(
    struct samEntry *samSTPtr,
-   signed char **buffStrPtr,
-   unsigned long *lenBuffULPtr,
    void *samFILE,
    void *outFILE
 );

@@ -1,20 +1,23 @@
+MAKE=make
 LD=cc
 CC=cc
-CFLAGS= -O3 -std=c89 -Wall -Wextra
+CFLAGS= -DNONE
 PREFIX=/usr/local/bin
 ext=unix
 O=.o.$(ext)
 
 all:
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C freezeTBSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbAmrSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbMiruSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C whoToAmrSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C swapDbRefSrc
-	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C guiFreezeTBSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbAmrSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbMiruSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C whoToAmrSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C swapDbRefSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C freezeTBSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C guiFreezeTBSrc
 
 install:
+	mv guiFreezeTBSrc/guiFreezeTB $(PREFIX)
+	chmod a+x $(PREFIX)/guiFreezeTB
 	mv freezeTBSrc/freezeTB $(PREFIX)
 	chmod a+x $(PREFIX)/freezeTB
 	mv tbAmrSrc/tbAmr $(PREFIX)
@@ -27,8 +30,6 @@ install:
 	chmod a+x $(PREFIX)/whoToAmr
 	mv swapDbRefSrc/swapDbRef $(PREFIX)
 	chmod a+x $(PREFIX)/swapDbRef
-	mv guiFreezeTBSrc/guiFreezeTB $(PREFIX)
-	chmod a+x $(PREFIX)/guiFreezeTB
 
 clean:
 	rm \
@@ -42,4 +43,5 @@ clean:
 		genLib/*.o.$(ext) \
 		genBio/*.o.$(ext) \
 		genAln/*.o.$(ext) \
-		genClust/*.o.$(ext)
+		genClust/*.o.$(ext) \
+		genFreezeTB/*.o.$(ext)

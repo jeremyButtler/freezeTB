@@ -31,26 +31,25 @@
 
 #include "../genLib/base10str.h"
 #include "../genLib/charCp.h"
-#include "../tbAmrSrc/amrST.h"
-#include "genIndice.h"
-#include "whoToAmr.h"
+#include "../genFreezeTB/amrST.h"
+#include "../genFreezeTB/genIndice.h"
+#include "../genFreezeTB/whoToAmr.h"
 
 /*no .c files*/
-#include "../genLib/dataTypeShortHand.h"
+#include "../ftbVersion.h"
+#include "../genLib/endLine.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden includes
 !   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/genMath.h"
-!   o .c  #include "../genLib/codonTbl.h"
-!   o .c  #include "../tbAmrSrc/drugAry.h"
+!   o .c  #include "../genLib/fileFun.h"
+!   o .c  #include "../genBio/codonFun.h"
+!   o .c  #include "../genFreezeTB/drugAry.h"
 !   o .h  #include "../genLib/ntTo2Bit.h"
 !   o .h  #include "../genLib/revNtTo2Bit.h"
+!   o .h  #include "../genLib/codonTbl.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-#define def_year_mainWhoToAmr 2024
-#define def_month_mainWhoToAmr 8
-#define def_day_mainWhoToAmr 16
 
 /*-------------------------------------------------------\
 | Fun01: pversion_mainWhoToAmr
@@ -68,10 +67,11 @@ pversion_mainWhoToAmr(
 ){
    fprintf(
       (FILE *) outFILE,
-      "whoToAmr version: %i-%02i-%02i\n",
-      def_year_mainWhoToAmr,
-      def_month_mainWhoToAmr,
-      def_day_mainWhoToAmr
+      "whoToAmr from freezeTB version: %i-%02i-%02i%s",
+      def_year_ftbVersion,
+      def_month_ftbVersion,
+      def_day_ftbVersion,
+      str_endLine
    );
 } /*pversion_mainWhoToAmr*/
 
@@ -111,17 +111,20 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -ref rerence.fa > out.tsv\n"
+      "  -ref rerence.fa > out.tsv%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "  - converts 2023 WHO tuberculosis AMR catalog\n"
+      "  - converts 2023 WHO tuberculosis AMR catalog%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "    to tbAmr format (is a tsv file)\n"
+      "    to tbAmr format (is a tsv file)%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -154,7 +157,8 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "Input:\n"
+      "Input:%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -164,27 +168,32 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -master tab_one.tsv: [Required]\n"
+      "  -master tab_one.tsv: [Required]%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "    o master tab (1st) of WHO 2023 tuberculosis\n"
+      "    o master tab (1st) of WHO 2023 tuberculosis%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "      catalog saved as a tsv file\n"
+      "      catalog saved as a tsv file%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "    o if converting with excel, delete first\n"
+      "    o if converting with excel, delete first%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "      two headers (keep thrid header)\n"
+      "      two headers (keep thrid header)%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -194,17 +203,20 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -indice tab_two.tsv: [Required]\n"
+      "  -indice tab_two.tsv: [Required]%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "    o genome indice tab (2nd) of WHO 2023\n"
+      "    o genome indice tab (2nd) of WHO 2023%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "      tuberculosis catalog (as tsv)\n"
+      "      tuberculosis catalog (as tsv)%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -219,22 +231,26 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "\n"
+      "%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o using 2021 WHO tubucerlosis catalog indice\n"
+     "    o using 2021 WHO tubucerlosis catalog indice%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "      tab (needs to be csv)\n"
+      "      tab (needs to be csv)%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o sets program to 2021 catalog mode\n"
+     "    o sets program to 2021 catalog mode%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -244,12 +260,14 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -out out.tsv: [Optional; stdout]\n"
+      "  -out out.tsv: [Optional; stdout]%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o file to output converted database to\n"
+     "    o file to output converted database to%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -259,22 +277,26 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -all-amrs: [Optional; No]\n"
+      "  -all-amrs: [Optional; No]%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o print grade 1, 2 3, 4, and 5 (all) AMRs\n"
+     "    o print grade 1, 2 3, 4, and 5 (all) AMRs%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "  -res-amrs: [Optional; Yes]\n"
+     "  -res-amrs: [Optional; Yes]%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o print grade 1 and 2 AMRs (resistant)\n"
+     "    o print grade 1 and 2 AMRs (resistant)%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -284,22 +306,26 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -gene-del: [Optional; Yes]\n"
+      "  -gene-del: [Optional; Yes]%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o print gene deletion AMRs\n"
+     "    o print gene deletion AMRs%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "  -no-lof: [Optional; No]\n"
+      "  -no-lof: [Optional; No]%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o do not print gene deletion AMRs\n"
+     "    o do not print gene deletion AMRs%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -318,57 +344,68 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -coords gene_coords.tsv: [Required]\n"
+      "  -coords gene_coords.tsv: [Required]%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o mapping coordinates of genes in reference\n"
+     "    o mapping coordinates of genes in reference%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o format:\n"
+     "    o format:%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "      - column 1: gene name (ignored)\n"
+     "      - column 1: gene name (ignored)%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "      - column 2: reference name (ignored)\n"
+     "      - column 2: reference name (ignored)%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "      - column 3: reading frame direction of gene\n"
+     "      - column 3: genes reading frame direction%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "        * \"+\" for foward reading frame\n"
+     "        * \"+\" for foward reading frame%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "        * \"-\" for reverse reading frame\n"
+     "        * \"-\" for reverse reading frame%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "      - column 4: starting coordiante of gene\n"
+     "      - column 4: starting coordiante of gene%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "      - column 5: ending coordiante of gene\n"
+     "      - column 5: ending coordiante of gene%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "    o auto build gene_coords.tsv:\n"
+     "    o auto build gene_coords.tsv:%s",
+      str_endLine
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -378,62 +415,74 @@ phelp_mainWhoToAmr(
 
    fprintf(
      (FILE *) outFILE,
-     "      minimap2 -a --secondary=no ref.fa genes.fa |\n"
+     "      minimap2 -a --secondary=no ref.fa genes.fa |"
    );
 
    fprintf(
      (FILE *) outFILE,
-     "        awk \'\n"
+     "%s        awk \'%s",
+      str_endLine,
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "           BEGIN{FS=OFS=\"\\t\"};\n"
+     "           BEGIN{FS=OFS=\"\\t\"};%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "           {\n"
+     "           {%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              if($6 !~ /^[0-9]*M$/) next;\n"
+     "              if($6 !~ /^[0-9]*M$/) next;%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              if($2 != 16 && $2 != 0) next;\n"
+     "              if($2 != 16 && $2 != 0) next;%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              sub(/M/, \"\", $6);\n"
+     "              sub(/M/, \"\", $6);%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              --$6;\n"
+     "              --$6;%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              if($2 == 16) dirSC = \"-\";\n"
+     "              if($2 == 16) dirSC = \"-\";%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              else dirSC = \"+\";\n"
+     "              else dirSC = \"+\";%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "              print $1, $3, dirSC, $4, $4 + $6;\n"
+     "              print $1, $3, dirSC, $4, $4 + $6;%s",
+      str_endLine
    );
 
    fprintf(
      (FILE *) outFILE,
-     "           }' > gene_coords.tsv\n"
+     "           }' > gene_coords.tsv%s",
+      str_endLine
    );
 
    /*****************************************************\
@@ -443,12 +492,14 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "  -h: print this help message and exit\n"
+      "  -h: print this help message and exit%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "  -v: print version number and exit\n"
+      "  -v: print version number and exit%s",
+      str_endLine
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -458,12 +509,14 @@ phelp_mainWhoToAmr(
 
    fprintf(
       (FILE *) outFILE,
-      "Output:\n"
+      "Output:%s",
+      str_endLine
    );
 
    fprintf(
       (FILE *) outFILE,
-      "  - prints converted databyase to -out or stdout\n"
+      "  - prints converted database to -out or stdout%s",
+      str_endLine
    );
 } /*phelp_mainWhoToAmr*/
 
@@ -536,8 +589,8 @@ input_mainWhoToAmr(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar errSC = 0;
-   sint siArg = 1;
+   signed char errSC = 0;
+   signed int siArg = 1;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -575,13 +628,13 @@ input_mainWhoToAmr(
       if(! strcmp("-ref", argAryStr[siArg]))
       { /*If: reference sequence*/
          ++siArg;
-         *refStr = (schar *) argAryStr[siArg];
+         *refStr = (signed char *) argAryStr[siArg];
       } /*If: reference sequence*/
 
       else if(! strcmp("-coords", argAryStr[siArg]))
       { /*Else If: coordinates file*/
          ++siArg;
-         *coordsStr = (schar *) argAryStr[siArg];
+         *coordsStr = (signed char *) argAryStr[siArg];
       } /*Else If: coordinates file*/
 
       else if(! strcmp("-all-amrs", argAryStr[siArg]))
@@ -599,28 +652,30 @@ input_mainWhoToAmr(
       else if(! strcmp("-2021", argAryStr[siArg]))
       { /*Else If: 2021 who genome indice csv file*/
          ++siArg;
-         *whoFirstTabStr = (schar *) argAryStr[siArg];
+         *whoFirstTabStr =
+             (signed char *) argAryStr[siArg];
          *who2023Bl = 0;
       } /*Else If: 2021 who genome indice csv file*/
 
       else if(! strcmp("-master", argAryStr[siArg]))
       { /*Else If: tab1 (master) of who 2023*/
          ++siArg;
-         *whoFirstTabStr = (schar *) argAryStr[siArg];
+         *whoFirstTabStr =
+            (signed char *) argAryStr[siArg];
          *who2023Bl = 1;
       } /*Else If: tab1 (master) of who 2023*/
 
       else if(! strcmp("-indice", argAryStr[siArg]))
       { /*Else If: tab2 (genome indice) of who 2023*/
          ++siArg;
-         *whoSecTabStr = (schar *) argAryStr[siArg];
+         *whoSecTabStr = (signed char *) argAryStr[siArg];
          *who2023Bl = 1;
       } /*Else If: tab2 (genome indice) of who 2023*/
 
       else if(! strcmp("-out", argAryStr[siArg]))
       { /*Else If: output file*/
          ++siArg;
-         *outStr = (schar *) argAryStr[siArg];
+         *outStr = (signed char *) argAryStr[siArg];
       } /*Else If: output file*/
 
       /**************************************************\
@@ -702,8 +757,9 @@ input_mainWhoToAmr(
       { /*Else: invalid input*/
          fprintf(
             stderr,
-            "%s is no recognized\n",
-            argAryStr[siArg]
+            "%s is no recognized%s",
+            argAryStr[siArg],
+            str_endLine
          );
  
          goto err_fun03_sec04;
@@ -770,21 +826,21 @@ main(
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   schar *whoFirstTabStr = 0;
-   schar *whoSecTabStr = 0;
-   schar *refStr = 0;
-   schar *coordsStr = 0;
-   schar *outStr = (schar *) "-";
+   signed char *whoFirstTabStr = 0;
+   signed char *whoSecTabStr = 0;
+   signed char *refStr = 0;
+   signed char *coordsStr = 0;
+   signed char *outStr = (signed char *) "-";
 
-   schar allAmrsBl = 0;
-   schar rmGeneDelBl = 0;
-   schar who2023Bl = 1; /*2023 catalog entries*/
+   signed char allAmrsBl = 0;
+   signed char rmGeneDelBl = 0;
+   signed char who2023Bl = 1; /*2023 catalog entries*/
 
-   ulong numAmrUL = 0;
-   schar *drugHeapAryStr = 0;
-   sint numDrugsSI = 0;
+   unsigned long numAmrUL = 0;
+   signed char *drugHeapAryStr = 0;
+   signed int numDrugsSI = 0;
 
-   schar errSC = 0;
+   signed char errSC = 0;
 
    FILE *checkFILE = 0;
 
@@ -840,7 +896,8 @@ main(
 
       fprintf(
          stderr,
-         "No file for -2021 or -master\n"
+         "No file for -2021 or -master%s",
+         str_endLine
       );
 
       goto fileErr_main_sec07_sub03;
@@ -857,15 +914,17 @@ main(
       if(who2023Bl)
          fprintf(
             stderr,
-            "could not open -master %s\n",
-             whoFirstTabStr
+            "could not open -master %s%s",
+             whoFirstTabStr,
+             str_endLine
          );
 
       else
          fprintf(
             stderr,
-            "could not open -2021 %s\n",
-             whoFirstTabStr
+            "could not open -2021 %s%s",
+             whoFirstTabStr,
+             str_endLine
          );
 
       goto fileErr_main_sec07_sub03;
@@ -885,7 +944,8 @@ main(
       { /*If: file not input*/
          fprintf(
             stderr,
-            "no file for -indice\n"
+            "no file for -indice%s",
+            str_endLine
          );
 
          goto fileErr_main_sec07_sub03;
@@ -901,8 +961,9 @@ main(
       { /*If: could not open second tab file*/
          fprintf(
             stderr,
-            "Could not open -indice %s\n",
-             whoSecTabStr
+            "Could not open -indice %s%s",
+             whoSecTabStr,
+             str_endLine
          );
    
          goto fileErr_main_sec07_sub03;
@@ -921,7 +982,8 @@ main(
    { /*If: no reference sequence file was input*/
       fprintf(
          stderr,
-         "a reference sequence (-ref ref.fa) is needed\n"
+         "a reference sequence (-ref ref.fa) is needed%s",
+         str_endLine
       );
 
       goto fileErr_main_sec07_sub03;
@@ -937,8 +999,9 @@ main(
    { /*If: could not open reference sequence file*/
          fprintf(
             stderr,
-            "Could not open -ref %s\n",
-             refStr
+            "Could not open -ref %s%s",
+             refStr,
+             str_endLine
          );
    
          goto fileErr_main_sec07_sub03;
@@ -959,7 +1022,7 @@ main(
          "gene coordiantes (-coords genes.tsv) are needed"
       );
 
-      fprintf(stderr, "\n");
+      fprintf(stderr, "%s", str_endLine);
       goto fileErr_main_sec07_sub03;
    } /*If: no gene coordinates file was input*/
 
@@ -973,8 +1036,9 @@ main(
    { /*If: could not open gene coordinates file*/
        fprintf(
           stderr,
-          "Could not open -coords %s\n",
-           refStr
+          "Could not open -coords %s%s",
+           refStr,
+           str_endLine
        );
    
       goto fileErr_main_sec07_sub03;
@@ -1025,7 +1089,8 @@ main(
       { /*If: memory error*/
          fprintf(
             stderr,
-            "mememory error: making AMR array\n"
+            "mememory error: making AMR array%s",
+            str_endLine
          );
 
          goto memErr_main_sec07_sub02;
@@ -1035,7 +1100,8 @@ main(
       { /*If: file error*/
          fprintf(
             stderr,
-            "catalog file not in correct format\n"
+            "catalog file not in correct format%s",
+            str_endLine
          );
 
          goto fileErr_main_sec07_sub03;
@@ -1050,14 +1116,15 @@ main(
    errSC =
       parseVarId_whoToAmr(
          amrHeapAryST,
-         (sint) numAmrUL
+         (signed int) numAmrUL
       );
 
    if(errSC)
    { /*If: memory error*/
       fprintf(
          stderr,
-         "memory error: processing variant ids\n"
+         "memory error: processing variant ids%s",
+         str_endLine
       );
 
       goto memErr_main_sec07_sub02;
@@ -1082,7 +1149,8 @@ main(
 
       fprintf(
          stderr,
-         "memory error: finding AMR codon positions\n"
+         "memory error: finding AMR codon positions%s",
+         str_endLine
       );
 
       goto memErr_main_sec07_sub02;
@@ -1106,8 +1174,9 @@ main(
    { /*If: file error*/
       fprintf(
          stderr,
-         "could not print to -out %s\n",
-         outStr
+         "could not print to -out %s%s",
+         outStr,
+         str_endLine
       );
 
       goto fileErr_main_sec07_sub03;

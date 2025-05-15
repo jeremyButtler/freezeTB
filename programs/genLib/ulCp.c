@@ -99,30 +99,43 @@
 |   - Modifies:
 |     o  dupStr to hold lenUI characters from cpStr
 \-------------------------------------------------------*/
-void
-cpLen_ulCp(
-   signed char *dupStr,
-   signed char *cpStr,
-   unsigned int lenUI
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) cpStr;
-   ulong_ulCp *dupUL = (ulong_ulCp *) dupStr;
-   unsigned int uiChar = 0;
-
-   for(
-      uiChar= 0;
-      uiChar < (lenUI >> def_shiftULBy_ulCp);
-      ++uiChar
-   ) dupUL[uiChar] = cpUL[uiChar];
-
-   for(
-      uiChar = ( lenUI - (lenUI & def_modUL_ulCp) );
-      uiChar < lenUI;
-     ++uiChar
-   ) dupStr[uiChar] = cpStr[uiChar];
-
-   dupStr[lenUI] = '\0';
-} /*cpLen_ulCp*/
+#ifdef NOUL
+   void
+   cpLen_ulCp(
+      signed char *dupStr,
+      signed char *cpStr,
+      unsigned int lenUI
+   ){
+      while(lenUI--)
+         *dupStr++ = *cpStr++;
+      *dupStr = '\0';
+   } /*cpLen_ulCp*/
+#else
+   void
+   cpLen_ulCp(
+      signed char *dupStr,
+      signed char *cpStr,
+      unsigned int lenUI
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) cpStr;
+      ulong_ulCp *dupUL = (ulong_ulCp *) dupStr;
+      unsigned int uiChar = 0;
+   
+      for(
+         uiChar= 0;
+         uiChar < (lenUI >> def_shiftULBy_ulCp);
+         ++uiChar
+      ) dupUL[uiChar] = cpUL[uiChar];
+   
+      for(
+         uiChar = ( lenUI - (lenUI & def_modUL_ulCp) );
+         uiChar < lenUI;
+        ++uiChar
+      ) dupStr[uiChar] = cpStr[uiChar];
+   
+      dupStr[lenUI] = '\0';
+   } /*cpLen_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun10: cpDelim_ulCp
@@ -135,6 +148,8 @@ cpLen_ulCp(
 |   - delimUL:
 |     o delminator to end at (as long). Use makeULDelim
 |       to build this deliminator
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o delminator (as char) to stop copying at
 | Output:
@@ -144,29 +159,46 @@ cpLen_ulCp(
 |   - This will likely not be very good at copying short
 |     strings.
 \-------------------------------------------------------*/
-unsigned int
-cpDelim_ulCp(
-   signed char *dupStr,
-   signed char *cpStr,
-   ulong_ulCp delimUL,
-   signed char delimSC
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
-   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
-   signed char *dupTmpStr = 0;
-
-   while( ! ifDelim_ulCp(*cpUL, delimUL) )
-      *dupUL++ = *cpUL++;
-
-   cpStr = (signed char *) cpUL;
-   dupTmpStr = (signed char *) dupUL;
-
-   while( *cpStr != delimSC )
-      *dupTmpStr++ = *cpStr++;
-
-   *dupTmpStr = '\0';
-   return dupTmpStr - dupStr; /*number of chars copied*/
-} /*cpDelim_ulCp*/
+#ifdef NOUL
+   unsigned int
+   cpDelim_ulCp(
+      signed char *dupStr,
+      signed char *cpStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      signed char *endStr = dupStr;
+   
+      while(*cpStr != delimSC)
+         *endStr++ = *cpStr++;
+      *endStr = '\0';
+      return endStr - dupStr;
+   } /*cpDelim_ulCp*/
+#else
+   unsigned int
+   cpDelim_ulCp(
+      signed char *dupStr,
+      signed char *cpStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+      ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+      signed char *dupTmpStr = 0;
+   
+      while( ! ifDelim_ulCp(*cpUL, delimUL) )
+         *dupUL++ = *cpUL++;
+   
+      cpStr = (signed char *) cpUL;
+      dupTmpStr = (signed char *) dupUL;
+   
+      while( *cpStr != delimSC )
+         *dupTmpStr++ = *cpStr++;
+   
+      *dupTmpStr = '\0';
+      return dupTmpStr - dupStr;
+   } /*cpDelim_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun11: cpStr_ulCp
@@ -183,27 +215,42 @@ cpDelim_ulCp(
 |   - This will likely not be very good at copying short
 |     strings.
 \-------------------------------------------------------*/
-unsigned int
-cpStr_ulCp(
-   signed char *dupStr,
-   signed char *cpStr
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
-   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
-   signed char *dupTmpStr = 0;
-
-   while( ! ifNull_ulCp(*cpUL) )
-      *dupUL++ = *cpUL++;
-
-   cpStr = (signed char *) cpUL;
-   dupTmpStr = (signed char *) dupUL;
-
-   while( *cpStr != '\0' )
-      *dupTmpStr++ = *cpStr++;
-
-   *dupTmpStr = '\0';
-   return dupTmpStr - dupStr; /*number of char copied*/
-} /*cpStr_ulCp*/
+#ifdef NOUL
+   unsigned int
+   cpStr_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      signed char *endStr = dupStr;
+   
+      while(*cpStr)
+         *endStr++ = *cpStr++;
+      *endStr = '\0';
+      return endStr - dupStr;
+   } /*cpStr_ulCp*/
+#else
+   unsigned int
+   cpStr_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+      ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+      signed char *dupTmpStr = 0;
+   
+      while( ! ifNull_ulCp(*cpUL) )
+         *dupUL++ = *cpUL++;
+   
+      cpStr = (signed char *) cpUL;
+      dupTmpStr = (signed char *) dupUL;
+   
+      while( *cpStr != '\0' )
+         *dupTmpStr++ = *cpStr++;
+   
+      *dupTmpStr = '\0';
+      return dupTmpStr - dupStr; /*number of char copied*/
+   } /*cpStr_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun12: cpLineUnix_ulCp
@@ -220,27 +267,42 @@ cpStr_ulCp(
 |   - This will likely not be very good at copying short
 |     strings.
 \-------------------------------------------------------*/
-unsigned int
-cpLineUnix_ulCp(
-   signed char *dupStr,
-   signed char *cpStr
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
-   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
-   signed char *dupTmpStr = 0;
-
-   while( ! ifLineUnix_ulCp(*cpUL) )
-      *dupUL++ = *cpUL++;
-
-   cpStr = (signed char *) cpUL;
-   dupTmpStr = (signed char *) dupUL;
-
-   while( *cpStr & (~ '\n') )
-      *dupTmpStr++ = *cpStr++;
-
-   *dupTmpStr = '\0';
-   return dupTmpStr - dupStr; /*number of char copied*/
-} /*cpLineUnix_ulCp*/
+#ifdef NOUL
+   unsigned int
+   cpLineUnix_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      signed char *endStr = dupStr;
+   
+      while( *cpStr & (~ '\n') )
+         *endStr++ = *cpStr++;
+      *endStr = '\0';
+      return endStr - dupStr;
+   } /*cpStr_ulCp*/
+#else
+   unsigned int
+   cpLineUnix_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+      ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+      signed char *dupTmpStr = 0;
+   
+      while( ! ifLineUnix_ulCp(*cpUL) )
+         *dupUL++ = *cpUL++;
+   
+      cpStr = (signed char *) cpUL;
+      dupTmpStr = (signed char *) dupUL;
+   
+      while( *cpStr & (~ '\n') )
+         *dupTmpStr++ = *cpStr++;
+   
+      *dupTmpStr = '\0';
+      return dupTmpStr - dupStr; /*number of char copied*/
+   } /*cpLineUnix_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun13: cpLine_ulCp
@@ -258,29 +320,47 @@ cpLineUnix_ulCp(
 |   - This will likely not be very good at copying short
 |     strings.
 \-------------------------------------------------------*/
-unsigned int
-cpLine_ulCp(
-   signed char *dupStr,
-   signed char *cpStr
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
-   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
-   signed char *dupTmpStr = 0;
+#ifdef NOUL
+   unsigned int
+   cpLine_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      signed char *endStr = dupStr;
+   
+      while(
+            *cpStr > '\r'  /*\r > \t > \n > \0*/
+         || *cpStr == '\t' /*so catch tab case*/
+      ) *endStr++ = *cpStr++;
 
-   while( ! ifEndLine_ulCp(*cpUL) )
-      *dupUL++ = *cpUL++;
-
-   cpStr = (signed char *) cpUL;
-   dupTmpStr = (signed char *) dupUL;
-
-   while(
-         *cpStr > '\r'  /*\r > \t > \n > \0*/
-      || *cpStr == '\t' /*so catch tab case*/
-   ) *dupTmpStr++ = *cpStr++;
-
-   *dupTmpStr = '\0';
-   return dupTmpStr - dupStr; /*number of char copied*/
-} /*cpLine_ulCp*/
+      *endStr = '\0';
+      return endStr - dupStr;
+   } /*cpLine_ulCp*/
+#else
+   unsigned int
+   cpLine_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+      ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+      signed char *dupTmpStr = 0;
+   
+      while( ! ifEndLine_ulCp(*cpUL) )
+         *dupUL++ = *cpUL++;
+   
+      cpStr = (signed char *) cpUL;
+      dupTmpStr = (signed char *) dupUL;
+   
+      while(
+            *cpStr > '\r'  /*\r > \t > \n > \0*/
+         || *cpStr == '\t' /*so catch tab case*/
+      ) *dupTmpStr++ = *cpStr++;
+   
+      *dupTmpStr = '\0';
+      return dupTmpStr - dupStr; /*number of char copied*/
+   } /*cpLine_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun14: cpWhite_ulCp
@@ -297,27 +377,43 @@ cpLine_ulCp(
 |   - This will likely not be very good at copying short
 |     strings.
 \-------------------------------------------------------*/
-unsigned int
-cpWhite_ulCp(
-   signed char *dupStr,
-   signed char *cpStr
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
-   ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
-   signed char *dupTmpStr = 0;
+#ifdef NOUL
+   unsigned int
+   cpWhite_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
 
-   while( ! ifWhite_ulCp(*cpUL) )
-      *dupUL++ = *cpUL++;
-
-   cpStr = (signed char *) cpUL;
-   dupTmpStr = (signed char *) dupUL;
-
-   while( *cpStr > 33 )
-      *dupTmpStr++ = *cpStr++;
-
-   *dupTmpStr = '\0';
-   return dupTmpStr - dupStr; /*number of char copied*/
-} /*cpWhite_ulCp*/
+      signed char *endStr = dupStr;
+   
+      while(*cpStr > 32)
+         *endStr++ = *cpStr++;
+      *endStr = '\0';
+      return endStr - dupStr;
+   } /*cpWhite_ulCp*/
+#else
+   unsigned int
+   cpWhite_ulCp(
+      signed char *dupStr,
+      signed char *cpStr
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) (cpStr);
+      ulong_ulCp *dupUL = (ulong_ulCp *) (dupStr);
+      signed char *dupTmpStr = 0;
+   
+      while( ! ifWhite_ulCp(*cpUL) )
+         *dupUL++ = *cpUL++;
+   
+      cpStr = (signed char *) cpUL;
+      dupTmpStr = (signed char *) dupUL;
+   
+      while( *cpStr > 33 )
+         *dupTmpStr++ = *cpStr++;
+   
+      *dupTmpStr = '\0';
+      return dupTmpStr - dupStr; /*number of char copied*/
+   } /*cpWhite_ulCp*/
+#endif
 
 
 /*-------------------------------------------------------\
@@ -330,31 +426,49 @@ cpWhite_ulCp(
 |   - delimUL:
 |     o deliminator (as ulong_ulCp (fun02)) at end of
 |       string
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o deliminator (as char) at end of string
 | Output:
 |   - Returns:
 |     o number of characters in the string
 \-------------------------------------------------------*/
-unsigned int
-lenStr_ulCp(
-   signed char *inStr,
-   ulong_ulCp delimUL,
-   signed char delimSC
-){
-   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
-   signed char *tmpStr = 0;
-
-   while( ! ifDelim_ulCp(*ptrUL, delimUL) )
-      ++ptrUL;
-
-   tmpStr = (signed char *) ptrUL;
-
-   while(*tmpStr != delimSC)
-      ++tmpStr;
-
-   return tmpStr - inStr;
-} /*lenStr_ulCp*/
+#ifdef NOUL
+   unsigned int
+   lenStr_ulCp(
+      signed char *inStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      signed char *tmpStr = inStr;
+   
+      while(*tmpStr != delimSC)
+         ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*lenStr_ulCp*/
+#else
+   unsigned int
+   lenStr_ulCp(
+      signed char *inStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+      signed char *tmpStr = 0;
+   
+      while( ! ifDelim_ulCp(*ptrUL, delimUL) )
+         ++ptrUL;
+   
+      tmpStr = (signed char *) ptrUL;
+   
+      while(*tmpStr != delimSC)
+         ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*lenStr_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun16: lenStrNull_ulCp
@@ -367,31 +481,50 @@ lenStr_ulCp(
 |   - delimUL:
 |     o deliminator (as ulong_ulCp (fun02)) at end of
 |       string
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o deliminator (as char) at end of string
 | Output:
 |   - Returns:
 |     o number of characters in the string
 \-------------------------------------------------------*/
-unsigned int
-lenStrNull_ulCp(
-   signed char *inStr,
-   ulong_ulCp delimUL,
-   signed char delimSC
-){
-   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
-   signed char *tmpStr = 0;
+#ifdef NOUL
+   unsigned int
+   lenStrNull_ulCp(
+      signed char *inStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      signed char *tmpStr = inStr;
 
-   while( ! ifNullDelim_ulCp(*ptrUL, delimUL) )
-      ++ptrUL;
+      delimSC = ~delimSC; 
+      while(*tmpStr & delimSC)
+         ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*lenStrNull_ulCp*/
+#else
+   unsigned int
+   lenStrNull_ulCp(
+      signed char *inStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+      signed char *tmpStr = 0;
+   
+      while( ! ifNullDelim_ulCp(*ptrUL, delimUL) )
+         ++ptrUL;
+   
+      tmpStr = (signed char *) ptrUL;
 
-   tmpStr = (signed char *) ptrUL;
-
-   while( (*tmpStr ^ delimSC) )
-      ++tmpStr;
-
-   return tmpStr - inStr;
-} /*lenStrNull_ulCp*/
+      delimSC = ~delimSC; 
+      while(*tmpStr & delimSC)
+         ++tmpStr;
+      return tmpStr - inStr;
+   } /*lenStrNull_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun17: endStr_ulCp
@@ -403,23 +536,36 @@ lenStrNull_ulCp(
 |   - Returns:
 |     o number of characters in the string
 \-------------------------------------------------------*/
-unsigned int
-endStr_ulCp(
-   signed char *inStr
-){
-   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
-   signed char *tmpStr = 0;
+#ifdef NOUL
+   unsigned int
+   endStr_ulCp(
+      signed char *inStr
+   ){
+      signed char *tmpStr = inStr;
 
-   while( ! ifNull_ulCp(*ptrUL) )
-      ++ptrUL;
-
-   tmpStr = (signed char *) ptrUL;
-
-   while( *tmpStr != '\0' )
-      ++tmpStr;
-
-   return tmpStr - inStr;
-} /*endStr_ulCp*/
+      while(*tmpStr)
+         ++tmpStr;
+      return tmpStr - inStr;
+   } /*endStr_ulCp*/
+#else
+   unsigned int
+   endStr_ulCp(
+      signed char *inStr
+   ){
+      ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+      signed char *tmpStr = 0;
+   
+      while( ! ifNull_ulCp(*ptrUL) )
+         ++ptrUL;
+   
+      tmpStr = (signed char *) ptrUL;
+   
+      while( *tmpStr != '\0' )
+         ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*endStr_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun18: endLineUnix_ulCp
@@ -432,23 +578,36 @@ endStr_ulCp(
 |   - Returns:
 |     o number of characters in the string
 \-------------------------------------------------------*/
-unsigned int
-endLineUnix_ulCp(
-   signed char *inStr
-){
-   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
-   signed char *tmpStr = 0;
-
-   while( ! ifLineUnix_ulCp(*ptrUL) )
-      ++ptrUL;
-
-   tmpStr = (signed char *) ptrUL;
-
-   while( *tmpStr & (~ '\n') )
-      ++tmpStr;
-
-   return tmpStr - inStr;
-} /*endLineUnix_ulCp*/
+#ifdef NOUL
+   unsigned int
+   endLineUnix_ulCp(
+      signed char *inStr
+   ){
+      signed char *tmpStr = inStr;
+   
+      while( *tmpStr & (~ '\n') )
+         ++tmpStr;
+      return tmpStr - inStr;
+   } /*endLineUnix_ulCp*/
+#else
+   unsigned int
+   endLineUnix_ulCp(
+      signed char *inStr
+   ){
+      ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+      signed char *tmpStr = 0;
+   
+      while( ! ifLineUnix_ulCp(*ptrUL) )
+         ++ptrUL;
+   
+      tmpStr = (signed char *) ptrUL;
+   
+      while( *tmpStr & (~ '\n') )
+         ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*endLineUnix_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun19: endLine_ulCp
@@ -462,25 +621,38 @@ endLineUnix_ulCp(
 |   - Returns:
 |     o number of characters in the string
 \-------------------------------------------------------*/
-unsigned int
-endLine_ulCp(
-   signed char *inStr
-){
-   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
-   signed char *tmpStr = 0;
-
-   while( ! ifEndLine_ulCp(*ptrUL) )
-      ++ptrUL;
-
-   tmpStr = (signed char *) ptrUL;
-
-   while(
-         *tmpStr > '\r'  /*\r > \t > \n > \0*/
-      || *tmpStr == '\t' /*so catch tab case*/
-   ) ++tmpStr;
-
-   return tmpStr - inStr;
-} /*endLine_ulCp*/
+#ifdef NOUL
+   unsigned int
+   endLine_ulCp(
+      signed char *inStr
+   ){
+      signed char *tmpStr = inStr;
+   
+      while(*tmpStr > '\r' || *tmpStr == '\t')
+         ++tmpStr;
+      return tmpStr - inStr;
+   } /*endLine_ulCp*/
+#else
+   unsigned int
+   endLine_ulCp(
+      signed char *inStr
+   ){
+      ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+      signed char *tmpStr = 0;
+   
+      while( ! ifEndLine_ulCp(*ptrUL) )
+         ++ptrUL;
+   
+      tmpStr = (signed char *) ptrUL;
+   
+      while(
+            *tmpStr > '\r'  /*\r > \t > \n > \0*/
+         || *tmpStr == '\t' /*so catch tab case*/
+      ) ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*endLine_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun20: endWhite_ulCp
@@ -492,23 +664,36 @@ endLine_ulCp(
 |   - Returns:
 |     o number of characters in the string
 \-------------------------------------------------------*/
-unsigned int
-endWhite_ulCp(
-   signed char *inStr
-){
-   ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
-   signed char *tmpStr = 0;
-
-   while( ! ifWhite_ulCp(*ptrUL) )
-      ++ptrUL;
-
-   tmpStr = (signed char *) ptrUL;
-
-   while( *tmpStr > 33)
-      ++tmpStr;
-
-   return tmpStr - inStr;
-} /*endWhite_ulCp*/
+#ifdef NOUL
+   unsigned int
+   endWhite_ulCp(
+      signed char *inStr
+   ){
+      signed char *tmpStr = inStr;
+   
+      while( *tmpStr > 33)
+         ++tmpStr;
+      return tmpStr - inStr;
+   } /*endWhite_ulCp*/
+#else
+   unsigned int
+   endWhite_ulCp(
+      signed char *inStr
+   ){
+      ulong_ulCp *ptrUL = (ulong_ulCp *) inStr;
+      signed char *tmpStr = 0;
+   
+      while( ! ifWhite_ulCp(*ptrUL) )
+         ++ptrUL;
+   
+      tmpStr = (signed char *) ptrUL;
+   
+      while( *tmpStr > 33)
+         ++tmpStr;
+   
+      return tmpStr - inStr;
+   } /*endWhite_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun21: eql_ulCp
@@ -521,6 +706,8 @@ endWhite_ulCp(
 |   - delimUL:
 |     o delminator to end at (as long). Use makeULDelim
 |       to build this deliminator
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o delminator (as char) to stop copying at
 | Output:
@@ -532,39 +719,60 @@ endWhite_ulCp(
 |   - This will likely not be very good at comparing
 |     short strings.
 \-------------------------------------------------------*/
-signed long
-eql_ulCp(
-   signed char *qryStr,
-   signed char *refStr,
-   ulong_ulCp delimUL,
-   signed char delimSC
-){
-   ulong_ulCp *qryUL = (ulong_ulCp *) qryStr;
-   ulong_ulCp *refUL = (ulong_ulCp *) refStr;
-
-   while( ! ifDelim_ulCp(*qryUL, delimUL) )
-   { /*Loop: Copy cpStr to dupStr*/
-      if(*qryUL != *refUL)
-         break;
-
-      ++qryUL;
-      ++refUL;
-   } /*Loop: Copy cpStr to dupStr*/
-
-   qryStr = (signed char *) qryUL;
-   refStr = (signed char *) refUL;
-
-   while( *qryStr != delimSC )
-   { /*Loop: find difference*/
-      if(*qryStr != *refStr)
-         break;
-
-      ++qryStr;
-      ++refStr;
-   } /*Loop: find difference*/
-
-   return *qryStr - *refStr;
-} /*eql_ulCp*/
+#ifdef NOUL
+   signed long
+   eql_ulCp(
+      signed char *qryStr,
+      signed char *refStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      while( *qryStr != delimSC )
+      { /*Loop: find difference*/
+         if(*qryStr != *refStr)
+            break;
+   
+         ++qryStr;
+         ++refStr;
+      } /*Loop: find difference*/
+   
+      return *qryStr - *refStr;
+   } /*eql_ulCp*/
+#else
+   signed long
+   eql_ulCp(
+      signed char *qryStr,
+      signed char *refStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
+      ulong_ulCp *qryUL = (ulong_ulCp *) qryStr;
+      ulong_ulCp *refUL = (ulong_ulCp *) refStr;
+   
+      while( ! ifDelim_ulCp(*qryUL, delimUL) )
+      { /*Loop: Copy cpStr to dupStr*/
+         if(*qryUL != *refUL)
+            break;
+   
+         ++qryUL;
+         ++refUL;
+      } /*Loop: Copy cpStr to dupStr*/
+   
+      qryStr = (signed char *) qryUL;
+      refStr = (signed char *) refUL;
+   
+      while( *qryStr != delimSC )
+      { /*Loop: find difference*/
+         if(*qryStr != *refStr)
+            break;
+   
+         ++qryStr;
+         ++refStr;
+      } /*Loop: find difference*/
+   
+      return *qryStr - *refStr;
+   } /*eql_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun22: eqlNull_ulCp
@@ -583,37 +791,56 @@ eql_ulCp(
 |   - this will likely not be very good at comparing
 |     short strings.
 \-------------------------------------------------------*/
-signed long
-eqlNull_ulCp(
-   signed char *qryStr,
-   signed char *refStr
-){
-   ulong_ulCp *qryUL = (ulong_ulCp *) qryStr;
-   ulong_ulCp *refUL = (ulong_ulCp *) refStr;
-
-   while( ! ifNull_ulCp(*qryUL) )
-   { /*Loop: Copy cpStr to dupStr*/
-      if(*qryUL != *refUL)
-         break;
-
-      ++qryUL;
-      ++refUL;
-   } /*Loop: Copy cpStr to dupStr*/
-
-   qryStr = (signed char *) qryUL;
-   refStr = (signed char *) refUL;
-
-   while( *qryStr != (signed char) '\0' )
-   { /*Loop: find difference*/
-      if(*qryStr != *refStr)
-         break;
-
-      ++qryStr;
-      ++refStr;
-   } /*Loop: find difference*/
-
-   return *qryStr - *refStr;
-} /*eqlNull_ulCp*/
+#ifdef NOUL
+   signed long
+   eqlNull_ulCp(
+      signed char *qryStr,
+      signed char *refStr
+   ){
+      while(*qryStr != (signed char) '\0' )
+      { /*Loop: find difference*/
+         if(*qryStr != *refStr)
+            break;
+   
+         ++qryStr;
+         ++refStr;
+      } /*Loop: find difference*/
+   
+      return *qryStr - *refStr;
+   } /*eqlNull_ulCp*/
+#else
+   signed long
+   eqlNull_ulCp(
+      signed char *qryStr,
+      signed char *refStr
+   ){
+      ulong_ulCp *qryUL = (ulong_ulCp *) qryStr;
+      ulong_ulCp *refUL = (ulong_ulCp *) refStr;
+   
+      while( ! ifNull_ulCp(*qryUL) )
+      { /*Loop: Copy cpStr to dupStr*/
+         if(*qryUL != *refUL)
+            break;
+   
+         ++qryUL;
+         ++refUL;
+      } /*Loop: Copy cpStr to dupStr*/
+   
+      qryStr = (signed char *) qryUL;
+      refStr = (signed char *) refUL;
+   
+      while( *qryStr != (signed char) '\0' )
+      { /*Loop: find difference*/
+         if(*qryStr != *refStr)
+            break;
+   
+         ++qryStr;
+         ++refStr;
+      } /*Loop: find difference*/
+   
+      return *qryStr - *refStr;
+   } /*eqlNull_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun23: eqlWhite_ulCp
@@ -632,40 +859,62 @@ eqlNull_ulCp(
 |   - this will likely not be very good at comparing
 |     short strings.
 \-------------------------------------------------------*/
-signed long
-eqlWhite_ulCp(
-   signed char *qryStr,
-   signed char *refStr
-){
-   ulong_ulCp *qryUL = (ulong_ulCp *) qryStr;
-   ulong_ulCp *refUL = (ulong_ulCp *) refStr;
-
-   while( ! ifWhite_ulCp(*qryUL) )
-   { /*Loop: Copy cpStr to dupStr*/
-      if(*qryUL != *refUL)
-         break;
-
-      ++qryUL;
-      ++refUL;
-   } /*Loop: Copy cpStr to dupStr*/
-
-   qryStr = (signed char *) qryUL;
-   refStr = (signed char *) refUL;
-
-   while( *qryStr > 32 )
-   { /*Loop: find difference*/
-      if(*qryStr != *refStr)
-         break;
-
-      ++qryStr;
-      ++refStr;
-   } /*Loop: find difference*/
-
-   if(*refStr > 32)
-      return *qryStr - *refStr;
-
-   return 0;
-} /*eqlWhite_ulCp*/
+#ifdef NOUL
+   signed long
+   eqlWhite_ulCp(
+      signed char *qryStr,
+      signed char *refStr
+   ){
+      while( *qryStr > 32 )
+      { /*Loop: find difference*/
+         if(*qryStr != *refStr)
+            break;
+   
+         ++qryStr;
+         ++refStr;
+      } /*Loop: find difference*/
+   
+      if(*refStr > 32)
+         return *qryStr - *refStr;
+   
+      return 0;
+   } /*eqlWhite_ulCp*/
+#else
+   signed long
+   eqlWhite_ulCp(
+      signed char *qryStr,
+      signed char *refStr
+   ){
+      ulong_ulCp *qryUL = (ulong_ulCp *) qryStr;
+      ulong_ulCp *refUL = (ulong_ulCp *) refStr;
+   
+      while( ! ifWhite_ulCp(*qryUL) )
+      { /*Loop: Copy cpStr to dupStr*/
+         if(*qryUL != *refUL)
+            break;
+   
+         ++qryUL;
+         ++refUL;
+      } /*Loop: Copy cpStr to dupStr*/
+   
+      qryStr = (signed char *) qryUL;
+      refStr = (signed char *) refUL;
+   
+      while( *qryStr > 32 )
+      { /*Loop: find difference*/
+         if(*qryStr != *refStr)
+            break;
+   
+         ++qryStr;
+         ++refStr;
+      } /*Loop: find difference*/
+   
+      if(*refStr > 32)
+         return *qryStr - *refStr;
+   
+      return 0;
+   } /*eqlWhite_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun24: rmWhite_ulCp
@@ -679,51 +928,82 @@ eqlWhite_ulCp(
 |   - Returns:
 |     o number of characters in inStr
 \-------------------------------------------------------*/
-unsigned int
-rmWhite_ulCp(
-   signed char *inStr
-){
-   ulong_ulCp *cpUL = (ulong_ulCp *) inStr;
-   ulong_ulCp *dupUL = (ulong_ulCp *) inStr;
-
-   signed char *dupStr = inStr;
-   signed char *cpStr = inStr;
-
-   unsigned int uiChar = 0;
-
-   while(*cpStr != '\0')
-   { /*Loop: remove white space*/
-
-      if( ! ifWhite_ulCp(*cpUL) )
-         *dupUL++ = *cpUL++;
-
-      else
-      { /*Else: have white space, manually copy*/
-         cpStr = (signed char *) cpUL;
-         dupStr = (signed char *) dupUL;
-         
-         for(
-            uiChar = 0;
-            uiChar < sizeof(ulong_ulCp);
-            ++uiChar
-         ){ /*Loop: remove white space*/
-            if(*cpStr == '\0')
-               goto done_fun24;
-            else if(*cpStr < 33)
+#ifdef NOUL
+   unsigned int
+   rmWhite_ulCp(
+      signed char *inStr
+   ){
+      signed char *dupStr = inStr;
+      signed char *cpStr = inStr;
+   
+      while(*cpStr != '\0')
+      { /*Loop: remove white space*/
+         if(*cpStr > 32)
+            *dupStr++ = *cpStr++;
+   
+         else
+         { /*Else: remove white space*/
+            while(*cpStr < 33)
+            { /*Loop: move past white space*/
+               if(! *cpStr)
+                  goto done_fun24;
                ++cpStr;
-            else
-               *cpStr++ = *dupStr++;
-         } /*Loop: remove white space*/
+            } /*Loop: move past white space*/
 
-         cpUL = (ulong_ulCp *) cpStr;
-         dupUL = (ulong_ulCp *) dupStr;
-      } /*Else: have white space, manually copy*/
-   } /*Loop: remove white space*/
-
-   done_fun24:;
-      *dupStr = '\0';
-      return dupStr - inStr;
-} /*rmWhite_ulCp*/
+            *dupStr++ = *cpStr++;
+         } /*Else: remove white space*/
+      } /*Loop: remove white space*/
+   
+      done_fun24:;
+         *dupStr = '\0';
+         return dupStr - inStr;
+   } /*rmWhite_ulCp*/
+#else
+   unsigned int
+   rmWhite_ulCp(
+      signed char *inStr
+   ){
+      ulong_ulCp *cpUL = (ulong_ulCp *) inStr;
+      ulong_ulCp *dupUL = (ulong_ulCp *) inStr;
+   
+      signed char *dupStr = inStr;
+      signed char *cpStr = inStr;
+   
+      unsigned int uiChar = 0;
+   
+      while(*cpStr != '\0')
+      { /*Loop: remove white space*/
+         if(! ifWhite_ulCp(*cpUL) )
+            *dupUL++ = *cpUL++;
+   
+         else
+         { /*Else: have white space, manually copy*/
+            cpStr = (signed char *) cpUL;
+            dupStr = (signed char *) dupUL;
+            
+            for(
+               uiChar = 0;
+               uiChar < sizeof(ulong_ulCp);
+               ++uiChar
+            ){ /*Loop: remove white space*/
+               if(*cpStr == '\0')
+                  goto done_fun24;
+               else if(*cpStr < 33)
+                  ++cpStr;
+               else
+                  *dupStr++ = *cpStr++;
+            } /*Loop: remove white space*/
+   
+            cpUL = (ulong_ulCp *) cpStr;
+            dupUL = (ulong_ulCp *) dupStr;
+         } /*Else: have white space, manually copy*/
+      } /*Loop: remove white space*/
+   
+      done_fun24:;
+         *dupStr = '\0';
+         return dupStr - inStr;
+   } /*rmWhite_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun25: swapDelim_ulCp
@@ -736,6 +1016,8 @@ rmWhite_ulCp(
 |   - delimUL:
 |     o delminator to end at (as long). Use makeULDelim
 |       to build this deliminator
+|     o this will give an unused variable warning on
+|       -DNOUL, but allows user to turn off ulCp
 |   - delimSC:
 |     o delminator (as char) to stop copying at
 | Output:
@@ -746,166 +1028,222 @@ rmWhite_ulCp(
 |   - This will likely not be very good at swapping short
 |     strings.
 \-------------------------------------------------------*/
-void
-swapDelim_ulCp(
-   signed char *firstStr,
-   signed char *secStr,
-   ulong_ulCp delimUL,
-   signed char delimSC
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun25: swapDelim_ulCp
-   '   - swaps two strings until deliminator is found
-   '   o fun25 sec01:
-   '     - variable declarations
-   '   o fun25 sec02:
-   '     - swap until first deliminator
-   '   o fun25 sec03:
-   '     - if both strings end early
-   '   o fun25 sec04:
-   '     - if 1st string ends early, finsh swapping second
-   '   o fun25 sec05:
-   '     - else 2nd string ends early, finsh swapping 1st
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun25 Sec01:
-   ^   - variable declarations
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   ulong_ulCp *firstUL = (ulong_ulCp *) firstStr;
-   ulong_ulCp *secUL = (ulong_ulCp *) secStr;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun25 Sec02:
-   ^   - swap until first deliminator
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   while(
-      ! (
-            ifDelim_ulCp(*firstUL, delimUL)
-          | ifDelim_ulCp(*secUL, delimUL) 
-        )
-   ){ /*Loop: Copy cpStr to dupStr*/
-      *firstUL ^= *secUL;
-      *secUL ^= *firstUL;
-      *firstUL++ ^= *secUL++;
-   } /*Loop: Copy cpStr to dupStr*/
-
-   firstStr = (signed char *) firstUL;
-   secStr = (signed char *) secUL;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun25 Sec03:
-   ^   - if both strings end early
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   if(
-        ifDelim_ulCp(*firstUL, delimUL)
-      & ifDelim_ulCp(*secUL, delimUL) 
-   ){ /*If: both ended early*/
+#ifdef NOUL
+   void
+   swapDelim_ulCp(
+      signed char *firstStr,
+      signed char *secStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){
       while(
             *firstStr != delimSC
-         || *secStr != delimSC
-      ){ /*Loop: copy first string*/
-         if(*secStr == delimSC)
-         { /*If: second string ended first*/
-            *secStr++ = *firstStr;
-            *firstStr++ = '\0';
-         } /*If: second string ended first*/
+         && *secStr != delimSC
+      ){ /*Loop: swap strings*/
+         *firstStr ^= *secStr;
+         *secStr ^= *firstStr;
+         *firstStr++ ^= *secStr++;
+      }  /*Loop: swap strings*/
 
-         else if(*firstStr == delimSC)
-         { /*Else If: first string ended first*/
-            *firstStr++ = *secStr;
-            *secStr++ = '\0';
-         } /*Else If: first string ended first*/
+      if(*firstStr != delimSC)
+      { /*If: second string ended early*/
+         *secStr++ = *firstStr;
+         *firstStr++ = '\0';
 
-         else
-         { /*Else: copying values*/
+         while(*firstStr != delimSC)
+            *secStr++ = *firstStr++;
+         *secStr = '\0';
+      } /*If: second string ended early*/
+
+      else if(*secStr != delimSC)
+      { /*Else If: first string ended early*/
+         *firstStr++ = *secStr;
+         *secStr++ = '\0';
+
+         while(*secStr != delimSC)
+            *firstStr++ = *secStr++;
+         *firstStr = '\0';
+      } /*Else If: first string ended early*/
+
+      else
+      { /*Else: both strings were same length*/
+         *firstStr = '\0';
+         *secStr = '\0';
+      } /*Else: both strings were same length*/
+   } /*swapDelim_ulCp*/
+#else
+   void
+   swapDelim_ulCp(
+      signed char *firstStr,
+      signed char *secStr,
+      ulong_ulCp delimUL,
+      signed char delimSC
+   ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+      ' Fun25: swapDelim_ulCp
+      '   - swaps two strings until deliminator is found
+      '   o fun25 sec01:
+      '     - variable declarations
+      '   o fun25 sec02:
+      '     - swap until first deliminator
+      '   o fun25 sec03:
+      '     - if both strings end early
+      '   o fun25 sec04:
+      '     - if 1st string ends early, finsh swapping 2nd
+      '   o fun25 sec05:
+      '     - 2nd string ends early, finsh swapping 1st
+      \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun25 Sec01:
+      ^   - variable declarations
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      ulong_ulCp *firstUL = (ulong_ulCp *) firstStr;
+      ulong_ulCp *secUL = (ulong_ulCp *) secStr;
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun25 Sec02:
+      ^   - swap until first deliminator
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      while(
+         ! (
+               ifDelim_ulCp(*firstUL, delimUL)
+             | ifDelim_ulCp(*secUL, delimUL) 
+           )
+      ){ /*Loop: Copy cpStr to dupStr*/
+         *firstUL ^= *secUL;
+         *secUL ^= *firstUL;
+         *firstUL++ ^= *secUL++;
+      } /*Loop: Copy cpStr to dupStr*/
+   
+      firstStr = (signed char *) firstUL;
+      secStr = (signed char *) secUL;
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun25 Sec03:
+      ^   - if both strings end early
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+
+      if(
+            ifDelim_ulCp(*firstUL, delimUL)
+         && ifDelim_ulCp(*secUL, delimUL) 
+      ){ /*If: both ended early*/
+         while(
+               *firstStr != delimSC
+            || *secStr != delimSC
+         ){ /*Loop: copy first string*/
+            if(*secStr == delimSC)
+            { /*If: second string ended first*/
+               *secStr++ = *firstStr;
+               *firstStr++ = '\0';
+   
+               while(*firstStr != delimSC)
+                  *secStr++ = *firstStr++;
+               *secStr = '\0';
+               break;
+            } /*If: second string ended first*/
+   
+            else if(*firstStr == delimSC)
+            { /*Else If: first string ended first*/
+               *firstStr++ = *secStr;
+               *secStr++ = '\0';
+   
+               while(*secStr != delimSC)
+                  *firstStr++ = *secStr++;
+               *firstStr = '\0';
+               break;
+            } /*Else If: first string ended first*/
+   
+            else
+            { /*Else: copying values*/
+               *firstStr ^= *secStr;
+               *secStr ^= *firstStr;
+               *firstStr++ ^= *secStr++;
+            } /*Else: copying values*/
+         } /*Loop: copy first string*/
+      }  /*If: both ended early*/
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun25 Sec04:
+      ^   - if first string ends early, finsh swapping 2nd
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      else if(ifDelim_ulCp(*firstUL, delimUL))
+      { /*If: first string ended*/
+   
+         while(*firstStr != delimSC)
+         { /*Loop: copy first string*/
+            if(*secStr == delimSC)
+               break;
+   
             *firstStr ^= *secStr;
             *secStr ^= *firstStr;
             *firstStr++ ^= *secStr++;
-         } /*Else: copying values*/
-      } /*Loop: copy first string*/
-   }  /*If: both ended early*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun25 Sec04:
-   ^   - if first string ends early, finsh swapping second
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   else if(ifDelim_ulCp(*firstUL, delimUL))
-   { /*If: first string ended*/
-
-      while(*firstStr != delimSC)
-      { /*Loop: copy first string*/
-         if(*secStr == delimSC)
-            break;
-
-         *firstStr ^= *secStr;
-         *secStr ^= *firstStr;
-         *firstStr++ ^= *secStr++;
-      } /*Loop: copy first string*/
-
-      if(*secStr != delimSC)
-      { /*If: second string has more values*/
-         *firstStr++ = *secStr;
-         *secStr++ = '\0';
-      } /*If: second string has more values*/
-
-      firstUL = (ulong_ulCp *) firstStr;
-      secUL = (ulong_ulCp *) secStr;
-
-      while( ! ifDelim_ulCp(*secUL, delimUL) )
-         *firstUL++ = *secUL++;
-
-      firstStr = (signed char *) firstUL;
-      secStr = (signed char *) secUL;
-
-      while(*secStr != delimSC)
-         *firstStr++ = *secStr++;
-
-      *firstStr = '\0';
-   } /*If: first string ended*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun25 Sec05:
-   ^   - else 2nd string ends early, finsh swapping 1st
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   else
-   { /*Else: second string ended*/
-
-      while(*secStr != delimSC)
-      { /*Loop: copy first string*/
-         if(*firstStr == delimSC)
-            break;
-
-         *firstStr ^= *secStr;
-         *secStr ^= *firstStr;
-         *firstStr++ ^= *secStr++;
-      } /*Loop: copy first string*/
-
-      if(*firstStr != delimSC)
-      { /*If: first string has more values*/
-         *secStr++ = *firstStr;
-         *firstStr++ = '\0';
-      } /*If: first string has more values*/
-
-      firstUL = (ulong_ulCp *) firstStr;
-      secUL = (ulong_ulCp *) secStr;
-
-      while( ! ifDelim_ulCp(*firstUL, delimUL) )
-         *secUL++ = *firstUL++;
-
-      firstStr = (signed char *) firstUL;
-      secStr = (signed char *) secUL;
-
-      while(*firstStr != delimSC)
-         *secStr++ = *firstStr++;
-
-      *secStr = '\0';
-   } /*Else: second string ended*/
-} /*swapDelim_ulCp*/
+         } /*Loop: copy first string*/
+   
+         if(*secStr != delimSC)
+         { /*If: second string has more values*/
+            *firstStr++ = *secStr;
+            *secStr++ = '\0';
+         } /*If: second string has more values*/
+   
+         firstUL = (ulong_ulCp *) firstStr;
+         secUL = (ulong_ulCp *) secStr;
+   
+         while( ! ifDelim_ulCp(*secUL, delimUL) )
+            *firstUL++ = *secUL++;
+   
+         firstStr = (signed char *) firstUL;
+         secStr = (signed char *) secUL;
+   
+         while(*secStr != delimSC)
+            *firstStr++ = *secStr++;
+   
+         *firstStr = '\0';
+      } /*If: first string ended*/
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun25 Sec05:
+      ^   - else 2nd string ends early, finsh swapping 1st
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      else
+      { /*Else: second string ended*/
+   
+         while(*secStr != delimSC)
+         { /*Loop: copy first string*/
+            if(*firstStr == delimSC)
+               break;
+   
+            *firstStr ^= *secStr;
+            *secStr ^= *firstStr;
+            *firstStr++ ^= *secStr++;
+         } /*Loop: copy first string*/
+   
+         if(*firstStr != delimSC)
+         { /*If: first string has more values*/
+            *secStr++ = *firstStr;
+            *firstStr++ = '\0';
+         } /*If: first string has more values*/
+   
+         firstUL = (ulong_ulCp *) firstStr;
+         secUL = (ulong_ulCp *) secStr;
+   
+         while( ! ifDelim_ulCp(*firstUL, delimUL) )
+            *secUL++ = *firstUL++;
+   
+         firstStr = (signed char *) firstUL;
+         secStr = (signed char *) secUL;
+   
+         while(*firstStr != delimSC)
+            *secStr++ = *firstStr++;
+   
+         *secStr = '\0';
+      } /*Else: second string ended*/
+   } /*swapDelim_ulCp*/
+#endif
 
 /*-------------------------------------------------------\
 | Fun26: swapNull_ulCp
@@ -923,164 +1261,215 @@ swapDelim_ulCp(
 |   - This will likely not be very good at swapping short
 |     strings.
 \-------------------------------------------------------*/
-void
-swapNull_ulCp(
-   signed char *firstStr,
-   signed char *secStr
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun26: swapNull_ulCp
-   '   - swaps two strings until deliminator is found
-   '   o fun26 sec01:
-   '     - variable declarations
-   '   o fun26 sec02:
-   '     - swap until first deliminator
-   '   o fun26 sec03:
-   '     - if both strings ended early
-   '   o fun26 sec04:
-   '     - if 1st string ends early, finsh swapping second
-   '   o fun26 sec05:
-   '     - else 2nd string ends early, finsh swapping 1st
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+#ifdef NOUL
+   void
+   swapNull_ulCp(
+      signed char *firstStr,
+      signed char *secStr
+   ){
+      while(*firstStr && *secStr)
+      { /*Loop: swap strings*/
+         *firstStr ^= *secStr;
+         *secStr ^= *firstStr;
+         *firstStr++ ^= *secStr++;
+      }  /*Loop: swap strings*/
 
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec01:
-   ^   - variable declarations
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+      if(*firstStr)
+      { /*If: second string ended early*/
+         *secStr++ = *firstStr;
+         *firstStr++ = '\0';
 
-   ulong_ulCp *firstUL = (ulong_ulCp *) firstStr;
-   ulong_ulCp *secUL = (ulong_ulCp *) secStr;
+         while(*firstStr)
+            *secStr++ = *firstStr++;
+         *secStr = '\0';
+      } /*If: second string ended early*/
 
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec02:
-   ^   - swap until first deliminator
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+      else if(*secStr)
+      { /*Else If: first string ended early*/
+         *firstStr++ = *secStr;
+         *secStr++ = '\0';
 
-   while(
-      ! (
-             ifNull_ulCp(*firstUL)
-           | ifNull_ulCp(*secUL)
-        )
-   ){ /*Loop: Copy cpStr to dupStr*/
-      *firstUL ^= *secUL;
-      *secUL ^= *firstUL;
-      *firstUL++ ^= *secUL++;
-   } /*Loop: Copy cpStr to dupStr*/
+         while(*secStr)
+            *firstStr++ = *secStr++;
+         *firstStr = '\0';
+      } /*Else If: first string ended early*/
 
-   firstStr = (signed char *) firstUL;
-   secStr = (signed char *) secUL;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec03:
-   ^   - if both strings ended early
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   if(
-        ifNull_ulCp(*firstUL)
-     || ifNull_ulCp(*secUL)
-   ){ /*If: both strings end early*/
+      else
+      { /*Else: both strings were same length*/
+         *firstStr = '\0';
+         *secStr = '\0';
+      } /*Else: both strings were same length*/
+   } /*swapNull_ulCp*/
+#else
+   void
+   swapNull_ulCp(
+      signed char *firstStr,
+      signed char *secStr
+   ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+      ' Fun26: swapNull_ulCp
+      '   - swaps two strings until deliminator is found
+      '   o fun26 sec01:
+      '     - variable declarations
+      '   o fun26 sec02:
+      '     - swap until first deliminator
+      '   o fun26 sec03:
+      '     - if both strings ended early
+      '   o fun26 sec04:
+      '     - if 1st string ends early, finsh swapping 2nd
+      '   o fun26 sec05:
+      '     - else 2nd string ends early, finsh 1st
+      \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun26 Sec01:
+      ^   - variable declarations
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      ulong_ulCp *firstUL = (ulong_ulCp *) firstStr;
+      ulong_ulCp *secUL = (ulong_ulCp *) secStr;
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun26 Sec02:
+      ^   - swap until first deliminator
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
       while(
-            *firstStr != '\0'
-         || *secStr != '\0'
-      ){ /*Loop: copy first string*/
-         if(*secStr == '\0')
-         { /*If: second string ended first*/
-            *secStr++ = *firstStr;
-            *firstStr++ = '\0';
-         } /*If: second string ended first*/
-
-         else if(*firstStr == '\0')
-         { /*Else If: first string ended first*/
-            *firstStr++ = *secStr;
-            *secStr++ = '\0';
-         } /*Else If: first string ended first*/
-
-         else
-         { /*Else: copying values*/
+         ! (
+                ifNull_ulCp(*firstUL)
+              | ifNull_ulCp(*secUL)
+           )
+      ){ /*Loop: Copy cpStr to dupStr*/
+         *firstUL ^= *secUL;
+         *secUL ^= *firstUL;
+         *firstUL++ ^= *secUL++;
+      } /*Loop: Copy cpStr to dupStr*/
+   
+      firstStr = (signed char *) firstUL;
+      secStr = (signed char *) secUL;
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun26 Sec03:
+      ^   - if both strings ended early
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      if(
+           ifNull_ulCp(*firstUL)
+        && ifNull_ulCp(*secUL)
+      ){ /*If: both strings end early*/
+         while(
+               *firstStr != '\0'
+            || *secStr != '\0'
+         ){ /*Loop: copy first string*/
+            if(*secStr == '\0')
+            { /*If: second string ended first*/
+               *secStr++ = *firstStr;
+               *firstStr++ = '\0';
+   
+               while(*firstStr != '\0')
+                  *secStr++ = *firstStr++;
+               *secStr = '\0';
+               break;
+            } /*If: second string ended first*/
+   
+            else if(*firstStr == '\0')
+            { /*Else If: first string ended first*/
+               *firstStr++ = *secStr;
+               *secStr++ = '\0';
+   
+               while(*secStr != '\0')
+                  *firstStr++ = *secStr++;
+               *firstStr = '\0';
+               break;
+            } /*Else If: first string ended first*/
+   
+            else
+            { /*Else: copying values*/
+               *firstStr ^= *secStr;
+               *secStr ^= *firstStr;
+               *firstStr++ ^= *secStr++;
+            } /*Else: copying values*/
+         } /*Loop: copy first string*/
+      }  /*If: both strings end early*/
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun26 Sec04:
+      ^   - if first string ends early, finsh swapping 2nd
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+        
+      else if( ifNull_ulCp(*firstUL) )
+      { /*Else If: first string ended*/
+   
+         while(*firstStr != '\0')
+         { /*Loop: copy first string*/
+            if(*secStr == '\0')
+               break;
+   
             *firstStr ^= *secStr;
             *secStr ^= *firstStr;
             *firstStr++ ^= *secStr++;
-         } /*Else: copying values*/
-      } /*Loop: copy first string*/
-   }  /*If: both strings end early*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec04:
-   ^   - if first string ends early, finsh swapping second
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-     
-   else if( ifNull_ulCp(*firstUL) )
-   { /*Else If: first string ended*/
-
-      while(*firstStr != '\0')
-      { /*Loop: copy first string*/
-         if(*secStr == '\0')
-            break;
-
-         *firstStr ^= *secStr;
-         *secStr ^= *firstStr;
-         *firstStr++ ^= *secStr++;
-      } /*Loop: copy first string*/
-
-      if(*secStr != '\0')
-      { /*If: second string has more values*/
-         *firstStr++ = *secStr;
-         *secStr++ = '\0';
-      } /*If: second string has more values*/
-
-      firstUL = (ulong_ulCp *) firstStr;
-      secUL = (ulong_ulCp *) secStr;
-
-      while( ! ifNull_ulCp(*secUL) )
-         *firstUL++ = *secUL++;
-
-      firstStr = (signed char *) firstUL;
-      secStr = (signed char *) secUL;
-
-      while(*secStr != '\0')
-         *firstStr++ = *secStr++;
-
-      *firstStr = '\0';
-   } /*Else If: first string ended*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun26 Sec05:
-   ^   - else 2nd string ends early, finsh swapping 1st
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   else
-   { /*Else: second string ended*/
-
-      while(*secStr != '\0')
-      { /*Loop: copy first string*/
-         if(*firstStr == '\0')
-            break;
-
-         *firstStr ^= *secStr;
-         *secStr ^= *firstStr;
-         *firstStr++ ^= *secStr++;
-      } /*Loop: copy first string*/
-
-      if(*firstStr != '\0')
-      { /*If: first string has more values*/
-         *secStr++ = *firstStr;
-         *firstStr++ = '\0';
-      } /*If: first string has more values*/
-
-      firstUL = (ulong_ulCp *) firstStr;
-      secUL = (ulong_ulCp *) secStr;
-
-      while( ! ifNull_ulCp(*firstUL) )
-         *secUL++ = *firstUL++;
-
-      firstStr = (signed char *) firstUL;
-      secStr = (signed char *) secUL;
-
-      while(*firstStr != '\0')
-         *secStr++ = *firstStr++;
-
-      *secStr = '\0';
-   } /*Else: second string ended*/
-} /*swapNull_ulCp*/
+         } /*Loop: copy first string*/
+   
+         if(*secStr != '\0')
+         { /*If: second string has more values*/
+            *firstStr++ = *secStr;
+            *secStr++ = '\0';
+         } /*If: second string has more values*/
+   
+         firstUL = (ulong_ulCp *) firstStr;
+         secUL = (ulong_ulCp *) secStr;
+   
+         while( ! ifNull_ulCp(*secUL) )
+            *firstUL++ = *secUL++;
+   
+         firstStr = (signed char *) firstUL;
+         secStr = (signed char *) secUL;
+   
+         while(*secStr != '\0')
+            *firstStr++ = *secStr++;
+   
+         *firstStr = '\0';
+      } /*Else If: first string ended*/
+   
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun26 Sec05:
+      ^   - else 2nd string ends early, finsh swapping 1st
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+      else
+      { /*Else: second string ended*/
+   
+         while(*secStr != '\0')
+         { /*Loop: copy first string*/
+            if(*firstStr == '\0')
+               break;
+   
+            *firstStr ^= *secStr;
+            *secStr ^= *firstStr;
+            *firstStr++ ^= *secStr++;
+         } /*Loop: copy first string*/
+   
+         if(*firstStr != '\0')
+         { /*If: first string has more values*/
+            *secStr++ = *firstStr;
+            *firstStr++ = '\0';
+         } /*If: first string has more values*/
+   
+         firstUL = (ulong_ulCp *) firstStr;
+         secUL = (ulong_ulCp *) secStr;
+   
+         while( ! ifNull_ulCp(*firstUL) )
+            *secUL++ = *firstUL++;
+   
+         firstStr = (signed char *) firstUL;
+         secStr = (signed char *) secUL;
+   
+         while(*firstStr != '\0')
+            *secStr++ = *firstStr++;
+   
+         *secStr = '\0';
+      } /*Else: second string ended*/
+   } /*swapNull_ulCp*/
+#endif
 
 /*=======================================================\
 : License:
