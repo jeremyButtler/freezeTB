@@ -5443,6 +5443,9 @@ run_freezeTB(
                outFILE
             );
 
+          fclose(outFILE);
+          outFILE = 0;
+
           if(errSC)
           { /*Else: error reading reference*/
              tmpStr = errHeapStr;
@@ -6358,11 +6361,7 @@ run_freezeTB(
             goto nextHeader_fun09_sec06_sub01_cat04;
 
          /*get reference length*/
-         tmpStr +=
-            strToSI_base10str(
-               tmpStr,
-               &lenRefSI
-            );
+         tmpStr += strToSI_base10str(tmpStr, &lenRefSI);
 
          if(*tmpStr > 31)
             lenRefSI = def_refLen_tbConDefs;
@@ -7147,6 +7146,8 @@ run_freezeTB(
 
    fclose(idFILE);
    idFILE = 0;
+
+   freeStack_file_inflate(&gzFileStackST);
 
    /*memory for masking primers*/
    free(maskStartHeapAryUI);

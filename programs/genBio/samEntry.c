@@ -355,7 +355,7 @@ setup_samEntry(
     if(! samSTPtr->extraStr)
        goto memErr_fun03_sec06;
 
-    samSTPtr->extraSizeUI = 1024;
+    samSTPtr->extraSizeUI = 1024 - 8;
     
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
     ^ Fun03 Sec06:
@@ -363,11 +363,10 @@ setup_samEntry(
     \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
     blank_samEntry(samSTPtr);
-
     return 0;
 
     memErr_fun03_sec06:;
-    return def_memErr_samEntry;
+       return def_memErr_samEntry;
 } /*setup_samEntry*/
 
 /*-------------------------------------------------------\
@@ -2260,101 +2259,223 @@ findRefPos_samEntry(
 
    signed int lastCigMacSI = *siCig;
 
-   if(samSTPtr->cigTypeStr[*siCig] == 'S')
-      goto softMask_fun13_sec01;
+   if(*refPosSI <= targPosSI)
+   { /*If: need to move forwards*/
+      if(samSTPtr->cigTypeStr[*siCig] == 'S')
+         goto softMask_fun13_sec01;
 
-   if(samSTPtr->cigTypeStr[*siCig] == 'H')
-      goto hardMask_fun13_sec03;
+      if(samSTPtr->cigTypeStr[*siCig] == 'H')
+         goto hardMask_fun13_sec03;
 
-   /*Check if I did a full cigar entry move*/
-   while(*refPosSI < targPosSI)
-   { /*Loop: till I am on the target base*/
-      lastCigMacSI = *siCig;
+      /*Check if I did a full cigar entry move*/
+      while(*refPosSI < targPosSI)
+      { /*Loop: till I am on the target base*/
+         lastCigMacSI = *siCig;
 
-      switch(samSTPtr->cigTypeStr[*siCig])
-      { /*Switch: check what the next entry is*/
-         case 'S':
-         case 'I':
-         /*Case: Softmasking or insertions*/
-            softMask_fun13_sec01:;
-            *seqPosSI += *cigNtSI;
-            ++(*siCig);
-            *cigNtSI = 0;
-            break;
-         /*Case: Softmasking or insertions*/
-
-         /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-         ^ Fun13 Sec02:
-         ^   - Move position in deletion cases
-         \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-         case 'D':
-         /*Case: Deletion*/
-            *refPosSI += *cigNtSI;
-
-            if(*refPosSI <= (targPosSI))
-            { /*If: I have not found target position*/
+         switch(samSTPtr->cigTypeStr[*siCig])
+         { /*Switch: check what the next entry is*/
+            case 'S':
+            case 'I':
+            /*Case: Softmasking or insertions*/
+               softMask_fun13_sec01:;
+               *seqPosSI += *cigNtSI;
                ++(*siCig);
                *cigNtSI = 0;
-            } /*If: I have not found target position*/
+               break;
+            /*Case: Softmasking or insertions*/
 
+            /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+            ^ Fun13 Sec02:
+            ^   - Move position in deletion cases
+            \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+            case 'D':
+            /*Case: Deletion*/
+               *refPosSI += *cigNtSI;
+
+               if(*refPosSI <= (targPosSI))
+               { /*If: I have not found target position*/
+                  ++(*siCig);
+                  *cigNtSI = 0;
+               } /*If: I have not found target position*/
+
+               else
+               { /*Else: I overshot the target*/
+                  *cigNtSI = *refPosSI - targPosSI;
+                  *refPosSI -= *cigNtSI;
+                     /*correct overshot*/
+               } /*Else: I overshot the target*/
+
+               break;
+            /*Case: Deletion*/
+
+            /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+            ^ Fun13 Sec03:
+            ^   - Move position for snp/match cases\
+            \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+            case 'M':
+            case 'X':
+            case '=':
+            /*Case: match (M or =) or snp (M or X)*/
+               *refPosSI += *cigNtSI;
+               *seqPosSI += *cigNtSI;
+
+               if(*refPosSI <= targPosSI)
+               { /*If: I have not found target position*/
+                  *cigNtSI = 0;
+                  ++(*siCig);
+               } /*If: I have not found target position*/
+
+               else 
+               { /*Else: I overshot the target*/
+                  *cigNtSI = *refPosSI - targPosSI;
+
+                  *refPosSI -= *cigNtSI; /*overshot*/
+                  *seqPosSI -= *cigNtSI; /*overshot*/
+               } /*Else: I overshot the target*/
+
+               break;
+            /*Case: match (M or =) or snp (M or X)*/
+
+            default:
+            /*Case: hard mask of some kind*/
+               hardMask_fun13_sec03:;
+               ++(*siCig);
+               *cigNtSI = 0;
+            /*Case: hard mask of some kind*/
+         } /*Switch: check what the next entry is*/
+
+         /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+         ^ Fun13 Sec04:
+         ^   - Move to the next cigar entry
+         \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+         if(*siCig >= (signed int) samSTPtr->cigLenUI)
+         { /*If: end of sequence*/
+            if(samSTPtr->cigLenUI > 0)
+               *siCig = samSTPtr->cigLenUI - 1;
             else
-            { /*Else: I overshot the target*/
-               *cigNtSI = *refPosSI - targPosSI;
-               *refPosSI -= *cigNtSI; /*correct overshot*/
-            } /*Else: I overshot the target*/
-
+               *siCig = 0;
+            *cigNtSI = 0;
             break;
-         /*Case: Deletion*/
+         } /*If: end of sequence*/
+
+         if(*cigNtSI == 0)
+            *cigNtSI = samSTPtr->cigArySI[*siCig];
+      } /*Loop: till I am on the target base*/
+   } /*If: need to move forwards*/
+
+   else
+   { /*Else: need to move backwards*/
+      if(samSTPtr->cigTypeStr[*siCig] == 'S')
+         goto softMask_fun13_sec0x;
+
+      if(samSTPtr->cigTypeStr[*siCig] == 'H')
+         goto hardMask_fun13_sec0x;
+
+      /*Check if I did a full cigar entry move*/
+      while(*refPosSI > targPosSI)
+      { /*Loop: till I am on the target base*/
+         if(! *seqPosSI)
+            break; /*end of seqeuence*/
+
+         lastCigMacSI = *siCig;
+
+         switch(samSTPtr->cigTypeStr[*siCig])
+         { /*Switch: check what the next entry is*/
+            case 'S':
+            case 'I':
+            /*Case: Softmasking or insertions*/
+               softMask_fun13_sec0x:;
+               *seqPosSI -=
+                  samSTPtr->cigArySI[*siCig] - *cigNtSI;
+               --*siCig;
+               *cigNtSI = 0;
+               break;
+            /*Case: Softmasking or insertions*/
+
+            /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+            ^ Fun13 Sec02:
+            ^   - Move position in deletion cases
+            \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+            case 'D':
+            /*Case: Deletion*/
+               *refPosSI -=
+                  samSTPtr->cigArySI[*siCig] - *cigNtSI;
+
+               if(*refPosSI >= targPosSI)
+               { /*If: I have not found target position*/
+                  --*siCig;
+                  *cigNtSI = 0;
+               } /*If: I have not found target position*/
+
+               else
+               { /*Else: I overshot the target*/
+                  *cigNtSI = targPosSI - *refPosSI;
+                  *refPosSI += *cigNtSI;
+                     /*correct overshot*/
+                  *cigNtSI =
+                     samSTPtr->cigArySI[*siCig] -*cigNtSI;
+               } /*Else: I overshot the target*/
+
+               break;
+            /*Case: Deletion*/
+
+            /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+            ^ Fun13 Sec03:
+            ^   - Move position for snp/match cases\
+            \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+            case 'M':
+            case 'X':
+            case '=':
+            /*Case: match (M or =) or snp (M or X)*/
+               *refPosSI -=
+                  samSTPtr->cigArySI[*siCig] - *cigNtSI;
+               *seqPosSI -=
+                  samSTPtr->cigArySI[*siCig] - *cigNtSI;
+
+               if(*refPosSI >= targPosSI)
+               { /*If: I have not found target position*/
+                  *cigNtSI = 0;
+                  --*siCig;
+               } /*If: I have not found target position*/
+
+               else 
+               { /*Else: I overshot the target*/
+                  *cigNtSI = targPosSI - *refPosSI;
+                  *refPosSI += *cigNtSI;
+                  *seqPosSI += *cigNtSI; /*overshot*/
+                  *cigNtSI =
+                     samSTPtr->cigArySI[*siCig] -*cigNtSI;
+               } /*Else: I overshot the target*/
+
+               break;
+            /*Case: match (M or =) or snp (M or X)*/
+
+            default:
+            /*Case: hard mask of some kind*/
+               hardMask_fun13_sec0x:;
+               --*siCig;
+               *cigNtSI = 0;
+            /*Case: hard mask of some kind*/
+         } /*Switch: check what the next entry is*/
 
          /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-         ^ Fun13 Sec03:
-         ^   - Move position for snp/match cases\
+         ^ Fun13 Sec04:
+         ^   - Move to the next cigar entry
          \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-         case 'M':
-         case 'X':
-         case '=':
-         /*Case: match (M or =) or snp (M or X)*/
-            *refPosSI += *cigNtSI;
-            *seqPosSI += *cigNtSI;
-
-            if(*refPosSI <= targPosSI)
-            { /*If: I have not found target position*/
-               *cigNtSI = 0;
-               ++(*siCig);
-            } /*If: I have not found target position*/
-
-            else 
-            { /*Else: I overshot the target*/
-               *cigNtSI = *refPosSI - targPosSI;
-
-               *refPosSI -= *cigNtSI; /*correct overshot*/
-               *seqPosSI -= *cigNtSI; /*correct overshot*/
-            } /*Else: I overshot the target*/
-
-            break;
-         /*Case: match (M or =) or snp (M or X)*/
-
-         default:
-         /*Case: hard mask of some kind*/
-            hardMask_fun13_sec03:;
-            ++(*siCig);
-            *cigNtSI = 0;
-         /*Case: hard mask of some kind*/
-      } /*Switch: check what the next entry is*/
-
-      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun13 Sec04:
-      ^   - Move to the next cigar entry
-      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-      if(*siCig >= (signed int) samSTPtr->cigLenUI)
-         break; /*End of the sequence*/
-
-      if(*cigNtSI == 0)
-         *cigNtSI = samSTPtr->cigArySI[*siCig];
-   } /*Loop: till I am on the target base*/
+         if(*siCig < 0)
+         { /*If: at start of seqence*/
+            *cigNtSI = samSTPtr->cigArySI[0];
+            *siCig = 0;
+            break; /*start of the sequence*/
+         } /*If: at start of seqence*/
+      } /*Loop: till I am on the target base*/
+   } /*Else: need to move backwards*/
 
    return lastCigMacSI;
 } /*findRefPos_samEntry*/

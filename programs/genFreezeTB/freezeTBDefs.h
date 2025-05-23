@@ -28,8 +28,10 @@
    /*stop removing indels when indels are longer than
    `  5 bases
    */
-#define def_homoMask_freezeTBDefs 0
-   /*0 is use reference base*/
+#define def_homoMask_freezeTBDefs '0'
+   /*0 is use reference base; prefere N so does not mess
+   `  up AMR step
+   */
 
 
 /*=======================================================\

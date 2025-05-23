@@ -729,6 +729,9 @@ LofRev_checkAmr(
 |     o 1: check for LoFs in frameshift
 |     o 0: treat frameshifts as exact matches
 |   - aaIndelBl:
+|     o 3: skip aa indel check and check if codon has
+|          indel
+|     o 2: skip aa indel check
 |     o 1: amino acid changes, if codon has indel not
 |          in target position, check amino acids
 |     o 0: ignore all sequences with indel in codon
@@ -774,6 +777,8 @@ checkAmr(
    /*For finding the amr position*/
    unsigned int seqPosUI = 0;
    unsigned int refPosUI = 0;
+   signed int aaSeqPosSI = 0; /*DELETE*/
+   signed int aaRefPosSI = 0; /*DELETE*/
 
    /*For processing the cigar entries*/
    signed int cigNtSI = 0;
@@ -993,7 +998,11 @@ checkAmr(
       *   o fun07 sec03 sub04 cat03:
       *     - check if AMR pattern is amino acid sequence
       *   o fun07 sec03 sub04 cat04:
-      *     - check if non-amino acid AMR is match
+      *     - check if snp AMR is present
+      *   o fun07 sec03 sub04 cat05:
+      *     - check if deletion AMR is present
+      *   o fun07 sec03 sub04 cat06:
+      *     - check if insertion AMR is present
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1129,48 +1138,207 @@ checkAmr(
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun07 Sec03 Sub04 Cat04:
-      +   - check if non-amino acid AMR is match
+      +   - check if snp AMR is present
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
       
       checkSnp_fun07_sec03_sub04_cat04:;
 
-      for(
+      if(amrAryST[siAmr].mutTypeStr[0] == 's')
+      { /*If: snp mutation*/
+         for(
+            siBase = 0;
+            (amrUStr[siBase] & ~32)
+               == (seqUStr[siBase] & ~32);
+            ++siBase
+         ){ /*Loop : see if have extact match to the amr*/
+            switch(samSTPtr->cigTypeStr[cigPosSI])
+            { /*Switch: update cigar mutation coutner*/
+               case 'M':
+               case '=':
+               case 'X':
+                  break;
+               default:
+                  goto nextAmr_fun07_sec03_sub08;
+            } /*Switch: update cigar mutation coutner*/
+
+            /*see if I need to move to next cigar entry*/
+            --cigCountSI;
+
+            if(cigCountSI <= 0)
+            { /*If: next cigar entry*/
+               ++cigPosSI;
+               cigCountSI = samSTPtr->cigArySI[cigPosSI];
+            } /*If: next cigar entry*/
+
+            if(amrUStr[siBase] == '\0')
+               break;
+
+            if(seqUStr[siBase] == '\0')
+               goto nextAmr_fun07_sec03_sub08;
+               /*not enough bases to tell if AMR*/
+         } /*Loop : See if have extact match to the amr*/
+
+         if(amrUStr[siBase] != '\0')
+            goto nextAmr_fun07_sec03_sub08; /*not AMR*/
+
+         goto isRes_fun06_sec03__sub07; /*is AMR*/
+      } /*If: snp mutation*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec03 Sub04 Cat05:
+      +   - check if deletion AMR is present
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(amrAryST[siAmr].mutTypeStr[0] == 'd')
+      { /*Else If: deletion*/
          siBase = 0;
-         (amrUStr[siBase] &~32) == (seqUStr[siBase] &~32);
-         ++siBase
-      ){ /*Loop : see if have extact match to the amr*/
-         switch(samSTPtr->cigTypeStr[cigPosSI])
-         { /*Switch: update cigar mutation coutner*/
-            case 'M': ++snpSI; break;
-            case '=': ++snpSI; break;
-            case 'X': ++snpSI; break;
-            case 'I': ++insSI; break;
-            case 'D': ++delSI; break;
-         } /*Switch: update cigar mutation coutner*/
 
-         /*see if I need to move to next cigar entry*/
-         --cigCountSI;
+         if(! amrUStr) ;
+         else if(amrUStr[0]) /*0 means no sequence*/
+         { /*Else If: included non-deleted amr bases*/
+            for(
+               ;
+               (amrUStr[siBase] & ~32)
+                  == (seqUStr[siBase] & ~32);
+               ++siBase
+            ){ /*Loop : move past non-deletion bases*/
+               switch(samSTPtr->cigTypeStr[cigPosSI])
+               { /*Switch: update cigar mutation coutner*/
+                  case 'M':
+                  case '=':
+                  case 'X':
+                     break;
+                  default:
+                     goto nextAmr_fun07_sec03_sub08;
+               } /*Switch: update cigar mutation coutner*/
 
-         if(cigCountSI <= 0)
-         { /*If: next cigar entry*/
-            ++cigPosSI;
-            cigCountSI = samSTPtr->cigArySI[cigPosSI];
-         } /*If: next cigar entry*/
+               /*check if need move to next cigar entry*/
+               --cigCountSI;
 
-         if(amrUStr[siBase] == '\0')
-            break;
+               if(cigCountSI <= 0)
+               { /*If: next cigar entry*/
+                  ++cigPosSI;
+                  cigCountSI =
+                     samSTPtr->cigArySI[cigPosSI];
+               } /*If: next cigar entry*/
 
-         if(seqUStr[siBase] == '\0')
-            break;
-      } /*Loop : See if have extact match to the amr*/
+               if(amrUStr[siBase] == '\0')
+                  break; /*end of AMR part of seqeunce*/
 
-      siMatch = siBase; /*for comparison step*/
+               if(seqUStr[siBase] == '\0')
+                  goto nextAmr_fun07_sec03_sub08;
+                  /*not enough bases to tell if AMR*/
+            }  /*Loop : move past non-deletion bases*/
+         } /*Else If: included non-deleted amr bases*/
 
-      if(amrUStr[siBase] != '\0')
-         goto nextAmr_fun07_sec03_sub08; /*not AMR*/
+         while(amrAryST[siAmr].refSeqStr[siBase])
+         { /*Loop: find number of deletions*/
+            if(samSTPtr->cigTypeStr[cigPosSI] != 'D')
+               goto nextAmr_fun07_sec03_sub08;
 
-      /*may be an AMR; make sure not false positive*/
-      goto falsePositiveCheck_fun07_sec04_sub06_cat01;
+            /*see if I need to move to next cigar entry*/
+            --cigCountSI;
+
+            if(cigCountSI <= 0)
+            { /*If: next cigar entry*/
+               ++cigPosSI;
+               cigCountSI = samSTPtr->cigArySI[cigPosSI];
+            } /*If: next cigar entry*/
+
+            if(! samSTPtr->cigTypeStr[cigPosSI])
+               break; /*end of read*/
+         } /*Loop: find number of deletions*/
+
+         siMatch = siBase; /*for comparison step*/
+
+         if(amrAryST[siAmr].refSeqStr[siBase])
+            goto nextAmr_fun07_sec03_sub08;
+            /*not enough deletions*/
+
+         goto isRes_fun06_sec03__sub07; /*is AMR*/
+      } /*Else If: deletion*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec03 Sub04 Cat06:
+      +   - check if insertion AMR is present
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(amrAryST[siAmr].mutTypeStr[0] == 'i')
+      { /*Else If: insertion*/
+         siBase = 0;
+
+         if(! amrAryST[siAmr].refSeqStr) ;
+         else if(amrAryST[siAmr].refSeqStr[0])
+         { /*If: included non-inserted reference bases*/
+            for(
+               ;
+               (amrAryST[siAmr].refSeqStr[siBase] & ~32)
+                  == (seqUStr[siBase] & ~32);
+               ++siBase
+            ){ /*Loop : move past non-inserted bases*/
+               switch(samSTPtr->cigTypeStr[cigPosSI])
+               { /*Switch: update cigar mutation coutner*/
+                  case 'M':
+                  case '=':
+                  case 'X':
+                     break;
+                  default:
+                     goto nextAmr_fun07_sec03_sub08;
+               } /*Switch: update cigar mutation coutner*/
+
+               /*check if need move to next cigar entry*/
+               --cigCountSI;
+
+               if(cigCountSI <= 0)
+               { /*If: next cigar entry*/
+                  ++cigPosSI;
+                  cigCountSI =
+                     samSTPtr->cigArySI[cigPosSI];
+               } /*If: next cigar entry*/
+
+               if(! amrAryST[siAmr].refSeqStr[siBase])
+                  break;
+                  /*end of non-inserted bases*/
+
+               if(seqUStr[siBase] == '\0')
+                  goto nextAmr_fun07_sec03_sub08;
+                  /*not enough bases to tell if AMR*/
+            }  /*Loop : move past non-inserted bases*/
+         } /*If: included non-inserted reference bases*/
+
+         while(amrAryST[siAmr].amrSeqStr[siBase])
+         { /*Loop: find number of insertions*/
+            if(samSTPtr->cigTypeStr[cigPosSI] != 'I')
+               goto nextAmr_fun07_sec03_sub08;
+               /*needs to be an insertion*/
+
+            if(
+                 (seqUStr[siBase] & ~32)
+              != (amrAryST[siAmr].amrSeqStr[siBase] & ~32)
+            ) goto nextAmr_fun07_sec03_sub08;
+              /*does not match profile*/
+
+            /*see if I need to move to next cigar entry*/
+            --cigCountSI;
+
+            if(cigCountSI <= 0)
+            { /*If: next cigar entry*/
+               ++cigPosSI;
+               cigCountSI = samSTPtr->cigArySI[cigPosSI];
+            } /*If: next cigar entry*/
+
+            if(! samSTPtr->cigTypeStr[cigPosSI])
+               break; /*end of read*/
+         } /*Loop: find number of insertions*/
+
+         siMatch = siBase; /*for comparison step*/
+
+         if(amrAryST[siAmr].amrSeqStr[siBase])
+            goto nextAmr_fun07_sec03_sub08;
+            /*not enough deletions*/
+
+         goto isRes_fun06_sec03__sub07; /*is AMR*/
+      } /*Else If: insertion*/
 
       /**************************************************\
       * Fun07 Sec03 Sub05:
@@ -1209,16 +1377,15 @@ checkAmr(
 
 
       /*find codon start*/
-      siBase =
-           amrAryST[siAmr].codonPosUI
-         - (signed int) refPosUI;
+      siBase = amrAryST[siAmr].codonPosUI - refPosUI;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun07 Sec03 Sub05 Cat02:
       +   - check if have indel in codon
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      if(! aaIndelBl && *amrAryST[siAmr].mutTypeStr =='s')
+      if(aaIndelBl & 1) ;
+      else if(*amrAryST[siAmr].mutTypeStr =='s')
       { /*If: want to ignore codon indels*/
 
          /*check the current base on*/
@@ -1303,7 +1470,6 @@ checkAmr(
                if(samSTPtr->cigTypeStr[siMatch] == 'I')
                   goto nextAmr_fun07_sec03_sub08;
             } /*If: moving back two bases*/
-
          } /*If: moving backwards*/
 
          snpSI = 0;
@@ -1315,8 +1481,29 @@ checkAmr(
       +   - move to first base in target codon
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+      cigPosSI = siCig;
+      cigCountSI = cigNtSI;
+      aaRefPosSI = refPosUI;
+      aaSeqPosSI = seqPosUI;
+       
+      findRefPos_samEntry(
+         samSTPtr,
+         &cigPosSI,
+         &cigCountSI,
+         amrAryST[siAmr].codonPosUI,
+         &aaRefPosSI,
+         &aaSeqPosSI
+      );
+
+      if(   aaRefPosSI
+         != (signed int) amrAryST[siAmr].codonPosUI
+      ) goto nextAmr_fun07_sec03_sub08;
+         /*do not have reference position*/
+
       /*should work out, even when reverse complement*/
-      seqUStr += siBase;
+      /*seqUStr += siBase;*/
+      seqUStr =
+         (unsigned char *) &samSTPtr->seqStr[aaSeqPosSI];
 
       siBase = 0; /*for finding the number of
                  ` matches/snps, inss, and dels in
@@ -1398,7 +1585,10 @@ checkAmr(
                goto nextAmr_fun07_sec03_sub08;
          } /*Loop: check codon reading frame*/
 
-         siMatch = amrAryST[siAmr].lenAmrSeqUI;
+         if(aaIndelBl & 2)
+            goto isRes_fun06_sec03__sub07;
+         else
+            siMatch = amrAryST[siAmr].lenAmrSeqUI;
       } /*If: reverse complement gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1468,7 +1658,10 @@ checkAmr(
                goto nextAmr_fun07_sec03_sub08;
          } /*Loop: check codon reading frame*/
 
-         siMatch = amrAryST[siAmr].lenAmrSeqUI;
+         if(aaIndelBl & 2)
+            goto isRes_fun06_sec03__sub07;
+         else
+            siMatch = amrAryST[siAmr].lenAmrSeqUI;
       } /*Else If: foward gene*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1495,7 +1688,7 @@ checkAmr(
       +     in amr region
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      falsePositiveCheck_fun07_sec04_sub06_cat01:;
+      /*falsePositiveCheck_fun07_sec04_sub06_cat01:;*/
 
       while(
          siBase < (signed int) amrAryST[siAmr].lenAmrSeqUI
@@ -1515,6 +1708,11 @@ checkAmr(
          if(cigCountSI <= 0)
          { /*If: next cigar entry*/
             ++cigPosSI;
+
+            if(cigPosSI >=(signed int) samSTPtr->cigLenUI)
+               goto nextAmr_fun07_sec03_sub08;
+               /*not enough bases to validate*/
+
             cigCountSI = samSTPtr->cigArySI[cigPosSI];
          } /*If: next cigar entry*/
 
@@ -1539,6 +1737,18 @@ checkAmr(
          if(cigCountSI <= 0)
          { /*If: next cigar entry*/
             ++cigPosSI;
+
+            if(cigPosSI < (signed int) samSTPtr->cigLenUI)
+               ;
+            else if(
+                 siBase
+              >= (signed int) amrAryST[siAmr].lenRefSeqUI
+            ) break;
+
+            else
+               goto nextAmr_fun07_sec03_sub08;
+               /*not enough bases to validate AMR*/
+
             cigCountSI = samSTPtr->cigArySI[cigPosSI];
          } /*If: next cigar entry*/
 
@@ -1629,8 +1839,7 @@ checkAmr(
       \**************************************************/
 
       nextAmr_fun07_sec03_sub08:;
-
-      ++siAmr;
+         ++siAmr;
    } /*Loop: check if have any AMR mutations*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2253,13 +2462,24 @@ pRead_checkAmr(
 
        if(indexUI > 0)
        { /*If: need to check indexs*/
-          if( !
+          if(
               eql_charCp(
                  amrAryST[indexUI].varIdStr,
                  amrAryST[lastPrintIndexUI].varIdStr,
                  (signed char) '\0'
               )
-          ) continue; /*id already printed*/
+          ) ; /*if read ids are not the same*/
+
+          else if(
+              eql_charCp(
+                 amrAryST[indexUI].mutTypeStr,
+                 amrAryST[lastPrintIndexUI].mutTypeStr,
+                 (signed char) '\0'
+              )
+          ) ; /*different mutation types*/
+
+          else
+             continue;
        } /*If: need to check indexs*/
       
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2596,6 +2816,9 @@ pIdVarTbl_checkAmr(
 |     o 1: check for framshifts (LoF/frameshift AMRs)
 |     o 0: ingore frameshifts (are exact matches)
 |   - aaIndelBl:
+|     o 3: skip aa indel check and check if codon has
+|          indel
+|     o 2: skip aa indel check
 |     o 1: amino acid changes, if codon has indel not
 |          in target position, check amino acids
 |     o 0: ignore all sequences with indel in codon

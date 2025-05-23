@@ -1786,12 +1786,12 @@ readTbl_amrST(
 
       else
       { /*Else: have number*/
+         ++amrSTAry[uiAmr].codonPosUI; /*to index 1*/
          tmpStr +=
             strToUI_base10str(
                tmpStr,
                &amrSTAry[uiAmr].codonPosUI
             );
-
          --amrSTAry[uiAmr].codonPosUI; /*to index 0*/
 
          if(*tmpStr != '\t')

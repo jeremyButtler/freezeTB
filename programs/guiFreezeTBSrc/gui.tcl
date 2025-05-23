@@ -154,7 +154,7 @@ set glob_lowDepthTextCol "#000004" ; # magma dark purple
       "Pmd" # protonimid
       "Pza" # pyrazinamide (Pyz, Pza, Pyr)
       "Rif" # rifampicin (Rif, Rmp, Rfm)
-      "Stm" # strptomycin (Str, Stp, Stm)
+      "Stm" # streptomycin (Str, Stp, Stm)
    ]
 ---;
 ---#

@@ -387,29 +387,62 @@ void phelp_tbAmr(
     +   - indels in amino acid SNP AMRs
     \+++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-    if(def_aaIndel_tbAmrDefs)
+    if(def_aaIndel_tbAmrDefs & 1)
        fprintf(
           (FILE *) outFILE,
           "  -aa-indel: [Optinal; Yes]%s",
-      str_endLine
+          str_endLine
        );
     else
        fprintf(
           (FILE *) outFILE,
           "  -aa-indel: [Optinal; No]%s",
-      str_endLine
+          str_endLine
        );
 
 
     fprintf(
        (FILE *) outFILE,
        "    o allow indels in SNP amino acid AMRs%s",
-      str_endLine
+       str_endLine
     );
 
     fprintf(
        (FILE *) outFILE,
        "    o Turn off with: -no-aa-indel%s",
+       str_endLine
+    );
+
+
+    if(def_aaIndel_tbAmrDefs & 2)
+       fprintf(
+          (FILE *) outFILE,
+          "  -aa-check: [Optinal; Yes]%s",
+          str_endLine
+       );
+    else
+       fprintf(
+          (FILE *) outFILE,
+          "  -aa-check: [Optinal; No]%s",
+          str_endLine
+       );
+
+
+    fprintf(
+       (FILE *) outFILE,
+       "    o check if mutant has same number of indels%s",
+       str_endLine
+    );
+ 
+    fprintf(
+       (FILE *) outFILE,
+       "      as refernce%s",
+       str_endLine
+    );
+
+    fprintf(
+       (FILE *) outFILE,
+       "    o Turn off with: -no-aa-check%s",
       str_endLine
     );
 
@@ -577,6 +610,8 @@ void phelp_tbAmr(
 |   - framshiftBl:
 |     o set to 1 (check frameshits) or 0 (do not check)
 |   - aaIndeBl:
+|     o set to 3 if 1 and 2 enabled
+|     o set to 2 if skipping amino acid final indel check
 |     o set to 1 if user wanted indel in snp aa AMRs
 |     o set to 0 if user wanted indels only on indel aa
 |       AMRs
@@ -899,7 +934,7 @@ input_tbAmr(
             (signed char *) argAryStr[siArg],
             (signed char) '\0'
          )
-      ) *aaIndelBl = 1;
+      ) *aaIndelBl |= 1;
 
       else if( 
          ! eql_charCp(
@@ -907,7 +942,23 @@ input_tbAmr(
             (signed char *) argAryStr[siArg],
             (signed char) '\0'
          )
-      ) *aaIndelBl = 0;
+      ) *aaIndelBl &= ~1;
+
+      else if( 
+         ! eql_charCp(
+            (signed char *) "-aa-check",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ) *aaIndelBl |= 2;
+
+      else if( 
+         ! eql_charCp(
+            (signed char *) "-no-aa-check",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ) *aaIndelBl &= ~2;
 
       /**************************************************\
       * Fun03 Sec03 Sub06:

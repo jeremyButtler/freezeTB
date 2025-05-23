@@ -230,6 +230,9 @@ LofRev_checkAmr(
 |     o 1: check for LoFs in frameshift
 |     o 0: treat frameshifts as exact matches
 |   - aaIndelBl:
+|     o 3: skip aa indel check and check if codon has
+|          indel
+|     o 2: skip aa indel check
 |     o 1: amino acid changes, if codon has indel not
 |          in target position, check amino acids
 |     o 0: ignore all sequences with indel in codon
@@ -414,6 +417,9 @@ pIdVarTbl_checkAmr(
 |     o 1: check for framshifts (LoF/frameshift AMRs)
 |     o 0: ingore frameshifts (are exact matches)
 |   - aaIndelBl:
+|     o 3: skip aa indel check and check if codon has
+|          indel
+|     o 2: skip aa indel check
 |     o 1: amino acid changes, if codon has indel not
 |          in target position, check amino acids
 |     o 0: ignore all sequences with indel in codon

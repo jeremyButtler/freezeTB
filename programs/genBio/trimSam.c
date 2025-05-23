@@ -48,7 +48,6 @@
 ! Hidden depenencies
 !   o .c  #include "../genLib/base10StrToNum.h"
 !   o .c  #include "../genLib/numToStr.h"
-!   o .c  #include "../genLib/strAry.h"
 !   o .c  #include "../genLib/fileFun.h"
 !   o .h  #include "../genLib/endLine.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"
@@ -277,14 +276,8 @@ coords_trimSam(
    '   o fun02 sec02:
    '     - check ranges and set up variables
    '   o fun02 sec03:
-   '     - find the starting position
+   '     - trim read
    '   o fun02 sec04:
-   '     - find the ending position
-   '   o fun02 sec05:
-   '     - set up the lengths and ending coordinates
-   '   o fun02 sec06:
-   '     - trim the sequence, Q-score, and cigar entries
-   '   o fun02 sec07:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -295,13 +288,14 @@ coords_trimSam(
 
    signed char errSC = 0;
 
-   unsigned int seqStartUI = 0;
-   signed int firstCigSI = 0;
-
    signed int siCig = 0;
    signed int cigBaseOnSI = 0;
    signed int refPosSI = 0;
    signed int seqPosSI = 0;
+
+   signed int seqEndPosSI = 0;
+   signed int siEndCig = 0;
+   signed int cigEndBaseSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec02:
@@ -310,24 +304,24 @@ coords_trimSam(
 
     /*Check if is an header is an header entry*/
     if(samSTPtr->extraStr[0] == '@')
-       goto header_fun02_sec07;
+       goto header_fun02_sec04;
 
     /*Check if is an unmapped read*/
     if(samSTPtr->flagUS & 4)
-       goto noMap_fun02_sec07;
+       goto noMap_fun02_sec04;
 
     if(samSTPtr->cigTypeStr[0] == '*')
-       goto noMap_fun02_sec07;
+       goto noMap_fun02_sec04;
 
     /*Check if has a sequence to trim*/
     if(samSTPtr->seqStr[0] == '*')
-       goto noSeq_fun02_sec07;
+       goto noSeq_fun02_sec04;
 
    if(samSTPtr->refStartUI > (unsigned int) endSI)
-      goto outOfRange_fun02_sec07;
+      goto outOfRange_fun02_sec04;
 
    if(samSTPtr->refEndUI < (unsigned int) startSI)
-      goto outOfRange_fun02_sec07;
+      goto outOfRange_fun02_sec04;
 
    cigBaseOnSI = samSTPtr->cigArySI[0];
    refPosSI = (signed int) samSTPtr->refStartUI;
@@ -341,7 +335,7 @@ coords_trimSam(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec03:
-   ^   - find the starting position
+   ^   - trim read
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    findRefPos_samEntry(
@@ -353,247 +347,81 @@ coords_trimSam(
       &seqPosSI
    );
 
+   seqEndPosSI = seqPosSI;
+   siEndCig = siCig;
+   cigEndBaseSI = cigBaseOnSI;
+
+   findRefPos_samEntry(
+      samSTPtr,
+      &siEndCig,
+      &cigEndBaseSI,
+      endSI,
+      &refPosSI,
+      &seqEndPosSI
+   );
+
    samSTPtr->cigArySI[siCig] = cigBaseOnSI;
    samSTPtr->refStartUI = (unsigned int) refPosSI;
 
-   seqStartUI = (unsigned int) seqPosSI;
-   firstCigSI = siCig;
+   /*new tricks*/
+   samSTPtr->cigArySI[siEndCig] -= cigEndBaseSI;
+   samSTPtr->readLenUI = seqEndPosSI - seqPosSI;
 
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun02 Sec04:
-   ^   - find the ending position
-   ^   o fun02 sec04 sub01:
-   ^     - start loop and handle soft masking entires
-   ^   o fun02 sec04 sub02:
-   ^     - handle insertion entries
-   ^   o fun02 sec04 sub03:
-   ^     - handle deletion entries
-   ^   o fun02 sec04 sub04:
-   ^     - handle snp entries
-   ^   o fun02 sec04 sub05:
-   ^     - move to next cigar entry
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*****************************************************\
-   * Fun02 Sec04 Sub01:
-   *   - start loop and handle soft masking entires
-   \*****************************************************/
-
-   while(refPosSI < endSI)
-   { /*Loop: till I am on the target base*/
-      switch((samSTPtr)->cigTypeStr[(siCig)])
-      { /*Switch: check what the next entry is*/
-         case 'S':
-         /*Case: Softmasking*/
-            seqStartUI += cigBaseOnSI;
-            samSTPtr->maskCntUI +=  cigBaseOnSI;
-
-            ++siCig;
-            cigBaseOnSI = 0;
-            break;
-         /*Case: Softmasking*/
-
-         /***********************************************\
-         * Fun02 Sec04 Sub02:
-         *   - handle insertion entries
-         \***********************************************/
-
-         case 'I':
-         /*Case: insertions*/
-            seqStartUI += cigBaseOnSI;
-            samSTPtr->insCntUI +=  cigBaseOnSI;
-
-            ++siCig;
-            cigBaseOnSI = 0;
-            break;
-         /*Case: insertions*/
-
-         /***********************************************\
-         * Fun02 Sec04 Sub03:
-         *   - handle deletion entries
-         \***********************************************/
-
-         case 'D':
-         /*Case: Deletion*/
-            refPosSI += cigBaseOnSI;
-            samSTPtr->delCntUI += cigBaseOnSI;
-
-            if(refPosSI <= endSI)
-            { /*If: I have not found target position*/
-               ++siCig;
-               cigBaseOnSI = 0;
-            } /*If: I have not found target position*/
-
-            else 
-            { /*Else: I overshot the target*/
-               /*Find how many bases overshot by*/
-               cigBaseOnSI = (refPosSI - endSI);
-
-               /*Make corrections for overshooting*/
-               refPosSI -= cigBaseOnSI;
-               samSTPtr->delCntUI -= cigBaseOnSI;
-            } /*Else: I overshot the target*/
-
-            break;
-         /*Case: Deletion*/
-
-         /***********************************************\
-         * Fun02 Sec04 Sub03:
-         *   - handle match entries
-         \***********************************************/
-
-         case 'M':
-         case '=':
-         /*Case: match (M or =)*/
-            refPosSI += cigBaseOnSI;
-            seqPosSI += cigBaseOnSI;
-            samSTPtr->matchCntUI += cigBaseOnSI;
-
-            if(refPosSI <= endSI)
-            { /*If: I have not found target position*/
-               cigBaseOnSI = 0;
-               ++siCig;
-            } /*If: I have not found target position*/
-
-            else
-            { /*Else: I overshot the target*/
-               /*Find how many bases overshot by*/
-               cigBaseOnSI = (int) (refPosSI - endSI);
-
-               /*Make corrections for overshooting*/
-               refPosSI -= cigBaseOnSI;
-               seqPosSI -= cigBaseOnSI;
-               samSTPtr->matchCntUI -= cigBaseOnSI;
-            } /*Else: I overshot the target*/
-
-            break;
-         /*Case: match (M or =)*/
-
-         /***********************************************\
-         * Fun02 Sec04 Sub04:
-         *   - handle snp entries
-         \***********************************************/
-
-         case 'X':
-         /*Case: SNP (X)*/
-            refPosSI += cigBaseOnSI;
-            seqPosSI += cigBaseOnSI;
-            samSTPtr->snpCntUI += cigBaseOnSI;
-
-            if(refPosSI <= endSI)
-            { /*If: I have not found target position*/
-               cigBaseOnSI = 0;
-               ++siCig;
-            } /*If: I have not found target position*/
-
-            else
-            { /*Else: I overshot the target*/
-               /*Find how many bases overshot by*/
-               cigBaseOnSI = (int) (refPosSI - endSI);
-
-               /*Make corrections for overshooting*/
-               refPosSI -= cigBaseOnSI;
-               seqPosSI -= cigBaseOnSI;
-
-               samSTPtr->snpCntUI = cigBaseOnSI;
-            } /*Else: I overshot the target*/
-
-            break;
-         /*Case: SNP (X)*/
-      } /*Switch: check what the next entry is*/
-
-      /**************************************************\
-      * Fun02 Sec04 Sub05:
-      *   - move to next cigar entry
-      \**************************************************/
-
-      if(siCig >= (signed int) samSTPtr->cigLenUI)
-         break; /*End of the sequence*/
-
-      /*This case will be true most of the time, unless
-      `   the start has already been found
-      */
-      if(cigBaseOnSI == 0)
-         cigBaseOnSI = samSTPtr->cigArySI[siCig];
-   } /*Loop: till I am on the target base*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun02 Sec05:
-   ^   - set up the lengths and ending coordinates
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   samSTPtr->cigArySI[siCig] = cigBaseOnSI;
-   samSTPtr->cigLenUI = siCig - firstCigSI;
-
-   samSTPtr->readLenUI =
-      (unsigned int) (seqPosSI - seqStartUI);
-   samSTPtr->refEndUI = refPosSI;
-   samSTPtr->alnReadLenUI = samSTPtr->refEndUI;
-   samSTPtr->alnReadLenUI -= samSTPtr->refStartUI;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun02 Sec06:
-   ^   - trim the sequence, Q-score, and cigar entries
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   cpLen_ulCp(
-      samSTPtr->seqStr,
-      &samSTPtr->seqStr[seqStartUI],
-      samSTPtr->readLenUI
-   );
-
-   if(! samSTPtr->qStr[0])
-      ;
-   else if(! samSTPtr->qStr[1])
-      ;
-   else
-   { /*Else: have q-score entry*/
-      cpQEntry_samEntry(
-         samSTPtr,
-         &(samSTPtr->qStr[seqStartUI]),
-         1
-      ); /*Uses samSTPtr->readLenUI to get length*/
-         /*Also finds median and mean Q-scores*/
-   } /*Else: have q-score entry*/
+   samSTPtr->cigLenUI = siEndCig - siCig + 1;
 
    cpLen_ulCp(
       samSTPtr->cigTypeStr,
-      &(samSTPtr->cigTypeStr[firstCigSI]),
+      &samSTPtr->cigTypeStr[siCig],
       samSTPtr->cigLenUI
    );
 
    cpLen_ulCp(
       (signed char *) samSTPtr->cigArySI,
-      (signed char *) &(samSTPtr->cigArySI[firstCigSI]),
-      (samSTPtr->cigLenUI << 2)
+      (signed char *) &samSTPtr->cigArySI[siCig],
+      samSTPtr->cigLenUI * sizeof(signed int)
    );
 
+   cpLen_ulCp(
+      samSTPtr->seqStr,
+      &samSTPtr->seqStr[seqPosSI],
+      samSTPtr->readLenUI
+   );
+
+   if(! samSTPtr->qStr[0]) ;
+   else if(! samSTPtr->qStr[1]) ;
+   else
+      cpQEntry_samEntry(
+         samSTPtr,
+         &samSTPtr->qStr[seqPosSI],
+         1 /*blank q-score histograms*/
+      ); /*also finds mean/median q-score*/
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun02 Sec07:
+   ^ Fun02 Sec04:
    ^   - clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    errSC = 0;
-   goto cleanUp_fun02_sec07;
+   goto cleanUp_fun02_sec04;
 
-   outOfRange_fun02_sec07:;
-   errSC = def_rangeErr_trimSam;
-   goto cleanUp_fun02_sec07;
+   outOfRange_fun02_sec04:;
+      errSC = def_rangeErr_trimSam;
+      goto cleanUp_fun02_sec04;
 
-   header_fun02_sec07:;
-   errSC = def_header_trimSam;
-   goto cleanUp_fun02_sec07;
+   header_fun02_sec04:;
+      errSC = def_header_trimSam;
+      goto cleanUp_fun02_sec04;
 
-   noMap_fun02_sec07:;
-   errSC = def_noMap_trimSam;
-   goto cleanUp_fun02_sec07;
+   noMap_fun02_sec04:;
+      errSC = def_noMap_trimSam;
+      goto cleanUp_fun02_sec04;
 
-   noSeq_fun02_sec07:;
-   errSC = def_noSeq_trimSam;
-   goto cleanUp_fun02_sec07;
+   noSeq_fun02_sec04:;
+      errSC = def_noSeq_trimSam;
+      goto cleanUp_fun02_sec04;
 
-   cleanUp_fun02_sec07:;
-   return errSC;
+   cleanUp_fun02_sec04:;
+      return errSC;
 } /*coords_trimSam*/
 
 /*-------------------------------------------------------\

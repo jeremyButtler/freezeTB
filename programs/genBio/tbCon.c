@@ -1792,6 +1792,7 @@ collapse_tbCon(
          ++uiRef;
       } /*Loop: Collapse the fragment*/
 
+      retSamST[siFrag].seqStr[uiBase] = 0;
       retSamST[siFrag].readLenUI = uiBase;
       retSamST[siFrag].cigLenUI = uiCig + 1;
          /*The read length is at index 1, but the cigar is

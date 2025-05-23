@@ -405,7 +405,7 @@ void
 seqToIndex_alnSet(
    signed char *seqStr
 ){
-   while(*seqStr != '\0')
+   while(*seqStr)
    { /*Loop: convert bases to lookup table values*/
       *seqStr &= def_ntToCode_alnSet;
       ++seqStr;
@@ -429,7 +429,7 @@ void
 indexToSeq_alnSet(
    signed char *seqStr
 ){
-   while(*seqStr != '\0')
+   while(*seqStr)
    { /*Loop: convert bases to lookup table values*/
       *seqStr |= 64;
       ++seqStr;

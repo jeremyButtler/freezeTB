@@ -12,8 +12,7 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
 
 # License:
 
-freezeTB includes databases from other repositories and
-  complied code (minimap2) from other repositories. In
+freezeTB includes databases from other repositories. In
   those cases the licensing will be under the owner's
   repository.
 
@@ -68,11 +67,13 @@ Here are the order of Merlin winners:
         Apr;35(4):907-14.
         doi: 10.1128/jcm.35.4.907-914.1997.
         PMID: 9157152; PMCID: PMC229700.
-  - minimap2: speeds everything up
+  - minimap2: not included in freezeTB anymore, but is
+    installed automatically on Mac and is still a
+    recommended install for other OS's
     - [https://github.com/lh3/minimap2](
        https://github.com/lh3/minimap2)
-  - I used tcltk to make the GUI (graphical user
-    interface [the window])
+  - tcltk to make the GUI (graphical user interface [the
+    window])
     - [https://github.com/tcltk/tk](
        https://github.com/tcltk/tk)
     - [https://github.com/tcltk/tcl](
@@ -95,7 +96,7 @@ For Linux I am assuming you are using a Debian based
 1. Install R: `sudo apt-get install r-base;`
 2. Install: tcltk:`sudo apt-get install tcl-dev tk-dev`
 3. You may need to install `gcc` and `make`
-4. Recommended minimap2: `sudo apt-get install minimap2;`
+4. I recommend minimap2: `sudo apt-get install minimap2;`
    - Otherwise freezeTB is slow
 
 ```
@@ -148,7 +149,7 @@ Enter your password when prompted.
 2. Install X11 (xquartz) `brew install xquartz`
 3. Install tcltk `brew install tcl-tk`
 4. Install R `brew install R`
-5. Recommended minimap2 `brew install minimap2`
+5. I recommend minimap2 `brew install minimap2`
    - Otherwise freezeTB is slow
 
 Then you can install freezeTB:
@@ -331,7 +332,7 @@ For Linux freezeTB will also search for the freezeTBFiles
 
 For Windows freezeTB will also search for the
   freezeTBFiles directory (has databases)
-  in `%HOME%\Documents` (user Documents) first and
+  in `%app%\Documents` (user Documents) first and
   then in `%PUBLIC%\Documents` (Public Documents).
 
 ### Mac/Linux:
@@ -345,8 +346,11 @@ Map reads to the reference using
 Then run
   freezeTB: `freezeTB -sam reads.sam -prefix goodName`.
 
+You can also have freezeTB do the read mapping with
+  `freezeTB -prefix goodName /path/to/fastq_pass/*.fastq*`.
+
 To get graphs
-  do: `graphAmpDepth.r -stats goodName-depths.tsv -who /usr/local/share/freezeTBFiles/amrDb.tsv -prefix goodName`
+  do: `graphAmpDepth.r -stats goodName-depths.tsv -amrs goodName-read-amrs.tsv -who /usr/local/share/freezeTBFiles/amrDb.tsv -prefix goodName`
 
 ### Windows:
 
@@ -366,6 +370,13 @@ Map reads to the reference using
 
 Build graphs (if wanted)
   do: `%ProgramFiles%\R\<R version>\bin\Rscript %ProgramFiles%\freezeTB\graphAmdDepth.r -stats goodName-depths.tsv -who %PUBLIC%\Documents\freezeTBFiles\amrDb.tsv -prefix goodName`
+
+### R9.4 flow cells
+
+The settings for freezeTB are setup for R10.4 flow cells.
+  If you plan on using R9.4 flow cells, then at least
+  disable frame shift checking and increase the required
+  percentage of indels needed to keep an AMR to 70%.
 
 # Extra files:
 

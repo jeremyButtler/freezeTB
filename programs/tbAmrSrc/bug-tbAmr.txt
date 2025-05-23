@@ -4,7 +4,12 @@ b checkAmr.c:2587
 # First kept frameshift case (BC33)
 #b checkAmr.c:1053 if iAmr == 3059
 #b checkAmr.c:983 if refPosUI == 1917940
-b checkAmr.c:887 if amrAryST[siAmr].refPosUI == 2155167
+#b checkAmr.c:887 if amrAryST[siAmr].refPosUI == 2155167
+b checkAmr.c:898 if siAmr == 13103
+b checkAmr.c:898 if siAmr == 14869
+b checkAmr.c:898 if siAmr == 13349
+b checkAmr.c:898 if siAmr == 13615
+#b checkAmr.c:1760 if amrAryST[siAmr].varIdStr[11] == '?'
 
 # If I had resistance
 #b checkAmr.c:1391
