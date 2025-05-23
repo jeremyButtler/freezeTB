@@ -10,8 +10,6 @@
 '     - tof04: con_clust general functions
 '     - tof05: build/use index_clustST; consensus to
 '     - tof06: consensus and cluster functions
-'     - tof07: var_clust general
-'     - tof08: hist_clust support + probability functions
 '   - TOF00: header entry
 '     o header:
 '       - included libraries
@@ -80,36 +78,8 @@
 '       - extracts reads for a signle cluster
 '     o fun26: pbins_clustST
 '       - extracts reads for each cluster to a sam file
-'   - TOF07: var_clust general
-'     o fun27: blank_var_clustST
-'       - blanks var_clustST for use with a new reference
-'     o fun28: init_var_clustST
-'       - initializes a var_clustST array
-'     o fun29: freeStack_var_clustST
-'       - frees arrays in a var_clustST struct
-'     o fun30: freeHeap_var_clustST
-'       - frees a heap allocated var_clustST struct
-'     o fun31: freeHeapAry_var_clustST
-'       - frees an array of heap allocated var_clustST
-'     o fun32: setupRef_var_clustST
-'       - setsup a var_clustST for a reference
-'     o fun33: rmLowDepth_var_clustST
-'       - remove low read depth variants in a var_clustST
-'   - TOF08: hist_clust support + probability functions
-'     o fun34: blank_hist_clustST
-'       - blanks hist_clustST for use
-'     o fun35: init_hist_clustST
-'       - initializes hist_clustST for use
-'     o fun36: freeStack_hist_clustST
-'       - frees variables inside a hist_clustST
-'     o fun37: freeHeap_hist_clustST
-'       - frees a hist_clustST struct
-'     o fun38: prob_clustST
-'       - find probability that a profile is supported
-'     o fun39: roughProb_clustST
-'       - get expected power of 10 of profile being unique
-'     o fun40: findBestProf_hist_clustST
-'       - finds best profile in a hist_clustST history
+'   o license:
+'     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -145,7 +115,6 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   - .c  #include "../genLib/base10str.h"
-!   - .c  #include "../genLib/strAry.h"
 !   - .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -2771,690 +2740,73 @@ pbins_clustST(
       return errSC;
 } /*pbins_clustST*/
 
-/*-------------------------------------------------------\
-| Fun27: blank_var_clustST
-|   - blanks var_clustST for use with a new reference
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST struct to blank
-| Output:
-|   - Modifies:
-|     o sets all values in aAryUI, cAryUI, gAryUI,
-|       tAryUI, delAryUI, and insAryUI to 0
-|     o sets lenRefUI to 0
-\-------------------------------------------------------*/
-void
-blank_var_clustST(
-   struct var_clustST *varSTPtr
-){
-   unsigned int uiBase = 0;
-
-   varSTPtr->refNumUI = 0;
-   varSTPtr->lenRefUI = 0;
-
-   for(
-      uiBase = 0;
-      uiBase < varSTPtr->lenUI;
-      ++uiBase
-   ){ /*Loop: blank arrays*/
-      if(varSTPtr->aAryUI)
-         varSTPtr->aAryUI[uiBase] = 0;
-
-      if(varSTPtr->cAryUI)
-         varSTPtr->cAryUI[uiBase] = 0;
-
-      if(varSTPtr->gAryUI)
-         varSTPtr->gAryUI[uiBase] = 0;
-
-      if(varSTPtr->tAryUI)
-         varSTPtr->tAryUI[uiBase] = 0;
-
-      if(varSTPtr->delAryUI)
-         varSTPtr->delAryUI[uiBase] = 0;
-
-      if(varSTPtr->insAryUI)
-         varSTPtr->insAryUI[uiBase] = 0;
-   } /*Loop: blank arrays*/
-} /*blank_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun28: init_var_clustST
-|   - initializes a var_clustST array
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST struct to initialize
-| Output:
-|   - Modifies:
-|     o sets all values to 0
-\-------------------------------------------------------*/
-void
-init_var_clustST(
-   struct var_clustST *varSTPtr
-){
-   varSTPtr->aAryUI = 0;
-   varSTPtr->cAryUI = 0;
-   varSTPtr->gAryUI = 0;
-   varSTPtr->tAryUI = 0;
-   varSTPtr->delAryUI = 0;
-   varSTPtr->insAryUI = 0;
-
-   varSTPtr->lenUI = 0;
-   blank_var_clustST(varSTPtr);
-} /*init_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun29: freeStack_var_clustST
-|   - frees arrays in a var_clustST struct
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST with arrays to free
-| Output:
-|   - Frees:
-|     o all arrays (and initializes)
-\-------------------------------------------------------*/
-void
-freeStack_var_clustST(
-   struct var_clustST *varSTPtr
-){
-   if(! varSTPtr)
-      return; /*no struct input*/
-
-   if(varSTPtr->aAryUI)
-      free(varSTPtr->aAryUI);
-
-   if(varSTPtr->cAryUI)
-      free(varSTPtr->cAryUI);
-
-   if(varSTPtr->gAryUI)
-      free(varSTPtr->gAryUI);
-
-   if(varSTPtr->tAryUI)
-      free(varSTPtr->tAryUI);
-
-   if(varSTPtr->delAryUI)
-      free(varSTPtr->delAryUI);
-
-   if(varSTPtr->insAryUI)
-      free(varSTPtr->insAryUI);
-
-   init_var_clustST(varSTPtr);
-} /*freeStack_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun30: freeHeap_var_clustST
-|   - frees a heap allocated var_clustST struct
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST to free
-| Output:
-|   - Frees:
-|     o varSTPtr (you must set to 0)
-\-------------------------------------------------------*/
-void
-freeHeap_var_clustST(
-   struct var_clustST *varSTPtr
-){
-   if(varSTPtr)
-   { /*If: have struct to free*/
-      freeStack_var_clustST(varSTPtr);
-      free(varSTPtr);
-   } /*If: have struct to free*/
-} /*freeHeap_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun31: freeHeapAry_var_clustST
-|   - frees an array of heap allocated var_clustST
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST array to free
-|   - lenUI:
-|     o length of var_clustST array (index 1)
-| Output:
-|   - Frees:
-|     o all var_clustST structs in varSTPtr
-|      (you must set varSTPtr to 0)
-\-------------------------------------------------------*/
-void
-freeHeapAry_var_clustST(
-   struct var_clustST *varSTPtr,
-   signed int lenSI
-){
-   if(! varSTPtr)
-      return; /*not structs input*/
-
-   --lenSI;
-
-   while(lenSI >= 0)
-      freeHeap_var_clustST(&varSTPtr[lenSI]);
-
-   free(varSTPtr);
-} /*freeHeapAry_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun32: setupRef_var_clustST
-|   - setsup a var_clustST for a reference
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST to set up
-|   - lenRefUI:
-|     o length of reference to add (index 1)
-| Output:
-|   - Modifies:
-|     o arrays in varSTPtr to have allocated memory
-|     o lenRefUI in varSTPtr to be lenRefUI
-|     o lenUI in varSTPtr to be lenRefUI (if shorter)
-|   - Returns:
-|     o 0 for no errors
-|     o def_memErr_clustST for memory errors
-\-------------------------------------------------------*/
-signed char
-setupRef_var_clustST(
-   struct var_clustST *varSTPtr,
-   unsigned int lenRefUI
-){
-   varSTPtr->lenRefUI = lenRefUI;
-
-   if(varSTPtr->lenUI < lenRefUI)
-   { /*If: need to resiaze arrays*/
-      freeStack_var_clustST(varSTPtr);
-      varSTPtr->lenUI = lenRefUI;
-   } /*If: need to resiaze arrays*/
-
-   if(! varSTPtr->aAryUI)
-   { /*If: a array needs memory*/
-      varSTPtr->aAryUI =
-         malloc(lenRefUI * sizeof(unsigned int));
-
-      if(! varSTPtr->aAryUI)
-         goto memErr_fun06;
-   } /*If: a array needs memory*/
-
-   if(! varSTPtr->cAryUI)
-   { /*If: c array needs memory*/
-      varSTPtr->cAryUI =
-         malloc(lenRefUI * sizeof(unsigned int));
-
-      if(! varSTPtr->cAryUI)
-         goto memErr_fun06;
-   } /*If: c array needs memory*/
-
-   if(! varSTPtr->gAryUI)
-   { /*If: g array needs memory*/
-      varSTPtr->gAryUI =
-         malloc(lenRefUI * sizeof(unsigned int));
-
-      if(! varSTPtr->gAryUI)
-         goto memErr_fun06;
-   } /*If: g array needs memory*/
-
-   if(! varSTPtr->tAryUI)
-   { /*If: t array needs memory*/
-      varSTPtr->tAryUI =
-         malloc(lenRefUI * sizeof(unsigned int));
-
-      if(! varSTPtr->tAryUI)
-         goto memErr_fun06;
-   } /*If: t array needs memory*/
-
-   if(! varSTPtr->delAryUI)
-   { /*If: del array needs memory*/
-      varSTPtr->delAryUI =
-         malloc(lenRefUI * sizeof(unsigned int));
-
-      if(! varSTPtr->delAryUI)
-         goto memErr_fun06;
-   } /*If: del array needs memory*/
-
-   if(! varSTPtr->insAryUI)
-   { /*If: ins array needs memory*/
-      varSTPtr->insAryUI =
-         malloc(lenRefUI * sizeof(unsigned int));
-
-      if(! varSTPtr->insAryUI)
-         goto memErr_fun06;
-   } /*If: ins array needs memory*/
-
-   blank_var_clustST(varSTPtr);
-
-   return 0;
-
-   memErr_fun06:;
-   return def_memErr_clustST;
-} /*setupRef_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun33: rmLowDepth_var_clustST
-|   - remove low read depth variants in a var_clustST
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST to set up
-|   - minDepthUI:
-|     o min depth to keep a variant
-| Output:
-|   - Modifies:
-|     o arrays in varSTPtr to have low read depth
-|       positions set to 0
-\-------------------------------------------------------*/
-void
-rmLowDepth_var_clustST(
-   struct var_clustST *varSTPtr,
-   unsigned int minDepthUI
-){
-   unsigned int uiBase = 0;
-
-   for(
-      uiBase = 0;
-      uiBase < varSTPtr->lenRefUI;
-      ++uiBase
-   ){ /*Loop: remove low read depth variants*/
-      if(varSTPtr->aAryUI[uiBase] < minDepthUI)
-         varSTPtr->aAryUI[uiBase] = 0;
-
-      if(varSTPtr->cAryUI[uiBase] < minDepthUI)
-         varSTPtr->cAryUI[uiBase] = 0;
-
-      if(varSTPtr->gAryUI[uiBase] < minDepthUI)
-         varSTPtr->gAryUI[uiBase] = 0;
-
-      if(varSTPtr->tAryUI[uiBase] < minDepthUI)
-         varSTPtr->tAryUI[uiBase] = 0;
-
-      if(varSTPtr->delAryUI[uiBase] < minDepthUI)
-         varSTPtr->delAryUI[uiBase] = 0;
-
-      if(varSTPtr->insAryUI[uiBase] < minDepthUI)
-         varSTPtr->insAryUI[uiBase] = 0;
-   } /*Loop: remove low read depth variants*/
-} /*rmLowDepth_var_clustST*/
-
-/*-------------------------------------------------------\
-| Fun34: blank_hist_clustST
-|   - blanks hist_clustST for use
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST struct to blank
-| Output:
-|   - Modifies:
-|     o sets all values (except lenUI) to 0
-|     o sets all arrays to be filled with 0's
-\-------------------------------------------------------*/
-void
-blank_hist_clustST(
-   struct hist_clustST *histSTPtr
-){
-   unsigned int uiHist = 0;
-
-   histSTPtr->startUI = 0;
-   histSTPtr->endUI = 0;
-   histSTPtr->numVarUI = 0;
-   histSTPtr->depthUL = 0;
-
-   for(
-      uiHist = 0;
-      uiHist < histSTPtr->lenUI;
-      ++uiHist
-   ){ /*Loop: blank arrays*/
-      if(histSTPtr->indexAryUI)
-         histSTPtr->indexAryUI[uiHist] = 0;
-
-      if(histSTPtr->typeAryUC)
-         histSTPtr->typeAryUC[uiHist] = 0;
-
-      if(histSTPtr->profAryUI)
-         histSTPtr->profAryUI[uiHist] = 0;
-
-      if(histSTPtr->histAryUI)
-         histSTPtr->histAryUI[uiHist] = 0;
-
-      if(histSTPtr->depthAryUL)
-         histSTPtr->depthAryUL[uiHist] = 0;
-   } /*Loop: blank arrays*/
-} /*blank_hist_clustST*/
-
-/*-------------------------------------------------------\
-| Fun35: init_hist_clustST
-|   - initializes hist_clustST for use
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST struct to initialize
-| Output:
-|   - Modifies:
-|     o sets all values to 0
-\-------------------------------------------------------*/
-void
-init_hist_clustST(
-   struct hist_clustST *histSTPtr
-){
-   histSTPtr->lenUI = 0;
-
-   histSTPtr->indexAryUI = 0;
-   histSTPtr->typeAryUC = 0;
-   histSTPtr->profAryUI = 0;
-   histSTPtr->histAryUI = 0;
-   histSTPtr->depthAryUL = 0;
-
-   blank_hist_clustST(histSTPtr);
-} /*init_hist_clustST*/
-
-/*-------------------------------------------------------\
-| Fun36: freeStack_hist_clustST
-|   - frees variables inside a hist_clustST
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST with variables to free
-| Output:
-|   - Modifies:
-|     o frees all arrays, then initializes
-\-------------------------------------------------------*/
-void
-freeStack_hist_clustST(
-   struct hist_clustST *histSTPtr
-){
-   if(! histSTPtr)
-      return; /*nothing to free*/
-
-   if(histSTPtr->indexAryUI)
-      free(histSTPtr->indexAryUI);
-
-   if(histSTPtr->typeAryUC)
-      free(histSTPtr->typeAryUC);
-
-   if(histSTPtr->profAryUI)
-      free(histSTPtr->profAryUI);
-
-   if(histSTPtr->histAryUI)
-      free(histSTPtr->histAryUI);
-
-   if(histSTPtr->depthAryUL)
-      free(histSTPtr->depthAryUL);
-
-   init_hist_clustST(histSTPtr);
-} /*freeStack_hist_clustST*/
-
-/*-------------------------------------------------------\
-| Fun37: freeHeap_hist_clustST
-|   - frees a hist_clustST struct
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST struct to free
-| Output:
-|   - Frees:
-|     o histSTPtr (you must set to 0)
-\-------------------------------------------------------*/
-void
-freeHeap_hist_clustST(
-   struct hist_clustST *histSTPtr
-){
-   if(histSTPtr)
-   { /*If: have struct to free*/
-      freeStack_hist_clustST(histSTPtr);
-      free(histSTPtr);
-   } /*If: have struct to free*/
-} /*freeHeap_hist_clustST*/
-
-/*-------------------------------------------------------\
-| Fun38: prob_clustST
-|   - find probability that a profile is supported
-|   - probablity calcualtion is from hairSplitter
-|     Roland Faure, Dominique Lavenier,
-|     and Jean-Francios Flot; HairSplittler: haplotype
-|     assembly from long, nosiy reads; preprint; 2024
-|     https://doi.org/10.1101/2024.02/13.580067
-| Input:
-|   - numVarUI:
-|     o number of variants in profile
-|   - lenTargUI:
-|     o number of bases in target region
-|   - depthUL:
-|     o depth of profile
-|   - maxDepthUL:
-|     o maximum number of reads
-|   - errF:
-|     o expected error rate (as percentage)
-| Output:
-|   - Returns:
-|     o probability of profile
-\-------------------------------------------------------*/
-double
-prob_clustST(
-   unsigned int numVarUI,
-   unsigned int lenTargUI,
-   unsigned long depthUL,
-   unsigned long maxDepthUL,
-   float errF
-){
-   unsigned int uiProb = 0;
-   double probDbl = 0;
-
-   /*b choose m (variants)*/
-   for(
-      uiProb = 0;
-      uiProb < numVarUI;
-      ++uiProb
-   ){ /*Loop: find number of variations*/
-      probDbl *=
-        (
-             (double) (lenTargUI - uiProb)
-           / (double) (uiProb + 1)
-        ) * errF;
-   } /*Loop: find number of variations*/
-
-   /*(b choose m)*/
-   for(
-      uiProb = 0;
-      uiProb < depthUL;
-      ++uiProb
-   ){ /*Loop: find combinations for read depth*/
-      probDbl *=
-        (
-             (double) (maxDepthUL - uiProb)
-           / (double) (uiProb + 1)
-        ) * errF;
-   } /*Loop: find combinations for read depth*/
-
-   /*finish off e^[a * b]*/
-   for(
-      uiProb = numVarUI + depthUL;
-      uiProb < numVarUI * depthUL;
-      ++uiProb
-   ) probDbl *= errF;
-
-   return probDbl;
-} /*prob_clustST*/
-
-/*-------------------------------------------------------\
-| Fun39: roughProb_clustST
-|   - finds expected power of 10 of profile being unique
-|   - always use prob_clustST to verify
-| Input:
-|   - numVarUI:
-|     o number of variants in profile
-|   - lenTargUI:
-|     o number of bases in target region
-|   - depthUL:
-|     o depth of profile
-|   - maxDepthUL:
-|     o maximum number of reads
-|   - errF:
-|     o expected error rate (as percentage)
-| Output:
-|   - Returns:
-|     o a rough estimate of the power 10 of probability
-\-------------------------------------------------------*/
-signed long
-roughProb_clustST(
-   unsigned int numVarUI,
-   unsigned int lenTargUI,
-   unsigned long depthUL,
-   unsigned long maxDepthUL,
-   float errF
-){
-   unsigned int errDigUI = 0;
-   unsigned int lenDigUI = 0;
-   unsigned int depthDigUI = 0;
-   unsigned int tmpSI = 0;
-
-   do{ /*Loop: find power of error*/
-      tmpSI = errF * 10;
-      ++errDigUI;
-      errF *= 10;
-   } while(tmpSI == 0);
-     /*Loop: find power of error*/
-
-   do{ /*Loop: find power of length*/
-      tmpSI = lenTargUI / 10;
-      ++lenDigUI;
-      lenTargUI /= 10;
-   } while(tmpSI != 0);
-     /*Loop: find power of length*/
-
-   do{ /*Loop: find power of depth*/
-      tmpSI = maxDepthUL / 10;
-      ++depthDigUI;
-      maxDepthUL /= 10;
-   } while(tmpSI != 0);
-     /*Loop: find power of depth*/
-
-   return
-      (signed long)
-        ( (depthDigUI * depthUL) + (lenDigUI * numVarUI) )
-      - (errDigUI * numVarUI * depthUL);
-      /*this is very rough, but it should give me an idea
-      `   if two profiles are in the same power of 10
-      */
-} /*roughProb_clustST*/
-
-/*-------------------------------------------------------\
-| Fun40: findBestProf_hist_clustST
-|   - finds best profile in a hist_clustST history
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST with history to search
-|   - probDblPtr:
-|     o pointer to double to hold probability
-|   - errRateF:
-|     o expected error rate (%)
-| Output:
-|   - Modifies:
-|     o probDblPtr to have probability of best history
-|   - Returns:
-|     o index of history with best probability
-\-------------------------------------------------------*/
-unsigned int
-findBestProf_hist_clustST(
-   struct hist_clustST *histSTPtr, /*has history*/
-   double *probDblPtr,             /*will have odds*/
-   float errRateF                  /*expected error*/
-){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun40 TOC:
-   '   - finds best profile in a hist_clustST history
-   '   o fun40 sec01:
-   '     - variable declarations
-   '   o fun40 sec02:
-   '     - find best profile in history
-   '   o fun40 sec03:
-   '     - find probability of best profile in history
-   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun40 Sec01:
-   ^   - variable declarations
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   unsigned int uiHist = 0;
-   unsigned int lenUI =
-      histSTPtr->endUI - histSTPtr->startUI + 1;
-
-   signed long probSL = 0;
-   double probDbl = 0;
-
-   signed char haveBestProbBl = 0;
-
-   unsigned int bestIndexUI = 0;
-   signed long bestProbSL = 0;
-   double bestProbDbl = 0;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun40 Sec02:
-   ^   - find best profile in history
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   for(
-      uiHist = 0;
-      uiHist < histSTPtr->lenUI;
-      ++uiHist
-   ){ /*Loop: find probabilities*/
-      probSL =
-        roughProb_clustST(
-           histSTPtr->histAryUI[uiHist], /*# variants*/
-           lenUI,                        /*overlap len*/
-           histSTPtr->depthAryUL[uiHist],/*depth of prof*/
-           histSTPtr->depthUL,           /*read depth*/
-           errRateF                      /*error rate*/
-        );
-
-      if(bestProbSL > probSL)
-      { /*If: new best*/
-         bestProbSL = probSL;
-         bestIndexUI = uiHist;
-         *probDblPtr = 0;
-         haveBestProbBl = 0;
-         continue;
-      } /*If: new best*/
-
-      else if(bestProbSL < probSL)
-          continue; /*old probability is better*/
-
-      /*this is the acutal probability. I use rough
-      `  becuase it is quicker
-      */
-      if(! haveBestProbBl)
-      { /*If: have not found probability yet*/
-         *probDblPtr =
-            prob_clustST(
-              histSTPtr->histAryUI[bestIndexUI],
-              lenUI,                       /*overlap len*/
-              histSTPtr->depthAryUL[bestIndexUI],
-              histSTPtr->depthUL,           /*read depth*/
-              errRateF                      /*error rate*/
-            );
-
-         haveBestProbBl = 1;
-      } /*If: have not found probability yet*/
-      
-      probDbl =
-        prob_clustST(
-           histSTPtr->histAryUI[uiHist], /*# variants*/
-           lenUI,                        /*overlap len*/
-           histSTPtr->depthAryUL[uiHist],/*depth of prof*/
-           histSTPtr->depthUL,           /*read depth*/
-           errRateF                      /*error rate*/
-        );
-
-      if(bestProbDbl > probDbl)
-      { /*If: new best probability*/
-         bestProbSL = probSL;
-         bestIndexUI = uiHist;
-         *probDblPtr = probDbl;
-      } /*If: new best probability*/
-   } /*Loop: find probabilities*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun40 Sec03:
-   ^   - find probability of best profile in history
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   if(! haveBestProbBl)
-   { /*If: have not found probability yet*/
-      *probDblPtr =
-         prob_clustST(
-           histSTPtr->histAryUI[bestIndexUI],
-           lenUI,                       /*overlap len*/
-           histSTPtr->depthAryUL[bestIndexUI],
-           histSTPtr->depthUL,           /*read depth*/
-           errRateF                      /*error rate*/
-         );
-   } /*If: have not found probability yet*/
-
-   return bestIndexUI;
-} /*findBestProf_hist_clustST*/
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconvient / not possible, this code is under the
+:   MIT license.
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

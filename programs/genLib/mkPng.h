@@ -43,6 +43,8 @@
 '     - add image IDAT header
 '   o .c fun20: addIend_st_mkPng
 '     - add end header (IEND) for png 
+'   o fun21: print_st_mkPng
+'     - prints a png to output file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #ifndef MAKE_GRAPH_PNG_H
@@ -407,7 +409,7 @@ addBar_st_mkPng(
 
 
 /*-------------------------------------------------------\
-| Fun20: print_st_mkPng
+| Fun21: print_st_mkPng
 |   - prints a png to output file
 | Input:
 |   - pngSTPtr:

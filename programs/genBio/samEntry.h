@@ -5,8 +5,6 @@
 '     - header guards and definitions
 '   o .h st01 samEntry:
 '     - Holds a single samfile entry
-'   o .h st02: refs_samEntry
-'     - holds reference length & name from sam file header
 '   o fun01 blank_samEntry:
 '     - Sets all non-alloacted variables in samEntry to 0
 '   o fun02 init_samEntry:
@@ -54,24 +52,6 @@
 '      - reverse complements a sam file sequence entry
 '   o fun20: getHead_samEntry
 '     - get header for a sam file
-'   o fun21: blank_refs_samEntry
-'     - blanks a refs_samEntry struct
-'   o fun22: init_refs_samEntry
-'     - initializes a refs_samEntry struct
-'   o fun23: freeStack_refs_samEntry
-'     - frees variables in a refs_samEntry struct
-'   o fun24: freeHeap_refs_samEntry
-'     - frees a refs_samEntry struct
-'   o fun25: setup_refs_samEntry
-'     - allocates memory for a refs_samEntry struct
-'   o fun26: realloc_refs_samEntry
-'     - reallocates memory for a refs_samEntry struct
-'   o fun27: getRefLen_samEntry
-'     - gets reference ids & length from a sam file header
-'   o fun28: findRef_refs_samEntry
-'     - finds a reference id in a refs_samEntry struct
-'   o fun29: addRef_samEntry
-'     - adds reference information to array in refStack
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
 '        pdf
@@ -156,18 +136,6 @@ typedef struct samEntry
     unsigned int qHistUI[def_maxQ_samEntry + 8];
     unsigned long sumQUL;             /*Total for mean Q*/
 }samEntry;
-
-/*-------------------------------------------------------\
-| ST02: refs_samEntry
-|   - holds reference length and name from sam file header
-\-------------------------------------------------------*/
-typedef struct refs_samEntry
-{
-   unsigned int *lenAryUI; /*reference lengths*/
-   signed char *idAryStr;  /*reference names (ids)*/
-   unsigned int numRefUI;  /*number of references*/
-   unsigned int arySizeUI; /*length of length/id arrays*/
-}refs_samEntry;
 
 /*-------------------------------------------------------\
 | Fun01: blank_samEntry
@@ -587,205 +555,6 @@ signed char *
 getHead_samEntry(
    struct samEntry *samSTPtr,
    void *samFILE
-);
-
-/*-------------------------------------------------------\
-| Fun21: blank_refs_samEntry
-|   - blanks a refs_samEntry struct
-| Input:
-|   - refsSTPtr:
-|     o pointer to refs_samEntry struct to blank
-| Output:
-|   - Modifies:
-|     o refsSTPtr to be blanked
-\-------------------------------------------------------*/
-void
-blank_refs_samEntry(
-   struct refs_samEntry *refSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun22: init_refs_samEntry
-|   - initializes a refs_samEntry struct
-| Input:
-|   - refsSTPtr:
-|     o pointer to refs_samEntry struct to initialize
-| Output:
-|   - Modifies:
-|     o refsSTPtr to be initialize (everything 0)
-\-------------------------------------------------------*/
-void
-init_refs_samEntry(
-   struct refs_samEntry *refSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun23: freeStack_refs_samEntry
-|   - frees variables in a refs_samEntry struct
-| Input:
-|   - refsSTPtr:
-|     o pointer to refs_samEntry with variables to free
-| Output:
-|   - Frees:
-|     o lenAryUI and refIdStr arrays in refsSTPtr
-\-------------------------------------------------------*/
-void
-freeStack_refs_samEntry(
-   struct refs_samEntry *refSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun24: freeHeap_refs_samEntry
-|   - frees a refs_samEntry struct
-| Input:
-|   - refsSTPtr:
-|     o pointer to refs_samEntry struct to free
-| Output:
-|   - Frees:
-|     o refSTPtr (you must set to 0)
-\-------------------------------------------------------*/
-void
-freeHeap_refs_samEntry(
-   struct refs_samEntry *refSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun25: setup_refs_samEntry
-|   - allocates memory for a refs_samEntry struct
-| Input:
-|   - refsSTPtr:
-|     o pointer to refs_samEntry struct to get memory for
-|   - numRefsUI:
-|     o number of refs to start out with (0 goes to 16)
-| Output:
-|   - Mofidifies:
-|     o lenAryUI and idAryUI in refSTPtr to have memory
-|   - Returns:
-|     o 0 for no errors
-|     o def_memErr_samEntry for memory errors
-\-------------------------------------------------------*/
-signed char
-setup_refs_samEntry(
-   struct refs_samEntry *refSTPtr,
-   unsigned int numRefsUI
-);
-
-/*-------------------------------------------------------\
-| Fun26: realloc_refs_samEntry
-|   - reallocates memory for a refs_samEntry struct
-| Input:
-|   - refsSTPtr:
-|     o pointer to refs_samEntry struct to reallocate
-|   - numRefsUI:
-|     o new number of refs
-| Output:
-|   - Mofidifies:
-|     o lenAryUI and idAryUI in refSTPtr to be resized
-|     o sizeAryUI to be numRefsUI
-|     o calls blank_refs_samEntry
-|   - Returns:
-|     o 0 for no errors
-|     o def_memErr_samEntry for memory errors
-\-------------------------------------------------------*/
-signed char
-realloc_refs_samEntry(
-   struct refs_samEntry *refSTPtr,
-   unsigned int numRefsUI
-);
-
-/*-------------------------------------------------------\
-| Fun27: getRefLen_samEntry
-|   - gets reference ids and length from a sam file header
-| Input:
-|   - refSTPtr:
-|     o pointer to refs_samEntry struct to hold id/length
-|     o is sorted by reference id (use functions in
-|       ../genLib/strAry to access ids)
-|   - samSTPtr:
-|     o pointer to samEntry struct to hold line after
-|       last reference (used for reading sam file)
-|   - samFILE:
-|     o FILE pointer to sam file header
-|   - outFILE:
-|     o FILE pointer to print all headers to (0 no print)
-|   - headStrPtr:
-|     o pointer to c-string to hold non-reference headers
-|   - lenHeadULPtr:
-|     o unsigned long with headStrPtr length
-| Output:
-|   - Modifies:
-|     o refSTPtr to have reference length and ids
-|     o samSTPtr to have first read
-|     o samFILE to point to first read after header
-|     o outFILE to have header (or not use if 0)
-|     o headStrPtr to have non-reference headers
-|     o lenHeadULPtr have new headStrPtr size (if resized)
-|   - Returns:
-|     o 0 for no errors
-|     o def_memErr_samEntry for memory errors
-|     o def_fileErr_samEntry for file errors
-\-------------------------------------------------------*/
-signed char
-getRefLen_samEntry(
-   struct refs_samEntry *refSTPtr,/*holds ref lengths*/
-   struct samEntry *samSTPtr,    /*for reading sam*/
-   void *samFILE,                /*sam file with lengths*/
-   void *outFILE,                /*print headers to*/
-   signed char **headStrPtr,     /*holds non-ref header*/
-   unsigned long *lenHeadULPtr   /*length of headStrPtr*/
-);
-
-/*-------------------------------------------------------\
-| Fun28: findRef_refs_samEntry
-|   - finds a reference id in a refs_samEntry struct
-| Input:
-|   - idStr:
-|     o c-string with reference id to find
-|   - refSTPtr:
-|     o pointer to refs_samEntry struct with references
-| Output:
-|   - Returns:
-|     o index of reference id if found
-|     o < 0 if reference id not in list
-\-------------------------------------------------------*/
-signed long
-findRef_refs_samEntry(
-   signed char *idStr,            /*id to find*/
-   struct refs_samEntry *refSTPtr /*holds ref lengths*/
-);
-
-/*-------------------------------------------------------\
-| Fun29: addRef_samEntry
-|   - adds reference information to array in refStack
-| Input:
-|   - idStr:
-|     o c-string with id to add
-|   - lenUI:
-|     o length of reference sequence
-|   - refsPtr:
-|     o pointer to refs_samEntry struct to add ref to
-|   - errSCPtr:
-|     o pointer to signed char to hold errors
-| Output:
-|   - Modifies:
-|     o idAryStr in refsPtr to have idStr
-|     o lenAryUI in refsPtr to have lenUI
-|     o numRefUI in refsPtr to be resized if realloc used
-|     o arrySizeUI in refsPtr to be incurmented by 1
-|     o errSCPtr to be
-|       * 0 for no error
-|       * def_expand_samEntry if needed to realloc
-|       * def_memErr_samEntry for memory error
-|   - Returns
-|     o index of reference
-|     o -1 for errors
-\-------------------------------------------------------*/
-signed long
-addRef_samEntry(
-   signed char *idStr,
-   unsigned int lenUI,
-   struct refs_samEntry *refsPtr,
-   signed char *errSCPtr
 );
 
 #endif

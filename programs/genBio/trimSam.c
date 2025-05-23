@@ -347,9 +347,15 @@ coords_trimSam(
       &seqPosSI
    );
 
+   samSTPtr->cigArySI[siCig] = cigBaseOnSI;
+   samSTPtr->refStartUI = (unsigned int) refPosSI;
+
    seqEndPosSI = seqPosSI;
    siEndCig = siCig;
    cigEndBaseSI = cigBaseOnSI;
+
+   if(samSTPtr->refEndUI < (unsigned int) endSI)
+      endSI = samSTPtr->refEndUI;
 
    findRefPos_samEntry(
       samSTPtr,
@@ -360,12 +366,13 @@ coords_trimSam(
       &seqEndPosSI
    );
 
-   samSTPtr->cigArySI[siCig] = cigBaseOnSI;
-   samSTPtr->refStartUI = (unsigned int) refPosSI;
-
-   /*new tricks*/
    samSTPtr->cigArySI[siEndCig] -= cigEndBaseSI;
    samSTPtr->readLenUI = seqEndPosSI - seqPosSI;
+
+   if(! siEndCig) ; /*at start (nothing kept)*/
+   else if(! samSTPtr->cigArySI[siEndCig])
+      --siEndCig;
+      
 
    samSTPtr->cigLenUI = siEndCig - siCig + 1;
 

@@ -7,10 +7,171 @@ Here to give an idea of how to use the libraries in
 # TOC: Table Of Contents
 
 - genBio TOC: Table Of Contents
+  - [samRef](#samEntry)
+    - get reference ids and lengths from samfile header
   - [samEntry](#samEntry)
     - has structure to hold sam file entries
   - [seqST](#seqST)
     - has structure to read in fastq or fasta files
+
+# samRef
+
+Has structure and function to scan sam file header and
+  find/extract reference ids and lengths.
+
+# refs_samRef:
+
+Has the list of references and their lengths found in the
+  sam file header.
+
+- lenAryUI array that has all the reference lengths
+- idAryStr has the reference names
+  - this is a c-string array from ../genLib/strAry.c, so
+    you will need to use get_strAry() (fun03
+    ../genLib/strAry.c) to get ids out of it.
+- numRefUI has the number of references in lenAryUI and
+  idAryStr
+  
+### refs_samRef workflow
+
+The workflow for a refs_samRef struct is similar to a
+  samEntry struct. You first initialize the struct, then
+  setup initial memory. After that you can read in a
+  samEntry header or add references one by one. You can
+  then search the structure for references. Finally you
+  will free the struct.
+
+You can initialize a refs_samRef struct with
+  `init_refs_samRef(refs_samRefPointer);`.
+
+You can then setup memory using 
+
+```
+init_refs_samRef(refs_samRefPointer);
+if(setup_refs_samRef(refs_samRefPointer);
+   /*deal with memory errors*/
+```
+
+You can then read the headers from a sam file using
+  getRefLen_samEntry. This will read the headers until
+  it hits the frist sequence.
+
+- Input:
+  - pointer to a `refs_samRef` structure to store
+    lengths and reference ids in
+  - pointer to a samEntry to get lines
+    - will be set to first sequence line
+  - FILE pointer to sam file to get references from
+  - FILE pointer to file to print headers to
+    - use 0/null to not print headers
+  - c-string pointer to get non-reference header entries
+    - resized as needed (ok if pointer is set to 0)
+  - unsinged long pointer to get/has header c-string size
+
+- Output:
+  - Returns 0 for no errors
+  - Returns def_memErr_samEntry for memory errors
+  - Returns def_fileErr_samEntry for file errors
+  - stores header in input c-string
+  - updates unsigned long pointer to header c-string is
+    resized
+
+You can then find references in the refs_samRef struct
+  using findRef_refs_samRef. The input is the id to
+  search for and teh refs_samRef struct to search. The
+  output is the index of the reference or a negative
+  number if no referene was found.
+
+Finally you can free the refs_samRef structure using
+  freeStack_refs_samRef (for variables in struct) or
+  with freeHeap_refs_samRef (for entire struct). If
+  you use freeHeap_refs_samRef, remember to set you
+  structure pointer to null.
+
+```
+freeStack_refs_samRef(refs_samRefPointer);
+```
+
+```
+freeHeap_refs_samRef(refs_samRefPointer);
+refs_samRefPointer = 0;
+```
+
+### refs_samRef example
+
+```
+#ifdef PLAN9
+  #include <u.h>
+  #include <libc.h>
+#else
+  #include <stdlib.h>
+#endif
+
+#include <stdio.h>
+#include "samEntry.h"
+
+
+int
+main(
+){
+
+   signed char errorSC = 0;
+   signed char *headerStr = 0;
+   unsigned long headerSizeUL = 0;
+   signed long indexSL = 0;
+   
+   struct refs_samRef refsStruct;
+   struct samEntry samStruct;
+   
+   FILE *samFILE = fopen("file.sam", "r");
+   
+   init_refs_samRef(&refsStruct);
+   init_samEntry(&samStruct);
+   
+   if(! samFILE)
+      /*deal with file errors*/
+   if(setup_samEntry(&samStruct)
+      /*deal with memory errors*/
+   if(setup_refs_samRef(&refsStruct))
+      /*deal with memory errors*/
+   
+   errorSC =
+      getRefLen_samRef(
+         &refStruct,
+         &samStruct, /*set to first read in sam file*/
+         samFILE,
+         0,      /*not printing headers to output file*/
+         &headerStr,
+         &headerSizeUL
+      );
+   
+   indexSL =
+     findRef_refs_samRef(&refStruct,samStruct.refIdStr);
+   
+   if(indexSL < 0)
+      /*likely umapped read (reference not in header)*/
+   else
+   { /*Else: found reference, print reference length*/
+      printf(
+         "%s\t%li\n",
+         refStruct.idAryStr[indexSL],
+         refStruct.lenAryUI[indexSL]
+      );
+   } /*Else: found reference, print reference length*/
+   
+   freeStack_samEntry(&samStruct);
+   freeStack_refs_samRef(&refStruct);
+   fclose(samFILE);
+   samFILE = 0;
+   
+   if(headerStr)
+      free(headerStr);
+   headerStr = 0;
+   
+   return 0;
+}
+```
+
 
 # samEntry
 
@@ -19,10 +180,6 @@ Has the samEntry structure, which is for reading in
   used to print sam file entries as stats (filtsam
   -out-stats), as fastq's, as sam files, or as fasta
   files.
-
-Also has refs_samEntry, which is used to hold reference
-  sequences length and name. This is stored in the header.
-  This is mainly here for tbCon.
 
 ## Error types:
 
@@ -49,16 +206,16 @@ The samEntry struct is large, but should have enough
 - read and reference ID/name variables
    - qryIdStr: is a c-string with the read id for the
      mapped read/sequence
-     - lenQryIdUC holds the length
+     - qryIdLenUC holds the length
    - refIdStr: is a c-string with the read id for the
      reference the read/sequence mapped to
-     - lenRefIdUC holds the length
+     - refIdLenUC holds the length
 - variables with the cigar entry
   - cigTypeStr: is the symbols (=, X, M, I, D, S, H) in
     the cigar entry
   - cigArySI: has the number of times each symbol in the
     cigar entry is repeated
-  - lenCigUI is the length of cigTypeStr and cigArySI
+  - cigLenUI is the length of cigTypeStr and cigArySI
 - sequence variables
   - seqStr is a c-string with the sequence
   - qStr is a c-string with the q-score entry
@@ -74,21 +231,21 @@ The samEntry struct is large, but should have enough
   - flagUS has the flags (2nd sam file entry)
   - medianQF has the median q-score
   - meanQF has the mean q-score
-  - numMatchUI has the number of matches
-  - numSnpUI has the number of SNPs
-  - numInsUI has the number of insertions
-  - numDelUI has the number of deletions
-  - numMaskUI has the number of soft masked bases
+  - matchCntUI has the number of matches
+  - snpCntUI has the number of SNPs
+  - insCntUI has the number of insertions
+  - delCntUI has the number of deletions
+  - maskCntUI has the number of soft masked bases
 - extra entries:
   - extraStr is a c-strig the extra entries (beyond the
     first 11) in the sam file
     - it also gets the header or comment when an `@line`
       is read
-   - lenExtraUI is the length (number of bytes) in
+   - extraLenUI is the length (number of bytes) in
      extraStr
 - other entries:
   - rNextStr has the RNEXT entry
-    - length is in lenRNextUC
+    - length is in rnextLenUC
   - pNextSI has the PNEXT entry
   - tLenSI has the TLEN entry
 
@@ -139,28 +296,55 @@ For heap allocated samEntry structs use freeHeap_samEntry
 
 You can use get_samEntry (fun12 samEntry.c/h) to get a
   sam file entry from a file. This returns 0 for success,
-  def_EOF_samEntry for end of file, and
-  def_memErr_samEntry for memory errors.
+  def_EOF_samEntry for end of file, def_fileErr_samEntry
+  for an invalid line, and def_memErr_samEntry for memory
+  errors.
 
 - Input:
   - samEntry structure pionter to get new entry
     - this function calls blank_samEntry, so do not worry
       about this
-  - c-string pointer to buffer to refill
-    - this is resized as needed, until it can accomindate
-      the largest entry in the sam file
-    - it is ok if this points to null
-  - unsigned long pointer to get the size of the input
-    c-string
-    - this is changed as needed
   - FILE pointer with sam file to get entry from
     - advanced to next line in sam file
 
 Be aware, comments go in extra entry.
 
 ```
-if(samEntryStruct->extraStr[0] == '@')
-   /*handel comment (header line)*/;
+errorSC = get_samEntry(samEntryStructPointer, samFILE);
+if(errorSC == def_memErr_samEntry)
+   /*deal with memory error*/
+else if(errorSC == def_fileErr_samEntry)
+   /*deal with file error*/
+else if(errorSC == def_EOF_samEntry)
+{ /*Else If: at end of file*/
+   freeHeap_samEntry(samEntryStructPointer);
+   return 1;
+} /*Else If: at end of file*/
+
+if(samEntryStructPointer->extraStr[0] == '@')
+   /*if is comment (header line)*/;
+else
+   /*else is read*/
+```
+
+You can also read in a line and convert it to a sam file
+  entry using lineTo_samEntry (fun11 samEntry.c/h). The
+  input is a pointer to a samEntry struct and the c-string
+  to convert. The return values are def_memErr_samEntry
+  for memory errors or 0 for success.
+
+```
+lengthSL =
+   getFullLine_fileFun(
+      samFILE,
+      &bufferStr,
+      &bufferSizeSL,
+      &bytesSL,  /*real bytes read from file*/
+      0          /*copy at index 0 in buffStr*/
+   );
+
+if(lineTo_samEntry(samStructPionter, bufferStr))
+   /*deal with memory error*/
 ```
 
 #### samEntry: move to target position
@@ -209,8 +393,20 @@ lastCigar =
 if(samEntryStruct->cigTypeStr[cigarPosition] == 'D')
    /*reference base at target is a deltion in the query*/;
 else
-{ /*Else: do somenthing with position*/
-} /*Else: do somenthing with position*/
+  /*do somenthing with position*/
+
+/*now find position 1000 from current position, this can
+`   only move forward
+*/
+lastCigar =
+   findRefPos_samEntry(
+     samEntryStruct,
+     &cigarPosition,
+     &basesInCigar,
+     1000,
+     &referencePosition,
+     &sequencePosition,
+);
 ```
 
 #### samEntry: swap entries
@@ -227,44 +423,54 @@ Swapping is done lazely, so pointers are swapped instead
 
 #### samEntry: less usefull functions
 
-get_samEntry is a wrapper around two functions, which can
-  be called separately to skip. The first is
-  getLine_samEntry (fun10 samEntry.c/h), which reads in a
-  single line from a sam file. The next is lineTo_samEntry
-  (fun11 samEntry.c/h), which adds a line to a samEntry
-  struct. See the function headers for more information if
-  you are intrested in using one of these functions.
+**q-score update**
 
 If you modify the q-score entry in a samEntry struct, then
   you can update thm with findQScores_samEntry (fun08
   samEntry.c/h). However, before calling, make sure you
   blank your q-score histogram (qHistUI) in your samEntry
   struct. This takes in a pointer to a samEntry struct to
-  update and returns nothing.
+  update and returns nothing. It will blank and then
+  update all q-score values in the structure.
 
-Here is how you would blankl the q-score entry:
+**q-score copy**
 
-```
-for(qScore = 0; qScore < def_maxQ_samEntry; ++qScore)
-   samEntry_struct->qHistUI[qScore] = 0;
-```
+If you need to copy a q-score entry into you samEntry
+  structure, use cpQEntry_samEntry (fun09 samEntry.c/h).
+  This function will both copy the q-score entry and
+  also update all q-score stats. You must make sure there
+  is enough memory before updating the q-scores.
+
+- Input:
+  - samEntry structure pointer to copy q-scores to
+  - c-string with q-scores to copy
+  - 1 (always provide this)
+
+The return value is the length of the copied c-string.
+
+**get sam file header**
+
+You can read the entire header for a samEntry struct
+  into a c-string using getHead_samEntry
+  (fun20 samEntry.c/h).
+
+- Input:
+  - samEntry structure pointer to read sam file with
+    - will be set to frist non-header line
+  - FILE poitner to sam file to get header from
+- Returns:
+  - pointer to c-string with header
+  - 0 for memory errors
 
 ### samEntry printing:
 
 #### samEntry printing; sam files
 
 You can print a samEntry struct to a sam file using
-  p_samEntry (fun15 samEntry.c/h). The return value is
-  0 for no errors and def_memErr_samEntry for memory
-  errors.
+  p_samEntry (fun15 samEntry.c/h).
 
 - Input:
   - samEntry structure pointer to print to sam file
-  - pointer to c-string buffer to hold printed entry
-    - this is resized as needed (use same buffer as
-      get_samEntry)
-  - unsigned long pointer with buffer size
-    - updated when needed
   - 1 or 0 marking if you want a line break at the end
     - 0: put line break at end
     - 1: do not add a line break
@@ -324,8 +530,6 @@ main(
    signed char headBl = 1; /*print header for stats file*/
    signed char errorSC = 0;
    struct samEntry samStruct;
-   signed char *buffStr = 0;
-   unsigned long sizeUL = 0;
 
    singed char *fileStr = (signed char *) "file.sam";
    FILE *samFILE = 0;
@@ -347,11 +551,12 @@ main(
    ^ get past headers
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   errorSC =
-     get_samEntry(&samStruct, &buffStr, &sizeUL, samFILE);
+   errorSC = get_samEntry(&samStruct, samFILE);
 
    if(errorSC == def_memErr_samEntry)
       goto memErr_main;
+   else if(errorSC == def_fileErr_samEntry)
+      goto fileErr_main;
    else if(errorSC)
       goto empytFile_main;
 
@@ -360,18 +565,12 @@ main(
       if(samStruct.extraStr[0] != '@')
          break; /*end of header*/
 
-      errorSC =
-         get_samEntry(
-            &samStruct,
-            &buffStr,
-            &sizeUL,
-            samFILE
-         );
+      errorSC = get_samEntry(&samStruct, samFILE);
    } /*Loop: get headers*/
 
    if(errorSC == def_memErr_samEntry)
       goto memErr_main;
-   else if(errorSC)
+   else if(errorSC == def_fileErr_samEntry)
       goto fileErr_main;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -391,17 +590,13 @@ main(
            /*1 is to get anonymous base counts*/
            /*headBl is set to 0 after frist call*/
 
-      errorSC =
-         get_samEntry(
-            &samStruct,
-            &buffStr,
-            &sizeUL,
-            samFILE
-         );
+      errorSC = get_samEntry(&samStruct, samFILE);
    } /*Loop: get reads in sam file*/
 
    if(errorSC == def_memErr_samEntry)
       goto memErr_main;
+   if(errorSC == def_fileErr_samEntry)
+      goto fileErr_main;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ clean up, deal with errors, and return
@@ -447,33 +642,102 @@ main(
 
       freeStack_samEntry(&samStruct);
 
-      free(buffStr);
-      buffStr = 0;
-
       return errorSC;
 }
 ```
 
-## refs_samEntry:
+# seqST
 
-Not likely used often, but holds the list of references
-  and their lengths found in the sam file header.
+seqST is a library designed to read in sequences from
+  fasta and fastq files. It also includes a reverse
+  complement function.
 
-- lenAryUI array that has all the reference lengths
-- idAryStr has the reference names
-  - this is a c-string array from ../genLib/strAry.c, so
-    you will need to use get_strAry() (fun03
-    ../genLib/strAry.c) to get ids out of it.
-- numRefUI has the number of references in lenAryUI and
-  idAryStr
-  
-### refs_samEntry workflow
+For reading `.gz` compressed files, use the seqST
+  structure in seqST with `gzSeqST`. The gz size of
+  sequence reading is separate because adding gz support
+  adds roughly 18kb to the musl static binary size.
 
-The workflow for a refs_samEntry struct is similar to a
-  samEntry struct. You first initialize the struct, then
-  setup initial memory. After that you can read in a
-  samEntry header or add references one by one. You can
-  then search the structure for references. Finally you
-  will free the struct.
+## seqST structure
 
-#### ref_SamEntry  initialize
+The seqST structure is designed to hold sequence data
+  from fasta or fastq files. The variables you migth work
+  with are:
+
+- idStr holds the read id
+  - the read id length is stored in idLenSL
+- seqStr holds the sequence
+  - the sequence length is stored in seqLenSL
+- qStr (fastq only) holds the quality score entry
+  - the q-score length is stored in qLenSL
+  - the first character set to 0/null if no q-score entry
+- offsetSL is the index of first base to align
+  - for pairwise aligners (needle, water, memwater)
+  - index 0
+- endAlnSL is the index of last base to align
+  - for pairwise aligners (needle, water, memwater)
+  - index 0
+
+## seqST functions
+
+The workflow for a seqST structure is to initialize, then
+  read sequences. You can then manipulate the seqST
+  structer how you want.
+
+### seqST setup
+
+To initialize a seqST structure use init_seqST (fun07).
+  The input is a pointer to a seqST structure to
+  initialize.
+
+### seqST get sequences
+
+You can read a fasta sequence using getFa_seqST (fun03).
+  The input is a pointer to a seqST structure to hold the
+  sequence and a FILE poitner to the file to read from.
+  The output is 0 for no errors, def_EOF_seqST if at end
+  of file (no sequence read in), def_fileErr_seqST for
+  file errors, and `def_fileErr_seqST | def_badLine_seqST`
+  for non-fasta entries.
+
+You can read a fastq sequence using getFq_seqST (fun03).
+  The input is a pointer to a seqST structure to hold the
+  sequence and a FILE poitner to the file to read from.
+  The output is 0 for no errors, def_EOF_seqST if at end
+  of file (no sequence read in), def_fileErr_seqST for
+  file errors, and `def_fileErr_seqST | def_badLine_seqST`
+  for non-fasta entries.
+
+### seqST reverse complement
+
+You can reverse complement a sequence using revComp_seqST.
+  The input is a pionter to a seqST structure to reverse
+ complement.
+
+### seqST read fasta file
+
+You can get every sequence from a fasta file using
+  readFaFile_seqST. The output is a pointer to a seqST
+  structure array (sorted by id) or 0 for any kind of
+  error.
+
+- Input
+  - FILE pointer to fasta file to get sequences from
+  - signed long pointer get number of sequences read
+  - signed long pointer get number of seqST structs in
+    the returned array
+  - signed char pointer to get any errors
+    - set to def_memErr_seqST for memory errors
+    - set to def_fileErr_seqST for file errors
+    - set to `def_fileErr_seqST | def_badLine_seqST`
+      a invalid entry
+
+You can then find sequences by name/id using search_seqST.
+  The input is the sorted seqST structure array to search,
+  the name/id to search for (c-string), and the number
+  of sequences in the array.
+
+When finished with the seqST structure array, you can
+  free it using freeHeapAry_seqST. You will need to
+  provide the array and the number of seqST structers in
+  the array.
+

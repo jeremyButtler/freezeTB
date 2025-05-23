@@ -42,7 +42,6 @@
 !   o .c  #include "../genLib/ulCp.h"
 !   o .c  #include "../genLib/charCp.h"
 !   o .c  #include "../genLib/numToStr.h"
-!   o .c  #include "../genLib/strAry.h"
 !   o .c  #include "../genLib/fileFun.h"
 !   o .c  #include "../genBio/samEntry.h"
 !   o .h  #include "../genLib/endStr.h"

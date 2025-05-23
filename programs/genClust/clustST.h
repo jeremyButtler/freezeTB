@@ -11,8 +11,6 @@
 '     - tof05: build/use index_clustST; consensus to
 '     - tof05: setting up/using index_clustST struct
 '     - tof06: consensus and cluster functions
-'     - tof07: var_clust general
-'     - tof08: hist_clust support + probability functions
 '   - TOF00: header entry
 '     o header:
 '       - forward declarations, defined variables, guards
@@ -83,36 +81,8 @@
 '       - extracts reads for a signle cluster
 '     o fun26: pbins_clustST
 '       - extracts reads for each cluster to a sam file
-'   - TOF07: var_clust general
-'     o fun27: blank_var_clustST
-'       - blanks var_clustST for use with a new reference
-'     o fun28: init_var_clustST
-'       - initializes a var_clustST array
-'     o fun29: freeStack_var_clustST
-'       - frees arrays in a var_clustST struct
-'     o fun30: freeHeap_var_clustST
-'       - frees a heap allocated var_clustST struct
-'     o fun31: freeHeapAry_var_clustST
-'       - frees an array of heap allocated var_clustST
-'     o fun32: setupRef_var_clustST
-'       - setsup a var_clustST for a reference
-'     o fun33: rmLowDepth_var_clustST
-'       - remove low read depth variants in a var_clustST
-'   - TOF08: hist_clust support + probability functions
-'     o fun34: blank_hist_clustST
-'       - blanks hist_clustST for use
-'     o fun35: init_hist_clustST
-'       - initializes hist_clustST for use
-'     o fun36: freeStack_hist_clustST
-'       - frees variables inside a hist_clustST
-'     o fun37: freeHeap_hist_clustST
-'       - frees a hist_clustST struct
-'     o fun38: prob_clustST
-'       - find probability that a profile is supported
-'     o fun39: roughProb_clustST
-'       - get expected power of 10 of profile being unique
-'     o fun40: findBestProf_hist_clustST
-'       - finds best profile in a hist_clustST history
+'   o license:
+'     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -919,271 +889,75 @@ pbins_clustST(
    void *samFILE
 );
 
-/*-------------------------------------------------------\
-| Fun27: blank_var_clustST
-|   - blanks var_clustST for use with a new reference
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST struct to blank
-| Output:
-|   - Modifies:
-|     o sets all values in aAryUI, cAryUI, gAryUI,
-|       tAryUI, delAryUI, and insAryUI to 0
-|     o sets lenRefUI to 0
-\-------------------------------------------------------*/
-void
-blank_var_clustST(
-   struct var_clustST *varSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun28: init_var_clustST
-|   - initializes a var_clustST array
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST struct to initialize
-| Output:
-|   - Modifies:
-|     o sets all values to 0
-\-------------------------------------------------------*/
-void
-init_var_clustST(
-   struct var_clustST *varSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun29: freeStack_var_clustST
-|   - frees arrays in a var_clustST struct
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST with arrays to free
-| Output:
-|   - Frees:
-|     o all arrays (and initializes)
-\-------------------------------------------------------*/
-void
-freeStack_var_clustST(
-   struct var_clustST *varSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun30: freeHeap_var_clustST
-|   - frees a heap allocated var_clustST struct
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST to free
-| Output:
-|   - Frees:
-|     o varSTPtr (you must set to 0)
-\-------------------------------------------------------*/
-void
-freeHeap_var_clustST(
-   struct var_clustST *varSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun31: freeHeapAry_var_clustST
-|   - frees an array of heap allocated var_clustST
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST array to free
-|   - lenUI:
-|     o length of var_clustST array (index 1)
-| Output:
-|   - Frees:
-|     o all var_clustST structs in varSTPtr
-|      (you must set varSTPtr to 0)
-\-------------------------------------------------------*/
-void
-freeHeapAry_var_clustST(
-   struct var_clustST *varSTPtr,
-   signed int lenSI
-);
-
-/*-------------------------------------------------------\
-| Fun32: setupRef_var_clustST
-|   - setsup a var_clustST for a reference
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST to set up
-|   - lenRefUI:
-|     o length of reference to add (index 1)
-| Output:
-|   - Modifies:
-|     o arrays in varSTPtr to have allocated memory
-|     o lenRefUI in varSTPtr to be lenRefUI
-|     o lenUI in varSTPtr to be lenRefUI (if shorter)
-|   - Returns:
-|     o 0 for no errors
-|     o def_memErr_clustST for memory errors
-\-------------------------------------------------------*/
-signed char
-setupRef_var_clustST(
-   struct var_clustST *varSTPtr,
-   unsigned int lenRefUI
-);
-
-/*-------------------------------------------------------\
-| Fun33: rmLowDepth_var_clustST
-|   - remove low read depth variants in a var_clustST
-| Input:
-|   - varSTPtr:
-|     o pointer to var_clustST to set up
-|   - minDepthUI:
-|     o min depth to keep a variant
-| Output:
-|   - Modifies:
-|     o arrays in varSTPtr to have low read depth
-|       positions set to 0
-\-------------------------------------------------------*/
-void
-rmLowDepth_var_clustST(
-   struct var_clustST *varSTPtr,
-   unsigned int minDepthUI
-);
-
-/*-------------------------------------------------------\
-| Fun34: blank_hist_clustST
-|   - blanks hist_clustST for use
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST struct to blank
-| Output:
-|   - Modifies:
-|     o sets all values (except lenUI) to 0
-|     o sets all arrays to be filled with 0's
-\-------------------------------------------------------*/
-void
-blank_hist_clustST(
-   struct hist_clustST *histSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun35: init_hist_clustST
-|   - initializes hist_clustST for use
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST struct to initialize
-| Output:
-|   - Modifies:
-|     o sets all values to 0
-\-------------------------------------------------------*/
-void
-init_hist_clustST(
-   struct hist_clustST *histSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun36: freeStack_hist_clustST
-|   - frees variables inside a hist_clustST
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST with variables to free
-| Output:
-|   - Modifies:
-|     o frees all arrays, then initializes
-\-------------------------------------------------------*/
-void
-freeStack_hist_clustST(
-   struct hist_clustST *histSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun37: freeHeap_hist_clustST
-|   - frees a hist_clustST struct
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST struct to free
-| Output:
-|   - Frees:
-|     o histSTPtr (you must set to 0)
-\-------------------------------------------------------*/
-void
-freeHeap_hist_clustST(
-   struct hist_clustST *histSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun38: prob_clustST
-|   - find probability that a profile is supported
-|   - probablity calcualtion is from hairSplitter
-|     Roland Faure, Dominique Lavenier,
-|     and Jean-Francios Flot; HairSplittler: haplotype
-|     assembly from long, nosiy reads; preprint; 2024
-|     https://doi.org/10.1101/2024.02/13.580067
-| Input:
-|   - numVarUI:
-|     o number of variants in profile
-|   - lenTargUI:
-|     o number of bases in target region
-|   - depthUL:
-|     o depth of profile
-|   - maxDepthUL:
-|     o maximum number of reads
-|   - errF:
-|     o expected error rate (as percentage)
-| Output:
-|   - Returns:
-|     o probability of profile
-\-------------------------------------------------------*/
-double
-prob_clustST(
-   unsigned int numVarUI,
-   unsigned int lenTargUI,
-   unsigned long depthUL,
-   unsigned long maxDepthUL,
-   float errF
-);
-
-/*-------------------------------------------------------\
-| Fun39: roughProb_clustST
-|   - finds expected power of 10 of profile being unique
-|   - always use prob_clustST to verify
-| Input:
-|   - numVarUI:
-|     o number of variants in profile
-|   - lenTargUI:
-|     o number of bases in target region
-|   - depthUL:
-|     o depth of profile
-|   - maxDepthUL:
-|     o maximum number of reads
-|   - errF:
-|     o expected error rate (as percentage)
-| Output:
-|   - Returns:
-|     o a rough estimate of the power 10 of probability
-\-------------------------------------------------------*/
-signed long
-roughProb_clustST(
-   unsigned int numVarUI,
-   unsigned int lenTargUI,
-   unsigned long depthUL,
-   unsigned long maxDepthUL,
-   float errF
-);
-
-/*-------------------------------------------------------\
-| Fun40: findBestProf_hist_clustST
-|   - finds best profile in a hist_clustST history
-| Input:
-|   - histSTPtr:
-|     o pointer to hist_clustST with history to search
-|   - probDblPtr:
-|     o pointer to double to hold probability
-|   - errRateF:
-|     o expected error rate (%)
-| Output:
-|   - Modifies:
-|     o probDblPtr to have probability of best history
-|   - Returns:
-|     o index of history with best probability
-\-------------------------------------------------------*/
-unsigned int
-findBestProf_hist_clustST(
-   struct hist_clustST *histSTPtr, /*has history*/
-   double *probDblPtr,             /*will have odds*/
-   float errRateF                  /*expected error*/
-);
-
 #endif
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconvient / not possible, this code is under the
+:   MIT license.
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2024 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

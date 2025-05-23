@@ -40,6 +40,8 @@
 '     - copied from misc0110's libattpng repository
 '   o .c fun20: pIEND_st_mkPng
 '     - add end header (IEND) for png 
+'   o fun21: print_st_mkPng
+'     - prints a png to output file
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #ifdef PLAN9
@@ -1351,9 +1353,7 @@ pPLTE_st_mkPng(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   unsigned char *tmpAryUC = 0;
    unsigned int uiCol = 0;
-   unsigned int uiIndex = 0;
    unsigned int crc32UI = 0xffffffff;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1401,12 +1401,19 @@ pPLTE_st_mkPng(
       fputc(pngSTPtr->redAryUC[uiCol], (FILE *) outFILE);
 
       crc32UI =
-         crc32Byte_checkSum(pngSTPtr->bluAryUC, crc32UI);
+         crc32Byte_checkSum(
+            pngSTPtr->bluAryUC[uiCol],
+            crc32UI
+         );
       fputc(pngSTPtr->bluAryUC[uiCol], (FILE *) outFILE);
 
       crc32UI =
-         crc32Byte_checkSum(pngSTPtr->greAryUC, crc32UI);
+         crc32Byte_checkSum(
+            pngSTPtr->greAryUC[uiCol],
+            crc32UI
+         );
       fputc(pngSTPtr->greAryUC[uiCol], (FILE *) outFILE);
+      ++uiCol;
    } /*Loop: add color pallete to header*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1478,15 +1485,14 @@ pIDAT_st_mkPng(
    ^   - write IDAT header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   tmpUS = pngSTPtr->pixPerByteUC;
-   tmpUS *= pngSTPtr->widthUS;
-   ++tmpUS;
-   tmpUS += 5;
-   tmpUS *= pngSTPtr->heightUS;
-   tmpUS += 6;
+   /*size of png to print out ot header*/
+   tmpUS = 5 + pngSTPtr->pixPerByteUC; /*(5 + bpl)*/
+   tmpUS *= pngSTPtr->heightUS; /*(5 + bpl) * height)*/
+   tmpUS += 6;           /*2 + heigth * (5 + bpl) + 4)*/
 
-   addUint_mkPng(pngSTPtr->ihdrStr, tmpUS, indexUI);
-   
+   addUint_mkPng(tmpUS, outFILE);
+      /*size of png, comes before idat header*/
+
    crc32Byte_checkSum('I', crc32UI);
    crc32Byte_checkSum('D', crc32UI);
    crc32Byte_checkSum('A', crc32UI);
@@ -1629,17 +1635,17 @@ pIDAT_st_mkPng(
       \**************************************************/
 
       fputc(
-         pngSTPtr->pixelAryUC[pixeSL],
+         pngSTPtr->pixelAryUC[pixelSL],
          (FILE *) outFILE
       );
 
       crc32UI =
           crc32Byte_checkSum(
-             pngSTPtr->pixelAryUC[pixeSL],
+             pngSTPtr->pixelAryUC[pixelSL],
              crc32UI
           );
       adler32Byte_checkSum(
-         pngSTPtr->pixelAryUC[pixeSL],
+         pngSTPtr->pixelAryUC[pixelSL],
          &sumOneSI,
          &sumTwoSI
       );
@@ -1685,8 +1691,6 @@ pIDAT_st_mkPng(
 | Fun20: pIEND_st_mkPng
 |   - add end header (IEND) for png 
 | Input:
-|   - pngSTPtr:
-|     o pointer to st_mkPng struct to add IEND header to
 |   - outFILE:
 |     o FILE pointer to print IEND header to
 | Output:
@@ -1695,10 +1699,8 @@ pIDAT_st_mkPng(
 \-------------------------------------------------------*/
 void
 pIEND_st_mkPng(
-   struct st_mkPng *pngSTPtr,
    void *outFILE
 ){
-   unsigned int uiIndex = 0;
    unsigned int crc32UI = 0xffffffff;
 
    addUint_mkPng(0, (FILE *) outFILE);
@@ -1722,7 +1724,7 @@ pIEND_st_mkPng(
 } /*pIEND_st_mkPng*/
 
 /*-------------------------------------------------------\
-| Fun20: print_st_mkPng
+| Fun21: print_st_mkPng
 |   - prints a png to output file
 | Input:
 |   - pngSTPtr:
@@ -1739,7 +1741,7 @@ print_st_mkPng(
    struct st_mkPng *pngSTPtr,  /*png to print*/
    void *outFILE               /*file to print to*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun20 TOC:
+   ' Fun21 TOC:
    '   - prints a png to output file
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -1754,10 +1756,10 @@ print_st_mkPng(
    fputc('\n', (FILE *) outFILE);
 
 
-   pIHDR_st_mkPng(pngSTPtr, setSTPtr, outFILE);
+   pIHDR_st_mkPng(pngSTPtr, outFILE);
    pPLTE_st_mkPng(pngSTPtr, outFILE);
-   pIDAT_st_mkPng(pngSTPtr, setSTPtr, outFILE);
-   pIEND_st_mkPng(pngSTPtr, outFILE);
+   pIDAT_st_mkPng(pngSTPtr, outFILE);
+   pIEND_st_mkPng(outFILE);
 
    /*not including transparency*/
 } /*print_st_mkPng*/

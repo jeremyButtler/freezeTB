@@ -44,7 +44,6 @@
 !   - .c  #include "../genLib/numToStr.h"
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/charCp.h"
-!   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genLib/fileFun.h"
 !   - .h  #include "ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/

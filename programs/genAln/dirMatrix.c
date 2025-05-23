@@ -56,7 +56,6 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../genLib/base10str.h"
-!   o .c  #include "../genLib/strAry.h"
 !   o .c  #include "../genLib/fileLen.h"
 !   o .h  #include "../genLib/endLine.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"

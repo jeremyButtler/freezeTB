@@ -36,7 +36,6 @@
 !   - .c  #include "../genLib/numToStr.h"
 !   - .c  #include "../genLib/base10StrToNum.h"
 !   - .c  #include "../genLib/charCp.h"
-!   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genLib/fileFun.h"
 !   - .h  #include "../genLib/genMath.h" .h macro only
 !   - .h  #include "ntTo5Bit.h"

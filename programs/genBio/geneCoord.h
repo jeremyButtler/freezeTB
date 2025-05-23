@@ -283,7 +283,7 @@ sortName_geneCoord(
 |    o The index of gene with the same name
 |    o -1 if there was no gene
 \-------------------------------------------------------*/
-signed int
+int
 findName_geneCoord(
    struct geneCoord *geneST,
    signed char *nameStr,

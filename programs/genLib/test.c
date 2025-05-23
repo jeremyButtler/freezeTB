@@ -4,6 +4,7 @@
 
 int
 main(
+   void
 ){
    signed char errSC = 0;
    struct st_mkPng *pngSTPtr = mk_st_mkPng(0, 0, 0);
@@ -14,16 +15,18 @@ main(
    if(! outFILE)
       goto fileErr_main;
 
-   addBar_st_mkPng(
+   /*addBar_st_mkPng(
       pngSTPtr,
       0,
       0,
       100,
       100,
       3
-   );
+   );*/
 
    print_st_mkPng(pngSTPtr, outFILE);
+   errSC = 0;
+   goto cleanUp_main;
 
    memErr_main:;
       errSC = 1;

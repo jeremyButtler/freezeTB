@@ -45,7 +45,6 @@
 !   o .c  #include "../genLib/base10str.h"
 !   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genulCp.h"
-!   o .c  #include "../genLib/strAry.h"
 !   o .c  #include "../genLib/fileFun.h"
 !   o .h  #include "../genLib/endLine.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/

@@ -77,8 +77,10 @@ typedef struct prof_illNano
    unsigned int *posAryUI;      /*reference position*/
    signed char *ntArySC;        /*variant base*/
 
-   unsigned int *depthAryUI;    /*depth of known bases*/
-   unsigned int *xDepthAryUI;   /*depth of unknown bases*/
+   unsigned int *depthAryUI; /*depth of known bases*/
+   unsigned int *xDepthAryUI;/*depth of unknown bases*/
+   unsigned int depthUI;     /*number reads with profile*/
+   unsigned int totalDepthUI; /*number reads at position*/
 
    unsigned int sizeProfUI;     /*size of profile*/
    unsigned int varInProfUI;   /*# variants in profile*/

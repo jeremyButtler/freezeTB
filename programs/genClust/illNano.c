@@ -78,7 +78,6 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
 !   o .c   #include "../genLib/numToStr.h"
-!   o .c   #include "../genLib/strAry.h"
 !   o .c   #include "../genLib/fileFun.h"
 !   o .h   #include "ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -109,6 +108,8 @@ blank_prof_illNano(
    profSTPtr->sumDiffUL = 0;
    profSTPtr->overlapUI = 0;
    profSTPtr->avgDiffF = 0;
+   profSTPtr->depthUI = 0;
+   profSTPtr->totalDepthUI = 0;
 
    if(
          profSTPtr->posAryUI
@@ -679,6 +680,11 @@ merge_prof_illNano(
       ++uiSec;
       ++uiFirst;
    } /*Loop: merge profiles*/
+
+   if(secProfSTPtr->depthUI)
+      firstProfSTPtr->depthUI += secProfSTPtr->depthUI;
+   else
+      ++firstProfSTPtr->depthUI;
 } /*merge_prof_illNano*/
 
 /*-------------------------------------------------------\
@@ -1946,6 +1952,7 @@ getNanoReads_illNano(
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       nodeSTPtr = profListSTPtr->listST;
+      nodeSTPtr->totalDepthUI = nodeSTPtr->depthUI;
       tmpHeapProfST = nodeSTPtr->nextST;
 
       /*n^2 loop*/
@@ -1953,20 +1960,20 @@ getNanoReads_illNano(
       { /*Loop: compare profiles*/
 
          diffSI =
-            cmp_prof_illNano(
-               nodeSTPtr,
-               tmpHeapProfST,
-               1          /*want difference*/
-            );
+            cmp_prof_illNano(nodeSTPtr, tmpHeapProfST, 1);
+            /* 1 is to get difference*/
 
          if(diffSI >= 0)
          { /*If: profiles overlap*/
+            nodeSTPtr->totalDepthUI +=
+               tmpHeapProfST->depthUI;
+            tmpHeapProfST->totalDepthUI +=
+               nodeSTPtr->depthUI;
             ++nodeSTPtr->overlapUI;
             ++tmpHeapProfST->overlapUI;
 
             nodeSTPtr->sumDiffUL += diffSI;
             tmpHeapProfST->sumDiffUL += diffSI;
-
 
             nodeSTPtr->minDiffUI =
                min_genMath(
@@ -1999,6 +2006,7 @@ getNanoReads_illNano(
          else
          { /*Else: moving to next node*/
             nodeSTPtr = nodeSTPtr->nextST;
+            nodeSTPtr->totalDepthUI += nodeSTPtr->depthUI;
             tmpHeapProfST = nodeSTPtr->nextST;
 
             if(! tmpHeapProfST)
@@ -2022,9 +2030,10 @@ getNanoReads_illNano(
 
          else
          { /*Else: have overlaping profiles*/
-            nodeSTPtr->avgDiffF = (float)
+            nodeSTPtr->avgDiffF =
+               (float)
                  (float) nodeSTPtr->sumDiffUL
-               / (float) (nodeSTPtr->overlapUI);
+               / (float) nodeSTPtr->overlapUI;
          } /*Else: have overlaping profiles*/
 
          nodeSTPtr = nodeSTPtr->nextST;
@@ -2079,12 +2088,17 @@ phead_profList_illNano(
 ){
    fprintf(
       (FILE *) outFILE,
-      "num_var\tnum_overlap\tmin_diff\tavg_diff"
+      "num_var\tnum_overlap\tprof_depth\tread_depth"
    );
 
    fprintf(
       (FILE *) outFILE,
-      "\tmax_diff\tprofile\tvar_depth\tx_var_depth%s",
+      "\tmin_diff\tavg_diff\tmax_diff\tprofile\t"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "var_depth\tx_var_depth%s",
       str_endLine
    );
 } /*phead_profList_illNano*/
@@ -2115,9 +2129,11 @@ p_profList_illNano(
    { /*Loop: print profile list*/
       fprintf(
          (FILE *) outFILE,
-         "%u\t%u\t%u\t%0.3f\t%u\t",
+         "%u\t%u\t%u\t%u\t%u\t%0.3f\t%u\t",
          nodeST->varInProfUI,
          nodeST->overlapUI,
+         nodeST->depthUI,
+         nodeST->totalDepthUI,
          nodeST->minDiffUI,
          nodeST->avgDiffF,
          nodeST->maxDiffUI
@@ -2137,7 +2153,7 @@ p_profList_illNano(
          fprintf(
             (FILE *) outFILE,
             "%u%c",
-            nodeST->posAryUI[uiVar],
+            nodeST->posAryUI[uiVar] + 1,
             nodeST->ntArySC[uiVar]
          ); /*print out variant*/
       } /*Loop: print profile*/
@@ -2161,7 +2177,7 @@ p_profList_illNano(
          fprintf(
             (FILE *) outFILE,
             "%u:%u",
-            nodeST->posAryUI[uiVar],
+            nodeST->posAryUI[uiVar] + 1,
             nodeST->depthAryUI[uiVar]
          ); /*print out variant*/
       } /*Loop: print depth for profile*/

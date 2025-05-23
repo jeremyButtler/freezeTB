@@ -45,7 +45,6 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../generalLib/ulCp.h"
-!   o .c  #include "../generalLib/strAry.h"
 !   o .c  #include "../generalLib/fileFun.h"
 !   o .h  #include "../generalBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
