@@ -16,10 +16,15 @@ Here to give you an orientation of the C code files and
     - does checks sums for inflate; currently alder32 only
   - [endLine](#endLine)
     - line ending variable for OS's
+  - [fileFun](#fileFun)
+    - randon file funcitions, currently only a count
+      number lines functions
   - [genMath](#genMath)
     - math (branchless) functions
   - [inflate](#inflate)
     - inflates deflated data (for .gz files)
+  - [mkPng](#mkPng)
+    - not working; goal is make uncompressed pallete pngs
   - [numToStr](#numToStr)
     - number to c-string
   - [ptrAry](#ptrAry)
@@ -203,6 +208,97 @@ For big endin OS's use `-DBIG_ENDIN` flag.
   - int: swapEndUI = uiSwap_endin(input)
   - short: swapEndUS = usSwap_endin(input)
 
+# fileFun
+
+## fileFun overview
+
+Non-gz functions for file manipulation.
+
+- [lineCnt_fileFun](#lineCnt_fileFun)
+  - count number of lines in a file
+- [getLine_fileFun](#getLine_fileFun)
+  - get a line or maximum number of bytes from a file
+- [getFullLine_fileFun](#getFullLine_fileFun)
+  - get a full length line from a file
+
+| Flag           | Use                                   |
+|:---------------|:--------------------------------------|
+| `-DSLOW_BREAK` | slower, reliable line break detection |
+
+Table: configuartion options. For windows replace `-D`
+  with `/D`.
+
+## lineCnt_fileFun
+
+lineCnt_fileFun will seek the start of the file after it
+  is finished. It will also modify the signed long to hold
+  the length of the longest line in the file. This length
+  does not include line breaks.
+
+| Input            | Use                                 |
+|:-----------------|:------------------------------------|
+| `FILE *`         | file to find the number of lines in |
+| `signed long *`  | max line length; minus line breaks  |
+
+Table: Input for lineCnt_fileFun
+
+| Output               |
+|:---------------------|
+| number lines in file |
+
+Table: output for lineCnt_fileFun
+
+## getLine_fileFun
+
+getLine_fileFun will return the number of bytes in the
+  read in buffer, but it will also modify a signed long
+  to have the number of bytes read from the file. These
+  values can differ, since getLine_fileFun will replace
+  line breaks (`\n`, `\r\n`, `\r`, and `\n\r`) with the
+  OS line breaks it was compiled for. So, the return
+  value includes the modified line break ending, while
+  the modified signed long has the actual bytes read from
+  the file.
+
+| Input            | Use                             |
+|:-----------------|:--------------------------------|
+| `FILE *`         | file to get next line in        |
+| `signed char *`  | buffer to hold output           |
+| `signed long`    | maximum number of bytes to grab |
+| `signed long *`  | number bytes read from file     |
+
+Table: Input for getLine_fileFun
+
+| Output | Use                                           |
+|:-------|:----------------------------------------------|
+| > 0    | number bytes in buffer (can differ from file) |
+| 0      | End Of File (EOF)                             |
+
+Table: Output for getLine_fileFun
+
+## getFullLine_fileFun
+
+getFullLine_fileFun will use expand a buffer until a full
+  line has been read in. It uses getLine_fileFun to read
+  in line by line.
+
+| Input            | Use                                |
+|:-----------------|:-----------------------------------|
+| `FILE *`         | file to get next line in           |
+| `signed char **` | buffer to hold output (is resized) |
+| `signed long *`  | current size of buffer             |
+| `signed long *`  | number bytes read from file        |
+
+Table: Input for getFullLine_fileFun
+
+| Output | Use                                           |
+|:-------|:----------------------------------------------|
+| > 0    | number bytes in buffer (can differ from file) |
+| 0      | End Of File (EOF)                             |
+| < 0    | memory error when resizing the buffer         |
+
+Table: Output for getFullLine_fileFun
+
 # genMath
 
 These are my general math functions. Most are branchless
@@ -214,6 +310,36 @@ These are my general math functions. Most are branchless
 
 The min/max ifMin/ifMax exist are .h file macros. The
   other functions are in the .c file.
+
+# mkPng:
+
+Not yet working. When working, it will not be very good
+  since it does not apply compression to output PNGs.
+  When working code to make a PNG.
+
+Uses st_mkPng structure. You should not fiddle with this
+  structure.
+
+Inorder to get a PNG structure reader for use you need
+  to blank the structure with `blank_st_mkPng`. Then
+  initialize with `init_st_mkPng`. Next you allocate
+  memory and set the image dimentions
+  with `setup_st_mkPng`.
+
+You can skip the initial steps by calling `mk_st_png`.
+
+To reuse a png structure, call `blank_st_mkPng` and then
+  `setup_st_mkPng`.
+
+You can add or remove colors to your pallete
+  with `addCol_st_mkPng` and `rmCol_st_mkPng`.
+
+You can graph a pixel with `addPixel_st_mkPng` or a
+  straight line with `addBar_st_mkPng`.
+
+When finished print your png with `print_st_mkPng`. Then
+  free you png struct with `freeStack_st_mkPng` (if on
+  stack) or `freeHeap_st_mkPng` if on heap.
 
 # numToStr:
 
@@ -275,6 +401,14 @@ Most of the variables should not be interacted with,
   this, unless you know what you are doing
   - buffPosSL is the current position in the uncompressed
     buffer
+
+| Flag            | Use                             |
+|:----------------|:--------------------------------|
+| `-DNOUL`        | see ulCp                        |
+| `-DSIXTEEN_BIT` | do not use gz (32 bit) checksum |
+
+Table: flags for inflate. For Windows replace `-D`
+  with `/D`
 
 ## file_inflate overview
 
@@ -557,6 +691,13 @@ Table: of macros that check a long for certain charaters.
   to make a deliminator. By white space I mean any
   asccii value less then 33 (this includes space, tab,
   carriage return, newline, and null).
+
+| Flags        | use                                     |
+|:-------------|:----------------------------------------|
+| `-DNOUL`     | slower, but always works byte copying   |
+| `-DPLAN9_64` | use long long (for plan9 64 bit)        |
+
+Table: flags for ulCp. For Windows replace `-D` with `/D`.
 
 Finally, this has a slew of functions, check the header
   of the .c or .h file for a list.

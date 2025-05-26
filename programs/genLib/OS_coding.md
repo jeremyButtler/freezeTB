@@ -92,16 +92,27 @@ Table: character(s) for each OS's line break. By hobby
   OS I mean research/hobby, so unlikely to be seen.
 
 To avoid new line and carraige return issues I have
-  started to look for all cases.
+  started to look for all cases. However, for printing,
+  Windows will treat `\r\n` as two lines. So, only print
+  a `\n`.
 
 ```
 /*get off line endings*/
-if(bufferStr[index] == '\r')
-   ++index;
 if(bufferStr[index] == '\n')
+{ /*If: new line line break*/
    ++index;
-if(bufferStr[index] == '\r')
+
+   if(bufferStr[index] == '\r')
+      ++index;
+} /*If: new line line break*/
+
+else if(bufferStr[index] == '\r')
+} /*Else If: carriage return line break*/
    ++index;
+
+   if(bufferStr[index] == '\n')
+      ++index;
+} /*Else If: carriage return line break*/
 ```
 
 # Build systems
@@ -788,7 +799,7 @@ Some habits I have learned. These may be good, or may be
   - when memory is reused, pass buffers in and resize
     buffers to avoid many malloc calls
 - Make sure all function allocated varaibles are cleaned
-  up at the end of a function
+  up or returned at the end of a function
   - This reduces memory leaks and often is little in cost
     compared to the function exection time
   - Also allows making errors into
@@ -797,6 +808,37 @@ Some habits I have learned. These may be good, or may be
     errors.
 - after debugging (or during), always test code with
   valgrind (sometimes I forget)
+- always have at least two make files, one for debugging
+  and one for the user
+  - I always use `-O0`, `-g`, and `-Werror` in the
+    dubugging make file.
+  - I never use debugging symbols (`-g`/`-ggdb`) in the
+    users make file. The debugging symbols can make a
+    400kb program into a 900kb program.
+  - most users know this, but I always use `-std=c89`,
+    `-Wall`, `-Wextra`, and `-Wpendantic` in both my
+    debugging and non-debugging make files
+  - treat warnings seriously, unless there is no way
+    around or you are on Windows or Plan9, were warnings
+    are either to sensitive (Plan9 with extra warnings) or
+    about the standard libraries (Windows with extra
+    warnings). Tread both Windows and plan9 on a case by
+    case bases.
+  - ignore openBDS's warning about `strcpy`. Yes it is
+    important, but there is no good replacement, including
+    openBSD's suggestion on all OSs.
+    - my solution was to make my own function that openBSD
+      has never seen. Just as problematic, but the
+      compiler has never seen it.
+      - What else do you expect people to do when you
+        complain about the standar libraries?
+  - this is a habit I need to learn, remove unused code
+    from your .c files or place then in an old .c file.
+    they just increase the compile size of your program.
+    - the only exception I can think of is if you are
+      coding a library of usefull functions.
+
+Here is an example of my clean up.
 
 ```
 /*not a very good example, because it is to simple*/
@@ -835,6 +877,36 @@ getNumbers(x){
      return error
 }
 ```
+
+## Weird things I have noticed
+
+One trick I have picked up is that .o and .a files will be
+  included in static compile steps, even when you are not
+  using the functions that call them. For example:
+
+Say we have library 1:
+
+```
+#include "someLib.h"
+
+add(int x, int y){ return x + y;};
+use_somLib(int x, int y){ return somLib(x + y);};
+```
+
+Even if I never use `use_someLib` in my final program, the
+  `someLib` .o files will be included. At one or two
+  points I have broken libraries up at logical points to
+  prevent this bloat. The two I have done are dealing
+  with `.gz` files in gzSeqST instead of seqST and
+  splitting `samEntry` into `samEntry` and `samRef`.
+
+I guess what I have learned is if there is a logical
+  splits and the extra libraries are rarely used in other
+  .c files, then split them into smaller units.
+
+I would avoid using `fileFun`, but that is to critical for
+  what I do. Otherwise I could reduce programs the used
+  it (most, if not all) by 4kb.
 
 # Summary
 

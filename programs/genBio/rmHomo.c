@@ -261,9 +261,6 @@ indel_rmHomo(
          || samSTPtr->cigTypeStr[uiCig] == 'X'
          || samSTPtr->cigTypeStr[uiCig] == 'S'
       ){ /*If: non-indel mutation*/
-         if(samSTPtr->cigTypeStr[uiCig] != 'S')
-            refPosUI += samSTPtr->cigArySI[uiCig];
-
          cpLen_ulCp(
             &(*seqBuffStrPtr)[dupPosUI],
             &samSTPtr->seqStr[seqPosUI],
@@ -281,6 +278,10 @@ indel_rmHomo(
 
          dupPosUI += samSTPtr->cigArySI[uiCig];
          seqPosUI += samSTPtr->cigArySI[uiCig];
+
+         if(samSTPtr->cigTypeStr[uiCig] != 'S')
+            refPosUI += samSTPtr->cigArySI[uiCig];
+
          ++uiCig;
 
          continue;
@@ -427,6 +428,10 @@ indel_rmHomo(
             } /*Loop: copy insertion*/
          } /*If: need to copy insertion*/
 
+         else
+            refPosUI += samSTPtr->cigArySI[uiCig];
+            /*need to update reference position*/
+
          ++uiCig; /*keep cigar entry*/
          continue;
       } /*If: homoplymer to small*/
@@ -513,7 +518,6 @@ indel_rmHomo(
             continue;
          } /*Else: no quality score entry*/
       } /*Else: insertion*/
-
    } /*Loop: remove indels*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
