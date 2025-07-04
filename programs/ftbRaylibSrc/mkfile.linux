@@ -1,0 +1,74 @@
+# NOTE on linux you need a shared library ray lib install
+#  this is because GL (-lGL) is often installed
+#  as a shared library (no .a file)
+
+CC=cc
+LD=cc
+MAKE=make
+CFLAGS=-c -static -O0 -g -Wall -Wextra
+O=o.linux
+PREFIX=/usr/local/bin
+raylibPath=../raylib/src
+genLib=../genLib
+RAYFLAGS=\
+   -L/usr/local/lib \
+   -lraylib \
+   -lGL \
+   -lm \
+   -lpthread \
+   -ldl \
+   -lrt \
+   -lX11
+
+objFiles=\
+   $(genLib)/ulCp.$O \
+   widgets.$O \
+   ftbRaylib.$O
+
+all: ftbRaylib
+	$(LD) -o ftbRaylib $(objFiles) $(RAYFLAGS)
+	# note, ray lib file should come last. Also, using
+	# local location so the user does not need to install
+
+ftbRaylib.$O: ftbRaylib.c widgets.$O
+	$(CC) $(CFLAGS) -o ftbRaylib.$O  ftbRaylib.c
+
+widgets.$O: widgets.c widgets.h ulCp.$O raylib
+		$(CC) $(CFLAGS) -o widgets.$O widgets.c
+
+ulCp.$O: $(genLib)/ulCp.c $(genLib)/ulCp.h
+	$(CC) $(CFLAGS) -o $(genLib)/ulCp.$O $(genLib)/ulCp.c
+
+# need to build raylib, but bit tricky
+raylib:
+	$(MAKE) \
+		PLATFORM=PLATFORM_DESKTOP \
+		RAYLIB_LIBTYPE=SHARED \
+		-C ../raylib/src;
+		# need a shared library, because GL is often a
+		#  shared library on linux
+	sudo $(MAKE) \
+		PLATFORM=PLATFORM_DESKTOP \
+		RAYLIB_LIBTYPE=SHARED \
+		-C ../raylib/src \
+		install;
+
+install:
+	mv ftbRaylib $(PREFIX);
+	chmod a+x $(PREFIX)/ftbRaylib;
+
+clean:
+	objStr="$(objFiles)"; \
+		fileStr="$${objStr%% *}"; \
+		while [ ! "$$fileStr" = "" ]; \
+		do \
+			if [ -f "$$fileStr" ]; then rm "$$fileStr"; fi; \
+			objStr="$${objStr#"$${objStr%%[[:space:]]*}"}"; \
+			objStr="$${objStr#"$${objStr%%[![:space:]]*}"}";\
+			objStr="$${objStr%% *}"; \
+			fileStr="$${objStr%% *}"; \
+		done;
+			# this clean up step is more complex, but it also
+			# avoids trying to deleting files that do not
+			# exist. So, it never errors out
+	$(MAKE) -C ../raylib/src clean 

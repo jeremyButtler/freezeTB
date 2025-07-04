@@ -326,7 +326,8 @@ elif [ "$osStr" = "win" ];
 then # Else If: windows make file
    headStr="$headStr\nCC=cl.exe";
    headStr="$headStr\nLD=link.exe";
-   headStr="$headStr\ncoreCFLAGS= /c /O2 /Ot /Za /Tc";
+   headStr="$headStr\ncoreCFLAGS= /DWINDOWS /c /O2 /Ot";
+   headStr="$headStr\ncoreCFLAGS= $coreCFLAGS /Za /Tc";
    headStr="$headStr\nCFLAGS=/DNONE";
    headStr="$headStr\nNAME=$nameStr.exe";
    headStr="$headStr\nPREFIX=\"%localAppData%\"";
@@ -356,7 +357,7 @@ then # Else If: windows make file
    ldStr="\t\$(LD)";
    ldFlagsStr="/out:\$(NAME) \$(objFiles)";
 
-   slashSC="\\";
+   slashSC="\\\\"; # double slash to avoid odd prints
 # Else If: windows make file
 
 #*********************************************************
@@ -1248,8 +1249,12 @@ edClustDep="clustST $clustSTDep";
 #   o sec03 sub07 cat09:
 #     - genIndice (for whoToAmr)
 #   o sec03 sub07 cat10:
-#     - whoToAmr (for whoToAmr)
+#     - addAmr (for addAmr)
 #   o sec03 sub07 cat11:
+#     - whoToAmr (for whoToAmr)
+#   o sec03 sub07 cat12:
+#     - freezeTBPaths (for freezeTB)
+#   o sec03 sub07 cat13:
 #     - freezeTB (for mainFreezeTB)
 #*********************************************************
 
@@ -1429,6 +1434,31 @@ genIndiceDep="base10str $base10strDep charCp $charCpDep";
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Sec03 Sub07 Cat10:
+#   - addAmr (for addAmr)
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+amrSTObj="${genFreezeTBStr}amrST.\$O";
+amrSTDep="drugAry $drugAryDep fileFun $fileFunDep";
+amrSTDep="$amrSTDep charCp $charCpDep";
+
+addAmrStr="${genFreezeTBStr}addAmr.\$O: \\
+	${genFreezeTBStr}addAmr.c \\
+	${genFreezeTBStr}addAmr.h \\
+	${genFreezeTBStr}amrST.\$O \\
+	${genBioStr}geneCoord.\$O \\
+	${genBioStr}codonFun.\$O \\
+	${genLibStr}genMath.\$O
+		$ccStr $dashOStr${genFreezeTBStr}addAmr.\$O \\
+			$cFlagsStr $coreFlagsStr \\
+			${genFreezeTBStr}addAmr.c";
+
+addAmrObj="${genFreezeTBStr}addAmr.\$O";
+addAmrDep="amrST $amrSTDep geneCoord $geneCoordDep";
+addAmrDep="$addAmrDep codonFun $codonFunDep";
+addAmrDep="$addAmrDep genMath $genMath";
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Sec03 Sub07 Cat11:
 #   - whoToAmr (for whoToAmr)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1450,7 +1480,7 @@ whoToAmrDep="$whoToAmrDep genMath $genMathDep";
 whoToAmrDep="$whoToAmrDep codonFun $codonFunDep";
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Sec03 Sub07 Cat11:
+# Sec03 Sub07 Cat12:
 #   - freezeTBPaths (for freezeTB)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1467,7 +1497,7 @@ freezeTBPathsObj="${genFreezeTBStr}freezeTBPaths.\$O";
 freezeTBPathsDep="ulCp $ulCpDep";
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Sec03 Sub07 Cat12:
+# Sec03 Sub07 Cat13:
 #   - freezeTB (for mainFreezeTB)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1539,7 +1569,7 @@ tclTkInclude = /I \"%programFiles%\\Tcl90\\include\"
 tclTkLib = \"%programFiles%\\Tcl90\\lib\\\\tk90t.lib\" \"%programFiles%\\Tcl90\\lib\\\\tcl90t.lib\"
 !MESSAGE found tcltk 9.0.x in \"%programFiles%\"
 
-!IF [cmd /C IF EXIST \"%programFiles%\\Tcl90\\lib\\\\tcl9tk90.lib\" exit 1]
+!ELSEIF [cmd /C IF EXIST \"%programFiles%\\Tcl90\\lib\\\\tcl9tk90.lib\" exit 1]
 tclTkInclude = /I \"%programFiles%\\Tcl90\\include\"
 tclTkLib = \"%programFiles%\\Tcl90\\lib\\\\tcl9tk90.lib\" \"%programFiles%\\Tcl90\\lib\\\\tcl90.lib\"
 !MESSAGE found tcltk 9.0.x in \"%programFiles%\"
@@ -1608,13 +1638,14 @@ else
 		elif [ -f /usr/X11R6/lib/libX11.so ]; then x11Obj=\"usr/X11R6/lib/libX11.so\"; \\
 		else echo \"could not find libX11\"; exit; \\
 		fi; \\
+		echo \"found libX11 at \$\$x11Obj\"; \\
 		\\
 		tclObj=\"\"; \\
 		if [ -f /opt/homebrew/lib/libtcl9.0.dylib ]; then tclObj=/opt/homebrew/lib/libtcl9.0.dylib; \\
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl9.0.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtcl9.0.dylib; \\
 		elif [ -f /opt/homebrew/lib/libtcl8.6.dylib ]; then tclObj=/opt/homebrew/lib/libtcl8.6.dylib; \\
-		elif [ -f /opt/homebrew/lib/libtcl9.0.dylib ]; then tclObj=/opt/homebrew/lib/libtcl9.0.dylib; \\
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl8.6.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtcl8.6.dylib; \\
 		elif [ -f /opt/homebrew/Cellar/tcl-tk@8/8.6.15/lib/libtcl8.6.dylib ]; then tclObj=/opt/homebrew/Cellar/tcl-tk@8/8.6.15/lib/libtcl8.6.dylib; \\
-		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib ]; then tclObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib; \\
 		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib ]; then tclObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib; \\
 		elif [ -f /usr/lib/libtcl9.0.so ]; then tclObj=/usr/lib/libtcl9.0.so; \\
 		elif [ -f /usr/lib/libtcl8.6.so ]; then tclObj=/usr/lib/libtcl8.6.so; \\
@@ -1642,13 +1673,19 @@ else
 		elif [ -f /usr/local/libexec/x86_64-linux-gnu/libexectcl8.6.so ]; then tclObj=/usr/local/libexec/x86_64-linux-gnu/libexectcl8.6.so; \\
 		else echo \"could not find libtcl\"; exit; \\
 		fi; \\
+		echo \"found libtcl at \$\$tclObj\"; \\
 		\\
 		tkObj=\"\"; \\
 		if [ -f /opt/homebrew/lib/libtcl9tk9.0.dylib ]; then tkObj=/opt/homebrew/lib/libtcl9tk9.0.dylib; \\
+		elif [ -f /opt/homebrew/lib/libtk9.0.dylib ]; then tkObj=/opt/homebrew/lib/libtk9.0.dylib; \\
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl9tk9.0.dylib ]; then tkObj=/opt/homebrew/lib/tcl-tk/libtcl9tk9.0.dylib; \\
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtk9.0.dylib ]; then tkObj=/opt/homebrew/lib/tcl-tk/libtk9.0.dylib; \\
 		elif [ -f /opt/homebrew/lib/libtcl8tk8.6.dylib ]; then tkObj=/opt/homebrew/lib/libtcl8tk8.6.dylib; \\
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl8tk8.6.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtcl8tk8.6.dylib; \\
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtk8.6.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtk8.6.dylib; \\
 		elif [ -f /opt/homebrew/Cellar/tk-tk@8/8.6.15/lib/libtcl8tk8.6.dylib ]; then tkObj=/opt/homebrew/Cellar/tk-tk@8/8.6.15/lib/libtcl8tk8.6.dylib; \\
-		elif [ -f /usr/local/Cellar/tk-tk/9.0.1/lib/libtcl9tk9.0.dylib ]; then tkObj=/usr/local/Cellar/tk-tk/9.0.1/lib/libtcl9tk9.0.dylib; \\
-		elif [ -f /usr/local/Cellar/tk-tk/9.0.1/lib/libtcl9tk9.0.dylib ]; then tkObj=/usr/local/Cellar/tk-tk/9.0.1/lib/libtcl9tk9.0.dylib; \\
+		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtk9.0.dylib ]; then tkObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtk9.0.dylib; \\
+		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9tk9.0.dylib ]; then tkObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9tk9.0.dylib; \\
 		elif [ -f /usr/lib/libtk9.0.so ]; then tkObj=/usr/lib/libtk9.0.so; \\
 		elif [ -f /usr/lib/libtk8.6.so ]; then tkObj=/usr/lib/libtk8.6.so; \\
 		elif [ -f /usr/local/lib/libtk9.0.so ]; then tkObj=/usr/local/lib/libtk9.0.so; \\
@@ -1675,6 +1712,7 @@ else
 		elif [ -f /usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so ]; then tkObj=/usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so; \\
 		else echo \"could not find libtk\"; exit; \\
 		fi; \\
+		echo \"found libtk at \$\$tkObj\"; \\
 		$ldStr \$\$x11Obj \$\$tkObj \$\$tclObj ";
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1686,10 +1724,14 @@ includeStr="
 		@hPath=""; \\
 		if [ -d /opt/X11/include ]; then hPath=\"\$\$hPath -I/opt/X11/include\"; fi; \\
 		if [ -d /opt/homebrew/include ]; then hPath=\"\$\$hPath -I/opt/homebrew/include\"; fi; \\
+		if [ -d /opt/homebrew/include/tcl-tk ]; then hPath=\"\$\$hPath -I/opt/homebrew/include/tcl-tk\"; fi; \\
+		if [ -d /opt/homebrew/include/tcltk ]; then hPath=\"\$\$hPath -I/opt/homebrew/include/tcltk\"; fi; \\
 		if [ -d /usr/include/tcl-tk ]; then hPath=\"\$\$hPath -I/usr/include/tcl-tk\"; fi; \\
+		if [ -d /usr/include/tcltk ]; then hPath=\"\$\$hPath -I/usr/include/tcltk\"; fi; \\
 		if [ -d /usr/include ]; then hPath=\"\$\$hPath -I/usr/include\"; fi; \\
 		if [ -d /usr/X11/include ]; then hPath=\"\$\$hPath -I/usr/X11/include\"; fi; \\
 		if [ -d /usr/local/include/tcl-tk ]; then hPath=\"\$\$hPath -I/usr/local/include/tcl-tk\"; fi; \\
+		if [ -d /usr/local/include/tcltk ]; then hPath=\"\$\$hPath -I/usr/local/include/tcltk\"; fi; \\
 		if [ -d /usr/local/include ]; then hPath=\"\$\$hPath -I/usr/local/include\"; fi; \\
       \\"
 
@@ -2992,11 +3034,11 @@ do # Loop: get dependencies
    #     - refSwap
    #   o sec04 sub08 cat09:
    #     - genIndice
-   #   o sec04 sub08 cat10:
-   #     - whoToAmr
    #   o sec04 sub08 cat11:
-   #     - freezeTBPaths
+   #     - whoToAmr
    #   o sec04 sub08 cat12:
+   #     - freezeTBPaths
+   #   o sec04 sub08 cat13:
    #     - freezeTB
    #******************************************************
 
@@ -3245,6 +3287,33 @@ do # Loop: get dependencies
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++
    # Sec04 Sub08 Cat10:
+   #   - addAmr
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   elif [ "$libStr" = "addAmr" ]; then
+   # Else If: addAmr program
+      if [ "$addAmrBl" = "" ]; then
+         cmdStr="${cmdStr}${newLineStr}${addAmrStr}";
+         objFilesStr="$objFilesStr \\\\\n$spaceStr";
+         objFilesStr="${objFilesStr}$addAmrObj";
+
+         if [ $libCntSI -lt $mainCntSI ]; then
+            mainCmdStr="$mainCmdStr \\
+	$addAmrObj";
+         fi
+
+         addAmrBl=1;
+         depStr="$depStr $addAmrDep";
+
+         if [ "$genFreezeTBBl" -lt 1 ]; then
+            genFreezeTBBl=1;
+            libPathStr="$libPathStr\ngenFreezeTB=..${slashSC}genFreezeTB";
+         fi
+      fi
+   # Else If: addAmr program
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Sec04 Sub08 Cat11:
    #   - whoToAmr
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -3271,7 +3340,7 @@ do # Loop: get dependencies
    # Else If: whoToAmr program
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   # Sec04 Sub08 Cat11:
+   # Sec04 Sub08 Cat12:
    #   - freezeTBPaths
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -3298,7 +3367,7 @@ do # Loop: get dependencies
    # Else If: freezeTBPaths program
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   # Sec04 Sub08 Cat11:
+   # Sec04 Sub08 Cat13:
    #   - freezeTB
    #++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -3330,6 +3399,9 @@ do # Loop: get dependencies
    #******************************************************
 
    elif [ "$libStr" = "tcltk" ]; then
+      headStr="$(
+         printf "%s" "$headStr" | sed 's/c89/c99/;'
+      )";
       tclTkBl=1;
    fi # check librarys called
 

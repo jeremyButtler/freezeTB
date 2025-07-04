@@ -92,6 +92,7 @@ static signed char codonTbl[5][5][5] =
    Trp W Tryptophan
    Try Y Tyrosine
    Val V Valine
+   X   X anything
 */
 
 /*Table

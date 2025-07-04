@@ -26,11 +26,13 @@
 '       coordiante (uses shell sort)
 '   o fun08: sortGeneId_amrST
 '     - sort amrST struct array by gene names (ids)
-'   o fun09: getAmr_amrST
+'   o fun09: sortVarId_amrST
+'     - sort amrST struct array by variant id
+'   o fun10: getAmr_amrST
 '     - finds nearest amr to input query coordiante
-'   o fun10: p_amrST
+'   o fun11: p_amrST
 '     - Print out the amr database used
-'   o fun11: readTbl_amrST
+'   o fun12: readTbl_amrST
 '     - gets amr data from tbAmr tsv file (p_amrST;fun 10)
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -125,7 +127,7 @@ typedef struct amrST{
 
    signed char gradeSC;    /*grade of resitance*/
    signed char mutTypeStr[4]; /*mutation type*/
-   signed char dirFlagSC;   /*-1: gene reverse, else 0*/
+   signed char dirFlagSC;   /*1: gene reverse, else 0*/
       /*this is marked in the gene_locus column as a c
       ' at the end
       */
@@ -303,7 +305,28 @@ sortGeneId_amrST(
 );
 
 /*-------------------------------------------------------\
-| Fun09: getAmr_amrST
+| Fun09: sortVarId_amrST
+|   - sort amrST struct array by variant id
+| Input:
+|   - amrAryST:
+|     o pointer to start of amrST array to sort
+|   - startUI:
+|     o index of first elment to sort
+|   - endUI:
+|     o index (0) of last elment to sort
+| Output:
+|   - Modifies:
+|     o amrAryST to be sorted by variant ids
+\-------------------------------------------------------*/
+void
+sortVarId_amrST(
+   struct amrST *amrAryST,
+   unsigned int startUI,
+   unsigned int endUI
+);
+
+/*-------------------------------------------------------\
+| Fun10: getAmr_amrST
 |  - finds nearest amr to input query coordiante
 | Input:
 |  - amrAryST:
@@ -325,7 +348,7 @@ getAmr_amrST(
 );
 
 /*-------------------------------------------------------\
-| Fun10: p_amrST
+| Fun11: p_amrST
 |  - print out amr database used
 | Input:
 |  - amrAryST:
@@ -356,7 +379,7 @@ p_amrST(
 );
 
 /*-------------------------------------------------------\
-| Fun11: readTbl_amrST
+| Fun12: readTbl_amrST
 |   - gets amr data from tbAmr tsv file (p_amrST; fun 10)
 | Input:
 |   - tbAmrTblStr:
@@ -364,6 +387,7 @@ p_amrST(
 |   - numAmrUI:
 |     o pointer to unisgined to to hold hold number of
 |       AMRs in tbAmrTblStr
+|     o this is also the size of the array
 |   - durgStrAry:
 |     o pointer to a c-string to hold antbiotic names
 |   - numDrugsSI

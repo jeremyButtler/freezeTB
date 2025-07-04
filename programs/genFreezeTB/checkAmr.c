@@ -23,19 +23,25 @@
 '     - checks if sam entry has amr's
 '   o .c fun08: pCrossRes_checkAmr
 '     - print out cross resitance (report, not database)
-'   o fun09: pConHead_checkAmr
+'   o fun09: cmpAmrs_checkAmr
+'     - checks if two AMR structs are the same variant
+'   o fun10: flagAmrHit_checkAmr
+'     - flag all duplicates in a AMR hit list
+'   o fun11: pConHead_checkAmr
 '     - prints header for a consensus amr check
-'   o fun10: pCon_checkAmr
+'   o fun12: pCon_checkAmr
 '     - prints out all amr's that were in a consensus
-'   o fun11: pReadHead_checkAmr
+'   o fun13: readGetVarHits_checkAmr
+'     - finds non-duplicate AMRs for the target variant ID
+'   o fun14: pReadHead_checkAmr
 '     - prints header for reads AMR table
-'   o fun12: pRead_checkAmr
+'   o fun15: pRead_checkAmr
 '     - prints AMRs detected in reads that have min depth
-'   o fun13: pIdVarHead_checkAmr
+'   o fun16: pIdVarHead_checkAmr
 '     - prints header for the read id mapped variant table
-'   o fun14: pIdVarTbl_checkAmr
+'   o fun17: pIdVarTbl_checkAmr
 '     - prints table of read ids and detected AMRs
-'   o fun15: samFindAmrs_checkAmr
+'   o fun18: samo findAmrs_checkAmr
 '     - look for AMRs in sam file entries
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -61,6 +67,7 @@
 #include "drugAry.h"
 
 #include "../genLib/charCp.h"
+#include "../genLib/ulCp.h"
 #include "../genLib/genMath.h"
 #include "../genBio/codonFun.h"
 #include "../genBio/samEntry.h"
@@ -99,6 +106,7 @@ init_amrHit_checkAmr(
    amrHitSTPtr->amrSTPtr = 0;
    amrHitSTPtr->seqPosUI = 0;
    amrHitSTPtr->nextAmr = 0;
+   amrHitSTPtr->dupBl = 0;
 } /*init_amrHit_checkAmr*/
 
 /*-------------------------------------------------------\
@@ -884,11 +892,9 @@ checkAmr(
  
    while(siAmr < numAmrSI)
    { /*Loop: check if have any AMR mutations*/
-      if(
-           samSTPtr->refEndUI
-         < amrAryST[siAmr].refPosUI + 1
-      ) goto finished_fun07_sec04_sub03;
-        /*no more AMRs*/
+      if(samSTPtr->refEndUI < amrAryST[siAmr].refPosUI +1)
+         goto finished_fun07_sec04_sub03;
+         /*no more AMRs*/
 
       /*make sure read covers full AMR*/
       amrEndSI =
@@ -1976,7 +1982,239 @@ pCrossRes_checkAmr(
 } /*pCrossRes_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun09: pConHead_checkAmr
+| Fun09: cmpAmrs_checkAmr
+|   - checks if two AMR structs are the same variant
+| Input:
+|   - oneST:
+|     o pointer to first amrST structures to compare
+|   - twoST:
+|     o pointer to second amrST structures to compare
+| Output:
+|   - Returns:
+|     o -1 if are different by variant ID
+|     o -2 if same variant ID, but different attribute
+|     o 0 if are the same to checkAmr
+|     o 1 if first AMR has more support
+|     o 2 if second AMR has more support
+\-------------------------------------------------------*/
+signed char
+cmpAmrs_checkAmr(
+   struct amrST *oneST,
+   struct amrST *twoST
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun09 TOC:
+   '   - checks if two AMR structs are the same variant
+   '   o fun09 sec01:
+   '     - variable declarations
+   '   o fun09 sec02:
+   '     - check if have same AMRs to checkAmr
+   '   o fun09 sec03:
+   '     - find which AMR has the most support
+   '   o fun09 sec04:
+   '     - find which AMR has the most support
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int siFlag = 0;
+   unsigned long onePercUL = 0;
+   unsigned long twoPercUL = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec02:
+   ^   - check if have same AMRs to checkAmr
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(eqlNull_ulCp(oneST->varIdStr, twoST->varIdStr))
+      goto noMatch_fun09_sec04;
+
+   for(siFlag = 0; siFlag < def_maxDrugs_amrST; ++siFlag)
+   { /*Loop: check if different resistance*/
+      if(
+            oneST->amrFlagsUL[siFlag]
+         != twoST->amrFlagsUL[siFlag]
+      ) goto sameIdDiffEntry_fun09_sec04;
+
+      if(
+            oneST->crossResFlagsUL[siFlag]
+         != twoST->crossResFlagsUL[siFlag]
+      ) goto sameIdDiffEntry_fun09_sec04;
+   }  /*Loop: check if different resistance*/
+
+   if(oneST->highResBl != twoST->highResBl)
+      goto sameIdDiffEntry_fun09_sec04;
+
+   else if(oneST->lowResBl != twoST->lowResBl)
+      goto sameIdDiffEntry_fun09_sec04;
+
+   else if(oneST->additiveResBl != twoST->additiveResBl)
+      goto sameIdDiffEntry_fun09_sec04;
+
+   else if(oneST->gradeSC != twoST->gradeSC)
+      goto sameIdDiffEntry_fun09_sec04;
+
+   else if(
+      eqlNull_ulCp(
+         oneST->needsGeneStr,
+         twoST->needsGeneStr
+      )
+   ) goto sameIdDiffEntry_fun09_sec04;
+
+   else if(
+      eqlNull_ulCp(oneST->mutTypeStr, twoST->mutTypeStr)
+   ) goto sameIdDiffEntry_fun09_sec04;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec03:
+   ^   - find which AMR has the most support
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(! oneST->numMapReadsUI && ! twoST->numMapReadsUI)
+      goto sameSup_fun09_sec04;
+   else if(! oneST->numMapReadsUI)
+      goto secSup_fun09_sec04;
+   else if(! twoST->numMapReadsUI)
+      goto firstSup_fun09_sec04;
+
+   /*if the differences are by a fraction of a percent,
+   `  then I will compare the number of supporting
+   `  reads
+   */
+   onePercUL = oneST->numSupReadsUI;
+   onePercUL /= oneST->numMapReadsUI;
+
+   twoPercUL = twoST->numSupReadsUI;
+   twoPercUL /= twoST->numMapReadsUI;
+
+   if(onePercUL > twoPercUL)
+      goto firstSup_fun09_sec04;
+   else if(twoPercUL > onePercUL)
+      goto secSup_fun09_sec04;
+   else if(oneST->numSupReadsUI > twoST->numSupReadsUI)
+      goto firstSup_fun09_sec04;
+   else if(oneST->numSupReadsUI < twoST->numSupReadsUI)
+      goto secSup_fun09_sec04;
+   else
+      goto sameSup_fun09_sec04;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun09 Sec04:
+   ^   - find which AMR has the most support
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   firstSup_fun09_sec04:;
+      return 1; /*first AMR has more support*/
+
+   secSup_fun09_sec04:;
+      return 2; /*second AMR has more support*/
+
+   sameSup_fun09_sec04:;
+      return 0; /*AMRs are a match*/
+
+   sameIdDiffEntry_fun09_sec04:;
+      return -2; /*AMRs are a match*/
+
+   noMatch_fun09_sec04:;
+      return -1; /*AMRs are different*/
+} /*cmpAmrs_checkAmr*/
+
+/*-------------------------------------------------------\
+| Fun10: flagAmrHit_checkAmr
+|   - flag all duplicates in a AMR hit list
+| Input:
+|   - amrHitListST:
+|     o pointer to list of amrHit_checkAmr structs to
+|       flag duplicate AMRs
+| Output:
+|    - Modifies:
+|      o dupBl in each amrHit_checkAmr struct in
+|        amrHitListST to be 1 (if duplicates) or 0 if
+|        unique/best AMR
+\-------------------------------------------------------*/
+void
+flagAmrHit_checkAmr(
+   struct amrHit_checkAmr *amrHitListST
+){
+   signed char resSC = 0;
+   struct amrHit_checkAmr *lastAmrST = 0;
+   struct amrHit_checkAmr *scanAmrST = 0;
+
+   while(amrHitListST->nextAmr)
+   { /*Loop: find duplicate AMRs*/
+      resSC =
+         cmpAmrs_checkAmr(
+           amrHitListST->amrSTPtr,
+           amrHitListST->nextAmr->amrSTPtr
+         );
+
+      if(resSC == -1)
+      { /*If: different variant IDs*/
+         lastAmrST = amrHitListST->nextAmr;
+         goto nextAmr_fun10;
+      } /*If: different variant IDs*/
+
+      else if(resSC == 1 || ! resSC)
+      { /*Else If: next AMR is a duplicate*/
+         if(! lastAmrST)
+            lastAmrST = amrHitListST;
+         amrHitListST->nextAmr->dupBl = 1;
+         goto nextAmr_fun10;
+      } /*Else If: next AMR is a duplicate*/
+
+      else
+      { /*Else: need to scan older variant ids*/
+         if(! lastAmrST)
+         { /*If: first variant ID match*/
+            lastAmrST = amrHitListST;
+            goto nextAmr_fun10;
+         } /*If: first variant ID match*/
+
+         scanAmrST = lastAmrST;
+
+         while(scanAmrST < amrHitListST)
+         { /*Loop: see if AMR is a duplicate*/
+            if(scanAmrST->dupBl)
+            { /*If: this AMR was a duplicate*/
+               scanAmrST = scanAmrST->nextAmr;
+               continue;
+            } /*If: this AMR was a duplicate*/
+
+            resSC =
+               cmpAmrs_checkAmr(
+                 scanAmrST->amrSTPtr,
+                 amrHitListST->nextAmr->amrSTPtr
+               );
+
+            if(resSC < 0)
+            { /*If: different variant IDs*/
+               scanAmrST = scanAmrST->nextAmr;
+               continue;
+            } /*If: different variant IDs*/
+
+            else if(resSC < 2)
+            { /*Else If: equal AMRs or first is better*/
+               amrHitListST->nextAmr->dupBl = 1;
+               goto nextAmr_fun10;
+            } /*Else If: equal AMRs or first is better*/
+
+            else
+            { /*Else: new AMR is better*/
+               scanAmrST->dupBl = 1;
+               goto nextAmr_fun10;
+            } /*Else: new AMR is better*/
+         } /*Loop: see if AMR is a duplicate*/
+      } /*Else: need to scan older variant ids*/
+
+      nextAmr_fun10:;
+         amrHitListST = amrHitListST->nextAmr;
+   } /*Loop: find duplicate AMRs*/
+} /*flagAmrHit_checkAmr*/
+
+/*-------------------------------------------------------\
+| Fun11: pConHead_checkAmr
 |   - prints header for a consensus amr check
 | Input:
 |   - outFILE:
@@ -2002,7 +2240,7 @@ pConHead_checkAmr(
 } /*pConHead_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun10: pCon_checkAmr
+| Fun12: pCon_checkAmr
 |   - prints out all amr's that were in a consensus
 | Input:
 |   - seqIdStr:
@@ -2019,6 +2257,9 @@ pConHead_checkAmr(
 | Output: 
 |   - Prints:
 |     o amr's in amrHitListST to outFILE
+|   - Modifies:
+|     o dupBl in amrHitListST to be 1 for duplicate
+|       variant ids
 \-------------------------------------------------------*/
 void
 pCon_checkAmr(
@@ -2027,88 +2268,70 @@ pCon_checkAmr(
    signed char *drugAryStr,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun10 TOC:
+   ' Fun12 TOC:
    '   - prints out all amr's that were in a consensus
-   '   o fun10 sec01:
+   '   o fun12 sec01:
    '     - variable decerations
-   '   o fun10 sec02:
+   '   o fun12 sec02:
    '     - print AMRs
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec01:
+   ^ Fun12 Sec01:
    ^   - variable decerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   struct amrHit_checkAmr *tmpST = (amrHitListST);
-   struct amrHit_checkAmr *lastST = 0;
-   signed char matchBl = 0;
+   struct amrHit_checkAmr *tmpST = amrHitListST;
 
    unsigned long amrFlagUL = 0;
    signed int flagOnSI = 0;
    signed char *drugStr = 0;
    signed char firstPrintBl = 0;
    signed int siAmr = 0;
-   
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec02:
+   ^ Fun12 Sec02:
    ^   - print AMRs
-   ^   o fun10 sec02 sub01:
+   ^   o fun12 sec02 sub01:
    ^     - print AMRs/check if already printed variant
-   ^   o fun10 sec02 sub02:
+   ^   o fun12 sec02 sub02:
    ^     - print read/gene ids
-   ^   o fun10 sec02 sub03:
+   ^   o fun12 sec02 sub03:
    ^     - print antibiotics resitant to
-   ^   o fun10 sec02 sub04:
+   ^   o fun12 sec02 sub04:
    ^     - print cross resistance
-   ^   o fun10 sec02 sub05:
+   ^   o fun12 sec02 sub05:
    ^     - print variant id, mutation type, and positions
-   ^   o fun10 sec02 sub06:
+   ^   o fun12 sec02 sub06:
    ^     - print high, unkown (normal?), or low resitance
-   ^   o fun10 sec02 sub07:
+   ^   o fun12 sec02 sub07:
    ^     - print if low resitance is additive
-   ^   o fun10 sec02 sub08:
+   ^   o fun12 sec02 sub08:
    ^     - print if restance needs a functional gene
-   ^   o fun10 sec02 sub09:
+   ^   o fun12 sec02 sub09:
    ^     - print effect of mutation
-   ^   o fun10 sec02 sub10:
+   ^   o fun12 sec02 sub10:
    ^     - print WHOs comment and if whole gene effect
-   ^   o fun10 sec02 sub11:
+   ^   o fun12 sec02 sub11:
    ^     - move onto next AMR
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun10 Sec02 Sub01:
+   * Fun12 Sec02 Sub01:
    *   - print AMRs/check if already printed variant
    \*****************************************************/
+
+   /*flag duplicate AMRs (so only best printed*/
+   flagAmrHit_checkAmr(amrHitListST);
 
    while(tmpST)
    { /*Loop: print all amr's*/
 
-      if(lastST)
-      { /*If: need to check previous results*/
-         matchBl =
-            eql_charCp(
-               tmpST->amrSTPtr->varIdStr,
-               lastST->amrSTPtr->varIdStr,
-               (signed char) '\0'
-            );
-
-         lastST = tmpST;
-         tmpST = tmpST->nextAmr;
-
-         if(! tmpST)
-            break; /*no more AMRs (finished)*/
-
-         if(! matchBl)
-            continue;
-      } /*If: need to check previous results*/
-
-      else
-         lastST = tmpST;
+      if(tmpST->dupBl)
+         goto nextAmr_fun12_sec02_sub11;
 
       /**************************************************\
-      * Fun10 Sec02 Sub02:
+      * Fun12 Sec02 Sub02:
       *   - print read/gene ids
       \**************************************************/
 
@@ -2120,7 +2343,7 @@ pCon_checkAmr(
       );
       
       /**************************************************\
-      * Fun10 Sec02 Sub03:
+      * Fun12 Sec02 Sub03:
       *   - print antibiotics resitant to
       \**************************************************/
 
@@ -2140,7 +2363,7 @@ pCon_checkAmr(
          while(amrFlagUL)
          { /*Loop: check each flag in a flag set*/
             if(! (amrFlagUL & 1) )
-               goto nextAmrFlag_fun10_sec02_sub03;
+               goto nextAmrFlag_fun12_sec02_sub03;
                /*not resistance to this antibiotic*/
             
             drugStr =
@@ -2162,14 +2385,14 @@ pCon_checkAmr(
             
             else fprintf((FILE *) outFILE, "_%s", drugStr);
             
-             nextAmrFlag_fun10_sec02_sub03:;
+             nextAmrFlag_fun12_sec02_sub03:;
             ++flagOnSI;
             amrFlagUL >>= 1;
          } /*Loop: check each flag in a flag set*/
       } /*Loop: run through all antibiotic flags*/
       
       /**************************************************\
-      * Fun10 Sec02 Sub04:
+      * Fun12 Sec02 Sub04:
       *   - print cross resistance
       \**************************************************/
 
@@ -2184,7 +2407,7 @@ pCon_checkAmr(
       );
       
       /**************************************************\
-      * Fun10 Sec02 Sub05:
+      * Fun12 Sec02 Sub05:
       *   - print variant id, mutation type, and positions
       \**************************************************/
 
@@ -2199,7 +2422,7 @@ pCon_checkAmr(
       );
 
       /**************************************************\
-      * Fun10 Sec02 Sub06:
+      * Fun12 Sec02 Sub06:
       *   - print high, unkown (normal?), or low resitance
       \**************************************************/
 
@@ -2222,7 +2445,7 @@ pCon_checkAmr(
          );
 
       /**************************************************\
-      * Fun10 Sec02 Sub07:
+      * Fun12 Sec02 Sub07:
       *   - print if low resitance is additive
       \**************************************************/
 
@@ -2239,7 +2462,7 @@ pCon_checkAmr(
          );
 
       /**************************************************\
-      * Fun10 Sec02 Sub08:
+      * Fun12 Sec02 Sub08:
       *   - print if restance needs a functional gene
       \**************************************************/
 
@@ -2249,7 +2472,7 @@ pCon_checkAmr(
       );
 
       /**************************************************\
-      * Fun10 Sec02 Sub09:
+      * Fun12 Sec02 Sub09:
       *   - print effect of mutation
       \**************************************************/
 
@@ -2267,7 +2490,7 @@ pCon_checkAmr(
          );
 
       /**************************************************\
-      * Fun10 Sec02 Sub10:
+      * Fun12 Sec02 Sub10:
       *   - print WHOs comment and if whole gene effect
       \**************************************************/
       
@@ -2299,16 +2522,160 @@ pCon_checkAmr(
          );
 
       /**************************************************\
-      * Fun10 Sec02 Sub11:
+      * Fun12 Sec02 Sub11:
       *   - move to next AMR
       \**************************************************/
       
-      tmpST = tmpST->nextAmr;
+      nextAmr_fun12_sec02_sub11:;
+         tmpST = tmpST->nextAmr;
    } /*Loop: print all amr's*/
 } /*pCon_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun11: pReadHead_checkAmr
+| Fun13: readGetVarHits_checkAmr
+|   - finds non-duplicate AMRs for the target variant ID
+| Input:
+|   - amrAryST:
+|     o pointer to an array of amrST structures to print
+|   - indexSI:
+|     o index of AMR in amrAryST
+|   - numAmrsUI:
+|     o number AMRs in amrAryST
+| Output:
+|   - Returns:
+|     o 0 for memory errors
+|     o signed int array ending in -1 with the index of
+|       each different AMR
+|       * the index after -1 has the next variant ID to
+|         scan
+| Note:
+|   - Requires AMRs to be sorted by variant (gene) id
+\-------------------------------------------------------*/
+signed int *
+readGetVarHits_checkAmr(
+   struct amrST *amrAryST,
+   signed int indexSI,      /*index at in AMR array*/
+   unsigned int numAmrsUI
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun13 TOC:
+   '   - finds non-duplicate AMRs for target variant ID
+   '   o fun13 sec01:
+   '     - variable declarations and initial memory alloc
+   '   o fun13 sec02:
+   '     - find unique AMRs for this variant id
+   '   o fun13 sec03:
+   '     - return the result
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun13 Sec01:
+   ^   - variable declarations and initial memory alloc
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int *retHeapArySI = 0;
+   signed int *tmpSIPtr = 0;
+   signed int retSizeSI = 16;
+   signed int retLenSI = 0;
+   signed int posSI = indexSI + 1;
+   signed int checkSI = 0;
+   signed char resSC = 0;
+
+   retHeapArySI = malloc(retSizeSI * sizeof(signed int));
+   if(! retHeapArySI)
+      goto memErr_fun13_sec03;
+   retHeapArySI[retLenSI++] = indexSI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun13 Sec02:
+   ^   - find unique AMRs for this variant id
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while(resSC != -1)
+   { /*Loop: check matching variant IDs*/
+      if(posSI >= (signed int) numAmrsUI)
+         break; /*at end of AMR list*/
+
+      resSC =
+         cmpAmrs_checkAmr(
+            &amrAryST[ retHeapArySI[0] ],
+            &amrAryST[posSI]
+         );
+
+      if(resSC == -1)
+         break; /*finished*/
+
+      else if(resSC == 1 || ! resSC)
+         goto nextAmr_fun13_sec02;
+
+      else if(resSC == 2)
+      { /*Else If: second AMR is better*/
+         retHeapArySI[0] = posSI;
+         goto nextAmr_fun13_sec02;
+      } /*Else If: second AMR is better*/
+
+      else if(resSC == -2)
+      { /*Else If: need to scan for duplicate*/
+         for(checkSI = 1; checkSI < retLenSI; ++checkSI)
+         { /*Loop: check if have duplicate entry*/
+            resSC =
+               cmpAmrs_checkAmr(
+                  &amrAryST[ retHeapArySI[checkSI] ],
+                  &amrAryST[posSI]
+               );
+
+            if(resSC == 1 || ! resSC)
+               break; /*duplicate, can ignore*/
+
+            else if(resSC == 2)
+            { /*Else If: this is a better match*/
+               retHeapArySI[checkSI] = posSI;
+               break;
+            } /*Else If: this is a better match*/
+         } /*Loop: check if have duplicate entry*/
+
+         if(checkSI >= retLenSI)
+         { /*If: this was not a duplicate*/
+            if(retLenSI >= retSizeSI - 2)
+            { /*If: need to resize array*/
+               retSizeSI <<= 1;
+               tmpSIPtr =
+                  realloc(
+                     retHeapArySI,
+                     retSizeSI * sizeof(signed int)
+                  );
+               if(! tmpSIPtr)
+                  goto memErr_fun13_sec03;
+               retHeapArySI = tmpSIPtr;
+            } /*If: need to resize array*/
+
+            retHeapArySI[retLenSI++] = posSI;
+         } /*If: this was not a duplicate*/
+      } /*Else If: need to scan for duplicate*/
+
+      nextAmr_fun13_sec02:;
+         ++posSI;
+   }  /*Loop: check matching variant IDs*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun13 Sec03:
+   ^   - return the result
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   retHeapArySI[retLenSI++] = -1; /*mark end of array*/
+   retHeapArySI[retLenSI] = posSI;/*next variant to scan*/
+   goto ret_fun13_sec03;
+
+   memErr_fun13_sec03:;
+      if(retHeapArySI)
+         free(retHeapArySI);
+      goto ret_fun13_sec03;
+
+   ret_fun13_sec03:;
+      return retHeapArySI;
+} /*readGetVarHitks_checkAmr*/
+
+/*-------------------------------------------------------\
+| Fun14: pReadHead_checkAmr
 |   - prints header for reads AMR table
 | Input:
 |   - outFILE:
@@ -2337,7 +2704,7 @@ pReadHead_checkAmr(
 } /*pReadHead_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun12: pRead_checkAmr
+| Fun15: pRead_checkAmr
 |   - prints AMRs detected in reads that have min depth
 | Input:
 |   - minDepthUI:
@@ -2358,12 +2725,16 @@ pReadHead_checkAmr(
 |     o total number of reads input
 |   - amrAryST:
 |     o pointer to an array of amrST structures to print
+|   - numAmrsUI:
+|     o number AMRs in amrAryST
 |   - drugAryStr:
 |     o c-string array (drugAry.c) of antibiotic drugs.
 |     o needs to have same order as flags in amrAryST
 |   - outFILE:
 |     o file to print the amr's to
 | Output: 
+|   - Modifies:
+|     o amrAryST to be sorted by position
 |   - Prints:
 |     o AMRs with >= min stats to outFILE
 \-------------------------------------------------------*/
@@ -2381,22 +2752,28 @@ pRead_checkAmr(
    signed char *drugAryStr,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun12 TOC: pRead_checkAmr
-   '   o fun12 sec01:
+   ' Fun15 TOC: pRead_checkAmr
+   '   o fun15 sec01:
    '     - variable declerations
-   '   o fun12 sec02:
+   '   o fun15 sec02:
    '     - start loop and filter AMRs
-   '   o fun12 sec03:
+   '   o fun15 sec03:
    '     -  print out the entry (passed filters)
+   '   o fun15 sec04:
+   '     -  move to next variant ID in list
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec01:
+   ^ Fun15 Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    unsigned int indexUI = 0;
-   unsigned int lastPrintIndexUI = 0;
+
+   /*For dupilcate variant id removal
+   #  unsigned int lastPrintIndexUI = 0;
+   */
+
    float percSupF = 0;
    unsigned long amrFlagUL = 0;
    signed int flagOnSI = 0;
@@ -2404,319 +2781,374 @@ pRead_checkAmr(
    signed int siAmr = 0;
    signed char firstPrintBl = 1;
    
+   /*for duplicate filtering*/
+   signed int *hitsHeapArySI = 0;
+   signed int hitPosSI = 0;
+   signed int errArySI[3]; /*if had memory errors*/
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec02:
+   ^ Fun15 Sec02:
    ^   - start loop and filter AMRs
-   ^   o fun12 sec02 Sub01:
+   ^   o fun15 sec02 Sub01:
    ^     - start loop and remove low depth AMRs
-   ^   o fun12 sec02 Sub02:
+   ^   o fun15 sec02 Sub02:
    ^     - remove AMRs with a lower % of mapped reads
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub01:
+   * Fun15 Sec02 Sub01:
    *   - start loop and remove low depth AMRs
    \*****************************************************/
 
-   for(indexUI = 0; indexUI < (numAmrsUI); ++indexUI)
+   sortVarId_amrST(amrAryST, 0, numAmrsUI - 1);
+
+   indexUI = 0;
+
+   while(indexUI < numAmrsUI)
    { /*Loop: check and print out amrs*/
 
-      if(amrAryST[indexUI].numSupReadsUI < minDepthUI)
-         continue; /*to few reads support the AMR*/
-      
-      else if(amrAryST[indexUI].numMapReadsUI == 0)
-         continue; /*to few reads mapped to AMR region*/
+      hitsHeapArySI =
+         readGetVarHits_checkAmr(
+            amrAryST,
+            (signed int) indexUI,
+            numAmrsUI
+         );
 
-      /**************************************************\
-      * Fun12 Sec02 Sub02:
-      *   - remove AMRs with a lower % of mapped reads
-      \**************************************************/
-      
-      percSupF =
-              (float) amrAryST[indexUI].numMapReadsUI
-            / (float) totalReadsUI;
-      
-      if(percSupF < minPercTotalF)
-         continue; /*not enough support*/
-      
-      percSupF =
-           (float) amrAryST[indexUI].numSupReadsUI
-         / (float) amrAryST[indexUI].numMapReadsUI;
-      
-      if(percSupF < minPercMapF)
-         continue; /*support for AMR under minimum %*/
+      if(! hitsHeapArySI)
+      { /*If: had memory error*/
+         errArySI[0] = (signed int) indexUI;
+         errArySI[1] = -1;
+         errArySI[2] = (signed int) indexUI + 1;
 
-      else if(
-            amrAryST[indexUI].mutTypeStr[0] == 'd'
-         && percSupF < minIndelSupF
-      ) continue; /*removing indel*/
-      
-      else if(! frameShiftBl)
-         ; /*did not check frameshift events*/
+         /*bad way of handeling, but should work*/
+      } /*If: had memory error*/
 
-      else if(! amrAryST[indexUI].frameshiftBl)
-         ; /*not checking frameshift mutations*/
-
-      else if(percSupF < minFrameshiftF)
-         continue; /*beneath min support*/
-
-       if(indexUI > 0)
-       { /*If: need to check indexs*/
-          if(
-              eql_charCp(
-                 amrAryST[indexUI].varIdStr,
-                 amrAryST[lastPrintIndexUI].varIdStr,
-                 (signed char) '\0'
-              )
-          ) ; /*if read ids are not the same*/
-
-          else if(
-              eql_charCp(
-                 amrAryST[indexUI].mutTypeStr,
-                 amrAryST[lastPrintIndexUI].mutTypeStr,
-                 (signed char) '\0'
-              )
-          ) ; /*different mutation types*/
-
-          else
-             continue;
-       } /*If: need to check indexs*/
-      
-      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun12 Sec03:
-      ^   -  print out entry (passed filters)
-      ^   o fun12 sec03 Sub01:
-      ^     - print gene id
-      ^   o fun12 sec03 Sub02:
-      ^     - print antibiotics resitant to
-      ^   o fun12 sec03 Sub03:
-      ^     - print antibiotics cross resistance to
-      ^   o fun12 sec03 Sub04:
-      ^     - print variant id, mutation, reference
-      ^       position, number reads supporting AMR and
-      ^       total reads at reference position.
-      ^   o fun12 sec03 Sub05:
-      ^     - print high, unkown/normal, or low resitance
-      ^   o fun12 sec03 Sub06:
-      ^     - print if low resitance is additive
-      ^   o fun12 sec03 Sub07:
-      ^     - Print if restance needs a functional gene
-      ^   o fun12 sec03 Sub08:
-      ^     - print mutation effect
-      ^   o fun12 sec03 Sub09:
-      ^     - print WHOs comment and if whole gene effect
-      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-      
-      /**************************************************\
-      * Fun12 Sec03 Sub01:
-      *   - print gene id
-      \**************************************************/
-
-      lastPrintIndexUI = indexUI;
-
-      fprintf(
-        (FILE *) outFILE,
-        "%s\t",
-        (amrAryST)[indexUI].geneIdStr /*gene id*/
-      );
-      
-      /**************************************************\
-      * Fun12 Sec03 Sub02:
-      *   - print antibiotics resitant to
-      \**************************************************/
-
-      flagOnSI = 0;
-      firstPrintBl = 1;
-      
       for(
-         siAmr = 0;
-         siAmr < def_maxDrugs_amrST;
-         ++siAmr
-      ){ /*Loop: run through all drug flags*/
-         amrFlagUL = amrAryST[indexUI].amrFlagsUL[siAmr];
-         
-         if(! amrFlagUL)
-            continue; /*no resitance*/
+         hitPosSI = 0;
+         hitsHeapArySI[hitPosSI] != -1;
+         ++hitPosSI
+      ){ /*Loop: print non-duplicate AMRs*/
 
-         while(amrFlagUL)
-         { /*Loop: check each flag in a drug set*/
-            if(!(amrFlagUL & 1))
-            { /*If: There is no amr to this drug*/
+         indexUI = hitsHeapArySI[hitPosSI];
+
+         if(amrAryST[indexUI].numSupReadsUI < minDepthUI)
+            continue; /*to few reads support the AMR*/
+         
+         else if(amrAryST[indexUI].numMapReadsUI == 0)
+            continue; /*to few reads mapped to AMR*/
+   
+         /***********************************************\
+         * Fun15 Sec02 Sub02:
+         *   - remove AMRs with a lower % of mapped reads
+         \***********************************************/
+         
+         percSupF =
+                 (float) amrAryST[indexUI].numMapReadsUI
+               / (float) totalReadsUI;
+         
+         if(percSupF < minPercTotalF)
+            continue; /*not enough support*/
+         
+         percSupF =
+              (float) amrAryST[indexUI].numSupReadsUI
+            / (float) amrAryST[indexUI].numMapReadsUI;
+         
+         if(percSupF < minPercMapF)
+            continue; /*support for AMR under minimum %*/
+   
+         else if(
+               amrAryST[indexUI].mutTypeStr[0] == 'd'
+            && percSupF < minIndelSupF
+         ) continue; /*removing indel*/
+         
+         else if(! frameShiftBl)
+            ; /*did not check frameshift events*/
+   
+         else if(! amrAryST[indexUI].frameshiftBl)
+            ; /*not checking frameshift mutations*/
+   
+         else if(percSupF < minFrameshiftF)
+            continue; /*beneath min support*/
+   
+          /* was here to remove duplicate variant calls
+          #  if(indexUI > 0)
+          #  { # If: need to check indexs
+          #     if(
+          #         eql_charCp(
+          #            amrAryST[indexUI].varIdStr,
+          #            amrAryST[lastPrintIndexUI].varIdStr,
+          #            (signed char) '\0'
+          #         )
+          #     ) ; # variant ids are the same
+          #
+          #     else if(
+          #         eql_charCp(
+          #            amrAryST[indexUI].mutTypeStr,
+          #            amrAryST[lastPrintIndexUI].mutTypeStr,
+          #            (signed char) '\0'
+          #         )
+          #     ) ; # different mutation types
+          #
+          #     else
+          #        continue;
+          #  } # If: need to check indexs
+          */
+         
+         /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+         ^ Fun15 Sec03:
+         ^   -  print out entry (passed filters)
+         ^   o fun15 sec03 Sub01:
+         ^     - print gene id
+         ^   o fun15 sec03 Sub02:
+         ^     - print antibiotics resitant to
+         ^   o fun15 sec03 Sub03:
+         ^     - print antibiotics cross resistance to
+         ^   o fun15 sec03 Sub04:
+         ^     - print variant id, mutation, reference
+         ^       position, number reads supporting AMR and
+         ^       total reads at reference position.
+         ^   o fun15 sec03 Sub05:
+         ^     - print high, normal, or low resitance
+         ^   o fun15 sec03 Sub06:
+         ^     - print if low resitance is additive
+         ^   o fun15 sec03 Sub07:
+         ^     - print if restance needs a functional gene
+         ^   o fun15 sec03 Sub08:
+         ^     - print mutation effect
+         ^   o fun15 sec03 Sub09:
+         ^     - WHO comment and if whole gene effect
+         \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+         
+         /***********************************************\
+         * Fun15 Sec03 Sub01:
+         *   - print gene id
+         \***********************************************/
+   
+         /* was for duplicate variant id removal
+         #   lastPrintIndexUI = indexUI;
+         */
+   
+         fprintf(
+           (FILE *) outFILE,
+           "%s\t",
+           (amrAryST)[indexUI].geneIdStr /*gene id*/
+         );
+         
+         /***********************************************\
+         * Fun15 Sec03 Sub02:
+         *   - print antibiotics resitant to
+         \***********************************************/
+   
+         flagOnSI = 0;
+         firstPrintBl = 1;
+         
+         for(
+            siAmr = 0;
+            siAmr < def_maxDrugs_amrST;
+            ++siAmr
+         ){ /*Loop: run through all drug flags*/
+            amrFlagUL =
+               amrAryST[indexUI].amrFlagsUL[siAmr];
+            
+            if(! amrFlagUL)
+               continue; /*no resitance*/
+   
+            while(amrFlagUL)
+            { /*Loop: check each flag in a drug set*/
+               if(!(amrFlagUL & 1))
+               { /*If: There is no amr to this drug*/
+                  ++flagOnSI;
+                  amrFlagUL >>= 1;
+                  continue; /*No resitance*/
+               } /*If: There is no amr to this drug*/
+               
+               drugStr =
+                  get_drugAry(
+                     drugAryStr,
+                     flagOnSI
+                  );
+               
+               if(firstPrintBl)
+               { /*If: is frist print out*/
+                  fprintf(
+                     (FILE *) outFILE,
+                     "%s",
+                     drugStr
+                  );
+   
+                  firstPrintBl = 0;
+               } /*If: is frist print out*/
+               
+               else
+                  fprintf(
+                     (FILE *) outFILE,
+                     "_%s",
+                     drugStr
+                  );
+               
                ++flagOnSI;
                amrFlagUL >>= 1;
-               continue; /*No resitance*/
-            } /*If: There is no amr to this drug*/
+            } /*Loop: check each flag in a drug set*/
+         } /*Loop: run through all drug flags*/
             
-            drugStr =
-               get_drugAry(
-                  drugAryStr,
-                  flagOnSI
-               );
-            
-            if(firstPrintBl)
-            { /*If: is frist print out*/
-               fprintf(
-                  (FILE *) outFILE,
-                  "%s",
-                  drugStr
-               );
-
-               firstPrintBl = 0;
-            } /*If: is frist print out*/
-            
-            else
-               fprintf(
-                  (FILE *) outFILE,
-                  "_%s",
-                  drugStr
-               );
-            
-            ++flagOnSI;
-            amrFlagUL >>= 1;
-         } /*Loop: check each flag in a drug set*/
-      } /*Loop: run through all drug flags*/
+         /***********************************************\
+         * Fun15 Sec03 Sub03:
+         *   - print antibiotics cross resistanct to
+         \***********************************************/
+   
+         fprintf(
+            (FILE *) outFILE,
+            "\t"
+         ); /*separate resistance &
+            `  cross resitance entries
+            */
          
-      /**************************************************\
-      * Fun12 Sec03 Sub03:
-      *   - print antibiotics cross resistanct to
-      \**************************************************/
-
-      fprintf(
-         (FILE *) outFILE,
-         "\t"
-      ); /*separate resistance & cross resitance entries*/
-      
-      pCrossRes_checkAmr(
-         &(amrAryST)[indexUI],
-        drugAryStr,
-        (FILE *) outFILE
-      );
-
-      /**************************************************\
-      * Fun12 Sec03 Sub04:
-      *   - print variant id, mutation, reference
-      *     position, number reads supporting AMR and
-      *     total reads at reference position.
-      \**************************************************/
-
-      fprintf(
-        (FILE *) outFILE,
-        "\t%s\t%s\t%i\t%i\t%i\t%.2f\t%i",
-        amrAryST[indexUI].varIdStr,   /*variant id*/
-        amrAryST[indexUI].mutTypeStr, /*snp/del/ins/LoF*/
-        amrAryST[indexUI].gradeSC,
-        (int) amrAryST[indexUI].refPosUI + 1,
-        (int) amrAryST[indexUI].numSupReadsUI,
-        percSupF * 100,
-        (int) amrAryST[indexUI].numMapReadsUI
-      );
-
-      /**************************************************\
-      * Fun12 Sec03 Sub05:
-      *   - print high, unkown/normal, or low resitance
-      \**************************************************/
-
-      if(amrAryST[indexUI].highResBl)
-         fprintf(
-            (FILE *) outFILE,
-            "\thigh"
+         pCrossRes_checkAmr(
+            &(amrAryST)[indexUI],
+           drugAryStr,
+           (FILE *) outFILE
          );
-
-      else if(amrAryST[indexUI].lowResBl)
+   
+         /***********************************************\
+         * Fun15 Sec03 Sub04:
+         *   - print variant id, mutation, reference
+         *     position, number reads supporting AMR and
+         *     total reads at reference position.
+         \***********************************************/
+   
          fprintf(
-            (FILE *) outFILE,
-            "\tlow"
+           (FILE *) outFILE,
+           "\t%s\t%s\t%i\t%i\t%i\t%.2f\t%i",
+           amrAryST[indexUI].varIdStr,   /*variant id*/
+           amrAryST[indexUI].mutTypeStr,
+              /*snp/del/ins/LoF*/
+           amrAryST[indexUI].gradeSC,
+           (int) amrAryST[indexUI].refPosUI + 1,
+           (int) amrAryST[indexUI].numSupReadsUI,
+           percSupF * 100,
+           (int) amrAryST[indexUI].numMapReadsUI
          );
-
-      else
+   
+         /***********************************************\
+         * Fun15 Sec03 Sub05:
+         *   - print high, unkown/normal, or low resitance
+         \***********************************************/
+   
+         if(amrAryST[indexUI].highResBl)
+            fprintf(
+               (FILE *) outFILE,
+               "\thigh"
+            );
+   
+         else if(amrAryST[indexUI].lowResBl)
+            fprintf(
+               (FILE *) outFILE,
+               "\tlow"
+            );
+   
+         else
+            fprintf(
+               (FILE *) outFILE,
+               "\tNA"
+            );
+   
+         /***********************************************\
+         * Fun15 Sec03 Sub06:
+         *   - print if low resitance is additive
+         \***********************************************/
+   
+         if(amrAryST[indexUI].additiveResBl)
+            fprintf(
+               (FILE *) outFILE,
+               "\tAdditive"
+            );
+   
+         else
+            fprintf(
+               (FILE *) outFILE,
+               "\tNA"
+            );
+   
+         /***********************************************\
+         * Fun15 Sec03 Sub07:
+         *   - print if restance needs a functional gene
+         \***********************************************/
+   
          fprintf(
-            (FILE *) outFILE,
-            "\tNA"
+            (FILE *) outFILE, "\t%s",
+            amrAryST[indexUI].needsGeneStr
          );
+   
+         /***********************************************\
+         * Fun15 Sec03 Sub08:
+         *   - print mutation effect
+         \***********************************************/
+         
+         if((amrAryST)[indexUI].effectStr)
+            fprintf(
+               (FILE *) outFILE,
+               "\t%s",
+               amrAryST[indexUI].effectStr
+            );
+         else
+            fprintf(
+               (FILE *) outFILE,
+               "\tNA"
+            );
+   
+         /***********************************************\
+         * Fun15 Sec03 Sub09:
+         *   - print WHOs comment and if whole gene effect
+         \***********************************************/
+         
+         if(amrAryST[indexUI].commentStr)
+         { /*If: have a who comment*/
+            fprintf(
+               (FILE *) outFILE,
+               "\t%s",
+               amrAryST[indexUI].commentStr
+            );
+         } /*If: have a who comment*/
+         
+         else
+            fprintf(
+               (FILE *) outFILE,
+               "\tNA"
+            );
+   
+         if(amrAryST[indexUI].wholeGeneFlagSC)
+            fprintf(
+               (FILE *) outFILE,
+               "\tTrue%s",
+               str_endLine
+            );
+   
+         else
+            fprintf(
+               (FILE *) outFILE,
+               "\tFalse%s",
+               str_endLine
+            );
+   
+      }  /*Loop: print non-duplicate AMRs*/
 
-      /**************************************************\
-      * Fun12 Sec03 Sub06:
-      *   - print if low resitance is additive
-      \**************************************************/
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun15 Sec04:
+      ^   -  move to next variant ID in list
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-      if(amrAryST[indexUI].additiveResBl)
-         fprintf(
-            (FILE *) outFILE,
-            "\tAdditive"
-         );
+      indexUI = hitsHeapArySI[hitPosSI + 1];
 
-      else
-         fprintf(
-            (FILE *) outFILE,
-            "\tNA"
-         );
-
-      /**************************************************\
-      * Fun12 Sec03 Sub07:
-      *   - print if restance needs a functional gene
-      \**************************************************/
-
-      fprintf(
-         (FILE *) outFILE, "\t%s",
-         amrAryST[indexUI].needsGeneStr
-      );
-
-      /**************************************************\
-      * Fun12 Sec03 Sub08:
-      *   - print mutation effect
-      \**************************************************/
-      
-      if((amrAryST)[indexUI].effectStr)
-         fprintf(
-            (FILE *) outFILE,
-            "\t%s",
-            amrAryST[indexUI].effectStr
-         );
-      else
-         fprintf(
-            (FILE *) outFILE,
-            "\tNA"
-         );
-
-      /**************************************************\
-      * Fun12 Sec03 Sub09:
-      *   - print WHOs comment and if whole gene effect
-      \**************************************************/
-      
-      if(amrAryST[indexUI].commentStr)
-      { /*If: have a who comment*/
-         fprintf(
-            (FILE *) outFILE,
-            "\t%s",
-            amrAryST[indexUI].commentStr
-         );
-      } /*If: have a who comment*/
-      
-      else
-         fprintf(
-            (FILE *) outFILE,
-            "\tNA"
-         );
-
-      if(amrAryST[indexUI].wholeGeneFlagSC)
-         fprintf(
-            (FILE *) outFILE,
-            "\tTrue%s",
-            str_endLine
-         );
-
-      else
-         fprintf(
-            (FILE *) outFILE,
-            "\tFalse%s",
-            str_endLine
-         );
-
+      if(hitsHeapArySI != errArySI)
+         free(hitsHeapArySI);
+      hitsHeapArySI = 0;
    } /*Loop:Check and print out amrs*/
+
+   sortPos_amrST(amrAryST, 0, numAmrsUI - 1);
 } /*pRead_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun13: pIdVarHead_checkAmr
+| Fun16: pIdVarHead_checkAmr
 |   - prints header for the read id mapped variant table
 | Input:
 |   - outFILE:
@@ -2737,7 +3169,7 @@ pIdVarHead_checkAmr(
 } /*pIdVarHead_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun14: pIdVarTbl_checkAmr
+| Fun17: pIdVarTbl_checkAmr
 |   - prints table of read ids and detected AMRs
 | Input:
 |   - idStr:
@@ -2800,7 +3232,7 @@ pIdVarTbl_checkAmr(
 } /*pIdVarTbl_checkAmr*/
 
 /*-------------------------------------------------------\
-| Fun15: samFindAmrs_checkAmr
+| Fun18: samFindAmrs_checkAmr
 |   - look for AMRs in sam file entries
 | Input:
 |   - amrAryST
@@ -2810,8 +3242,8 @@ pIdVarTbl_checkAmr(
 |   - drugAryStr:
 |     o c-string array (drugAry.c) with antibiotic names
 |   - readsBl:
-|     o 1: print read AMRs (pRead_checkAmry [fun12])
-|     o 0: print consensus AMRs (pCon_checkAmr [fun10])
+|     o 1: print read AMRs (pRead_checkAmry [fun15])
+|     o 0: print consensus AMRs (pCon_checkAmr [fun13])
 |   - framshiftBl:
 |     o 1: check for framshifts (LoF/frameshift AMRs)
 |     o 0: ingore frameshifts (are exact matches)
@@ -2867,23 +3299,23 @@ samFindAmrs_checkAmr(
    signed char *outFileStr, /*output file (main)*/
    signed char *idFileStr   /*output file (ids)*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun15 TOC:P samFindAmrs_checkAmr
+   ' Fun18 TOC:P samFindAmrs_checkAmr
    '   - Look for anti-microbial (antibiotic) genes in the
    '     reads in a sam file
-   '   o fun15 sec01:
+   '   o fun18 sec01:
    '     - Variable declerations
-   '   o fun15 sec02:
+   '   o fun18 sec02:
    '     - Get the first sam entry
-   '   o fun15 sec03:
+   '   o fun18 sec03:
    '     - Check for AMRs
-   '   o fun15 sec04:
+   '   o fun18 sec04:
    '     - Print out read AMR stats
-   '   o fun15 sec05:
+   '   o fun18 sec05:
    '     - Clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec01:
+   ^ Fun18 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2899,7 +3331,7 @@ samFindAmrs_checkAmr(
    FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec02:
+   ^ Fun18 Sec02:
    ^   - Get the first sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2908,7 +3340,7 @@ samFindAmrs_checkAmr(
    errSC = setup_samEntry(&samStackST);
 
    if(errSC)
-      goto memErr_fun15_sec05_sub03;
+      goto memErr_fun18_sec05_sub03;
 
    if(
          ! samFileStr
@@ -2924,7 +3356,7 @@ samFindAmrs_checkAmr(
          );
 
       if(! samFILE)
-         goto fileErr_fun15_sec05_sub03;
+         goto fileErr_fun18_sec05_sub03;
    } /*Else: sam file provided*/
 
    if(
@@ -2941,7 +3373,7 @@ samFindAmrs_checkAmr(
       );
 
       if(! outFILE)
-         goto fileErr_fun15_sec05_sub03;
+         goto fileErr_fun18_sec05_sub03;
    } /*Else: given output file*/
 
    if(idFileStr)
@@ -2953,7 +3385,7 @@ samFindAmrs_checkAmr(
          );
 
       if(! idFILE)
-         goto fileErr_fun15_sec05_sub03;
+         goto fileErr_fun18_sec05_sub03;
       
       pIdVarHead_checkAmr(idFILE);
    } /*If: I given read id file*/
@@ -2962,23 +3394,23 @@ samFindAmrs_checkAmr(
    errSC = get_samEntry(&samStackST, samFILE);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec03:
+   ^ Fun18 Sec03:
    ^   - check for AMRs
-   ^   o fun15 sec03 sub01:
+   ^   o fun18 sec03 sub01:
    ^     - filter out less usefull entries
-   ^   o fun15 sec03 sub02:
+   ^   o fun18 sec03 sub02:
    ^     - check for amrs
-   ^   o fun15 sec03 sub03:
+   ^   o fun18 sec03 sub03:
    ^     - print consensus sequence AMRS
-   ^   o fun15 sec03 sub04:
+   ^   o fun18 sec03 sub04:
    ^     - deal with read amrs; print ids if requested/
    ^       free consensus structuerrs
-   ^   o fun15 sec03 sub05:
+   ^   o fun18 sec03 sub05:
    ^     - move to next sam entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun15 Sec03 Sub01:
+   * Fun18 Sec03 Sub01:
    *   - filter out less usefull entries/start loop
    \*****************************************************/
 
@@ -3006,7 +3438,7 @@ samFindAmrs_checkAmr(
       } /*If: umapped read, secondary, supplemental*/
 
       /**************************************************\
-      * Fun15 Sec03 Sub02:
+      * Fun18 Sec03 Sub02:
       *   - check for amrs
       \**************************************************/
 
@@ -3024,10 +3456,10 @@ samFindAmrs_checkAmr(
          );
 
       if(errSC)
-         goto memErr_fun15_sec05_sub03;
+         goto memErr_fun18_sec05_sub03;
 
       /**************************************************\
-      * Fun15 Sec03 Sub03:
+      * Fun18 Sec03 Sub03:
       *   - print consensus sequence AMRS
       \**************************************************/
 
@@ -3042,7 +3474,7 @@ samFindAmrs_checkAmr(
       } /*If: am printing out consensus AMRs*/
 
       /**************************************************\
-      * Fun15 Sec03 Sub04:
+      * Fun18 Sec03 Sub04:
       *   - print ids/amr table (for detected AMRs)
       \**************************************************/
 
@@ -3056,7 +3488,7 @@ samFindAmrs_checkAmr(
       } /*Else If: printing out read ids*/
 
       /**************************************************\
-      * Fun15 Sec03 Sub05:
+      * Fun18 Sec03 Sub05:
       *   - move to next sam entry
       \**************************************************/
 
@@ -3067,12 +3499,12 @@ samFindAmrs_checkAmr(
    } /*Loop: check if have antibiotic resitance*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec04:
+   ^ Fun18 Sec04:
    ^   - print read AMR stats
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(errSC > 1)
-      goto memErr_fun15_sec05_sub03;
+      goto memErr_fun18_sec05_sub03;
 
    if(samFILE != stdin)
       fclose(samFILE);
@@ -3099,20 +3531,20 @@ samFindAmrs_checkAmr(
    } /*If: printing reads AMRs*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec05:
+   ^ Fun18 Sec05:
    ^   - clean up
-   ^   o fun15 sec05 sub01:
+   ^   o fun18 sec05 sub01:
    ^     - no error clean up
-   ^   o fun15 sec05 sub02:
+   ^   o fun18 sec05 sub02:
    ^     - memory error clean up
-   ^   o fun15 sec05 sub03:
+   ^   o fun18 sec05 sub03:
    ^     - file error clean up
-   ^   o fun15 sec05 sub04:
+   ^   o fun18 sec05 sub04:
    ^     - general clean up (everything calls)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun15 Sec05 Sub01:
+   * Fun18 Sec05 Sub01:
    *   - no error clean up
    \*****************************************************/
 
@@ -3120,25 +3552,25 @@ samFindAmrs_checkAmr(
    goto cleanUp_fun14_sec05_sub04;
 
    /*****************************************************\
-   * Fun15 Sec05 Sub02:
+   * Fun18 Sec05 Sub02:
    *   - memory error clean up
    \*****************************************************/
 
-   memErr_fun15_sec05_sub03:;
+   memErr_fun18_sec05_sub03:;
    errSC = def_memErr_amrST;
    goto cleanUp_fun14_sec05_sub04;
 
    /*****************************************************\
-   * Fun15 Sec05 Sub03:
+   * Fun18 Sec05 Sub03:
    *   - file error clean up
    \*****************************************************/
 
-   fileErr_fun15_sec05_sub03:;
+   fileErr_fun18_sec05_sub03:;
    errSC = def_fileErr_amrST;
    goto cleanUp_fun14_sec05_sub04;
 
    /*****************************************************\
-   * Fun15 Sec05 Sub04:
+   * Fun18 Sec05 Sub04:
    *   - general clean up (everything calls)
    \*****************************************************/
 

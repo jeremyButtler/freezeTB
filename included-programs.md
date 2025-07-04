@@ -15,7 +15,7 @@ For unix several of the programs are installed in the
 Chapter one: monsters that consume all hope
 
 - freezeTB: core program for freezeTB
-- guiFreezeTB: primrary gui that wraps freezeTB
+- ftbTclTk: primrary gui that wraps freezeTB
 - graphAmpDepth.r: Rscript that makes graphs for freezeTB
 
 ## Modules:
@@ -38,6 +38,9 @@ Chapter two: here be dragons
 
 Chapter three: do not underestimate the pixies
 
+- addAmr: adds an drug resistance mutation to a tbAmr
+  (freezeTB) AMR databse
+  - has some valgrind issues, but should work ok
 - whoToAmr: converts the WHO 2023 catalog to tbAmr format
 - swapDbRef: is a program to switch out references in the
   reference database.
@@ -87,9 +90,17 @@ Chapter three: do not underestimate the pixies
     - freezeTB results saved to each fastq_pass's input
       prefix
 
+## Future programs:
+
+Chapter four: monsters from beyond
+
+- ftbRaylib is an attempt to remake the freezeTB GUI
+- rayWidg (in ftbRaylibSrc) is the widget organization
+  system for the new GUI attempt
+
 ## Older progams (some functional):
 
-Chapter four: the undead awaken
+Chapter five: the undead awaken
 
 These are so out of date it is not worth using. Still,
   they are examples of tcltk in R.
@@ -104,7 +115,7 @@ These are so out of date it is not worth using. Still,
 
 ## Really random stuff:
 
-Chapter five: the GUI fiend
+Chapter six: the GUI fiend
 
 In programs/guiFreezeTB there is a script called gui.tcl.
   This is the GUI script used in guiFreezeTB. However,

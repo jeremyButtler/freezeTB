@@ -109,7 +109,7 @@ realloc_drugAry(
 |     o will not copy past '\0'
 | Output:
 |   - Modifies:
-|     o dubAryStr to hold the new drug name
+|     o durgAryStr to hold the new drug name
 |   - Returns:
 |     o length of the copied string
 \-------------------------------------------------------*/
@@ -176,31 +176,25 @@ find_drugAry(
    signed char *drugOnStr = 0;
    signed char *targStr = qryStr;
 
-   for(
-      siIndex=0;
-      siIndex < (numDrugsSI);
-      ++siIndex
-   ){ /*Loop: find qryStr in drugAryStr*/
-      drugOnStr =
-         get_drugAry(
-            drugAryStr,
-            siIndex
-         ); /*get pointer to drug*/
+   for(siIndex=0; siIndex < numDrugsSI; ++siIndex)
+   { /*Loop: find qryStr in drugAryStr*/
+      drugOnStr = get_drugAry(drugAryStr, siIndex);
+            /*get pointer to drug*/
 
-      while((*targStr | 32) == (*drugOnStr | 32))
+      while( (*targStr | 32) == (*drugOnStr | 32) )
       { /*Loop: see if have match*/
          if(*drugOnStr == '\0')
             break;
-
+         else if(*targStr == delimSC)
+            break;
          ++targStr;
          ++drugOnStr;
       } /*Loop: see if have match*/
 
-      if(
-            *drugOnStr == '\0'
-         && *targStr == delimSC
-      ) break; /*found target*/
-
+      if(*drugOnStr != '\0')
+        ;
+      else if(*targStr == delimSC)
+         break; /*found target*/
       targStr = qryStr; /*reset to start of query*/
    } /*Loop: find qryStr in drugAryStr*/
 

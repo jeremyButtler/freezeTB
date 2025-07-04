@@ -7,7 +7,9 @@
 '     - converts a number to a c-string
 '   o fun02: backNumToStr
 '     - converts a number to a c-string backwards
-'   o fun03: double_numToStr
+'   o fun03: signed_numToStr
+'     - converts a signed number to a c-string
+'   o fun04: double_numToStr
 '     - converts a double to a c-string
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -70,6 +72,59 @@ numToStr(
 } /*numToStr*/
 
 /*-------------------------------------------------------\
+| Fun03: signed_numToStr
+|   - converts a signed number to a c-string
+| Input:
+|   - cstr:
+|     o c-string to hold the converted number
+|   - numSL:
+|     o number to convert
+| Output:
+|   - Modifies:
+|     o cstr to have the number (adds a '\0' at the end)
+|   - Returns:
+|     o number of characters copied to cstr
+\-------------------------------------------------------*/
+signed int
+signed_numToStr(
+   signed char *cstr,
+   signed long numSL
+){
+   signed int retSI = 0;
+   signed char *startStr = 0;
+   signed char *endStr = 0;
+
+   if(numSL < 0)
+   { /*If: negative number*/
+      numSL *= -1;
+      cstr[0] = '-';
+      ++retSI;
+      startStr = cstr + 1;
+   } /*If: negative number*/
+
+   else
+      startStr = cstr;
+
+   do{
+      cstr[retSI] = (numSL % 10) + 48;
+      ++retSI;
+      numSL /= 10;
+   } while(numSL);
+
+   cstr[retSI] = '\0';
+   endStr = &cstr[retSI - 1];
+
+   while(startStr < endStr)
+   { /*Loop: Reverse array*/
+      *endStr ^= *startStr;
+      *startStr ^= *endStr;
+      *endStr-- ^= *startStr++;
+   } /*Loop: Reverse array*/
+
+   return retSI;
+} /*signed_numToStr*/
+
+/*-------------------------------------------------------\
 | Fun02: backNumToStr
 |   - converts a number to a c-string backwards
 | Input:
@@ -102,7 +157,7 @@ backwards_numToStr(
 } /*backNumToStr*/
 
 /*-------------------------------------------------------\
-| Fun03: double_numToStr
+| Fun04: double_numToStr
 |   - converts a double to a c-string
 | Input:
 |   - cstr:
@@ -124,22 +179,22 @@ double_numToStr(
    double numDbl,
    unsigned char decUC
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun03 TOC:
+   ' Fun04 TOC:
    '   - converts a double to a c-string
-   '   o fun03 sec01:
+   '   o fun04 sec01:
    '     - variable declarations
-   '   o fun03 sec02:
+   '   o fun04 sec02:
    '     - convert non-decimal part to c-string
-   '   o fun03 sec03:
+   '   o fun04 sec03:
    '     - convert decimal part to number
-   '   o fun03 sec04:
+   '   o fun04 sec04:
    '     - check if need to round
-   '   o fun03 sec05:
+   '   o fun04 sec05:
    '     - add null and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec01:
+   ^ Fun04 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -150,7 +205,7 @@ double_numToStr(
    double decDbl = 0;       /*has decimal fraction*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec02:
+   ^ Fun04 Sec02:
    ^   - convert non-decimal part to c-string
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -180,7 +235,7 @@ double_numToStr(
    } /*Loop: Reverse array (is backwards)*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec03:
+   ^ Fun04 Sec03:
    ^   - convert decimal part to number
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -210,7 +265,7 @@ double_numToStr(
    cstr[retUI] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec04:
+   ^ Fun04 Sec04:
    ^   - check if need to round
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -229,7 +284,7 @@ double_numToStr(
                   startStr == cstr
                || *startStr == '-'
             ){ /*If: need to round up on frist digit*/
-               endBuff_fun03_sec04:;
+               endBuff_fun04_sec04:;
 
                endStr = startStr + 1;
 
@@ -244,7 +299,7 @@ double_numToStr(
                *startStr = '1';
                ++retUI; /*account for one more digit*/
 
-               goto rounded_fun03_sec03;
+               goto rounded_fun04_sec03;
             } /*If: need to round up on frist digit*/
 
             if(*startStr != '.')
@@ -261,14 +316,14 @@ double_numToStr(
          ) *(startStr - 1) += 1; /*round up last digit*/
 
          else
-            goto endBuff_fun03_sec04;
+            goto endBuff_fun04_sec04;
          
-         rounded_fun03_sec03:;
+         rounded_fun04_sec03:;
       } /*Else: need to round multiple values*/
    } /*If: need to round up*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec05:
+   ^ Fun04 Sec05:
    ^   - add null and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
    

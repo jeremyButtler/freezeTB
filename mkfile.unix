@@ -1,14 +1,13 @@
-MAKE=make
 LD=cc
 CC=cc
-CFLAGS= -O3 -std=c89 -Wall -Wextra
+CFLAGS=-DNONE
 PREFIX=/usr/local/bin
 DB_PREFIX=/usr/local/share
 ext=unix
 O=.o.$(ext)
 
 all:
-	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C programs
+	make CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C programs
 
 install:
 	if [ ! -d "$(PREFIX)" ] ; then mkdir -p "$(PREFIX)"; fi

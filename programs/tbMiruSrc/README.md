@@ -37,6 +37,28 @@ You can also scan fasta and fastq files using the kmer
   pimers.tsv file). I am not sure how well it works,
   other than on NC000962. No idea on reads.
 
+Also note, if you are using `-fa` (fasta file) or `-fq`
+  (fastq) you need to provide the MIRU-VNTR primers. The
+  names on the primers must exactly match the names in the
+  table. So, for example, primer `0154` is named `0154`
+  in the primer file and is named `0154` in the table.
+  The table will included some extra stuff after the name,
+  but that is after the first `.`.
+
+Also, do not use `.` in your names. It will mess up the
+  table system.
+
+
+Here is the full primer entry for MIRU-VNTR primer 1054:
+
+```
+0154  T  TGGACTTGCAGCAATGGACCAAC TACTCGGACGCCGGCTCAAAAT
+```
+
+However, the full table header entry for primer 0154
+  is `0154.153949.23.154457.2`. Were the `.` seprate out
+  first the id, then coordinate and length data.
+
 # How to build a database:
 
 ## The format
@@ -70,3 +92,8 @@ Example of an primer header entry:
 You can add in the primer coordinates automatically with
   mkMiruTbl (see its README.md). It is slow, but it works.
 
+## TODO:
+
+Fix valgrind read warnings that happen when NC_015758,
+  NZ_LR993210, NZ_KK339080, and NZ_LR993208 are used
+  together. Likely unique to NZ_KK339080.

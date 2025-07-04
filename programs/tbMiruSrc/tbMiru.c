@@ -74,6 +74,7 @@
 #define def_phelp_tbMiru 1
 #define def_pversion_tbMiru 2
 #define nonNum_tbMiru 4
+#define def_genome_tbMiru 0
 
 #define def_samIn_tbMiru 0
 #define def_fqIn_tbMiru 1
@@ -154,7 +155,8 @@ phelp_tbMiru(
    );
 
    fprintf(outFILE, "%s", str_endLine);
-   
+
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec02:
    ^   - print input options
@@ -169,8 +171,10 @@ phelp_tbMiru(
    ^   o fun02 sec02 sub05:
    ^     - miru table entry
    ^   o fun02 sec02 sub07:
-   ^     - out file entry
+   ^     - each line is a genome flag
    ^   o fun02 sec02 sub07:
+   ^     - out file entry
+   ^   o fun02 sec02 sub08:
    ^     - out table file entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -262,6 +266,11 @@ phelp_tbMiru(
    fprintf(
       outFILE,
       "      - column 1 is primer id%s",
+      str_endLine
+   );
+   fprintf(
+      outFILE,
+      "        * names must be names used in -miru-tbl%s",
       str_endLine
    );
 
@@ -408,14 +417,48 @@ phelp_tbMiru(
      str_endLine
    );
 
+   /**************************************************\
+   * Fun02 Sec02 Sub06:
+   *   - each line is a genome flag
+   \**************************************************/
+
    fprintf(
      outFILE,
      "        not the reverse primer%s",
      str_endLine
    );
 
+   if(def_genome_tbMiru)
+      fprintf(
+         outFILE,
+        " -genome: [Optional; Yes]%s",
+        str_endLine
+      );
+   else
+      fprintf(
+         outFILE,
+        " -genome: [Optional; No]%s",
+        str_endLine
+      );
+
+   fprintf(
+      outFILE,
+      "  - each sequence in file is an entire genome%s",
+      str_endLine
+   );
+   fprintf(
+      outFILE,
+      "  - -out is always set to stdout%s",
+      str_endLine
+   );
+   fprintf(
+      outFILE,
+      "  - disable with `-no-genome`%s",
+      str_endLine
+   );
+
    /**************************************************\
-   * Fun02 Sec02 Sub06:
+   * Fun02 Sec02 Sub07:
    *   - out file entry
    \**************************************************/
 
@@ -434,7 +477,7 @@ phelp_tbMiru(
    );
 
    /**************************************************\
-   * Fun02 Sec02 Sub07:
+   * Fun02 Sec02 Sub08:
    *   - out table file entry
    \**************************************************/
 
@@ -510,6 +553,9 @@ phelp_tbMiru(
 |   - fudgeLenSI:
 |     o pointer to integer with difference in allowed
 |       amplicon lengths
+|   - genomeBlPtr:
+|     o pointer to signed char, set to 1 if user wanted
+|       multi-fasta genome mode
 | Output:
 |   - Modifies:
 |     o all input variables, except numArgsSI and
@@ -529,7 +575,8 @@ input_tbMiru(
    signed char **primFileStr,
    signed char **outFileStr,
    signed char **tblOutFileStr,
-   signed int *fudgeLenSI
+   signed int *fudgeLenSI,
+   signed char *genomeBlPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun03 TOC:
    '   o fun03 sec04:
@@ -645,6 +692,22 @@ input_tbMiru(
          ++siArg;
          *primFileStr = (signed char *) argAryStr[siArg];
       } /*Else If: miru table file input*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-genome",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ) *genomeBlPtr = 1;
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-no-genome",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ) *genomeBlPtr = 0;
 
       /**************************************************\
       * Fun03 Sec03 Sub02:
@@ -916,6 +979,7 @@ main(
    signed char *tblOutFileStr = 0;
 
    signed int fudgeLenSI = def_fudgeLen_tbMiruDefs;
+   signed char genomeBl = def_genome_tbMiru;
 
    signed char errSC = 0;
 
@@ -981,7 +1045,8 @@ main(
          &primFileStr,
          &outFileStr,
          &tblOutFileStr,
-         &fudgeLenSI
+         &fudgeLenSI,
+         &genomeBl
       ); /*Get the user input*/
 
    if(errSC)
@@ -1310,6 +1375,14 @@ main(
 
       else
          errSC = getFa_seqST(samFILE, &seqStackST);
+
+      if(genomeBl)
+      { /*If: each sequence is an entire genome*/
+         plineages_miruTbl(miruHeapST, 0);
+           /*not using stdout (0) will overwrite*/
+         resetCnt_miruTbl(miruHeapST);
+           /*clear this genomes results*/
+      } /*If: each sequence is an entire genome*/
    } /*Loop: find lineages*/
 
    /*****************************************************\
@@ -1363,7 +1436,9 @@ main(
    freeStack_tblST_kmerFind(&tblStackST);
    freeStack_seqST(&seqStackST);
 
-   goto pLineages_main_sec06_sub01;
+   if(genomeBl)
+      goto done_main_sec07;
+      /*already printed results*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec06:
@@ -1444,35 +1519,15 @@ main(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec07:
    ^   - clean up
-   ^   o main sec07 sub01:
-   ^     - no error clean up
-   ^   o main sec07 sub02:
-   ^     - error clean up
-   ^   o main sec07 sub03:
-   ^     - general cleanup (all errors and no errors)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*****************************************************\
-   * Main Sec07 Sub01:
-   *   - no error clean up
-   \*****************************************************/
-
-   errSC = 0;
-   goto cleanUp_main_sec07_sub03;
-
-   /*****************************************************\
-   * Main Sec07 Sub02:
-   *   - error clean up
-   \*****************************************************/
+   done_main_sec07:;
+      errSC = 0;
+      goto cleanUp_main_sec07_sub03;
 
    err_main_sec07_sub02:;
-   errSC = 1;
-   goto cleanUp_main_sec07_sub03;
-
-   /*****************************************************\
-   * Main Sec07 Sub03:
-   *   - general cleanup (all errors and no errors)
-   \*****************************************************/
+      errSC = 1;
+      goto cleanUp_main_sec07_sub03;
 
    cleanUp_main_sec07_sub03:;
       freeStack_samEntry(&samStackST);

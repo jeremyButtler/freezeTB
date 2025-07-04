@@ -874,7 +874,9 @@
          ++refStr;
       } /*Loop: find difference*/
    
-      if(*refStr > 32)
+      if(*qryStr > 32)
+         return *qryStr - *refStr;
+      else if(*refStr > 32)
          return *qryStr - *refStr;
    
       return 0;
@@ -889,13 +891,13 @@
       ulong_ulCp *refUL = (ulong_ulCp *) refStr;
    
       while( ! ifWhite_ulCp(*qryUL) )
-      { /*Loop: Copy cpStr to dupStr*/
+      { /*Loop: compare query to reference*/
          if(*qryUL != *refUL)
             break;
    
          ++qryUL;
          ++refUL;
-      } /*Loop: Copy cpStr to dupStr*/
+      } /*Loop: compare query to reference*/
    
       qryStr = (signed char *) qryUL;
       refStr = (signed char *) refUL;
@@ -909,7 +911,9 @@
          ++refStr;
       } /*Loop: find difference*/
    
-      if(*refStr > 32)
+      if(*qryStr > 32)
+         return *qryStr - *refStr;
+      else if(*refStr > 32)
          return *qryStr - *refStr;
    
       return 0;

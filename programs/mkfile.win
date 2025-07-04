@@ -22,12 +22,12 @@ all:
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
 	cd ..\freezeTBSrc
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
-	cd ..\guiFreezeTBSrc
+	cd ..\ftbTclTkSrc
 	nmake CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" /F mkfile.$(ext)
 	cd ..
 
 install: install-support
-	move guiFreezeTBSrc\guiFreezeTB.exe "$(PREFIX)"
+	move ftbTclTkSrc\ftbTclTk.exe "$(PREFIX)"
 	move freezeTBSrc\freezeTB.exe "$(PREFIX)"
 	move tbAmrSrc\tbAmr.exe $(PREFIX)
 	move tbMiruSrc\tbMiru.exe $(PREFIX)
@@ -37,6 +37,7 @@ install: install-support
 
 clean:
 	del \
+		ftbTclTkSrc\*.o.$(ext) \
 		freezeTBSrc\*.o.$(ext) \
 		tbAmrSrc\*.o.$(ext) \
 		tbMiruSrc\*.o.$(ext) \

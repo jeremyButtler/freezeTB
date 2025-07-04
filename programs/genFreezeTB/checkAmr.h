@@ -1,10 +1,6 @@
-/*#######################################################\
-# Name: checkAmr
-#   - has functions to detect AMRs in sam file entrie
-\#######################################################*/
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' checkAmr SOF: Start Of File
+'   - has functions to detect AMRs in sam file entrie
 '   o header:
 '     - definitions, forward declerations, and guards
 '   o .h st01: amrHit_checkAmr
@@ -27,19 +23,25 @@
 '     - checks if sam entry has amr's
 '   o .c fun08: pCrossRes_checkAmr
 '     - print out cross resitance (report, not database)
-'   o fun09: pConHead_checkAmr
+'   o fun09: cmpAmrs_checkAmr
+'     - checks if two AMR structs are the same variant
+'   o fun10: flagAmrHit_checkAmr
+'     - flag all duplicates in a AMR hit list
+'   o fun11: pConHead_checkAmr
 '     - prints header for a consensus amr check
-'   o fun10: pCon_checkAmr
+'   o fun12: pCon_checkAmr
 '     - prints out all amr's that were in a consensus
-'   o fun11: pReadHead_checkAmr
+'   o fun13: readGetVarHits_checkAmr
+'     - finds non-duplicate AMRs for the target variant ID
+'   o fun14: pReadHead_checkAmr
 '     - prints header for reads AMR table
-'   o fun12: pRead_checkAmr
+'   o fun15: pRead_checkAmr
 '     - prints AMRs detected in reads that have min depth
-'   o fun13: pIdVarHead_checkAmr
+'   o fun16: pIdVarHead_checkAmr
 '     - prints header for the read id mapped variant table
-'   o fun14: pIdVarTbl_checkAmr
+'   o fun17: pIdVarTbl_checkAmr
 '     - prints table of read ids and detected AMRs
-'   o fun15: samFindAmrs_checkAmr
+'   o fun18: samo findAmrs_checkAmr
 '     - look for AMRs in sam file entries
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -62,8 +64,9 @@ struct amrST;
 \-------------------------------------------------------*/
 typedef struct amrHit_checkAmr{
    struct amrST *amrSTPtr;
-   unsigned seqPosUI;
+   unsigned int seqPosUI;
    struct amrHit_checkAmr *nextAmr;
+   signed char dupBl; /*marks if duplicate variant*/
 }amrHit_checkAmr;
 
 /*-------------------------------------------------------\
@@ -260,7 +263,47 @@ checkAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun09: pConHead_checkAmr
+| Fun09: cmpAmrs_checkAmr
+|   - checks if two AMR structs are the same variant
+| Input:
+|   - oneST:
+|     o pointer to first amrST structures to compare
+|   - twoST:
+|     o pointer to second amrST structures to compare
+| Output:
+|   - Returns:
+|     o -1 if are different by variant ID
+|     o -2 if same variant ID, but different attribute
+|     o 0 if are the same to checkAmr
+|     o 1 if first AMR has more support
+|     o 2 if second AMR has more support
+\-------------------------------------------------------*/
+signed char
+cmpAmrs_checkAmr(
+   struct amrST *oneST,
+   struct amrST *twoST
+);
+
+/*-------------------------------------------------------\
+| Fun10: flagAmrHit_checkAmr
+|   - flag all duplicates in a AMR hit list
+| Input:
+|   - amrHitListST:
+|     o pointer to list of amrHit_checkAmr structs to
+|       flag duplicate AMRs
+| Output:
+|    - Modifies:
+|      o dupBl in each amrHit_checkAmr struct in
+|        amrHitListST to be 1 (if duplicates) or 0 if
+|        unique/best AMR
+\-------------------------------------------------------*/
+void
+flagAmrHit_checkAmr(
+   struct amrHit_checkAmr *amrHitListST
+);
+
+/*-------------------------------------------------------\
+| Fun11: pConHead_checkAmr
 |   - prints header for a consensus amr check
 | Input:
 |   - outFILE:
@@ -275,7 +318,7 @@ pConHead_checkAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun10: pCon_checkAmr
+| Fun12: pCon_checkAmr
 |   - prints out all amr's that were in a consensus
 | Input:
 |   - seqIdStr:
@@ -292,6 +335,9 @@ pConHead_checkAmr(
 | Output: 
 |   - Prints:
 |     o amr's in amrHitListST to outFILE
+|   - Modifies:
+|     o dupBl in amrHitListST to be 1 for duplicate
+|       variant ids
 \-------------------------------------------------------*/
 void
 pCon_checkAmr(
@@ -301,9 +347,33 @@ pCon_checkAmr(
    void *outFILE
 );
 
+/*-------------------------------------------------------\
+| Fun13: readGetVarHits_checkAmr
+|   - finds non-duplicate AMRs for the target variant ID
+| Input:
+|   - amrAryST:
+|     o pointer to an array of amrST structures to print
+|   - indexSI:
+|     o index of AMR in amrAryST
+|   - numAmrsUI:
+|     o number AMRs in amrAryST
+| Output:
+|   - Returns:
+|     o 0 for memory errors
+|     o signed int array ending in -1 with the index of
+|       each different AMR
+|       * the index after -1 has the next variant ID to
+|         scan
+\-------------------------------------------------------*/
+signed int *
+readGetVarHits_checkAmr(
+   struct amrST *amrAryST,
+   signed int indexSI,      /*index at in AMR array*/
+   unsigned int numAmrsUI
+);
 
 /*-------------------------------------------------------\
-| Fun11: pReadHead_checkAmr
+| Fun14: pReadHead_checkAmr
 |   - prints header for reads AMR table
 | Input:
 |   - outFILE:
@@ -318,7 +388,7 @@ pReadHead_checkAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun12: pRead_checkAmr
+| Fun15: pRead_checkAmr
 |   - prints AMRs detected in reads that have min depth
 | Input:
 |   - minDepthUI:
@@ -329,16 +399,18 @@ pReadHead_checkAmr(
 |   - minPercTotalF:
 |     o min percent of mapped reads needed to keep an amr
 |       (compared to all reads [total depth])
-|   - minFrameshiftF:
-|     o minimum percent support to keep a frame shift
 |   - minIndelSupF:
 |     o minimum percent support to keep an indel AMR
+|   - minFrameshiftF:
+|     o minimum percent support to keep a frame shift
 |   - framShiftBl:
 |     o 1: looked for frameshifts in data
 |   - totalReadsUI:
 |     o total number of reads input
 |   - amrAryST:
 |     o pointer to an array of amrST structures to print
+|   - numAmrsUI:
+|     o number AMRs in amrAryST
 |   - drugAryStr:
 |     o c-string array (drugAry.c) of antibiotic drugs.
 |     o needs to have same order as flags in amrAryST
@@ -353,8 +425,8 @@ pRead_checkAmr(
    unsigned int minDepthUI,
    float minPercMapF,
    float minPercTotalF,
-   float minFrameshiftF,    /*% support for frameshift*/
    float minIndelSupF,      /*% support to keep indel*/
+   float minFrameshiftF,    /*% support for frameshift*/
    signed char frameShiftBl,/*looked for frameshifts*/
    unsigned int totalReadsUI,
    struct amrST *amrAryST,
@@ -364,7 +436,7 @@ pRead_checkAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun13: pIdVarHead_checkAmr
+| Fun16: pIdVarHead_checkAmr
 |   - prints header for the read id mapped variant table
 | Input:
 |   - outFILE:
@@ -379,7 +451,7 @@ pIdVarHead_checkAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun14: pIdVarTbl_checkAmr
+| Fun17: pIdVarTbl_checkAmr
 |   - prints table of read ids and detected AMRs
 | Input:
 |   - idStr:
@@ -401,7 +473,7 @@ pIdVarTbl_checkAmr(
 );
 
 /*-------------------------------------------------------\
-| Fun15: samFindAmrs_checkAmr
+| Fun18: samFindAmrs_checkAmr
 |   - look for AMRs in sam file entries
 | Input:
 |   - amrAryST
@@ -411,8 +483,8 @@ pIdVarTbl_checkAmr(
 |   - drugAryStr:
 |     o c-string array (drugAry.c) with antibiotic names
 |   - readsBl:
-|     o 1: print read AMRs (pRead_checkAmry [fun12])
-|     o 0: print consensus AMRs (pCon_checkAmr [fun10])
+|     o 1: print read AMRs (pRead_checkAmry [fun15])
+|     o 0: print consensus AMRs (pCon_checkAmr [fun13])
 |   - framshiftBl:
 |     o 1: check for framshifts (LoF/frameshift AMRs)
 |     o 0: ingore frameshifts (are exact matches)

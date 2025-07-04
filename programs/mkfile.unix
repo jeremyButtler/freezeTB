@@ -13,11 +13,11 @@ all:
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C whoToAmrSrc
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C swapDbRefSrc
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C freezeTBSrc
-	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C guiFreezeTBSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C ftbTclTkSrc
 
 install:
-	mv guiFreezeTBSrc/guiFreezeTB $(PREFIX)
-	chmod a+x $(PREFIX)/guiFreezeTB
+	mv ftbTclTKSrc/ftbTclTk $(PREFIX)
+	chmod a+x $(PREFIX)/ftbTclTk
 	mv freezeTBSrc/freezeTB $(PREFIX)
 	chmod a+x $(PREFIX)/freezeTB
 	mv tbAmrSrc/tbAmr $(PREFIX)
@@ -32,16 +32,4 @@ install:
 	chmod a+x $(PREFIX)/swapDbRef
 
 clean:
-	rm \
-		guiFreezeTBSrc/*.o.$(ext) \
-		freezeTBSrc/*.o.$(ext) \
-		tbAmrSrc/*.o.$(ext) \
-		tbMiruSrc/*.o.$(ext) \
-		tbSpolSrc/*.o.$(ext) \
-		whoToAmrSrc/*.o.$(ext) \
-		swapDbRefSrc/*.o.$(ext) \
-		genLib/*.o.$(ext) \
-		genBio/*.o.$(ext) \
-		genAln/*.o.$(ext) \
-		genClust/*.o.$(ext) \
-		genFreezeTB/*.o.$(ext)
+	rm */*.o.$(ext);

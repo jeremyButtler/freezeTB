@@ -1,0 +1,30 @@
+gyrB_p.Ser447Phe	-lfx -note forward
+
+fgd1_LoF -dlm -note forward
+fgd1_p.Asn112fs -other delamanid -note forward
+
+rpoB_p.Gln432_Met434del	-rif -note forward
+rpoB_p.Gln432_Met434delinsLeu -rif -note forward
+rpoB_p.Ser431_Gln432insArg -other rifampicin -note forward
+rpoB_p.Asn437_Asn438del -rif -note forward
+Rv0678_p.Met1?	-bdq -needs MmpL5 -note forward
+Rv0678_p.Asp8fs	-cfz	-needs MmpL5	-note forward
+Rv0678_p.Gln22* -bdq -needs MmpL5 -note forward
+rpoB_p.Phe433dup	-grade-1 -note forward
+
+katG_LoF	-inh -high-res -note reverse
+katG_p.Pro569fs	-inh	-high-res -note reverse
+katG_p.Trp689*	-inh -high-rest -note reverse
+katG_p.Trp328Leu -inh	-grade-1 -high-res -note reverse
+katG_deletion -inh -high-res -note reverse
+katG_p.Met1?	-grade-1 -inh high-res -note reverse
+
+pncA_p.Ter187Argext*? -pza -note reverse
+pncA_c.-11A>G -pza -grade-1 -note reverse_gene
+
+rrl_n.2269_2270insT -lzd -note forward_gene
+rrl_n.2270G>C -lzd -note forward_gene
+eis_c.-8delC -kan -note reverse_gene
+
+inhA_c.-154G>A -eto -note forward_gene
+inhA_c.-154G>A -inh -low-res -add-res -grade-1 -note low_res

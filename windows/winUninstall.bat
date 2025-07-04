@@ -8,6 +8,10 @@ if exist "%localAppData%\freezeTB" (
    rmdir /Q /S "%localAppData%\freezeTB"
 )
 
+if exist "%userprofile%\Desktop\freezeTB.lnk" (
+   del "%userprofile%\Desktop\freezeTB.lnk"
+)
+
 :: rmdir removes directory
 ::   /S allows removal if directory is non-empty
 ::   /Q forces removal (do not ask user)
@@ -17,3 +21,6 @@ if exist "%localAppData%\freezeTB" (
 if exit "%userprofile%\Desktop\freezeTB.lnk" (
  del "%userprofile%\Desktop\freezeTB.lnk"
 )
+
+echo "uninstalled freezeTB"
+pause

@@ -12,9 +12,11 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
 
 # License:
 
-freezeTB includes databases from other repositories. In
-  those cases the licensing will be under the owner's
-  repository.
+freezeTB includes databases from other repositories and
+  raysan5's raylib [https://github.com/raysan5/raylib](
+          https://github.com/raysan5/raylib),
+  which is under the zlib license. In those cases the
+  licensing will be under the owner's repository.
 
 All code that is unique to freezeTB is under a dual
   license. The primary license is Unlicense. However, not
@@ -34,6 +36,7 @@ Here are the order of Merlin winners:
     encouragment
   - Bryce Inman: GUI testing, AMR testing, and designed
     wet lab side
+  - Anna Kovalenko for advice during the building process
   - Abigail Seeger: GUI testing on windows
   - My dad for listening and giving feedback
 - Taken from other sources:
@@ -72,6 +75,10 @@ Here are the order of Merlin winners:
     recommended install for other OS's
     - [https://github.com/lh3/minimap2](
        https://github.com/lh3/minimap2)
+  - raylib: not used yet, but hoping to replace tcltk with
+    raylib for the GUI (under zlib licenense)
+    - [https://github.com/raysan5/raylib](
+       https://github.com/raysan5/raylib)
   - tcltk to make the GUI (graphical user interface [the
     window])
     - [https://github.com/tcltk/tk](
@@ -80,7 +87,8 @@ Here are the order of Merlin winners:
        https://github.com/tcltk/tcl)
 
 - Unique to freezeTB:
-  - Everything in programs
+  - Most of the stuff in programs
+    - raylib is the only thing not unique to freezeTB
   - The icon
   - Everything in scripts
 
@@ -91,7 +99,8 @@ Here are the order of Merlin winners:
 For Linux I am assuming you are using a Debian based
   distribution, such as Ubuntu. However, I have not been
   able to get the GUI (graphical user interface) compiled
-  on Ubuntu (some linking issue).
+  on Ubuntu (some linking issue). For other distros or
+  Unix OS's, make sure you have the packages.
 
 1. Install R: `sudo apt-get install r-base;`
 2. Install: tcltk:`sudo apt-get install tcl-dev tk-dev`
@@ -105,17 +114,6 @@ git clone https://github.com/jeremybuttler/freezeTB
 cd freezeTB
 make -f mkfile.unix
 sudo make -f mkfile.unix install
-```
-
-You can change the make variable to use gmake with the
- `MAKE=gmake` command. This is only needed on on a bsd,
-  were the default make is bsd make. Otherwise the GUI can
-  not locate tcltk. I could not get the POSIX solution
-  working on Mac.
-
-```
-make MAKE=gmake -f mkfile.unix
-sudo make MAKE=gmake -f mkfile.unix install
 ```
 
 ## Mac
@@ -161,6 +159,17 @@ cd freezeTB
 make -f mkfile.unix
 sudo make -f mkfile.unix install
 ```
+
+This is really painfull.
+
+If you are having issues linking to tcltk, then edit the
+  `mkfile.unix` in `programs/ftbTclTkSrc`. You will see
+  three gaint if statments that are looking for X11, Tcl,
+  and Tk. Copy an `elif` line and add your paths
+  (locations) to X11, Tcl, and Tk to these if statements.
+
+You will also have another if statement looking for the
+  include directory. Make sure you path is in there.
 
 ### Mac minimap2 from source
 

@@ -1,7 +1,7 @@
 
 CC=cl.exe
 LD=link.exe
-coreCFLAGS= /c /O2 /Ot /Za /Tc
+coreCFLAGS= /DWINDOWS /c /O2 /Ot /Za /Tc
 CFLAGS=/DNONE
 NAME=freezeTB.exe
 PREFIX="%localAppData%"
@@ -91,7 +91,7 @@ $(genFreezeTB)\freezeTB.$O: \
 	$(genLib)\charCp.h \
 	$(genLib)\genMath.h \
 	$(genLib)\endLine.h \
-	..tbVersion.h
+	..\ftbVersion.h
 		$(CC) /Fo:$(genFreezeTB)\freezeTB.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)\freezeTB.c

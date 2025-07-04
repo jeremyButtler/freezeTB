@@ -6698,7 +6698,7 @@ run_freezeTB(
 
             else
             { /*Else: fastq file input*/
-               fqFILE = fopen(argAryStr[fqIndexSI], "r");
+               fqFILE = fopen(argAryStr[fqIndexSI], "rb");
 
                if(! fqFILE)
                { /*If: could not open fastq file*/

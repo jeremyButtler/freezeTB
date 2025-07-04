@@ -7,6 +7,10 @@
 '     - converts a number to a c-string
 '   o fun02: backNumToStr
 '     - converts a number to a c-string backwards
+'   o fun03: signed_numToStr
+'     - converts a signed number to a c-string
+'   o fun04: double_numToStr
+'     - converts a double to a c-string
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -64,7 +68,27 @@ backwards_numToStr(
 );
 
 /*-------------------------------------------------------\
-| Fun03: double_numToStr
+| Fun03: signed_numToStr
+|   - converts a signed number to a c-string
+| Input:
+|   - cstr:
+|     o c-string to hold the converted number
+|   - numSL:
+|     o number to convert
+| Output:
+|   - Modifies:
+|     o cstr to have the number (adds a '\0' at the end)
+|   - Returns:
+|     o number of characters copied to cstr
+\-------------------------------------------------------*/
+signed int
+signed_numToStr(
+   signed char *cstr,
+   signed long numSL
+);
+
+/*-------------------------------------------------------\
+| Fun04: double_numToStr
 |   - converts a double to a c-string
 | Input:
 |   - cstr:

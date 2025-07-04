@@ -2776,7 +2776,7 @@ next_file_inflate(
             goto eofErr_fun26_sec05;
 
          fileSTPtr->zipMaskUC = 8;
-         lenUS = usToLittle_endin(lenUS);
+         lenUS = usToBig_endin(lenUS);
             /*on bigendin systems flips to bigendin, but
             `  does nothing on little endin
             */

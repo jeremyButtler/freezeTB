@@ -66,7 +66,7 @@ fi # If: need to install homebrew
 #   - X11 (xquatz) check
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-libStr="$(sh programs/guiFreezeTBSrc/x11GetLib.sh)";
+libStr="$(sh programs/ftbTclTKSrc/libDetect/x11GetLib.sh)";
 
 if [[ ! -f "$libStr" ]];
 then # If: need to install X11/Xquartz
@@ -79,7 +79,7 @@ fi # If: need to install X11/Xquartz
 #   - tcltk check/install
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-libStr="$(bash programs/guiFreezeTBSrc/tkGetLib.sh)";
+libStr="$(bash programs/ftbTclTKSrc/libDetect/tkGetLib.sh)";
 
 if [[ ! -f "$libStr" ]];
 then # If: need to install tcltk
@@ -88,7 +88,7 @@ then # If: need to install tcltk
 # If: need to install tcltk
 else
 # Else: make sure tcl is not missing
-   libStr="$(bash programs/guiFreezeTBSrc/tclGetLib.sh)";
+   libStr="$(bash programs/ftbTclTKSrc/libDetect/tclGetLib.sh)";
 
    if [[ ! -f "$libStr" ]];
    then # If: need to install tcltk
@@ -133,7 +133,7 @@ make -f mkfile.unix;
 sudo make -f mkfile.unix install;
 
 # set up shortcut by sim link
-ln /usr/local/bin/guiFreezeTB ~/Desktop/freezeTB;
+ln /usr/local/bin/ftbTclTk ~/Desktop/freezeTB;
 
 # set up fileicon
 libStr="$(fileicon --version)";

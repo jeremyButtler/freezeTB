@@ -24,7 +24,7 @@
 '       around
 '   o fun07: sort_geneCoord
 '     - Sorts the arrays in a genesCoord structure by
-'       starting positiion with shell short.
+'       starting position with shell short.
 '   o fun08: findStart_geneCoord
 '     - Does a binary search by starting coordinate for a
 '       potentail gene in a geneCoord structure
@@ -712,7 +712,7 @@ sortName_geneCoord(
 |    o The index of gene with the same name
 |    o -1 if there was no gene
 \-------------------------------------------------------*/
-int
+signed int
 findName_geneCoord(
    struct geneCoord *geneST,
    signed char *nameStr,

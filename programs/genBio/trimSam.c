@@ -277,7 +277,7 @@ coords_trimSam(
    '     - check ranges and set up variables
    '   o fun02 sec03:
    '     - trim read
-   '   o fun02 sec04:
+   '   o fun02 sec05:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -304,24 +304,24 @@ coords_trimSam(
 
     /*Check if is an header is an header entry*/
     if(samSTPtr->extraStr[0] == '@')
-       goto header_fun02_sec04;
+       goto header_fun02_sec05;
 
     /*Check if is an unmapped read*/
     if(samSTPtr->flagUS & 4)
-       goto noMap_fun02_sec04;
+       goto noMap_fun02_sec05;
 
     if(samSTPtr->cigTypeStr[0] == '*')
-       goto noMap_fun02_sec04;
+       goto noMap_fun02_sec05;
 
     /*Check if has a sequence to trim*/
     if(samSTPtr->seqStr[0] == '*')
-       goto noSeq_fun02_sec04;
+       goto noSeq_fun02_sec05;
 
    if(samSTPtr->refStartUI > (unsigned int) endSI)
-      goto outOfRange_fun02_sec04;
+      goto outOfRange_fun02_sec05;
 
    if(samSTPtr->refEndUI < (unsigned int) startSI)
-      goto outOfRange_fun02_sec04;
+      goto outOfRange_fun02_sec05;
 
    cigBaseOnSI = samSTPtr->cigArySI[0];
    refPosSI = (signed int) samSTPtr->refStartUI;
@@ -356,6 +356,8 @@ coords_trimSam(
 
    if(samSTPtr->refEndUI < (unsigned int) endSI)
       endSI = samSTPtr->refEndUI;
+   else
+      samSTPtr->refEndUI = (unsigned int) endSI;
 
    findRefPos_samEntry(
       samSTPtr,
@@ -405,29 +407,69 @@ coords_trimSam(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec04:
+   ^   - find alignment stats
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   for(
+      siCig = 0;
+      siCig < (signed int) samSTPtr->cigLenUI;
+      ++siCig
+   ){ /*Loop: refind counts*/
+      switch(samSTPtr->cigTypeStr[siCig])
+      { /*Switch: count entries*/
+         case 'M':
+         case '=':
+            samSTPtr->matchCntUI +=
+               samSTPtr->cigArySI[siCig];
+            break;
+         case 'X':
+            samSTPtr->snpCntUI +=
+               samSTPtr->cigArySI[siCig];
+            break;
+         case 'I':
+            samSTPtr->insCntUI +=
+               samSTPtr->cigArySI[siCig];
+            break;
+         case 'D':
+            samSTPtr->delCntUI +=
+               samSTPtr->cigArySI[siCig];
+            break;
+         case 'S':
+            samSTPtr->maskCntUI +=
+               samSTPtr->cigArySI[siCig];
+            break;
+      } /*Switch: count entries*/
+   }  /*Loop: refind counts*/
+
+   samSTPtr->alnReadLenUI = samSTPtr->matchCntUI;
+   samSTPtr->alnReadLenUI += samSTPtr->snpCntUI;
+   samSTPtr->alnReadLenUI += samSTPtr->delCntUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun02 Sec05:
    ^   - clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    errSC = 0;
-   goto cleanUp_fun02_sec04;
+   goto cleanUp_fun02_sec05;
 
-   outOfRange_fun02_sec04:;
+   outOfRange_fun02_sec05:;
       errSC = def_rangeErr_trimSam;
-      goto cleanUp_fun02_sec04;
+      goto cleanUp_fun02_sec05;
 
-   header_fun02_sec04:;
+   header_fun02_sec05:;
       errSC = def_header_trimSam;
-      goto cleanUp_fun02_sec04;
+      goto cleanUp_fun02_sec05;
 
-   noMap_fun02_sec04:;
+   noMap_fun02_sec05:;
       errSC = def_noMap_trimSam;
-      goto cleanUp_fun02_sec04;
+      goto cleanUp_fun02_sec05;
 
-   noSeq_fun02_sec04:;
+   noSeq_fun02_sec05:;
       errSC = def_noSeq_trimSam;
-      goto cleanUp_fun02_sec04;
+      goto cleanUp_fun02_sec05;
 
-   cleanUp_fun02_sec04:;
+   cleanUp_fun02_sec05:;
       return errSC;
 } /*coords_trimSam*/
 

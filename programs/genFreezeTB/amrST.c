@@ -27,11 +27,13 @@
 '       coordiante (uses shell sort)
 '   o fun08: sortGeneId_amrST
 '     - sort amrST struct array by gene names (ids)
-'   o fun09: getAmr_amrST
+'   o fun09: sortVarId_amrST
+'     - sort amrST struct array by variant id
+'   o fun10: getAmr_amrST
 '     - finds nearest amr to input query coordiante
-'   o fun10: p_amrST
+'   o fun11: p_amrST
 '     - Print out the amr database used
-'   o fun11: readTbl_amrST
+'   o fun12: readTbl_amrST
 '     - gets amr data from tbAmr tsv file (p_amrST;fun 10)
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -515,7 +517,10 @@ sortPos_amrST(
   ^ Fun07 Sec02:
   ^   - find max search value (number rounds to sort)
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-  
+
+  if(numElmUL <= 1)
+     return; /*nothing to sort*/
+
   /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
   subUL = 1; /*Initialzie first array*/
   while(subUL < numElmUL - 1) subUL = (3 * subUL) + 1;
@@ -706,7 +711,136 @@ sortGeneId_amrST(
 } /*sortGeneId_amrST*/
 
 /*-------------------------------------------------------\
-| Fun09: getAmr_amrST
+| Fun09: sortVarId_amrST
+|   - sort amrST struct array by variant id
+| Input:
+|   - amrAryST:
+|     o pointer to start of amrST array to sort
+|   - startUI:
+|     o index of first elment to sort
+|   - endUI:
+|     o index (0) of last elment to sort
+| Output:
+|   - Modifies:
+|     o amrAryST to be sorted by variant ids
+\-------------------------------------------------------*/
+void
+sortVarId_amrST(
+   struct amrST *amrAryST,
+   unsigned int startUI,
+   unsigned int endUI
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun09 TOC:
+   '   - sort amrST struct array by variant id
+   '   - Shell sort taken from:
+   '     - Adam Drozdek. 2013. Data Structures and
+   '       Algorithims in c++. Cengage Leraning. fourth
+   '       edition. pages 505-508
+   '     - I made some minor changes, but is mostly the
+   '       same
+   '   o fun09 sec01:
+   '     - variable declerations
+   '   o fun09 sec02:
+   '     - find the number of rounds to sort for
+   '   o fun09 sec03:
+   '     - sort the amrSTs by variant id
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun09 Sec01:
+  ^   - variable declerations
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Number of elements to sort*/
+  unsigned long numElmUL = (endUI) - (startUI);
+  
+  /*Number of sorting rounds*/
+  unsigned long subUL = 0;
+  unsigned long nextElmUL = 0;
+  unsigned long lastElmUL = 0;
+  unsigned long elmOnUL = 0;
+  
+  /*Get arrays to sort from the matrix (for sanity)*/
+  
+  /*Variables to incurment loops*/
+  unsigned long ulIndex = 0;
+  unsigned long ulElm = 0;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun09 Sec02:
+  ^   - find the max search value (number rounds to sort)
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
+  subUL = 1; /*Initialzie first array*/
+  while(subUL < numElmUL - 1) subUL = (3 * subUL) + 1;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ^ Fun09 Sec03:
+  ^   - sort the amrSTs by variant id
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  while(subUL > 0)
+  { /*Loop: all sub arrays sort the subarrays*/
+
+    for(
+       ulIndex = 0;
+       ulIndex <= subUL;
+       ++ulIndex
+    ){ /*Loop: each element in the subarray*/
+
+      for(ulElm = ulIndex;
+          ulElm + subUL <= endUI;
+          ulElm += subUL
+      ){ /*Loop: swap each nth element of the subarray*/
+        nextElmUL = ulElm + subUL;
+        
+        if(
+            eql_charCp(
+                amrAryST[ulElm].varIdStr,
+                amrAryST[nextElmUL].varIdStr,
+                '\0'
+            )
+          > 0
+        ){ /*If: need to swap an element*/
+          swap_amrST(
+             &amrAryST[ulElm],
+             &amrAryST[nextElmUL]
+          );
+          
+          lastElmUL = ulElm;
+          elmOnUL = ulElm;
+          
+          while(lastElmUL >= subUL)
+          { /*Loop: move swapped element back*/
+            lastElmUL -= subUL;
+            
+            if(
+                eql_charCp(
+                   amrAryST[elmOnUL].varIdStr,
+                   amrAryST[lastElmUL].varIdStr,
+                   '\0'
+                )
+              > 0
+            ) break; /*positioned element*/
+            
+             swap_amrST(
+                &amrAryST[elmOnUL],
+                &amrAryST[lastElmUL]
+             );
+            
+            elmOnUL = lastElmUL;
+          } /*Loop: move swapped element back*/
+        } /*If: need to swap elements*/
+      } /*Loop: swap each nth element of the subarray*/
+    } /*Loop: each element in the subarray*/
+    
+    subUL = (subUL - 1) / 3; /*move to the next round*/
+  } /*Loop: all sub arrays to sort the subarrays*/
+} /*sortVarId_amrST*/
+
+/*-------------------------------------------------------\
+| Fun10: getAmr_amrST
 |  - finds nearest amr to input query coordiante
 | Input:
 |  - amrAryST:
@@ -787,7 +921,7 @@ getAmr_amrST(
 } /*getAmr_amrST*/
 
 /*-------------------------------------------------------\
-| Fun10: p_amrST
+| Fun11: p_amrST
 |  - print out amr database used
 | Input:
 |  - amrAryST:
@@ -816,22 +950,22 @@ p_amrST(
    signed int numDrugsSI,
    signed char *outStr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun10 TOC: p_amrST
+   ' Fun11 TOC: p_amrST
    '   - print out amr database used
-   '   o fun10 sec01:
+   '   o fun11 sec01:
    '     - variable declerations
-   '   o fun10 sec02:
+   '   o fun11 sec02:
    '     - open output file
-   '   o fun10 sec03:
+   '   o fun11 sec03:
    '     - print header
-   '   o fun10 sec04:
+   '   o fun11 sec04:
    '     - print AMRs
-   '   o fun10 sec05:
+   '   o fun11 sec05:
    '     - close file and exit
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec01:
+   ^ Fun11 Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -854,7 +988,7 @@ p_amrST(
    FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec02:
+   ^ Fun11 Sec02:
    ^   - open output file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -870,7 +1004,7 @@ p_amrST(
       return def_fileErr_amrST;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec03:
+   ^ Fun11 Sec03:
    ^   - print header
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -893,31 +1027,31 @@ p_amrST(
    fprintf(outFILE, "%s", str_endLine);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec04:
+   ^ Fun11 Sec04:
    ^   - print AMRs
-   ^   o fun10 sec04 sub01:
+   ^   o fun11 sec04 sub01:
    ^     - start loop; print ids & reference position
-   ^   o fun10 sec04 sub02:
+   ^   o fun11 sec04 sub02:
    ^     - print direction and AMR type/sequence
-   ^   o fun10 sec04 sub03:
+   ^   o fun11 sec04 sub03:
    ^     - print amino acid sequence and coordinates
-   ^   o fun10 sec04 sub04:
+   ^   o fun11 sec04 sub04:
    ^     - print gene coordinates
-   ^   o fun10 sec04 sub05:
+   ^   o fun11 sec04 sub05:
    ^     - print resistance level/if additive
-   ^   o fun10 sec04 sub06:
+   ^   o fun11 sec04 sub06:
    ^     - print drugs resistant to
-   ^   o fun10 sec04 sub07:
+   ^   o fun11 sec04 sub07:
    ^     - print effect entry
-   ^   o fun10 sec04 sub08:
+   ^   o fun11 sec04 sub08:
    ^     - print comment entry
-   ^   o fun10 sec04 sub09:
+   ^   o fun11 sec04 sub09:
    ^     - print grade (main drug), if effect appies to
    ^       entire gene, and if unknown entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun10 Sec04 Sub01:
+   * Fun11 Sec04 Sub01:
    *   - start loop; print ids and reference position
    \*****************************************************/
 
@@ -935,7 +1069,7 @@ p_amrST(
       ); /*print first few entries*/
 
       /**************************************************\
-      * Fun10 Sec04 Sub02:
+      * Fun11 Sec04 Sub02:
       *   - print direction and AMR type/sequence
       \**************************************************/
 
@@ -962,7 +1096,7 @@ p_amrST(
       );
 
       /**************************************************\
-      * Fun10 Sec04 Sub03:
+      * Fun11 Sec04 Sub03:
       *   - print amino acid sequence and coordinates
       \**************************************************/
 
@@ -1006,7 +1140,7 @@ p_amrST(
          fprintf(outFILE, "\tNA\tNA\tNA\t0\t0");
 
       /**************************************************\
-      * Fun10 Sec04 Sub04:
+      * Fun11 Sec04 Sub04:
       *   - print gene coordinates
       \**************************************************/
 
@@ -1023,7 +1157,7 @@ p_amrST(
          fprintf(outFILE, "\tNA\tNA");
             
       /**************************************************\
-      * Fun10 Sec04 Sub05:
+      * Fun11 Sec04 Sub05:
       *   - print resistance level/if additive
       \**************************************************/
 
@@ -1050,7 +1184,7 @@ p_amrST(
         );
 
       /**************************************************\
-      * Fun10 Sec04 Sub06:
+      * Fun11 Sec04 Sub06:
       *   - print drugs resistant to
       \**************************************************/
 
@@ -1119,7 +1253,7 @@ p_amrST(
          fprintf(outFILE, "\t*");
 
          /***********************************************\
-         * Fun10 Sec04 Sub07:
+         * Fun11 Sec04 Sub07:
          *   - print effect entry
          \***********************************************/
 
@@ -1150,7 +1284,7 @@ p_amrST(
          } /*Else: may have effect entry*/
  
          /***********************************************\
-         * Fun10 Sec04 Sub08:
+         * Fun11 Sec04 Sub08:
          *   - print comment entry
          \***********************************************/
 
@@ -1184,7 +1318,7 @@ p_amrST(
          } /*Else: may have comment entry*/
  
          /***********************************************\
-         * Fun10 Sec04 Sub09:
+         * Fun11 Sec04 Sub09:
          *   - print grade (main drug), if effect applies
          *     to entire gene, and if unknown entry
          \***********************************************/
@@ -1202,7 +1336,7 @@ p_amrST(
    } /*Loop: print each  amr*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun10 Sec05:
+   ^ Fun11 Sec05:
    ^   - close file and exit
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1213,7 +1347,7 @@ p_amrST(
 } /*p_amrST*/
 
 /*-------------------------------------------------------\
-| Fun11: readTbl_amrST
+| Fun12: readTbl_amrST
 |   - gets amr data from tbAmr tsv file (p_amrST; fun 10)
 | Input:
 |   - tbAmrTblStr:
@@ -1221,6 +1355,7 @@ p_amrST(
 |   - numAmrUI:
 |     o pointer to unisgined to to hold hold number of
 |       AMRs in tbAmrTblStr
+|     o this is also the size of the array
 |   - durgStrAry:
 |     o pointer to a c-string to hold antbiotic names
 |   - numDrugsSI
@@ -1255,24 +1390,24 @@ readTbl_amrST(
    signed int *maxDrugsI,    /*max drugs for drugAryStr*/
    signed char *errSC        /*holds errors*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun11 TOC: readTbl_amrST
+   ' Fun12 TOC: readTbl_amrST
    '   - gets amr data from tbAmr tsv (p_amrST; fun 10)
-   '   o fun11 sec01:
+   '   o fun12 sec01:
    '     - variable declarations
-   '   o fun11 sec02:
+   '   o fun12 sec02:
    '     - process header
-   '   o fun11 sec03:
+   '   o fun12 sec03:
    '     - process header and get number of lines
-   '   o fun11 sec04:
+   '   o fun12 sec04:
    '     - prepare buffers for extracting AMRs
-   '   o fun11 sec05:
+   '   o fun12 sec05:
    '     - extract information from the file
-   '   o fun11 sec06:
+   '   o fun12 sec06:
    '     - clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec01:
+   ^ Fun12 Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1299,36 +1434,31 @@ readTbl_amrST(
    FILE *amrFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec02:
+   ^ Fun12 Sec02:
    ^   - check if file eixists
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   amrFILE =
-      fopen(
-         (char *) tbAmrTblStr,
-         "r"
-      );
-
+   amrFILE = fopen((char *) tbAmrTblStr, "r");
    if(amrFILE == 0)
-      goto fileErr_fun11_sec06_sub03;
+      goto fileErr_fun12_sec06_sub03;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec03:
+   ^ Fun12 Sec03:
    ^   - process header and get number of lines
-   ^   o fun11 sec03 sub01:
+   ^   o fun12 sec03 sub01:
    ^     - get number of lines in file
-   ^   o fun11 sec03 sub02:
+   ^   o fun12 sec03 sub02:
    ^     - read in header
-   ^   o fun11 sec03 sub03:
+   ^   o fun12 sec03 sub03:
    ^     - get number of antibiotics
-   ^   o fun11 sec03 sub04:
+   ^   o fun12 sec03 sub04:
    ^     - allocate memory for antibiotics
-   ^   o fun11 sec03 sub05:
+   ^   o fun12 sec03 sub05:
    ^     - copy the antibiotics to the drug array
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec03 Sub01:
+   * Fun12 Sec03 Sub01:
    *   - get number of lines in file
    \*****************************************************/
 
@@ -1338,31 +1468,28 @@ readTbl_amrST(
    lenBuffUI = (unsigned int) maxLineLenSL + 3;
 
    if(! *numAmrUI)
-      goto fileErr_fun11_sec06_sub03; /*no AMRs in file*/
+      goto fileErr_fun12_sec06_sub03; /*no AMRs in file*/
 
    buffHeapStr =
       malloc((lenBuffUI + 9) * sizeof(signed char));
    if(buffHeapStr == 0)
-      goto memErr_fun11_sec06_sub02;
+      goto memErr_fun12_sec06_sub02;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub02:
+   * Fun12 Sec03 Sub02:
    *   - read in header
    \*****************************************************/
 
    tmpStr =
       (signed char *)
-      fgets(
-         (char *) buffHeapStr,
-         lenBuffUI,
-         amrFILE
-      ); /*file set to start by lineCnt_fileFun*/
+      fgets((char *) buffHeapStr, lenBuffUI, amrFILE);
+      /*file set to start by lineCnt_fileFun*/
 
    if(! tmpStr)
-      goto fileErr_fun11_sec06_sub03;
+      goto fileErr_fun12_sec06_sub03;
   
    /*****************************************************\
-   * Fun11 Sec03 Sub03:
+   * Fun12 Sec03 Sub03:
    *   - get number of antibiotics
    \*****************************************************/
 
@@ -1385,39 +1512,35 @@ readTbl_amrST(
       )
    ){ /*Loop: find end of antibiotics columns*/
       ++(*numDrugsSI);
-
       while(buffHeapStr[siEndDrug++] != '\t') ;
    } /*Loop: find end of antibiotics columns*/
 
    /*****************************************************\
-   * Fun11 Sec03 Sub04:
+   * Fun12 Sec03 Sub04:
    *   - allocate memory for antibiotics
    \*****************************************************/
 
    if(newDrugAryBl)
    { /*If: is new drug array*/
       *drugAryStr = alloc_drugAry(*numDrugsSI);
-
       if(! *drugAryStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
+      *maxDrugsI = *numDrugsSI;
+         /*numDrugsSI is index 0*/
    } /*If: is new drug array*/
 
    else if(*numDrugsSI > *maxDrugsI)
    { /*Else If: need to add more memory to drug array*/
-      tmpStr =
-         realloc_drugAry(
-            *drugAryStr,
-            *numDrugsSI
-         );
-
+      tmpStr = realloc_drugAry(*drugAryStr, *numDrugsSI);
       if(! tmpStr)
-         goto memErr_fun11_sec06_sub02;
-
+         goto memErr_fun12_sec06_sub02;
       *drugAryStr = tmpStr;
+      *maxDrugsI = *numDrugsSI;
+         /*numDrugsSI is index 0*/
    } /*Else If: need to add more memory to drug array*/
 
    /*****************************************************\
-   * Fun11 Sec03 Sub05:
+   * Fun12 Sec03 Sub05:
    *   - copy antibiotics to drug array
    \*****************************************************/
 
@@ -1436,77 +1559,76 @@ readTbl_amrST(
    } /*Loop: read in antibiotic entries*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec04:
+   ^ Fun12 Sec04:
    ^   - prepare buffers for extracting AMRs
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    amrSTAry =
       malloc(*numAmrUI * sizeof(struct amrST));
-
    if(! amrSTAry)
-      goto memErr_fun11_sec06_sub02;
+      goto memErr_fun12_sec06_sub02;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec05:
+   ^ Fun12 Sec05:
    ^   - extract information from file
-   ^   o fun11 sec05 sub02:
+   ^   o fun12 sec05 sub02:
    ^     - get first entry, start loop, & initialize
-   ^   o fun11 sec05 sub02:
+   ^   o fun12 sec05 sub02:
    ^     - read in gene id
-   ^   o fun11 sec05 sub03:
+   ^   o fun12 sec05 sub03:
    ^     - read in variaint id
-   ^   o fun11 sec05 sub04:
+   ^   o fun12 sec05 sub04:
    ^     - read in refernce positon
-   ^   o fun11 sec05 sub05:
+   ^   o fun12 sec05 sub05:
    ^     - read in direction
-   ^   o fun11 sec05 sub06:
+   ^   o fun12 sec05 sub06:
    ^     - read in mutation type
-   ^   o fun11 sec05 sub07:
+   ^   o fun12 sec05 sub07:
    ^     - read in frame shift entry
-   ^   o fun11 sec05 sub08:
+   ^   o fun12 sec05 sub08:
    ^     - read in reference sequence
-   ^   o fun11 sec05 sub09:
+   ^   o fun12 sec05 sub09:
    ^     - read in amr sequence
-   ^   o fun11 sec05 sub10:
+   ^   o fun12 sec05 sub10:
    ^     - read in frist codon base in reference
-   ^   o fun11 sec05 sub11:
+   ^   o fun12 sec05 sub11:
    ^     - read in starting codon number
-   ^   o fun11 sec05 sub12:
+   ^   o fun12 sec05 sub12:
    ^     - read in ending codon number
-   ^   o fun11 sec05 sub13:
+   ^   o fun12 sec05 sub13:
    ^     - read in reference amino acid sequence
-   ^   o fun11 sec05 sub14:
+   ^   o fun12 sec05 sub14:
    ^     - read in amr amino acid sequence
-   ^   o fun11 sec05 sub15:
+   ^   o fun12 sec05 sub15:
    ^     - read in gene starting position
-   ^   o fun11 sec05 sub16:
+   ^   o fun12 sec05 sub16:
    ^     - read in gene ending position
-   ^   o fun11 sec05 sub17:
+   ^   o fun12 sec05 sub17:
    ^     - check if is a high resistance gene
-   ^   o fun11 sec05 sub18:
+   ^   o fun12 sec05 sub18:
    ^     - check if is a low resistance gene
-   ^   o fun11 sec05 sub19:
+   ^   o fun12 sec05 sub19:
    ^     - check if resistance is additive
-   ^   o fun11 sec05 sub20:
+   ^   o fun12 sec05 sub20:
    ^     - read in "if it needs a functional gene"
-   ^   o fun11 sec05 sub21:
+   ^   o fun12 sec05 sub21:
    ^     - read in antibiotic flags
-   ^   o fun11 sec05 sub22:
+   ^   o fun12 sec05 sub22:
    ^     - read in effect entry
-   ^   o fun11 sec05 sub23:
+   ^   o fun12 sec05 sub23:
    ^     - read in comment entry
-   ^   o fun11 sec05 sub24:
+   ^   o fun12 sec05 sub24:
    ^     - read in grade entry
-   ^   o fun11 sec05 sub25:
+   ^   o fun12 sec05 sub25:
    ^     - read in "if entry effects the entire gene"
-   ^   o fun11 sec05 sub26:
+   ^   o fun12 sec05 sub26:
    ^     - read in unkown type entry
-   ^   o fun11 sec05 sub27:
+   ^   o fun12 sec05 sub27:
    ^     - get the next line
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec05 Sub01:
+   * Fun12 Sec05 Sub01:
    *   - get first entry, Start read in loop, & initailze
    \*****************************************************/
 
@@ -1529,18 +1651,15 @@ readTbl_amrST(
       tmpStr = buffHeapStr;
 
       /**************************************************\
-      * Fun11 Sec05 Sub02:
+      * Fun12 Sec05 Sub02:
       *   - read in gene id
       \**************************************************/
 
       amrSTAry[uiAmr].lenGeneIdUI =
-        lenStrNull_charCp(
-           tmpStr,
-           '\t'
-        );
+        lenStrNull_charCp( tmpStr, '\t');
 
       if(tmpStr[amrSTAry[uiAmr].lenGeneIdUI] != '\t')
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       amrSTAry[uiAmr].geneIdStr =
          malloc(
@@ -1549,7 +1668,7 @@ readTbl_amrST(
          ); /*Allocate memory for the gene name*/
 
       if(! amrSTAry[uiAmr].geneIdStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_charCp(
          amrSTAry[uiAmr].geneIdStr,
@@ -1560,7 +1679,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenGeneIdUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub03:
+      * Fun12 Sec05 Sub03:
       *   - read in variaint id
       \**************************************************/
 
@@ -1572,7 +1691,7 @@ readTbl_amrST(
          );
 
       if(tmpStr[amrSTAry[uiAmr].lenVarIdUI] != '\t')
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       amrSTAry[uiAmr].varIdStr =
          malloc(
@@ -1581,7 +1700,7 @@ readTbl_amrST(
          ); /*Allocate memory for the variant id*/
 
       if(! amrSTAry[uiAmr].varIdStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_ulCp(
          amrSTAry[uiAmr].varIdStr,
@@ -1592,7 +1711,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenVarIdUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub04:
+      * Fun12 Sec05 Sub04:
       *   - read in refernce positon
       \**************************************************/
 
@@ -1605,15 +1724,15 @@ readTbl_amrST(
       --amrSTAry[uiAmr].refPosUI; /*convert to index 0*/
 
       if(*tmpStr > 32)
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       if(*tmpStr == '\0')
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       ++tmpStr; /*get off the tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub05:
+      * Fun12 Sec05 Sub05:
       *   - read in direction
       \**************************************************/
 
@@ -1630,13 +1749,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub06:
+      * Fun12 Sec05 Sub06:
       *   - read in the mutation type
       \**************************************************/
 
@@ -1678,13 +1797,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub07:
+      * Fun12 Sec05 Sub07:
       *   - read in frame shift entry
       \**************************************************/
 
@@ -1696,13 +1815,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;/*end of line*/
+            goto fileErr_fun12_sec06_sub03;/*end of line*/
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub08:
+      * Fun12 Sec05 Sub08:
       *   - read in reference sequence
       \**************************************************/
 
@@ -1713,7 +1832,7 @@ readTbl_amrST(
          );
 
       if(tmpStr[amrSTAry[uiAmr].lenRefSeqUI] != '\t')
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       amrSTAry[uiAmr].refSeqStr =
          malloc(
@@ -1722,7 +1841,7 @@ readTbl_amrST(
          );
 
       if(! amrSTAry[uiAmr].refSeqStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_charCp(
          amrSTAry[uiAmr].refSeqStr,
@@ -1733,7 +1852,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenRefSeqUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub09:
+      * Fun12 Sec05 Sub09:
       *   - read in amr sequence
       \**************************************************/
 
@@ -1744,7 +1863,7 @@ readTbl_amrST(
          );
 
       if(tmpStr[amrSTAry[uiAmr].lenAmrSeqUI] != '\t')
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       amrSTAry[uiAmr].amrSeqStr =
          malloc(
@@ -1753,7 +1872,7 @@ readTbl_amrST(
          );
 
       if(! amrSTAry[uiAmr].amrSeqStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_charCp(
          amrSTAry[uiAmr].amrSeqStr,
@@ -1764,7 +1883,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenAmrSeqUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub10:
+      * Fun12 Sec05 Sub10:
       *   - read in frist codon base in reference
       \**************************************************/
 
@@ -1778,7 +1897,7 @@ readTbl_amrST(
          while(*tmpStr < 31)
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
-               goto fileErr_fun11_sec06_sub03;
+               goto fileErr_fun12_sec06_sub03;
 
             ++tmpStr;
          } /*Loop: get past tab*/
@@ -1795,13 +1914,13 @@ readTbl_amrST(
          --amrSTAry[uiAmr].codonPosUI; /*to index 0*/
 
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;/*non-numeric*/
+            goto fileErr_fun12_sec06_sub03;/*non-numeric*/
 
          ++tmpStr;
       } /*Else: have number*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub11:
+      * Fun12 Sec05 Sub11:
       *   - read in starting codon number
       \**************************************************/
 
@@ -1815,7 +1934,7 @@ readTbl_amrST(
          while(*tmpStr < 31)
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
-               goto fileErr_fun11_sec06_sub03;
+               goto fileErr_fun12_sec06_sub03;
 
             ++tmpStr;
          } /*Loop: get past tab*/
@@ -1830,13 +1949,13 @@ readTbl_amrST(
             );
 
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Else: have number*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub12:
+      * Fun12 Sec05 Sub12:
       *   - read in ending codon number
       \**************************************************/
 
@@ -1850,7 +1969,7 @@ readTbl_amrST(
          while(*tmpStr < 31)
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
-               goto fileErr_fun11_sec06_sub03;
+               goto fileErr_fun12_sec06_sub03;
 
             ++tmpStr;
          } /*Loop: get past tab*/
@@ -1865,13 +1984,13 @@ readTbl_amrST(
             );
 
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Else: have number*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub13:
+      * Fun12 Sec05 Sub13:
       *   - read in reference amino acid sequence
       \**************************************************/
 
@@ -1882,7 +2001,7 @@ readTbl_amrST(
           );
 
       if(tmpStr[amrSTAry[uiAmr].lenRefAaUI] != '\t')
-         goto fileErr_fun11_sec06_sub03; /*end of line*/
+         goto fileErr_fun12_sec06_sub03; /*end of line*/
 
       amrSTAry[uiAmr].refAaStr =
          malloc(
@@ -1891,7 +2010,7 @@ readTbl_amrST(
          );
    
       if(! amrSTAry[uiAmr].refAaStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_charCp(
          amrSTAry[uiAmr].refAaStr,
@@ -1900,12 +2019,12 @@ readTbl_amrST(
       );
 
       if(*tmpStr == '\0')
-         goto fileErr_fun11_sec06_sub03;/*end of line*/
+         goto fileErr_fun12_sec06_sub03;/*end of line*/
 
       tmpStr += amrSTAry[uiAmr].lenRefAaUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub14:
+      * Fun12 Sec05 Sub14:
       *   - read in the amr amino acid sequence
       \**************************************************/
 
@@ -1916,7 +2035,7 @@ readTbl_amrST(
          );
 
       if(tmpStr[amrSTAry[uiAmr].lenAmrAaUI] != '\t')
-         goto fileErr_fun11_sec06_sub03;/*end of line*/
+         goto fileErr_fun12_sec06_sub03;/*end of line*/
 
       amrSTAry[uiAmr].amrAaStr =
          malloc(
@@ -1925,7 +2044,7 @@ readTbl_amrST(
          );
    
       if(! amrSTAry[uiAmr].amrAaStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_charCp(
          amrSTAry[uiAmr].amrAaStr,
@@ -1936,7 +2055,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenAmrAaUI + 1;
          
       /**************************************************\
-      * Fun11 Sec05 Sub15:
+      * Fun12 Sec05 Sub15:
       *   - read in gene starting position
       \**************************************************/
 
@@ -1950,7 +2069,7 @@ readTbl_amrST(
          while(*tmpStr < 31)
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
-               goto fileErr_fun11_sec06_sub03;
+               goto fileErr_fun12_sec06_sub03;
 
             ++tmpStr;
          } /*Loop: get past tab*/
@@ -1965,14 +2084,14 @@ readTbl_amrST(
             );
 
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          --amrSTAry[uiAmr].geneFirstRefUI; /*to index 0*/
          ++tmpStr;
       } /*Else: I have a number*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub16:
+      * Fun12 Sec05 Sub16:
       *   - read in gene ending position
       \**************************************************/
 
@@ -1986,7 +2105,7 @@ readTbl_amrST(
          while(*tmpStr < 31)
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
-               goto fileErr_fun11_sec06_sub03;
+               goto fileErr_fun12_sec06_sub03;
 
             ++tmpStr;
          } /*Loop: get past tab*/
@@ -2001,14 +2120,14 @@ readTbl_amrST(
             );
 
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          --amrSTAry[uiAmr].geneLastRefUI; /*to index 0*/
          ++tmpStr;
       } /*Else: I have a number*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub17:
+      * Fun12 Sec05 Sub17:
       *   - check if is a high resistance gene
       \**************************************************/
       
@@ -2020,13 +2139,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub18:
+      * Fun12 Sec05 Sub18:
       *   - check if is a low resistance gene
       \**************************************************/
       
@@ -2038,13 +2157,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub19:
+      * Fun12 Sec05 Sub19:
       *   - check if resistance is additive
       \**************************************************/
       
@@ -2056,13 +2175,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub20:
+      * Fun12 Sec05 Sub20:
       *   - Read in "if it needs a functional gene"
       \**************************************************/
 
@@ -2076,7 +2195,7 @@ readTbl_amrST(
             malloc( 3 * sizeof(char));
 
          if(! amrSTAry[uiAmr].needsGeneStr)
-            goto memErr_fun11_sec06_sub02;
+            goto memErr_fun12_sec06_sub02;
 
         amrSTAry[uiAmr].needsGeneStr[0] = 'N';
         amrSTAry[uiAmr].needsGeneStr[1] = 'A';
@@ -2094,7 +2213,7 @@ readTbl_amrST(
             );
 
          if(tmpStr[amrSTAry[uiAmr].lenNeedsGeneUI] !='\t')
-            goto fileErr_fun11_sec06_sub03;/*end of line*/
+            goto fileErr_fun12_sec06_sub03;/*end of line*/
 
          amrSTAry[uiAmr].needsGeneStr =
             malloc(
@@ -2103,7 +2222,7 @@ readTbl_amrST(
             );
 
          if(! amrSTAry[uiAmr].needsGeneStr)
-            goto memErr_fun11_sec06_sub02;
+            goto memErr_fun12_sec06_sub02;
 
          cpLen_charCp(
             amrSTAry[uiAmr].needsGeneStr,
@@ -2114,11 +2233,11 @@ readTbl_amrST(
          tmpStr += amrSTAry[uiAmr].lenNeedsGeneUI + 1;
 
          if(*(tmpStr - 1) != '\t')
-            goto fileErr_fun11_sec06_sub03;/*end of line*/
+            goto fileErr_fun12_sec06_sub03;/*end of line*/
       } /*Else if: entry (may be NA)*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub21:
+      * Fun12 Sec05 Sub21:
       *   - read in antibiotic flags
       \**************************************************/
 
@@ -2153,7 +2272,7 @@ readTbl_amrST(
          while(*tmpStr < 31)
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
-               goto fileErr_fun11_sec06_sub03;
+               goto fileErr_fun12_sec06_sub03;
 
             ++tmpStr;
          } /*Loop: get past tab*/
@@ -2165,13 +2284,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub22:
+      * Fun12 Sec05 Sub22:
       *   - read in effect entry
       \**************************************************/
 
@@ -2183,7 +2302,7 @@ readTbl_amrST(
          );
 
       if(tmpStr[amrSTAry[uiAmr].lenEffectUI] != '\t')
-         goto fileErr_fun11_sec06_sub03;/*end of line*/
+         goto fileErr_fun12_sec06_sub03;/*end of line*/
 
       amrSTAry[uiAmr].effectStr =
          malloc(
@@ -2192,7 +2311,7 @@ readTbl_amrST(
          );
 
       if(! amrSTAry[uiAmr].effectStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_ulCp(
          amrSTAry[uiAmr].effectStr,
@@ -2203,7 +2322,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenEffectUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub23:
+      * Fun12 Sec05 Sub23:
       *   - read in comment entry
       \**************************************************/
 
@@ -2213,7 +2332,7 @@ readTbl_amrST(
          ++amrSTAry[uiAmr].lenCommentUI;
 
       if(tmpStr[amrSTAry[uiAmr].lenCommentUI] != '\t')
-         goto fileErr_fun11_sec06_sub03;/*end of line*/
+         goto fileErr_fun12_sec06_sub03;/*end of line*/
 
       amrSTAry[uiAmr].commentStr =
          malloc(
@@ -2222,7 +2341,7 @@ readTbl_amrST(
          );
 
       if(! amrSTAry[uiAmr].commentStr)
-         goto memErr_fun11_sec06_sub02;
+         goto memErr_fun12_sec06_sub02;
 
       cpLen_ulCp(
          amrSTAry[uiAmr].commentStr,
@@ -2233,7 +2352,7 @@ readTbl_amrST(
       tmpStr += amrSTAry[uiAmr].lenCommentUI + 1;
 
       /**************************************************\
-      * Fun11 Sec05 Sub24:
+      * Fun12 Sec05 Sub24:
       *   - read in grade entry
       \**************************************************/
 
@@ -2248,13 +2367,13 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub25:
+      * Fun12 Sec05 Sub25:
       *   - Read in if the entry effects the entire gene
       \**************************************************/
 
@@ -2266,20 +2385,20 @@ readTbl_amrST(
       while(*tmpStr < 31)
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
-            goto fileErr_fun11_sec06_sub03;
+            goto fileErr_fun12_sec06_sub03;
 
          ++tmpStr;
       } /*Loop: get past tab*/
 
       /**************************************************\
-      * Fun11 Sec05 Sub26:
+      * Fun12 Sec05 Sub26:
       *   - read in unkown type entry
       \**************************************************/
 
       amrSTAry[uiAmr].unknownBl = *tmpStr - 48;
 
       /**************************************************\
-      * Fun11 Sec05 Sub27:
+      * Fun12 Sec05 Sub27:
       *   - get next line
       \**************************************************/
 
@@ -2291,57 +2410,57 @@ readTbl_amrST(
    } /*Loop: read in file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec06:
+   ^ Fun12 Sec06:
    ^   - clean up and return
-   ^   o fun11 sec06 sub01:
+   ^   o fun12 sec06 sub01:
    ^     - no error clean up
-   ^   o fun11 sec06 sub02:
+   ^   o fun12 sec06 sub02:
    ^     - memory error clean up
-   ^   o fun11 sec06 sub03:
+   ^   o fun12 sec06 sub03:
    ^     - file error clean up
-   ^   o fun11 sec06 sub04:
+   ^   o fun12 sec06 sub04:
    ^     - error clean up (all errors jump to)
-   ^   o fun11 sec06 sub05:
+   ^   o fun12 sec06 sub05:
    ^     - general clean up (everything jumps to)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec06 Sub01:
+   * Fun12 Sec06 Sub01:
    *   - no error clean up
    \*****************************************************/
 
-   ++(*numDrugsSI); /*convert index 0 to index 1*/
+   /*++(*numDrugsSI);*/ /*convert index 0 to index 1*/
 
    *errSC = 0;
 
    sortPos_amrST(amrSTAry, 0, *numAmrUI - 1);
 
-   goto cleanUp_fun11_sec06_sub05;
+   goto cleanUp_fun12_sec06_sub05;
 
    /*****************************************************\
-   * Fun11 Sec06 Sub02:
+   * Fun12 Sec06 Sub02:
    *   - memory error clean up
    \*****************************************************/
 
-   memErr_fun11_sec06_sub02:;
+   memErr_fun12_sec06_sub02:;
       *errSC = def_memErr_amrST;
-      goto errCleanUp_fun11_sec06_sub04;
+      goto errCleanUp_fun12_sec06_sub04;
 
    /*****************************************************\
-   * Fun11 Sec06 Sub03:
+   * Fun12 Sec06 Sub03:
    *   - file error clean up
    \*****************************************************/
 
-   fileErr_fun11_sec06_sub03:;
+   fileErr_fun12_sec06_sub03:;
       *errSC = def_fileErr_amrST;
-      goto errCleanUp_fun11_sec06_sub04;
+      goto errCleanUp_fun12_sec06_sub04;
 
    /*****************************************************\
-   * Fun11 Sec06 Sub04:
+   * Fun12 Sec06 Sub04:
    *   - error clean up (all errors jump to)
    \*****************************************************/
 
-   errCleanUp_fun11_sec06_sub04:;
+   errCleanUp_fun12_sec06_sub04:;
       if(newDrugAryBl)
       { /*If: I made a new drug array*/
          if(*drugAryStr != 0)
@@ -2361,14 +2480,14 @@ readTbl_amrST(
       *numAmrUI = 0;
       amrSTAry = 0;
 
-   goto cleanUp_fun11_sec06_sub05;
+   goto cleanUp_fun12_sec06_sub05;
 
    /*****************************************************\
-   * Fun11 Sec06 Sub05:
+   * Fun12 Sec06 Sub05:
    *   - general clean up (everything jumps to)
    \*****************************************************/
 
-   cleanUp_fun11_sec06_sub05:;
+   cleanUp_fun12_sec06_sub05:;
       if(buffHeapStr != 0)
          free(buffHeapStr);
 
