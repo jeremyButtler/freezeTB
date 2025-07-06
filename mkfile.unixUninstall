@@ -1,0 +1,21 @@
+PREFIX=/usr/local/bin
+DB_PREFIX=/usr/local/share/freezeTBFiles
+
+uninstall: rmInstall
+	if [ -d "~/Documents/freezeTBFiles" ]; then rm -r "~/Documents/freezeTBFiles"; fi;
+
+rmInstall:
+	if [ -f "~/Desktop/freezeTB" ]; then rm "~/Desktop/freezeTB"; fi;
+	if [ -f "$(PREFIX)/ftbRaylib" ]; then rm "$(PREFIX)/ftbRaylib"; fi;
+	if [ -f "$(PREFIX)/ftbTclTk" ]; then rm "$(PREFIX)/ftbTclTk"; fi;
+	if [ -f "$(PREFIX)/guiFreezeTB" ]; then rm "$(PREFIX)/guiFreezeTB"; fi;
+	if [ -f "$(PREFIX)/graphAmpDepth.r" ]; then rm "$(PREFIX)/graphAmpDepth.r"; fi;
+	if [ -f "$(PREFIX)/freezeTB" ]; then rm "$(PREFIX)/freezeTB";   fi;
+	if [ -f "$(PREFIX)/addAmr" ]; then rm "$(PREFIX)/addAmr";     fi;
+	if [ -f "$(PREFIX)/mkMiruTbl" ]; then rm "$(PREFIX)/mkMiruTbl";  fi;
+	if [ -f "$(PREFIX)/swapDbRef" ]; then rm "$(PREFIX)/swapDbRef";  fi;
+	if [ -f "$(PREFIX)/tbAmr" ]; then rm "$(PREFIX)/tbAmr";      fi;
+	if [ -f "$(PREFIX)/tbMiru" ]; then rm "$(PREFIX)/tbMiru";     fi;
+	if [ -f "$(PREFIX)/tbSpol" ]; then rm "$(PREFIX)/tbSpol";     fi;
+	if [ -f "$(PREFIX)/whoToAmr" ]; then rm "$(PREFIX)/whoToAmr";   fi;
+	if [ -d "$(DB_PREFIX)" ]; then rm -r "$(DB_PREFIX)";      fi;

@@ -1,0 +1,128 @@
+
+CC=cc
+LD=cc
+coreCFLAGS= -c -O3 -std=c89 -g -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
+CFLAGS=-DNONE
+NAME=addAmr
+PREFIX=/usr/local/bin
+O=o.static
+
+genFreezeTB=../genFreezeTB
+genBio=../genBio
+genLib=../genLib
+
+objFiles= \
+   $(genFreezeTB)/addAmr.$O \
+   $(genBio)/seqST.$O \
+   $(genFreezeTB)/amrST.$O \
+   $(genFreezeTB)/drugAry.$O \
+   $(genLib)/fileFun.$O \
+   $(genLib)/ulCp.$O \
+   $(genLib)/charCp.$O \
+   $(genBio)/geneCoord.$O \
+   $(genLib)/base10str.$O \
+   $(genBio)/codonFun.$O \
+   $(genLib)/genMath.$O \
+   mainAddAmr.$O
+
+$(NAME): mainAddAmr.$O
+		$(LD) -o $(NAME) $(objFiles)
+
+mainAddAmr.$O: \
+	mainAddAmr.c \
+	$(genFreezeTB)/addAmr.$O \
+	$(genBio)/seqST.$O \
+	../ftbVersion.h \
+	../genLib/endLine.h
+			$(CC) -o mainAddAmr.$O \
+				$(CFLAGS) $(coreCFLAGS) mainAddAmr.c
+
+$(genFreezeTB)/addAmr.$O: \
+	$(genFreezeTB)/addAmr.c \
+	$(genFreezeTB)/addAmr.h \
+	$(genFreezeTB)/amrST.$O \
+	$(genBio)/geneCoord.$O \
+	$(genBio)/codonFun.$O \
+	$(genLib)/genMath.$O
+		$(CC) -o $(genFreezeTB)/addAmr.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/addAmr.c
+
+$(genBio)/seqST.$O: \
+	$(genBio)/seqST.c \
+	$(genBio)/seqST.h \
+	$(genLib)/fileFun.$O
+		$(CC) -o $(genBio)/seqST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/seqST.c
+
+$(genFreezeTB)/amrST.$O: \
+	$(genFreezeTB)/amrST.c \
+	$(genFreezeTB)/amrST.h \
+	$(genFreezeTB)/drugAry.$O \
+	$(genLib)/fileFun.$O \
+	$(genLib)/charCp.$O \
+	$(genLib)/endLine.h
+		$(CC) -o $(genFreezeTB)/amrST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/amrST.c
+
+$(genFreezeTB)/drugAry.$O: \
+	$(genFreezeTB)/drugAry.c $(genFreezeTB)/drugAry.h
+		$(CC) -o $(genFreezeTB)/drugAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/drugAry.c
+
+$(genLib)/fileFun.$O: \
+	$(genLib)/fileFun.c \
+	$(genLib)/fileFun.h \
+	$(genLib)/ulCp.$O
+		$(CC) -o $(genLib)/fileFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/fileFun.c
+
+$(genLib)/ulCp.$O: \
+	$(genLib)/ulCp.c \
+	$(genLib)/ulCp.h
+		$(CC) -o $(genLib)/ulCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/ulCp.c
+
+$(genLib)/charCp.$O: \
+	$(genLib)/charCp.c \
+	$(genLib)/charCp.h
+		$(CC) -o $(genLib)/charCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/charCp.c
+
+$(genBio)/geneCoord.$O: \
+	$(genBio)/geneCoord.c \
+	$(genBio)/geneCoord.h \
+	$(genLib)/fileFun.$O \
+	$(genLib)/base10str.$O \
+	$(genLib)/charCp.$O \
+	$(genLib)/genMath.h
+	$(CC) -o $(genBio)/geneCoord.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genBio)/geneCoord.c
+
+$(genLib)/base10str.$O: \
+	$(genLib)/base10str.c \
+	$(genLib)/base10str.h
+		$(CC) -o $(genLib)/base10str.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/base10str.c
+
+$(genBio)/codonFun.$O: \
+	$(genBio)/codonFun.c \
+	$(genBio)/codonFun.h \
+	$(genBio)/codonTbl.h \
+	$(genBio)/ntTo2Bit.h \
+	$(genBio)/revNtTo2Bit.h
+		$(CC) -o $(genBio)/codonFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/codonFun.c
+
+$(genLib)/genMath.$O: \
+	$(genLib)/genMath.c \
+	$(genLib)/genMath.h
+		$(CC) -o $(genLib)/genMath.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/genMath.c
+
+
+
+clean:
+	rm $(objFiles)

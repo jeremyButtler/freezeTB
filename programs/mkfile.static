@@ -5,7 +5,10 @@ PREFIX=/usr/local/bin
 ext=static
 O=.o.$(ext)
 
+
 all:
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C addAmrSrc
+	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C mkMiruTblSrc
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbAmrSrc
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbMiruSrc
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C tbSpolSrc
@@ -15,10 +18,14 @@ all:
 	$(MAKE) CC="$(CC)" LD="$(LD)" CFLAGS="$(CFLAGS)" -f mkfile.$(ext) -C ftbTclTkSrc
 
 install:
-	mv ftbTclTKSrc/ftbTclTk $(PREFIX)
+	mv ftbTclTkSrc/ftbTclTk $(PREFIX)
 	chmod a+x $(PREFIX)/ftbTclTk
 	mv freezeTBSrc/freezeTB $(PREFIX)
 	chmod a+x $(PREFIX)/freezeTB
+	mv addAmrSrc/addAmr $(PREFIX)
+	chmod a+x $(PREFIX)/addAmr
+	mv mkMiruTblSrc/mkMiruTbl $(PREFIX)
+	chmod a+x $(PREFIX)/mkMiruTbl
 	mv tbAmrSrc/tbAmr $(PREFIX)
 	chmod a+x $(PREFIX)/tbAmr
 	mv tbMiruSrc/tbMiru $(PREFIX)

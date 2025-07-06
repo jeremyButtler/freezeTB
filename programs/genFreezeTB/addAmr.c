@@ -2634,7 +2634,9 @@ lineToVar_addAmr(
    signed char *tmpStr = 0;
    signed char *varStr = 0;      /*to variant id*/
    signed char *afterVarStr = 0; /*entry after variant*/
-   signed char geneStr[128];
+
+   #define def_maxGeneId_fun09 128
+   signed char geneStr[def_maxGeneId_fun09 + 8];
 
    signed char oldCharSC = 0;
    signed char *oldPosStr = 0;
@@ -2647,6 +2649,10 @@ lineToVar_addAmr(
    ^ Fun09 Sec02:
    ^   - get line with variant id
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   for(lenSL = 0; lenSL < def_maxGeneId_fun09; ++lenSL)
+      geneStr[lenSL] = 0;
+   lenSL = 0;
 
    /*check if line is empty*/
    tmpStr = lineStr;

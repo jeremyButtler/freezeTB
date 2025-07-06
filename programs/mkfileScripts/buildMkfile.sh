@@ -327,7 +327,7 @@ then # Else If: windows make file
    headStr="$headStr\nCC=cl.exe";
    headStr="$headStr\nLD=link.exe";
    headStr="$headStr\ncoreCFLAGS= /DWINDOWS /c /O2 /Ot";
-   headStr="$headStr\ncoreCFLAGS= $coreCFLAGS /Za /Tc";
+   headStr="$headStr /Za /Tc";
    headStr="$headStr\nCFLAGS=/DNONE";
    headStr="$headStr\nNAME=$nameStr.exe";
    headStr="$headStr\nPREFIX=\"%localAppData%\"";

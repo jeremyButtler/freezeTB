@@ -124,6 +124,8 @@ You can install freezTB in multiple ways. The easiest way
 
 ## Easy way:
 
+### To install freezeTB
+
 Download freezeTB from github and then use the
   `macInstall` script to install dependencies and
   freezeTB. This will auto install minimap2 for you.
@@ -139,7 +141,6 @@ sh macInstall
 ```
 
 Enter your password when prompted.
-
 
 ## Harder way:
 
@@ -227,11 +228,6 @@ Best way I found. It relies on visual 2022 build tools
   - to install globaly; run as administratory
    (right click->run as administrator)
 
-To uninstall; double click `winUninstall.bat` in `windows`
-  folder.
-  - to remove globaly; run as administratory
-   (right click->run as administrator)
-
 If you are on an ARM CPU, open a developer console (see if
   failed). Then `cd "%homePath%\Downloads\freezeTB\programs\freezeTBSrc\`.
   After that do `nmake /F mkfile.win`. Copy
@@ -317,7 +313,59 @@ Build minimap2 (x86 [intel/amd])
 Copy minimap2 to your freezeTB install location or into
   your PATH.
 
-`cp minimap2.exe C:/Users/<user name>/Downloads/freezeTB/winBin`
+`copy minimap2.exe "C:\Users\<user_name>\Downloads\freezeTB\winBin"`
+
+Or, if you already installed freezeTB, copy minimap2.exe
+  to your install location. It is
+  either `"C:\Users\<user_name>\appData\local\freezeTB"`
+  or if you ran the winInstall script as an administrator
+  it is in `"C:\Program Files\freezeTB"`.
+
+For appData do
+   do `copy minimap2.exe "C:\Users\<user_name>\appData\local\freezeTB"`
+
+For program files (global) do
+   do `copy minimap2.exe "C:\Program Files\freezeTB"`
+
+# Uninstalling freezeTB
+
+The uninstall scripts will uninstall the freezeTB
+  programs, but will not uninstall the depenencies/auto
+  installed programs. For Mac this is homebrew, minimap2, 
+  R, xQuartz, and TclTk. For Linux and windows you will
+  not remove TclTk, visual studio build tools (windows),
+  R, and minimap2 (windows will remove).
+
+## Unix (Mac/Linux/...)
+
+```
+cd ~/Downloads/freezeTB
+sudo make -f mkfile.unixUninstall
+```
+
+To uninstall, but not remove the freezeTB databases in you
+  Documents directory, do.
+
+```
+cd ~/Downloads/freezeTB
+sudo make -f mkfile.unixUninstall rmInstall
+```
+
+If you installed freezeTB to a different location using
+  `make PREFIX=/path/to/new/location -f mkfile.unix install`,
+  then do
+
+```
+cd ~/Downloads/freezeTB
+sudo make PREFIX=/path/to/install/location -f mkfile.unixUninstall
+```
+
+## Windows
+
+To uninstall; double click `winUninstall.bat` in `windows`
+  folder.
+  - to remove globaly; run as administratory
+   (right click->run as administrator)
 
 # Run
 
