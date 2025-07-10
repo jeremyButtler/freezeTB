@@ -344,7 +344,14 @@ The uninstall scripts will uninstall the freezeTB
   not remove TclTk, visual studio build tools (windows),
   R, and minimap2 (windows will remove).
 
-## Unix (Mac/Linux/...)
+## Mac
+
+```
+cd ~/Downloads/freezeTB;
+sh macUninstall;
+```
+
+## Unix (Linux)
 
 ```
 cd ~/Downloads/freezeTB

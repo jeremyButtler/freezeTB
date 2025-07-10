@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+make -f mkfile.mac -C programs/ftbTclTkSrc uninstall;
+make -f mkfile.mac -C programs/ftbTclTkSrc clean;
