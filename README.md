@@ -13,10 +13,20 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
 # License:
 
 freezeTB includes databases from other repositories and
-  raysan5's raylib [https://github.com/raysan5/raylib](
-          https://github.com/raysan5/raylib),
-  which is under the zlib license. In those cases the
-  licensing will be under the owner's repository.
+  code from other repositories. The code in in the programs
+  directory.
+
+- raylib from raysan5's raylib
+  [https://github.com/raysan5/raylib](
+   https://github.com/raysan5/raylib)
+  - zlib license
+- minimap2 from lh3 [https://github.com/lh3/minimap2](
+  https://github.com/lh3/minimap2)
+  - MIT license
+- TclTk from [https://github.com/tcltk/tcl](
+  https://github.com/tcltk/tcl) and
+  [https://github.com/tcltk/tk](https://github.com/tcltk/tk)
+  - MIT license
 
 All code that is unique to freezeTB is under a dual
   license. The primary license is Unlicense. However, not
@@ -70,9 +80,7 @@ Here are the order of Merlin winners:
         Apr;35(4):907-14.
         doi: 10.1128/jcm.35.4.907-914.1997.
         PMID: 9157152; PMCID: PMC229700.
-  - minimap2: not included in freezeTB anymore, but is
-    installed automatically on Mac and is still a
-    recommended install for other OS's
+  - minimap2: included for unix, recommend for windows
     - [https://github.com/lh3/minimap2](
        https://github.com/lh3/minimap2)
   - raylib: not used yet, but hoping to replace tcltk with

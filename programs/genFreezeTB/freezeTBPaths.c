@@ -146,6 +146,9 @@ checkPaths_freezeTBPaths(
          (signed char *) "/Documents/";
       signed char *altPathStr =
          (signed char *) "/share/";
+
+      signed char *localInstallStr =
+         (signed char *) "/.ftb/";
    #endif
 
    FILE *testFILE = 0;
@@ -248,7 +251,43 @@ checkPaths_freezeTBPaths(
 
          #ifndef WINDOWS
             if(! testFILE)
-               pathStr[0] = '\0'; /*no idea were at*/ 
+            { /*If: not in global path*/
+               /*the local install hidden path*/
+               tmpStr = pathStr;
+
+               tmpStr +=
+                  cpStr_ulCp(
+                    tmpStr,
+                    homePathStr
+                  );
+
+               tmpStr +=
+                  cpStr_ulCp(
+                     tmpStr,
+                     localInstallStr
+                  );
+
+               tmpStr +=
+                  cpStr_ulCp(
+                     tmpStr,
+                     dbDirStr
+                  );
+
+               tmpStr +=
+                  cpStr_ulCp(
+                     tmpStr,
+                     fileStr
+                  );
+
+               testFILE =
+                  fopen(
+                     (char *) pathStr,
+                     "r"
+                  );
+
+                if(! testFILE)
+                  pathStr[0] = '\0'; /*no idea were at*/ 
+            } /*If: not in global path*/
 
             /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
             ^ Fun01 Sec05:

@@ -462,7 +462,28 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
       --- ; # seeing if local minimap2 exists
 
       if { $status eq 0 } {
-         set glob_minimapFoundBl 0 ;
+         set mapPath $::env(HOME);
+
+         ---set ::mapPath 
+            [file join
+               $mapPath
+               "bin"
+               "minimap2"
+            ]
+         ---; # build alternate minimap2 path
+
+         ---set
+            status
+            [catch
+             {exec $::mapPath --version} ::mapVer
+            ]
+         --- ; # get minimap2 version
+
+         if { $status eq 0 } {
+            # found minimap2
+         } else {
+            set glob_minimapFoundBl 0 ;
+         } ; # If: failed to find minimap2 locally
       } ; # If: minimap2 could not be found
    } ; # If: minimiap2 not in path or on system
 
@@ -503,14 +524,23 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
          ---;
 
          if { [file exists $::graphScript] eq 0 } {
-            set ::glob_mkGraphBl 0 ;
+            set ::graphScript $::env(HOME);
+            ---set ::graphScript
+               [file join
+                $::graphScript
+                "bin"
+                "graphAmpDepth.r"
+            ]---
 
-            ---tk_messageBox
-               -message "graphAmpDepth.r not found"
-               -title "no graphing script"
-            ---;
+            if { [file exists $::graphScript] eq 0 } {
+               set ::glob_mkGraphBl 0 ;
+               set ::graphScript "" ;
 
-            set ::graphScript "" ;
+               ---tk_messageBox
+                  -message "graphAmpDepth.r not found"
+                  -title "no graphing script"
+               ---;
+            } ; # If: could not find graphing script location
          } ; # If: could not find graphing script
       } ; # If: did not find graphing script
    } else {
