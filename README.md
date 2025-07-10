@@ -148,6 +148,9 @@ cd freezeTB
 sh macInstall
 ```
 
+Do not worry about the Rec errors at the end. This is
+  a failed attempt to setup the icon.
+
 Enter your password when prompted.
 
 ## Harder way:
