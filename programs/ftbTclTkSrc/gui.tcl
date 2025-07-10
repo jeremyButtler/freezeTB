@@ -53,7 +53,9 @@
 
 # required input
 variable glob_fqIn "" ;
-variable glob_dirOut "" ;
+---variable glob_dirOut
+   [file join $::env(HOME) "Desktop"]
+--- ; # set default output directory to desktop
 variable glob_prefix "FTB_output" ;
 
 # read filtering settings
@@ -461,7 +463,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
          ]
       --- ; # seeing if local minimap2 exists
 
-      if { $status eq 0 } {
+      if { $status ne 0 } {
          set mapPath $::env(HOME);
 
          ---set ::mapPath 
