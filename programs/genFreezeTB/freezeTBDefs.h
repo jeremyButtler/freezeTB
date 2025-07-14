@@ -8,17 +8,17 @@
 
 /*AMR settings*/
 #define def_minPercMapped_freezeTBDefs 0.1f
-#define def_amrIndelSup_freezeTBDefs 0.25f
+#define def_amrIndelSup_freezeTBDefs 0.7f
    /*percent support to keep indel*/
 #define def_frameshift_freezeTBDefs 1
    /*1: check for frameshifts*/
-#define def_supFrameshift_freezeTBDefs 0.25f
+#define def_supFrameshift_freezeTBDefs 0.7f
    /*percent support to keep frameshift*/
 
 #define def_mixedInfect_freezeTBDefs 0
  /*1: run mixed infection detection*/
 
-#define def_indelClean_freezeTBDefs 1
+#define def_indelClean_freezeTBDefs 0
    /*1: clean up homopolymer indels; 0 do not*/
 #define def_minHomo_freezeTBDefs 4
    /*start removing indels if in homopolymers larger then
@@ -28,7 +28,7 @@
    /*stop removing indels when indels are longer than
    `  5 bases
    */
-#define def_homoMask_freezeTBDefs '0'
+#define def_homoMask_freezeTBDefs 0
    /*0 is use reference base; prefere N so does not mess
    `  up AMR step
    */
