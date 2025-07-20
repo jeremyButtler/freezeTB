@@ -1,3 +1,5 @@
+![freezeTB icon](FTB-icon.svg)
+
 # Use
 
 freezeTB is a program that detects gene mutations
@@ -13,8 +15,8 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
 # License:
 
 freezeTB includes databases from other repositories and
-  code from other repositories. The code in in the programs
-  directory.
+  code from other repositories. The code in in the
+  programs directory that is not from freezeTB are.
 
 - raylib from raysan5's raylib
   [https://github.com/raysan5/raylib](

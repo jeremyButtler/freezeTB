@@ -1,14 +1,23 @@
 # How freezeTB works
 
+![Flow diagram showing freezeTB work flow](FTB-diagram.svg)
+
+Note the images in the figure above are safe, public
+  domain images from openclipart.org (manigifying glass
+  and trash can) or were made by the freezeTB crew and
+  are under freezeTB's license (public domain or MIT; your
+  choice).
+
 1. GUI only: uses minimap2 to map fastq file to reference
-   - The alternative will be `mapRead` from bioTools
+   - The alternative will be the internal read mapper
+     (`mapRead` from bioTools)
 2. freezeTB removes:
    - unmapped reads
    - secondary alignments
    - supplemental alignments
 3. Soft masking is trimmed of the ends of each read
-4. rmHomo is used to remove small indels in homopolymers
-   over three bases long
+4. Optional: rmHomo is used to remove small indels in
+   homopolymers over three bases long
 5. freezeTB then filters the reads, removing any read that
    has:
    - to short by aligned length (number of reference bases
@@ -17,7 +26,7 @@
    - has a low mean Q-score
    - has a low median Q-score
 6. freezeTB then adds the read depth histogram of
-7. freezeTB then masks primer locations in reads by
+7. Optional: freezeTB masks primer locations in reads by
    coordinates (if requested)
 8. freezeTB checks the read for AMRs
 9. freezeTB checks for any MIRU-VNTR lineages in an
@@ -28,8 +37,8 @@
    - Bases with Q-scores under 3 are removed
 12. After going though all reads; freezeTB prints out
     the read stats
-13. mixed infection with edClust if requested, replaces
-    tbCon consensus building
+13. Optinoal: mixed infection with edClust if requested,
+    replaces/uses tbCon consensus building
 14. freezeTB then collapses the consensus (if not doing
     mixed infection detection)
     - Split into fragments with 20x or greater read depth
