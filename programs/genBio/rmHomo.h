@@ -5,6 +5,9 @@
 '     - guards and forward declarations
 '   o fun01: indel_rmHomo
 '     - remove indels from homopolymers
+'   o fun02: leftAlnIndel_rmHomo
+'     - forces all homopolymer indels to be left or right
+'       aligned
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -87,6 +90,31 @@ indel_rmHomo(
    `  This does come at the cost of having to always
    `  copy the sequence though.
    */
+
+/*-------------------------------------------------------\
+| Fun02: leftAlnIndel_rmHomo
+|   - forces all homopolymer indels to be left or right
+|     aligned
+| Input:
+|   - samSTPtr:
+|     o samEntry struct pointer to sequence to remove
+|       indels from homopolymers
+|   - refStr:
+|     o c-string with reference sequence in samSTPtr is
+|       mapped to
+| Output:
+|   - Modifies:
+|     o seqStr and qStr in samSTPtr to have indel
+|       homopolymers left or right aligned
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+\-------------------------------------------------------*/
+signed char
+leftAlnIndel_rmHomo(
+   struct samEntry *samSTPtr,/*sequence with indels*/
+   signed char *refStr       /*reference sequence*/
+);
 
 #endif
 

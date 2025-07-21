@@ -5369,7 +5369,7 @@ run_freezeTB(
    +   - open reference file
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   if(! ftbSetStackST.indelCleanBl) ;
+   if(! ftbSetStackST.indelCleanBl && samFileStr) ;
    else
    { /*Else: need reference (rmHomo or mapRead)*/
       outFILE =
@@ -6823,6 +6823,14 @@ run_freezeTB(
 
          else if(forErrSC)
             continue; /*read did not map*/
+
+         /*left align homopolymer indels*/
+         seqToIndex_alnSet(samStackST.seqStr);
+         leftAlnIndel_rmHomo(
+            &samStackST,
+            mapRefStackST.seqSTPtr->seqStr
+         );
+         indexToSeq_alnSet(samStackST.seqStr);
 
          p_samEntry(&samStackST, 0, samFILE);
       } /*If: need to map reads*/ 

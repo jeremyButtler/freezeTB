@@ -1,10 +1,13 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' rmHomo SOF: Start Of File
-'   - removes indels in homopolymers
+'   - removes and or adjusts indels in homopolymers
 '   o header:
 '     - included libraries
 '   o fun01: indel_rmHomo
 '     - remove indels from homopolymers
+'   o fun02: leftAlnIndel_rmHomo
+'     - forces all homopolymer indels to be left or right
+'       aligned
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -31,7 +34,6 @@
 !   - std #include <stdio.h>
 !   - .c  #include "../genLib/base10str.h"
 !   - .c  #include "../genLib/numToStr.h"
-!   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genLib/fileFun.h"
 !   - .h  #include "../genLib/endLine.h"
 !   - .h  #include "../genBio/ntTo5Bit.h"
@@ -303,14 +305,14 @@ indel_rmHomo(
       /**************************************************\
       * Fun01 Sec03 Sub03:
       *   - find homopolymer length
-      *   o fun01 sec03 sub03 cat01
+      *   o fun01 sec03 sub03 cat01:
       *     - find strict homopolyer length
-      *   o fun01 sec03 sub03 cat02
+      *   o fun01 sec03 sub03 cat02:
       *     - find length of neighbor homopolymers
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun01 Sec03 Sub03 Cat01
+      + Fun01 Sec03 Sub03 Cat01:
       +   - find strict homopolyer length
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -350,7 +352,7 @@ indel_rmHomo(
       } /*If: have previous bases (homopolymer?)*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun01 Sec03 Sub03 Cat02
+      + Fun01 Sec03 Sub03 Cat02:
       +   - find length of neighbor homopolymers
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -631,6 +633,634 @@ indel_rmHomo(
    ret_fun01_sec05:;
       return (signed char) qUC;
 } /*indel_rmHomo*/
+
+/*-------------------------------------------------------\
+| Fun02: leftAlnIndel_rmHomo
+|   - forces all homopolymer indels to be left or right
+|     aligned
+| Input:
+|   - samSTPtr:
+|     o samEntry struct pointer to sequence to remove
+|       indels from homopolymers
+|   - refStr:
+|     o c-string with reference sequence in samSTPtr is
+|       mapped to
+| Output:
+|   - Modifies:
+|     o seqStr and qStr in samSTPtr to have indel
+|       homopolymers left or right aligned
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+\-------------------------------------------------------*/
+signed char
+leftAlnIndel_rmHomo(
+   struct samEntry *samSTPtr,/*sequence with indels*/
+   signed char *refStr       /*reference sequence*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun02 TOC:
+   '   - forces all homopolymer indels to be left or right
+   '     aligned
+   '   o fun02 sec01:
+   '     - variable declarations 
+   '   o fun02 sec02:
+   '     - memory allocation and q-score entry detection
+   '   o fun02 sec03:
+   '     - indel removal
+   '   o fun02 sec04:
+   '     - add null to end of c-strings (sequence/cigar)
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun02 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char *cigHeapStr = 0;
+   signed int *cigHeapArySI = 0;
+
+   unsigned char qUC = 0;
+
+   unsigned int uiCig = 0;
+   signed int tmpCigSI = 0;
+   signed int tmpNtSI = 0;
+   unsigned int cpCigUI = 0;
+   unsigned int newCigUI = 0; /*position in new cigar*/
+   signed int extraNtSI = 0;
+
+   unsigned int seqPosUI = 0;
+   unsigned int dupPosUI = 0;
+
+   unsigned int refPosUI = 0;
+   unsigned int tmpPosUI = 0;
+
+   /*homopolyer lengths*/
+   signed char ntSC = 0;          /*nucleotide of indel*/
+   unsigned int tmpUI = 0;
+   unsigned int backHomoLenUI = 0;
+   unsigned int forHomoLenUI = 0;
+
+   unsigned int lenBuffUI = 0;
+   signed char qBl = 0; /*1: have q-score entry*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun02 Sec02:
+   ^   - memory allocation and q-score entry detection
+   ^   o fun02 sec02 sub01:
+   ^     - get maximum possible length
+   ^   o fun02 sec02 sub02:
+   ^     - detect if have q-score entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun02 Sec02 Sub01:
+   *   - get maximum possible length
+   \*****************************************************/
+
+   if(! samSTPtr->seqStr[0])
+      goto noSeq_fun02_sec05;
+   else if(samSTPtr->seqStr[0] == '*')
+      goto noSeq_fun02_sec05;
+
+   lenBuffUI = samSTPtr->readLenUI;
+   lenBuffUI += samSTPtr->delCntUI;
+      /*deletions mean adding in a base, so need to have
+      `  some extra room
+      */
+
+   lenBuffUI += 8;
+      /*prevents read overflows from ulCp functions*/
+
+   cigHeapStr = malloc(lenBuffUI * sizeof(signed char));
+   if(! cigHeapStr)
+      goto memErr_fun02_sec05;
+   cigHeapStr[0] = 0;
+
+   cigHeapArySI = malloc(lenBuffUI * sizeof(signed int));
+   if(! cigHeapArySI)
+      goto memErr_fun02_sec05;
+   cigHeapArySI[0] = 0;
+
+   /*****************************************************\
+   * Fun02 Sec02 Sub02:
+   *   - detect if have q-score entry
+   \*****************************************************/
+
+   if(! samSTPtr->qStr)
+      qBl = 1;
+   else if(samSTPtr->qStr[0] == '\0')
+      qBl = 1;
+   else if(
+         samSTPtr->qStr[0] == '*'
+      && samSTPtr->qStr[1] == '\0'
+   ) ; /*no q-score entry*/
+
+   else
+      qBl = 1;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun02 Sec03:
+   ^   - indel removal
+   ^   o fun02 sec03 sub01:
+   ^     - copy matches/snps/soft masked bases
+   ^   o fun02 sec03 sub02:
+   ^     - deal with hard masking cases
+   ^   o fun02 sec03 sub03:
+   ^     - find homopolymer length
+   ^   o fun02 sec03 sub04:
+   ^     - shift indels
+   ^   o fun02 sec03 sub04:
+   ^     - check if can shift indels
+   ^   o fun02 sec03 sub05:
+   ^     - shift deletions
+   ^   o fun02 sec03 sub06:
+   ^     - shift insertions
+   ^   o fun02 sec03 sub07:
+   ^     - move to next cigar entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun02 Sec03 Sub01:
+   *  - copy matches/snps/soft masked bases
+   \*****************************************************/
+
+   newCigUI = 0;
+   refPosUI = samSTPtr->refStartUI;
+
+   for(
+      cpCigUI = 0;
+      cpCigUI < samSTPtr->cigLenUI;
+      ++cpCigUI
+   ){ /*Loop: remove indels*/
+
+      if(
+            samSTPtr->cigTypeStr[uiCig] == 'M'
+         || samSTPtr->cigTypeStr[uiCig] == '='
+         || samSTPtr->cigTypeStr[uiCig] == 'X'
+         || samSTPtr->cigTypeStr[uiCig] == 'S'
+      ){ /*If: non-indel mutation*/
+         cigHeapStr[newCigUI] =
+            samSTPtr->cigTypeStr[uiCig];
+         cigHeapArySI[newCigUI] =
+            samSTPtr->cigArySI[uiCig];
+
+         dupPosUI += samSTPtr->cigArySI[uiCig];
+         seqPosUI += samSTPtr->cigArySI[uiCig];
+
+         if(samSTPtr->cigTypeStr[uiCig] != 'S')
+            refPosUI += samSTPtr->cigArySI[uiCig];
+
+         ++newCigUI;
+         goto nextCigarEntry_fun02_sec03_sub07;
+      }  /*If: non-indel mutation*/
+
+      /**************************************************\
+      * Fun02 Sec03 Sub02:
+      *  - deal with hard masking cases
+      \**************************************************/
+
+      if(
+            samSTPtr->cigTypeStr[uiCig] != 'D'
+         && samSTPtr->cigTypeStr[uiCig] != 'I'
+      ){ /*If: not an indel (hard masking)*/
+         cigHeapStr[newCigUI] =
+            samSTPtr->cigTypeStr[uiCig];
+         cigHeapArySI[newCigUI] =
+            samSTPtr->cigArySI[uiCig];
+
+         refPosUI += samSTPtr->cigArySI[uiCig];
+
+         ++newCigUI;
+         goto nextCigarEntry_fun02_sec03_sub07;
+      }  /*If: not an indel (hard masking)*/
+
+      /**************************************************\
+      * Fun02 Sec03 Sub03:
+      *   - detect if in homopolymer
+      *   o fun02 sec03 sub03 cat01:
+      *     - check if insertion matches bases around it
+      *   o fun02 sec03 sub03 cat02:
+      *     - find forward and reverse homopolmer lengths
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun02 Sec03 Sub03 Cat01:
+      +   - check if insertion matches bases around it
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(samSTPtr->cigTypeStr[uiCig] == 'D')
+         ntSC = refStr[refPosUI]; /*if deletion*/
+
+      else if(
+         samSTPtr->seqStr[seqPosUI] == refStr[refPosUI -1]
+      ) ntSC = samSTPtr->seqStr[seqPosUI];
+
+      else if(
+         samSTPtr->seqStr[seqPosUI] == refStr[refPosUI]
+      ) ntSC = samSTPtr->seqStr[seqPosUI];
+
+      else
+      { /*Else: inserton is different*/
+         cigHeapStr[newCigUI] =
+            samSTPtr->cigTypeStr[uiCig];
+         cigHeapArySI[newCigUI] =
+            samSTPtr->cigArySI[uiCig];
+
+         seqPosUI += samSTPtr->cigArySI[uiCig];
+
+         ++newCigUI;
+         goto nextCigarEntry_fun02_sec03_sub07;
+      } /*Else: insertion is different*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun02 Sec03 Sub03 Cat02:
+      +   - find homopolmer length
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      backHomoLenUI = 0;
+      forHomoLenUI = 0;
+
+      if(refPosUI > 0)
+      { /*If: may have previous bases (homopolymer?)*/
+         tmpPosUI = refPosUI - 1;
+
+         while(refStr[tmpPosUI] == ntSC)
+         { /*Loop: find end of homopolymer*/
+            ++backHomoLenUI;
+
+            if(! tmpPosUI)
+               break;
+
+            --tmpPosUI;
+         } /*Loop: find end of homopolymer*/
+
+      } /*If: may have previous bases (homopolymer?)*/
+
+      if(refStr[refPosUI])
+      { /*If: not end of sequence*/
+         tmpPosUI = refPosUI + 1;
+
+         while(refStr[tmpPosUI++] == ntSC)
+            ++forHomoLenUI;
+      } /*If: not end of sequence*/
+
+      /**************************************************\
+      * Fun02 Sec03 Sub04:
+      *   - check if can shift indels
+      \**************************************************/
+
+      if(! backHomoLenUI)
+      { /*Else If: no homo or indel already left aligned*/
+         cigHeapStr[newCigUI] =
+            samSTPtr->cigTypeStr[uiCig];
+         cigHeapArySI[newCigUI] =
+            samSTPtr->cigArySI[uiCig];
+
+         if(samSTPtr->cigTypeStr[uiCig] == 'D')
+            refPosUI += samSTPtr->cigArySI[uiCig];
+         else
+            seqPosUI += samSTPtr->cigArySI[uiCig];
+
+         ++newCigUI;
+         goto nextCigarEntry_fun02_sec03_sub07;
+      } /*Else If: no homo or indel already left aligned*/
+
+      /**************************************************\
+      * Fun02 Sec03 Sub05:
+      *   - shift deletions
+      \**************************************************/
+
+      else if(samSTPtr->cigTypeStr[uiCig] == 'D')
+      { /*Else: need to align a deletion*/
+         tmpCigSI = cigHeapArySI[newCigUI - 1];
+         tmpPosUI = refPosUI;
+         tmpUI = 0;
+
+         if(
+               cigHeapStr[newCigUI - 1] == '='
+            || cigHeapStr[newCigUI - 1] == 'M'
+         ){ /*If: may have a match*/
+            while(tmpCigSI > 0)
+            { /*Loop: find insert position*/
+               if(refStr[tmpPosUI] != ntSC)
+                  break;
+               ++tmpUI;
+               --tmpPosUI;
+               --tmpCigSI;
+
+               if(tmpPosUI <= 0)
+                  break;
+               if(tmpUI == backHomoLenUI)
+                  break; /*at start of indel*/
+            }  /*Loop: find insert position*/
+         }  /*If: may have a match*/
+
+         cigHeapArySI[newCigUI - 1] -= tmpUI;
+         cigHeapStr[newCigUI] = 'D';
+
+         if(
+              forHomoLenUI
+            < (unsigned int) samSTPtr->cigArySI[uiCig]
+         ) cigHeapArySI[newCigUI] = forHomoLenUI + 1;
+               /*+1 to account for not counting deletion*/
+
+         else
+            cigHeapArySI[newCigUI] =
+               samSTPtr->cigArySI[uiCig];
+
+         /*check if did not shift all deletions*/
+         if(
+              cigHeapArySI[newCigUI]
+            < samSTPtr->cigArySI[uiCig]
+         ) extraNtSI = 
+                samSTPtr->cigArySI[uiCig]
+              - cigHeapArySI[newCigUI];
+         else
+            extraNtSI = 0;
+
+         ++newCigUI;
+
+         /*finish the new cigar entry for the old del*/
+         if(tmpUI > 0)
+         { /*If: need to shift bases around*/
+            if(cigHeapStr[newCigUI - 2] == '=')
+               cigHeapStr[newCigUI] = '=';
+            else
+               cigHeapStr[newCigUI] = 'M';
+
+            cigHeapArySI[newCigUI] = tmpUI;
+            ++newCigUI;
+         } /*If: need to shift bases around*/
+
+         if(extraNtSI)
+         { /*If: had extra deletions*/
+            cigHeapStr[newCigUI] = 'D';
+            cigHeapArySI[newCigUI] = extraNtSI;
+            ++newCigUI;
+         } /*If: had extra deletions*/
+
+         refPosUI += samSTPtr->cigArySI[uiCig];
+         goto nextCigarEntry_fun02_sec03_sub07;
+      } /*Else: need to align a deletion*/
+
+      /**************************************************\
+      * Fun02 Sec03 Sub06:
+      *   - shift insertions
+      *   o fun02 sec03 sub06 cat01:
+      *     - find new insertion position and shift length
+      *   o fun02 sec03 sub06 cat02:
+      *     - swap quality scores around
+      *   o fun02 sec03 sub06 cat03:
+      *     - insert insertion into new cigar position
+      *     - shift insertion cigar entry
+      *     * ins matches homopolymer so safe to do after
+      *       swaping q-scores
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun02 Sec03 Sub06 Cat01:
+      +   - find new insertion position and shift length
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else
+      { /*Else: need to shift insertion*/
+         tmpCigSI = cigHeapArySI[newCigUI - 1];
+         tmpPosUI = refPosUI - 1;
+            /*ins is always one ahead*/
+         tmpUI = 0;
+
+         if(
+               cigHeapStr[newCigUI - 1] == '='
+            || cigHeapStr[newCigUI - 1] == 'M'
+         ){ /*If: may have a match*/
+            while(tmpCigSI && refStr[tmpPosUI] == ntSC)
+            { /*Loop: find insert position*/
+               ++tmpUI;
+               --tmpPosUI;
+               --tmpCigSI;
+
+               if(tmpPosUI <= 0)
+                  break;
+               if(tmpUI == backHomoLenUI)
+                  break; /*at start of indel*/
+            }  /*Loop: find insert position*/
+         }  /*If: may have a match*/
+
+
+         /*find insertion length to shift*/
+         extraNtSI = 1;
+
+         if(samSTPtr->cigArySI[uiCig] > 1)
+         { /*If: need to find number of insertions*/
+            tmpCigSI = samSTPtr->cigArySI[uiCig] - 1;
+               /*-1 to account for first insertion*/
+            tmpNtSI = seqPosUI + 1;
+               /*+1 to get of first insertion*/
+
+            while(
+                  tmpCigSI
+               && samSTPtr->seqStr[tmpNtSI] == ntSC
+            ){ /*Loop: find insertion length*/
+               ++extraNtSI;
+               ++tmpNtSI;
+               --tmpNtSI;
+               --tmpCigSI;
+            } /*Loop: find insertion length*/
+         } /*If: need to find number of insertions*/
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun02 Sec03 Sub06 Cat02:
+         +   - swap quality scores around
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         if(qBl)
+         { /*If: have q-score entry to swap*/
+            tmpPosUI = seqPosUI - backHomoLenUI;
+
+            for(
+               tmpNtSI = 0;
+               tmpNtSI < extraNtSI;
+               ++tmpNtSI
+            ){ /*Loop: swap quality score entries*/
+               samSTPtr->qStr[tmpPosUI + tmpNtSI] ^=
+                  samSTPtr->qStr[seqPosUI + tmpNtSI];
+               samSTPtr->qStr[seqPosUI + tmpNtSI] ^=
+                  samSTPtr->qStr[tmpPosUI + tmpNtSI];
+               samSTPtr->qStr[tmpPosUI + tmpNtSI] ^=
+                  samSTPtr->qStr[seqPosUI + tmpNtSI];
+            } /*Loop: swap quality score entries*/
+         } /*If: have q-score entry to swap*/
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun02 Sec03 Sub06 Cat03:
+         +   - shift insertion cigar entry
+         +   * ins matches homopolymer so safe to do after
+         +     swaping q-scores
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         cigHeapArySI[newCigUI - 1] -= tmpUI;
+         cigHeapStr[newCigUI] = 'I';
+         cigHeapArySI[newCigUI] = extraNtSI;
+
+         /*check if did not shift all insertions*/
+         if(extraNtSI < samSTPtr->cigArySI[uiCig])
+            extraNtSI = 
+               samSTPtr->cigArySI[uiCig] - extraNtSI;
+         else
+            extraNtSI = 0;
+
+         ++newCigUI;
+
+         /*finish the new cigar entry for the old ins*/
+         if(tmpUI > 0)
+         { /*If: need to shift bases around*/
+            if(cigHeapStr[newCigUI - 2] == '=')
+               cigHeapStr[newCigUI] = '=';
+            else
+               cigHeapStr[newCigUI] = 'M';
+
+            cigHeapArySI[newCigUI] = tmpUI;
+            ++newCigUI;
+         } /*If: need to shift bases around*/
+
+         if(extraNtSI)
+         { /*If: had extra insertions*/
+            cigHeapStr[newCigUI] = 'I';
+            cigHeapArySI[newCigUI] = extraNtSI;
+            ++newCigUI;
+         } /*If: had extra insertions*/
+
+         seqPosUI += samSTPtr->cigArySI[uiCig];
+         goto nextCigarEntry_fun02_sec03_sub07;
+      } /*Else: need to shift insertion*/
+ 
+      /**************************************************\
+      * Fun02 Sec03 Sub07:
+      *   - move to next cigar entry
+      \**************************************************/
+
+      nextCigarEntry_fun02_sec03_sub07:;
+         if(newCigUI < 2)
+            ;
+         else if(
+               cigHeapStr[newCigUI - 1]
+            == cigHeapStr[newCigUI - 2]
+         ){ /*Else If: can merge cigar entries*/
+            cigHeapArySI[newCigUI - 2] +=
+               cigHeapArySI[newCigUI - 1];
+            --newCigUI;
+
+            cigHeapArySI[newCigUI] = 0;
+            cigHeapStr[newCigUI] = 0;
+         }  /*Else If: can merge cigar entries*/
+
+         ++uiCig;
+   } /*Loop: remove indels*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun02 Sec04:
+   ^   - add null to end of c-strings (sequence/cigar)
+   ^   o fun02 sec04 sub01:
+   ^     - merge duplicate cigar entries
+   ^   o fun02 sec04 sub02:
+   ^     - copy new cigar entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun02 Sec04 Sub01:
+   *   - merge duplicate cigar entries & remove 0 entries
+   \*****************************************************/
+
+   uiCig = 0;
+
+   for(
+     cpCigUI = 1;
+     cpCigUI < newCigUI;
+     ++cpCigUI
+   ){ /*Loop: merge duplicate cigar entries*/
+      if(cigHeapStr[uiCig] == cigHeapStr[cpCigUI])
+         cigHeapArySI[uiCig] += cigHeapArySI[cpCigUI];
+         /*can merge entries*/
+
+      else if(cigHeapArySI[cpCigUI] <= 0)
+         continue; /*cigar entry is 0 (no bases)*/
+
+      else
+      { /*Else: moving to next cigar entry*/
+         ++uiCig;
+         cigHeapStr[uiCig] = cigHeapStr[cpCigUI];
+         cigHeapArySI[uiCig] = cigHeapArySI[cpCigUI];
+      } /*Else: moving to next cigar entry*/
+   }  /*Loop: merge duplicate cigar entries*/
+
+   ++uiCig;
+   cigHeapStr[uiCig] = 0;
+   cigHeapArySI[uiCig] = 0;
+   newCigUI = uiCig;
+
+   /*****************************************************\
+   * Fun02 Sec04 Sub02:
+   *   - copy new cigar entry
+   \*****************************************************/
+
+   if(newCigUI > samSTPtr->cigSizeUI)
+   { /*If: new cigar is longer then old cigar memory*/
+      free(samSTPtr->cigTypeStr);
+      free(samSTPtr->cigArySI);
+
+      samSTPtr->cigTypeStr = cigHeapStr;
+      samSTPtr->cigArySI = cigHeapArySI;
+
+      cigHeapStr = 0;
+      cigHeapArySI = 0;
+
+      samSTPtr->cigSizeUI = newCigUI;
+   } /*If: new cigar is longer then old cigar memory*/
+
+   else
+   { /*Else: need to copy in new cigar entries*/
+      cpLen_ulCp(
+         samSTPtr->cigTypeStr,
+         cigHeapStr,
+         newCigUI
+      );
+
+      cpLen_ulCp(
+         (signed char *) samSTPtr->cigArySI,
+         (signed char *) cigHeapArySI,
+         newCigUI * (sizeof(signed int))
+      );
+   } /*Else: need to copy in new cigar entries*/
+
+   samSTPtr->cigLenUI = newCigUI;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun02 Sec05:
+   ^   - return and clean up
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   qUC = 0;
+   goto ret_fun02_sec05;
+
+   noSeq_fun02_sec05:;
+      qUC = 0;
+      goto ret_fun02_sec05;
+ 
+   memErr_fun02_sec05:;
+      qUC = 1;
+      goto ret_fun02_sec05;
+
+   ret_fun02_sec05:;
+      if(cigHeapStr)
+         free(cigHeapStr);
+      cigHeapStr = 0;
+
+      if(cigHeapArySI)
+         free(cigHeapArySI);
+      cigHeapArySI = 0;
+
+      return (signed char) qUC;
+} /*leftAlnIndel_rmHomo*/
 
 /*=======================================================\
 : License:
