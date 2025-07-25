@@ -8,9 +8,11 @@ Note the images in the figure above are safe, public
   are under freezeTB's license (public domain or MIT; your
   choice).
 
-1. GUI only: uses minimap2 to map fastq file to reference
-   - The alternative will be the internal read mapper
-     (`mapRead` from bioTools)
+1. Read mapping to H37Rv (NC_000962) reference:
+   1. you input a sam file with `-sam` (command line only)
+   2. GUI's default: use minimap2 to map reads
+   3. use the internal read mapper (`mapRead` from
+      bioTools) to map reads (GUI fallback/command line)
 2. freezeTB removes:
    - unmapped reads
    - secondary alignments

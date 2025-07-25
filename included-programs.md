@@ -6,6 +6,10 @@ I have made the programs in freezeTb to be modular. This
   means that if you like a particular program, then you
   can compile it out separately.
 
+Some of the programs apply to more then just TB. In these
+  cases the program can be found in my bioTools
+  repository.
+
 For unix several of the programs are installed in the
   install step, however for windows you will have to copy
   each one.
@@ -199,7 +203,7 @@ End of comment block ---#
 
 # freezeTB as an bash script
 
-Chapter six: make your own monster
+Chapter seven: make your own monster
 
 A better picture of how freezeTB works might be gotten by
   showing how it would look if I used a bash script. This
@@ -246,6 +250,7 @@ graphExtStr="tiff";
 graphBl="FALSE";
 adjBl="FALSE";
 maskBl="FALSE";
+rmHomoBl="FALSE";
 
 # these variables are not changed by the user
 
@@ -273,6 +278,8 @@ Input:
       read coverage graphs
   -ext: [$extStr]
     o file extension to save graphs as
+  -rmHomo: [$rmHomoBl]
+    o remove homopolymers
 Output:
   - a lot of files named after -prefix.
 " 
@@ -291,6 +298,7 @@ while [[ #$ -gt 0 ]]; do
       -coord-adj) adjBl="TRUE";;
       -prim-mask) maskBl="TRUE";;
       -ext) graphExtStr="$2"; graphBl="TRUE";;
+      -rmHomo) rmHomoeBl="TRUE";;
       -h) printf "%s\n" "$helpStr"; exit;;
       *) printf "%s not recognized\n" "$1"; exit;;
    esac
@@ -321,8 +329,8 @@ else
        "$readsStr" \
      > "$samStr.sam";
      # fallback read mapper
- minMapqSI = 0;
-fi
+   minMapqSI = 0;
+fi;
 
 # filter out low quality reads
 filtsam \
@@ -334,15 +342,21 @@ filtsam \
     -min-mapq 15 \
     -min-mean-q 7 \
     -min-median-q 7 \
-    -sam "$samStr.sam" |
-  rmHomo \
-     -ref "$dbStr/NC000962 \
-     -sam - \
-     -out "$samStr-filt.sam"; # also clean up indels
+    -sam "$samStr.sam";
 
 samStr="$samStr-filt";
 
-if [[ "$maskPrimBl" == "TRUE" ]]; then
+if [ "$rmHomoBl" = "TRUE" ];
+then
+  rmHomo \
+     -ref "$dbStr/NC000962 \
+     -sam "$samStr.sam" \
+     -out "$samStr-filt-rm.sam"; # also clean up indels
+  samStr="$samStr-filt-rm";
+fi;
+
+
+if [ "$maskPrimBl" = "TRUE" ]; then
 # If: primer masking was requested
    maskPrim \
       -sam "$samStr" \
@@ -354,7 +368,7 @@ if [[ "$maskPrimBl" == "TRUE" ]]; then
 else
    unfiltSamStr="$samStr";
    samStr="$samStr.sam";
-fi # If: primer masking was requested
+fi; # If: primer masking was requested
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec04:
@@ -372,7 +386,7 @@ ampDepth \
 
 # find AMRs
 tbAmr \
-   -amr-tbl "$dbDirStr/who-2023.tsv" \
+   -amr-tbl "$dbDirStr/amrDb.tsv" \
    -sam "$samStr" \
    -id-file "$prefixStr-read-amrsIds.tsv" \
    -out "$prefixStr-amrs.tsv";
@@ -392,7 +406,7 @@ tbSpol \
     -out "$prefixStr-read-spoligo.tsv";
 
 # build the consensuses
-if [[ "$mixedInfectBl" -lt 1 ]]; then
+if [ "$mixedInfectBl" -lt 1 ]; then
    tbCon \
        -sam "$samStr" \
        -out-tsv "$prefixStr-consnesuses.tsv" \
@@ -403,7 +417,7 @@ else
        -sam "$samStr" \
        -min-mapq "$minMapSI" \
        -prefix "$prefixStr" \
-fi
+fi;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec05:
@@ -413,7 +427,7 @@ fi
 
 # find the AMRs
 tbAmr \
-   -amr-tbl freezeTBFiles/who-2023.tsv \
+   -amr-tbl freezeTBFiles/amrDb.tsv \
     -sam "$prefixStr-cons.sam" \
     -out "$prefixStr-con-amrs.tsv";
 
@@ -436,17 +450,17 @@ tbSpol \
 #   - build the read depth and coverage graphs
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-if [[ "$graphBl" == "TRUE" ]]; then
+if [ "$graphBl" == "TRUE" ]; then
 # If: graphs were wanted
    # For graphing (wait till ampDepth finishes)
    Rscript graphAmpDepth.r \
       -stats $prefixStr-stats.tsv" \
-      -who "$dbDirStr/who-2023.tsv" \
+      -who "$dbDirStr/amrDb.tsv" \
       -ext "$graphExtStr" \
       -amrs ""$prefixStr-amrs.tsv" \
       -prefix "$prefixStr";
 
    # -min-len not used, but controls min amplicon length;
    # default is 50 (think no longer used)
-fi # If: graphs were wanted
+fi; # If: graphs were wanted
 ```

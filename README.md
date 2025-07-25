@@ -29,6 +29,10 @@ freezeTB includes databases from other repositories and
   https://github.com/tcltk/tcl) and
   [https://github.com/tcltk/tk](https://github.com/tcltk/tk)
   - MIT license
+- IBM Plex Mono font from fontshare.org
+  - Under SIL Open Font License Version 1.1
+  - [https://www.fontspace.com/search?q=IBM%20Plex%20Mono](
+     https://www.fontspace.com/search?q=IBM%20Plex%20Mono)
 
 All code that is unique to freezeTB is under a dual
   license. The primary license is Unlicense. However, not
@@ -89,6 +93,11 @@ Here are the order of Merlin winners:
     raylib for the GUI (under zlib licenense)
     - [https://github.com/raysan5/raylib](
        https://github.com/raysan5/raylib)
+  - IBM Plex Mono font from fontshare.org
+    - Used in my raylib GUI I am developing
+    - Under SIL Open Font License Version 1.1
+    - [https://www.fontspace.com/search?q=IBM%20Plex%20Mono](
+       https://www.fontspace.com/search?q=IBM%20Plex%20Mono)
   - tcltk to make the GUI (graphical user interface [the
     window])
     - [https://github.com/tcltk/tk](
@@ -98,7 +107,6 @@ Here are the order of Merlin winners:
 
 - Unique to freezeTB:
   - Most of the stuff in programs
-    - raylib is the only thing not unique to freezeTB
   - The icon
   - Everything in scripts
 

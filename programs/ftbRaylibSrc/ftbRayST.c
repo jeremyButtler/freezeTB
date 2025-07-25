@@ -49,6 +49,8 @@
    #include <stdlib.h>
 #endif
 
+#include "../genLib/ulCp.h"
+
 #include "../raylib/src/raylib.h"
 #include "ftbRayST.h"
 #include "rayWidg.h"
@@ -56,6 +58,7 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   - .c  #include "../genLib/ulCp.h"
+!   - .h  #include "ibmPlexMono.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -77,18 +80,6 @@
    `  (counter % def_interval) > def_blinkTime to find how
    `  long a blink lasts
    */
-
-/*widget ids*/
-/*#define def_noId_ftbRayST 0*/ /*not used for an widget*/
-#define def_idFqBut_ftbRayST 0
-#define def_idPrefixLab_ftbRayST 1
-#define def_idPrefixEntry_ftbRayST 2
-#define def_idOutBut_ftbRayST 3
-#define def_idConfigBut_ftbRayST 4
-/*#define def_idIllumina_ftbRayST 5
-#define def_idRunBut_ftbRayST 6*/
-#define def_idRunBut_ftbRayST 5
-#define def_idIllumina_ftbRayST 6
 
 /*widget rows*/
 #define def_xFqBut_ftbRayST 0
@@ -143,10 +134,12 @@ blank_gui_ftbRayST(
    if(! guiSTPtr)
       return;
 
+   guiSTPtr->mesgStr[0] = 0;
+
    guiSTPtr->inputBl = 1;
    guiSTPtr->inWinWidthSI = def_winWidth_ftbRayST;
    guiSTPtr->inWinHeightSI= def_winHeight_ftbRayST;
-   guiSTPtr->focusSI = def_idFqBut_ftbRayST;
+   guiSTPtr->focusSI = 5;
    guiSTPtr->blinkSC = 0;
 
    /*fastq button defaults*/
@@ -186,6 +179,14 @@ init_gui_ftbRayST(
    guiSTPtr->fileAryStr = 0;
    guiSTPtr->fileIndexArySI = 0;
    guiSTPtr->widgSTPtr = 0;
+
+   guiSTPtr->mesgBoxIdSI = 0;
+   guiSTPtr->fqButIdSI = 0;
+   guiSTPtr->prefixLabIdSI = 0;
+   guiSTPtr->prefixEntryIdSI = 0;
+   guiSTPtr->outDirIdSI = 0;
+   guiSTPtr->configIdSI = 0;
+   guiSTPtr->runIdSI = 0;
 
    blank_gui_ftbRayST(guiSTPtr);
 } /*init_gui_ftbRayST*/
@@ -253,24 +254,24 @@ draw_gui_ftbRayST(
    signed char blinkBl = 0; /*be in blink state*/
    struct Color guiCol =
       GetColor(guiSTPtr->widgSTPtr->guiColSI);
+   signed int heightSI = 0;
+   signed int widthSI = 0;
 
    if(guiSTPtr->inputBl)
    { /*If: displaying the input GUI*/
+      heightSI = guiSTPtr->inWinHeightSI;
+      widthSI = guiSTPtr->inWinWidthSI;
       SetWindowTitle((char *) inputStr);
-      SetWindowSize(
-         guiSTPtr->inWinWidthSI,
-         guiSTPtr->inWinHeightSI
-      );
    } /*If: displaying the input GUI*/
 
    else
    { /*Else: displaying the output GUI*/
+      heightSI = guiSTPtr->outWinHeightSI;
+      widthSI = guiSTPtr->outWinWidthSI;
       SetWindowTitle((char *) outputStr);
-      SetWindowSize(
-         guiSTPtr->outWinWidthSI,
-         guiSTPtr->outWinHeightSI
-      );
    } /*Else: displaying the output GUI*/
+
+   SetWindowSize(widthSI, heightSI);
 
    /*check if blinking the cursor*/
    guiSTPtr->blinkSC =
@@ -300,7 +301,7 @@ draw_gui_ftbRayST(
       butDraw_rayWidg(
          def_maxWidgetWidth_ftbRayST,
          0,                /*minumum width = any size*/
-         def_idFqBut_ftbRayST,  /*button id in array*/
+         guiSTPtr->fqButIdSI,  /*button id in array*/
          textFqButStr,
          0,                     /*drawing button*/
          guiSTPtr->widgSTPtr    /*has widgets to draw*/
@@ -310,7 +311,7 @@ draw_gui_ftbRayST(
       labDraw_rayWidg(
          def_maxWidgetWidth_ftbRayST,
          0,                        /*no min width*/
-         def_idPrefixLab_ftbRayST,
+         guiSTPtr->prefixLabIdSI,
          textPrefixLabStr,
          ' ',                      /*padding with spaces*/
          2,                        /*right pad if needed*/
@@ -320,7 +321,7 @@ draw_gui_ftbRayST(
 
       entryDraw_rayWidg(
          def_widthPrefixEntry_ftbRayST,
-         def_idPrefixEntry_ftbRayST,
+         guiSTPtr->prefixEntryIdSI,
          guiSTPtr->prefixPosArySI, /*cursor + scroll pos*/
          blinkBl,                  /*blink cursor*/
          guiSTPtr->inPrefixStr,    /*current user input*/
@@ -332,7 +333,7 @@ draw_gui_ftbRayST(
       butDraw_rayWidg(
          def_maxWidgetWidth_ftbRayST,
          0,                /*minumum width = any size*/
-         def_idOutBut_ftbRayST,  /*button id in array*/
+         guiSTPtr->outDirIdSI,  /*button id in array*/
          textOutButStr,
          0,                     /*drawing button*/
          guiSTPtr->widgSTPtr    /*has widgets to draw*/
@@ -344,7 +345,7 @@ draw_gui_ftbRayST(
       butDraw_rayWidg(
          def_maxWidgetWidth_ftbRayST,
          0,                /*minumum width = any size*/
-         def_idConfigBut_ftbRayST,  /*button id in array*/
+         guiSTPtr->configIdSI,  /*button id in array*/
          textConfigButStr,
          0,                     /*drawing button*/
          guiSTPtr->widgSTPtr    /*has widgets to draw*/
@@ -354,11 +355,21 @@ draw_gui_ftbRayST(
       butDraw_rayWidg(
          def_maxWidgetWidth_ftbRayST,
          0,                /*minumum width = any size*/
-         def_idRunBut_ftbRayST,  /*button id in array*/
+         guiSTPtr->runIdSI,  /*button id in array*/
          textRunButStr,
          0,                     /*drawing button*/
          guiSTPtr->widgSTPtr    /*has widgets to draw*/
       );
+
+      mesgBoxDraw_rayWidg(
+         guiSTPtr->mesgBoxIdSI,
+         widthSI,
+         heightSI,
+         guiSTPtr->mesgStr,
+         (signed char *) "Ok",
+         guiSTPtr->widgSTPtr
+      );
+         
    EndDrawing();
 } /*draw_gui_ftbRayST*/
 
@@ -399,7 +410,6 @@ mk_gui_ftbRayST(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    struct gui_ftbRayST *retHeapGUI = 0;
-   signed int tmpSI = 0;
    /*Image ftbIconImg = 0;*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -418,7 +428,12 @@ mk_gui_ftbRayST(
       goto memErr_fun06;
    init_widg_rayWidg(retHeapGUI->widgSTPtr);
 
-   tmpSI =
+   retHeapGUI->mesgBoxIdSI =
+      mkMesgBox_rayWidg(retHeapGUI->widgSTPtr);
+   if(retHeapGUI->mesgBoxIdSI < 0)
+      goto memErr_fun06;
+
+   retHeapGUI->fqButIdSI =
       addWidget_widg_rayWidg(
          def_xFqBut_ftbRayST,
          def_yFqBut_ftbRayST,
@@ -427,10 +442,10 @@ mk_gui_ftbRayST(
          -1, /*auto set height of widget*/
          retHeapGUI->widgSTPtr
       );
-   if(tmpSI < 0)
+   if(retHeapGUI->fqButIdSI < 0)
       goto memErr_fun06;
 
-   tmpSI =
+   retHeapGUI->prefixLabIdSI =
       addWidget_widg_rayWidg(
          def_xPrefixLab_ftbRayST,
          def_yPrefixLab_ftbRayST,
@@ -439,10 +454,10 @@ mk_gui_ftbRayST(
          -1, /*auto set height of widget*/
          retHeapGUI->widgSTPtr
       );
-   if(tmpSI < 0)
+   if(retHeapGUI->prefixLabIdSI < 0)
       goto memErr_fun06;
 
-   tmpSI =
+   retHeapGUI->prefixEntryIdSI =
       addWidget_widg_rayWidg(
          def_xPrefixEntry_ftbRayST,
          def_yPrefixEntry_ftbRayST,
@@ -451,10 +466,10 @@ mk_gui_ftbRayST(
          -1, /*auto set height of widget*/
          retHeapGUI->widgSTPtr
       );
-   if(tmpSI < 0)
+   if(retHeapGUI->prefixEntryIdSI < 0)
       goto memErr_fun06;
 
-   tmpSI =
+   retHeapGUI->outDirIdSI =
       addWidget_widg_rayWidg(
          def_xOutBut_ftbRayST,
          def_yOutBut_ftbRayST,
@@ -463,10 +478,10 @@ mk_gui_ftbRayST(
          -1, /*auto set height of widget*/
          retHeapGUI->widgSTPtr
       );
-   if(tmpSI < 0)
+   if(retHeapGUI->outDirIdSI < 0)
       goto memErr_fun06;
 
-   tmpSI =
+   retHeapGUI->configIdSI =
       addWidget_widg_rayWidg(
          def_xConfigBut_ftbRayST,
          def_yConfigBut_ftbRayST,
@@ -475,12 +490,12 @@ mk_gui_ftbRayST(
          -1, /*auto set height of widget*/
          retHeapGUI->widgSTPtr
       );
-   if(tmpSI < 0)
+   if(retHeapGUI->configIdSI < 0)
       goto memErr_fun06;
 
    /*TODO: add illumin check box*/
 
-   tmpSI =
+   retHeapGUI->runIdSI =
       addWidget_widg_rayWidg(
          def_xRunBut_ftbRayST,
          def_yRunBut_ftbRayST,
@@ -489,7 +504,7 @@ mk_gui_ftbRayST(
          -1, /*auto set height of widget*/
          retHeapGUI->widgSTPtr
       );
-   if(tmpSI < 0)
+   if(retHeapGUI->runIdSI < 0)
       goto memErr_fun06;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -498,7 +513,7 @@ mk_gui_ftbRayST(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    inactiveAdd_widg_rayWidg(
-      def_idPrefixLab_ftbRayST,
+      retHeapGUI->prefixLabIdSI,
       retHeapGUI->widgSTPtr
    ); /*make sure label is in inactive state (no focus)*/
 
@@ -524,6 +539,13 @@ mk_gui_ftbRayST(
 
    SetTargetFPS(60);
 
+   if(
+      setup_widg_rayWidg(
+          retHeapGUI->widgSTPtr,
+          def_fontSize_ftbRayST
+      )
+   ) goto memErr_fun06;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun06 Sec04:
    ^   - convert tile coordinates to x,y coordinates
@@ -537,7 +559,7 @@ mk_gui_ftbRayST(
    butDraw_rayWidg(
       def_maxWidgetWidth_ftbRayST,
       0,                /*minumum width = any size*/
-      def_idFqBut_ftbRayST,  /*button id in array*/
+      retHeapGUI->fqButIdSI,  /*button id in array*/
       textFqButStr,
       1,                     /*finding coordinates*/
       retHeapGUI->widgSTPtr    /*has widgets to draw*/
@@ -547,7 +569,7 @@ mk_gui_ftbRayST(
    labDraw_rayWidg(
       def_maxWidgetWidth_ftbRayST,
       0,                        /*no min width*/
-      def_idPrefixLab_ftbRayST,
+      retHeapGUI->prefixLabIdSI,
       textPrefixLabStr,
       ' ',                      /*padding with spaces*/
       2,                        /*right pad if needed*/
@@ -557,7 +579,7 @@ mk_gui_ftbRayST(
 
    entryDraw_rayWidg(
       def_widthPrefixEntry_ftbRayST,
-      def_idPrefixEntry_ftbRayST,
+      retHeapGUI->prefixEntryIdSI,
       retHeapGUI->prefixPosArySI, /*cursor + scroll pos*/
       1,                          /*draw cursor*/
       retHeapGUI->inPrefixStr,    /*current user input*/
@@ -569,7 +591,7 @@ mk_gui_ftbRayST(
    butDraw_rayWidg(
       def_maxWidgetWidth_ftbRayST,
       0,                /*minumum width = any size*/
-      def_idOutBut_ftbRayST,  /*button id in array*/
+      retHeapGUI->outDirIdSI,  /*button id in array*/
       textOutButStr,
       1,                        /*finding coordinates*/
       retHeapGUI->widgSTPtr    /*has widgets to draw*/
@@ -581,7 +603,7 @@ mk_gui_ftbRayST(
    butDraw_rayWidg(
       def_maxWidgetWidth_ftbRayST,
       0,                /*minumum width = any size*/
-      def_idConfigBut_ftbRayST,  /*button id in array*/
+      retHeapGUI->configIdSI,  /*button id in array*/
       textConfigButStr,
       1,                        /*finding coordinates*/
       retHeapGUI->widgSTPtr    /*has widgets to draw*/
@@ -591,7 +613,7 @@ mk_gui_ftbRayST(
    butDraw_rayWidg(
       def_maxWidgetWidth_ftbRayST,
       0,                /*minumum width = any size*/
-      def_idRunBut_ftbRayST,  /*button id in array*/
+      retHeapGUI->runIdSI,  /*button id in array*/
       textRunButStr,
       1,                        /*finding coordinates*/
       retHeapGUI->widgSTPtr    /*has widgets to draw*/
@@ -688,18 +710,18 @@ checkRunEvent_ftbRayST(
 
    if(indexSI != -2)
    { /*If: user switched focus*/
-      if(indexSI == def_idPrefixEntry_ftbRayST)
+      if(indexSI == guiSTPtr->prefixEntryIdSI)
          activeAdd_widg_rayWidg(
-            def_idPrefixEntry_ftbRayST,
+            guiSTPtr->prefixEntryIdSI,
             guiSTPtr->widgSTPtr
          );
       else
          activeClear_widg_rayWidg(
-            def_idPrefixEntry_ftbRayST,
+            guiSTPtr->prefixEntryIdSI,
             guiSTPtr->widgSTPtr
          );
 
-      goto done_fun07_sec0x;
+      goto done_fun07_sec07;
       /*event was a change in focus*/
    } /*If: user switched focus*/
 
@@ -710,10 +732,18 @@ checkRunEvent_ftbRayST(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    indexSI =
-     enterCheck_widg_rayWidg(keySI,0,guiSTPtr->widgSTPtr);
+     enterCheck_widg_rayWidg(
+        keySI,
+        0, /*key is from GetKey()*/
+        &parSI, /*gets parent id if widget is child*/
+        guiSTPtr->widgSTPtr
+     );
 
    if(indexSI != -2)
    { /*If: enter key was hit*/
+      /*I can ignore other errors here because I made sure
+      `  they would never happen
+      */
       draw_gui_ftbRayST(guiSTPtr);
 
       while( IsKeyDown(KEY_ENTER) )
@@ -724,42 +754,22 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      switch(guiSTPtr->focusSI)
-      { /*Switch: handle button press*/
-         case def_idFqBut_ftbRayST:
-            goto getFqFiles_fun07_sec0x_sub0x;
-            break;
-         case def_idOutBut_ftbRayST:
-            goto getOutDir_fun07_sec0x_sub0x;
-            break;
-         case def_idConfigBut_ftbRayST:
-            goto getConfigFile_fun07_sec0x_sub0x;
-            break;
-         case def_idRunBut_ftbRayST:
-            goto runFtb_fun07_sec0x_sub0x;
-            break;
-   
-         case def_idPrefixEntry_ftbRayST:
-            break; /*does not use press events*/
-         case def_idIllumina_ftbRayST:
-            if(
-               checkedStateGet_widg_rayWidg(
-                 def_idIllumina_ftbRayST,
-                 guiSTPtr->widgSTPtr
-               )
-            ) checkedClear_widg_rayWidg(
-                  def_idIllumina_ftbRayST,
-                  guiSTPtr->widgSTPtr
-               ); /*need to clear checked state*/
-            else
-               checkedAdd_widg_rayWidg(
-                  def_idIllumina_ftbRayST,
-                  guiSTPtr->widgSTPtr
-               ); /*need to add checked state*/
-            break; /*updated with GUI*/
-      } /*Switch: handle button press*/
+      if(indexSI == guiSTPtr->fqButIdSI)
+         goto getFqFiles_fun07_sec06_sub0x;
 
-      goto done_fun07_sec0x;
+      else if(indexSI == guiSTPtr->outDirIdSI)
+         goto getOutDir_fun07_sec06_sub0x;
+
+      else if(indexSI == guiSTPtr->configIdSI)
+         goto getConfigFile_fun07_sec06_sub0x;
+
+      else if(indexSI == guiSTPtr->runIdSI)
+         goto runFtb_fun07_sec06_sub0x;
+
+      else if(parSI == guiSTPtr->mesgBoxIdSI)
+         goto mesgBox_fun07_sec06_sub0x;
+
+      goto done_fun07_sec07;
    } /*If: enter key*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -781,7 +791,7 @@ checkRunEvent_ftbRayST(
    else if(releaseBl)
       ;
    else
-      goto detectScroll_fun07_sec0x;
+      goto detectScroll_fun07_sec06;
 
    indexSI =
       getMouseWidg_widg_rayWidg(
@@ -791,85 +801,115 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       ); /*get id of widget mouse is on*/
 
+    pressClear_widg_rayWidg(
+       guiSTPtr->fqButIdSI,
+       guiSTPtr->widgSTPtr
+   );
+
+   pressClear_widg_rayWidg(
+      guiSTPtr->outDirIdSI,
+      guiSTPtr->widgSTPtr
+   );
+
+   pressClear_widg_rayWidg(
+      guiSTPtr->configIdSI,
+      guiSTPtr->widgSTPtr
+   );
+
+   pressClear_widg_rayWidg(
+      guiSTPtr->runIdSI,
+      guiSTPtr->widgSTPtr
+   );
+
+   mesgBoxEvent_rayWidg(
+      0, /*clear button press*/
+      guiSTPtr->mesgBoxIdSI,
+      0, /*no need to list child*/
+      guiSTPtr->widgSTPtr
+   );
+
    /*****************************************************\
    * Fun07 Sec04 Sub02:
    *   - find click event widget
    \*****************************************************/
 
-   switch(indexSI)
-   { /*Switch: handle button press*/
-      case def_idFqBut_ftbRayST:
-         if(pressBl)
-            pressAdd_widg_rayWidg(
-               def_idFqBut_ftbRayST,
-               guiSTPtr->widgSTPtr
-            );
-         else
-            goto getFqFiles_fun07_sec0x_sub0x;
-         break;
-      case def_idOutBut_ftbRayST:
-         if(pressBl)
-            pressAdd_widg_rayWidg(
-               def_idOutBut_ftbRayST,
-               guiSTPtr->widgSTPtr
-            );
-         else
-            goto getOutDir_fun07_sec0x_sub0x;
-        break;
-      case def_idConfigBut_ftbRayST:
-         if(pressBl)
-            pressAdd_widg_rayWidg(
-               def_idConfigBut_ftbRayST,
-               guiSTPtr->widgSTPtr
-            );
-         else
-            goto getConfigFile_fun07_sec0x_sub0x;
-         break;
-      case def_idRunBut_ftbRayST:
-         if(pressBl)
-            pressAdd_widg_rayWidg(
-               def_idRunBut_ftbRayST,
-               guiSTPtr->widgSTPtr
-            );
-         else
-            goto runFtb_fun07_sec0x_sub0x;
-         break; 
-      case def_idPrefixEntry_ftbRayST:
-         activeAdd_widg_rayWidg(
-            def_idPrefixEntry_ftbRayST,
+   if(indexSI == guiSTPtr->fqButIdSI)
+   { /*If: hit fastq button*/
+      if(pressBl)
+         pressAdd_widg_rayWidg(
+            guiSTPtr->fqButIdSI,
             guiSTPtr->widgSTPtr
          );
-         break; /*does not use press events*/
-      case def_idIllumina_ftbRayST:
-         if(
-            checkedStateGet_widg_rayWidg(
-              def_idIllumina_ftbRayST,
-              guiSTPtr->widgSTPtr
-            )
-         ) checkedClear_widg_rayWidg(
-               def_idIllumina_ftbRayST,
-               guiSTPtr->widgSTPtr
-            ); /*need to clear checked state*/
-         else
-            checkedAdd_widg_rayWidg(
-               def_idIllumina_ftbRayST,
-               guiSTPtr->widgSTPtr
-            ); /*need to add checked state*/
-         break; /*updated with GUI*/
-   } /*Switch: handle button press*/
+      else
+         goto getFqFiles_fun07_sec06_sub0x;
+   } /*If: hit fastq button*/
 
-   goto done_fun07_sec0x;
+   else if(indexSI == guiSTPtr->outDirIdSI)
+   { /*Else If: output directory button*/
+      if(pressBl)
+         pressAdd_widg_rayWidg(
+            guiSTPtr->outDirIdSI,
+            guiSTPtr->widgSTPtr
+         );
+      else
+         goto getOutDir_fun07_sec06_sub0x;
+   } /*Else If: output directory button*/
+
+   else if(indexSI == guiSTPtr->configIdSI)
+   { /*Else If: configuration file button*/
+      if(pressBl)
+         pressAdd_widg_rayWidg(
+            guiSTPtr->configIdSI,
+            guiSTPtr->widgSTPtr
+         );
+      else
+         goto getConfigFile_fun07_sec06_sub0x;
+   } /*Else If: configuration file button*/
+
+   else if(indexSI == guiSTPtr->runIdSI)
+   { /*Else If: run freezeTB button*/
+      if(pressBl)
+         pressAdd_widg_rayWidg(
+            guiSTPtr->runIdSI,
+            guiSTPtr->widgSTPtr
+         );
+      else
+         goto runFtb_fun07_sec06_sub0x;
+   } /*Else If: run freezeTB button*/
+
+   else if(indexSI == guiSTPtr->prefixEntryIdSI)
+   { /*Else If: prefix entry box*/
+      activeAdd_widg_rayWidg(
+         guiSTPtr->prefixEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+   } /*Else If: prefix entry box*/
+
+   else if(parSI == guiSTPtr->mesgBoxIdSI)
+   { /*Else If: dealing with a message box*/
+      if(pressBl)
+         mesgBoxEvent_rayWidg(
+            1, /*add button press*/
+            guiSTPtr->mesgBoxIdSI,
+            indexSI,
+            guiSTPtr->widgSTPtr
+         );
+      else
+         goto mesgBox_fun07_sec06_sub0x;
+   } /*Else If: dealing with a message box*/
+
+   goto done_fun07_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec05:
    ^   - detect scroll events and add text events
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   detectScroll_fun07_sec0x:;
+   detectScroll_fun07_sec06:;
 
    if(
       activeStateGet_widg_rayWidg(
-         def_idPrefixEntry_ftbRayST,
+         guiSTPtr->prefixEntryIdSI,
          guiSTPtr->widgSTPtr
       )
    ){ /*If: scrolling in prefix entry box*/
@@ -879,11 +919,11 @@ checkRunEvent_ftbRayST(
       { /*If: user wanted to change text position*/
          guiSTPtr->prefixPosArySI[0] += scrollSI;
             /*scroll position*/
-         goto done_fun07_sec0x;
+         goto done_fun07_sec07;
       } /*If: user wanted to change text position*/
 
       else if(! keySI)
-         goto done_fun07_sec0x;
+         goto done_fun07_sec07;
          /*nothing input*/
 
       else
@@ -904,9 +944,11 @@ checkRunEvent_ftbRayST(
                127
             ); /*make sure valid output name*/
 
-         goto done_fun07_sec0x;
+         goto done_fun07_sec07;
       } /*Else If: user input text*/
    } /*If: scrolling in prefix entry box*/
+
+   goto done_fun07_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec06:
@@ -914,17 +956,65 @@ checkRunEvent_ftbRayST(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*TODO: add function calls*/
-   getFqFiles_fun07_sec0x_sub0x:;
-   getOutDir_fun07_sec0x_sub0x:;
-   getConfigFile_fun07_sec0x_sub0x:;
-   runFtb_fun07_sec0x_sub0x:;
+   mesgBox_fun07_sec06_sub0x:;
+      mesgBoxEvent_rayWidg(
+         2, /*rease key event*/
+         parSI,
+         indexSI,
+         guiSTPtr->widgSTPtr
+      );
+      goto done_fun07_sec07;
+
+   getFqFiles_fun07_sec06_sub0x:;
+      hidenClear_widg_rayWidg(
+         guiSTPtr->mesgBoxIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      cpStr_ulCp(
+         guiSTPtr->mesgStr,
+         (signed char *) "open file browser to get fastq files"
+      ); /*TODO add real function*/
+      goto done_fun07_sec07;
+
+   getOutDir_fun07_sec06_sub0x:;
+      hidenClear_widg_rayWidg(
+         guiSTPtr->mesgBoxIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      cpStr_ulCp(
+         guiSTPtr->mesgStr,
+         (signed char *) "open file browser to get output"
+      ); /*TODO add real function*/
+      goto done_fun07_sec07;
+
+   getConfigFile_fun07_sec06_sub0x:;
+      hidenClear_widg_rayWidg(
+         guiSTPtr->mesgBoxIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      cpStr_ulCp(
+         guiSTPtr->mesgStr,
+         (signed char *) "open file browser to get FTB config file"
+      ); /*TODO add real function*/
+      goto done_fun07_sec07;
+
+   runFtb_fun07_sec06_sub0x:;
+      hidenClear_widg_rayWidg(
+         guiSTPtr->mesgBoxIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      cpStr_ulCp(
+         guiSTPtr->mesgStr,
+         (signed char *) "runs freezeTB on input"
+      ); /*TODO add real function*/
+      goto done_fun07_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec07:
    ^   - return results and redraw gui
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun07_sec0x:;
+   done_fun07_sec07:;
       draw_gui_ftbRayST(guiSTPtr);
       return 0;
 } /*checkRunEvent_ftbRayST*/

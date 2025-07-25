@@ -41,6 +41,13 @@ struct widg_rayWidg;
 /*entry box dimensions*/
 #define def_widthPrefixEntry_ftbRayST 200
 
+#define def_fontSize_ftbRayST 20
+   /*18 is recomended size for large text in disablity
+   `  accesibility guidelines, however, monospaced fonts
+   `  are often a bit smaller, so did 20 instead.
+   */
+
+
 /*-------------------------------------------------------\
 | ST01: gui_ftbRayST
 |   - has widgets used in the ftbRaylib GUI
@@ -49,6 +56,9 @@ struct widg_rayWidg;
 typedef struct gui_ftbRayST
 {
    struct widg_rayWidg *widgSTPtr; /*has widgets*/
+
+   signed char mesgStr[128];
+      /*message for the message box*/
 
    signed char inputBl; /*on input screen*/
    signed char curDirStr[4096]; /*current location*/
@@ -77,6 +87,15 @@ typedef struct gui_ftbRayST
 
    /*for configuration file button*/
    signed char configFileStr[1024];
+
+   /*widget ids*/
+   signed int mesgBoxIdSI;
+   signed int fqButIdSI;
+   signed int prefixLabIdSI;
+   signed int prefixEntryIdSI;
+   signed int outDirIdSI;
+   signed int configIdSI;
+   signed int runIdSI;
 }gui_ftbRayST;
 
 /*-------------------------------------------------------\

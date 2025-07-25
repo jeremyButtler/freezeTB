@@ -20,6 +20,7 @@
    `   not work on plan9
    */
    #include <u.h>
+   #include <libc.h>
 #endif
 
 #include "../raylib/src/raylib.h"
@@ -29,6 +30,7 @@
 ! Hidden Libraries:
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "rayWidg.h"
+!   - .h  #include "ibmPlexMono.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\
