@@ -212,6 +212,8 @@ freeStack_gui_ftbRayST(
       free(guiSTPtr->fileAryStr);
    if(guiSTPtr->fileIndexArySI)
       free(guiSTPtr->fileIndexArySI);
+   if(guiSTPtr->widgSTPtr)
+      freeHeap_widg_rayWidg(guiSTPtr->widgSTPtr);
 
    init_gui_ftbRayST(guiSTPtr);
 } /*freeStack_gui_ftbRayST*/
@@ -539,12 +541,8 @@ mk_gui_ftbRayST(
 
    SetTargetFPS(60);
 
-   if(
-      setup_widg_rayWidg(
-          retHeapGUI->widgSTPtr,
-          def_fontSize_ftbRayST
-      )
-   ) goto memErr_fun06;
+   if( setup_widg_rayWidg(retHeapGUI->widgSTPtr) )
+      goto memErr_fun06;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun06 Sec04:

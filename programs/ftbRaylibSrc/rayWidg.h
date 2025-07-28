@@ -13,170 +13,178 @@
 '       - blanks a widg_rayWidg struct
 '     o fun03: init_widg_rayWidg
 '       - initializes a widg_rayWidg struct
-'     o fun04: measureFont_widg_rayWidg
-'       - measures the width of the character "D" for a
-'         font
-'     o fun05: setup_widg_rayWidg
+'     o fun04: setup_widg_rayWidg
 '       - adds the default font to a rayWidg struct and
 '         sets it up for use (only call once)
-'     o fun06: freeStack_widg_rayWidg
+'     o fun05: freeStack_widg_rayWidg
 '       - frees arrays in a widg_rayWidg struct
-'     o fun07: freeHeap_widg_rayWidg
+'     o fun06: freeHeap_widg_rayWidg
 '       - frees a widg_rayWidg struct
-'     o fun08: realloc_widg_rayWidg
+'     o fun07: realloc_widg_rayWidg
 '       - reallocates memory for a widg_rayWidg struct
 '       - note: this will not downsize or report downsize
 '         attempts
 '   * change font or font variables in widg_rayWidg struct
-'     o fun09: changeFont_widg_rayWidg
+'     o fun08: fontMeasure_widg_rayWidg
+'       - measures the width of the character "D" for a
+'         font
+'     o fun09: textMeasure_widg_rayWidg
+'       - measures the width of input text
+'     o fun10: changeFont_widg_rayWidg
 '       - adds a font from a file to a widg_rayWidg struct
-'     o fun10: useEmbedFont_widg_rayWidg
+'     o fun11: useEmbedFont_widg_rayWidg
 '       - uses an embed font
 '       - make this using ExprotFontAsCode from raylib
-'     o fun11: swapFont_widg_rayWidg
+'     o fun12: swapFont_widg_rayWidg
 '       - swaps the font out with an input font pointer
 '       - this is a swap of pointers only, so only free
 '         the input font when you are finished
-'     o fun12: setFontSize_widg_rayWidg
+'     o fun13: setFontSize_widg_rayWidg
 '       - changes font size
-'     o fun13: setFontSpacing_widg_rayWidg
+'     o fun14: setFontSpacing_widg_rayWidg
 '       - changes a fonts spacing
 '   * widg_rayWidg struct querying functions
-'     o fun14: xCoordGet_widg_rayWidg
+'     o fun15: xCoordGet_widg_rayWidg
 '       - get the x-coordinate of a widget
-'     o fun15: yCoordSet_widg_rayWidg
+'     o fun16: yCoordSet_widg_rayWidg
 '       - get the y-coordinate of a widget
-'     o fun16: widthGet_widg_rayWidg
+'     o fun17: widthGet_widg_rayWidg
 '       - get the width of a widget
-'     o fun17: heightGet_widg_rayWidg
+'     o fun18: heightGet_widg_rayWidg
 '       - get the height of a widget
-'     o fun18: rowGet_widg_rayWidg
+'     o fun19: rowGet_widg_rayWidg
 '       - get the row a widget is assigned to
-'     o fun19: colGet_widg_rayWidg
+'     o fun20: colGet_widg_rayWidg
 '       - get the column a widget is assigned to
-'     o fun20: stateGet_widg_rayWidg
+'     o fun21: stateGet_widg_rayWidg
 '       - get the state of a widget
-'     o fun21: pressStateGet_widg_rayWidg
+'     o fun22: pressStateGet_widg_rayWidg
 '       - detect if widget is in pressed state
-'     o fun22: checkedStateGet_widg_rayWidg
+'     o fun23: checkedStateGet_widg_rayWidg
 '       - detect if widget is in checked state
-'     o fun23: activeStateGet_widg_rayWidg
+'     o fun24: activeStateGet_widg_rayWidg
 '       - detect if widget is in active state
-'     o fun24: focusStateGet_widg_rayWidg
+'     o fun25: focusStateGet_widg_rayWidg
 '       - detect if widget is in focus state
-'     o fun25: inacitveStateGet_widg_rayWidg
+'     o fun26: inacitveStateGet_widg_rayWidg
 '       - detect if widget is in inacitve state
-'     o fun26: hidenStateGet_widg_rayWidg
+'     o fun27: hidenStateGet_widg_rayWidg
 '       - detect if widget is in hiden state
-'     o fun27: childStateGet_widg_rayWidg
+'     o fun28: childStateGet_widg_rayWidg
 '       - detect if widget is a child widget
-'     o fun28: numWidgetGet_widg_rayWidg
+'     o fun29: hogStateGet_widg_rayWidg
+'       - detect if widget is a hog (high priority) widget
+'     o fun30: numWidgetGet_widg_rayWidg
 '       - get number of widgets made
-'     o fun29: focusGet_widg_rayWidg
+'     o fun31: focusGet_widg_rayWidg
 '       - get the id (index) of the focused widget
 '   * widg_rayWidg struct modify coordiantes and size
-'     o fun30: xCoordSet_widg_rayWidg
+'     o fun32: xCoordSet_widg_rayWidg
 '       - sets a widgets x coordiante
-'     o fun31: yCoordSet_widg_rayWidg
+'     o fun33: yCoordSet_widg_rayWidg
 '       - sets a widgets y coordiante
-'     o fun32: widthSet_widg_rayWidg
+'     o fun34: widthSet_widg_rayWidg
 '       - sets a widgets width
-'     o fun33: heightSet_widg_rayWidg
+'     o fun35: heightSet_widg_rayWidg
 '       - sets a widgets height
-'     o fun34: rowSet_widg_rayWidg
+'     o fun36: rowSet_widg_rayWidg
 '       - sets a widgets row number
-'     o fun35: colSet_widg_rayWidg
+'     o fun37: colSet_widg_rayWidg
 '       - sets a widgets column number
 '   * widg_rayWidg struct modify state of widgets
-'     o fun36: stateSet_widg_rayWidg
+'     o fun38: stateSet_widg_rayWidg
 '       - sets a widgets state to input state
-'     o fun37: pressAdd_widg_rayWidg
+'     o fun39: pressAdd_widg_rayWidg
 '       - adds the pressed state to a widget
-'     o fun38: checkedAdd_widg_rayWidg
+'     o fun40: checkedAdd_widg_rayWidg
 '       - adds the checkeded state to a widget
-'     o fun39: activeAdd_widg_rayWidg
+'     o fun41: activeAdd_widg_rayWidg
 '       - adds the activeed state to a widget
-'     o fun40: focusAdd_widg_rayWidg
+'     o fun42: focusAdd_widg_rayWidg
 '       - adds the activeed state to a widget
-'     o fun41: inactiveAdd_widg_rayWidg
+'     o fun43: inactiveAdd_widg_rayWidg
 '       - adds the inactive state to a widget
-'     o fun42: hidenAdd_widg_rayWidg
+'     o fun44: hidenAdd_widg_rayWidg
 '       - adds the hiden state to a widget
-'     o fun43: childAdd_widg_rayWidg
+'     o fun45: childAdd_widg_rayWidg
 '       - adds the child state to a widget
 '       - only use this funcition if you know what your are
 '         are doing and understand how the child/parent
 '         system in rayWidg works
+'     o fun46: hogAdd_widg_rayWidg
+'       - adds the hog state to a widget
 '   * widg_rayWidg struct clear state of widgets
-'     o fun44: stateClear_widg_rayWidg
+'     o fun47: stateClear_widg_rayWidg
 '       - remove all states in a widget (set to 0)
-'     o fun45: pressClear_widg_rayWidg
+'     o fun48: pressClear_widg_rayWidg
 '       - remove wigets pressed state
-'     o fun46: checkedClear_widg_rayWidg
+'     o fun49: checkedClear_widg_rayWidg
 '       - remove wigets checked state
-'     o fun47: activeClear_widg_rayWidg
+'     o fun50: activeClear_widg_rayWidg
 '       - remove wigets active state
-'     o fun48: focusClear_widg_rayWidg
+'     o fun51: focusClear_widg_rayWidg
 '       - remove wigets focus state
-'     o fun49: inactiveClear_widg_rayWidg
+'     o fun52: inactiveClear_widg_rayWidg
 '       - remove wigets & its child widgets inactive state
-'     o fun50: hidenClear_widg_rayWidg
+'     o fun53: hidenClear_widg_rayWidg
 '       - remove wigets and its child widgets hiden state
-'     o fun51: childClear_widg_rayWidg
+'     o fun54: childClear_widg_rayWidg
 '       - clears the child state in a widget
 '       - only use this function if you know what your are
 '         doing and understand how the child/parent system
 '         works
+'     o fun55: hogClear_widg_rayWidg
+'       - clears the hog state in a widget
 '   * get OS state
-'     o fun52: getDarkModeState_rayWidg
+'     o fun56: getDarkModeState_rayWidg
 '       - detects if Mac/Windows computer is in dark mode
-'     o fun53: checkGuiColorMode_rayWidg
+'     o fun57: checkGuiColorMode_rayWidg
 '       - checks is user is using dark or light mode, and
 '         sets the color scheme to the correct mode
 '   * widget modification or focs/state changes
-'     o fun54: addWidget_widg_rayWidg
+'     o fun58: addWidget_widg_rayWidg
 '       - add a new widget to a widg_rayWidg struct
-'     o fun55: tile_widg_rayWidg
+'     o fun59: tile_widg_rayWidg
 '       - find tiling x,y coordiantes for each widget
 '         using widths, heights, rows, and columns
 '       - note this can only support one level of children
 '         widgets
-'     o fun56: focusCheck_widg_rayWidg
+'     o fun60: focusCheck_widg_rayWidg
 '       - detect if input key was tab and update focus
-'     o fun57: enterCheck_widg_rayWidg
+'     o fun61: enterCheck_widg_rayWidg
 '       - check if key event was an enter key
-'     o fun58: getMouseWidg_widg_rayWidg
+'     o fun62: getMouseWidg_widg_rayWidg
 '       - get widget mouse was on
-'     o fun59: blinkGet_rayWidg
+'     o fun63: blinkGet_rayWidg
 '      - returns current state of cursor blink for widgets
 '   * string functions
-'     o fun60: intStrCheck_rayWidg
+'     o fun64: intStrCheck_rayWidg
 '       - corrects mistakes in a c-string that is supposed
 '         to be an integer
-'     o fun61: floatStrCheck_rayWidg
+'     o fun65: floatStrCheck_rayWidg
 '       - corrects mistakes in a c-string that is supposed
 '         to be an float
-'     o fun62: fileStrCheck_rayWidg
+'     o fun66: fileStrCheck_rayWidg
 '       - corrects non-file characters in c-string
 '       - spaces/tabes converted to '_', other than that,
 '         only A-Z, a-z, 0-9, '-', '_', & '.' are allowed
-'     o fun63: addCharToEntry_rayWidg
+'     o fun67: addCharToEntry_rayWidg
 '       - adds a character to an entry box text
 '   * widget drawing
-'     o fun64: drawRec_rayWidg
+'     o fun68: drawRec_rayWidg
 '       - draws a rectangle for rayWidg
-'     o fun65: butDraw_rayWidg
+'     o fun69: butDraw_rayWidg
 '       - draw a button
-'     o fun66: entryDraw_rayWidg
+'     o fun70: entryDraw_rayWidg
 '       - draw an entry box and its text
-'     o fun67: labDraw_rayWidg
+'     o fun71: labDraw_rayWidg
 '       - draw a label
 '   * complex widgets
-'     o fun68: mkMesgBox_rayWidg
+'     o fun72: mkMesgBox_rayWidg
 '       - makes an emtpy message box widget
-'     o fun69: mesgBoxDraw_rayWidg
+'     o fun73: mesgBoxDraw_rayWidg
 '       - draws a message box
-'     o fun70: mesgBoxEvent_rayWidg
+'     o fun74: mesgBoxEvent_rayWidg
 '      - checks the event that was fired in a message box
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -218,6 +226,7 @@ typedef struct Font (*fontFunction)(void);
 #define def_macSegments_rayWidg 100
 
 #define def_maxStrLen_rayWidg ( (signed int) (((unsigned int) -1) - 1) )
+#define def_fontSize_rayWidg 20
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Header Sec02:
@@ -251,6 +260,13 @@ typedef struct Font (*fontFunction)(void);
    /*rayWidg only supports one level of child widgets
    `   the idea is that comples widgets that need children
    `   are hidden in functions, which can resolve them
+   */
+#define def_hog_rayWidg 256 /*widget is prioritiy*/
+   /*means widget is a hog and trys to prevent you
+   `  from interacting with other widgets in the GUI.
+   `  The only exception are other hog widgets that are
+   `  in a child state will allow interaction with other
+   `  children with the hog state from the same parent
    */
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -396,32 +412,13 @@ init_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun04: measureFont_widg_rayWidg
-|   - measures the width of the character "D" for a font
-| Input:
-|   o widgSTPtr:
-|     - widg_rayWidg struct pointer to get font
-|       measurements
-| Output:
-|   - Modifies:
-|     o fontWidthF and fontHeightF in widgSTPtr to have
-|       the width and hight of the font
-\-------------------------------------------------------*/
-void
-measureFont_widg_rayWidg(
-   struct widg_rayWidg *widgSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun05: setup_widg_rayWidg
+| Fun04: setup_widg_rayWidg
 |   - adds the default font to a rayWidg struct and sets
 |     it up for use (only call once)
 | Input:
 |   o widgSTPtr:
 |     - widg_rayWidg struct pointer to add default font
 |       to
-|   o fontSizeSI:
-|     - text size to print in GUI
 | Output:
 |   - Modifies:
 |     o fontSTPtr in widgSTPtr to have new font
@@ -437,12 +434,11 @@ measureFont_widg_rayWidg(
 \-------------------------------------------------------*/
 signed char
 setup_widg_rayWidg(
-   struct widg_rayWidg *widgSTPtr,
-   signed int fontSizeSI
+   struct widg_rayWidg *widgSTPtr
 );
 
 /*-------------------------------------------------------\
-| Fun06: freeStack_widg_rayWidg
+| Fun05: freeStack_widg_rayWidg
 |   - frees arrays in a widg_rayWidg struct
 | Input:
 |   - widgSTPtr:
@@ -458,7 +454,7 @@ freeStack_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun07: freeHeap_widg_rayWidg
+| Fun06: freeHeap_widg_rayWidg
 |   - frees a widg_rayWidg struct
 | Input:
 |   - widgSTPtr:
@@ -473,7 +469,7 @@ freeHeap_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun08: realloc_widg_rayWidg
+| Fun07: realloc_widg_rayWidg
 |   - reallocates memory for a widg_rayWidg struct
 |   - note, this will not downsize or report downsize
 |     attempts
@@ -499,7 +495,48 @@ realloc_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun09: changeFont_widg_rayWidg
+| Fun08: fontMeasure_widg_rayWidg
+|   - measures the width of the character "D" for a font
+| Input:
+|   o widgSTPtr:
+|     - widg_rayWidg struct pointer to get font
+|       measurements
+| Output:
+|   - Modifies:
+|     o fontWidthF and fontHeightF in widgSTPtr to have
+|       the width and hight of the font
+\-------------------------------------------------------*/
+void
+fontMeasure_widg_rayWidg(
+   struct widg_rayWidg *widgSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun09: textMeasure_widg_rayWidg
+|   - measures the width of input text
+| Input:
+|   o textStr:
+|     - c-string with text to measure
+|   o heightSIPtr:
+|     - signed int pionter to get height of text
+|   o widgSTPtr:
+|     - widg_rayWidg struct pointer to get font
+|       measurements
+| Output:
+|   - Modifies:
+|     o heightSIPtr to have height of text
+|   - Returns:
+|     o size of text in pixels
+\-------------------------------------------------------*/
+signed int
+textMeasure_widg_rayWidg(
+   signed char *textStr,
+   signed int *heightSIPtr,
+   struct widg_rayWidg *widgSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun10: changeFont_widg_rayWidg
 |   - adds a font from a file to a widg_rayWidg struct
 | Input:
 |   o widgSTPtr:
@@ -529,7 +566,7 @@ changeFont_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun10: useEmbedFont_widg_rayWidg
+| Fun11: useEmbedFont_widg_rayWidg
 |   - uses an embed font
 |   - make this using ExprotFontAsCode from raylib
 | Input:
@@ -560,7 +597,7 @@ useEmbedFont_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun11: swapFont_widg_rayWidg
+| Fun12: swapFont_widg_rayWidg
 |   - swaps the font out with an input font pointer
 |   - this is a swap of pointers only, so only free the
 |     input font when you are finished
@@ -592,7 +629,7 @@ swapFont_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun12: setFontSize_widg_rayWidg
+| Fun13: setFontSize_widg_rayWidg
 |   - changes font size
 | Input:
 |   o widgSTPtr:
@@ -610,7 +647,7 @@ setFontSize_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun13: setFontSpacing_widg_rayWidg
+| Fun14: setFontSpacing_widg_rayWidg
 |   - changes a fonts spacing
 | Input:
 |   o widgSTPtr:
@@ -628,7 +665,7 @@ setFontSpacing_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun14: xCoordGet_widg_rayWidg
+| Fun15: xCoordGet_widg_rayWidg
 |   - get the x-coordinate of a widget
 | Input:
 |   - idSI:
@@ -653,7 +690,7 @@ xCoordGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun15: yCoordGet_widg_rayWidg
+| Fun16: yCoordGet_widg_rayWidg
 |   - get the y-coordinate of a widget
 | Input:
 |   - idSI:
@@ -678,7 +715,7 @@ yCoordGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun16: widthGet_widg_rayWidg
+| Fun17: widthGet_widg_rayWidg
 |   - get the width of a widget
 | Input:
 |   - idSI:
@@ -700,7 +737,7 @@ widthGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun17: heightGet_widg_rayWidg
+| Fun18: heightGet_widg_rayWidg
 |   - get the height of a widget
 | Input:
 |   - idSI:
@@ -721,7 +758,7 @@ heightGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun18: rowGet_widg_rayWidg
+| Fun19: rowGet_widg_rayWidg
 |   - get the row a widget is assigned to
 | Input:
 |   - idSI:
@@ -742,7 +779,7 @@ rowGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun19: colGet_widg_rayWidg
+| Fun20: colGet_widg_rayWidg
 |   - get the column a widget is assigned to
 | Input:
 |   - idSI:
@@ -763,7 +800,7 @@ colGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun20: stateGet_widg_rayWidg
+| Fun21: stateGet_widg_rayWidg
 |   - get the state of a widget
 | Input:
 |   - idSI:
@@ -788,7 +825,7 @@ stateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun21: pressStateGet_widg_rayWidg
+| Fun22: pressStateGet_widg_rayWidg
 |   - detect if widget is in pressed state
 | Input:
 |   - idSI:
@@ -808,7 +845,7 @@ pressStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun22: checkedStateGet_widg_rayWidg
+| Fun23: checkedStateGet_widg_rayWidg
 |   - detect if widget is in checked state
 | Input:
 |   - idSI:
@@ -828,7 +865,7 @@ checkedStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun23: activeStateGet_widg_rayWidg
+| Fun24: activeStateGet_widg_rayWidg
 |   - detect if widget is in active state
 | Input:
 |   - idSI:
@@ -848,7 +885,7 @@ activeStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun24: focusStateGet_widg_rayWidg
+| Fun25: focusStateGet_widg_rayWidg
 |   - detect if widget is in focus state
 | Input:
 |   - idSI:
@@ -868,7 +905,7 @@ focusStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun25: inactiveStateGet_widg_rayWidg
+| Fun26: inactiveStateGet_widg_rayWidg
 |   - detect if widget is in inactive state
 | Input:
 |   - idSI:
@@ -888,7 +925,7 @@ inactiveStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun26: hidenStateGet_widg_rayWidg
+| Fun27: hidenStateGet_widg_rayWidg
 |   - detect if widget is in hiden state
 | Input:
 |   - idSI:
@@ -908,7 +945,7 @@ hidenStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun27: childStateGet_widg_rayWidg
+| Fun28: childStateGet_widg_rayWidg
 |   - detect if widget is a child widget
 | Input:
 |   - idSI:
@@ -929,7 +966,27 @@ childStateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun28: numWidgetGet_widg_rayWidg
+| Fun29: hogStateGet_widg_rayWidg
+|   - detect if widget is a hog (high priority) widget
+| Input:
+|   - idSI:
+|     o id (index) of widget to check if child widget
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with widget to check
+| Output:
+|   - Returns:
+|     o 1 if is a hog widget
+|     o 0 if not a hog (or out of bounds)
+|     o def_noWidget_rayWidg if widget does not exist
+\-------------------------------------------------------*/
+signed int
+hogStateGet_widg_rayWidg(
+   signed int idSI,               /*id of widget*/
+   struct widg_rayWidg *widgSTPtr /*has wiget*/
+);
+
+/*-------------------------------------------------------\
+| Fun30: numWidgetGet_widg_rayWidg
 |   - get number of widgets made
 | Input:
 |   - widgSTPtr:
@@ -945,7 +1002,7 @@ numWidgetGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun29: focusGet_widg_rayWidg
+| Fun31: focusGet_widg_rayWidg
 |   - get the id (index) of the focused widget
 | Input:
 |   - widgSTPtr:
@@ -960,7 +1017,7 @@ focusGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun30: xCoordSet_widg_rayWidg
+| Fun32: xCoordSet_widg_rayWidg
 |   - sets a widgets x coordiante
 | Input:
 |   - xSI:
@@ -984,7 +1041,7 @@ xCoordSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun31: yCoordSet_widg_rayWidg
+| Fun33: yCoordSet_widg_rayWidg
 |   - sets a widgets y coordiante
 | Input:
 |   - ySI:
@@ -1008,7 +1065,7 @@ yCoordSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun32: widthSet_widg_rayWidg
+| Fun34: widthSet_widg_rayWidg
 |   - sets a widgets width
 | Input:
 |   - widthSI:
@@ -1030,7 +1087,7 @@ widthSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun33: heightSet_widg_rayWidg
+| Fun35: heightSet_widg_rayWidg
 |   - sets a widgets height
 | Input:
 |   - heightSI:
@@ -1052,7 +1109,7 @@ heightSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun34: rowSet_widg_rayWidg
+| Fun36: rowSet_widg_rayWidg
 |   - sets a widgets row number
 | Input:
 |   - rowSI:
@@ -1075,7 +1132,7 @@ rowSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun35: colSet_widg_rayWidg
+| Fun37: colSet_widg_rayWidg
 |   - sets a widgets column number
 | Input:
 |   - colSI:
@@ -1099,7 +1156,7 @@ colSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun36: stateSet_widg_rayWidg
+| Fun38: stateSet_widg_rayWidg
 |   - sets a widgets state to input state
 | Input:
 |   - stateUC:
@@ -1133,7 +1190,7 @@ stateSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun37: pressAdd_widg_rayWidg
+| Fun39: pressAdd_widg_rayWidg
 |   - adds the pressed state to a widget
 | Input:
 |   - idSI:
@@ -1152,7 +1209,7 @@ pressAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun38: checkedAdd_widg_rayWidg
+| Fun40: checkedAdd_widg_rayWidg
 |   - adds the checkeded state to a widget
 | Input:
 |   - idSI:
@@ -1171,7 +1228,7 @@ checkedAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun39: activeAdd_widg_rayWidg
+| Fun41: activeAdd_widg_rayWidg
 |   - adds the activeed state to a widget
 | Input:
 |   - idSI:
@@ -1190,7 +1247,7 @@ activeAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun40: focusAdd_widg_rayWidg
+| Fun42: focusAdd_widg_rayWidg
 |   - adds the focus state to a widget
 | Input:
 |   - idSI:
@@ -1210,7 +1267,7 @@ focusAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun41: inactiveAdd_widg_rayWidg
+| Fun43: inactiveAdd_widg_rayWidg
 |   - adds the inactive state to a widget
 | Input:
 |   - idSI:
@@ -1229,7 +1286,7 @@ inactiveAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun42: hidenAdd_widg_rayWidg
+| Fun44: hidenAdd_widg_rayWidg
 |   - adds the hiden state to a widget
 | Input:
 |   - idSI:
@@ -1248,7 +1305,7 @@ hidenAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun43: childAdd_widg_rayWidg
+| Fun45: childAdd_widg_rayWidg
 |   - adds the child state to a widget
 |   - only use this funcition if you know what your are
 |     doing and understand how the child/parent system
@@ -1282,7 +1339,26 @@ childAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun44: stateClear_widg_rayWidg
+| Fun46: hogAdd_widg_rayWidg
+|   - adds the hog state to a widget
+| Input:
+|   - idSI:
+|     o id (indey) of widget to add child state to
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with widget to change
+| Output:
+|   - Returns:
+|     o 0 for no errors
+|     o def_noWidget_rayWidg if widget does not exist
+\-------------------------------------------------------*/
+signed char
+hogAdd_widg_rayWidg(
+   signed int idSI,               /*id of widget*/
+   struct widg_rayWidg *widgSTPtr /*has wiget*/
+);
+
+/*-------------------------------------------------------\
+| Fun47: stateClear_widg_rayWidg
 |   - remove all states in a widget (set to 0)
 | Input:
 |   - idSI:
@@ -1301,7 +1377,7 @@ stateClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun45: pressClear_widg_rayWidg
+| Fun48: pressClear_widg_rayWidg
 |   - remove wigets pressed state
 | Input:
 |   - idSI:
@@ -1320,7 +1396,7 @@ pressClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun46: checkedClear_widg_rayWidg
+| Fun49: checkedClear_widg_rayWidg
 |   - remove wigets checked state
 | Input:
 |   - idSI:
@@ -1339,7 +1415,7 @@ checkedClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun47: activeClear_widg_rayWidg
+| Fun50: activeClear_widg_rayWidg
 |   - remove wigets active state
 | Input:
 |   - idSI:
@@ -1358,7 +1434,7 @@ activeClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun48: focusClear_widg_rayWidg
+| Fun51: focusClear_widg_rayWidg
 |   - remove wigets focus state
 | Input:
 |   - idSI:
@@ -1379,7 +1455,7 @@ focusClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun49: inactiveClear_widg_rayWidg
+| Fun52: inactiveClear_widg_rayWidg
 |   - remove wigets and its child widgets inactive state
 | Input:
 |   - idSI:
@@ -1398,7 +1474,7 @@ inactiveClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun50: hidenClear_widg_rayWidg
+| Fun53: hidenClear_widg_rayWidg
 |   - remove wigets and its child widgets hiden state
 | Input:
 |   - idSI:
@@ -1417,7 +1493,7 @@ hidenClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun51: childClear_widg_rayWidg
+| Fun54: childClear_widg_rayWidg
 |   - clears the child state in a widget
 |   - only use this function if you know what your are
 |     doing and understand how the child/parent system
@@ -1451,7 +1527,26 @@ childClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun52: getDarkModeState_rayWidg
+| Fun55: hogClear_widg_rayWidg
+|   - clears the hog state in a widget
+| Input:
+|   - idSI:
+|     o id (indey) of widget to clear child state
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with widget to change
+| Output:
+|   - Returns:
+|     o 0 for no errors
+|     o def_noWidget_rayWidg if widget does not exist
+\-------------------------------------------------------*/
+signed char
+hogClear_widg_rayWidg(
+   signed int idSI,               /*id of widget*/
+   struct widg_rayWidg *widgSTPtr /*has wiget*/
+);
+
+/*-------------------------------------------------------\
+| Fun56: getDarkModeState_rayWidg
 |   - detects if Mac or Windows computer is in dark mode
 | Input:
 | Output:
@@ -1468,7 +1563,7 @@ getDarkModeState_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun53: checkGuiColorMode_rayWidg
+| Fun57: checkGuiColorMode_rayWidg
 |   - checks is user is using dark or light mode, and
 |     sets the color scheme to the correct mode
 | Input:
@@ -1485,7 +1580,7 @@ checkGuiColorMode_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun54: addWidget_widg_rayWidg
+| Fun58: addWidget_widg_rayWidg
 |   - add a new widget to a widg_rayWidg struct
 | Input:
 |   - xSI:
@@ -1525,7 +1620,7 @@ addWidget_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun55: tile_widg_rayWidg
+| Fun59: tile_widg_rayWidg
 |   - find tiling x,y coordiantes for each widget using
 |     widths, heights, rows, and columns
 |   - note this can only support one level of children
@@ -1553,7 +1648,7 @@ tile_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun56: focusCheck_widg_rayWidg
+| Fun60: focusCheck_widg_rayWidg
 |   - detect if input key was tab and update focus
 | Input:
 |   - keySI:
@@ -1585,7 +1680,7 @@ focusCheck_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun57: enterCheck_widg_rayWidg
+| Fun61: enterCheck_widg_rayWidg
 |   - check if key event was an enter key
 | Input:
 |   - keySI:
@@ -1621,7 +1716,7 @@ enterCheck_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun58: getMouseWidg_widg_rayWidg
+| Fun62: getMouseWidg_widg_rayWidg
 |   - get widget mouse was on
 | Input:
 |   - xSI:
@@ -1653,7 +1748,7 @@ getMouseWidg_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun59: blinkGet_rayWidg
+| Fun63: blinkGet_rayWidg
 |   - returns current state of cursor blink for widgets
 | Input:
 |   - blinkSI:
@@ -1677,7 +1772,7 @@ blinkGet_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun60: intStrCheck_rayWidg
+| Fun64: intStrCheck_rayWidg
 |   - corrects mistakes in a c-string that is supposed to
 |     be an integer
 | Input:
@@ -1707,7 +1802,7 @@ intStrCheck_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun61: floatStrCheck_rayWidg
+| Fun65: floatStrCheck_rayWidg
 |   - corrects mistakes in a c-string that is supposed to
 |     be an float
 | Input:
@@ -1737,7 +1832,7 @@ floatStrCheck_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun62: fileStrCheck_rayWidg
+| Fun66: fileStrCheck_rayWidg
 |   - corrects non-file characters in c-string
 |   - spaces/tabes converted to '_', other than that,
 |     only A-Z, a-z, 0-9, '-', '_', and '.' are allowed
@@ -1768,7 +1863,7 @@ fileStrCheck_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun63: addCharToEntry_rayWidg
+| Fun67: addCharToEntry_rayWidg
 |   - adds a character to an entry box text
 | Input:
 |   - keySI:
@@ -1812,7 +1907,7 @@ addCharToEntry_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun64: drawRec_rayWidg
+| Fun68: drawRec_rayWidg
 |   - draws a rectangle for rayWidg
 | Input:
 |   - widgSTPtr:
@@ -1848,7 +1943,7 @@ drawRec_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun65: butDraw_rayWidg
+| Fun69: butDraw_rayWidg
 |   - draw a button
 | Input:
 |   - maxWidthSI:
@@ -1896,7 +1991,7 @@ butDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun66: entryDraw_rayWidg
+| Fun70: entryDraw_rayWidg
 |   - draw an entry box and its text
 | Input:
 |   - widthSI:
@@ -1960,7 +2055,7 @@ entryDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun67: labDraw_rayWidg
+| Fun71: labDraw_rayWidg
 |   - draw a label
 | Input:
 |   - maxWidthSI:
@@ -2013,7 +2108,7 @@ labDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun68: mkMesgBox_rayWidg
+| Fun72: mkMesgBox_rayWidg
 |   - makes an emtpy message box widget
 | Input:
 |   - widgSTPtr:
@@ -2033,7 +2128,7 @@ mkMesgBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun69: mesgBoxDraw_rayWidg
+| Fun73: mesgBoxDraw_rayWidg
 |   - draws a message box
 | Input:
 |   - idSI:
@@ -2062,7 +2157,7 @@ mkMesgBox_rayWidg(
 |       normal state
 |   - Returns:
 |     o width of message box if drawn
-|     o def_noWidge_rayWidg if widget does not exit
+|     o def_noWidg_rayWidg if widget does not exit
 |     o 0 if widget is hidden (not drawn)
 |     o -1 if message was to long
 \-------------------------------------------------------*/
@@ -2077,7 +2172,7 @@ mesgBoxDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun70: mesgBoxEvent_rayWidg
+| Fun74: mesgBoxEvent_rayWidg
 |   - checks the event that was fired in a message box
 | Input:
 |   - eventSC:

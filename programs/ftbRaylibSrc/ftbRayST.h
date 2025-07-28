@@ -41,13 +41,6 @@ struct widg_rayWidg;
 /*entry box dimensions*/
 #define def_widthPrefixEntry_ftbRayST 200
 
-#define def_fontSize_ftbRayST 20
-   /*18 is recomended size for large text in disablity
-   `  accesibility guidelines, however, monospaced fonts
-   `  are often a bit smaller, so did 20 instead.
-   */
-
-
 /*-------------------------------------------------------\
 | ST01: gui_ftbRayST
 |   - has widgets used in the ftbRaylib GUI

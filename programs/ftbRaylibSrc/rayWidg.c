@@ -13,170 +13,178 @@
 '       - blanks a widg_rayWidg struct
 '     o fun03: init_widg_rayWidg
 '       - initializes a widg_rayWidg struct
-'     o fun04: measureFont_widg_rayWidg
-'       - measures the width of the character "D" for a
-'         font
-'     o fun05: setup_widg_rayWidg
+'     o fun04: setup_widg_rayWidg
 '       - adds the default font to a rayWidg struct and
 '         sets it up for use (only call once)
-'     o fun06: freeStack_widg_rayWidg
+'     o fun05: freeStack_widg_rayWidg
 '       - frees arrays in a widg_rayWidg struct
-'     o fun07: freeHeap_widg_rayWidg
+'     o fun06: freeHeap_widg_rayWidg
 '       - frees a widg_rayWidg struct
-'     o fun08: realloc_widg_rayWidg
+'     o fun07: realloc_widg_rayWidg
 '       - reallocates memory for a widg_rayWidg struct
 '       - note: this will not downsize or report downsize
 '         attempts
 '   * change font or font variables in widg_rayWidg struct
-'     o fun09: changeFont_widg_rayWidg
+'     o fun08: fontMeasure_widg_rayWidg
+'       - measures the width of the character "D" for a
+'         font
+'     o fun09: textMeasure_widg_rayWidg
+'       - measures the width of input text
+'     o fun10: changeFont_widg_rayWidg
 '       - adds a font from a file to a widg_rayWidg struct
-'     o fun10: useEmbedFont_widg_rayWidg
+'     o fun11: useEmbedFont_widg_rayWidg
 '       - uses an embed font
 '       - make this using ExprotFontAsCode from raylib
-'     o fun11: swapFont_widg_rayWidg
+'     o fun12: swapFont_widg_rayWidg
 '       - swaps the font out with an input font pointer
 '       - this is a swap of pointers only, so only free
 '         the input font when you are finished
-'     o fun12: setFontSize_widg_rayWidg
+'     o fun13: setFontSize_widg_rayWidg
 '       - changes font size
-'     o fun13: setFontSpacing_widg_rayWidg
+'     o fun14: setFontSpacing_widg_rayWidg
 '       - changes a fonts spacing
 '   * widg_rayWidg struct querying functions
-'     o fun14: xCoordGet_widg_rayWidg
+'     o fun15: xCoordGet_widg_rayWidg
 '       - get the x-coordinate of a widget
-'     o fun15: yCoordSet_widg_rayWidg
+'     o fun16: yCoordSet_widg_rayWidg
 '       - get the y-coordinate of a widget
-'     o fun16: widthGet_widg_rayWidg
+'     o fun17: widthGet_widg_rayWidg
 '       - get the width of a widget
-'     o fun17: heightGet_widg_rayWidg
+'     o fun18: heightGet_widg_rayWidg
 '       - get the height of a widget
-'     o fun18: rowGet_widg_rayWidg
+'     o fun19: rowGet_widg_rayWidg
 '       - get the row a widget is assigned to
-'     o fun19: colGet_widg_rayWidg
+'     o fun20: colGet_widg_rayWidg
 '       - get the column a widget is assigned to
-'     o fun20: stateGet_widg_rayWidg
+'     o fun21: stateGet_widg_rayWidg
 '       - get the state of a widget
-'     o fun21: pressStateGet_widg_rayWidg
+'     o fun22: pressStateGet_widg_rayWidg
 '       - detect if widget is in pressed state
-'     o fun22: checkedStateGet_widg_rayWidg
+'     o fun23: checkedStateGet_widg_rayWidg
 '       - detect if widget is in checked state
-'     o fun23: activeStateGet_widg_rayWidg
+'     o fun24: activeStateGet_widg_rayWidg
 '       - detect if widget is in active state
-'     o fun24: focusStateGet_widg_rayWidg
+'     o fun25: focusStateGet_widg_rayWidg
 '       - detect if widget is in focus state
-'     o fun25: inacitveStateGet_widg_rayWidg
+'     o fun26: inacitveStateGet_widg_rayWidg
 '       - detect if widget is in inacitve state
-'     o fun26: hidenStateGet_widg_rayWidg
+'     o fun27: hidenStateGet_widg_rayWidg
 '       - detect if widget is in hiden state
-'     o fun27: childStateGet_widg_rayWidg
+'     o fun28: childStateGet_widg_rayWidg
 '       - detect if widget is a child widget
-'     o fun28: numWidgetGet_widg_rayWidg
+'     o fun29: hogStateGet_widg_rayWidg
+'       - detect if widget is a hog (high priority) widget
+'     o fun30: numWidgetGet_widg_rayWidg
 '       - get number of widgets made
-'     o fun29: focusGet_widg_rayWidg
+'     o fun31: focusGet_widg_rayWidg
 '       - get the id (index) of the focused widget
 '   * widg_rayWidg struct modify coordiantes and size
-'     o fun30: xCoordSet_widg_rayWidg
+'     o fun32: xCoordSet_widg_rayWidg
 '       - sets a widgets x coordiante
-'     o fun31: yCoordSet_widg_rayWidg
+'     o fun33: yCoordSet_widg_rayWidg
 '       - sets a widgets y coordiante
-'     o fun32: widthSet_widg_rayWidg
+'     o fun34: widthSet_widg_rayWidg
 '       - sets a widgets width
-'     o fun33: heightSet_widg_rayWidg
+'     o fun35: heightSet_widg_rayWidg
 '       - sets a widgets height
-'     o fun34: rowSet_widg_rayWidg
+'     o fun36: rowSet_widg_rayWidg
 '       - sets a widgets row number
-'     o fun35: colSet_widg_rayWidg
+'     o fun37: colSet_widg_rayWidg
 '       - sets a widgets column number
 '   * widg_rayWidg struct modify state of widgets
-'     o fun36: stateSet_widg_rayWidg
+'     o fun38: stateSet_widg_rayWidg
 '       - sets a widgets state to input state
-'     o fun37: pressAdd_widg_rayWidg
+'     o fun39: pressAdd_widg_rayWidg
 '       - adds the pressed state to a widget
-'     o fun38: checkedAdd_widg_rayWidg
+'     o fun40: checkedAdd_widg_rayWidg
 '       - adds the checkeded state to a widget
-'     o fun39: activeAdd_widg_rayWidg
+'     o fun41: activeAdd_widg_rayWidg
 '       - adds the activeed state to a widget
-'     o fun40: focusAdd_widg_rayWidg
+'     o fun42: focusAdd_widg_rayWidg
 '       - adds the activeed state to a widget
-'     o fun41: inactiveAdd_widg_rayWidg
+'     o fun43: inactiveAdd_widg_rayWidg
 '       - adds the inactive state to a widget
-'     o fun42: hidenAdd_widg_rayWidg
+'     o fun44: hidenAdd_widg_rayWidg
 '       - adds the hiden state to a widget
-'     o fun43: childAdd_widg_rayWidg
+'     o fun45: childAdd_widg_rayWidg
 '       - adds the child state to a widget
 '       - only use this funcition if you know what your are
 '         are doing and understand how the child/parent
 '         system in rayWidg works
+'     o fun46: hogAdd_widg_rayWidg
+'       - adds the hog state to a widget
 '   * widg_rayWidg struct clear state of widgets
-'     o fun44: stateClear_widg_rayWidg
+'     o fun47: stateClear_widg_rayWidg
 '       - remove all states in a widget (set to 0)
-'     o fun45: pressClear_widg_rayWidg
+'     o fun48: pressClear_widg_rayWidg
 '       - remove wigets pressed state
-'     o fun46: checkedClear_widg_rayWidg
+'     o fun49: checkedClear_widg_rayWidg
 '       - remove wigets checked state
-'     o fun47: activeClear_widg_rayWidg
+'     o fun50: activeClear_widg_rayWidg
 '       - remove wigets active state
-'     o fun48: focusClear_widg_rayWidg
+'     o fun51: focusClear_widg_rayWidg
 '       - remove wigets focus state
-'     o fun49: inactiveClear_widg_rayWidg
+'     o fun52: inactiveClear_widg_rayWidg
 '       - remove wigets & its child widgets inactive state
-'     o fun50: hidenClear_widg_rayWidg
+'     o fun53: hidenClear_widg_rayWidg
 '       - remove wigets and its child widgets hiden state
-'     o fun51: childClear_widg_rayWidg
+'     o fun54: childClear_widg_rayWidg
 '       - clears the child state in a widget
 '       - only use this function if you know what your are
 '         doing and understand how the child/parent system
 '         works
+'     o fun55: hogClear_widg_rayWidg
+'       - clears the hog state in a widget
 '   * get OS state
-'     o fun52: getDarkModeState_rayWidg
+'     o fun56: getDarkModeState_rayWidg
 '       - detects if Mac/Windows computer is in dark mode
-'     o fun53: checkGuiColorMode_rayWidg
+'     o fun57: checkGuiColorMode_rayWidg
 '       - checks is user is using dark or light mode, and
 '         sets the color scheme to the correct mode
 '   * widget modification or focs/state changes
-'     o fun54: addWidget_widg_rayWidg
+'     o fun58: addWidget_widg_rayWidg
 '       - add a new widget to a widg_rayWidg struct
-'     o fun55: tile_widg_rayWidg
+'     o fun59: tile_widg_rayWidg
 '       - find tiling x,y coordiantes for each widget
 '         using widths, heights, rows, and columns
 '       - note this can only support one level of children
 '         widgets
-'     o fun56: focusCheck_widg_rayWidg
+'     o fun60: focusCheck_widg_rayWidg
 '       - detect if input key was tab and update focus
-'     o fun57: enterCheck_widg_rayWidg
+'     o fun61: enterCheck_widg_rayWidg
 '       - check if key event was an enter key
-'     o fun58: getMouseWidg_widg_rayWidg
+'     o fun62: getMouseWidg_widg_rayWidg
 '       - get widget mouse was on
-'     o fun59: blinkGet_rayWidg
+'     o fun63: blinkGet_rayWidg
 '      - returns current state of cursor blink for widgets
 '   * string functions
-'     o fun60: intStrCheck_rayWidg
+'     o fun64: intStrCheck_rayWidg
 '       - corrects mistakes in a c-string that is supposed
 '         to be an integer
-'     o fun61: floatStrCheck_rayWidg
+'     o fun65: floatStrCheck_rayWidg
 '       - corrects mistakes in a c-string that is supposed
 '         to be an float
-'     o fun62: fileStrCheck_rayWidg
+'     o fun66: fileStrCheck_rayWidg
 '       - corrects non-file characters in c-string
 '       - spaces/tabes converted to '_', other than that,
 '         only A-Z, a-z, 0-9, '-', '_', & '.' are allowed
-'     o fun63: addCharToEntry_rayWidg
+'     o fun67: addCharToEntry_rayWidg
 '       - adds a character to an entry box text
 '   * widget drawing
-'     o fun64: drawRect_rayWidg
+'     o fun68: drawRect_rayWidg
 '       - draws a rectangle for rayWidg
-'     o fun65: butDraw_rayWidg
+'     o fun69: butDraw_rayWidg
 '       - draw a button
-'     o fun66: entryDraw_rayWidg
+'     o fun70: entryDraw_rayWidg
 '       - draw an entry box and its text
-'     o fun67: labDraw_rayWidg
+'     o fun71: labDraw_rayWidg
 '       - draw a label
 '   * complex widgets
-'     o fun68: mkMesgBox_rayWidg
+'     o fun72: mkMesgBox_rayWidg
 '       - makes an emtpy message box widget
-'     o fun69: mesgBoxDraw_rayWidg
+'     o fun73: mesgBoxDraw_rayWidg
 '       - draws a message box
-'     o fun70: mesgBoxEvent_rayWidg
+'     o fun74: mesgBoxEvent_rayWidg
 '      - checks the event that was fired in a message box
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -314,46 +322,19 @@ init_widg_rayWidg(
    widgSTPtr->fontHeightF = 0;
    widgSTPtr->spacingF = 0;
 
+   widgSTPtr->sizeSI = 0;
+
    blank_widg_rayWidg(widgSTPtr);
 } /*init_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun04: measureFont_widg_rayWidg
-|   - measures the width of the character "D" for a font
-| Input:
-|   o widgSTPtr:
-|     - widg_rayWidg struct pointer to get font
-|       measurements
-| Output:
-|   - Modifies:
-|     o fontWidthF and fontHeightF in widgSTPtr to have
-|       the width and hight of the font
-\-------------------------------------------------------*/
-void
-measureFont_widg_rayWidg(
-   struct widg_rayWidg *widgSTPtr
-){
-   Vector2 tmpVect2 =
-      MeasureTextEx(
-         *widgSTPtr->fontSTPtr,
-         "D",
-         widgSTPtr->fontSizeSI,
-         widgSTPtr->spacingF
-      );
-   widgSTPtr->fontWidthF = tmpVect2.x;
-   widgSTPtr->fontHeightF = tmpVect2.y;
-} /*measureFont_widg_rayWidg*/
-
-/*-------------------------------------------------------\
-| Fun05: setup_widg_rayWidg
+| Fun04: setup_widg_rayWidg
 |   - adds the default font to a rayWidg struct and sets
 |     it up for use (only call once)
 | Input:
 |   o widgSTPtr:
 |     - widg_rayWidg struct pointer to add default font
 |       to
-|   o fontSizeSI:
-|     - text size to print in GUI
 | Output:
 |   - Modifies:
 |     o fontSTPtr in widgSTPtr to have new font
@@ -369,35 +350,34 @@ measureFont_widg_rayWidg(
 \-------------------------------------------------------*/
 signed char
 setup_widg_rayWidg(
-   struct widg_rayWidg *widgSTPtr,
-   signed int fontSizeSI
+   struct widg_rayWidg *widgSTPtr
 ){
    if(widgSTPtr->fontSTPtr && widgSTPtr->unloadFontBl)
       UnloadFont(*widgSTPtr->fontSTPtr);
 
    widgSTPtr->fontSTPtr = calloc(1, sizeof(Font));
    if(! widgSTPtr->fontSTPtr)
-      goto memErr_fun05;
+      goto memErr_fun04;
    widgSTPtr->freeFontBl = 1;
 
    *widgSTPtr->fontSTPtr = LoadFont_IbmPlexMono();
       /*sadly raylib always assumes this succeded, so I
       `   have no way to check for failure
       */
-   widgSTPtr->unloadFontBl = 1;
+   widgSTPtr->unloadFontBl = 0;
 
-   widgSTPtr->fontSizeSI = fontSizeSI;
+   widgSTPtr->fontSizeSI = def_fontSize_rayWidg;
    widgSTPtr->spacingF = 1;
-   measureFont_widg_rayWidg(widgSTPtr);
+   fontMeasure_widg_rayWidg(widgSTPtr);
 
    return 0;
 
-   memErr_fun05:;
+   memErr_fun04:;
       return 1;
 } /*setup_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun06: freeStack_widg_rayWidg
+| Fun05: freeStack_widg_rayWidg
 |   - frees arrays in a widg_rayWidg struct
 | Input:
 |   - widgSTPtr:
@@ -440,7 +420,7 @@ freeStack_widg_rayWidg(
 } /*freeStack_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun07: freeHeap_widg_rayWidg
+| Fun06: freeHeap_widg_rayWidg
 |   - frees a widg_rayWidg struct
 | Input:
 |   - widgSTPtr:
@@ -460,7 +440,7 @@ freeHeap_widg_rayWidg(
 } /*freeHeap_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun08: realloc_widg_rayWidg
+| Fun07: realloc_widg_rayWidg
 |   - reallocates memory for a widg_rayWidg struct
 |   - note, this will not downsize or report downsize
 |     attempts
@@ -484,19 +464,19 @@ realloc_widg_rayWidg(
    signed int sizeSI,
    struct widg_rayWidg *widgSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun08 TOC:
-   '   o fun08 sec01:
+   ' Fun07 TOC:
+   '   o fun07 sec01:
    '     - variable declarations and initial check
-   '   o fun08 sec02:
+   '   o fun07 sec02:
    '     - deal with no memory (get initial memory)
-   '   o fun08 sec03:
+   '   o fun07 sec03:
    '     - have memory, need to reallocate
-   '   o fun08 sec04:
+   '   o fun07 sec04:
    '     - return results
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec01:
+   ^ Fun07 Sec01:
    ^   - variable declarations and initial check
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -511,57 +491,55 @@ realloc_widg_rayWidg(
          sizeSI =
             widgSTPtr->sizeSI + (widgSTPtr->sizeSI >> 1);
       else
-         goto noResize_fun08_sec04;
+         goto noResize_fun07_sec04;
    } /*If: user wants auto resize*/
 
    if(sizeSI <= widgSTPtr->sizeSI)
-      goto noResize_fun08_sec04;
+      goto noResize_fun07_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec02:
+   ^ Fun07 Sec02:
    ^   - deal with no memory (get initial memory)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(widgSTPtr->sizeSI <= 0)
    { /*If: no memory to begin with*/
-      freeStack_widg_rayWidg(widgSTPtr);
- 
       widgSTPtr->xArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! widgSTPtr->xArySI)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
       widgSTPtr->yArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! widgSTPtr->yArySI)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
       widgSTPtr->widthArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! widgSTPtr->widthArySI)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
       widgSTPtr->heightArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! widgSTPtr->heightArySI)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
 
       widgSTPtr->stateAryUS =
          malloc(sizeSI * sizeof(unsigned short));
       if(! widgSTPtr->stateAryUS)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
 
       widgSTPtr->rowArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! widgSTPtr->rowArySI)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
       widgSTPtr->colArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! widgSTPtr->colArySI)
-         goto memErr_fun08_sec04;
+         goto memErr_fun07_sec04;
 
-      goto done_fun08_sec04;
+      goto done_fun07_sec04;
    } /*If: no memory to begin with*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec03:
+   ^ Fun07 Sec03:
    ^   - have memory, need to reallocate
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -571,7 +549,7 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(signed int)
       );
    if(! siSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->xArySI = siSwapPtr;
 
    siSwapPtr =
@@ -580,7 +558,7 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(signed int)
       );
    if(! siSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->yArySI = siSwapPtr;
 
    siSwapPtr =
@@ -589,7 +567,7 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(signed int)
       );
    if(! siSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->widthArySI = siSwapPtr;
 
    siSwapPtr =
@@ -598,7 +576,7 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(signed int)
       );
    if(! siSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->heightArySI = siSwapPtr;
 
    ucSwapPtr =
@@ -608,7 +586,7 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(unsigned short)
       );
    if(! ucSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->stateAryUS = (unsigned short *) ucSwapPtr;
 
    siSwapPtr =
@@ -617,7 +595,7 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(signed int)
       );
    if(! siSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->rowArySI = siSwapPtr;
 
    siSwapPtr =
@@ -626,29 +604,90 @@ realloc_widg_rayWidg(
          sizeSI * sizeof(signed int)
       );
    if(! siSwapPtr)
-      goto memErr_fun08_sec04;
+      goto memErr_fun07_sec04;
    widgSTPtr->colArySI = siSwapPtr;
 
-   goto done_fun08_sec04;
+   goto done_fun07_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec04:
+   ^ Fun07 Sec04:
    ^   - return results
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun08_sec04:;
+   done_fun07_sec04:;
       widgSTPtr->sizeSI = sizeSI;
       return 0;
 
-   noResize_fun08_sec04:;
+   noResize_fun07_sec04:;
       return 0;
 
-   memErr_fun08_sec04:;
+   memErr_fun07_sec04:;
       return 1;
 } /*realloc_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun09: changeFont_widg_rayWidg
+| Fun08: fontMeasure_widg_rayWidg
+|   - measures the width of the character "D" for a font
+| Input:
+|   o widgSTPtr:
+|     - widg_rayWidg struct pointer to get font
+|       measurements
+| Output:
+|   - Modifies:
+|     o fontWidthF and fontHeightF in widgSTPtr to have
+|       the width and hight of the font
+\-------------------------------------------------------*/
+void
+fontMeasure_widg_rayWidg(
+   struct widg_rayWidg *widgSTPtr
+){
+   Vector2 tmpVect2 =
+      MeasureTextEx(
+         *widgSTPtr->fontSTPtr,
+         "D",
+         widgSTPtr->fontSizeSI,
+         widgSTPtr->spacingF
+      );
+   widgSTPtr->fontWidthF = tmpVect2.x;
+   widgSTPtr->fontHeightF = tmpVect2.y;
+} /*fontMeasure_widg_rayWidg*/
+
+/*-------------------------------------------------------\
+| Fun09: textMeasure_widg_rayWidg
+|   - measures the width of input text
+| Input:
+|   o textStr:
+|     - c-string with text to measure
+|   o heightSIPtr:
+|     - signed int pionter to get height of text
+|   o widgSTPtr:
+|     - widg_rayWidg struct pointer to get font
+|       measurements
+| Output:
+|   - Modifies:
+|     o heightSIPtr to have height of text
+|   - Returns:
+|     o size of text in pixels
+\-------------------------------------------------------*/
+signed int
+textMeasure_widg_rayWidg(
+   signed char *textStr,
+   signed int *heightSIPtr,
+   struct widg_rayWidg *widgSTPtr
+){
+   Vector2 tmpVect2 =
+      MeasureTextEx(
+         *widgSTPtr->fontSTPtr,
+         (char *) textStr,
+         widgSTPtr->fontSizeSI,
+         widgSTPtr->spacingF
+      );
+   *heightSIPtr = tmpVect2.y;
+   return tmpVect2.x;
+} /*textMeasure_widg_rayWidg*/
+
+/*-------------------------------------------------------\
+| Fun10: changeFont_widg_rayWidg
 |   - adds a font from a file to a widg_rayWidg struct
 | Input:
 |   o widgSTPtr:
@@ -684,7 +723,7 @@ changeFont_widg_rayWidg(
       widgSTPtr->fontSTPtr = 0;
       widgSTPtr->fontSTPtr = calloc(1, sizeof(Font));
       if(! widgSTPtr->fontSTPtr)
-         goto memErr_fun09;
+         goto memErr_fun10;
       widgSTPtr->freeFontBl = 1;
    } /*If: need to get memory*/
 
@@ -696,16 +735,16 @@ changeFont_widg_rayWidg(
 
    widgSTPtr->fontSizeSI = fontSizeSI;
    widgSTPtr->spacingF = 1;
-   measureFont_widg_rayWidg(widgSTPtr);
+   fontMeasure_widg_rayWidg(widgSTPtr);
 
    return 0;
 
-   memErr_fun09:;
+   memErr_fun10:;
       return 1;
 } /*changeFont_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun10: useEmbedFont_widg_rayWidg
+| Fun11: useEmbedFont_widg_rayWidg
 |   - uses an embed font
 |   - make this using ExprotFontAsCode from raylib
 | Input:
@@ -742,7 +781,7 @@ useEmbedFont_widg_rayWidg(
       widgSTPtr->fontSTPtr = 0;
       widgSTPtr->fontSTPtr = calloc(1, sizeof(Font));
       if(! widgSTPtr->fontSTPtr)
-         goto memErr_fun10;
+         goto memErr_fun11;
       widgSTPtr->freeFontBl = 1;
    } /*If: need to get memory*/
 
@@ -750,20 +789,21 @@ useEmbedFont_widg_rayWidg(
       /*sadly raylib always assumes this succeded, so I
       `   have no way to check for failure
       */
-   widgSTPtr->unloadFontBl = 1;
+   widgSTPtr->unloadFontBl = 0;
+      /*this is hardcoded in the .h file*/
 
    widgSTPtr->fontSizeSI = fontSizeSI;
    widgSTPtr->spacingF = 1;
-   measureFont_widg_rayWidg(widgSTPtr);
+   fontMeasure_widg_rayWidg(widgSTPtr);
 
    return 0;
 
-   memErr_fun10:;
+   memErr_fun11:;
       return 1;
 } /*useEmbedFont_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun11: swapFont_widg_rayWidg
+| Fun12: swapFont_widg_rayWidg
 |   - swaps the font out with an input font pointer
 |   - this is a swap of pointers only, so only free the
 |     input font when you are finished
@@ -804,11 +844,11 @@ swapFont_widg_rayWidg(
    widgSTPtr->fontSTPtr = newFontSTPtr;
    widgSTPtr->fontSizeSI = fontSizeSI;
    widgSTPtr->spacingF = 1;
-   measureFont_widg_rayWidg(widgSTPtr);
+   fontMeasure_widg_rayWidg(widgSTPtr);
 } /*swapFont_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun12: setFontSize_widg_rayWidg
+| Fun13: setFontSize_widg_rayWidg
 |   - changes font size
 | Input:
 |   o widgSTPtr:
@@ -827,11 +867,11 @@ setFontSize_widg_rayWidg(
    signed int fontSizeSI
 ){
    widgSTPtr->fontSizeSI = fontSizeSI;
-   measureFont_widg_rayWidg(widgSTPtr);
+   fontMeasure_widg_rayWidg(widgSTPtr);
 } /*setFontSize_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun13: setFontSpacing_widg_rayWidg
+| Fun14: setFontSpacing_widg_rayWidg
 |   - changes a fonts spacing
 | Input:
 |   o widgSTPtr:
@@ -850,11 +890,11 @@ setFontSpacing_widg_rayWidg(
    float spacingF
 ){
    widgSTPtr->spacingF = spacingF;
-   measureFont_widg_rayWidg(widgSTPtr);
+   fontMeasure_widg_rayWidg(widgSTPtr);
 } /*setFontSpacing_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun14: xCoordGet_widg_rayWidg
+| Fun15: xCoordGet_widg_rayWidg
 |   - get the x-coordinate of a widget
 | Input:
 |   - idSI:
@@ -879,6 +919,8 @@ xCoordGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else if(widgSTPtr->rowArySI[idSI] >= 0)
       return def_noValue_rayWidg;
    else
@@ -886,7 +928,7 @@ xCoordGet_widg_rayWidg(
 } /*xCoordGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun15: yCoordGet_widg_rayWidg
+| Fun16: yCoordGet_widg_rayWidg
 |   - get the y-coordinate of a widget
 | Input:
 |   - idSI:
@@ -911,6 +953,8 @@ yCoordGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else if(widgSTPtr->rowArySI[idSI] >= 0)
       return def_noValue_rayWidg;
    else
@@ -918,7 +962,7 @@ yCoordGet_widg_rayWidg(
 } /*yCoordGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun16: widthGet_widg_rayWidg
+| Fun17: widthGet_widg_rayWidg
 |   - get the width of a widget
 | Input:
 |   - idSI:
@@ -940,6 +984,8 @@ widthGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else if(widgSTPtr->widthArySI[idSI] <= 0)
       return def_noValue_rayWidg;
    else
@@ -947,7 +993,7 @@ widthGet_widg_rayWidg(
 } /*widthGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun17: heightGet_widg_rayWidg
+| Fun18: heightGet_widg_rayWidg
 |   - get the height of a widget
 | Input:
 |   - idSI:
@@ -968,6 +1014,8 @@ heightGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else if(widgSTPtr->heightArySI[idSI] <= 0)
       return def_noValue_rayWidg;
    else
@@ -975,7 +1023,7 @@ heightGet_widg_rayWidg(
 } /*heightGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun18: rowGet_widg_rayWidg
+| Fun19: rowGet_widg_rayWidg
 |   - get the row a widget is assigned to
 | Input:
 |   - idSI:
@@ -996,6 +1044,8 @@ rowGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else if(widgSTPtr->rowArySI[idSI] < 0)
       return def_noValue_rayWidg;
    else
@@ -1003,7 +1053,7 @@ rowGet_widg_rayWidg(
 } /*rowGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun19: colGet_widg_rayWidg
+| Fun20: colGet_widg_rayWidg
 |   - get the column a widget is assigned to
 | Input:
 |   - idSI:
@@ -1024,6 +1074,8 @@ colGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else if(widgSTPtr->colArySI[idSI] < 0)
       return def_noValue_rayWidg;
    else
@@ -1031,7 +1083,7 @@ colGet_widg_rayWidg(
 } /*colGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun20: stateGet_widg_rayWidg
+| Fun21: stateGet_widg_rayWidg
 |   - get the state of a widget
 | Input:
 |   - idSI:
@@ -1056,12 +1108,14 @@ stateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   else if(idSI < 0)
+      return def_noWidget_rayWidg;
    else
       return widgSTPtr->stateAryUS[idSI];
 } /*stateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun21: pressStateGet_widg_rayWidg
+| Fun22: pressStateGet_widg_rayWidg
 |   - detect if widget is in pressed state
 | Input:
 |   - idSI:
@@ -1081,6 +1135,8 @@ pressStateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_press_rayWidg
@@ -1091,7 +1147,7 @@ pressStateGet_widg_rayWidg(
 } /*pressStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun22: checkedStateGet_widg_rayWidg
+| Fun23: checkedStateGet_widg_rayWidg
 |   - detect if widget is in checked state
 | Input:
 |   - idSI:
@@ -1111,6 +1167,8 @@ checkedStateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_checked_rayWidg
@@ -1121,7 +1179,7 @@ checkedStateGet_widg_rayWidg(
 } /*checkedStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun23: activeStateGet_widg_rayWidg
+| Fun24: activeStateGet_widg_rayWidg
 |   - detect if widget is in active state
 | Input:
 |   - idSI:
@@ -1151,7 +1209,7 @@ activeStateGet_widg_rayWidg(
 } /*activeStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun24: focusStateGet_widg_rayWidg
+| Fun25: focusStateGet_widg_rayWidg
 |   - detect if widget is in focus state
 | Input:
 |   - idSI:
@@ -1171,6 +1229,8 @@ focusStateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_focus_rayWidg
@@ -1181,7 +1241,7 @@ focusStateGet_widg_rayWidg(
 } /*focusStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun25: inactiveStateGet_widg_rayWidg
+| Fun26: inactiveStateGet_widg_rayWidg
 |   - detect if widget is in inactive state
 | Input:
 |   - idSI:
@@ -1201,6 +1261,8 @@ inactiveStateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_inactive_rayWidg
@@ -1211,7 +1273,7 @@ inactiveStateGet_widg_rayWidg(
 } /*inactiveStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun26: hidenStateGet_widg_rayWidg
+| Fun27: hidenStateGet_widg_rayWidg
 |   - detect if widget is in hiden state
 | Input:
 |   - idSI:
@@ -1231,6 +1293,8 @@ hidenStateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg
@@ -1241,7 +1305,7 @@ hidenStateGet_widg_rayWidg(
 } /*hidenStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun27: childStateGet_widg_rayWidg
+| Fun28: childStateGet_widg_rayWidg
 |   - detect if widget is a child widget
 | Input:
 |   - idSI:
@@ -1262,6 +1326,8 @@ childStateGet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
    else if(
       ! (widgSTPtr->stateAryUS[idSI] & def_child_rayWidg)
@@ -1278,7 +1344,39 @@ childStateGet_widg_rayWidg(
 } /*childStateGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun28: numWidgetGet_widg_rayWidg
+| Fun29: hogStateGet_widg_rayWidg
+|   - detect if widget is a hog (high priority) widget
+| Input:
+|   - idSI:
+|     o id (index) of widget to check if child widget
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with widget to check
+| Output:
+|   - Returns:
+|     o 1 if is a hog widget
+|     o 0 if not a hog (or out of bounds)
+|     o def_noWidget_rayWidg if widget does not exist
+\-------------------------------------------------------*/
+signed int
+hogStateGet_widg_rayWidg(
+   signed int idSI,               /*id of widget*/
+   struct widg_rayWidg *widgSTPtr /*has wiget*/
+){
+   if(idSI >= widgSTPtr->lenSI)
+      return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
+
+   else if(
+      widgSTPtr->stateAryUS[idSI] & def_hog_rayWidg
+   ) return 1;
+
+   else
+      return 0;
+} /*hogStateGet_widg_rayWidg*/
+
+/*-------------------------------------------------------\
+| Fun30: numWidgetGet_widg_rayWidg
 |   - get number of widgets made
 | Input:
 |   - widgSTPtr:
@@ -1296,7 +1394,7 @@ numWidgetGet_widg_rayWidg(
 } /*numWidgetGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun29: focusGet_widg_rayWidg
+| Fun31: focusGet_widg_rayWidg
 |   - get the id (index) of the focused widget
 | Input:
 |   - widgSTPtr:
@@ -1313,7 +1411,7 @@ focusGet_widg_rayWidg(
 } /*focusGet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun30: xCoordSet_widg_rayWidg
+| Fun32: xCoordSet_widg_rayWidg
 |   - sets a widgets x coordiante
 | Input:
 |   - xSI:
@@ -1336,6 +1434,8 @@ xCoordSet_widg_rayWidg(
    struct widg_rayWidg *widgSTPtr /*has wiget*/
 ){
    if(idSI >= widgSTPtr->lenSI)
+      return def_noWidget_rayWidg;
+   if(idSI < 0)
       return def_noWidget_rayWidg;
 
    else if(widgSTPtr->rowArySI[idSI] >= 0)
@@ -1369,7 +1469,7 @@ xCoordSet_widg_rayWidg(
 } /*xCoordSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun31: yCoordSet_widg_rayWidg
+| Fun33: yCoordSet_widg_rayWidg
 |   - sets a widgets y coordiante
 | Input:
 |   - ySI:
@@ -1392,6 +1492,8 @@ yCoordSet_widg_rayWidg(
    struct widg_rayWidg *widgSTPtr /*has wiget*/
 ){
    if(idSI >= widgSTPtr->lenSI)
+      return def_noWidget_rayWidg;
+   if(idSI < 0)
       return def_noWidget_rayWidg;
 
    else if(widgSTPtr->rowArySI[idSI] >= 0)
@@ -1425,7 +1527,7 @@ yCoordSet_widg_rayWidg(
 } /*yCoordSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun32: widthSet_widg_rayWidg
+| Fun34: widthSet_widg_rayWidg
 |   - sets a widgets width
 | Input:
 |   - widthSI:
@@ -1447,13 +1549,15 @@ widthSet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->widthArySI[idSI] = widthSI;
   return 0;
 } /*widthSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun33: heightSet_widg_rayWidg
+| Fun35: heightSet_widg_rayWidg
 |   - sets a widgets height
 | Input:
 |   - heightSI:
@@ -1475,13 +1579,15 @@ heightSet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->heightArySI[idSI] = heightSI;
   return 0;
 } /*heightSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun34: rowSet_widg_rayWidg
+| Fun36: rowSet_widg_rayWidg
 |   - sets a widgets row number
 | Input:
 |   - rowSI:
@@ -1504,6 +1610,8 @@ rowSet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->rowArySI[idSI] = rowSI;
 
@@ -1515,7 +1623,7 @@ rowSet_widg_rayWidg(
 } /*rowSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun35: colSet_widg_rayWidg
+| Fun37: colSet_widg_rayWidg
 |   - sets a widgets column number
 | Input:
 |   - colSI:
@@ -1539,6 +1647,8 @@ colSet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->colArySI[idSI] = colSI;
 
@@ -1550,7 +1660,7 @@ colSet_widg_rayWidg(
 } /*colSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun36: stateSet_widg_rayWidg
+| Fun38: stateSet_widg_rayWidg
 |   - sets a widgets state to input state
 | Input:
 |   - stateUC:
@@ -1584,6 +1694,8 @@ stateSet_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->stateAryUS[idSI] = stateUC;
 
@@ -1592,6 +1704,10 @@ stateSet_widg_rayWidg(
   if(! stateUC)
      return 0; /*no states to pass down to children*/
   ++idSI;
+
+  if(idSI >= widgSTPtr->lenSI)
+     return 0;
+
   while(
         idSI < widgSTPtr->lenSI
      && widgSTPtr->stateAryUS[idSI] & def_child_rayWidg
@@ -1601,7 +1717,7 @@ stateSet_widg_rayWidg(
 } /*stateSet_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun37: pressAdd_widg_rayWidg
+| Fun39: pressAdd_widg_rayWidg
 |   - adds the pressed state to a widget
 | Input:
 |   - idSI:
@@ -1620,6 +1736,8 @@ pressAdd_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->stateAryUS[idSI] |= def_press_rayWidg;
 
@@ -1627,7 +1745,7 @@ pressAdd_widg_rayWidg(
 } /*pressAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun38: checkedAdd_widg_rayWidg
+| Fun40: checkedAdd_widg_rayWidg
 |   - adds the checkeded state to a widget
 | Input:
 |   - idSI:
@@ -1653,7 +1771,7 @@ checkedAdd_widg_rayWidg(
 } /*checkedAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun39: activeAdd_widg_rayWidg
+| Fun41: activeAdd_widg_rayWidg
 |   - adds the activeed state to a widget
 | Input:
 |   - idSI:
@@ -1672,6 +1790,8 @@ activeAdd_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->stateAryUS[idSI] |= def_active_rayWidg;
 
@@ -1679,7 +1799,7 @@ activeAdd_widg_rayWidg(
 } /*activeAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun40: focusAdd_widg_rayWidg
+| Fun42: focusAdd_widg_rayWidg
 |   - adds the focus state to a widget
 | Input:
 |   - idSI:
@@ -1698,6 +1818,8 @@ focusAdd_widg_rayWidg(
    struct widg_rayWidg *widgSTPtr /*has wiget*/
 ){
    if(idSI >= widgSTPtr->lenSI)
+      return def_noWidget_rayWidg;
+   if(idSI < 0)
       return def_noWidget_rayWidg;
   
   if(widgSTPtr->focusSI < 0)
@@ -1721,7 +1843,7 @@ focusAdd_widg_rayWidg(
 } /*focusAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun41: inactiveAdd_widg_rayWidg
+| Fun43: inactiveAdd_widg_rayWidg
 |   - adds the inactive state to a widget
 | Input:
 |   - idSI:
@@ -1740,12 +1862,17 @@ inactiveAdd_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->stateAryUS[idSI] |= def_inactive_rayWidg;
   if(widgSTPtr->stateAryUS[idSI] & def_child_rayWidg)
      return 0; /*this is a child, so no other children*/
   ++idSI;
 
+
+  if(idSI >= widgSTPtr->lenSI)
+     return 0;
 
   while(
         idSI < widgSTPtr->lenSI
@@ -1756,7 +1883,7 @@ inactiveAdd_widg_rayWidg(
 } /*inactiveAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun42: hidenAdd_widg_rayWidg
+| Fun44: hidenAdd_widg_rayWidg
 |   - adds the hiden state to a widget
 | Input:
 |   - idSI:
@@ -1775,11 +1902,16 @@ hidenAdd_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
 
   widgSTPtr->stateAryUS[idSI] |= def_hiden_rayWidg;
   if(widgSTPtr->stateAryUS[idSI] & def_child_rayWidg)
      return 0; /*this is a child, so no other children*/
   ++idSI;
+
+  if(idSI >= widgSTPtr->lenSI)
+     return 0;
 
   while(
         idSI < widgSTPtr->lenSI
@@ -1790,7 +1922,7 @@ hidenAdd_widg_rayWidg(
 } /*hidenAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun43: childAdd_widg_rayWidg
+| Fun45: childAdd_widg_rayWidg
 |   - adds the child state to a widget
 |   - only use this funcition if you know what your are
 |     doing and understand how the child/parent system
@@ -1824,12 +1956,40 @@ childAdd_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] |= def_child_rayWidg;
   return 0;
 } /*hidenAdd_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun44: stateClear_widg_rayWidg
+| Fun46: hogAdd_widg_rayWidg
+|   - adds the hog state to a widget
+| Input:
+|   - idSI:
+|     o id (indey) of widget to add child state to
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with widget to change
+| Output:
+|   - Returns:
+|     o 0 for no errors
+|     o def_noWidget_rayWidg if widget does not exist
+\-------------------------------------------------------*/
+signed char
+hogAdd_widg_rayWidg(
+   signed int idSI,               /*id of widget*/
+   struct widg_rayWidg *widgSTPtr /*has wiget*/
+){
+   if(idSI >= widgSTPtr->lenSI)
+      return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
+  widgSTPtr->stateAryUS[idSI] |= def_hog_rayWidg;
+  return 0;
+} /*hogAdd_widg_rayWidg*/
+
+/*-------------------------------------------------------\
+| Fun47: stateClear_widg_rayWidg
 |   - remove all states in a widget (set to 0)
 | Input:
 |   - idSI:
@@ -1848,12 +2008,14 @@ stateClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] = 0;
   return 0;
 } /*stateClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun45: pressClear_widg_rayWidg
+| Fun48: pressClear_widg_rayWidg
 |   - remove wigets pressed state
 | Input:
 |   - idSI:
@@ -1872,12 +2034,14 @@ pressClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] &= ~def_press_rayWidg;
   return 0;
 } /*pressClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun46: checkedClear_widg_rayWidg
+| Fun49: checkedClear_widg_rayWidg
 |   - remove wigets checked state
 | Input:
 |   - idSI:
@@ -1896,12 +2060,14 @@ checkedClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] &= ~def_checked_rayWidg;
   return 0;
 } /*checkedClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun47: activeClear_widg_rayWidg
+| Fun50: activeClear_widg_rayWidg
 |   - remove wigets active state
 | Input:
 |   - idSI:
@@ -1920,12 +2086,14 @@ activeClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] &= ~def_active_rayWidg;
   return 0;
 } /*activeClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun48: focusClear_widg_rayWidg
+| Fun51: focusClear_widg_rayWidg
 |   - remove wigets focus state
 | Input:
 |   - idSI:
@@ -1946,6 +2114,8 @@ focusClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
    if(widgSTPtr->focusSI == idSI)
       widgSTPtr->focusSI = -1;
 
@@ -1954,7 +2124,7 @@ focusClear_widg_rayWidg(
 } /*focusClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun49: inactiveClear_widg_rayWidg
+| Fun52: inactiveClear_widg_rayWidg
 |   - remove wigets and its child widgets inactive state
 | Input:
 |   - idSI:
@@ -1973,10 +2143,16 @@ inactiveClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
+
   widgSTPtr->stateAryUS[idSI] &= ~def_inactive_rayWidg;
   if(widgSTPtr->stateAryUS[idSI] & def_child_rayWidg)
      return 0;
   ++idSI;
+
+  if(idSI >= widgSTPtr->lenSI)
+     return 0;
 
   while(
          idSI < widgSTPtr->lenSI
@@ -1987,7 +2163,7 @@ inactiveClear_widg_rayWidg(
 } /*inactiveClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun50: hidenClear_widg_rayWidg
+| Fun53: hidenClear_widg_rayWidg
 |   - remove wigets and its child widgets hiden state
 | Input:
 |   - idSI:
@@ -2006,8 +2182,13 @@ hidenClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] &= ~def_hiden_rayWidg;
   ++idSI;
+
+  if(idSI >= widgSTPtr->lenSI)
+     return 0;
 
   while(
          idSI < widgSTPtr->lenSI
@@ -2018,7 +2199,7 @@ hidenClear_widg_rayWidg(
 } /*hidenClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun51: childClear_widg_rayWidg
+| Fun54: childClear_widg_rayWidg
 |   - clears the child state in a widget
 |   - only use this function if you know what your are
 |     doing and understand how the child/parent system
@@ -2052,13 +2233,40 @@ childClear_widg_rayWidg(
 ){
    if(idSI >= widgSTPtr->lenSI)
       return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
   widgSTPtr->stateAryUS[idSI] &= ~def_child_rayWidg;
   return 0;   
 } /*childClear_widg_rayWidg*/
 
+/*-------------------------------------------------------\
+| Fun55: hogClear_widg_rayWidg
+|   - clears the hog state in a widget
+| Input:
+|   - idSI:
+|     o id (indey) of widget to clear child state
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with widget to change
+| Output:
+|   - Returns:
+|     o 0 for no errors
+|     o def_noWidget_rayWidg if widget does not exist
+\-------------------------------------------------------*/
+signed char
+hogClear_widg_rayWidg(
+   signed int idSI,               /*id of widget*/
+   struct widg_rayWidg *widgSTPtr /*has wiget*/
+){
+   if(idSI >= widgSTPtr->lenSI)
+      return def_noWidget_rayWidg;
+   if(idSI < 0)
+      return def_noWidget_rayWidg;
+  widgSTPtr->stateAryUS[idSI] &= ~def_hog_rayWidg;
+  return 0;   
+} /*hogClear_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun52: getDarkModeState_rayWidg
+| Fun56: getDarkModeState_rayWidg
 |   - detects if Mac or Windows computer is in dark mode
 | Input:
 | Output:
@@ -2161,7 +2369,7 @@ getDarkModeState_rayWidg(
 } /*getDarkModeState_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun53: checkGuiColorMode_rayWidg
+| Fun57: checkGuiColorMode_rayWidg
 |   - checks is user is using dark or light mode, and
 |     sets the color scheme to the correct mode
 | Input:
@@ -2220,7 +2428,7 @@ checkGuiColorMode_rayWidg(
 } /*checkGuiColorMode_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun54: addWidget_widg_rayWidg
+| Fun58: addWidget_widg_rayWidg
 |   - add a new widget to a widg_rayWidg struct
 | Input:
 |   - xSI:
@@ -2261,7 +2469,7 @@ addWidget_widg_rayWidg(
    signed int idSI = 0;
 
    if( realloc_widg_rayWidg(0, widgSTPtr) )
-      goto memErr_fun53; /*memory error while resizing*/
+      goto memErr_fun57; /*memory error while resizing*/
          /*realloc_widg_rayWig resizes the arrays by 50%
          `  if no more elements can be added to the arrays
          `  (or 16 for no elements)
@@ -2294,12 +2502,12 @@ addWidget_widg_rayWidg(
 
    return idSI;
 
-   memErr_fun53:;
+   memErr_fun57:;
       return 1;
 } /*addWidget_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun55: tile_widg_rayWidg
+| Fun59: tile_widg_rayWidg
 |   - find tiling x,y coordiantes for each widget using
 |     widths, heights, rows, and columns
 |   - note this can only support one level of children
@@ -2325,26 +2533,26 @@ tile_widg_rayWidg(
    signed int rowOffsetSI,         /*offset for 1st row*/
    signed int colOffsetSI          /*1st column offset*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun55 TOC:
+   ' Fun59 TOC:
    '   - find tiling x,y coordiantes for each widget using
    '     widths, heights, rows, and columns
-   '   o fun55 sec01:
+   '   o fun59 sec01:
    '     - variable declarations
-   '   o fun55 sec02:
+   '   o fun59 sec02:
    '     - get maximum rows and column (and get memory)
-   '   o fun55 sec03:
+   '   o fun59 sec03:
    '     - find parent widget row and column coordinates
-   '   o fun55 sec04:
+   '   o fun59 sec04:
    '     - add x,y to tiled parents and update non-tiled
    '       child widgets
-   '   o fun55 sec05:
+   '   o fun59 sec05:
    '     - find tile coordinates for tiled child widgets
    '   o fu10 sec06:
    '     - clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun55 Sec01:
+   ^ Fun59 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2366,7 +2574,7 @@ tile_widg_rayWidg(
    signed char tileBl = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun55 Sec02:
+   ^ Fun59 Sec02:
    ^   - get maximum rows and column (and get memory)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2399,20 +2607,20 @@ tile_widg_rayWidg(
    } /*Loop: find number of rows and columns*/
 
    if(! tileBl)
-      goto noTile_fun55_sec06;
+      goto noTile_fun59_sec06;
 
    ++rowSizeSI;
    ++colSizeSI;
 
    rowHeapArySI = calloc(rowSizeSI, sizeof(signed int));
    if(! rowHeapArySI)
-      goto memErr_fun55_sec06;
+      goto memErr_fun59_sec06;
    colHeapArySI = calloc(colSizeSI, sizeof(signed int));
    if(! colHeapArySI)
-      goto memErr_fun55_sec06;
+      goto memErr_fun59_sec06;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun55 Sec03:
+   ^ Fun59 Sec03:
    ^   - find parent widget row and column coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2472,7 +2680,7 @@ tile_widg_rayWidg(
    } /*Loop: find x coordinate of each row*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ fun55 sec04:
+   ^ fun59 sec04:
    ^   - add x,y to tiled parents and update non-tiled
    ^     child widgets
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -2482,12 +2690,12 @@ tile_widg_rayWidg(
    while(idSI < widgSTPtr->lenSI)
    { /*Loop: add in x,y coordaintes*/
       if(widgSTPtr->rowArySI[idSI] < 0)
-         goto nextWidg_fun55_sec04;
+         goto nextWidg_fun59_sec04;
       else if(widgSTPtr->colArySI[idSI] < 0)
-         goto nextWidg_fun55_sec04;
+         goto nextWidg_fun59_sec04;
       else if(
          widgSTPtr->stateAryUS[idSI] & def_child_rayWidg
-      ) goto nextWidg_fun55_sec04;
+      ) goto nextWidg_fun59_sec04;
 
       siRow = widgSTPtr->rowArySI[idSI];
       siCol = widgSTPtr->colArySI[idSI];
@@ -2510,9 +2718,9 @@ tile_widg_rayWidg(
 
           /*check if children were tiled in the widget*/
           if(widgSTPtr->rowArySI[idSI] >= 0)
-             goto nextChild_fun55_sec04;
+             goto nextChild_fun59_sec04;
           else if(widgSTPtr->colArySI[idSI] >= 0)
-             goto nextChild_fun55_sec04;
+             goto nextChild_fun59_sec04;
 
          siRow = widgSTPtr->rowArySI[idSI];
          siCol = widgSTPtr->colArySI[idSI];
@@ -2520,31 +2728,31 @@ tile_widg_rayWidg(
          widgSTPtr->yArySI[idSI] += yChangeSI;
          widgSTPtr->xArySI[idSI] += xChangeSI;
 
-         nextChild_fun55_sec04:;
+         nextChild_fun59_sec04:;
             ++idSI;
       }  /*Loop: update x,y coord child coordinates*/
 
       continue; /*already on next parent wiget*/
 
-      nextWidg_fun55_sec04:;
+      nextWidg_fun59_sec04:;
          ++idSI;
    } /*Loop: add in x,y coordaintes*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun55 Sec05:
+   ^ Fun59 Sec05:
    ^   - find tile coordinates for tiled child widgets
-   ^   o fun55 sec05 sub01:
+   ^   o fun59 sec05 sub01:
    ^     - find and setup for found child group
-   ^   o fun55 sec05 sub02:
+   ^   o fun59 sec05 sub02:
    ^     - find column and row sizes in child group
-   ^   o fun55 sec05 sub03:
+   ^   o fun59 sec05 sub03:
    ^     - add x,y coordinates in child group
-   ^   o fun55 sec05 sub04:
+   ^   o fun59 sec05 sub04:
    ^     - move to next widget
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun55 Sec05 Sub01:
+   * Fun59 Sec05 Sub01:
    *   - find and setup for found child group
    \*****************************************************/
 
@@ -2555,14 +2763,14 @@ tile_widg_rayWidg(
    while(idSI < widgSTPtr->lenSI)
    { /*Loop: find tile dimensions*/
       if(widgSTPtr->rowArySI[idSI] < 0)
-         goto childNextWidg_fun55_sec05_sub05;
+         goto childNextWidg_fun59_sec05_sub05;
          /*non-tiled*/
       else if(widgSTPtr->colArySI[idSI] < 0)
-         goto childNextWidg_fun55_sec05_sub05;
+         goto childNextWidg_fun59_sec05_sub05;
          /*non-tiled*/
       else if(
         !(widgSTPtr->stateAryUS[idSI] & def_child_rayWidg)
-      ) goto childNextWidg_fun55_sec05_sub05;
+      ) goto childNextWidg_fun59_sec05_sub05;
         /*this is a parent*/
 
       for(siRow = 1; siRow < rowSizeSI; ++siRow)
@@ -2579,7 +2787,7 @@ tile_widg_rayWidg(
       colLenSI = 0;
 
       /**************************************************\
-      * Fun55 Sec05 Sub02:
+      * Fun59 Sec05 Sub02:
       *   - find column and row sizes in child group
       \**************************************************/
 
@@ -2589,9 +2797,9 @@ tile_widg_rayWidg(
       ){ /*Loop: find child widget row and column sizes*/
 
          if(widgSTPtr->rowArySI[idSI] < 0)
-            goto nextChild_fun55_sec05_sub02;/*non-tiled*/
+            goto nextChild_fun59_sec05_sub02;/*non-tiled*/
          else if(widgSTPtr->colArySI[idSI] < 0)
-            goto nextChild_fun55_sec05_sub02;/*non-tiled*/
+            goto nextChild_fun59_sec05_sub02;/*non-tiled*/
 
          siRow = widgSTPtr->rowArySI[idSI];
          siCol = widgSTPtr->colArySI[idSI];
@@ -2612,7 +2820,7 @@ tile_widg_rayWidg(
          if(siCol > colLenSI)
             colLenSI = siCol;
 
-         nextChild_fun55_sec05_sub02:;
+         nextChild_fun59_sec05_sub02:;
             ++idSI;
       }  /*Loop: find child widget row and column sizes*/
 
@@ -2628,7 +2836,7 @@ tile_widg_rayWidg(
          /*find coordinate of each col; x coordiante*/
 
       /**************************************************\
-      * Fun55 Sec05 Sub03:
+      * Fun59 Sec05 Sub03:
       *   - add x,y coordinates in child group
       \**************************************************/
 
@@ -2641,9 +2849,9 @@ tile_widg_rayWidg(
 
           /*check if children were non-tile widgets*/
           if(widgSTPtr->rowArySI[idSI] < 0)
-             goto addCoordNextChild_fun55_sec05_sub03;
+             goto addCoordNextChild_fun59_sec05_sub03;
           else if(widgSTPtr->colArySI[idSI] < 0)
-             goto addCoordNextChild_fun55_sec05_sub03;
+             goto addCoordNextChild_fun59_sec05_sub03;
 
          siRow = widgSTPtr->rowArySI[idSI];
          siCol = widgSTPtr->colArySI[idSI];
@@ -2651,18 +2859,18 @@ tile_widg_rayWidg(
          widgSTPtr->yArySI[idSI] = rowHeapArySI[siRow];
          widgSTPtr->xArySI[idSI] = colHeapArySI[siCol];
 
-         addCoordNextChild_fun55_sec05_sub03:;
+         addCoordNextChild_fun59_sec05_sub03:;
             ++idSI;
       }  /*Loop: set tiled child wiget x,y coordinates*/
 
       /**************************************************\
-      * Fun55 Sec05 Sub04:
+      * Fun59 Sec05 Sub04:
       *   - move to next widget
       \**************************************************/
 
       continue; /*on next parent widget*/
 
-      childNextWidg_fun55_sec05_sub05:;
+      childNextWidg_fun59_sec05_sub05:;
          ++idSI;
    } /*Loop: find tile dimensions*/
 
@@ -2672,17 +2880,17 @@ tile_widg_rayWidg(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    idSI = 0;
-   goto ret_fun55_sec06;
+   goto ret_fun59_sec06;
 
-   noTile_fun55_sec06:;
+   noTile_fun59_sec06:;
       idSI = 0;
-      goto ret_fun55_sec06;
+      goto ret_fun59_sec06;
 
-   memErr_fun55_sec06:;
+   memErr_fun59_sec06:;
       idSI = 1;
-      goto ret_fun55_sec06;
+      goto ret_fun59_sec06;
 
-   ret_fun55_sec06:;
+   ret_fun59_sec06:;
       if(rowHeapArySI)
          free(rowHeapArySI);
       rowHeapArySI = 0;
@@ -2695,7 +2903,7 @@ tile_widg_rayWidg(
 } /*tile_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun56: focusCheck_widg_rayWidg
+| Fun60: focusCheck_widg_rayWidg
 |   - detect if input key was tab and update focus
 | Input:
 |   - keySI:
@@ -2725,19 +2933,19 @@ focusCheck_widg_rayWidg(
    signed char charBl, /*1: key was from GetChar()*/
    struct widg_rayWidg *widgSTPtr /*has focus to change*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun56 TOC:
+   ' Fun60 TOC:
    '   - detect if input key was tab and update focus
-   '   o fun56 sec01:
+   '   o fun60 sec01:
    '     - find if focus and set focus
-   '   o fun56 sec02:
+   '   o fun60 sec02:
    '     - check if next widget can be focused, if not
    '       find the next widget that can be focused
-   '   o fun56 sec03:
+   '   o fun60 sec03:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun56 Sec01:
+  ^ Fun60 Sec01:
   ^   - find if focus and set focus
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2746,6 +2954,7 @@ focusCheck_widg_rayWidg(
      /*not using alt tab, because alt tab is often a
      `  system hotkey for reverse cycle
      */
+  signed char hogBl = 0;
 
   shiftBl = IsKeyDown(KEY_LEFT_SHIFT);
   shiftBl |= IsKeyDown(KEY_RIGHT_SHIFT);
@@ -2755,7 +2964,7 @@ focusCheck_widg_rayWidg(
      if(keySI == '\t')
         charBl = shiftBl;
      else
-        goto nonFocusKey_fun56_sec04;
+        goto nonFocusKey_fun60_sec04;
   } /*If: character input*/
 
   else
@@ -2763,7 +2972,7 @@ focusCheck_widg_rayWidg(
      if(keySI == KEY_TAB)
         charBl = shiftBl;
      else
-        goto nonFocusKey_fun56_sec04;
+        goto nonFocusKey_fun60_sec04;
   } /*Else: key event input*/
 
   /*quickly wipe old focus; less efficent, but bit neater
@@ -2789,13 +2998,13 @@ focusCheck_widg_rayWidg(
      );
   } /*Else If: have a widget in focus*/
 
-  /*move focus to next widget*/
+  /*make sure I am on a widget that can accept focus*/
   if(charBl)
   { /*If: moving focus to last widget*/
-     if(widgSTPtr->focusSI <= 0)
+     if(widgSTPtr->focusSI >= widgSTPtr->lenSI)
         widgSTPtr->focusSI = widgSTPtr->lenSI - 1;
-     else
-        --widgSTPtr->focusSI;
+     else if(widgSTPtr->focusSI <= 0)
+        widgSTPtr->focusSI = widgSTPtr->lenSI - 1;
   } /*If: moving focus to last widget*/
 
   else
@@ -2804,22 +3013,40 @@ focusCheck_widg_rayWidg(
         widgSTPtr->focusSI = 0;
      else if(widgSTPtr->focusSI < 0)
         widgSTPtr->focusSI = 0;
-     else
-        ++widgSTPtr->focusSI;
   } /*Else: moving focus to next widget*/
 
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun56 Sec02:
+  ^ Fun60 Sec02:
   ^   - check if next widget can be focused, if not find
   ^     the next widget that can be focused
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
   /*check if next widget can be focused*/
   keySI = widgSTPtr->focusSI;
-  while(
-       widgSTPtr->stateAryUS[keySI] & def_hiden_rayWidg
-    || widgSTPtr->stateAryUS[keySI] & def_inactive_rayWidg
-  ){ /*Loop: find next widget in focus*/
+
+  if(
+       hogStateGet_widg_rayWidg(
+          widgSTPtr->focusSI,
+          widgSTPtr
+       ) == 1
+  ){ /*If: on a hog widget*/
+     hogBl = 1;
+
+     if(widgSTPtr->stateAryUS[keySI] & def_child_rayWidg)
+     { /*If: is a parent widget*/
+        if(charBl)
+           goto resetState_fun60_sec02;
+           /*going backwards to other widgets*/
+        else if(
+            widgSTPtr->stateAryUS[keySI + 1]
+          & def_child_rayWidg
+        ) goto resetState_fun60_sec02; /*no children*/
+        else
+           ++keySI; /*children to check*/
+     }  /*If: is a parent widget*/
+  }  /*If: on a hog widget*/
+
+  do { /*Loop: find next widget in focus*/
      if(charBl)
      { /*If: moving focus up*/
         --keySI;
@@ -2827,7 +3054,7 @@ focusCheck_widg_rayWidg(
         if(keySI < 0)
         { /*If: need to move to start*/
            if(endBl)
-              goto noFocus_fun56_sec04;
+              goto noFocus_fun60_sec04;
            keySI = widgSTPtr->lenSI - 1;
            endBl = 1;
         } /*If: need to move to start*/
@@ -2840,32 +3067,52 @@ focusCheck_widg_rayWidg(
         if(keySI >= widgSTPtr->lenSI)
         { /*If: need to move to start*/
            if(endBl)
-              goto noFocus_fun56_sec04;
+              goto noFocus_fun60_sec04;
            endBl = 1;
            keySI = 0;
         } /*If: need to move to start*/
      } /*Else: moving down*/
-  }  /*Loop: find next widget in focus*/
 
-  widgSTPtr->focusSI = keySI;
-  widgSTPtr->stateAryUS[keySI] |= def_focus_rayWidg;
+     if(! hogBl)
+        ;
+     else if(
+        !
+        (widgSTPtr->stateAryUS[keySI] & def_child_rayWidg)
+     ){ /*If: out of child widget range*/
+        keySI = widgSTPtr->focusSI;
+        goto resetState_fun60_sec02;
+     }  /*If: out of child widget range*/
+  } while(
+    (  widgSTPtr->stateAryUS[keySI] & def_hiden_rayWidg
+      ||
+       widgSTPtr->stateAryUS[keySI] & def_inactive_rayWidg
+    )
+    && (
+          ! hogBl
+       || widgSTPtr->stateAryUS[keySI] & def_hog_rayWidg
+    )
+  ); /*Loop: find next widget in focus*/
+
+  resetState_fun60_sec02:;
+     widgSTPtr->focusSI = keySI;
+     widgSTPtr->stateAryUS[keySI] |= def_focus_rayWidg;
 
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-  ^ Fun56 Sec03:
+  ^ Fun60 Sec03:
   ^   - return
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
   return keySI;
 
-  noFocus_fun56_sec04:;
+  noFocus_fun60_sec04:;
      widgSTPtr->focusSI = -1;
      return -1;
-  nonFocusKey_fun56_sec04:;
+  nonFocusKey_fun60_sec04:;
       return -2;
 } /*focusCheck_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun57: enterCheck_widg_rayWidg
+| Fun61: enterCheck_widg_rayWidg
 |   - check if key event was an enter key
 | Input:
 |   - keySI:
@@ -2906,7 +3153,7 @@ enterCheck_widg_rayWidg(
       if(keySI == '\n')
          charBl = 1;
       else
-         goto noPress_fun57;
+         goto noPress_fun61;
    } /*If: character input*/
 
    else
@@ -2914,22 +3161,22 @@ enterCheck_widg_rayWidg(
       if(keySI == KEY_ENTER)
          charBl = 1;
       else
-         goto noPress_fun57;
+         goto noPress_fun61;
    } /*Else: key event input*/
 
 
    /*check if widget is pressable*/
    keySI = widgSTPtr->focusSI;
    if(keySI < 0)
-      goto noFocus_fun57;
+      goto noFocus_fun61;
    else if(keySI >= widgSTPtr->lenSI)
-      goto noFocus_fun57;
+      goto noFocus_fun61;
    else if(
       widgSTPtr->stateAryUS[keySI] & def_hiden_rayWidg
-   ) goto noFocus_fun57;
+   ) goto noFocus_fun61;
    else if(
       widgSTPtr->stateAryUS[keySI] & def_inactive_rayWidg
-   ) goto noFocus_fun57;
+   ) goto noFocus_fun61;
 
 
    pressAdd_widg_rayWidg(keySI, widgSTPtr);
@@ -2938,20 +3185,20 @@ enterCheck_widg_rayWidg(
       childStateGet_widg_rayWidg(keySI, widgSTPtr);
 
    if(*parSIPtr == -3)
-      goto widgetErr_fun57;
+      goto widgetErr_fun61;
 
    return keySI;
 
-   noFocus_fun57:;
+   noFocus_fun61:;
       return -1;
-   noPress_fun57:;
+   noPress_fun61:;
       return -2;
-   widgetErr_fun57:;
+   widgetErr_fun61:;
       return -3;
 } /*enterCheck_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun58: getMouseWidg_widg_rayWidg
+| Fun62: getMouseWidg_widg_rayWidg
 |   - get widget mouse was on
 | Input:
 |   - xSI:
@@ -2969,7 +3216,8 @@ enterCheck_widg_rayWidg(
 |       * or -1 if returned widget was a parent
 |   - Returns:
 |     o id (index) of the widget the mouse was over
-|     o -1 if the mouse was on no widget
+|     o -1 if the mouse was on no widget or if have hog
+|       widget and clicked widget was not a hog widget
 |       * negative length (past widget size)
 | Note:
 |   - this only finds the first possible match
@@ -2981,23 +3229,24 @@ getMouseWidg_widg_rayWidg(
    signed int *parSIPtr, /*will get parent if on child*/
    struct widg_rayWidg *widgSTPtr /*widgets to search*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun58 TOC:
+   ' Fun62 TOC:
    '   - get widget mouse was on
-   '   o fun58 sec01:
+   '   o fun62 sec01:
    '     - find first parent widget the mouse coud be on
-   '   o fun58 sec02:
+   '   o fun62 sec02:
    '     - check if there is a child widget the mouse
    '       could be on
-   '   o fun58 sec03:
+   '   o fun62 sec03:
    '     - return results
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun58 Sec01:
+   ^ Fun62 Sec01:
    ^   - find first parent widget the mouse coud be on
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed int retSI = 0;
+   signed int tmpSI = 0;
 
    for(
       retSI = 0;
@@ -3036,10 +3285,10 @@ getMouseWidg_widg_rayWidg(
    }  /*Loop: find first widget that could match*/
 
    if(retSI >= widgSTPtr->lenSI)
-      goto noWidg_fun58_sec0x;
+      goto noWidg_fun62_sec03_sub03;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun58 Sec02:
+   ^ Fun62 Sec02:
    ^   - check if there is a child widget the mouse could
    ^     be on
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -3048,16 +3297,27 @@ getMouseWidg_widg_rayWidg(
       childStateGet_widg_rayWidg(retSI, widgSTPtr);
 
    if(*parSIPtr < -1)
-      goto noWidg_fun58_sec0x;
+      goto noWidg_fun62_sec03_sub03;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun58 Sec03:
+   ^ Fun62 Sec03:
    ^   - return results
+   ^   o fun62 sec03 sub01:
+   ^     - clear old focus state
+   ^   o fun62 sec03 sub02:
+   ^     - handle hog widget state checks
+   ^   o fun62 sec03 sub03:
+   ^     - return results
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto retWidg_run58_sec0x;
+   /*****************************************************\
+   * Fun62 Sec03 Sub01:
+   *   - clear old focus state
+   \*****************************************************/
 
-   retWidg_run58_sec0x:;
+   goto retWidg_fun62_sec03_sub01;
+
+   retWidg_fun62_sec03_sub01:;
       pressClear_widg_rayWidg(
          widgSTPtr->focusSI,
          widgSTPtr
@@ -3066,26 +3326,106 @@ getMouseWidg_widg_rayWidg(
          widgSTPtr->focusSI,
          widgSTPtr
       ); /*clear the old active event*/
-      focusClear_widg_rayWidg(
-         widgSTPtr->focusSI,
-         widgSTPtr
-      ); /*clear the old focus; also clears focus item*/
 
-      widgSTPtr->focusSI = retSI;
-      focusAdd_widg_rayWidg(retSI, widgSTPtr);
-         /*set clicked widget to focused widget*/
-      activeAdd_widg_rayWidg(retSI, widgSTPtr);
-         /*make into an active widget*/
+      /**************************************************\
+      * Fun62 Sec03 Sub02:
+      *   - handle hog widget state checks
+      \**************************************************/
 
-      return retSI;
+      if(widgSTPtr->focusSI < 0)
+         ; /*nothing is in focus*/
+      else if(
+           widgSTPtr->stateAryUS[widgSTPtr->focusSI]
+         & def_hog_rayWidg
+      ){ /*Else If: moving from a hog state widget*/
+         if(
+             widgSTPtr->stateAryUS[widgSTPtr->focusSI]
+           & def_hiden_rayWidg
+         ) goto setRet_fun62_sec03_sub03;
 
-   noWidg_fun58_sec0x:;
+         tmpSI = retSI;
+
+         if(tmpSI > widgSTPtr->focusSI)
+         { /*If: user clicked on a next widget*/
+            while(tmpSI > widgSTPtr->focusSI)
+            { /*Loop: check if have child widget path*/
+                if(
+                    widgSTPtr->stateAryUS[tmpSI]
+                  & def_child_rayWidg
+                ) --tmpSI;
+
+                else
+                   break;
+            } /*Loop: check if have child widget path*/
+
+            if(tmpSI == widgSTPtr->focusSI)
+               goto setRet_fun62_sec03_sub03;
+            else
+               goto hogNoMove_fun62_sec03_sub03;
+         } /*If: user clicked on a next widget*/
+
+         else
+         { /*Else: moving backwards*/
+            if(
+              !(
+                  widgSTPtr->stateAryUS[tmpSI]
+                & def_child_rayWidg
+              )
+            ) ++tmpSI;
+
+            while(tmpSI < widgSTPtr->focusSI)
+            { /*Loop: check if have child widget path*/
+                if(
+                    widgSTPtr->stateAryUS[tmpSI]
+                  & def_child_rayWidg
+                ) ++tmpSI;
+
+                else
+                   break;
+            } /*Loop: check if have child widget path*/
+
+            if(tmpSI == widgSTPtr->focusSI)
+               goto setRet_fun62_sec03_sub03;
+            else
+               goto hogNoMove_fun62_sec03_sub03;
+         } /*Else: moving backwards*/
+      }  /*Else If: moving from a hog state widget*/
+
+      /**************************************************\
+      * Fun62 Sec03 Sub03:
+      *   - return results
+      \**************************************************/
+
+      setRet_fun62_sec03_sub03:;
+         focusClear_widg_rayWidg(
+            widgSTPtr->focusSI,
+            widgSTPtr
+         ); /*clear old focus; also clears focus item*/
+
+         widgSTPtr->focusSI = retSI;
+         focusAdd_widg_rayWidg(retSI, widgSTPtr);
+            /*set clicked widget to focused widget*/
+         activeAdd_widg_rayWidg(retSI, widgSTPtr);
+            /*make into an active widget*/
+
+         return retSI;
+
+      hogNoMove_fun62_sec03_sub03:;
+         retSI = widgSTPtr->focusSI;
+         focusAdd_widg_rayWidg(retSI, widgSTPtr);
+            /*set clicked widget to focused widget*/
+         activeAdd_widg_rayWidg(retSI, widgSTPtr);
+            /*make into an active widget*/
+         *parSIPtr = -1;
+         return -1;
+
+   noWidg_fun62_sec03_sub03:;
       *parSIPtr = -1;
       return -1;
 } /*getMouseWidg_widg_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun59: blinkGet_rayWidg
+| Fun63: blinkGet_rayWidg
 |   - returns current state of cursor blink for widgets
 | Input:
 |   - blinkSI:
@@ -3116,7 +3456,7 @@ blinkGet_rayWidg(
 } /*blinkGet_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun60: intStrCheck_rayWidg
+| Fun64: intStrCheck_rayWidg
 |   - corrects mistakes in a c-string that is supposed to
 |     be an integer
 | Input:
@@ -3170,7 +3510,7 @@ intStrCheck_rayWidg(
    *dupStr = 0;
 
    if(! maxSI)
-      goto ret_fun61;
+      goto ret_fun65;
 
    strToSI_base10str(textStr, &tmpSI);
 
@@ -3198,12 +3538,12 @@ intStrCheck_rayWidg(
       *dupStr = 0;
    } /*Loop: remove digits till number is less then*/
 
-   ret_fun61:;
+   ret_fun65:;
       return dupStr - textStr;
 } /*intStrCheck_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun61: floatStrCheck_rayWidg
+| Fun65: floatStrCheck_rayWidg
 |   - corrects mistakes in a c-string that is supposed to
 |     be an float
 | Input:
@@ -3266,7 +3606,7 @@ floatStrCheck_rayWidg(
    *dupStr = 0;
 
    if(! maxF)
-      goto ret_fun61;
+      goto ret_fun65;
 
    strToF_base10str(textStr, &tmpF);
 
@@ -3294,12 +3634,12 @@ floatStrCheck_rayWidg(
       strToF_base10str(textStr, &tmpF);
    } /*Loop: remove digits till number is less then*/
 
-   ret_fun61:;
+   ret_fun65:;
       return dupStr - textStr;
 } /*floatStrCheck_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun62: fileStrCheck_rayWidg
+| Fun66: fileStrCheck_rayWidg
 |   - corrects non-file characters in c-string
 |   - spaces/tabes converted to '_', other than that,
 |     only A-Z, a-z, 0-9, '-', '_', and '.' are allowed
@@ -3386,7 +3726,7 @@ fileStrCheck_rayWidg(
 } /*fileStrCheck_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun63: addCharToEntry_rayWidg
+| Fun67: addCharToEntry_rayWidg
 |   - adds a character to an entry box text
 | Input:
 |   - keySI:
@@ -3428,24 +3768,24 @@ addCharToEntry_rayWidg(
    signed int *posArySI,   /*cursor + scroll position*/
    struct widg_rayWidg *widgSTPtr /*has font*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun63 TOC:
+   ' Fun67 TOC:
    '   - adds a character to an entry box text
-   '   o fun63 sec01:
+   '   o fun67 sec01:
    '     - variable declaration and movement keys
-   '   o fun63 sec02:
+   '   o fun67 sec02:
    '     - delete key
-   '   o fun63 sec03:
+   '   o fun67 sec03:
    '     - backspace key
-   '   o fun63 sec04:
+   '   o fun67 sec04:
    '     - keys that need a conversion
-   '   o fun63 sec05:
+   '   o fun67 sec05:
    '     - normal keys
-   '   o fun63 sec06:
+   '   o fun67 sec06:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun63 Sec01:
+   ^ Fun67 Sec01:
    ^   - variable declaration and movement keys
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3468,36 +3808,36 @@ addCharToEntry_rayWidg(
          --posArySI[1];
       if(posArySI[0] > posArySI[1])
          posArySI[0] = posArySI[1];
-      goto cursorMove_fun63_sec06;
+      goto cursorMove_fun67_sec06;
    } /*If: move left*/
 
    else if(keySI == KEY_RIGHT)
    { /*Else If: move left*/
       if(posArySI[1] < *lenSIPtr)
          ++posArySI[1];
-      goto cursorMove_fun63_sec06;
+      goto cursorMove_fun67_sec06;
    } /*Else If: move left*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun63 Sec02:
+   ^ Fun67 Sec02:
    ^   - delete key
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    else if(keySI == KEY_DELETE)
    { /*Else If: deleting the next character*/
       if(*lenSIPtr <= 0)
-         goto cursorMove_fun63_sec06;
+         goto cursorMove_fun67_sec06;
          /*delete, but nothing to delete*/
 
       else if(posArySI[1] >= *lenSIPtr)
-         goto cursorMove_fun63_sec06;
+         goto cursorMove_fun67_sec06;
          /*at end of string; nothing to delete*/
 
       else if(posArySI[1] == *lenSIPtr - 1)
       { /*Else If: only one character to delete*/
          textStr[posArySI[1]] = 0;
          --*lenSIPtr;
-         goto delete_fun63_sec06;
+         goto delete_fun67_sec06;
       } /*Else If: only one character to delete*/
 
       else
@@ -3513,23 +3853,23 @@ addCharToEntry_rayWidg(
 
          textStr[posSI] = 0;
          --*lenSIPtr;
-         goto delete_fun63_sec06;
+         goto delete_fun67_sec06;
       } /*Else: need to shift items around*/
    } /*Else If: deleting the next character*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun63 Sec03:
+   ^ Fun67 Sec03:
    ^   - backspace key
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    else if(keySI == KEY_BACKSPACE)
    { /*Else If: backspace to delete last character*/
       if(posArySI[1] <= 0)
-         goto cursorMove_fun63_sec06;
+         goto cursorMove_fun67_sec06;
          /*at start of string; nothing to delete*/
 
       else if(*lenSIPtr <= 0)
-         goto cursorMove_fun63_sec06;
+         goto cursorMove_fun67_sec06;
          /*delete, but nothing to delete*/
 
       else if(posArySI[1] == *lenSIPtr)
@@ -3537,7 +3877,7 @@ addCharToEntry_rayWidg(
          textStr[posArySI[1] - 1] = 0;
          --posArySI[1];
          --*lenSIPtr;
-         goto delete_fun63_sec06;
+         goto delete_fun67_sec06;
       } /*Else If: only one character to delete*/
 
       else
@@ -3554,126 +3894,126 @@ addCharToEntry_rayWidg(
          textStr[posSI] = 0;
          --*lenSIPtr;
          --posArySI[1];
-         goto delete_fun63_sec06;
+         goto delete_fun67_sec06;
       } /*Else: need to shift items around*/
    } /*Else If: backspace to delete last character*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun63 Sec04:
+   ^ Fun67 Sec04:
    ^   - keys that need a conversion
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    else if(keySI == KEY_END)
    { /*Else If: move cursor to end of text*/
       posArySI[1] = *lenSIPtr;
-      goto cursorMove_fun63_sec06;
+      goto cursorMove_fun67_sec06;
    } /*Else If: move cursor to end of text*/
 
    else if(keySI == KEY_HOME)
    { /*Else If: move cursor to start of text*/
       posArySI[0] = 0;
       posArySI[1] = 0;
-      goto cursorMove_fun63_sec06;
+      goto cursorMove_fun67_sec06;
    } /*Else If: move cursor to start of text*/
 
    else if(keySI == KEY_KP_0)
    { /*Else If: key pad 0*/
       keySI = '0';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 0*/
 
    else if(keySI == KEY_KP_1)
    { /*Else If: key pad 1*/
       keySI = '1';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 1*/
 
    else if(keySI == KEY_KP_2)
    { /*Else If: key pad 2*/
       keySI = '2';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 2*/
 
    else if(keySI == KEY_KP_3)
    { /*Else If: key pad 3*/
       keySI = '3';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 3*/
 
    else if(keySI == KEY_KP_4)
    { /*Else If: key pad 4*/
       keySI = '4';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 4*/
 
    else if(keySI == KEY_KP_5)
    { /*Else If: key pad 5*/
       keySI = '5';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 5*/
 
    else if(keySI == KEY_KP_6)
    { /*Else If: key pad 6*/
       keySI = '6';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 6*/
 
    else if(keySI == KEY_KP_7)
    { /*Else If: key pad 7*/
       keySI = '7';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 7*/
 
    else if(keySI == KEY_KP_8)
    { /*Else If: key pad 8*/
       keySI = '8';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 8*/
 
    else if(keySI == KEY_KP_9)
    { /*Else If: key pad 9*/
       keySI = '9';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad 9*/
 
    else if(keySI == KEY_KP_DECIMAL)
    { /*Else If: key pad .*/
       keySI = '.';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad .*/
 
    else if(keySI == KEY_KP_DIVIDE)
    { /*Else If: key pad /*/
       keySI = '/';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad /*/
 
    else if(keySI == KEY_KP_MULTIPLY)
    { /*Else If: key pad **/
       keySI = '*';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad **/
 
    else if(keySI == KEY_KP_SUBTRACT)
    { /*Else If: key pad -*/
       keySI = '-';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad -*/
 
    else if(keySI == KEY_KP_ADD)
    { /*Else If: key pad +*/
       keySI = '+';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad +*/
 
    else if(keySI == KEY_KP_EQUAL)
    { /*Else If: key pad =*/
       keySI = '=';
-      goto addNormalKey_fun63_sec05;
+      goto addNormalKey_fun67_sec05;
    } /*Else If: key pad =*/
  
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun63 Sec05:
+   ^ Fun67 Sec05:
    ^   - normal keys
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3690,7 +4030,7 @@ addCharToEntry_rayWidg(
       } /*Else If: alphabet key input*/
          
    
-      addNormalKey_fun63_sec05:;
+      addNormalKey_fun67_sec05:;
 
       if(posArySI[1] >= *lenSIPtr)
       { /*If: at end of string*/
@@ -3698,7 +4038,7 @@ addCharToEntry_rayWidg(
          ++posArySI[1];
          ++*lenSIPtr;
          textStr[*lenSIPtr] = 0;
-         goto addChar_fun63_sec06;
+         goto addChar_fun67_sec06;
       } /*If: at end of string*/
 
       else
@@ -3710,33 +4050,33 @@ addCharToEntry_rayWidg(
          ++*lenSIPtr;
          textStr[posSI] = keySI;
          textStr[*lenSIPtr] = 0;
-         goto addChar_fun63_sec06;
+         goto addChar_fun67_sec06;
       } /*Else: need to insert the new character*/
    } /*Else If: normal key pressed*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun63 Sec06:
+   ^ Fun67 Sec06:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto cursorMove_fun63_sec06;
+   goto cursorMove_fun67_sec06;
       /*no idea what the key event is*/
 
-   delete_fun63_sec06:;
+   delete_fun67_sec06:;
       if(posArySI[0] > posArySI[1])
          posArySI[0] = posArySI[1];
       posSI = -1;
-      goto ret_fun63_sec06;
+      goto ret_fun67_sec06;
 
-   addChar_fun63_sec06:;
+   addChar_fun67_sec06:;
       posSI = 1;
-      goto adjustPos_fun63_sec06;
+      goto adjustPos_fun67_sec06;
 
-   cursorMove_fun63_sec06:;
+   cursorMove_fun67_sec06:;
       posSI = 0;
-      goto adjustPos_fun63_sec06;
+      goto adjustPos_fun67_sec06;
 
-   adjustPos_fun63_sec06:;
+   adjustPos_fun67_sec06:;
       /*need to make sure the scroll and cursor position
       `  do not overextend the entry box
       */
@@ -3797,15 +4137,15 @@ addCharToEntry_rayWidg(
       textStr[posArySI[1] + 1] = swapArySC[1];
       textStr[posArySI[1] + 2] = swapArySC[2];
 
-      goto ret_fun63_sec06;
+      goto ret_fun67_sec06;
 
-   ret_fun63_sec06:;
+   ret_fun67_sec06:;
       textStr[*lenSIPtr] = 0;
       return (signed char) posSI;
 } /*addCharToEntry_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun64: drawRect_rayWidg
+| Fun68: drawRect_rayWidg
 |   - draws a rectangle for rayWidg
 | Input:
 |   - widgSTPtr:
@@ -3839,22 +4179,22 @@ drawRect_rayWidg(
    unsigned int borderHexUI, /*hex color of border*/
    unsigned int focusHexUI   /*hex color of focus border*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun64 TOC:
+   ' Fun68 TOC:
    '   - draws a rectangle for rayWidg
-   '   o fun64 sec01:
+   '   o fun68 sec01:
    '     - variable declarations
-   '   o fun64 sec02:
+   '   o fun68 sec02:
    '     - draw the rectangle
-   '   o fun64 sec03:
+   '   o fun68 sec03:
    '     - draw border around rectangle (if requested)
-   '   o fun64 sec04:
+   '   o fun68 sec04:
    '     - draw focus border (if requested)
-   '   o fun64 sec05:
+   '   o fun68 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun64 Sec01:
+   ^ Fun68 Sec01:
    ^   - variable declarations and initial checks
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3862,13 +4202,13 @@ drawRect_rayWidg(
    struct Color colorST;
 
    if(idSI > widgSTPtr->lenSI)
-      goto noWidget_fun64_sec05;
+      goto noWidget_fun68_sec05;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-       goto hiddenWidget_fun64_sec05;
+       goto hiddenWidget_fun68_sec05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun64 Sec02:
+   ^ Fun68 Sec02:
    ^   - draw the rectangle
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3903,7 +4243,7 @@ drawRect_rayWidg(
    #endif
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun64 Sec03:
+   ^ Fun68 Sec03:
    ^   - draw border around rectangle (if requested)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3946,7 +4286,7 @@ drawRect_rayWidg(
    } /*If: rectangle with border*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun64 Sec04:
+   ^ Fun68 Sec04:
    ^   - draw focus border around rectangle (if requested)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3989,21 +4329,21 @@ drawRect_rayWidg(
    } /*If: drawing a focus border*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun64 Sec05:
+   ^ Fun68 Sec05:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun64_sec05:;
+   noWidget_fun68_sec05:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun64_sec05:;
+   hiddenWidget_fun68_sec05:;
       return 0;
 } /*drawRect_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun65: butDraw_rayWidg
+| Fun69: butDraw_rayWidg
 |   - draw a button
 | Input:
 |   - maxWidthSI:
@@ -4049,22 +4389,22 @@ butDraw_rayWidg(
    signed char noDrawBl,  /*1:find size, but do not draw*/
    struct widg_rayWidg *widgSTPtr  /*has button widget*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun65 TOC:
+   ' Fun69 TOC:
    '   - draw a button
-   '   o fun65 sec01:
+   '   o fun69 sec01:
    '     - variable declarations
-   '   o fun65 sec02:
+   '   o fun69 sec02:
    '     - get color of button (state in)
-   '   o fun65 sec03:
+   '   o fun69 sec03:
    '     - get width of button
-   '   o fun65 sec04:
+   '   o fun69 sec04:
    '     - draw button
-   '   o fun65 sec05:
+   '   o fun69 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun65 Sec01:
+   ^ Fun69 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4074,24 +4414,24 @@ butDraw_rayWidg(
    struct Color textCol;
    struct Vector2 textDimVect2;
 
-   #define def_maxButText_fun65 32
+   #define def_maxButText_fun69 32
       /*max number of characters in button*/
-   signed char writeStr[def_maxButText_fun65 + 8];
+   signed char writeStr[def_maxButText_fun69 + 8];
 
    /*these are for shorting strings*/
    signed char histUC = 0;
    signed int histIndexSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun65 Sec02:
+   ^ Fun69 Sec02:
    ^   - get color of button (state in)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI > widgSTPtr->lenSI)
-      goto noWidget_fun65_sec05;
+      goto noWidget_fun69_sec05;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-       goto hiddenWidget_fun65_sec05;
+       goto hiddenWidget_fun69_sec05;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_inactive_rayWidg
@@ -4116,7 +4456,7 @@ butDraw_rayWidg(
    } /*Else If: button is in a normal state*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun65 Sec03:
+   ^ Fun69 Sec03:
    ^   - get width of button
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4134,8 +4474,8 @@ butDraw_rayWidg(
       widgSTPtr->widthArySI[idSI] = endStr_ulCp(textStr);
 
       if(
-        widgSTPtr->widthArySI[idSI] > def_maxButText_fun65
-      )widgSTPtr->widthArySI[idSI] = def_maxButText_fun65;
+        widgSTPtr->widthArySI[idSI] > def_maxButText_fun69
+      )widgSTPtr->widthArySI[idSI] = def_maxButText_fun69;
 
       cpLen_ulCp(
          writeStr,
@@ -4203,10 +4543,10 @@ butDraw_rayWidg(
       /*want a one character pad around the button*/
 
    if(noDrawBl)
-      goto done_fun65_sec05;
+      goto done_fun69_sec05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun65 Sec04:
+   ^ Fun69 Sec04:
    ^   - draw button
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4242,22 +4582,22 @@ butDraw_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun65 Sec05:
+   ^ Fun69 Sec05:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun65_sec05:;
+   done_fun69_sec05:;
       return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun65_sec05:;
+   noWidget_fun69_sec05:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun65_sec05:;
+   hiddenWidget_fun69_sec05:;
       return 0;
 } /*butDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun66: entryDraw_rayWidg
+| Fun70: entryDraw_rayWidg
 |   - draw an entry box and its text
 | Input:
 |   - widthSI:
@@ -4319,25 +4659,25 @@ entryDraw_rayWidg(
    signed char noDrawBl,  /*1: do not draw entry box*/
    struct widg_rayWidg *widgSTPtr /*has widget to draw*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun66 TOC:
+   ' Fun70 TOC:
    '   - draw an entry box, prevents typing if maxium is
    '     exceded or wrong entry type
-   '   o fun66 sec01:
+   '   o fun70 sec01:
    '     - variable declarations
-   '   o fun66 sec02:
+   '   o fun70 sec02:
    '     - check state of entry box
-   '   o fun66 sec03:
+   '   o fun70 sec03:
    '     - copy string & check/set scroll & cursor values
-   '   o fun66 sec04:
+   '   o fun70 sec04:
    '     - find text size and print cursor
-   '   o fun66 sec05:
+   '   o fun70 sec05:
    '     - draw entry box
-   '   o fun66 sec06:
+   '   o fun70 sec06:
    '     - return result
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun66 Sec01:
+   ^ Fun70 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4347,9 +4687,9 @@ entryDraw_rayWidg(
    struct Color textCol;
    struct Vector2 textDimVect2;
 
-   #define def_maxChar_fun66 256
+   #define def_maxChar_fun70 256
       /*max characters in entry box*/
-   signed char outStr[def_maxChar_fun66 + 8];
+   signed char outStr[def_maxChar_fun70 + 8];
    signed char *cpStr = 0;
    signed char *dupStr = 0;
    signed char rmStr[2] = {0, 0}; /*for adjusting length*/
@@ -4359,15 +4699,15 @@ entryDraw_rayWidg(
    signed int cursorPosSI = posArySI[1];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun66 Sec02:
+   ^ Fun70 Sec02:
    ^   - check state of entry box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidget_fun66_sec06;
+      goto noWidget_fun70_sec06;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-      goto hiddenWidget_fun66_sec06;
+      goto hiddenWidget_fun70_sec06;
       /*entry box is hidden*/
 
    else if(
@@ -4397,7 +4737,7 @@ entryDraw_rayWidg(
    } /*Else: not being used*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun66 Sec03:
+   ^ Fun70 Sec03:
    ^   - copy string & check/set scroll & cursor values
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4426,14 +4766,14 @@ entryDraw_rayWidg(
       /*set scroll position to cursor position*/
 
 
-   if(outLenSI >= def_maxChar_fun66)
-      outLenSI = def_maxChar_fun66 - 1;
+   if(outLenSI >= def_maxChar_fun70)
+      outLenSI = def_maxChar_fun70 - 1;
          /*need one character for the cursor*/
 
    cpLen_ulCp(outStr, &textStr[posArySI[0]], outLenSI);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun66 Sec04:
+   ^ Fun70 Sec04:
    ^   - find text size and print cursor
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4509,7 +4849,7 @@ entryDraw_rayWidg(
    cpLen_ulCp(outStr, cpStr, outLenSI);
 
    if(cursorPosSI < 0)
-      goto getDimensions_fun66_sec04;
+      goto getDimensions_fun70_sec04;
 
    if(cursorPosSI > outLenSI)
       cursorPosSI = outLenSI;
@@ -4536,7 +4876,7 @@ entryDraw_rayWidg(
 
    ++outLenSI;
 
-   getDimensions_fun66_sec04:;
+   getDimensions_fun70_sec04:;
 
    /*set width and height*/
    widgSTPtr->heightArySI[idSI] =
@@ -4547,10 +4887,10 @@ entryDraw_rayWidg(
       /*want a one character pad around the button*/
 
    if(noDrawBl)
-      goto done_fun66_sec06;
+      goto done_fun70_sec06;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun66 Sec05:
+   ^ Fun70 Sec05:
    ^   - draw entry box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4585,22 +4925,22 @@ entryDraw_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun66 Sec06:
+   ^ Fun70 Sec06:
    ^   - return result
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun66_sec06:;
+   done_fun70_sec06:;
       return outLenSI;
 
-   noWidget_fun66_sec06:;
+   noWidget_fun70_sec06:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun66_sec06:;
+   hiddenWidget_fun70_sec06:;
       return 0;
 } /*entryDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun67: labDraw_rayWidg
+| Fun71: labDraw_rayWidg
 |   - draw a label
 | Input:
 |   - maxWidthSI:
@@ -4651,54 +4991,54 @@ labDraw_rayWidg(
    signed char noDrawBl,  /*1: do not draw entry box*/
    struct widg_rayWidg *widgSTPtr /*has widget to draw*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun67 TOC:
+   ' Fun71 TOC:
    '   - draw a label
-   '   o fun67 sec01:
+   '   o fun71 sec01:
    '     - variable declarations
-   '   o fun67 sec02:
+   '   o fun71 sec02:
    '     - check state of label and copy string
-   '   o fun67 sec03:
+   '   o fun71 sec03:
    '     - find text size and pad if needed
-   '   o fun67 sec04:
+   '   o fun71 sec04:
    '     - return result
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun67 Sec01:
+   ^ Fun71 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    struct Color textCol;
    struct Vector2 textDimVect2;
 
-   #define def_maxChar_fun67 256
+   #define def_maxChar_fun71 256
       /*max characters in entry box*/
-   signed char outStr[def_maxChar_fun67 + 8];
+   signed char outStr[def_maxChar_fun71 + 8];
    signed int outLenSI = 0;
    signed int oldLenSI = 0;
    signed int tmpSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun67 Sec02:
+   ^ Fun71 Sec02:
    ^   - check state of label and copy string
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidget_fun67_sec04;
+      goto noWidget_fun71_sec04;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-      goto hiddenWidget_fun67_sec04;
+      goto hiddenWidget_fun71_sec04;
       /*entry box is hidden*/
 
-   if(minWidthSI > def_maxChar_fun67)
-      minWidthSI = def_maxChar_fun67;
+   if(minWidthSI > def_maxChar_fun71)
+      minWidthSI = def_maxChar_fun71;
 
    textCol = GetColor(widgSTPtr->textColSI);
    outLenSI = endStr_ulCp(textStr);
 
-   if(outLenSI >= def_maxChar_fun67)
+   if(outLenSI >= def_maxChar_fun71)
    { /*If: user input to long of string*/
-      outLenSI = def_maxChar_fun67 - 4;
+      outLenSI = def_maxChar_fun71 - 4;
          /*need on character for the cursor*/
       cpLen_ulCp(outStr, textStr, outLenSI);
       outStr[outLenSI++] = '.';
@@ -4711,7 +5051,7 @@ labDraw_rayWidg(
       cpLen_ulCp(outStr, textStr, outLenSI);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun67 Sec03:
+   ^ Fun71 Sec03:
    ^   - find text size and pad if needed
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4801,10 +5141,10 @@ labDraw_rayWidg(
       /*want a one character pad around the button*/
 
    if(noDrawBl)
-      goto done_fun67_sec04;
+      goto done_fun71_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun67 Sec04:
+   ^ Fun71 Sec04:
    ^   - draw label and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4823,18 +5163,18 @@ labDraw_rayWidg(
           textCol
       );
 
-   done_fun67_sec04:;
+   done_fun71_sec04:;
       return outLenSI;
 
-   noWidget_fun67_sec04:;
+   noWidget_fun71_sec04:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun67_sec04:;
+   hiddenWidget_fun71_sec04:;
       return 0;
 } /*labDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun68: mkMesgBox_rayWidg
+| Fun72: mkMesgBox_rayWidg
 |   - makes an emtpy message box widget
 | Input:
 |   - widgSTPtr:
@@ -4860,12 +5200,11 @@ mkMesgBox_rayWidg(
       idSI += (idSI >> 1);
 
       if( realloc_widg_rayWidg(idSI, widgSTPtr) )
-         goto memErr_fun68;
+         goto memErr_fun72;
    } /*If: need more memory*/
 
    idSI =
      addWidget_widg_rayWidg(0, 0, 0, 200, 100, widgSTPtr);
-   ++widgSTPtr->lenSI;
    inactiveAdd_widg_rayWidg(idSI, widgSTPtr);
 
    addWidget_widg_rayWidg(
@@ -4878,7 +5217,6 @@ mkMesgBox_rayWidg(
    ); /*add the top border*/
    childAdd_widg_rayWidg(idSI + 1, widgSTPtr);
    inactiveAdd_widg_rayWidg(idSI + 1, widgSTPtr);
-   ++widgSTPtr->lenSI;
 
    addWidget_widg_rayWidg(
       0, /*colomn*/
@@ -4890,7 +5228,6 @@ mkMesgBox_rayWidg(
    ); /*add the message*/
    childAdd_widg_rayWidg(idSI + 2, widgSTPtr);
    inactiveAdd_widg_rayWidg(idSI + 2, widgSTPtr);
-   ++widgSTPtr->lenSI;
 
    addWidget_widg_rayWidg(
       0,  /*colomn*/
@@ -4901,18 +5238,18 @@ mkMesgBox_rayWidg(
       widgSTPtr
    ); /*add the ok button*/
    childAdd_widg_rayWidg(idSI + 3, widgSTPtr);
-   ++widgSTPtr->lenSI;
+   hogAdd_widg_rayWidg(idSI + 3, widgSTPtr);
 
    hidenAdd_widg_rayWidg(idSI, widgSTPtr);
       /*hide the message box*/
    return idSI;
 
-   memErr_fun68:;
+   memErr_fun72:;
       return -1;
 } /*mkMesgBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun69: mesgBoxDraw_rayWidg
+| Fun73: mesgBoxDraw_rayWidg
 |   - draws a message box
 | Input:
 |   - idSI:
@@ -4954,31 +5291,31 @@ mesgBoxDraw_rayWidg(
    signed char *butTextStr, /*text on button*/
    struct widg_rayWidg *widgSTPtr /*has widgets*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun69 TOC:
+   ' Fun73 TOC:
    '   - draws a message box
-   '   o fun69 sec01:
+   '   o fun73 sec01:
    '     - variable declarations
-   '   o fun69 sec02:
+   '   o fun73 sec02:
    '     - initalize and copy/edit string
-   '   o fun69 sec03:
+   '   o fun73 sec03:
    '     - find widget widths
-   '   o fun69 sec04:
+   '   o fun73 sec04:
    '     - find widget coordinates
-   '   o fun69 sec05:
+   '   o fun73 sec05:
    '     - draw message box
-   '   o fun69 sec06:
+   '   o fun73 sec06:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun69 Sec01:
+   ^ Fun73 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    Vector2 textDimVect2;
 
-   #define def_lenOut_fun69 128
-   signed char outStr[def_lenOut_fun69 + 8];
+   #define def_lenOut_fun73 128
+   signed char outStr[def_lenOut_fun73 + 8];
    signed int textLenSI = endStr_ulCp(mesgStr);
    signed int butLenSI = 0;
    signed int maxLenSI = 0;
@@ -4987,16 +5324,16 @@ mesgBoxDraw_rayWidg(
    signed char *dupStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun69 Sec02:
+   ^ Fun73 Sec02:
    ^   - initalize and copy/edit string
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidget_fun69_sec0x;
+      goto noWidget_fun73_sec0x;
    if( hidenStateGet_widg_rayWidg(idSI, widgSTPtr) )
-      goto hidden_fun69_sec0x;
-   if(textLenSI > def_lenOut_fun69)
-      goto mesgErr_fun69_sec0x;
+      goto hidden_fun73_sec0x;
+   if(textLenSI > def_lenOut_fun73)
+      goto mesgErr_fun73_sec0x;
 
    cpStr = mesgStr;
    dupStr = outStr;
@@ -5012,7 +5349,7 @@ mesgBoxDraw_rayWidg(
    *dupStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun69 Sec03:
+   ^ Fun73 Sec03:
    ^   - find widget widths
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5057,16 +5394,16 @@ mesgBoxDraw_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun69 Sec04:
+   ^ Fun73 Sec04:
    ^   - find widget coordinates
-   ^   o fun69 sec04 sub01:
+   ^   o fun73 sec04 sub01:
    ^     - find x coordinates
-   ^   o fun69 sec04 sub02:
+   ^   o fun73 sec04 sub02:
    ^     - find y coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun69 Sec04 Sub01:
+   * Fun73 Sec04 Sub01:
    *   - find x coordinates
    \*****************************************************/
 
@@ -5108,7 +5445,7 @@ mesgBoxDraw_rayWidg(
       widgSTPtr->xArySI[idSI];
 
    /*****************************************************\
-   * Fun69 Sec04 Sub02:
+   * Fun73 Sec04 Sub02:
    *   - find y coordinates
    \*****************************************************/
 
@@ -5152,7 +5489,7 @@ mesgBoxDraw_rayWidg(
    widgSTPtr->yArySI[idSI + 3] += widgSTPtr->yArySI[idSI];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun69 Sec05:
+   ^ Fun73 Sec05:
    ^   - draw message box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5197,24 +5534,34 @@ mesgBoxDraw_rayWidg(
       ); /*button to accept message*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun69 Sec06:
+   ^ Fun73 Sec06:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   /*this widget's button is in hog state, so it should
+   `  take over the GUI
+   */
+   activeClear_widg_rayWidg(widgSTPtr->focusSI,widgSTPtr);
+   pressClear_widg_rayWidg(widgSTPtr->focusSI,widgSTPtr);
+   focusClear_widg_rayWidg(widgSTPtr->focusSI,widgSTPtr);
+
+   widgSTPtr->focusSI = idSI + 3;
+   focusAdd_widg_rayWidg(idSI + 3, widgSTPtr);
+
    return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun69_sec0x:;
+   noWidget_fun73_sec0x:;
       return def_noWidget_rayWidg;
 
-   hidden_fun69_sec0x:;
+   hidden_fun73_sec0x:;
       return 0;
 
-   mesgErr_fun69_sec0x:;
+   mesgErr_fun73_sec0x:;
       return -1;
 } /*mesgBoxDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun70: mesgBoxEvent_rayWidg
+| Fun74: mesgBoxEvent_rayWidg
 |   - checks the event that was fired in a message box
 | Input:
 |   - eventSC:
@@ -5248,31 +5595,99 @@ mesgBoxEvent_rayWidg(
    signed int childIdSI, /*id of child widget clicked*/
    struct widg_rayWidg *widgSTPtr  /*has widgets*/
 ){
+   signed int focusSI = 0;
+   signed int firstFocusSI = -1;
+
    if(! eventSC)
    { /*If: clearing button press*/
       pressClear_widg_rayWidg(parIdSI + 3, widgSTPtr);
-      goto noEvent_fun70;
+      goto noEvent_fun74;
    } /*If: clearing button press*/
 
    else if(childIdSI - parIdSI != 3)
-      goto emptyClick_fun70;
+      goto emptyClick_fun74;
 
    else if(eventSC == 1)
    { /*Else If: press event*/
       pressAdd_widg_rayWidg(childIdSI, widgSTPtr);
-      goto noEvent_fun70;
+      goto noEvent_fun74;
    } /*Else If: press event*/
 
    else if(eventSC == 2)
    { /*If: releasing widget*/
       pressClear_widg_rayWidg(childIdSI, widgSTPtr);
       hidenAdd_widg_rayWidg(parIdSI, widgSTPtr);
+
+      focusSI = widgSTPtr->focusSI + 1;
+
+      if(focusSI >= widgSTPtr->lenSI)
+         focusSI = 0;
+
+      while(firstFocusSI != widgSTPtr->focusSI)
+      { /*Loop: find next widget*/
+         if(focusSI >= widgSTPtr->lenSI)
+            focusSI = 0;
+
+         else if(focusSI == widgSTPtr->focusSI)
+         { /*Else If: nothing to focus*/
+            if(firstFocusSI < 0)
+            { /*If: nothing can be focused*/
+               widgSTPtr->focusSI = 0;
+               break;
+            } /*If: nothing can be focused*/
+
+            else
+            { /*Else: have new focus*/
+               widgSTPtr->focusSI = firstFocusSI;
+               focusAdd_widg_rayWidg(
+                  firstFocusSI,
+                  widgSTPtr
+               );
+               activeAdd_widg_rayWidg(
+                  firstFocusSI,
+                  widgSTPtr
+               );
+               break;
+            } /*Else: have new focus*/
+         } /*Else If: nothing to focus*/
+
+         else if(
+              widgSTPtr->stateAryUS[focusSI]
+            & def_hog_rayWidg
+         ){ /*Else If: found the next hog widget*/
+            widgSTPtr->focusSI = firstFocusSI;
+            focusAdd_widg_rayWidg(
+               firstFocusSI,
+               widgSTPtr
+            );
+            activeAdd_widg_rayWidg(
+               firstFocusSI,
+               widgSTPtr
+            );
+            break;
+         }  /*Else If: found the next hog widget*/
+
+         else if(
+              widgSTPtr->stateAryUS[focusSI]
+            & def_hiden_rayWidg
+         ) ;
+
+         else if(
+              widgSTPtr->stateAryUS[focusSI]
+            & def_inactive_rayWidg
+         ) ;
+
+         else if(firstFocusSI < 0)
+            firstFocusSI = focusSI;
+
+         ++focusSI;
+      }  /*Loop: find next widget*/
    } /*If: releasing widget*/
 
    return 1;
 
-   noEvent_fun70:;
+   noEvent_fun74:;
       return 0;
-   emptyClick_fun70:;
+   emptyClick_fun74:;
       return 0;
 } /*mesgBoxEvent_rayWidg*/

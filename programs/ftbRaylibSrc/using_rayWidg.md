@@ -78,6 +78,9 @@ Variables:
    - child state means the widget is part of a more
      complex widget
      - defintion is: def_child_rayWidg
+   - hog state means the widget will not let other widgets
+     respond to user events or be in focus
+     - defintion is: def_hog_rayWidg
 8. lenSI is the number of widgets that have been added
 9. sizeSI is the maximum number of widgets you can add
     before reszing (calling realloc_widg_rayWidg)
@@ -102,7 +105,7 @@ rayWidg uses two coordinate systems. The first is the x,y
   coordiante system used by raylib. Were x = 0 means the
   left edge of the GUI and y = 0 means the top of the GUI.
   In all cases these are global coordinates. Both x and y
-  refere to the left top coner of the widget you wish to
+  refer to the left top coner of the widget you wish to
   draw.
 
 You also have width and height, which control how big the
@@ -156,26 +159,35 @@ The x,y coordinate system is global and children x,y
 
 ## States
 
-The rayWidg library uses three states to organize widgets.
-  These are the hiden state and the child states.
+### States overview
+
+The rayWidg library uses four states to organize widgets.
+  These are the inactive state, hiden state, the, child
+  state, and the hog state.
+
+### hidden state
 
 The hiden state means that the widget is not present or
   part of the current GUI. All drawing functions and event
   functions will ignore the widget. This can be used for
   menu bars or alternative GUI windows.
 
+### inactive state
+
 The inactive state means that the widget is present, but
-  that it should be ingored. All drawing functions will
+  that it should be ignored. All drawing functions will
   draw the widget in the inactive color scheme and event
   functions will ignore the widget.
+
+### child state
 
 The child state means that the widget is part of a widget
   that is made up of multiple widgets (a complex widget),
   such as a list box or file browser. The rayWidg system
   only allows one level of nesting. This forces the
-  complex wigdg to use functions to allow it to do its
-  task. In some cases, such as the file browser, those
-  functions are pre-made. In other cases you will have to
+  complex widget to use functions to do its task. In some
+  cases, such as the file browser, those functions are
+  pre-made. For your own custom widgets you will have to
   make them.
 
 You can think of a complex widget as a mini GUI.
@@ -216,6 +228,18 @@ parent_1 child_1 child_2 parent_2 child_3
    complex widget 1      complex widget 2
 ```
 
+### hog state
+
+The hog state means that a widget has priority over other
+  widgets when it is not in a hidden state. When a hog
+  state widget is visable the tab focus and click events
+  will only fire for that widget. If the widget is a
+  child of a parent (complex) widget, then the tab focus
+  and click events work on other hog state child widgets
+  in the same parent.
+
+This state is used for message box's and file browsers.
+
 # Defined variables
 
 These are variables that can influence the default
@@ -246,10 +270,11 @@ These are variables that can influence the default
   - darkGrey is a dark grey color
   - white is white
   - black is black
+- def_fontSize_rayWidg: default font size to use (20)
 - def_macRoundness_rayWidg: controlls how round the
   rectangles are on a Mac or when `-DMAC` is used during
   compile time
-- def_maSegments_rayWidg: segments is used in drawing
+- def_macSegments_rayWidg: segments is used in drawing
   rouned rectangles in raylib, no idea what does
   - only appies to a Mac or when `-DMAC` is used during
     compile time
@@ -263,15 +288,26 @@ As a rule you should use the functions for changing or
   have all states set at once.
 
 The state array is an unsigned short, so a total of 16
-  flags are possible. Currenly only 8 flags are used.
+  flags are possible. Currenly only 9 flags are used.
 
 - def_press_rayWidg: is the pressed state
+  - button is pressed
 - def_checked_rayWidg: is the checked state
+  - check box or radio button (not used) is checked
 - def_active_rayWidg: is the active state
+  - entery box or similar active widget is being used
 - def_focus_rayWidg: is the focus state
+  - current widget in focus/working with
 - def_inactive_rayWidg: is the inactive state
+  - widget is does not take user input, ingore in focus
+    states
 - def_hiden_rayWidg: is the hiden state
+  - widget is hidden and should be ignored
 - def_child_rayWidg: is the child state
+  - is a child widget in a complex widget
+- def_hog_rayWidg: is the hog state
+  - widget is a high priority widget, nothing else can
+    be interacted with
 
 # change fonts and raylib emmbeding fonts
 
@@ -355,8 +391,10 @@ main(
       EndDrawing();
    } /*Loop: draw GUI*/
 
-   UnloadFont(newFontST);
-      /*I think this is needed, but have no idea*/
+   /*do not use UnloadFont(newFontST);, raylib points
+   `  Font arrays to the static structures in the Font
+   `  file
+   */
    CloseWindow();
 } /*main*/
 ```
@@ -379,10 +417,10 @@ You can cheat the system if needed by changing the font
   coordinates.
 
 The default font is IBM Plex Mono. I find raylibs default
-  font to be a bit ugley and not very legibal.
+  font to be a bit ugly and not very legibal.
 
 Again, rayWidg is not supper usefull. It was designed to
-  be something I could peices together in a shorter period
+  be something I could peice together in a shorter period
   of time.
 
 ### using raylib embeded fonts
@@ -577,17 +615,35 @@ main(
 
 The steps in using rayWidg are:
 
-1. create, initialize, and setup a widg_rayWidg struture
-2. add widgets to widg_rayWidg strcuter
-3. draw gui, use BeginDrawing, ClearBackground, and
+1. initialize the raylib GUI
+2. create, initialize, and setup a widg_rayWidg struture
+3. add simple widgets to widg_rayWidg strcuter
+4. draw gui, use BeginDrawing, ClearBackground, and
    EndDrawing from raylib and the widget functions from
    rayWidg
    - for tileing you will also have to call widget
      functions
-4. get user events and udate and draw GUI
-5. free memory and structuers
+5. the complex widgets
+6. get user events and udate and draw GUI
+7. free memory and structuers
 
-## 1. create, initialize, and setup
+## 1. initialize the raylib GUI
+
+Before using rayWidg you should initialize the raylib
+  GUI first. This prevents raylib from overriding rayWidgs
+  default font. All of these functions are from raylib.
+
+```
+InitWindow(<width>, <height>, <title>);
+SetTargetFPS(60); /*60 frames per second*/
+```
+
+```
+InitWindow(400, 200, "a GUI");
+SetTargetFPS(60); /*60 frames per second*/
+```
+
+## 2. create, initialize, and setup
 
 You can initialize (set everything to 0/null) a
   widg_rayWidg structer with init_widg_rayWidg(). The
@@ -602,23 +658,25 @@ init_widg_rayWidg(&widgetsStackST);
 After initialization you needt to setup a widg_rayWidg
   structure after initialization with
   `setup_widg_rayWidg()`. The input is the `widg_rayWidg`
-  structure to setup and the font size to use. The
-  return value is 0 for success and 1 for memory errors.
+  structure to setup. The return value is 0 for success
+  and 1 for memory errors.
 
 Currently this only affects the font.
 
 ```
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 ```
 
 
-## 2. add widgets
+## 3. add simple widgets
 
-You can add widgets with the addWidget_widg_rayWidt
-  function.
+You can add simple widgets with the addWidget_widg_rayWidg
+  function. The only exceptions are for complex widgets,
+  which as a rule require dedicated functions to set them
+  up.
 
 Input:
 
@@ -642,7 +700,7 @@ struct widg_rayWidg widgetsStackST;
 
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -673,7 +731,7 @@ if(idTwoSI < 0)
 ```
 
 
-## 3. draw gui
+## 4. draw gui
 
 You will have to start your GUI drawing with the
   BeginDrawing, ClearBackground, and EndDrawing functions
@@ -760,7 +818,7 @@ signed int idOneSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -807,7 +865,7 @@ signed int idOneSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -879,7 +937,7 @@ signed int idOneSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -921,7 +979,7 @@ signed int idOneSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -1040,7 +1098,7 @@ signed int buffLenSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 /*start draw at 1st character & cursor at 1st character*/
@@ -1107,7 +1165,7 @@ signed int buffLenSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 /*start draw at 1st character & cursor at 1st character*/
@@ -1220,7 +1278,7 @@ signed int idOneSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -1261,7 +1319,7 @@ signed int idOneSI = 0;
 struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 
-if( setup_widg_rayWidg(&widgStackST, 20) );
+if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 
 idOneSI =
@@ -1308,7 +1366,216 @@ EndDrawing();
 freeStack_widg_rayWidg(&widgStackST);
 ```
 
-## 4. get user events and udate and draw GUI
+## 5. complex widgets
+
+Complex widgets are widgets that can not be drawn using
+  a single widget entry. The consist of a parent widget,
+  which has the widget dimensions and child widgets, which
+  are the buttons, lables, and other parts of the widget.
+
+### message boxes (complex widgets)
+
+A mess box consists of four widgets; the parent rectangle,
+  the top border, the label, and a button. The use is
+  to print a single, short, one line message to the user
+  about an error or some other message. For rayWidg you
+  only need to keep track of the parent's id.
+
+```
+     parent (widget 0)
+         VVVVVV
++--------------------------+
+| child 1 (to border)      |
+|--------------------------|
+|                          |
+| child 2 message for user |
+|                          |
+|    +----------------+    |
+|    | child 3 button |    |
+|    +----------------+    |
++--------------------------+
+```
+
+The message box button has the hog priority, so when
+  visible, the user is unable to interact with the rest
+  of the GUI.
+
+When created the message box is set to the hidden state.
+  You then add the message in the draw command. Any events
+  that map to the message box are then processed by the
+  message box event function. This will set the message
+  box to the inivisible state if it is no longer needed.
+
+Because the message box is a hog and takes over the
+  GUI it is not designed to be a tiling widget. It is
+  drawn over the other tiling widgets close to the
+  center of the GUI.
+
+The `mkMesgBox_rayWidg()` function is used to make the
+  message box widget. You only need to call this once if
+  you plan to show one message box at a time. The input
+  is the `widg_rayWidg` structure to hold the message
+  box widget. The output is the id assigned to the parent
+  widget of the message box. A -1 is returned for memory
+  errors.
+
+When the message box is needed, you can then reveal the
+  message box by removeing the hidden
+  state (`hidenClear_widg_rayWidg()`) and then draw the
+  message box with the `mesgBoxDraw_rayWidg()` function.
+  This draws the message box with your message to the
+  screen.
+
+- Input:
+  - parent widget ID of the message box
+    - return from `mkMesgBox_rayWidg`
+  - width in pixels of the GUI
+  - height in pixels of the GUI
+  - c-string with the message to print out
+    - can not be longer then 128 characters, and it is
+      reccommend to have it be a short sentence
+    - must be a single line
+  - c-string with text to print on the button
+  - `widg_rayWidg` structure with message box
+- Output:
+  - width of message box if a message box was drawn
+  - 0 if message box was hidden (not drawn)
+  - def_noWidg_rayWidg if no widget was in the message
+    box
+  - -1 if the message is to long
+
+If youget the message box parent id 
+  from `getMouseWidg_widg_rayWidg()`
+  or `enterCheck_widg_rayWidg` you can then check if the
+  message box button was the target widget with
+  the `mesgBoxEvent_rayWidg()` function. This function
+  will set the press state of the button (if pressed) and
+  will also set the message box to the hidden state if
+  the button was released.
+
+- Input:
+  - the event you passing in
+    - 0 if you are clearing press events
+    - 1 if there was a press (mouse click or enter) event
+    - 1 if there was a release (mouse click or enter)
+      event
+  - the id of message box parent widget
+    - the return value from `mkMesgBox_rayWidg()`, or
+      the signed int pionter (parSIPtr) (3rd input) set
+      by `getMouseWidg_widg_rayWidg()`
+      and `enterCheck_widg_rayWidg()`
+  - the id of the child widget clicked/pressed
+    - return of the `getMouseWidg_widg_rayWidg()`
+      and `enterCheck_widg_rayWidg()` functions
+  - `widg_rayWidg` structure pointer with the message
+    box widget
+      
+This is a poor example, but shows how a message box
+  might be used.
+
+```
+signed int mesgBoxIdSI = 0;
+signed int keySI = 0;
+signed int parIdSI = 0;
+signed int idSI = 0;
+
+struct widg_rayWidg widgetsStackST;
+init_widg_rayWidg(&widgetsStackST);
+
+/*initialize GUI for raylib*/
+
+if( setup_widg_rayWidg(&widgStackST) );
+   /*deal with memory errors*/
+
+/*make other widgets*/
+
+mesgBoxIdSI = mkMesgBox_rayWidg(&widgStackST);
+
+if(mesgBoxIdSi < 0)
+   /*memory error*/
+
+/*set the message box to a non-hiden state*/
+hidenClear_widg_rayWidg(mesgBoxIdSI, &widgStackST);
+
+/*this is in your event loop*/
+BeginDrawing();
+   ClearBackground();
+
+   /*draw your other widgets here*/
+
+   mesgBoxEvent_rayWidg(
+      0,           /*0 here is the clear command*/
+      mesgBoxIdSI,
+      mesgBoxIdSI, /*ok since not targeting a child*/
+      &widgStackST
+   ); /*clear the message box of press events*/
+
+   if(
+      mesgBoxDraw_rayWidg(
+         mesgBoxIdSI,
+         400,  /*GUI was created to be 400 pixels wide*/
+         200,  /*GUI was made 200 pixels high*/
+         (signed char *) "hello world!",
+         (signed char *) "Press this button",
+         &widgStackST
+      ) < 0
+   ) /*message was to long*/
+EndDrawing();
+
+keySI = GetKeyPressed();
+
+idSI =
+   enterCheck_widg_rayWidg(
+      keySI,
+      0, /*key wad from GetKeyPressed*/
+      &parIdSI, /*gets parent id or -1 if not child*/
+      &widgStackST
+   );
+
+if(parIdSI >= 0 && parIdSI == mesgBoxIdSI)
+{ /*If: user selected a message box*/
+   mesgBoxEvent_rayWidg(
+      2,    /*treaing as release*/
+      parIdSI,
+      idSI,  /*child widget clicked*/
+      &widgStackST
+   ); /*returns 1 if message box was closed, not worring
+      `  about that here since I would do nothing
+      */
+} /*If: user selected a message box*/
+
+else
+{ /*Else: need to check if click event*/
+   idSI =
+      getMouseWidg_widg_rayWidg(
+         GetMouseX(),
+         GetMouseY(),
+         &parIdSI,
+         &widgStackST
+      );
+   
+   if(parIdSI >= 0 && parIdSI == mesgBoxIdSI)
+   { /*If: user selected a message box*/
+      if( IsMouseButtonReleased(MOUSE_BUTTON_LEFT) )
+         keySI = 2;
+      else if( IsMouseButtonPressed(MOUSE_BUTTON_LEFT) )
+         keySI = 1;
+   
+      mesgBoxEvent_rayWidg(
+         keySI, /*has if press or release event*/
+         parIdSI,
+         idSI,  /*child widget clicked*/
+         &widgStackST
+      ); /*returns 1 if message box was closed, not worring
+         `  about that here since I would do nothing
+         */
+   } /*If: user selected a message box*/
+} /*Else: need to check if click event*/
+
+freeStack_widg_rayWidg(&widgStackST);
+```
+
+## 6. get user events and udate and draw GUI
 
 You can get users events using the user event functions.
 
@@ -1342,4 +1609,310 @@ switch(indexSI)
       /*code goes here*/
       break;
 } /*Switch: detect which button was pressed*/
+```
+
+## 7. free memory and structuers
+
+When finshed you need to free the `widg_rayWidg` structure
+  with `freeStack_widg_rayWidg()` (for stack allocations)
+  or `freeHeap_widg_rayWidg()` (for heap allocations).
+
+Then you need to call `CloseWindow()` from  raylib to
+  close the GUI.
+
+```
+#include <raylib.h>
+#include "rayWidg.h"
+
+int
+main(
+){
+   struct widg_rayWidg &widgetsStackST;
+   init_widg_rayWidg(&widgetsStackST);
+   
+   /*initialize*/
+   InitWindow(400, 200, "this is a GUI");
+   SetTargetFPS(60);
+   
+   if(setup_widg_rayWidg(&widgetsStackST)
+       /*deal with  memory errors*/
+   
+   while( ! WindowShouldClose() )
+   { /*Loop: run GUI*/
+      /*GUI commands go here; idealy as a function*/
+   } /*Loop: run GUI*/
+   
+   freeStack_widg_rayWidg(&widgetsStackST);
+   CloseWindow();
+   return 0;
+} /*main*/
+```
+
+This is a very simple example hellow world and shows why
+  rayWidg is not the best system. You can compile it on
+  Linux with. Unlike the previous examples, this one has
+  been tested.
+
+```
+cc -o example example.c rayWidg.c ../genLib/base10str.c ../genLib/ulCp.c -L/usr/local/lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+```
+
+Code in example.c
+
+```
+#include <raylib.h>
+#include "rayWidg.h"
+
+int
+main(
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Table Of Contents:
+   '   o sec01: variable declaratins
+   '   o sec02: initialization
+   '   o sec03: add widgets
+   '   o sec04: draw the GUI
+   '   o sec05: detect tab key preses (cycle focus)
+   '   o sec06: detect enter key preses
+   '   o sec07: detect mouse clicks
+   '   o sec08: clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Sec01: variable declaratins
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char *buttonTextStr= (signed char *) "Press me";
+   signed int guiWidthSI = 400;
+   signed int guiHeightSI = 200;
+   signed int buttonIdSI = 0;
+   signed int messageBoxIdSI = 0;
+
+   signed int halfWidthSI = 0;
+   signed int halfHeightSI = 0;
+
+   signed int keySI = 0;
+   signed int indexSI = 0;
+   signed int parentIdSI = 0;
+
+   struct widg_rayWidg widgetsStackST;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Sec02: initialization
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   init_widg_rayWidg(&widgetsStackST);
+   
+   /*initialize*/
+   InitWindow(guiWidthSI, guiHeightSI, "this is a GUI");
+   SetTargetFPS(60);
+   
+   if( setup_widg_rayWidg(&widgetsStackST, 20) )
+       goto err_sec08;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Sec03: add widgets
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*this part is not needed, but I wanted to place the
+   `  button in the center
+   */
+   halfWidthSI =
+      textMeasure_widg_rayWidg(
+         buttonTextStr,
+         &halfHeightSI,
+         &widgetsStackST
+      );
+
+   halfWidthSI = guiWidthSI / 2 - halfWidthSI;
+   halfHeightSI = guiHeightSI / 2 - halfHeightSI;
+
+   /*this is the add button command*/
+   buttonIdSI =
+      addWidget_widg_rayWidg(
+         halfWidthSI,  /*x-axis coordinate of button*/
+         halfHeightSI, /*y-axis coordinate of button*/
+          0, /*not using tiling system*/
+         -1, /*set height automatically*/
+         -1, /*set width automatically*/
+         &widgetsStackST
+      );
+         
+   messageBoxIdSI = mkMesgBox_rayWidg(&widgetsStackST);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Sec04: draw the GUI
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while( ! WindowShouldClose() )
+   { /*Loop: run GUI*/
+      BeginDrawing();
+         ClearBackground( GetColor(def_white_rayWidg) );
+
+         butDraw_rayWidg(
+            guiWidthSI, /*maximum width of button*/
+            20,  /*minimum width of button*/
+            buttonIdSI,
+            "Press This",
+            0,   /*draw this button*/
+            &widgetsStackST
+         );
+
+         mesgBoxDraw_rayWidg(
+            messageBoxIdSI,
+            guiWidthSI,
+            guiHeightSI,
+            "hello world!",
+            "hi",
+            &widgetsStackST
+         );
+      EndDrawing();
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Sec05: detect tab key preses (cycle focus)
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+      keySI = GetKeyPressed();
+      indexSI =
+        focusCheck_widg_rayWidg(keySI, 0, &widgetsStackST);
+          
+       if(indexSI > -2)
+          continue;
+          /*means user pressed tab; For entry boxes you
+          `  will want to set/clear the activate state
+          `  here
+          */
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Sec06: detect enter key preses
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+      indexSI =
+         enterCheck_widg_rayWidg(
+            keySI,
+            0,
+            &parentIdSI,
+            &widgetsStackST
+         );
+
+      if(indexSI > -2)
+      { /*If: user hit enter*/
+         while( IsKeyDown(KEY_ENTER) )
+         { /*Loop: update GUI until enter key released*/
+            /*this section here should be put into a
+            `  separate function
+            */
+            BeginDrawing();
+               ClearBackground(
+                  GetColor(def_white_rayWidg)
+               );
+
+               butDraw_rayWidg(
+                  guiWidthSI, /*maximum width of button*/
+                  20,  /*minimum width of button*/
+                  buttonIdSI,
+                  "Press This",
+                  0,   /*draw this button*/
+                  &widgetsStackST
+               );
+
+               mesgBoxDraw_rayWidg(
+                  messageBoxIdSI,
+                  guiWidthSI,
+                  guiHeightSI,
+                  "hello world!",
+                  "hi",
+                  &widgetsStackST
+               );
+            EndDrawing();
+         } /*Loop: update GUI until enter key released*/
+
+         /*remove the press event*/
+         pressClear_widg_rayWidg(indexSI, &widgetsStackST);
+
+         if(indexSI == buttonIdSI)
+         { /*If: user selected the button*/
+            hidenClear_widg_rayWidg(
+               messageBoxIdSI,
+               &widgetsStackST
+            );
+         } /*If: user selected the button*/
+
+         else if(parentIdSI == messageBoxIdSI)
+         { /*Else If: user selected something in message*/
+            mesgBoxEvent_rayWidg(
+               2,
+               messageBoxIdSI, 
+               indexSI,
+               &widgetsStackST
+            );
+         } /*Else If: user selected something in message*/
+
+         continue;
+      } /*If: user hit enter*/
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Sec07: detect mouse clicks
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+      if( IsMouseButtonReleased(MOUSE_BUTTON_LEFT) )
+         keySI = 2;
+      else if( IsMouseButtonPressed(MOUSE_BUTTON_LEFT) )
+         keySI = 1;
+      else
+         continue; /*not left click*/
+
+       /*clear any old press events*/
+       pressClear_widg_rayWidg(buttonIdSI,&widgetsStackST);
+       mesgBoxEvent_rayWidg(
+          0,
+          messageBoxIdSI,
+          0, /*no need to list child for a clear*/
+          &widgetsStackST
+       );
+
+       indexSI =
+          getMouseWidg_widg_rayWidg(
+             GetMouseX(),
+             GetMouseY(),
+             &parentIdSI,
+             &widgetsStackST
+          ); /*find which widget was clicked*/
+
+       if(indexSI == buttonIdSI)
+       { /*If: user selected the button*/
+          hidenClear_widg_rayWidg(
+             messageBoxIdSI,
+             &widgetsStackST
+          );
+       } /*If: user selected the button*/
+
+       else if(parentIdSI == messageBoxIdSI)
+       { /*Else If: user selected something in message*/
+          mesgBoxEvent_rayWidg(
+             keySI,
+             messageBoxIdSI, 
+             indexSI,
+             &widgetsStackST
+          );
+       } /*Else If: user selected something in message*/
+
+       continue;
+   } /*Loop: run GUI*/
+   
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Sec08: clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   indexSI = 0;
+   goto ret_sec08;
+
+   err_sec08:;
+      indexSI = 1;
+      goto ret_sec08;
+
+   ret_sec08:;
+      freeStack_widg_rayWidg(&widgetsStackST);
+      CloseWindow();
+      return indexSI;
+} /*main*/
 ```
