@@ -136,6 +136,13 @@ You can install freezTB in multiple ways. The easiest way
 
 ### To install freezeTB
 
+You may get a request to install xcode. This is Mac
+  developer software and is needed to compile the code.
+
+Xcode may take a bit to install and you may have to
+  retry a few times. After xcode is installed then
+  run `cd ~/Downloads/freezeTB; sh macInstall;` again.
+
 This is the local install method.
 
 Download freezeTB from github and then use the
