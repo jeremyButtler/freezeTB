@@ -22,13 +22,6 @@ freezeTB includes databases from other repositories and
   [https://github.com/raysan5/raylib](
    https://github.com/raysan5/raylib)
   - zlib license
-- minimap2 from lh3 [https://github.com/lh3/minimap2](
-  https://github.com/lh3/minimap2)
-  - MIT license
-- TclTk from [https://github.com/tcltk/tcl](
-  https://github.com/tcltk/tcl) and
-  [https://github.com/tcltk/tk](https://github.com/tcltk/tk)
-  - MIT license
 - IBM Plex Mono font from fontshare.org
   - Under SIL Open Font License Version 1.1
   - [https://www.fontspace.com/search?q=IBM%20Plex%20Mono](
@@ -127,9 +120,8 @@ For Linux I am assuming you are using a Debian based
    - Otherwise freezeTB is slow
 
 ```
-cd ~/Downloads
-git clone https://github.com/jeremybuttler/freezeTB
-cd freezeTB
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB;
 make -f mkfile.unix
 sudo make -f mkfile.unix install
 ```
@@ -144,22 +136,35 @@ You can install freezTB in multiple ways. The easiest way
 
 ### To install freezeTB
 
+This is the local install method.
+
 Download freezeTB from github and then use the
-  `macInstall` script to install dependencies and
-  freezeTB. This will auto install minimap2 for you.
+  `macInstall` script to install freezeTB, TclTk, and
+  minimap2. Then if you want graphs, install R with
+  PNG support.
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.
 
 ```
-cd ~/Downloads
-git clone https://github.com/jeremybuttler/freezeTB
-cd freezeTB
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB;
 sh macInstall
 ```
 
 Do not worry about the Rec errors at the end. This is
   a failed attempt to setup the icon.
+
+For a global install (every user) you need `sudo` (root)
+  privleges. Here are the commands.
+
+```
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB;
+sed '3s/^/#/; 7,$s/^#//;' macInstall > tmp.sh;
+sh tmp.sh;
+rm tmp.sh;
+```
 
 Enter your password when prompted.
 
@@ -175,11 +180,10 @@ Enter your password when prompted.
 Then you can install freezeTB:
 
 ```
-cd ~/Downloads
-git clone https://github.com/jeremybuttler/freezeTB
-cd freezeTB
-make -f mkfile.unix
-sudo make -f mkfile.unix install
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB;
+make -f mkfile.unix;
+sudo make -f mkfile.unix install;
 ```
 
 This is really painfull.

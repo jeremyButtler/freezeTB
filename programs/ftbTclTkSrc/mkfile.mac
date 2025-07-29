@@ -60,6 +60,9 @@ objFiles= \
    ftbTclTk.$O
 
 icon: $(NAME)
+	if [ -f "${HOME}/Desktop/freezeTB" ]; then \
+		rm "${HOME}/Desktop/freezeTB"; \
+	fi;
 	ln -s "$(PREFIX)/bin/ftbTclTk" "${HOME}/Desktop/freezeTB"; # build shortcut
 	cp ../../FTB-icon.ico /tmp/FTB-icon.ico;
 	sips -i /tmp/FTB-icon.ico;
@@ -71,7 +74,7 @@ icon: $(NAME)
 
 $(NAME): mkDir ftbTclTk.$O
 	$(LD) -o $(NAME) $(objFiles) \
-		-F $(tcltk_prefix)/Library/Frameworks \
+		-F "$(PREFIX)/Frameworks" \
 		-framework Tcl \
   		-framework Tk
 	mv ftbTclTk "$(PREFIX)/bin";
@@ -92,8 +95,8 @@ ftbTclTk.$O: \
 	$(PREFIX)/bin/minimap2 \
 	$(genFreezeTB)/freezeTB.$O 
 		$(CC) $(CFLAGS) $(coreCFLAGS) -o ftbTclTk.$O ftbTclTk.c \
-			-I$(tcltk_prefix)/Library/Frameworks/Tcl.framework/Headers/ \
-			-I$(tcltk_prefix)/Library/Frameworks/Tk.framework/Headers/
+			-I$(PREFIX)/Frameworks/Tcl.framework/Headers/ \
+			-I$(PREFIX)/Frameworks/Tk.framework/Headers/
 $(genFreezeTB)/freezeTB.$O: \
 	$(genFreezeTB)/freezeTB.c \
 	$(genFreezeTB)/freezeTB.h \
@@ -473,12 +476,45 @@ $(genLib)/endin.$O: \
 		$(CC) -o $(genLib)/endin.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genLib)/endin.c
 
+# this is a bit of a pain, but should install tcltk for
+#   freezeTB only
 $(tcltk_prefix)/Library/Frameworks/Tk.framework/Headers/tk.h:
-	make -C ../tcltk/tcl/macosx;
-	make -C ../tcltk/tk/macosx;
-	make -C ../tcltk/tcl/macosx install INSTALL_ROOT="$(PREFIX)";
-	make -C ../tcltk/tk/macosx install INSTALL_ROOT="$(PREFIX)";
+	CFLAGS="-arch arm64 -mmacos-version-min=10.9";
+	export CFLAGS;
+	if [ ! -d ../tcltk]; then mkdir ../tcltk; fi;
+	if [ ! -d ../tcltk/tcl ]; then \
+		git clone https://github.com/tcltk/tcl ../tcltk/tcl; \
+	fi;
+	if [ ! -d "$(PREFIX)" ]; then \
+		mkdir "$(PREFIX)"; \
+	fi;
+	if [ ! -d "$(PREFIX)/Frameworks" ]; then \
+		mkdir "$(PREFIX)/Frameworks"; \
+	fi;
+	if [ ! -d "$(PREFIX)/Frameworks/Tcl.framework" ]; then \
+		make -C ../tcltk/tcl/macosx \
+			install-embedded \
+			SUBFRAMEWORK=1 \
+			DESTDIR=/tmp/tcltk \
+			DYLIB_INSTALL_DIR="${HOME}/.ftb/Frameworks/Tcl.framework"; \
+	fi;
+	if [ ! -d ../tcltk/tk ]; then \
+		git clone https://github.com/tcltk/tk ../tcltk/tk; \
+	fi;
+	if [ ! -d "$(PREFIX)/Frameworks/Tk.framework" ]; then \
+		make -C ../tcltk/tk/macosx \
+			install-embedded \
+			SUBFRAMEWORK=1 \
+			DESTDIR=/tmp/tcltk \
+			DYLIB_INSTALL_DIR="${HOME}/.ftb/Frameworks/Tk.framework"; \
+		mv /tmp/tcltk/Frameworks/* ~/.ftb/Frameworks; \
+	fi;
+
+# this should install the newest of minimap2
 $(PREFIX)/bin/minimap2:
+	if [ ! -d ../minimap2 ]; then \
+		git clone https://github.com/lh3/minimap2 ../minimap2; \
+	fi;
 	make -C ../minimap2 arm_neon=1 aarch64=1;
 	mv ../minimap2/minimap2 "$(PREFIX)/bin";
 	chmod a+x "$(PREFIX)/bin/minimap2";

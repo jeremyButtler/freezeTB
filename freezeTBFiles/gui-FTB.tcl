@@ -118,7 +118,12 @@ set ::mapPath [file join $mapPath "bin" "minimap2" ] ;
 set status [catch {exec $::mapPath --version} ::mapVer ]  ;
 if { $status eq 0 } {
 } else {
+set ::mapPath [file join $mapPath ".ftb" "bin" "minimap2" ] ;
+set status [catch {exec $::mapPath --version} ::mapVer ]  ;
+if { $status eq 0 } {
+} else {
 set glob_minimapFoundBl 0 ;
+} ;
 } ;
 } ;
 } ; 

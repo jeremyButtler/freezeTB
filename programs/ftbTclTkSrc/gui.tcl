@@ -484,7 +484,27 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
          if { $status eq 0 } {
             # found minimap2
          } else {
-            set glob_minimapFoundBl 0 ;
+            ---set ::mapPath 
+               [file join
+                  $mapPath
+                  ".ftb"
+                  "bin"
+                  "minimap2"
+               ]
+            ---; # build alternate minimap2 path
+
+            ---set
+               status
+               [catch
+                {exec $::mapPath --version} ::mapVer
+               ]
+            --- ; # get minimap2 version
+
+            if { $status eq 0 } {
+               # found minimap2
+            } else {
+               set glob_minimapFoundBl 0 ;
+            } ; # If: failed to find FTB minimap2
          } ; # If: failed to find minimap2 locally
       } ; # If: minimap2 could not be found
    } ; # If: minimiap2 not in path or on system
