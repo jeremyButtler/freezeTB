@@ -37,6 +37,7 @@
 #define FREEZE_TB_RAYLIB_STRUCT_H
 
 struct widg_rayWidg;
+struct str_ptrAry;
 
 /*entry box dimensions*/
 #define def_widthPrefixEntry_ftbRayST 200
@@ -65,9 +66,8 @@ typedef struct gui_ftbRayST
    signed char blinkSC;       /*status of cursor blink*/
 
    /*for fastq input button*/
-   signed char *fileAryStr;   /*array of c-strings*/
-   signed int *fileIndexArySI; /*each files array index*/
-   signed int fileCntSI;       /*number of files*/
+   struct str_ptrAry *fqStrSTPtr;
+      /*c-string array with fastq files*/
 
    /*prefix entry box*/
    signed char inPrefixStr[128]; /*input prefix name*/
@@ -83,12 +83,24 @@ typedef struct gui_ftbRayST
 
    /*widget ids*/
    signed int mesgBoxIdSI;
+   signed int fileBrowserIdSI;
    signed int fqButIdSI;
    signed int prefixLabIdSI;
    signed int prefixEntryIdSI;
    signed int outDirIdSI;
    signed int configIdSI;
    signed int runIdSI;
+
+   signed char browserSC;
+      /*0 for fq, 1 for output directory, 3 for config*/
+   struct files_rayWidg *fqFileSTPtr;
+      /*for fastq file browser*/
+   struct files_rayWidg *outDirSTPtr;
+      /*for getting output directory*/
+   struct files_rayWidg *configFileSTPtr;
+      /*for getting configuration directory*/
+
+   signed char fileMesgStr[128];
 }gui_ftbRayST;
 
 /*-------------------------------------------------------\
@@ -156,15 +168,16 @@ freeHeap_gui_ftbRayST(
 | Fun05: drawGUI_ftbRayST
 |   - draws the gui for a gui_ftbRayST structure
 | Input:
-|   - guiSTPtr:
+|   - voidGuiSTPtr:
 |     o gui_ftbRayST struct pointer with gui to draw
+|       sent in as void
 | Output:
 |   - Draws:
 |     o current GUI state to screen
 \-------------------------------------------------------*/
 void
 draw_gui_ftbRayST(
-   struct gui_ftbRayST *guiSTPtr
+   void *voidGuiSTPtr
 );
 
 /*-------------------------------------------------------\

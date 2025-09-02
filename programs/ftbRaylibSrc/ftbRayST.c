@@ -50,6 +50,7 @@
 #endif
 
 #include "../genLib/ulCp.h"
+#include "../genLib/ptrAry.h"
 
 #include "../raylib/src/raylib.h"
 #include "ftbRayST.h"
@@ -67,8 +68,8 @@
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
 /*main window settings*/
-#define def_winWidth_ftbRayST 400
-#define def_winHeight_ftbRayST 200
+#define def_winWidth_ftbRayST 420
+#define def_winHeight_ftbRayST 320
 
 #define def_maxWidgetWidth_ftbRayST 240
 
@@ -142,17 +143,21 @@ blank_gui_ftbRayST(
    guiSTPtr->focusSI = 5;
    guiSTPtr->blinkSC = 0;
 
-   /*fastq button defaults*/
-   guiSTPtr->fileCntSI = 0;
-
    /*prefix button defaults*/
-   guiSTPtr->inPrefixStr[0] = 0;
+   guiSTPtr->prefixLenSI =
+      cpStr_ulCp(
+         guiSTPtr->inPrefixStr,
+         (signed char *) "FTB_OUT"
+      );
    guiSTPtr->prefixPosArySI[0] = 0; /*scroll*/
    guiSTPtr->prefixPosArySI[1] = 0; /*cusor position*/
    guiSTPtr->prefixLenSI = 0;
 
    /*output button*/
    guiSTPtr->outDirStr[0] = 0;
+
+   /*file browser message*/
+   guiSTPtr->fileMesgStr[0] = 0;
 
    /*configuration file button*/
    guiSTPtr->configFileStr[0] = 0;
@@ -176,8 +181,7 @@ init_gui_ftbRayST(
    if(! guiSTPtr)
       return;
 
-   guiSTPtr->fileAryStr = 0;
-   guiSTPtr->fileIndexArySI = 0;
+   guiSTPtr->fqStrSTPtr = 0;
    guiSTPtr->widgSTPtr = 0;
 
    guiSTPtr->mesgBoxIdSI = 0;
@@ -187,6 +191,12 @@ init_gui_ftbRayST(
    guiSTPtr->outDirIdSI = 0;
    guiSTPtr->configIdSI = 0;
    guiSTPtr->runIdSI = 0;
+   guiSTPtr->fileBrowserIdSI = 0;
+
+   guiSTPtr->fqFileSTPtr = 0;
+   guiSTPtr->outDirSTPtr = 0;
+   guiSTPtr->configFileSTPtr = 0;
+   guiSTPtr->browserSC = -1;
 
    blank_gui_ftbRayST(guiSTPtr);
 } /*init_gui_ftbRayST*/
@@ -208,12 +218,16 @@ freeStack_gui_ftbRayST(
    if(! guiSTPtr)
       return;
 
-   if(guiSTPtr->fileAryStr)
-      free(guiSTPtr->fileAryStr);
-   if(guiSTPtr->fileIndexArySI)
-      free(guiSTPtr->fileIndexArySI);
+   if(guiSTPtr->fqStrSTPtr)
+      freeHeap_str_ptrAry(guiSTPtr->fqStrSTPtr);
    if(guiSTPtr->widgSTPtr)
       freeHeap_widg_rayWidg(guiSTPtr->widgSTPtr);
+   if(guiSTPtr->fqFileSTPtr)
+      freeHeap_files_rayWidg(guiSTPtr->fqFileSTPtr);
+   if(guiSTPtr->outDirSTPtr)
+      freeHeap_files_rayWidg(guiSTPtr->outDirSTPtr);
+   if(guiSTPtr->configFileSTPtr)
+      freeHeap_files_rayWidg(guiSTPtr->configFileSTPtr);
 
    init_gui_ftbRayST(guiSTPtr);
 } /*freeStack_gui_ftbRayST*/
@@ -243,21 +257,37 @@ freeHeap_gui_ftbRayST(
 | Fun05: drawGUI_ftbRayST
 |   - draws the gui for a gui_ftbRayST structure
 | Input:
-|   - guiSTPtr:
+|   - voidGuiSTPtr:
 |     o gui_ftbRayST struct pointer with gui to draw
+|       sent in as void
 | Output:
 |   - Draws:
 |     o current GUI state to screen
 \-------------------------------------------------------*/
 void
 draw_gui_ftbRayST(
-   struct gui_ftbRayST *guiSTPtr
+   void *voidGuiSTPtr
 ){
    signed char blinkBl = 0; /*be in blink state*/
-   struct Color guiCol =
-      GetColor(guiSTPtr->widgSTPtr->guiColSI);
+   struct Color guiCol;
    signed int heightSI = 0;
    signed int widthSI = 0;
+
+   struct gui_ftbRayST *guiSTPtr =
+      (gui_ftbRayST *) voidGuiSTPtr;
+   struct files_rayWidg *fileSTPtr = 0;
+
+   switch(guiSTPtr->browserSC)
+   { /*Switch: find which browser using*/
+      case 0: fileSTPtr = guiSTPtr->fqFileSTPtr; break;
+      case 1: fileSTPtr = guiSTPtr->outDirSTPtr; break;
+      case 2: fileSTPtr =guiSTPtr->configFileSTPtr; break;
+
+      default: fileSTPtr = guiSTPtr->fqFileSTPtr; break;
+         /*file browser is hidden, just give something*/
+   } /*Switch: find which browser using*/
+
+   guiCol = GetColor(guiSTPtr->widgSTPtr->guiColSI);
 
    if(guiSTPtr->inputBl)
    { /*If: displaying the input GUI*/
@@ -371,6 +401,15 @@ draw_gui_ftbRayST(
          (signed char *) "Ok",
          guiSTPtr->widgSTPtr
       );
+
+      fileBrowserDraw_rayWidg(
+         guiSTPtr->fileBrowserIdSI,
+         guiSTPtr->fileMesgStr,
+         widthSI,
+         heightSI,
+         fileSTPtr,
+         guiSTPtr->widgSTPtr
+      );
          
    EndDrawing();
 } /*draw_gui_ftbRayST*/
@@ -416,8 +455,19 @@ mk_gui_ftbRayST(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun06 Sec02:
-   ^   - add widgets
+   ^   - initialize and add widgets
+   ^   o fun06 sec02 sub01:
+   ^     - initialize the gui
+   ^   o fun06 sec02 sub02:
+   ^     - add input buttons and entry boxes
+   ^   o fun06 sec02 sub03:
+   ^     - add input file browsers
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub02:
+   *   - initialize the gui
+   \*****************************************************/
 
    retHeapGUI = malloc(sizeof(struct gui_ftbRayST));
    if(! retHeapGUI)
@@ -429,6 +479,26 @@ mk_gui_ftbRayST(
    if(! retHeapGUI->widgSTPtr)
       goto memErr_fun06;
    init_widg_rayWidg(retHeapGUI->widgSTPtr);
+
+   retHeapGUI->fqStrSTPtr = mk_str_ptrAry(32);
+   if(! retHeapGUI->fqStrSTPtr)
+      goto memErr_fun06;
+
+
+   InitWindow(
+      retHeapGUI->inWinWidthSI,
+      retHeapGUI->inWinHeightSI,
+      (char *) inputStr
+   );
+
+   /*SetWindowIcon(ftbIconImg)*/
+
+   SetTargetFPS(60);
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub02:
+   *   - add input buttons and entry boxes
+   \*****************************************************/
 
    retHeapGUI->mesgBoxIdSI =
       mkMesgBox_rayWidg(retHeapGUI->widgSTPtr);
@@ -509,6 +579,30 @@ mk_gui_ftbRayST(
    if(retHeapGUI->runIdSI < 0)
       goto memErr_fun06;
 
+   /*****************************************************\
+   * Fun06 Sec02 Sub02:
+   *   - add input file browsers
+   *   o fun06 sec02 sub02 cat01:
+   *     - add file browswer widget
+   *   o fun06 sec02 sub02 cat02:
+   *     - add fastq file browser structure
+   *   o fun06 sec02 sub02 cat03:
+   *     - add output directory file browser structure
+   *   o fun06 sec02 sub02 cat04:
+   *     - add configuration file file browser structure
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun06 Sec02 Sub02 Cat01:
+   +   - add file browswer widget
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   retHeapGUI->fileBrowserIdSI =
+      mkFileBrowser_rayWidg(retHeapGUI->widgSTPtr);
+
+   if(retHeapGUI->fileBrowserIdSI < 0)
+      goto memErr_fun06;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun06 Sec03:
    ^   - draw initial GUI
@@ -519,28 +613,6 @@ mk_gui_ftbRayST(
       retHeapGUI->widgSTPtr
    ); /*make sure label is in inactive state (no focus)*/
 
-   if(retHeapGUI->inputBl)
-   { /*If: drawing the input GUI*/
-      InitWindow(
-         retHeapGUI->inWinWidthSI,
-         retHeapGUI->inWinHeightSI,
-         (char *) inputStr
-      );
-   } /*If: drawing the input GUI*/
-
-   else
-   { /*Else: drawing the output GUI*/
-      InitWindow(
-         retHeapGUI->outWinWidthSI,
-         retHeapGUI->outWinHeightSI,
-         (char *) outputStr
-      );
-   } /*Else: drawing the output GUI*/
-
-   /*SetWindowIcon(ftbIconImg)*/
-
-   SetTargetFPS(60);
-
    if( setup_widg_rayWidg(retHeapGUI->widgSTPtr) )
       goto memErr_fun06;
 
@@ -548,6 +620,7 @@ mk_gui_ftbRayST(
    ^ Fun06 Sec04:
    ^   - convert tile coordinates to x,y coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
 
    /*this needs to come after window initialization step,
    `  otherwise I can not measure size of text
@@ -630,6 +703,115 @@ mk_gui_ftbRayST(
 
    draw_gui_ftbRayST(retHeapGUI);
 
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun06 Sec02 Sub02 Cat02:
+   +   - add fastq file browser structure
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   retHeapGUI->fqFileSTPtr =
+      malloc(sizeof(struct files_rayWidg));
+   if(! retHeapGUI->fqFileSTPtr)
+      goto memErr_fun06;
+   init_files_rayWidg(retHeapGUI->fqFileSTPtr);
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".fq",
+         1, /*cloear old extensions*/
+         1, /*select this extension*/
+         retHeapGUI->fqFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".fastq",
+         0,
+         1, /*select this extension*/
+         retHeapGUI->fqFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".fastq.gz",
+         0,
+         1, /*select this extension*/
+         retHeapGUI->fqFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".fq.gz",
+         0,
+         1, /*select this extension*/
+         retHeapGUI->fqFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun06 Sec02 Sub02 Cat03:
+   +   - add output directory file browser structure
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   retHeapGUI->outDirSTPtr =
+      malloc(sizeof(struct files_rayWidg));
+   if(! retHeapGUI->outDirSTPtr)
+      goto memErr_fun06;
+   init_files_rayWidg(retHeapGUI->outDirSTPtr);
+   setFileLimit_files_rayWidg(1, retHeapGUI->outDirSTPtr);
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "dir",
+         1, /*cloear old extensions*/
+         1, /*select this extension*/
+         retHeapGUI->outDirSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun06 Sec02 Sub02 Cat04:
+   +   - add configuration file file browser structure
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   retHeapGUI->configFileSTPtr =
+      malloc(sizeof(struct files_rayWidg));
+   if(! retHeapGUI->configFileSTPtr)
+      goto memErr_fun06;
+   init_files_rayWidg(retHeapGUI->configFileSTPtr);
+
+   setFileLimit_files_rayWidg(
+      1,
+      retHeapGUI->configFileSTPtr
+   );
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "*",
+         1, /*cloear old extensions*/
+         1, /*select this extension*/
+         retHeapGUI->configFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".txt",
+         0, /*do not clear old extensions*/
+         0, /*do not select this extension*/
+         retHeapGUI->configFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06;
+
    return retHeapGUI;
 
    memErr_fun06:;
@@ -665,13 +847,7 @@ checkRunEvent_ftbRayST(
    '   o fun07 sec01:
    '     - variable declarations
    '   o fun07 sec02:
-   '     - handle switching focus (tab) events
-   '   o fun07 sec03:
-   '     - detect enter key hits
-   '   o fun07 sec04:
-   '     - detect click events
-   '   o fun07 sec05:
-   '     - detect scroll events and add text events
+   '     - get and check events
    '   o fun07 sec06:
    '     - handle running button events
    '   o fun07 sec07:
@@ -683,328 +859,401 @@ checkRunEvent_ftbRayST(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   signed int keySI = GetKeyPressed();
-   signed int xSI = GetMouseX();
-   signed int ySI = GetMouseY();
+   signed char *tmpHeapStr = 0;
 
-   signed char releaseBl =
-      IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
-   signed char pressBl =
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-
-   int scrollSI = (signed int) GetMouseWheelMove();
-      /*returns integers, not percentage*/
-
+   struct event_rayWidg eventStackST;
    signed int indexSI = 0;
-   signed int parSI = -1;    /*updated for parent events*/
+   signed int tmpSI = 0;
+
+   struct files_rayWidg *fileSTPtr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec02:
-   ^   - handle switching focus (tab) events
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   indexSI =
-     focusCheck_widg_rayWidg(keySI,0,guiSTPtr->widgSTPtr);
-
-   if(indexSI != -2)
-   { /*If: user switched focus*/
-      if(indexSI == guiSTPtr->prefixEntryIdSI)
-         activeAdd_widg_rayWidg(
-            guiSTPtr->prefixEntryIdSI,
-            guiSTPtr->widgSTPtr
-         );
-      else
-         activeClear_widg_rayWidg(
-            guiSTPtr->prefixEntryIdSI,
-            guiSTPtr->widgSTPtr
-         );
-
-      goto done_fun07_sec07;
-      /*event was a change in focus*/
-   } /*If: user switched focus*/
-
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec03:
-   ^   - detect enter key hits
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   indexSI =
-     enterCheck_widg_rayWidg(
-        keySI,
-        0, /*key is from GetKey()*/
-        &parSI, /*gets parent id if widget is child*/
-        guiSTPtr->widgSTPtr
-     );
-
-   if(indexSI != -2)
-   { /*If: enter key was hit*/
-      /*I can ignore other errors here because I made sure
-      `  they would never happen
-      */
-      draw_gui_ftbRayST(guiSTPtr);
-
-      while( IsKeyDown(KEY_ENTER) )
-         draw_gui_ftbRayST(guiSTPtr);
-
-      pressClear_widg_rayWidg(
-         indexSI,
-         guiSTPtr->widgSTPtr
-      );
-
-      if(indexSI == guiSTPtr->fqButIdSI)
-         goto getFqFiles_fun07_sec06_sub0x;
-
-      else if(indexSI == guiSTPtr->outDirIdSI)
-         goto getOutDir_fun07_sec06_sub0x;
-
-      else if(indexSI == guiSTPtr->configIdSI)
-         goto getConfigFile_fun07_sec06_sub0x;
-
-      else if(indexSI == guiSTPtr->runIdSI)
-         goto runFtb_fun07_sec06_sub0x;
-
-      else if(parSI == guiSTPtr->mesgBoxIdSI)
-         goto mesgBox_fun07_sec06_sub0x;
-
-      goto done_fun07_sec07;
-   } /*If: enter key*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec04:
-   ^   - detect click events
-   ^   o fun07 sec04 sub01:
-   ^     - check if had event + clear old events and focus
-   ^   o fun07 sec04 sub02:
-   ^     - find click event widget
+   ^   - get and check events
+   ^   o fun07 sec02 sub01:
+   ^     - get event and check entery event
+   ^   o fun07 sec02 sub02:
+   ^     - check which event I am running
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun07 Sec04 Sub01:
-   *   - check if had event + clear old events and focus
+   * Fun07 Sec02 Sub01:
+   *   - get event and check entery event
    \*****************************************************/
 
-   if(pressBl)
-      ;
-   else if(releaseBl)
-      ;
-   else
-      goto detectScroll_fun07_sec06;
+   init_event_rayWidg(&eventStackST);
 
    indexSI =
-      getMouseWidg_widg_rayWidg(
-         xSI,
-         ySI,
-         &parSI,
+      get_event_rayWidg(
+         1,                  /*handel focus changes*/
+         draw_gui_ftbRayST,  /*redraw GUI for presses*/
+         guiSTPtr,           /*has GUI to redraw*/
+         &eventStackST,      /*has events*/
+         guiSTPtr->widgSTPtr /*has widgets*/
+      );
+
+   /*not worried, bucause this will check if the entry
+   `  box id matches the found id or is not active. So, it
+   `  does nothing if not on an entry box
+   */
+   tmpSI =
+      entryEvent_rayWidg(
+         guiSTPtr->prefixEntryIdSI,/*id of entry box*/
+         guiSTPtr->prefixPosArySI,/*cursor/scroll pos*/
+         guiSTPtr->inPrefixStr,   /*text in entry box*/
+         guiSTPtr->prefixLenSI,   /*string length*/
+         127,                     /*max string length*/
+         fileStrCheck_rayWidg,    /*check function*/
+         &eventStackST,
          guiSTPtr->widgSTPtr
-      ); /*get id of widget mouse is on*/
+      ); /*add any keyboard inputs to entry box*/
 
-    pressClear_widg_rayWidg(
-       guiSTPtr->fqButIdSI,
-       guiSTPtr->widgSTPtr
-   );
-
-   pressClear_widg_rayWidg(
-      guiSTPtr->outDirIdSI,
-      guiSTPtr->widgSTPtr
-   );
-
-   pressClear_widg_rayWidg(
-      guiSTPtr->configIdSI,
-      guiSTPtr->widgSTPtr
-   );
-
-   pressClear_widg_rayWidg(
-      guiSTPtr->runIdSI,
-      guiSTPtr->widgSTPtr
-   );
-
-   mesgBoxEvent_rayWidg(
-      0, /*clear button press*/
-      guiSTPtr->mesgBoxIdSI,
-      0, /*no need to list child*/
-      guiSTPtr->widgSTPtr
-   );
+   if(tmpSI >= 0)
+   { /*If: was a entry box input event*/
+      guiSTPtr->prefixLenSI = tmpSI;
+      goto done_fun07_sec07;
+   } /*If: was a entry box input event*/
 
    /*****************************************************\
-   * Fun07 Sec04 Sub02:
-   *   - find click event widget
+   * Fun07 Sec02 Sub02:
+   *   - check which event I am running
    \*****************************************************/
 
-   if(indexSI == guiSTPtr->fqButIdSI)
-   { /*If: hit fastq button*/
-      if(pressBl)
-         pressAdd_widg_rayWidg(
-            guiSTPtr->fqButIdSI,
-            guiSTPtr->widgSTPtr
-         );
-      else
-         goto getFqFiles_fun07_sec06_sub0x;
-   } /*If: hit fastq button*/
+   if(eventStackST.idSI == guiSTPtr->fqButIdSI)
+      goto getFqFiles_fun07_sec06_sub02;
 
-   else if(indexSI == guiSTPtr->outDirIdSI)
-   { /*Else If: output directory button*/
-      if(pressBl)
-         pressAdd_widg_rayWidg(
-            guiSTPtr->outDirIdSI,
-            guiSTPtr->widgSTPtr
-         );
-      else
-         goto getOutDir_fun07_sec06_sub0x;
-   } /*Else If: output directory button*/
+   else if(eventStackST.idSI == guiSTPtr->outDirIdSI)
+      goto getOutDir_fun07_sec06_sub03;
 
-   else if(indexSI == guiSTPtr->configIdSI)
-   { /*Else If: configuration file button*/
-      if(pressBl)
-         pressAdd_widg_rayWidg(
-            guiSTPtr->configIdSI,
-            guiSTPtr->widgSTPtr
-         );
-      else
-         goto getConfigFile_fun07_sec06_sub0x;
-   } /*Else If: configuration file button*/
+   else if(eventStackST.idSI == guiSTPtr->configIdSI)
+      goto getConfigFile_fun07_sec06_sub04;
 
-   else if(indexSI == guiSTPtr->runIdSI)
-   { /*Else If: run freezeTB button*/
-      if(pressBl)
-         pressAdd_widg_rayWidg(
-            guiSTPtr->runIdSI,
-            guiSTPtr->widgSTPtr
-         );
-      else
-         goto runFtb_fun07_sec06_sub0x;
-   } /*Else If: run freezeTB button*/
+   else if(eventStackST.idSI == guiSTPtr->runIdSI)
+      goto runFtb_fun07_sec06_sub06;
 
-   else if(indexSI == guiSTPtr->prefixEntryIdSI)
-   { /*Else If: prefix entry box*/
-      activeAdd_widg_rayWidg(
-         guiSTPtr->prefixEntryIdSI,
-         guiSTPtr->widgSTPtr
-      );
-   } /*Else If: prefix entry box*/
+   else if(eventStackST.parIdSI == guiSTPtr->mesgBoxIdSI)
+      goto mesgBox_fun07_sec06_sub01;
 
-   else if(parSI == guiSTPtr->mesgBoxIdSI)
-   { /*Else If: dealing with a message box*/
-      if(pressBl)
-         mesgBoxEvent_rayWidg(
-            1, /*add button press*/
-            guiSTPtr->mesgBoxIdSI,
-            indexSI,
-            guiSTPtr->widgSTPtr
-         );
-      else
-         goto mesgBox_fun07_sec06_sub0x;
-   } /*Else If: dealing with a message box*/
-
-   goto done_fun07_sec07;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec05:
-   ^   - detect scroll events and add text events
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   detectScroll_fun07_sec06:;
-
-   if(
-      activeStateGet_widg_rayWidg(
-         guiSTPtr->prefixEntryIdSI,
-         guiSTPtr->widgSTPtr
-      )
-   ){ /*If: scrolling in prefix entry box*/
-      /*keeping scroll and cursor locked for sanity*/
-
-      if(scrollSI)
-      { /*If: user wanted to change text position*/
-         guiSTPtr->prefixPosArySI[0] += scrollSI;
-            /*scroll position*/
-         goto done_fun07_sec07;
-      } /*If: user wanted to change text position*/
-
-      else if(! keySI)
-         goto done_fun07_sec07;
-         /*nothing input*/
-
-      else
-      { /*Else If: user input text*/
-         addCharToEntry_rayWidg(
-            keySI,
-            guiSTPtr->inPrefixStr,
-            &guiSTPtr->prefixLenSI,
-            def_widthPrefixEntry_ftbRayST,
-            guiSTPtr->prefixPosArySI,
-            guiSTPtr->widgSTPtr
-         ); /*do not care about output*/
-
-         guiSTPtr->prefixLenSI =
-            fileStrCheck_rayWidg(
-               guiSTPtr->inPrefixStr,       /*input text*/
-               guiSTPtr->prefixPosArySI[1], /*cusor pos*/
-               127
-            ); /*make sure valid output name*/
-
-         goto done_fun07_sec07;
-      } /*Else If: user input text*/
-   } /*If: scrolling in prefix entry box*/
+   else if(
+      eventStackST.parIdSI == guiSTPtr->fileBrowserIdSI
+   ) goto fileBrowser_fun07_sec06_sub05;
 
    goto done_fun07_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec06:
    ^   - handle running button events
+   ^   o fun07 sec06 sub01:
+   ^     - message box event
+   ^   o fun07 sec06 sub02:
+   ^     - get fastq files event
+   ^   o fun07 sec06 sub03:
+   ^     - get output directory event
+   ^   o fun07 sec06 sub04:
+   ^     - get configuration file event
+   ^   o fun07 sec06 sub05:
+   ^     - file browser event actions
+   ^   o fun07 sec06 sub06:
+   ^     - run event actions
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*TODO: add function calls*/
-   mesgBox_fun07_sec06_sub0x:;
+   /*****************************************************\
+   * Fun07 Sec06 Sub01:
+   *   - message box event
+   \*****************************************************/
+
+   mesgBox_fun07_sec06_sub01:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun07_sec07;
+
       mesgBoxEvent_rayWidg(
          2, /*rease key event*/
-         parSI,
-         indexSI,
+         eventStackST.parIdSI,
+         eventStackST.idSI,
          guiSTPtr->widgSTPtr
       );
       goto done_fun07_sec07;
 
-   getFqFiles_fun07_sec06_sub0x:;
+   /*****************************************************\
+   * Fun07 Sec06 Sub02:
+   *   - get fastq files event
+   \*****************************************************/
+
+   getFqFiles_fun07_sec06_sub02:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun07_sec07;
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->fileBrowserIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      guiSTPtr->browserSC = 0;
+
+      cpStr_ulCp(
+         guiSTPtr->fileMesgStr,
+         (signed char *) "select fastq files to run"
+      );
+      goto done_fun07_sec07;
+
+   /*****************************************************\
+   * Fun07 Sec06 Sub03:
+   *   - get output directory event
+   \*****************************************************/
+
+   getOutDir_fun07_sec06_sub03:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun07_sec07;
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->fileBrowserIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      guiSTPtr->browserSC = 1;
+
+      cpStr_ulCp(
+         guiSTPtr->fileMesgStr,
+         (signed char *) "select output folder"
+      );
+      goto done_fun07_sec07;
+
+   /*****************************************************\
+   * Fun07 Sec06 Sub04:
+   *   - get configuration file event
+   \*****************************************************/
+
+   getConfigFile_fun07_sec06_sub04:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun07_sec07;
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->fileBrowserIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      guiSTPtr->browserSC = 2;
+
+      cpStr_ulCp(
+         guiSTPtr->fileMesgStr,
+         (signed char *) "select FTB configuration file"
+      );
+      goto done_fun07_sec07;
+
+   /*****************************************************\
+   * Fun07 Sec06 Sub05:
+   *   - file browser event actions
+   *   o fun07 sec06 sub05 cat01:
+   *     - run file brower event
+   *   o fun07 sec06 sub05 cat02:
+   *     - cancel event
+   *   o fun07 sec06 sub05 cat03:
+   *     - selected output directory
+   *   o fun07 sec06 sub05 cat04:
+   *     - selected configuration file
+   *   o fun07 sec06 sub05 cat05:
+   *     - selected fastq files
+   *   o fun07 sec06 sub05 cat05:
+   *     - error or no event
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun07 Sec06 Sub05 Cat01:
+   +   - run file brower event
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fileBrowser_fun07_sec06_sub05:;
+      switch(guiSTPtr->browserSC)
+      { /*Switch: find which browser using*/
+         case 0: fileSTPtr = guiSTPtr->fqFileSTPtr; break;
+         case 1: fileSTPtr = guiSTPtr->outDirSTPtr; break;
+         case 2: fileSTPtr = guiSTPtr->configFileSTPtr;
+                 break;
+
+         default: goto done_fun07_sec07;
+           /*invalid option*/
+      } /*Switch: find which browser using*/
+
+      tmpSI =
+         fileBrowserEvent_rayWidg(
+            guiSTPtr->fileBrowserIdSI,
+            &eventStackST,
+            fileSTPtr,
+            guiSTPtr->widgSTPtr
+         );
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub05 Cat02:
+      +   - cancel event
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(tmpSI == 2)
+      { /*If: hit cancel*/
+         hidenAdd_widg_rayWidg(
+            guiSTPtr->fileBrowserIdSI,
+            guiSTPtr->widgSTPtr
+          ); /*use hit cancel*/
+
+          goto done_fun07_sec07;
+      } /*If: hit cancel*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub05 Cat03:
+      +   - selected output directory
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(tmpSI == 1)
+      { /*Else If: files were selected*/
+         hidenAdd_widg_rayWidg(
+            guiSTPtr->fileBrowserIdSI,
+            guiSTPtr->widgSTPtr
+         ); /*user hit select*/
+
+         switch(guiSTPtr->browserSC)
+         { /*Switch: find which browser using*/
+            case 1:
+            /*Case: output directory selected*/
+               tmpSI = 0;
+               tmpHeapStr =
+                  getFile_files_rayWidg(
+                     &tmpSI,
+                     0, /*only selected items*/
+                     fileSTPtr
+                  );
+               if(! tmpHeapStr)
+                  goto err_fun07_sec07;
+
+               cpStr_ulCp(guiSTPtr->outDirStr,tmpHeapStr);
+               free(tmpHeapStr);
+               tmpHeapStr = 0;
+               goto done_fun07_sec07;
+            /*Case: output directory selected*/
+
+            /*+++++++++++++++++++++++++++++++++++++++++++\
+            + Fun07 Sec06 Sub05 Cat04:
+            +   - selected configuration file
+            \+++++++++++++++++++++++++++++++++++++++++++*/
+
+            case 2:
+            /*Case: configuration file selected*/
+               tmpSI = 0;
+               tmpHeapStr =
+                  getFile_files_rayWidg(
+                     &tmpSI,
+                     0, /*only selected items*/
+                     fileSTPtr
+                  );
+               if(! tmpHeapStr)
+                  goto err_fun07_sec07;
+
+               cpStr_ulCp(
+                  guiSTPtr->configFileStr,
+                  tmpHeapStr
+               );
+               free(tmpHeapStr);
+               tmpHeapStr = 0;
+               goto done_fun07_sec07;
+            /*Case: configuration file selected*/
+
+            /*+++++++++++++++++++++++++++++++++++++++++++\
+            + Fun07 Sec06 Sub05 Cat05:
+            +   - selected fastq files
+            \+++++++++++++++++++++++++++++++++++++++++++*/
+
+            case 0:
+            /*Case: fastq files selected*/
+               tmpSI = 0;
+
+               while(tmpSI >= 0)
+               { /*Loop: get fastq files*/
+                  tmpHeapStr =
+                     getFile_files_rayWidg(
+                        &tmpSI,
+                        0, /*only selected items*/
+                        fileSTPtr
+                     );
+                  if(tmpSI < 0)
+                      break;
+                  else if(! tmpHeapStr)
+                     goto err_fun07_sec07;
+
+                  if(
+                     add_str_ptrAry(
+                        tmpHeapStr,
+                        guiSTPtr->fqStrSTPtr,
+                        guiSTPtr->fqStrSTPtr->lenSL
+                     )
+                  ) goto err_fun07_sec07;
+
+                  free(tmpHeapStr);
+                  tmpHeapStr = 0;
+               } /*Loop: get fastq files*/
+
+               goto done_fun07_sec07;
+            /*Case: fastq files selected*/
+         } /*Switch: find which browser using*/
+      } /*Else If: files were selected*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub05 Cat05:
+      +   - error or no event
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(tmpSI < -2)
+         goto err_fun07_sec07;
+
+      goto done_fun07_sec07;
+
+   /*****************************************************\
+   * Fun07 Sec06 Sub06:
+   *   - run event actions
+   \*****************************************************/
+
+   runFtb_fun07_sec06_sub06:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun07_sec07;
+
+      if(guiSTPtr->fqStrSTPtr->lenSL <= 0)
+      { /*If: no fastq files input*/
+         hidenClear_widg_rayWidg(
+            guiSTPtr->mesgBoxIdSI,
+            guiSTPtr->widgSTPtr
+         );
+         cpStr_ulCp(
+            guiSTPtr->mesgStr,
+            (signed char *) "no fastq files input"
+         );
+
+         goto done_fun07_sec07;
+      } /*If: no fastq files input*/
+
+      else if(guiSTPtr->prefixLenSI <= 0)
+      { /*Else If: no prefix input*/
+         hidenClear_widg_rayWidg(
+            guiSTPtr->mesgBoxIdSI,
+            guiSTPtr->widgSTPtr
+         );
+         cpStr_ulCp(
+            guiSTPtr->mesgStr,
+            (signed char *) "no prefix input"
+         );
+
+         guiSTPtr->prefixLenSI =
+            cpStr_ulCp(
+               guiSTPtr->inPrefixStr,
+               (signed char *) "FTB_OUT"
+            );
+         goto done_fun07_sec07;
+      } /*Else If: no prefix input*/
+
       hidenClear_widg_rayWidg(
          guiSTPtr->mesgBoxIdSI,
          guiSTPtr->widgSTPtr
       );
       cpStr_ulCp(
          guiSTPtr->mesgStr,
-         (signed char *) "open file browser to get fastq files"
-      ); /*TODO add real function*/
-      goto done_fun07_sec07;
-
-   getOutDir_fun07_sec06_sub0x:;
-      hidenClear_widg_rayWidg(
-         guiSTPtr->mesgBoxIdSI,
-         guiSTPtr->widgSTPtr
+         guiSTPtr->outDirSTPtr->pwdStr
       );
-      cpStr_ulCp(
-         guiSTPtr->mesgStr,
-         (signed char *) "open file browser to get output"
-      ); /*TODO add real function*/
-      goto done_fun07_sec07;
-
-   getConfigFile_fun07_sec06_sub0x:;
-      hidenClear_widg_rayWidg(
-         guiSTPtr->mesgBoxIdSI,
-         guiSTPtr->widgSTPtr
-      );
-      cpStr_ulCp(
-         guiSTPtr->mesgStr,
-         (signed char *) "open file browser to get FTB config file"
-      ); /*TODO add real function*/
-      goto done_fun07_sec07;
-
-   runFtb_fun07_sec06_sub0x:;
-      hidenClear_widg_rayWidg(
-         guiSTPtr->mesgBoxIdSI,
-         guiSTPtr->widgSTPtr
-      );
-      cpStr_ulCp(
-         guiSTPtr->mesgStr,
-         (signed char *) "runs freezeTB on input"
-      ); /*TODO add real function*/
       goto done_fun07_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1012,7 +1261,23 @@ checkRunEvent_ftbRayST(
    ^   - return results and redraw gui
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   goto done_fun07_sec07;
+
+   err_fun07_sec07:;
+      freeStack_event_rayWidg(&eventStackST);
+      tmpSI = 1;
+      goto ret_fun07_sec07;
+
    done_fun07_sec07:;
+      freeStack_event_rayWidg(&eventStackST);
       draw_gui_ftbRayST(guiSTPtr);
-      return 0;
+      tmpSI = 0;
+      goto ret_fun07_sec07;
+
+   ret_fun07_sec07:;
+      if(tmpHeapStr)
+         free(tmpHeapStr);
+      tmpHeapStr = 0;
+
+      return (signed char) tmpSI;
 } /*checkRunEvent_ftbRayST*/

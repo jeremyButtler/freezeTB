@@ -3,6 +3,10 @@
 Give an idea of how to use the rayWidg system to construct
   and build a gui.
 
+The examples in here (other then the final) have not
+  been tested. There are here to give an idea of how
+  to use rayWidg.
+
 # Reason
 
 The rayWidg system is not a very good system. It was made
@@ -29,11 +33,26 @@ Also, you have to set up what to draw, however, there
 
 # Structures
 
-Only one structure is used and it is the widg_rayWidg
-  struct. It keeps track of the widget coordinates and
-  states each widget is in. You can get or set these
-  variables by querying it with funcitions or by direct
-  access.
+There are several structures used to manage the rayWidg
+  system.
+
+- widg\_rayWidg is the widget orginazation structure, it
+  holds all the details (coordiantes, width, height, and
+  state) needed for a general widget managment
+- event\_rayWidg holds the data for a single event and
+  is generally used with the more complex widgets
+- listBox\_rayWidg is a structure that is used for listbox
+  widgets and widgets that use list boxes, such as the
+  file browser
+- files\_rayWidg is a structure that is used with the file
+  browser functions (to much to pass around)
+
+## widg\_rayWidg
+
+The primary structure is the widg\_rayWidg struct. It
+  keeps track of the widget coordinates and states each
+  widget is in. You can get or set these variables by
+  querying it with funcitions or by direct access.
 
 Variables:
 
@@ -51,39 +70,39 @@ Variables:
     auto set these values
 5. rowArySI: the row number if using tileing format
   - this is < 0 for non-tile widgets
-  - you need to call tile_widg_rayWidg to get tile widgets
-    x and y coordaintes
+  - you need to call tile\_widg\_rayWidg to get tile
+    widgets x and y coordaintes
 6. colArySI: the column number if using tileing format
   - this is < 0 for non-tile widgets
-  - you need to call tile_widg_rayWidg to get tile widgets
-    x and y coordaintes
+  - you need to call tile\_widg\_rayWidg to get tile
+    widgets x and y coordaintes
 7. stateAryUS: state(s) the widget is in, this can affect
    if a widget is drawn and its coloring
    - pressed state means it is being pressed by a key or
      by the mosue
-     - defition is: def_press_rayWidg
+     - defition is: def\_press\_rayWidg
    - checked state means it is a widget that can be
      checked and that it has been checked
-     - defintion is: def_checked_rayWidg
+     - defintion is: def\_checked\_rayWidg
    - active state means the widget is being activly used
-     - defintion is: def_active_rayWidg
+     - defintion is: def\_active\_rayWidg
    - focus state means the widget is currently in focus
-     - defintion is: def_focus_rayWidg
+     - defintion is: def\_focus\_rayWidg
    - inactive state means the widget is seen, but can not
      be interacted with
-     - defintion is: def_inactive_rayWidg
+     - defintion is: def\_inactive\_rayWidg
    - hiden state means the widget can not be seen, nor
      interacted with
-     - defintion is: def_hiden_rayWidg
+     - defintion is: def\_hiden\_rayWidg
    - child state means the widget is part of a more
      complex widget
-     - defintion is: def_child_rayWidg
+     - defintion is: def\_child\_rayWidg
    - hog state means the widget will not let other widgets
      respond to user events or be in focus
-     - defintion is: def_hog_rayWidg
+     - defintion is: def\_hog\_rayWidg
 8. lenSI is the number of widgets that have been added
 9. sizeSI is the maximum number of widgets you can add
-    before reszing (calling realloc_widg_rayWidg)
+    before reszing (calling realloc\_widg\_rayWidg)
 10. fontSizeSI is the current size of the font being
     used
     - if you change this, then call
@@ -96,6 +115,102 @@ Variables:
       `measureFont_widg_rayWidg()` to set the correct
       values for the new font size
     - `measureFont_widg_rayWidg(&widg_rayWidg_struct);`
+
+## event\_rayWidg
+
+The event\_rayWidg structure holds the data needed to
+  manage a single user event. This includes key presses,
+  left mouse clicks, and scroll wheel movements.
+
+The event\_rayWidg struct is designed to get input using
+  the get\_event\_rayWidg function.
+
+- Variables:
+  1. keySI: is the key pressed by the user
+     - from GetKeyPressed() function from rayWidg
+  2. shiftBl: is set to 1 if a shift key was pressed
+     - set to 0 if no shift or caps lock and shift
+     - set to 1 if left shift pressed
+     - set to 2 if right shift pressed
+     - set to 4 if caps lock pressed
+  3. altBl: is set if alt key is pressed
+     - set to 0 if alt key not pressed
+     - set to 1 if left alt pressed
+     - set to 2 if right alt pressed
+  4. ctrlBl: is set if ctrl key is pressed
+     - set to 0 if ctrl key not pressed
+     - set to 1 if left ctrl pressed
+     - set to 2 if right ctrl pressed
+  5. superBl: is set if ctrl key is pressed
+     - set to 0 if super key not pressed
+     - set to 1 if left super pressed
+     - set to 2 if right super pressed
+  6. menuBl: is set if ctrl key is pressed
+     - set to 0 if menu key not pressed
+     - set to 1 if left menu pressed
+     - set to 2 if right menu pressed
+  7. xSI: has the mouses x-coordinate or -1 if none
+  8. ySI: has the mouses y-coordinate or -1 if none
+  9. parIdSI: has the id of the parent of selected widget
+     - widget id if there is no parent; widget not child
+  10. childIdSI: has id of the widget or -1 if widget is
+      is not a child widget
+  11. leftPressBl: is 1 if left moust button was pressed
+  12. leftReleaseBl: is 1 if left moust button was
+       released
+  13. scrollF: has how much scroll wheel moved by or is
+      0 for no movement
+
+## listBox\_rayWidg
+
+The listBox\_rayWidg structure holds the variables used
+  to run a list box widget.
+
+- Variables:
+  1. maxWidthSI: maximum width of list box
+  2. minWidthSI: minimum width of list box
+  3. lineWidthSI: length in pixels of the longest line
+     - this is auto updated with the add function
+  4. maxHeightSI: maximum height of list box
+  5. minHeightSI: minimum height of list box
+  6. textAryStr: c-string array with contents of list box
+     - there may be more items then shown to user
+  7. stateArySC: what state each item is in
+     - hidden: not shown to user
+     - can select: user can select this item
+     - special: tells the list box event function to
+                notify you when this item is clicked or
+                enter hit
+       - can still apply even when it does not have the
+          can select state
+     - select: list box item has been selected
+  8. lenSI: number of c-strings in the array
+  9. onSI: item in list box the user is currently on
+  10. lastSelectSI: the last item that the user selected
+  11. scrollSI: first item shown in list box
+  12. maxSelectSI: maximum number of items the user can
+                   select
+  13. numSelectSI: number of items the user has selected
+
+## files\_rayWidg
+
+This structure is used with the file browser structure. It
+  is used to hold the data needed to mange the file
+  browser widget.
+
+- Variables:
+  1. pwdStr: c-string with the present working directory
+     - maximum limit is 504 characters
+  2. showHidenSC:
+     - if set to 1; shows hidden files on Unix
+     - if set to 0; does not show hidden files on Unix
+     - Windows, will not work, since I think Windows hides
+       hidden in the file attributes, Unix uses a `.` at
+       the start
+  3. fileListST: listBox\_rayWidg structure with the files
+     in the present working directory (pwdStr / varible 1)
+  4. extListST: listBox\_rayWidg structure with the file
+     extensions
 
 # Orginization
 
@@ -126,7 +241,7 @@ x,y
 The tileing sytem uses the width and height from the x,y
   system, but instead of you providing the x,y coordiante,
   your provide the column number and row number. The
-  tile_widg_rayWidg function will then auto find the x,y
+  tile\_widg\_rayWidg function will then auto find the x,y
   coordiantes using the width, height, row number, and
   column number.
 
@@ -247,34 +362,36 @@ These are variables that can influence the default
 
 ## Default variables
 
-- def_widgHeightGap_rayWidg: controlls the y-axis
+- def\_widgHeightGap\_rayWidg: controlls the y-axis
   (vertical) gap between widgts and the padding around
   text in widgets
-  - for gap: font_height / def_widgHeightGap_rayWidg
-  - for padding: font_height / def_widgHeightGap_rayWidg
-- def_maxStrLen_rayWidg: maximum length of string allowed
-- def_cursor_rayWidg: ascii character printed for cursor
+  - for gap: font\_height / def\_widgHeightGap\_rayWidg
+  - for padding:
+    font\_height / def\_widgHeightGap\_rayWidg
+- def\_maxStrLen\_rayWidg: maximum length of string
+  allowed
+- def\_cursor\_rayWidg: ascii character printed for cursor
   in entry boxes or other widgets that use the cursor
   (no idea which)
-- def_blinkCursor_rayWidg: ascii chacter printed for when
+- def\_blinkCursor\_rayWidg: ascii chacter printed for when
   the cursor is blinked
-- def_border_rayWidg: number of pixels to offset the
+- def\_border\_rayWidg: number of pixels to offset the
   border around a shape by
-- def_focusBorder_rayWidg: number of pixels to offset
+- def\_focusBorder\_rayWidg: number of pixels to offset
   the focus border by
-- def_<colorName>_rayWidg: predefined hex code for a color
-  in rayWidg (colors can vary between OSs)
+- def\_<colorName>\_rayWidg: predefined hex code for a
+  color in rayWidg (colors can vary between OSs)
   - use `Color colST GetColor(def_<colorName>_rayWidg)` to
     get the color for raylib or for rayWidg use hex values
   - lightGrey is a light grey color
   - darkGrey is a dark grey color
   - white is white
   - black is black
-- def_fontSize_rayWidg: default font size to use (20)
-- def_macRoundness_rayWidg: controlls how round the
+- def\_fontSize\_rayWidg: default font size to use (20)
+- def\_macRoundness\_rayWidg: controlls how round the
   rectangles are on a Mac or when `-DMAC` is used during
   compile time
-- def_macSegments_rayWidg: segments is used in drawing
+- def\_macSegments\_rayWidg: segments is used in drawing
   rouned rectangles in raylib, no idea what does
   - only appies to a Mac or when `-DMAC` is used during
     compile time
@@ -290,22 +407,22 @@ As a rule you should use the functions for changing or
 The state array is an unsigned short, so a total of 16
   flags are possible. Currenly only 9 flags are used.
 
-- def_press_rayWidg: is the pressed state
+- def\_press\_rayWidg: is the pressed state
   - button is pressed
-- def_checked_rayWidg: is the checked state
+- def\_checked\_rayWidg: is the checked state
   - check box or radio button (not used) is checked
-- def_active_rayWidg: is the active state
+- def\_active\_rayWidg: is the active state
   - entery box or similar active widget is being used
-- def_focus_rayWidg: is the focus state
+- def\_focus\_rayWidg: is the focus state
   - current widget in focus/working with
-- def_inactive_rayWidg: is the inactive state
+- def\_inactive\_rayWidg: is the inactive state
   - widget is does not take user input, ingore in focus
     states
-- def_hiden_rayWidg: is the hiden state
+- def\_hiden\_rayWidg: is the hiden state
   - widget is hidden and should be ignored
-- def_child_rayWidg: is the child state
+- def\_child\_rayWidg: is the child state
   - is a child widget in a complex widget
-- def_hog_rayWidg: is the hog state
+- def\_hog\_rayWidg: is the hog state
   - widget is a high priority widget, nothing else can
     be interacted with
 
@@ -646,8 +763,8 @@ SetTargetFPS(60); /*60 frames per second*/
 ## 2. create, initialize, and setup
 
 You can initialize (set everything to 0/null) a
-  widg_rayWidg structer with init_widg_rayWidg(). The
-  input is a pionter to a widg_rayWidg structer to
+  widg\_rayWidg structer with init\_widg\_rayWidg(). The
+  input is a pionter to a widg\_rayWidg structer to
   initialize.
 
 ```
@@ -655,7 +772,7 @@ struct widg_rayWidg widgetsStackST;
 init_widg_rayWidg(&widgetsStackST);
 ```
 
-After initialization you needt to setup a widg_rayWidg
+After initialization you needt to setup a widg\_rayWidg
   structure after initialization with
   `setup_widg_rayWidg()`. The input is the `widg_rayWidg`
   structure to setup. The return value is 0 for success
@@ -670,13 +787,12 @@ if( setup_widg_rayWidg(&widgStackST) );
    /*deal with memory errors*/
 ```
 
-
 ## 3. add simple widgets
 
-You can add simple widgets with the addWidget_widg_rayWidg
-  function. The only exceptions are for complex widgets,
-  which as a rule require dedicated functions to set them
-  up.
+You can add simple widgets with the
+  addWidget\_widg\_rayWidg function. The only exceptions
+  are for complex widgets, which as a rule require
+  dedicated functions to set them up.
 
 Input:
 
@@ -688,7 +804,7 @@ Input:
   - you must provided a non-negative width for the entry
     box
 - hieght of the widget or -1 to auto assign
-- widg_rayWidg structure pointer to add widget to
+- widg\_rayWidg structure pointer to add widget to
 
 The output is the id (index) assigned to the widget or
   -1 for mememory errors.
@@ -752,33 +868,33 @@ For non-tileling or tileing you will also call these
 
 Functions:
 
-- butDraw_rayWidg: draws a button and/or updates height
+- butDraw\_rayWidg: draws a button and/or updates height
   and width of a button widget
-- entryDraw_rayWidg: draws an entry box and/or updates
+- entryDraw\_rayWidg: draws an entry box and/or updates
   height of entry box
-- labDraw_rayWidg: draws a lable and/or updates height and
+- labDraw\_rayWidg: draws a lable and/or updates height and
   width of label
 
 ### tile widgets
 
-The tilein system uses tile_widg_rayWidg to find the x,y
-  coordinates for the tiled widgets. You will need to call
-  the drawing functions first or set the width and height
-  manually.
+The tileing system uses tile\_widg\_rayWidg to find the
+  x,y coordinates for the tiled widgets. You will need to
+  call the drawing functions first or set the width and
+  height manually.
 
 Input:
 
-- widg_rayWidg structure with tiled widgets to update
+- widg\_rayWidg structure with tiled widgets to update
 - the number of pixels to offset each row by
   - spacing between rows, use -1 to do the height of one
-    character (def_height_rayWidg)
+    character (def\_height\_rayWidg)
 - the number of pixels to offset each column by
   - spacing between columns, use -1 to do number of pixels
     in one letter ('a')
 
 The output is 0 for no errors and 1 for memeory errors.
   Look at the buttons, entry, and other widgets tile
-  examples for tile_widg_rayWidg examples.
+  examples for tile\_widg\_rayWidg examples.
 
 ### rectangles
 
@@ -798,18 +914,18 @@ For Macs or with `-DMAC` it will draw a rectangle with
     with borders
     - 0: draw rectangle only
     - 1: draw rectangle with a border (offset is
-         def_border_rayWidg)
+         def\_border\_rayWidg)
     - 2: draw rectangle with a focus (2nd) border (offset
-         is def_focusBorder_rayWidg)
+         is def\_focusBorder\_rayWidg)
     - 3: draw rectangle with border and focus border
   - rectangles color (as hex code)
   - borders color (as hex code)
   - focus borders color (as hex code)
 - Returns:
   - 0 if the widget is hidden
-  - def_noWidget_rayWidg if the widget id is out of bounds
-    (no widget)
-  - width of widget (widgSTPtr->widthArySI[id])
+  - def\_noWidget\_rayWidg if the widget id is out of
+    bounds (no widget)
+  - width of widget (`widgSTPtr->widthArySI[id]`)
     - this is not changed
 
 ```
@@ -904,7 +1020,7 @@ freeStack_widg_rayWidg(&widgStackST);
 ### buttons
 
 You can draw or get dimensions for a button widget by
-  using butDraw_rayWidg().
+  using butDraw\_rayWidg().
 
 Input:
 
@@ -918,14 +1034,14 @@ Input:
 - 1: if you only want to update width and height of the
   widget
   - 0: if you also want to draw the button
-- widg_rayWidg structure pointer with widget to draw as
+- widg\_rayWidg structure pointer with widget to draw as
   a button
 
 Return value:
 
 - width of the button for succes,
 - 0 if the widget is hidden (not drawable)
-- def_noWidget_rayWidg if the widget does not exist
+- def\_noWidget\_rayWidg if the widget does not exist
 
 This will also modify the height and width values.
 
@@ -1025,7 +1141,7 @@ freeStack_widg_rayWidg(&widgStackST);
 ### Entry box's
 
 You can draw or get dimensions for an entry box widget by
-  using entryDraw_rayWidg(). An entry box displays a line
+  using entryDraw\_rayWidg(). An entry box displays a line
   of text.
 
 Input:
@@ -1045,14 +1161,14 @@ Input:
 - 1: if you only want to update width and height of the
   widget
   - 0: if you also want to draw the entry box
-- widg_rayWidg structure pointer with widget to draw as
+- widg\_rayWidg structure pointer with widget to draw as
   an entry box
 
 Return value:
 
 - width of the entry box for success
 - 0 if the widget is hidden (not drawable)
-- def_noWidget_rayWidg if the widget does not exist
+- def\_noWidget\_rayWidg if the widget does not exist
 
 This will also modify the height and width values.
 
@@ -1061,15 +1177,15 @@ This will also modify the height and width values.
 There are also support functions for processing the text
   that goes into an entry box.
 
-- intStrCheck_rayWidg will modifiy the input text to be
+- intStrCheck\_rayWidg will modifiy the input text to be
   an integer.
   - it will also remove characters until it is less then
     the maximum value
   - first character is the cursor, next are the characters
     at the end
-- floatStrCheck_rayWidg intStrCheck_rayWidg, but for
+- floatStrCheck\_rayWidg intStrCheck\_rayWidg, but for
   floats instead of integers
-- fileStrCheck_rayWidg check if file/path has valid
+- fileStrCheck\_rayWidg check if file/path has valid
   characters, if not modifiy.
   - spaces and tabs are converted to underscores `_`
   - the allowed characters are `A-Z`, `a-z`, `0-9`, `-`,
@@ -1237,10 +1353,191 @@ if(buffStr[buffLenSI] > 31 || buffStr[buffLenSI] < 127)
 freeStack_widg_rayWidg(&widgStackST);
 ```
 
+### Entry box add character
+
+The last example with an entry box added the characters
+  in manually. However, if you prefer a more automated
+  approach, you can used the `entryEvent_rayWidg()`
+  function to check if the event was your entry box widget
+  and handel the event.
+
+- Input:
+  1. id of the entry box you want to check
+  2. two element signed int array
+     - element one (index 0) has the first character in
+       entry box
+     - element two (index 1) has character the cursor is
+       after
+  3. c-string with the current text in the entry box
+  4. current c-string length
+  5. maximum allowed length for the c-string (if running
+     a check function)
+  6. a function to check if the c-string is valid
+     - returns a signed int
+     - input is:
+       1. c-string (signed char \*)
+       2. signed int
+       3. signed int
+  7. event\_rayWidg structure with the event to run
+  8. widg\_rayWidg structure with the entry box widget
+- Output:
+  1. length of c-string
+  2. -1 if no event
+  3. -2 if the id did not match the entry box or the entry
+     box was not active
+
+**Example**
+
+```
+#include <stdio.h>
+#include <raylib.h>
+#include "rayWidg.h"
+
+/*this is used to pass paramaters to the draw function*/
+typedef struct
+GUI{
+   signed int entryWidthSI;      /*width of entry box*/
+   signed int entryIdSI;         /*id of entry box*/
+   signed int positionArySI[2];
+      /*scroll and cursor position in entry box*/
+
+   signed char buffStr[135];     /*text in entry box*/
+   signed int buffLenSI;       /*number characters input*/
+   struct widg_rayWidg *widgets; /*has widgets*/
+}
+
+/*this function is here to draw the GUI*/
+void
+drawFun(
+   void *inVoid
+){
+   struct GUI in = (struct GUI) *inVoid;
+
+   BeginDrawing();
+      ClearBackground();
+
+      entryDraw_rayWidg(
+         in->entryWidthSI,  /*width*/
+         in->entryIdSI,     /*id of entry box*/
+         in->positionArySI, /*cursor/scroll position*/
+         0,                 /*do not blink*/
+         in->buffStr,       /*user input text*/
+         0,                 /*want to draw the entry box*/
+         in->widgets        /*has widgets*/
+      );
+   EndDrawing();
+}
+
+int
+main(
+){
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec01: variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   struct GUI inGUI;
+   struct widg_rayWidg widgetsStackST;
+   struct event_rayWidg eventStackST;
+
+   signed int errorSI = 0;
+   signed char ranGuiBl = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec02: initialize and setup widgets
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*initialize the GUI*/
+   InitWindow(200 /*height*/, 400 /*width*/, "a_gui");
+   SetTargetFPS(60);
+
+   /*initialize  my structures*/
+   init_widg_rayWidg(&widgetsStackST);
+   init_event_rayWidg(&eventStackST);
+
+   /*setup the input GUI structure*/
+   inGUI.widgets = &widgetsStackST;
+   inGUI.positionArySI[0] = 0;
+   inGUI.positionArySI[1] = 0;
+   inGUI.buffStr[0] = '\0';
+   inGUI.buffLenSI = 0;
+
+   if( setup_widg_rayWidg(&widgStackST) );
+      goto memoryErr_main;
+
+   /*add my entry box to the GUI*/
+   inGUI.entryIdSI =
+      addWidget_widg_rayWidg(
+         20, /*x coordinate is 20*/
+         20, /*y coordinate is 20*/
+         0,  /*using x,y not tile coordainates*/
+         -1, /*auto assign width*/
+         -1, /*auto assing height*/
+         inGUI.widgets
+      );
+
+   if(inGUI.entryIdSI < 0)
+      goto memoryErr_main;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec03: run GUI
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while(! WindowShouldClose() )
+   { /*Loop: run the GUI*/
+
+      errorSI =
+         get_event_rayWidg(
+            1,       /*have tab switching widgets*/
+            drawFun, /*drawing function to call*/
+            &inGUI,  /*passed to drawing function*/
+            &eventStackST,
+            inGUI->widgets
+         );
+         /*errorSI has the event type. In this case there
+         `   is no need to check it
+         */
+
+      inGUI.buffLenSI =
+         entryEvent_rayWidg(
+            inGUI.entryIdSI, /*id of entry box*/
+            inGUI.positionArySI, /*position in entry box*/
+            inGUI.buffStr,  /*user input text*/
+            inGUI.buffLenSI,/*current input length*/
+            127,            /*limit to 127 characters*/
+            fileStrCheck_rayWidg, /*check function*/      
+               /*this is the function to check if the
+               `   input is a valid file name character
+               */
+            &eventStackST,
+            inGUI->widgets
+         ); /*if entry box not used, this is ignored*/
+   } /*Loop: run the GUI*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec04: clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   printf("you input: %s\n", inGUI.buffStr);
+   errorSI = 0;
+   goto return_main;
+
+   memoryErr_main:;
+      fprintf(stderr, "memory error\n");
+      errorSI = 1;
+      goto return_main;
+
+   return_main:;
+      CloseWindow(); /*opened a window*/
+      freeStack_widg_rayWidg(&widgStackST);
+      freeStack_event_rayWidg(&eventStackST);
+
+      return errorSI;
+```
+
 ### label
 
 You can draw a label (text) or get dimensions for a label
-  using labDraw_rayWidg().
+  using labDraw\_rayWidg().
 
 Input:
 
@@ -1260,14 +1557,14 @@ Input:
 - 1: if you only want to update width and height of the
   widget
   - 0: if you also want to draw the label
-- widg_rayWidg structure pointer with widget to draw as
+- widg\_rayWidg structure pointer with widget to draw as
   a label
 
 Return value:
 
 - width of the label for success
 - 0 if the widget is hidden (not drawable)
-- def_noWidget_rayWidg if the widget does not exist
+- def\_noWidget\_rayWidg if the widget does not exist
 
 
 **non-tileling example**
@@ -1440,7 +1737,7 @@ When the message box is needed, you can then reveal the
 - Output:
   - width of message box if a message box was drawn
   - 0 if message box was hidden (not drawn)
-  - def_noWidg_rayWidg if no widget was in the message
+  - def\_noWidg\_rayWidg if no widget was in the message
     box
   - -1 if the message is to long
 
@@ -1578,6 +1875,12 @@ freeStack_widg_rayWidg(&widgStackST);
 ## 6. get user events and udate and draw GUI
 
 You can get users events using the user event functions.
+  There are two kinds, the lower level functions cover a
+  specific event, such as the enter key, tab, or a mouse
+  event. The higher level function uses
+  the `event_rayWidg` to store the event and handles the
+  lower level events. It will even redraw the GUI for you
+  one key pressed if you input your drawing function.
 
 Note: when using enter to press buttons, you can hold down
   the press by detecting if the enter key `KEY_ENTER` is
@@ -1611,40 +1914,878 @@ switch(indexSI)
 } /*Switch: detect which button was pressed*/
 ```
 
-## 7. free memory and structuers
+### higher; get events
 
-When finshed you need to free the `widg_rayWidg` structure
-  with `freeStack_widg_rayWidg()` (for stack allocations)
-  or `freeHeap_widg_rayWidg()` (for heap allocations).
+The `get_event_rayWidg()` function will get one user
+  input event and store it in an event\_rayWidg structure.
 
-Then you need to call `CloseWindow()` from  raylib to
-  close the GUI.
+- Input:
+  1. 1 to have this function handle tabs (change focus
+     on tab input)
+  2. function to draw your GUI with
+     - is `void (*<name>(void *))`
+     - use 0/null to not use
+  3. void pointer to pass to the draw function
+  4. event\_rayWidg structure pointer to store events in
+  5. widg\_rayWidg structure pointer with widgets
+- Output:
+  1. 0 if nothing happened
+  2. def\_keyEvent\_rayWidg if a key was input
+  3. def\_keyEvent\_rayWidg | def\_releaseEvent\_rayWidg
+     if enter was released (only if draw function input)
+  4. def\_keyEvent\_rayWidg | def\_focus\_rayWidg tab key
+     was pressed (only if draw input 1 is set to 1)
+  5. def\_clickEvent\_rayWidg | def\_press\_rayWidg if
+     left mouse button was pressed down
+  6. def\_clickEvent\_rayWidg | def\_rleaseEvent\_rayWidg
+     if left mouse button was released
+
+For an example of a simple use case, please see the
+  entry box function. Also for a list of output not listed
+  here, please see the `event_rayWidg` structure section.
+
+You can get check if was a child widget using
+   `event_rayWidg->childIdSI`. If it is 0 or greater the
+   widget was a child widget.
+
+You can get the parent widget
+  using `event_rayWidg->parIdSI`. If it is 0 or greater
+  the widget was a child widget.
+
+You can check for release events using
+  using `event_rayWidg->leftReleaseBl`. If it is 1, then
+  the left mouse button was released.
+
+You can get the input key using `event_rayWidg->keySI`.
+  If it is 0, then no key was input. The key was taken
+  with `GetKeyPressed()` from raylib, so you will need to
+  convert it before use.
+
+### list boxes
+
+The list box occupies the space of one widget. The event
+  handeling for the list box is managed by a function,
+  which needs a listBox\_rayWidg structure.
+
+The list box events has several hotkeys that it uses.
+
+- Mouse events:
+  - left release: select one item in the list and remove
+    all other selected items
+  - left release + control: add one item in the list to
+    your selection
+    - if the item is already selected it is removed
+  - left release + shift: add a range of items to your
+    list, up to the maximum number of files
+    - only applies to last selected item, so if the last
+      item was removed from the selection, this will not
+      work
+  - move scroll wheel forward: move up one item
+  - move scroll wheel down: move down one item
+- Keyboard events
+  - up or k: move up one item in list
+  - shift+up, shift+K, or page up: move up one page
+  - down or j: move down one item in list
+  - shift+down, shift+J, or page down: move down one page
+  - home or g: move to top of list box
+  - end or shift+G: move to end of list box
+  - enter: select item and clear rest or if is a special
+    item (ex directory), return negative index (special
+    item)
+  - space: select one item and clear reast
+  - space+control: add one item to selection or if already
+    selected, remove it
+    - limited to max number of items
+  - space+shift: select all items between last selected
+    item and current item
+    - only applies to last selected item, so if the last
+      item was removed from the selection, this will not
+      work
+  - control+a: select all items (if possible, otherwise
+    first items until hit maximum limit)
+  - control+r: deselect all items
+
+#### make a list box
+
+You can make a list box widget using
+  the `mk_listBox_rayWidg()` function.
+
+- Input:
+  1. x coordinate (or column) of list box
+  2. y coordinate (or row) of list box
+  3. if doing tiling or strict x,y
+     - 1: treat input 1 and 2 as tile coordinates
+     - 0: treat input 1 and 2 as x,y coordinates
+  4. widg\_rayWidg struct pointer to hold the list box
+- Output:
+  - Returns: id (index) of list box
+  - Returns: -1 for memory errors
+
+After that you will need a listBox\_rayWidg structure to
+  interact with the list box. It will have to be
+  initialized and have items added to it.
+
+You can initialize the listbox using
+  the `init_listBox_rayWidg()` function. The input is a
+  pointer to your listBox\_rayWidg structure.
+
+After initialization you can add items to the list box
+  with the `addItem_listBox_rayWidg()` function.
+
+- Input:
+  1. c-string to add to list box
+  2. state (hidden, can select, special, selected) to add
+     to the item
+     - 0: goes to the can select state
+     - you can change this later
+  3. listBox\_rayWidg structure pointer to add input 1 to
+  4. widg\_rayWidg structure pointer
+     - has font, so used to measure size of added string
+- Output:
+  - Returns: 0 for no errors
+  - Returns: 1 for memory errors
+
+**Example**
 
 ```
+struct widg_rayWidg widgetsStackST;
+struct listBox_rayWidg listBoxStackST;
+
+init_widg_rayWidg(&widgetsStackST);
+init_listBox_rayWidg(&listBoxStackST);
+
+if( setup_widg_rayWidg(&widgetsStackST) )
+   /*deal with  memory errors*/
+
+mk_listbox_rayWidg(20, 100, 0, &widgetsStackST);
+  /*20 is x, 100 is y, 0 for no tile*/
+
+/*add item to the list box, repeat for more items*/
+if(
+   addItem_listBox_rayWidg(
+      (signed char *) "some text to add",
+      0, /*set to can select state*/
+      &listBoxStackST,
+      &widgetsStackST
+   )
+) /*deal with memory error*/
+
+freeStack_widg_rayWidg(&widgetsStackST);
+freeStack_listBox_rayWidg(&listBoxStackST);
+```
+
+#### list box drawing and events
+
+You can draw the list box in your GUI using
+  the `draw_listBox_rayWidg()` function.
+
+- Input:
+  1. id (index) of list box in widgets
+  2. decide if drawing or just getting dimensions
+     - 1: only get dimensions of the list box
+       - for tileing
+     - 0: draw the list box
+  3. listBox\_rayWidg structure pointer with list box
+     items to draw
+  4. widg\_rayWidg structure pointer with list box
+     dimensions
+- Output:
+  - Returns: width of list box for succes
+  - Returns: 0 if list box is hidden
+  - Returns: def\_noWidg\_rayWidg if widget does not exist
+
+You can check/run events for the list box using
+  the `listBoxEvent_rayWidg()` function. This is needed
+  because of all the complexity with the list box.
+
+- Input:
+  1. id (index) of list box in widgets
+     - this is used to verify that the list box is input,
+     - it allows you to call the event function without
+       checking in an if statement
+  2. listBox\_rayWidg structure pointer with list box
+     items and other related stats
+  3. event\_rayWidg structure with the event to check/run
+  4. widg\_rayWidg structure with the widgets
+- Output:
+  - Returns: -2 if input widget is not in widgets list
+  - Returns: -1 if the id in the event\_rayWidg struct
+             (input 3) does not match input it (input 1)
+  - Returns: 0 for no event of note
+  - Returns: 1 for movement event
+  - Returns: 2 when the user selected something
+  - Returns: 4 when the user pressed enter or clicked
+             twice (no time limit) on a special state item
+
+Finally, when finished with your list box use
+  `freeStack_listBox_rayWidg()` to free variables insied
+  your list box or `freeHeap_listBox_rayWidg()` to free
+  your list box. For freeHeap, remember to set the
+  listBox\_rayWidg pointer to null.
+
+- Input (freeStack and freeHeap):
+  - listBox\_rayWidg structure pionter to free
+
+**Example**
+
+```
+#include <stdio.h>
 #include <raylib.h>
 #include "rayWidg.h"
+
+typedef struct guiST
+{
+   struct widg_rayWidg wigetsST;
+
+   signed int listBoxIdSI;
+   struct listBox_rayWidg listBoxST;
+} /*guiST*/
+
+void
+drawGUI_main(
+   void *guiStruct
+){
+   struct guiST guiInST = (guiST *) guiStruct;
+
+   BeginDrawing();
+      ClearBackground( GetColor(def_white_rayWidg) );
+
+      draw_listBox_rayWidg(
+         0, /*only widget in GUI, so index 0*/
+         0, /*draw the list box*/
+         &guiInST->listBoxST,
+         &guiInST->widgetsST
+      );
+   EndDrawing();
+} /*drawGUI_main*/
 
 int
 main(
 ){
-   struct widg_rayWidg &widgetsStackST;
-   init_widg_rayWidg(&widgetsStackST);
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int errSI = 0;
+
+   struct guiST guiStackST;
+   struct event_rayWidg eventStackST;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec02:
+   ^   - initialize and setup structures
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
    
+   init_event_rayWidg(&eventStackST);
+   init_widg_rayWidg(&guiStackST.widgetsST);
+   init_listBox_rayWidg(&guiStackST.listBoxST);
+   
+   if( setup_widg_rayWidg(&guiStackST.widgetsST) )
+      goto memErr_main_sec05;
+   
+   mk_listbox_rayWidg(20, 100, 0, &guiStackST.widgetsST);
+     /*20 is x, 100 is y, 0 for no tile*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec03:
+   ^   - setup gui
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*add item to the list box, repeat for more items*/
+   if(
+      addItem_listBox_rayWidg(
+         (signed char *) "some text to add",
+         0, /*set to can select state*/
+         &guiStackST.listBoxST,
+         &guiStackST.widgetsST
+      )
+   ) goto memErr_main_sec05;
+
+   if(
+      addItem_listBox_rayWidg(
+         (signed char *) "some more text",
+         0, /*set to can select state*/
+         &guiStackST.listBoxST,
+         &guiStackST.widgetsST
+      )
+   ) goto memErr_main_sec05;
+
    /*initialize*/
    InitWindow(400, 200, "this is a GUI");
    SetTargetFPS(60);
    
-   if(setup_widg_rayWidg(&widgetsStackST)
-       /*deal with  memory errors*/
-   
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec04:
+   ^   - draw the GUI and interact with users
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    while( ! WindowShouldClose() )
    { /*Loop: run GUI*/
-      /*GUI commands go here; idealy as a function*/
+      errSI =
+         get_event_rayWidg(
+            1, /*incurment tabs for me*/
+            drawGUI_main,/*my function to redraw the GUI*/
+            &guiStackST, /*fed to drawGUI_main_sec05*/
+            &guiStackST.wigetsST
+         );
+
+       listBoxEvent_rayWidg(
+          0, /*only widget in GUI*/
+          &guiStackST.listBoxST,
+          &eventStackST,
+          &guiStackST.widgetsST
+       ); /*do not care about user selection, so not
+          `   checking return values
+          */
+
+      drawGUI_main(&guiStackST);
    } /*Loop: run GUI*/
    
-   freeStack_widg_rayWidg(&widgetsStackST);
-   CloseWindow();
-   return 0;
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec05:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   errSI = 0;
+   goto ret_main_sec05;
+
+   memErr_main_sec05:;
+      fprintf(stderr, "memory error\n");
+      errSI = 1;
+      goto ret_main_sec05;
+
+   ret_main_sec05::
+      CloseWindow();
+      freeStack_widg_rayWidg(&guiStackST.widgetsST);
+      freeStack_listBox_rayWidg(&guiStackST.listBoxST);
+      freeStack_event_rayWidg(&eventStackST);
+      return errSI;
+} /*main*/
+```
+
+#### list box manipuation functions
+
+There are functions to change or get the states of
+  different items, width, height, or maximun number of
+  selected items in the list box.
+
+Here is a list of the additional supporting functions.
+
+- Clear items and states
+  - `clear_listBox_rayWidg()`: clears (removes) all items
+    from the list box (lazy delete)
+    - Input: listBox\_rayWidg structure pionter
+  - `clearSelect_listBox_rayWidg()`: removes the select
+    state from all items in the list box
+    - Input: listBox\_rayWidg structure pionter
+- Set limits
+  - `selectMaxSet_listBox_rayWidg()`: set the maximum
+     number of items the user can select
+     - -1 for any number
+     - 0 for no items
+     - > 0 for a set number of items
+    - input:
+      1. number of items to set the maxium to
+      2. listBox\_rayWidg structure pionter
+  - `widthSet_listBox_rayWidg()`: set the maximum and
+    minimum width for the list box
+    - input:
+      1. maximum width (in pixels) for list box
+      2. minimum width (in pixels) for list box
+      3. listBox\_rayWidg structure pionter
+  - `heightSet_listBox_rayWidg()`: set the maximum and
+    minimum height for the list box
+    - input:
+      1. maximum height (in pixels) for list box
+      2. minimum height (in pixels) for list box
+      3. listBox\_rayWidg structure pionter
+- Set states for an item
+  - `hiddenSet_listBox_rayWidg()`: set (add or remove) the
+    hidden state form/to an item (not shown in list box)
+    - input:
+      1. item to add or remove the hidden state from
+      2. 1 is add hidden state, 0 is remove hidden state
+      3. listBox\_rayWidg structure pionter
+  - `selectSet_listBox_rayWidg()`: set (add or remove) the
+    select state form/to an item
+    - input:
+      1. item to add or remove the select state from
+      2. 1 is add select state, 0 is remove select state
+      3. listBox\_rayWidg structure pionter
+  - `specialSet_listBox_rayWidg()`: set (add or remove) the
+    special state form/to an item
+    - input:
+      1. item to add or remove the special state from
+      2. 1 is add special state, 0 is remove special state
+      3. listBox\_rayWidg structure pionter
+  - `canSelectSet_listBox_rayWidg()`: set (add or remove)
+    the "can select" state form/to an item
+    - input:
+      1. item to add or remove the "can select" state from
+      2. 1 is add state, 0 is remove state
+      3. listBox\_rayWidg structure pionter
+- Get state of an item
+  - `hiddenGet_listBox_rayWidg()`: get if item is hidden
+    - Input:
+      1. index of item to get state of
+      2. listBox\_rayWidg stucture pointer
+    - Output:
+      - Returns: 1 if item has hidden state
+      - Returns: 0 if item is not hidden
+  - `selectGet_listBox_rayWidg()`: get if item is selected
+    - Input:
+      1. index of item to get state of
+      2. listBox\_rayWidg stucture pointer
+    - Output:
+      - Returns: 1 if item is selected
+      - Returns: 0 if item is not selected
+  - `specialGet_listBox_rayWidg()`: get if item is special
+    - Input:
+      1. index of item to get state of
+      2. listBox\_rayWidg stucture pointer
+    - Output:
+      - Returns: 1 if item is special
+      - Returns: 0 if item is not special
+  - `canSelectGet_listBox_rayWidg()`: get if item can ge
+     selected by the user
+    - Input:
+      1. index of item to get state of
+      2. listBox\_rayWidg stucture pointer
+    - Output:
+      - Returns: 1 if item can be selected
+      - Returns: 0 if item can not be selected
+
+### file browsers
+
+#### file browswer overview
+
+A file browswer allows the user to select files. The file
+  browser in rayWidg has five widgets. The parent widget,
+  a list box to display files, two buttons (select and
+  cancel), and a list box to display file extensions.
+
+- Widgets:
+  1. parent widget (does nothing)
+  2. file list box (shows files)
+     - uses all the hotkeys from the list box
+  3. select button
+  4. cancel button
+  5. extension list box (extenions to show)
+     - uses all the hotkeys from the list box
+
+The file browser is a hog widget, so once revealed it
+  takes the priority from all other widgets. It also takes
+  up the GUI, hidding all other widgets.
+
+#### file browswer setup
+
+You can make a file browser widgets with
+  the `mkFileBrowser_rayWidg()` function.
+
+- Input:
+  1. widg\_rayWidg structure to add the file browswer to
+- Output:
+  - Returns: id of parent widget for file browser
+  - Returns: -1 for memory errors
+
+The file browser widget only stores the state, coordinates
+  and size of the file browser and its children. The
+  actual browsing (present working directory and files)
+  are stored in a files\_rayWidg structure. This allows
+  you to have a separate structure for each file browser,
+  but use the same widget for all.
+
+To initialize a files\_rayWidg structure you use the
+  `init_files_rayWidg()` function. The initialization
+  function will clear all values, but will also set the
+  present working directory (pwdStr) to the users home
+  directory. It should only ever by called once. If you
+  need to blank (clear files and reset home directory)
+  use the `blank_files_rayWidg()` function.
+
+- Input (init and blank):
+  1. pointer to files\_rayWidg structure to intialize
+     or if blanking, blank
+
+After initialzation, you can set the maximum number of
+  files the user can select with
+  the `setFileLimit_files_rayWidg()` function.
+
+- Input:
+  1. maximum number of files the user can select
+     - -1 for all files
+  2. files\_rayWidg structure pointer to set file limit
+
+#### file browsers; adding file extensions
+
+You can then add file extensions to for the file browser
+  to look for using the `addExt_files_rayWidg()` function.
+
+- Input:
+  1. c-string with file extension to add
+  2. 1 to remove all extensions and then add the new file
+     extension (input 1)
+     - 0 to append the new file extension
+  3. 1 to set the new file extension (input 1) to the
+     select state
+     - 0 to leave unselected
+  4. files\_rayWidg structuer pointer to add the file
+     extension (input 1) to
+  5. widg\_rayWidg structure with the font using
+- Output:
+  - Returns 0 for no errors
+  - Returns 1 for memory errors
+
+- List of file extensions:
+  1. `*` any file
+  2. `+` any file or directory
+  3. `dir` one or more directories
+  4. `.<extension>` your file extension
+
+#### file browser drawing
+
+You can draw the file browser by first removing the
+  hidden state from the widget
+  (`hiddenClear_widg_rayWidg()`), and then calling the
+  draw function.
+
+The `fileBrowserDraw_rayWidg()` function will draw the
+  file browser. It will also get files for a directory if
+  no files are present in the files list.
+
+- Input:
+  1. id/index of file browser
+  2. message to print in the file browser
+     - must be short (one line max)
+  3. width of the GUI
+     - used to figure out the file browsers width
+  4. height of the GUI
+     - used to figure out the file browsers height
+  5. files\_rayWidg structure pointer with present working
+     directory, files to print, and file extensions
+  6. widg\_rayWidg structure pointer with file browser
+     widget
+- Output:
+  - yes there is output, but not worth noting
+
+#### file browser; handeling events
+
+You can deal with user input in a file brower by using
+  the `fileBrowserEvent_rayWidg()` function. This uses
+  the event\_rayWidg structure to get the user event.
+
+- Input:
+  1. id/index of file browser (parent)
+     - used to make sure input in event\_rayWidg was
+       really the file browser
+  2. event\_rayWidg structure pointer with the users input
+     event
+  3. files\_rayWidg structure pointer with the present
+     working directory (pwd), files in the pwd, and the
+     file extensions to filter by
+  4. widg\_rayWidg structure pionter with the file browser
+     widget
+- Output:
+  - Returns: 2 if the user hit cancel
+    - will wipe file selection history
+  - Returns: 1 if the user hit select
+  - Returns: 0 if the user did something with the file
+    browser, but not worth noting
+  - Returns: -1 if the file browser was not selected
+    - input 1 (id) does not equal parent id in input 2
+      (event\_rayWidg strucutre)
+    - it is a different widget
+  - Returns: -2 if no widget was selected
+  - Returns: -3 for errors
+
+#### file browser; get files
+
+After the user has hit select, you can then get the
+  selected file using the `getFile_files_rayWidg()`
+  function. This function will return a heap allocated
+  c-string with the first selected file to the input
+  index. When finished the returned c-string must be
+  freeded with `free()`.
+
+To get multiple files, you can keep
+  calling `getFile_files_rayWidg()` until the index is
+  set to `-1`.
+
+- Input:
+  1. signed int pionter with index of first possible file
+     - use index 0
+     - this is modified to have the first possible index
+       of the next file
+  2. 1: to also return non-selected special files
+     (directories)
+     - use 0 (disables this; so only selected returned)
+  3. files\_rayWidg structure pointer with files
+- Output:
+  - Modifies: input 1 (signed int pionter) to be at the
+    first index of the next possible file, -1 if no more
+    files, or -2 for a memory error
+  - Returns: 0 for no files or an error
+  - Returns: c-string with the next file
+    - you must free this whith `free()` when you are
+      finished
+
+#### file browser; free structure
+
+Finally, when finished, you need to free the file browser
+  function using `freeStack_files_fileBrowser()` or
+  the `freeHeap_files_fileBrowser()` functins. The stack
+  free only frees the variables in the files\_rayWidg
+  structure, while heap frees the structure, but you
+  must set the pointer to 0.
+
+- Input (stack and heap):
+  1. pointer to files\_rayWidg structure to free
+
+#### file browser example
+
+```
+#include <stdio.h>
+#include <raylib.h>
+#include "rayWidg.h"
+#include "../genLib/ulCp.h"
+
+typedef struct guiST
+{
+   struct widg_rayWidg widgetsST;
+   signed char *mesgStr;
+
+   signed int buttonIdSI;
+   signed int mesgBoxIdSI;
+   signed int browserIdSI;
+
+   struct files_rayWidg filesRayWidgST;
+} /*guiST*/
+
+void
+drawGUI_main(
+   void *guiStruct
+){
+   struct guiST guiInST = (guiST *) guiStruct;
+
+   BeginDrawing();
+      ClearBackground( GetColor(def_white_rayWidg) );
+
+      butDraw_rayWidg(
+        200, /*maximum width*/
+        20,  /*minimum width*/
+        guiInST->buttonIdSI, /*id (index) of button*/
+        (signed char *) "press_me",
+        0,   /*want to draw*/
+        &guiInST->widgetsST
+      );
+
+      fileBrowserDraw_rayWidg(
+         guiInST->browserIdSI,
+         (signed char *) "select some files",
+         400, /*GUI is 400 pixels wide*/
+         200, /*GUI is 200 pixels high*/
+         &guiInST->filesRayWidgST,
+         &guiInST->widgetsST
+      );
+
+      mesgBoxDraw_rayWidg(
+         guiInST->mesgBoxIdSI,
+         400, /*GUI is 400 pixels wide*/
+         200, /*GUI is 200 pixels high*/
+         guiInST->mesgStr,
+         (signed char *) "Ok", /*text on button*/
+         &guiInST->widgestST
+      );
+   EndDrawing();
+} /*drawGUI_main*/
+
+int
+main(
+){
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int errSI = 0;
+   signed int indexSI = 0; /*index of file on*/
+
+   struct guiST guiStackST;
+   struct event_rayWidg eventStackST;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec02:
+   ^   - initialize and setup structures
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+   
+   guiStackST.mesgStr = 0;
+
+   init_event_rayWidg(&eventStackST);
+   init_widg_rayWidg(&guiStackST.widgetsST);
+   init_files_rayWidg(&guiStackST.filesRayWidgST);
+   
+   if( setup_widg_rayWidg(&guiStackST.widgetsST) )
+      goto memErr_main_sec05;
+   
+   guiStackST.browserIdSI =
+      mkFileBrowser_rayWidg(&guiStackST.widgetsST);
+   if(guiStackST.browserIdSI < 0)
+      goto memErr_main_sec05;
+
+   guiStackST->mesgBoxIdSI =
+      mkMesgBox_rayWidg(&guiStackST.widgetsST)
+   if(guiStackST.mesgBoxIdSI < 0)
+      goto memErr_main_sec05;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec03:
+   ^   - setup gui
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*initialize*/
+   InitWindow(400, 200, "this is a GUI");
+   SetTargetFPS(60);
+   
+   setFileLimit_files_rayWidg(
+      2,
+      &guiStackST.fileRayWidgST
+   ); /*only allowing user to select two files*/
+
+   /*add some file extensions*/
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".txt",
+         1, /*make sure no older extensions*/
+         1, /*select by default*/
+         &guiStackST.fileRayWidgST
+         &guiStackST.widgetsST
+      )
+   ) goto memErr_main_sec05;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) ".tsv",
+         0, /*want older file extensions, so append*/
+         1, /*select by default*/
+         &guiStackST.fileRayWidgST
+         &guiStackST.widgetsST
+      )
+   ) goto memErr_main_sec05;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "*", /*any file*/
+         0, /*want older file extensions, so append*/
+         0, /*do not select by default (user must)*/
+         &guiStackST.fileRayWidgST
+         &guiStackST.widgetsST
+      )
+   ) goto memErr_main_sec05;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec04:
+   ^   - draw the GUI and interact with users
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while( ! WindowShouldClose() )
+   { /*Loop: run GUI*/
+      errSI =
+         get_event_rayWidg(
+            1, /*incurment tabs for me*/
+            drawGUI_main,/*my function to redraw the GUI*/
+            &guiStackST, /*fed to drawGUI_main_sec05*/
+            &eventStackST, /*gets the event*/
+            &guiStackST.widgetsST
+         );
+
+       if(eventStackST.idSI == guiStackST.buttonIdSI)
+          hidenClear(guiStackST.browserId, &guiStackST);
+          /*need to reveal the file browser*/
+
+       else if(eventStackST.idSI ==guiStackST.browserIdSI)
+       { /*Else If: user interacted with file browser*/
+          errSI =
+             fileBrowserEvent_rayWidg(
+                guiStackST.browserIdSI,
+                &eventStackST,
+                &guiStackST.fileRayWidgST,
+                &guiStackST.widgetsST
+             ); /*do not care about user selection, so not
+             `   checking return values
+             */
+
+          if(errSI == 1)
+          { /*If: user selected files*/
+             hidenClear_widg_rayWidg(
+                guiStackST.mesgBoxIdSI,
+                &guiStackST.widgetsST
+             );
+
+             indexSI = 0;
+
+             guiStackST.mesgStr =
+                getFile_files_rayWidg(
+                   &indexSI, /*moved to next file*/
+                   0,
+                   guiStackST.filesRayWidgST
+                );
+
+             if(indexSI < -1)
+               goto memErr_main_sec05;
+          } /*If: user selected files*/
+       } /*Else If: user interacted with file browser*/
+
+       else if(eventStackST.idSI ==guiStackST.mesgBoxIdSI)
+       { /*Else If: showing message box*/
+           free(guiStackST.mesgStr);
+
+           guiStackST.mesgStr =
+              getFile_files_rayWidg(
+                 &indexSI, /*moved to next file*/
+                 0,
+                 guiStackST.filesRayWidgST
+              );
+
+           if(indexSI < -1)
+              goto memErr_main_sec05;
+           else if(indexSI == -1)
+           { /*Else If: no more files to show*/
+              mesgBoxEvent_rayWidg(
+                 2, /*release message box*/
+                eventStackST.parIdSI,
+                eventStackST.idSI, 
+                &guiStackST.widgetsST
+              );
+           } /*Else If: no more files to show*/
+       } /*Else If: showing message box*/
+
+       drawGUI_main(&guiStackST);
+   } /*Loop: run GUI*/
+   
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Main Sec05:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   errSI = 0;
+   goto ret_main_sec05;
+
+   memErr_main_sec05:;
+      fprintf(stderr, "memory error\n");
+      errSI = 1;
+      goto ret_main_sec05;
+
+   ret_main_sec05::
+      CloseWindow();
+      if(guiStackST.mesgStr)
+         free(guiStackST.mesgStr);
+      guiStackST.mesgStr = 0;
+
+      freeStack_widg_rayWidg(&guiStackST.widgetsST);
+      freeStack_files_rayWidg(&guiStackST.filesRayWidgST);
+      freeStack_event_rayWidg(&eventStackST);
+      return errSI;
 } /*main*/
 ```
 
@@ -1654,7 +2795,7 @@ This is a very simple example hellow world and shows why
   been tested.
 
 ```
-cc -o example example.c rayWidg.c ../genLib/base10str.c ../genLib/ulCp.c -L/usr/local/lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+cc -o example example.c rayWidg.c ../genLib/base10str.c ../genLib/ulCp.c ../genLib/ptrAry.c -L/usr/local/lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 ```
 
 Code in example.c

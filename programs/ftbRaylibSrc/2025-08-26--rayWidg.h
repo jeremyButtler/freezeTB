@@ -25,12 +25,10 @@
 '     o .h st01: widg_rayWidg
 '       - has widget ids, coordiantes, and dimensions
 '     o .h st02: event_rayWidg
-'       - stores mouse, keyboard, & scroll wheel events
+'       o stores mouse, keyboard, & scroll wheel events
 '     o .h st03: listBox_rayWidg
-'       - structure to store values in a list box
-'       - also grouped macros for list box states here
-'     o .h st04: files_rayWidg
-'       - structure with files listed in a file browser
+'       o structure to store values in a list box
+'       o also grouped macros for list box states here
 '   * Sof02: widg_rayWidg struct functions
 '       + sof02 sec01:
 '         - widg_rayWidg struct managment functions
@@ -73,181 +71,177 @@
 '       o fun010: checkTextWidth_rayWidg
 '         - check if text meets widgets length, if not
 '           shorten
-'       o fun011: backCheckTextWidth_rayWidg
-'         - check if text meets widgets length, if not
-'           shortens start of string until is proper
-'           length
-'       o fun012: changeFont_widg_rayWidg
+'       o fun011: changeFont_widg_rayWidg
 '         - adds a font from a file to a widg_rayWidg
-'       o fun013: useEmbedFont_widg_rayWidg
+'       o fun012: useEmbedFont_widg_rayWidg
 '         - uses an embed font
 '         - make this using ExprotFontAsCode from raylib
-'       o fun014: swapFont_widg_rayWidg
+'       o fun013: swapFont_widg_rayWidg
 '         - swaps the font out with an input font pointer
 '         - this is a swap of pointers only, so only free
 '           the input font when you are finished
-'       o fun015: setFontSize_widg_rayWidg
+'       o fun014: setFontSize_widg_rayWidg
 '         - changes font size
-'       o fun016: setFontSpacing_widg_rayWidg
+'       o fun015: setFontSpacing_widg_rayWidg
 '         - changes a fonts spacing
 '     + Sof02 Sec03:
 '       - widg_rayWidg struct querying functions
-'       o fun017: xCoordGet_widg_rayWidg
+'       o fun016: xCoordGet_widg_rayWidg
 '         - get the x-coordinate of a widget
-'       o fun018: yCoordSet_widg_rayWidg
+'       o fun017: yCoordSet_widg_rayWidg
 '         - get the y-coordinate of a widget
-'       o fun019: widthGet_widg_rayWidg
+'       o fun018: widthGet_widg_rayWidg
 '         - get the width of a widget
-'       o fun020: heightGet_widg_rayWidg
+'       o fun019: heightGet_widg_rayWidg
 '         - get the height of a widget
-'       o fun021: rowGet_widg_rayWidg
+'       o fun020: rowGet_widg_rayWidg
 '         - get the row a widget is assigned to
-'       o fun022: colGet_widg_rayWidg
+'       o fun021: colGet_widg_rayWidg
 '         - get the column a widget is assigned to
-'       o fun023: stateGet_widg_rayWidg
+'       o fun022: stateGet_widg_rayWidg
 '         - get the state of a widget
-'       o fun024: pressGet_widg_rayWidg
+'       o fun023: pressGet_widg_rayWidg
 '         - detect if widget is in pressed state
-'       o fun025: checkedGet_widg_rayWidg
+'       o fun024: checkedGet_widg_rayWidg
 '         - detect if widget is in checked state
-'       o fun026: activeGet_widg_rayWidg
+'       o fun025: activeGet_widg_rayWidg
 '         - detect if widget is in active state
-'       o fun027: focusGet_widg_rayWidg
+'       o fun026: focusGet_widg_rayWidg
 '         - detect if widget is in focus state
-'       o fun028: inacitveGet_widg_rayWidg
+'       o fun027: inacitveGet_widg_rayWidg
 '         - detect if widget is in inacitve state
-'       o fun029: hidenGet_widg_rayWidg
+'       o fun028: hidenGet_widg_rayWidg
 '         - detect if widget is in hiden state
-'       o fun030: childGet_widg_rayWidg
+'       o fun029: childGet_widg_rayWidg
 '         - detect if widget is a child widget
-'       o fun031: hogGet_widg_rayWidg
+'       o fun030: hogGet_widg_rayWidg
 '         - detect if widget is a hog (high priority)
 '           widget
-'       o fun032: numWidgetGet_widg_rayWidg
+'       o fun031: numWidgetGet_widg_rayWidg
 '         - get number of widgets made
-'       o fun033: focusWidgGet_widg_rayWidg
+'       o fun032: focusWidgGet_widg_rayWidg
 '         - get the id (index) of the focused widget
 '     + Sof02 Sec04:
 '       - widg_rayWidg struct modify coordiantes & size
-'       o fun034: xCoordSet_widg_rayWidg
+'       o fun033: xCoordSet_widg_rayWidg
 '         - sets a widgets x coordiante
-'       o fun035: yCoordSet_widg_rayWidg
+'       o fun034: yCoordSet_widg_rayWidg
 '         - sets a widgets y coordiante
-'       o fun036: widthSet_widg_rayWidg
+'       o fun035: widthSet_widg_rayWidg
 '         - sets a widgets width
-'       o fun037: heightSet_widg_rayWidg
+'       o fun036: heightSet_widg_rayWidg
 '         - sets a widgets height
-'       o fun038: rowSet_widg_rayWidg
+'       o fun037: rowSet_widg_rayWidg
 '         - sets a widgets row number
-'       o fun039: colSet_widg_rayWidg
+'       o fun038: colSet_widg_rayWidg
 '         - sets a widgets column number
 '     + Sof02 Sec05:
 '       - widg_rayWidg struct modify state of widgets
-'       o fun040: stateSet_widg_rayWidg
+'       o fun039: stateSet_widg_rayWidg
 '         - sets a widgets state to input state
-'       o fun041: pressAdd_widg_rayWidg
+'       o fun040: pressAdd_widg_rayWidg
 '         - adds the pressed state to a widget
-'       o fun042: checkedAdd_widg_rayWidg
+'       o fun041: checkedAdd_widg_rayWidg
 '         - adds the checkeded state to a widget
-'       o fun043: activeAdd_widg_rayWidg
+'       o fun042: activeAdd_widg_rayWidg
 '         - adds the activeed state to a widget
-'       o fun044: focusAdd_widg_rayWidg
+'       o fun043: focusAdd_widg_rayWidg
 '         - adds the activeed state to a widget
-'       o fun045: inactiveAdd_widg_rayWidg
+'       o fun044: inactiveAdd_widg_rayWidg
 '         - adds the inactive state to a widget
-'       o fun046: hidenAdd_widg_rayWidg
+'       o fun045: hidenAdd_widg_rayWidg
 '         - adds the hiden state to a widget
-'       o fun047: childAdd_widg_rayWidg
+'       o fun046: childAdd_widg_rayWidg
 '         - adds the child state to a widget
 '         - only use this funcition if you know what your
 '           are are doing and understand how the
 '           child/parent system in rayWidg works
-'       o fun048: hogAdd_widg_rayWidg
+'       o fun047: hogAdd_widg_rayWidg
 '         - adds the hog state to a widget
 '     + Sof07 Sec06:
 '       - widg_rayWidg struct clear state of widgets
-'       o fun049: stateClear_widg_rayWidg
+'       o fun048: stateClear_widg_rayWidg
 '         - remove all states in a widget (set to 0)
-'       o fun050: pressClear_widg_rayWidg
+'       o fun049: pressClear_widg_rayWidg
 '         - remove wigets pressed state
-'       o fun051: checkedClear_widg_rayWidg
+'       o fun050: checkedClear_widg_rayWidg
 '         - remove wigets checked state
-'       o fun052: activeClear_widg_rayWidg
+'       o fun051: activeClear_widg_rayWidg
 '         - remove wigets active state
-'       o fun053: focusClear_widg_rayWidg
+'       o fun052: focusClear_widg_rayWidg
 '         - remove wigets focus state
-'       o fun054: inactiveClear_widg_rayWidg
+'       o fun053: inactiveClear_widg_rayWidg
 '         - remove wigets & its child widgets inactive
 '           state
-'       o fun055: hidenClear_widg_rayWidg
+'       o fun054: hidenClear_widg_rayWidg
 '         - remove wigets and its child widgets hiden
 '           state
-'       o fun056: childClear_widg_rayWidg
+'       o fun055: childClear_widg_rayWidg
 '         - clears the child state in a widget
 '         - only use this function if you know what your
 '           are doing and understand how the child/parent
 '           system works
-'       o fun057: hogClear_widg_rayWidg
+'       o fun056: hogClear_widg_rayWidg
 '         - clears the hog state in a widget
 '   * Sof03:
 '     - event_rayWidg structure functions
-'     o fun058: blank_event_rayWidg
+'     o fun057: blank_event_rayWidg
 '       - sets all variables in event_rayWidg struct to
 '         blank (0 or -1)
-'     o fun059: init_event_rayWidg
+'     o fun058: init_event_rayWidg
 '       - sets all variables in an event_rayWidg struct to
 '         defuautls/null
-'     o fun060: freeStack_event_rayWidg
+'     o fun059: freeStack_event_rayWidg
 '       - frees variables in an event_rayWidg struct
-'     o fun061: freeHeap_event_rayWidg
+'     o fun060: freeHeap_event_rayWidg
 '       - frees a heap allocated event_rayWidg struct
-'     o fun062: get_event_rayWidg
+'     o fun061: get_event_rayWidg
 '       - adds a user event to an event_rayWidg struct
 '   * Sof04:
 '     - get OS state
-'     o fun063: getDarkModeState_rayWidg
+'     o fun062: getDarkModeState_rayWidg
 '       - detects if Mac/Windows computer is in dark mode
-'     o fun064: checkGuiColorMode_rayWidg
+'     o fun063: checkGuiColorMode_rayWidg
 '       - checks is user is using dark or light mode, and
 '         sets the color scheme to the correct mode
 '   * Sof05:
 '     - widget modification or focus/state changes
-'     o fun065: addWidget_widg_rayWidg
+'     o fun064: addWidget_widg_rayWidg
 '       - add a new widget to a widg_rayWidg struct
-'     o fun066: tile_widg_rayWidg
+'     o fun065: tile_widg_rayWidg
 '       - find tiling x,y coordiantes for each widget
 '         using widths, heights, rows, and columns
 '       - note this can only support one level of children
 '         widgets
-'     o fun067: focusCheck_widg_rayWidg
+'     o fun066: focusCheck_widg_rayWidg
 '       - detect if input key was tab and update focus
-'     o fun068: enterCheck_widg_rayWidg
+'     o fun067: enterCheck_widg_rayWidg
 '       - check if key event was an enter key
-'     o fun069: getMouseWidg_widg_rayWidg
+'     o fun068: getMouseWidg_widg_rayWidg
 '       - get widget mouse was on
-'     o fun070: blinkGet_rayWidg
+'     o fun069: blinkGet_rayWidg
 '      - returns current state of cursor blink for widgets
-'     o fun071: getLines_rayWidg
+'     o fun070: getLines_rayWidg
 '       - get number of lines can fit in a set height
-'     o fun072: lineToHeight_rayWidg
+'     o fun071: lineToHeight_rayWidg
 '       - convert line count to height in pixels
 '   * Sof06:
 '     - string functions
-'     o fun073: intStrCheck_rayWidg
+'     o fun072: intStrCheck_rayWidg
 '       - corrects mistakes in a c-string that is supposed
 '         to be an integer
-'     o fun074: floatStrCheck_rayWidg
+'     o fun073: floatStrCheck_rayWidg
 '       - corrects mistakes in a c-string that is supposed
 '         to be an float
-'     o fun075: fileStrCheck_rayWidg
+'     o fun074: fileStrCheck_rayWidg
 '       - corrects non-file characters in c-string
 '       - spaces/tabes converted to '_', other than that,
 '         only A-Z, a-z, 0-9, '-', '_', & '.' are allowed
-'     o fun076: addCharToEntry_rayWidg
+'     o fun075: addCharToEntry_rayWidg
 '       - adds a character to an entry box text
 '   * Sof07:
 '     - file_rayWidg and file functions
-'     o fun077: checkExt_rayWidg
+'     o fun076: checkExt_rayWidg
 '       - checks if file is the correct input extension
 '   * Sof08:
 '     - widget drawing
@@ -257,29 +251,27 @@
 '         - message box
 '       + sof08 sec03:
 '         - list box
-'       + sof08 sec04:
-'         - file browser
 '     + Sof08 Sec01:
 '       - simple widgets
-'       o fun078: drawRectByCoord_rayWidg
+'       o fun077: drawRectByCoord_rayWidg
 '         - draws a rectangle with input coordinates
-'       o fun079: drawRec_rayWidg
+'       o fun078: drawRec_rayWidg
 '         - draws a rectangle for rayWidg
-'       o fun080: butDraw_rayWidg
+'       o fun079: butDraw_rayWidg
 '         - draw a button
-'       o fun081: entryDraw_rayWidg
+'       o fun080: entryDraw_rayWidg
 '         - draw an entry box and its text
-'       o fun082: entryEvent_rayWidg
+'       o fun081: entryEvent_rayWidg
 '         - handels an event for an entry box
-'       o fun083: labDraw_rayWidg
+'       o fun082: labDraw_rayWidg
 '         - draw a label
 '     + Sof08 Sec02:
 '       - message box
-'       o fun085: mkMesgBox_rayWidg
+'       o fun084: mkMesgBox_rayWidg
 '         - makes an emtpy message box widget
-'       o fun086: mesgBoxDraw_rayWidg
+'       o fun085: mesgBoxDraw_rayWidg
 '         - draws a message box
-'       o fun087: mesgBoxEvent_rayWidg
+'       o fun086: mesgBoxEvent_rayWidg
 '        - checks event that was fired in a message box
 '     + Sof08 Sec03:
 '       - list box
@@ -296,101 +288,56 @@
 '       # Sof08 Sec03 Sub01:
 '         - clear, blank, initialize, realloc, and free
 '           listBox_rayWidg functions
-'         o fun088: blank_listBox_rayWidg
+'         o fun087: blank_listBox_rayWidg
 '           - blanks a listBox_rayWidg structure
-'         o fun089: init_listBox_rayWidg
+'         o fun088: init_listBox_rayWidg
 '           - initializes a listBox_rayWidg structure
-'         o fun090: freeStack_listBox_rayWidg
+'         o fun089: freeStack_listBox_rayWidg
 '           - frees variables in a listBox_rayWidg struct
-'         o fun092: realloc_listBox_rayWidg
+'         o fun091: realloc_listBox_rayWidg
 '           - add more memory to listBox_rayWidg structure
-'         o fun093: clear_listBox_rayWidg
+'         o fun092: clear_listBox_rayWidg
 '           - removes all items from the list box
-'         o fun094: clearSelect_listBox_rayWidg
+'         o fun093: clearSelect_listBox_rayWidg
 '           - clear all selections from a list box
 '       # Sof08 Sec03 Sub02:
 '         - listBox_rayWidg set variables functions
-'         o fun095: selectMaxSet_listBox_rayWidg
+'         o fun094: selectMaxSet_listBox_rayWidg
 '           - sets maximum number of items that can be
 '             selected in a list box
-'         o fun096: widthSet_listBox_rayWidg
+'         o fun095: widthSet_listBox_rayWidg
 '           - sets maximum and minimum width of a list box
-'         o fun097: heightSet_listBox_rayWidg
+'         o fun096: heightSet_listBox_rayWidg
 '           - sets maximum & minimum height of a list box
-'         o fun098: hiddenSet_listBox_rayWidg
+'         o fun097: hiddenSet_listBox_rayWidg
 '           - sets a list box item to the hiden state
-'         o fun099: selectSet_listBox_rayWidg
+'         o fun098: selectSet_listBox_rayWidg
 '           - sets a list box item to the select state
-'         o fun100: specialSet_listBox_rayWidg
+'         o fun099: specialSet_listBox_rayWidg
 '           - sets a list box item to the special state
-'         o fun101: canSelectSet_listBox_rayWidg
+'         o fun100: canSelectSet_listBox_rayWidg
 '           - sets a list box item to the can select state
 '       # Sof08 Sec03 Sub03:
 '         - listBox_rayWidg get variables value functions
-'         o fun102: hiddenGet_listBox_rayWidg
+'         o fun101: hiddenGet_listBox_rayWidg
 '           - gets if a list box item is in hiden state
-'         o fun103: selectGet_listBox_rayWidg
+'         o fun102: selectGet_listBox_rayWidg
 '           - sets a list box item to the select state
-'         o fun104: specialGet_listBox_rayWidg
+'         o fun103: specialGet_listBox_rayWidg
 '           - sets a list box item to the special state
-'         o fun105: canSelectGet_listBox_rayWidg
+'         o fun104: canSelectGet_listBox_rayWidg
 '           - sets a list box item to the can select state
 '       # Sof08 Sec03 Sub04:
 '         - list box widget create, draw, and event
 '           handeling
-'         o fun106: mk_listBox_rayWidg
+'         o fun105: mk_listBox_rayWidg
 '           - makes/adds list box to a widg_widgST struct
-'         o fun107: addItem_listBox_rayWidg
+'         o fun106: addItem_listBox_rayWidg
 '           - adds an item to a list box
-'         o fun108: nextItem_listBox_rayWidg
-'           - move to the next item or next item(s) in a
-'             listbox
-'         o fun109: toIndex_listBox_rayWidg
-'           - move list box selected item till at target
-'             index
-'         o fun110: draw_listBox_rayWidg
+'         o fun107: draw_listBox_rayWidg
 '           - draws a list box widget
-'         o fun111: listBoxEvent_rayWidg
+'         o fun108: listBoxEvent_rayWidg
 '           - runs an event for a list box
-'     + Sof08 Sec04:
-'       - file browser
-'         o sof08 sec04 sub01:
-'           - general functions (set, get, initialize)
-'         o sof08 sec04 sub02:
-'           - manipulate file browswer functions
-'       # Sof08 Sec04 Sub01:
-'         - general functions (set, get, initialize)
-'         o fun112: blank_files_rayWidg
-'           - set all files in a files_rayWidg struct to
-'             no files 
-'         o fun113: init_files_rayWidg
-'           - initialize a files_rayWidg struct
-'         o fun114: freeStack_files_rayWidg
-'           - frees variables in a files_rayWidg struct
-'         o fun115: freeHeap_files_rayWidg
-'           - frees files_rayWidg struct
-'         o fun116: setFileLim_files_rayWidg
-'           - sets maximum number of files user can choose
-'         o fun117: getFile_files_rayWidg
-'           - gets next selected file from a files_rayWidg
-'         o fun118: swapFiles_files_rayWidg
-'           - swap two files in a files_rayWidg struct
-'         o fun119: sortFiles_files_rayWidg
-'           - sorts files by name and if directory
-'         o fun120: scanForFiles_files_rayWidg
-'           - get files in a directory
-'         o fun121: changeExt_files_rayWidg
-'           - updates files for the change extension type
-'       # Sof08 Sec04 Sub02:
-'         - manipulate file browswer functions
-'         o fun120: addExt_files_rayWidg
-'           - add an file extension to a files_rayWidg
-'         o fun123: mkFileBrowser_rayWidg
-'           - makes a file browswer widget
-'         o fun124: fileBrowserDraw_rayWidg
-'           - draws a file browswer widget
-'         o fun125: fileBrowserEvent_rayWidg
-'           - process and event for the file browser
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -577,7 +524,7 @@ widg_rayWidg{
 
 /*-------------------------------------------------------\
 | ST02: event_rayWidg
-|   - stores the mouse, keyboard, and scroll wheel events
+|   o stores the mouse, keyboard, and scroll wheel events
 \-------------------------------------------------------*/
 typedef struct
 event_rayWidg{
@@ -592,7 +539,6 @@ event_rayWidg{
    signed int xSI;        /*mouse x-coordinate*/
    signed int ySI;        /*mouse y-coordinate*/
 
-   signed int idSI;       /*id of selected widget*/
    signed int parIdSI;    /*parent widget id mouse is on*/
    signed int childIdSI;  /*child widget id mouse is on*/
 
@@ -604,8 +550,8 @@ event_rayWidg{
 
 /*-------------------------------------------------------\
 | ST03: listBox_rayWidg
-|   - structure to store values in a list box
-|   - also grouped macros here
+|   o structure to store values in a list box
+|   o also grouped macros here
 \-------------------------------------------------------*/
 
 #define def_listHidden_rayWidg 1
@@ -646,7 +592,6 @@ listBox_rayWidg{
    signed int onSI;        /*entry on in list box*/
    signed int lastSelectSI;/*last item on*/
    signed int scrollSI;    /*position at in scroll*/
-   signed int lastScrollSI;/*last scroll position*/
 
    signed int clickSI;     /*item clicked on; -1 if none*/
 
@@ -656,12 +601,12 @@ listBox_rayWidg{
 
 /*-------------------------------------------------------\
 | ST04: files_rayWidg
-|   - structure with files listed in a file browser
+|   o structure with files listed in a file browser
+|   o TODO: add support functions
 \-------------------------------------------------------*/
 typedef struct
 files_rayWidg{
    signed char pwdStr[512]; /*present working directory*/
-   signed char showHidenSC; /*show hidden files (unix)*/
    struct listBox_rayWidg fileListST;/*has files*/
    struct listBox_rayWidg extListST; /*file extensions*/
 }files_rayWidg;
@@ -871,34 +816,7 @@ checkTextWidth_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun011: backCheckTextWidth_rayWidg
-|   - check if text meets widgets length, if not shortens
-|     start of string until is proper length
-| Input:
-|   - textStr:
-|     o c-string with text check
-|   - outStr:
-|     o c-string to hold ouput text
-|   - widthSI:
-|     o target width in pixels
-|   - widgSTPtr:
-|     o has font and font size
-| Output:
-|   - Modifies:
-|     o outStr to have the contents of textStr
-|       * if textStr is longer then widthSI, outStr gets
-|         is shortned to widthSI and starts in `...`
-\-------------------------------------------------------*/
-void
-backCheckTextWidth_rayWidg(
-   signed char *textStr, /*text to check width of*/
-   signed char *outStr,  /*gets modified text*/
-   signed int widthSI,   /*width of text*/
-   struct widg_rayWidg *widgSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun012: changeFont_widg_rayWidg
+| Fun011: changeFont_widg_rayWidg
 |   - adds a font from a file to a widg_rayWidg struct
 | Input:
 |   o widgSTPtr:
@@ -928,7 +846,7 @@ changeFont_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun013: useEmbedFont_widg_rayWidg
+| Fun012: useEmbedFont_widg_rayWidg
 |   - uses an embed font
 |   - make this using ExprotFontAsCode from raylib
 | Input:
@@ -959,7 +877,7 @@ useEmbedFont_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun014: swapFont_widg_rayWidg
+| Fun013: swapFont_widg_rayWidg
 |   - swaps the font out with an input font pointer
 |   - this is a swap of pointers only, so only free the
 |     input font when you are finished
@@ -991,7 +909,7 @@ swapFont_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun015: setFontSize_widg_rayWidg
+| Fun014: setFontSize_widg_rayWidg
 |   - changes font size
 | Input:
 |   o widgSTPtr:
@@ -1009,7 +927,7 @@ setFontSize_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun016: setFontSpacing_widg_rayWidg
+| Fun015: setFontSpacing_widg_rayWidg
 |   - changes a fonts spacing
 | Input:
 |   o widgSTPtr:
@@ -1027,7 +945,7 @@ setFontSpacing_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun017: xCoordGet_widg_rayWidg
+| Fun016: xCoordGet_widg_rayWidg
 |   - get the x-coordinate of a widget
 | Input:
 |   - idSI:
@@ -1052,7 +970,7 @@ xCoordGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun018: yCoordGet_widg_rayWidg
+| Fun017: yCoordGet_widg_rayWidg
 |   - get the y-coordinate of a widget
 | Input:
 |   - idSI:
@@ -1077,7 +995,7 @@ yCoordGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun019: widthGet_widg_rayWidg
+| Fun018: widthGet_widg_rayWidg
 |   - get the width of a widget
 | Input:
 |   - idSI:
@@ -1099,7 +1017,7 @@ widthGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun020: heightGet_widg_rayWidg
+| Fun019: heightGet_widg_rayWidg
 |   - get the height of a widget
 | Input:
 |   - idSI:
@@ -1120,7 +1038,7 @@ heightGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun021: rowGet_widg_rayWidg
+| Fun020: rowGet_widg_rayWidg
 |   - get the row a widget is assigned to
 | Input:
 |   - idSI:
@@ -1141,7 +1059,7 @@ rowGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun022: colGet_widg_rayWidg
+| Fun021: colGet_widg_rayWidg
 |   - get the column a widget is assigned to
 | Input:
 |   - idSI:
@@ -1162,7 +1080,7 @@ colGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun023: stateGet_widg_rayWidg
+| Fun022: stateGet_widg_rayWidg
 |   - get the state of a widget
 | Input:
 |   - idSI:
@@ -1187,7 +1105,7 @@ stateGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun024: pressGet_widg_rayWidg
+| Fun023: pressGet_widg_rayWidg
 |   - detect if widget is in pressed state
 | Input:
 |   - idSI:
@@ -1207,7 +1125,7 @@ pressGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun025: checkedGet_widg_rayWidg
+| Fun024: checkedGet_widg_rayWidg
 |   - detect if widget is in checked state
 | Input:
 |   - idSI:
@@ -1227,7 +1145,7 @@ checkedGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun026: activeGet_widg_rayWidg
+| Fun025: activeGet_widg_rayWidg
 |   - detect if widget is in active state
 | Input:
 |   - idSI:
@@ -1247,7 +1165,7 @@ activeGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun027: focusGet_widg_rayWidg
+| Fun026: focusGet_widg_rayWidg
 |   - detect if widget is in focus state
 | Input:
 |   - idSI:
@@ -1267,7 +1185,7 @@ focusGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun028: inactiveGet_widg_rayWidg
+| Fun027: inactiveGet_widg_rayWidg
 |   - detect if widget is in inactive state
 | Input:
 |   - idSI:
@@ -1287,7 +1205,7 @@ inactiveGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun029: hidenGet_widg_rayWidg
+| Fun028: hidenGet_widg_rayWidg
 |   - detect if widget is in hiden state
 | Input:
 |   - idSI:
@@ -1307,7 +1225,7 @@ hidenGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun030: childGet_widg_rayWidg
+| Fun029: childGet_widg_rayWidg
 |   - detect if widget is a child widget
 | Input:
 |   - idSI:
@@ -1328,7 +1246,7 @@ childGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun031: hogGet_widg_rayWidg
+| Fun030: hogGet_widg_rayWidg
 |   - detect if widget is a hog (high priority) widget
 | Input:
 |   - idSI:
@@ -1348,7 +1266,7 @@ hogGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun032: numWidgetGet_widg_rayWidg
+| Fun031: numWidgetGet_widg_rayWidg
 |   - get number of widgets made
 | Input:
 |   - widgSTPtr:
@@ -1364,7 +1282,7 @@ numWidgetGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun033: focusWidgGet_widg_rayWidg
+| Fun032: focusWidgGet_widg_rayWidg
 |   - get the id (index) of the focused widget
 | Input:
 |   - widgSTPtr:
@@ -1379,7 +1297,7 @@ focusWidgGet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun034: xCoordSet_widg_rayWidg
+| Fun033: xCoordSet_widg_rayWidg
 |   - sets a widgets x coordiante
 | Input:
 |   - xSI:
@@ -1403,7 +1321,7 @@ xCoordSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun035: yCoordSet_widg_rayWidg
+| Fun034: yCoordSet_widg_rayWidg
 |   - sets a widgets y coordiante
 | Input:
 |   - ySI:
@@ -1427,7 +1345,7 @@ yCoordSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun036: widthSet_widg_rayWidg
+| Fun035: widthSet_widg_rayWidg
 |   - sets a widgets width
 | Input:
 |   - widthSI:
@@ -1449,7 +1367,7 @@ widthSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun037: heightSet_widg_rayWidg
+| Fun036: heightSet_widg_rayWidg
 |   - sets a widgets height
 | Input:
 |   - heightSI:
@@ -1471,7 +1389,7 @@ heightSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun038: rowSet_widg_rayWidg
+| Fun037: rowSet_widg_rayWidg
 |   - sets a widgets row number
 | Input:
 |   - rowSI:
@@ -1494,7 +1412,7 @@ rowSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun039: colSet_widg_rayWidg
+| Fun038: colSet_widg_rayWidg
 |   - sets a widgets column number
 | Input:
 |   - colSI:
@@ -1518,7 +1436,7 @@ colSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun040: stateSet_widg_rayWidg
+| Fun039: stateSet_widg_rayWidg
 |   - sets a widgets state to input state
 | Input:
 |   - stateUC:
@@ -1552,7 +1470,7 @@ stateSet_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun041: pressAdd_widg_rayWidg
+| Fun040: pressAdd_widg_rayWidg
 |   - adds the pressed state to a widget
 | Input:
 |   - idSI:
@@ -1571,7 +1489,7 @@ pressAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun042: checkedAdd_widg_rayWidg
+| Fun041: checkedAdd_widg_rayWidg
 |   - adds the checkeded state to a widget
 | Input:
 |   - idSI:
@@ -1590,7 +1508,7 @@ checkedAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun043: activeAdd_widg_rayWidg
+| Fun042: activeAdd_widg_rayWidg
 |   - adds the activeed state to a widget
 | Input:
 |   - idSI:
@@ -1609,7 +1527,7 @@ activeAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun044: focusAdd_widg_rayWidg
+| Fun043: focusAdd_widg_rayWidg
 |   - adds the focus state to a widget
 | Input:
 |   - idSI:
@@ -1629,7 +1547,7 @@ focusAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun045: inactiveAdd_widg_rayWidg
+| Fun044: inactiveAdd_widg_rayWidg
 |   - adds the inactive state to a widget
 | Input:
 |   - idSI:
@@ -1648,7 +1566,7 @@ inactiveAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun046: hidenAdd_widg_rayWidg
+| Fun045: hidenAdd_widg_rayWidg
 |   - adds the hiden state to a widget
 | Input:
 |   - idSI:
@@ -1667,7 +1585,7 @@ hidenAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun047: childAdd_widg_rayWidg
+| Fun046: childAdd_widg_rayWidg
 |   - adds the child state to a widget
 |   - only use this funcition if you know what your are
 |     doing and understand how the child/parent system
@@ -1701,7 +1619,7 @@ childAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun048: hogAdd_widg_rayWidg
+| Fun047: hogAdd_widg_rayWidg
 |   - adds the hog state to a widget
 | Input:
 |   - idSI:
@@ -1720,7 +1638,7 @@ hogAdd_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun049: stateClear_widg_rayWidg
+| Fun048: stateClear_widg_rayWidg
 |   - remove all states in a widget (set to 0)
 | Input:
 |   - idSI:
@@ -1739,7 +1657,7 @@ stateClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun050: pressClear_widg_rayWidg
+| Fun049: pressClear_widg_rayWidg
 |   - remove wigets pressed state
 | Input:
 |   - idSI:
@@ -1758,7 +1676,7 @@ pressClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun051: checkedClear_widg_rayWidg
+| Fun050: checkedClear_widg_rayWidg
 |   - remove wigets checked state
 | Input:
 |   - idSI:
@@ -1777,7 +1695,7 @@ checkedClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun052: activeClear_widg_rayWidg
+| Fun051: activeClear_widg_rayWidg
 |   - remove wigets active state
 | Input:
 |   - idSI:
@@ -1796,7 +1714,7 @@ activeClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun053: focusClear_widg_rayWidg
+| Fun052: focusClear_widg_rayWidg
 |   - remove wigets focus state
 | Input:
 |   - idSI:
@@ -1817,7 +1735,7 @@ focusClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun054: inactiveClear_widg_rayWidg
+| Fun053: inactiveClear_widg_rayWidg
 |   - remove wigets and its child widgets inactive state
 | Input:
 |   - idSI:
@@ -1836,7 +1754,7 @@ inactiveClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun055: hidenClear_widg_rayWidg
+| Fun054: hidenClear_widg_rayWidg
 |   - remove wigets and its child widgets hiden state
 | Input:
 |   - idSI:
@@ -1855,7 +1773,7 @@ hidenClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun056: childClear_widg_rayWidg
+| Fun055: childClear_widg_rayWidg
 |   - clears the child state in a widget
 |   - only use this function if you know what your are
 |     doing and understand how the child/parent system
@@ -1889,7 +1807,7 @@ childClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun057: hogClear_widg_rayWidg
+| Fun056: hogClear_widg_rayWidg
 |   - clears the hog state in a widget
 | Input:
 |   - idSI:
@@ -1908,7 +1826,7 @@ hogClear_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun063: getDarkModeState_rayWidg
+| Fun062: getDarkModeState_rayWidg
 |   - detects if Mac or Windows computer is in dark mode
 | Input:
 | Output:
@@ -1925,7 +1843,7 @@ getDarkModeState_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun064: checkGuiColorMode_rayWidg
+| Fun063: checkGuiColorMode_rayWidg
 |   - checks is user is using dark or light mode, and
 |     sets the color scheme to the correct mode
 | Input:
@@ -1942,7 +1860,7 @@ checkGuiColorMode_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun058: blank_event_rayWidg
+| Fun057: blank_event_rayWidg
 |   - sets all variables in an event_rayWidg struct to
 |     blank (0 or -1)
 | Input:
@@ -1958,7 +1876,7 @@ blank_event_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun059: init_event_rayWidg
+| Fun058: init_event_rayWidg
 |   - sets all variables in an event_rayWidg struct to
 |     defuautls/null
 | Input:
@@ -1974,7 +1892,7 @@ init_event_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun060: freeStack_event_rayWidg
+| Fun059: freeStack_event_rayWidg
 |   - frees variables in an event_rayWidg struct
 | Input:
 |   - eventSTPtr:
@@ -1990,7 +1908,7 @@ freeStack_event_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun061: freeHeap_event_rayWidg
+| Fun060: freeHeap_event_rayWidg
 |   - frees a heap allocated event_rayWidg struct
 | Input:
 |   - eventSTPtr:
@@ -2005,7 +1923,7 @@ freeHeap_event_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun062: get_event_rayWidg
+| Fun061: get_event_rayWidg
 |   - adds a user event to an event_rayWidg struct
 | Input:
 |   - tabBl:
@@ -2061,7 +1979,7 @@ get_event_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun065: addWidget_widg_rayWidg
+| Fun064: addWidget_widg_rayWidg
 |   - add a new widget to a widg_rayWidg struct
 | Input:
 |   - xSI:
@@ -2101,7 +2019,7 @@ addWidget_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun066: tile_widg_rayWidg
+| Fun065: tile_widg_rayWidg
 |   - find tiling x,y coordiantes for each widget using
 |     widths, heights, rows, and columns
 |   - note this can only support one level of children
@@ -2129,7 +2047,7 @@ tile_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun067: focusCheck_widg_rayWidg
+| Fun066: focusCheck_widg_rayWidg
 |   - detect if input key was tab and update focus
 | Input:
 |   - keySI:
@@ -2161,7 +2079,7 @@ focusCheck_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun068: enterCheck_widg_rayWidg
+| Fun067: enterCheck_widg_rayWidg
 |   - check if key event was an enter key
 | Input:
 |   - keySI:
@@ -2197,7 +2115,7 @@ enterCheck_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun069: getMouseWidg_widg_rayWidg
+| Fun068: getMouseWidg_widg_rayWidg
 |   - get widget mouse was on
 | Input:
 |   - xSI:
@@ -2229,7 +2147,7 @@ getMouseWidg_widg_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun070: blinkGet_rayWidg
+| Fun069: blinkGet_rayWidg
 |   - returns current state of cursor blink for widgets
 | Input:
 |   - blinkSI:
@@ -2253,7 +2171,7 @@ blinkGet_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun071: getLines_rayWidg
+| Fun070: getLines_rayWidg
 |   - get number of lines can fit in a set height
 | Input:
 |   - heightSI:
@@ -2271,7 +2189,7 @@ getLines_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun072: lineToHeight_rayWidg
+| Fun071: lineToHeight_rayWidg
 |   - convert line count to height in pixels
 | Input:
 |   - linesSI:
@@ -2289,7 +2207,7 @@ linesToHeight_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun073: intStrCheck_rayWidg
+| Fun072: intStrCheck_rayWidg
 |   - corrects mistakes in a c-string that is supposed to
 |     be an integer
 | Input:
@@ -2319,7 +2237,7 @@ intStrCheck_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun074: floatStrCheck_rayWidg
+| Fun073: floatStrCheck_rayWidg
 |   - corrects mistakes in a c-string that is supposed to
 |     be an float
 | Input:
@@ -2349,7 +2267,7 @@ floatStrCheck_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun075: fileStrCheck_rayWidg
+| Fun074: fileStrCheck_rayWidg
 |   - corrects non-file characters in c-string
 |   - spaces/tabes converted to '_', other than that,
 |     only A-Z, a-z, 0-9, '-', '_', and '.' are allowed
@@ -2380,7 +2298,7 @@ fileStrCheck_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun076: addCharToEntry_rayWidg
+| Fun075: addCharToEntry_rayWidg
 |   - adds a character to an entry box text
 | Input:
 |   - keySI:
@@ -2424,7 +2342,7 @@ addCharToEntry_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun077: checkExt_rayWidg
+| Fun076: checkExt_rayWidg
 |   - checks if file is the correct input extension
 | Input:
 |   - fileStr:
@@ -2436,10 +2354,6 @@ addCharToEntry_rayWidg(
 |     o `+` stands for all files with an extension in
 |       the list (including directories)
 |     o `dir` stands for allow selection of directories
-|   - stateArySC:
-|     o tells if the file extension is selected or is not
-|       selected
-|       * def_listSelect_rayWidg for selected
 |   - extLenSI:
 |     o number of file extensions looking for
 |   - extIndexSI:
@@ -2453,14 +2367,14 @@ addCharToEntry_rayWidg(
 \-------------------------------------------------------*/
 signed char
 checkExt_rayWidg(
-   signed char *fileStr,    /*file to check extension of*/
+   signed char *fileStr, /*file to check extension of*/
    signed char *extAryStr[], /*file extensions*/
-   signed char *stateArySC,  /*is file extension used*/
-   signed int extLenSI       /*number of extensions*/
+   signed int extLenSI,  /*number of extensions*/
+   signed int extIndexSI /*index of extension using*/
 );
 
 /*-------------------------------------------------------\
-| Fun078: drawRectByCoord_rayWidg
+| Fun077: drawRectByCoord_rayWidg
 |   - draws a rectangle for rayWidg by input coordinates
 | Input:
 |   - xSI:
@@ -2507,7 +2421,7 @@ drawRectByCoord_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun079: drawRec_rayWidg
+| Fun078: drawRec_rayWidg
 |   - draws a rectangle for rayWidg
 | Input:
 |   - widgSTPtr:
@@ -2547,7 +2461,7 @@ drawRec_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun080: butDraw_rayWidg
+| Fun079: butDraw_rayWidg
 |   - draw a button
 | Input:
 |   - maxWidthSI:
@@ -2595,7 +2509,7 @@ butDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun081: entryDraw_rayWidg
+| Fun080: entryDraw_rayWidg
 |   - draw an entry box and its text
 | Input:
 |   - widthSI:
@@ -2659,7 +2573,7 @@ entryDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun082: entryEvent_rayWidg
+| Fun081: entryEvent_rayWidg
 |   - handels an event for an entry box
 | Input:
 |   - idSI:
@@ -2682,10 +2596,10 @@ entryDraw_rayWidg(
 |       * c-string (signed char *) with text to check
 |       * signed int with the cursor position
 |       * signed int with the maximum length
-|     o for examples see fun073, fun074, or fun075
-|       * fun073: intStrCheck_rayWidg
-|       * fun074: floatStrCheck_rayWidg
-|       * fun075: fileStrCheck_rayWidg
+|     o for examples see fun072, fun073, or fun074
+|       * fun072: intStrCheck_rayWidg
+|       * fun073: floatStrCheck_rayWidg
+|       * fun074: fileStrCheck_rayWidg
 |   - eventSTPtr:
 |     o event_rayWidg sturct pointer with event to add
 |   - widgSTPtr:
@@ -2719,7 +2633,7 @@ entryEvent_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun083: labDraw_rayWidg
+| Fun082: labDraw_rayWidg
 |   - draw a label
 | Input:
 |   - maxWidthSI:
@@ -2772,7 +2686,7 @@ labDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun085: mkMesgBox_rayWidg
+| Fun084: mkMesgBox_rayWidg
 |   - makes an emtpy message box widget
 | Input:
 |   - widgSTPtr:
@@ -2792,7 +2706,7 @@ mkMesgBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun086: mesgBoxDraw_rayWidg
+| Fun085: mesgBoxDraw_rayWidg
 |   - draws a message box
 | Input:
 |   - idSI:
@@ -2836,7 +2750,7 @@ mesgBoxDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun087: mesgBoxEvent_rayWidg
+| Fun086: mesgBoxEvent_rayWidg
 |   - checks the event that was fired in a message box
 | Input:
 |   - eventSC:
@@ -2872,7 +2786,39 @@ mesgBoxEvent_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun088: blank_listBox_rayWidg
+| Fun086: checkExt_rayWidg
+|   - checks if file is the correct input extension
+| Input:
+|   - fileStr:
+|     o c-string with file to check
+|   - fileExtAryStr:
+|     o c-string array with file extensions to look for
+|     o `*d` stands for all files and directories
+|     o `*` stands for all files (not directories)
+|     o `+` stands for all files with an extension in
+|       the list (including directories)
+|     o `dir` stands for allow selection of directories
+|   - extLenSI:
+|     o number of file extensions looking for
+|   - extIndexSI:
+|     o index of extension using
+| Output:
+|   - Returns:
+|     o 2 if was directory and is supported
+|     o 1 if fileStr has a supported extension
+|     o 0 if fileStr does not have the extension
+|     o -1 if not a file or directory
+\-------------------------------------------------------*/
+signed char
+checkExt_rayWidg(
+   signed char *fileStr, /*file to check extension of*/
+   signed char *extAryStr[], /*file extensions*/
+   signed int extLenSI,  /*number of extensions*/
+   signed int extIndexSI /*index of extension using*/
+);
+
+/*-------------------------------------------------------\
+| Fun087: blank_listBox_rayWidg
 |   - blanks a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2889,7 +2835,7 @@ blank_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun089: init_listBox_rayWidg
+| Fun088: init_listBox_rayWidg
 |   - initializes a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2905,7 +2851,7 @@ init_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun090: freeStack_listBox_rayWidg
+| Fun089: freeStack_listBox_rayWidg
 |   - frees variables in a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2923,7 +2869,7 @@ freeStack_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun091: freeHeap_listBox_rayWidg
+| Fun090: freeHeap_listBox_rayWidg
 |   - frees a heap allocated listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2938,7 +2884,7 @@ freeHeap_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun092: realloc_listBox_rayWidg
+| Fun091: realloc_listBox_rayWidg
 |   - add more memory to listBox_rayWidg structure
 | Input:
 |   - sizeSI:
@@ -2962,7 +2908,7 @@ realloc_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun093: clear_listBox_rayWidg
+| Fun092: clear_listBox_rayWidg
 |   - removes all items from the list box
 | Input:
 |   - listSTPtr:
@@ -2978,7 +2924,7 @@ clear_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun094: clearSelect_listBox_rayWidg
+| Fun093: clearSelect_listBox_rayWidg
 |   - clear all selections from a list box
 | Input:
 |   - listSTPtr:
@@ -2993,7 +2939,7 @@ clearSelect_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun095: selectMaxSet_listBox_rayWidg
+| Fun094: selectMaxSet_listBox_rayWidg
 |   - sets maximum number of items that can be selected in
 |     a list box
 | Input:
@@ -3012,7 +2958,7 @@ selectMaxSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun096: widthSet_listBox_rayWidg
+| Fun095: widthSet_listBox_rayWidg
 |   - sets maximum and minimum width of a list box
 | Input:
 |   - maxSI:
@@ -3034,7 +2980,7 @@ widthSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun097: heightSet_listBox_rayWidg
+| Fun096: heightSet_listBox_rayWidg
 |   - sets maximum and minimum height of a list box
 | Input:
 |   - maxSI:
@@ -3056,7 +3002,7 @@ heightSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun098: hiddenSet_listBox_rayWidg
+| Fun097: hiddenSet_listBox_rayWidg
 |   - sets a list box item to the hiden state
 | Input:
 |   - itemSI:
@@ -3078,7 +3024,7 @@ hiddenSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun099: selectSet_listBox_rayWidg
+| Fun098: selectSet_listBox_rayWidg
 |   - sets a list box item to the select state
 | Input:
 |   - itemSI:
@@ -3100,7 +3046,7 @@ selectSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun100: specialSet_listBox_rayWidg
+| Fun099: specialSet_listBox_rayWidg
 |   - sets a list box item to the special state
 | Input:
 |   - itemSI:
@@ -3122,7 +3068,7 @@ specialSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun101: canSelectSet_listBox_rayWidg
+| Fun100: canSelectSet_listBox_rayWidg
 |   - sets a list box item to the can select state
 | Input:
 |   - itemSI:
@@ -3144,7 +3090,7 @@ canSelectSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun102: hiddenGet_listBox_rayWidg
+| Fun101: hiddenGet_listBox_rayWidg
 |   - gets if a list box item is in the hiden state
 | Input:
 |   - itemSI:
@@ -3171,9 +3117,8 @@ hiddenGet_listBox_rayWidg(
 |   - listSTPtr:
 |     o listBox_rayWidg struct pointer
 | Output:
-|   - Returns:
-|     o 1 if item has special state
-|     o 0 if item does not have special state
+|   - Modifies:
+|     o adds the select state to a list box item
 \-------------------------------------------------------*/
 signed char
 selectGet_listBox_rayWidg(
@@ -3190,9 +3135,8 @@ selectGet_listBox_rayWidg(
 |   - listSTPtr:
 |     o listBox_rayWidg struct pointer
 | Output:
-|   - Returns:
-|     o 1 if item has special state
-|     o 0 if item does not have special state
+|   - Modifies:
+|     o adds the special state to a list box item
 \-------------------------------------------------------*/
 signed char
 specialGet_listBox_rayWidg(
@@ -3201,7 +3145,7 @@ specialGet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun105: canSelectGet_listBox_rayWidg
+| Fun106: canSelectGet_listBox_rayWidg
 |   - sets a list box item to the can select state
 | Input:
 |   - itemSI:
@@ -3209,9 +3153,8 @@ specialGet_listBox_rayWidg(
 |   - listSTPtr:
 |     o listBox_rayWidg struct pointer
 | Output:
-|   - Returns:
-|     o 1 if item has "can select" state
-|     o 0 if item does not have "can select" state
+|   - Modifies:
+|     o adds the can select state to a list box item
 \-------------------------------------------------------*/
 signed char
 canSelectGet_listBox_rayWidg(
@@ -3220,7 +3163,7 @@ canSelectGet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun106: mk_listBox_rayWidg
+| Fun105: mk_listBox_rayWidg
 |   - makes/adds a list box to a widg_widgST structure
 | Input:
 |   - xSI:
@@ -3252,7 +3195,7 @@ mk_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun107: addItem_listBox_rayWidg
+| Fun106: addItem_listBox_rayWidg
 |   - adds an item to a list box
 | Input:
 |   - textStr:
@@ -3285,71 +3228,7 @@ addItem_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun108: nextItem_listBox_rayWidg
-|   - move to the next item or next item(s) in a listbox
-| Input:
-|   - changeSI:
-|     o how many items to move up or down by
-|       * + is move down
-|       * - is move up
-|   - maxItemsSI:
-|     o maximum number of items to display
-|   - onSI:
-|     o item to start count from
-|       * -1 means use and update onSI in listSTPtr
-|       * >= 0 means do not modify or use onSI in
-|         listSTPtr
-|         @ for thread safty, this still uses the
-|           variables in listSTPtr, but it resets them
-|           back at the end
-|   - listSTPtr:
-|     o listBox_rayWidg struct pointer with items
-| Output:
-|   - Modifies:
-|     o onSI in listSTPtr to be on the input target
-|     o lastScrollSI in listSTPtr in listSTPtr to have the
-|       number of dispalyed items moved down
-|     o scrollSI to be advanced if lastScrollSI said
-|       user moved out of the window
-|   - Returns:
-|     o -1 if did not move
-|     o index moved to
-\-------------------------------------------------------*/
-signed int
-nextItem_listBox_rayWidg(
-   signed int changeSI,     /*how many items to move*/
-   signed int maxItemsSI,   /*maximum items in window*/
-   signed int onSI,         /*use -1 to do real change*/
-   struct listBox_rayWidg *listSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun109: toIndex_listBox_rayWidg
-|   - move list box selected item till at target index
-| Input:
-|   - indexSI:
-|     o index to move to
-|   - maxItemsSI:
-|     o maximum number of items to display
-|   - listSTPtr:
-|     o listBox_rayWidg struct pointer with items
-| Output:
-|   - Modifies:
-|     o onSI in listSTPtr to be on the input target
-|     o lastScrollSI in listSTPtr in listSTPtr to have the
-|       number of dispalyed items moved down
-|     o scrollSI to be advanced if lastScrollSI said
-|       user moved out of the window
-\-------------------------------------------------------*/
-void
-toIndex_listBox_rayWidg(
-   signed int indexSI,     /*index to move to*/
-   signed int maxItemsSI,  /*maximum items in window*/
-   struct listBox_rayWidg *listSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun110: draw_listBox_rayWidg
+| Fun107: draw_listBox_rayWidg
 |   - draws a list box widget
 | Input:
 |   - idSI:
@@ -3385,13 +3264,9 @@ draw_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun111: listBoxEvent_rayWidg
+| Fun108: listBoxEvent_rayWidg
 |   - runs an event for a list box
 | Input:
-|   - idSI:
-|     o id of listbox, this is used to check if the
-|       listbox was really selected (avoids ifs in
-|       your code)
 |   - listSTPtr:
 |     o listBox_rayWidg struct pointer with text (items)
 |       to print out and other list box needed tracking
@@ -3412,348 +3287,9 @@ draw_listBox_rayWidg(
 \-------------------------------------------------------*/
 signed int
 listBoxEvent_rayWidg(
-   signed int idSI,                  /*id of list box*/
    struct listBox_rayWidg *listSTPtr,/*list box data*/
    struct event_rayWidg *eventSTPtr, /*events user did*/
    struct widg_rayWidg *widgSTPtr    /*widgets user made*/
-);
-
-/*-------------------------------------------------------\
-| Fun112: blank_files_rayWidg
-|   - set all files in a files_rayWidg struct to no files 
-| Input:
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to blank
-| Output:
-|   - calls blank function for listBox_rayWidg structures
-|   - sets first item in pwdStr to null
-\-------------------------------------------------------*/
-void
-blank_files_rayWidg(
-  struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun113: init_files_rayWidg
-|   - initialize a files_rayWidg struct
-| Input:
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to initialize
-| Output:
-|   - calls init function for listBox_rayWidg structures
-|   - sets first item in pwdStr to null
-\-------------------------------------------------------*/
-void
-init_files_rayWidg(
-  struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun114: freeStack_files_rayWidg
-|   - frees variables in a files_rayWidg struct
-| Input:
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to free variables in
-| Output:
-|   - calls freeStack function for listBox_rayWidg structs
-|   - sets first item in pwdStr to null
-\-------------------------------------------------------*/
-void
-freeStack_files_rayWidg(
-  struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun115: freeHeap_files_rayWidg
-|   - frees files_rayWidg struct
-| Input:
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to free
-| Output:
-|   - Frees: fileSTPtr, but you must set to null
-\-------------------------------------------------------*/
-void
-freeHeap_files_rayWidg(
-  struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun116: setFileLim_files_rayWidg
-|   - sets the maximum number of files the user can choose
-| Input:
-|   - maxFilesSI:
-|     o maximum number of files the user can select
-|     o use -1 for any number
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to set file limit for
-| Output:
-|   - Modifies:
-|     o fileListST in fileSTPtr to have maxFilesSI
-\-------------------------------------------------------*/
-void
-setFileLimit_files_rayWidg(
-   signed int maxFilesSI, /*file limit*/
-   struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun117: getFile_files_rayWidg
-|   - gets the next selected files from a files_rayWidg
-|     struct
-| Input:
-|   - fileOnSIPtr:
-|     o signed int pionter with current file on and to
-|       advance to the next file
-|   - specialBl:
-|     o 1: return items that are special, but not selected
-|     o 0: only return a special item if it has been
-|          selected
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to free
-| Output:
-|   - Modifies:
-|     o fileOnSIPtr to the next file after the returned
-|       file
-|   - Returns:
-|     o heap allocated signed char array with the next
-|       file name (you must free it)
-|       * max size is 511 bytes
-|     o 0 for an error
-|       * for no files fileOnSIPtr is set to -1
-|       * for memory errors fileOnSIPtr is set to -2
-\-------------------------------------------------------*/
-signed char *
-getFile_files_rayWidg(
-   signed int *fileOnSIPtr, /*1st file to check if
-                            `  selected
-                            */
-   signed char specialBl,   /*1: ret non-select special*/
-   struct files_rayWidg *fileSTPtr /*has selected files*/
-);
-
-/*-------------------------------------------------------\
-| Fun118: swapFiles_files_rayWidg
-|   - swap two files in a files_rayWidg struct
-| Input:
-|   - firstSI:
-|     o index of first file to swap
-|   - secSI:
-|     o index of second file to swap
-|   - fileSTPtr:
-|     o files_rayWidg struct pionter with files to swap
-| Output:
-|   - Modifies:
-|     o textAryStr, stateArySC, and sizeArySI in fileSTPtr
-|       to have firstSI and secSI index's swapped
-\-------------------------------------------------------*/
-void
-swapFiles_files_rayWidg(
-   signed int firstSI,             /*1st file to swap*/
-   signed int secSI,               /*second file to swap*/
-   struct files_rayWidg *fileSTPtr /*has files to swap*/
-);
-
-/*-------------------------------------------------------\
-| Fun119: sortFiles_files_rayWidg
-|   - sorts files by name and if directory
-| Input:
-|   - fileSTPtr:
-|     o files_rayWidg sruct pionter to sort
-| Ouput:
-|   - Modifies:
-|     o textAryStr in fileListST in fileSTPtr to be sorted
-|       by if file/directory and then name
-|     o stateArySC in fileListST in fileSTPtr to be sorted
-|       by textAryStr in fileListST in fileSTPtr (kept in
-|       sync)
-\-------------------------------------------------------*/
-void
-sortFiles_files_rayWidg(
-   struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun120: scanForFiles_files_rayWidg
-|   - get files in a directory
-| Input:
-|   - dirStr:
-|     o c-string with the new working directory to get
-|       files from
-|   - firstBl:
-|     o 1: is the first round, so get files even though
-|          dirStr is same as pwdStr 
-|     o 0: do not get files if dirStr is same as pwdStr 
-|   - fileSTPtr:
-|     o file_rayWidg struct pointer to add files in
-|       directory to
-|   - widgSTPtr:
-|     o widg_rayWidg struct pointer with font size
-| Output:
-|   - Modifies:
-|     o fileListST in fileSTPtr to have files in directory
-|   - Returns:
-|     o 0 for no errors
-|     o -1 if input directory was a file
-|     o -2 if not a file or directory
-|     o -3 for same directory (no change)
-|     o -4 for memory errors
-\-------------------------------------------------------*/
-signed char
-scanForFiles_files_rayWidg(
-   signed char *dirStr, /*directory to get files for*/
-   signed char firstBl, /*1: first round, overwrite*/
-   struct files_rayWidg *fileSTPtr,/*add files to*/
-   struct widg_rayWidg *widgSTPtr  /*has font size*/
-);
-
-/*-------------------------------------------------------\
-| Fun121: changeExt_files_rayWidg
-|   - updates files for the change extension type
-| Input:
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer with files to update
-| Output:
-|   - Modifies:
-|     o fileListST in fileSTPtr to have new extensions
-|       applied
-\-------------------------------------------------------*/
-void
-changeExt_files_rayWidg(
-   struct files_rayWidg *fileSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun122: addExt_files_rayWidg
-|   - add an file extension to a files_rayWidg struct
-| Input:
-|   - extStr:
-|     o c-string with extension to add (can be 0/null)
-|   - clearBl:
-|     o 1: remove all old extensions
-|     o 0: append extension to the list
-|   - selectBl:
-|     o 1: select the extension for use
-|     o 0: do not select the extension
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer to add extension to
-|   - widgSTPtr:
-|     o widg_rayWidg struct pointer with font size
-| Output:
-|   - Modifies:
-|     o extListST in fileSTPtr to have the extensions
-|   - Returns:
-|     o 0 for no errors
-|     o 1 for memory errors
-\-------------------------------------------------------*/
-signed char
-addExt_files_rayWidg(
-   signed char *extStr, /*file extension to add in*/
-   signed char clearBl, /*1: clear old extensions*/
-   signed char selectBl,/*1: select the extension*/
-   struct files_rayWidg *fileSTPtr,/*add extension to*/
-   struct widg_rayWidg *widgSTPtr /*has font*/
-);
-
-/*-------------------------------------------------------\
-| Fun123: mkFileBrowser_rayWidg
-|   - makes a file browswer widget
-| Input:
-|   - widgSTPtr:
-|     o widg_rayWidg struct pointer to add file browser
-|       and its children widgets to
-| Output:
-|   - Modifies:
-|     o resizes arrays in widgSTPtr if not enough memory
-|       to hold the message box and its children widgets
-|   - Returns:
-|     o parent id (index) of the file browser widget
-|     o -1 for memory errors
-\-------------------------------------------------------*/
-signed char
-mkFileBrowser_rayWidg(
-   struct widg_rayWidg *widgSTPtr
-);
-
-/*-------------------------------------------------------\
-| Fun124: fileBrowserDraw_rayWidg
-|   - draws a file browswer widget
-| Input:
-|   - idSI:
-|     o parent id of file browser widget
-|   - mesgStr:
-|     o c-string with message to print for user
-|   - widthSI:
-|     o width of the GUI (message box auto sizes)
-|   - heightSI:
-|     o height of the GUI (message box auto sizes)
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer with files, current
-|       working directory, and extensions
-|   - widgSTPtr:
-|     o widg_rayWidg struct pointer with coordinates and
-|       dimensions of file browser to draw
-| Output:
-|   - Modifies:
-|     - file browswer widgets widthArySI, heightArySI,
-|       xArySI, and yArySI in widgSTPtr to have file
-|       browswer position and dimensions
-|       changed to
-|     - will set first extension to active
-|       (fileExtAryStr[0][0] *= -1) if no extension is
-|       setup as default
-|   - Returns:
-|     o width of file browser if drawn
-|     o 0 if file browser is not drawn
-|     o def_noWidget_rayWidg if id is invalid
-\-------------------------------------------------------*/
-signed char
-fileBrowserDraw_rayWidg(
-   signed int idSI,                /*id of file browser*/
-   signed char *mesgStr,           /*message for the usr*/
-   signed int widthSI,             /*width of GUI*/
-   signed int heightSI,            /*height of GUI*/
-   struct files_rayWidg *fileSTPtr,/*has files*/
-   struct widg_rayWidg *widgSTPtr  /*has browser widget*/
-);
-
-/*-------------------------------------------------------\
-| Fun125: fileBrowserEvent_rayWidg
-|   - process and event for the file browser
-| Input:
-|   - idSI:
-|     o id of file browser, this is used to check if the
-|       file browser was really selected (avoids ifs in
-|       your code)
-|   - eventSTPtr:
-|     o event_rayWidg struct pointer with the event to run
-|   - fileSTPtr:
-|     o files_rayWidg struct pointer with files and
-|       extensions
-|   - widgSTPtr:
-|     o widg_rayWidg struct pointer with file browser
-|       to draw
-| Output:
-|   - Modifies:
-|     - fileSTPtr to have changes in directory (pwdStr),
-|       files selection (fileListST), and extenon changes
-|       (extListST)
-|   - Returns:
-|     o 2 for cancel event
-|     o 1 for ok event
-|       - get files with the `getFile_files_rayWidg()`
-|         function
-|     o 0 for no major event
-|     o -1 if file browser widget no selected (different
-|       widget)
-|     o -2 if no widget was selected
-|     o -3 for errors (memory, file, ect ...)
-\-------------------------------------------------------*/
-signed char
-fileBrowserEvent_rayWidg(
-   signed int idSI,                 /*id of file browser*/
-   struct event_rayWidg *eventSTPtr, /*has click event*/
-   struct files_rayWidg *fileSTPtr,  /*has files/extions*/
-   struct widg_rayWidg *widgSTPtr
 );
 
 #endif
