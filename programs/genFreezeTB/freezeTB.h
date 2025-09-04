@@ -3,19 +3,29 @@
 '   - Process input reads for AMR(s) and MIRU lineages.
 '     This also builds a cosenssu and prints out depths
 '   o header:
-'     o guards
-'   o .c fun01: pversion_freezeTB
+'     o Included libraries
+'   o .c st01: set_freezeTB
+'     - has loose (not in structure) settings for freezeTB
+'   o fun01: blank_set_freezeTB
+'     - blanks a set_freezeTB stucture
+'   o fun02: init_set_freezeTB
+'     - initializes a set_freezeTB stucture
+'   o fun04: freeStack_set_freezeTB
+'     - frees variables in a set_freezeTB stack struct
+'   o fun05: freeHeap_set_freezeTB
+'     - frees a set_freezeTB stack struct
+'   o fun06: pversion_freezeTB
 '     - prints version number for freezeTB and |submodules
-'   o .c fun02: phelp_freezeTB
+'   o .c fun07: phelp_freezeTB
 '     - prints help message for freezeTB
-'   o .c fun03: input_freezeTB
+'   o .c fun08: input_freezeTB
 '     - gets user input
-'   o fun04: run_freezeTB:
-'     - drives everything, but not fun04 (for tcltk)
+'   o fun09: run_freezeTB:
+'     - drives everything, but not fun09 (for tcltk)
 '   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public dofun04 / mit)
+'     - licensing for this code (public dofun09 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -25,6 +35,21 @@
 
 #ifndef FREEZE_TB_H
 #define FREEZE_TB_H
+
+/*-------------------------------------------------------\
+| Fun06: pversion_freezeTB
+|   - prints version number for freezeTB and |submodules
+| Input:
+|   - outFILE:
+|     o file to print version numbers to
+| Ouput:
+|   - Prints:
+|     o version numbers to outFILE
+\-------------------------------------------------------*/
+void
+pversion_freezeTB(
+   void *outFILE
+);
 
 /*-------------------------------------------------------\
 | Fun04: run_freezeTB
@@ -46,7 +71,7 @@
 signed char *
 run_freezeTB(
    int numArgsSI,
-   const char *argAryStr[]
+   char *argAryStr[]
 );
 
 #endif

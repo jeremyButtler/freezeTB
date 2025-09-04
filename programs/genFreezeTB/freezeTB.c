@@ -14,7 +14,7 @@
 '     - frees variables in a set_freezeTB stack struct
 '   o fun05: freeHeap_set_freezeTB
 '     - frees a set_freezeTB stack struct
-'   o .c fun06: pversion_freezeTB
+'   o fun06: pversion_freezeTB
 '     - prints version number for freezeTB and |submodules
 '   o .c fun07: phelp_freezeTB
 '     - prints help message for freezeTB
@@ -2539,7 +2539,7 @@ phelp_freezeTB(
 int
 input_freezeTB(
    int numArgsSI,
-   const char *argAryStr[],
+   char *argAryStr[],
    signed char **samFileStr,
    signed int *fqIndexSIPtr,
    struct set_freezeTB *ftbSetSTPtr
@@ -4714,7 +4714,7 @@ input_freezeTB(
 signed char *
 run_freezeTB(
    int numArgsSI,
-   const char *argAryStr[]
+   char *argAryStr[]
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun09 TOC:
    '   - Run freezeTB on user input

@@ -92,7 +92,7 @@
 int
 main(
    int numArgsSI,
-   const char *argAryStr[]
+   char *argAryStr[]
 ){
    signed char *errHeapStr = 0;
    int retSI = 0;
