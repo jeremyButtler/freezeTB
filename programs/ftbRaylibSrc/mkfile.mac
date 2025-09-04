@@ -9,15 +9,16 @@ CFLAGS=-DNONE
 coreCFLAGS=-DMAC -c -static -O3 -g -Wall -Wextra
 O=o.mac
 raylibPath=../raylib/src
-genLib=../genLib
+libRayLib=$(raylibPath)/libraylib.a
+
 LDMacFlags=\
    -framework Foundation \
    -framework CoreVideo \
    -framework IOKit \
    -framework Cocoa \
-  	-framework GLUT \
+   -framework GLUT \
    -framework OpenGL \
-   ../raylib/src/libraylib.a
+   $(libRayLib)
 
 # foundation is so I can detect dark and light mode in
 #   widgets
@@ -72,6 +73,7 @@ objFiles=\
    $(genFreezeTB)/spolST.$O \
    $(genFreezeTB)/freezeTBPaths.$O \
    $(genFreezeTB)/freezeTB.$O \
+   darkLight.$O \
    rayWidg.$O \
    ftbRayST.$O \
    ftbRay.$O
@@ -84,14 +86,17 @@ ftbRay: ftbRay.$O
 
 # need to build raylib, but bit tricky
 $(libRayLib): $(raylibPath)/raylib.h
-	export MACOSX_DEPLOYMENT_TARGET=10.9 \
-	xcode-select --install && \
+	export MACOSX_DEPLOYMENT_TARGET=10.9 && \
+	xcodeHere="$(xcode-select -p 1/dev/null;echo $?)";\
+	if [ "$xcodeHere" -ne 0 ]; then\
+		xcode-select --install; \
+	fi; \
 	$(MAKE) PLATFORM=PLATFORM_DESKTOP -C ../raylib/src;
 
 ftbRay.$O: \
 	ftbRay.c \
 	ftbRayST.$O
-		$(CC) $(CFLAGS) -o ftbRay.$O  ftbRay.c
+		$(CC) $(coreCFLAGS) $(CFLAGS) -o ftbRay.$O  ftbRay.c
 
 ftbRayST.$O: \
 	ftbRayST.c \
@@ -99,34 +104,39 @@ ftbRayST.$O: \
 	rayWidg.$O \
 	$(genFreezeTB)/freezeTB.$O \
 	$(genLib)/ptrAry.$O
-		$(CC) $(CFLAGS) -o ftbRayST.$O ftbRayST.c
+		$(CC) $(coreCFLAGS) $(CFLAGS) \
+			-o ftbRayST.$O ftbRayST.c
 
 rayWidg.$O: \
 	rayWidg.c \
 	rayWidg.h \
+	darkLight.$O \
 	$(genLib)/ulCp.$O \
 	$(genLib)/base10str.$O \
 	$(libRayLib)
-		$(CC) -I$(raylibPath) $(CFLAGS) -o rayWidg.$O \
-			rayWidg.c
+		$(CC) -I$(raylibPath) $(coreCFLAGS) $(CFLAGS) \
+			-o rayWidg.$O rayWidg.c
+
+darkLight.$O: darkLight.h darkLight.m
+	$(CC) -c darkLight.m -o darkLight.$O -framework Cocoa
 
 $(genLib)/ptrAry.$O: \
 	$(genLib)/ptrAry.c \
 	$(genLib)/ptrAry.h \
 	$(genLib)/ulCp.$O
-		$(CC) $(CFLAGS) -o $(genLib)/ptrAry.$O \
+		$(CC) $(coreCFLAGS) $(CFLAGS) -o $(genLib)/ptrAry.$O \
 			$(genLib)/ptrAry.c
 
 $(genLib)/base10str.$O: \
 	$(genLib)/base10str.c \
 	$(genLib)/base10str.h
-		$(CC) $(CFLAGS) -o $(genLib)/base10str.$O \
+		$(CC) $(coreCFLAGS) $(CFLAGS) -o $(genLib)/base10str.$O \
 			$(genLib)/base10str.c
 
 $(genLib)/ulCp.$O: \
 	$(genLib)/ulCp.c \
 	$(genLib)/ulCp.h
-		$(CC) $(CFLAGS) -o $(genLib)/ulCp.$O \
+		$(CC) $(coreCFLAGS) $(CFLAGS) -o $(genLib)/ulCp.$O \
 			$(genLib)/ulCp.c
 
 $(genFreezeTB)/freezeTB.$O: \

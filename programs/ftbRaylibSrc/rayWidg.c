@@ -205,8 +205,6 @@
 '       - adds a user event to an event_rayWidg struct
 '   * Sof04:
 '     - get OS state
-'     o fun063: getDarkModeState_rayWidg
-'       - detects if Mac/Windows computer is in dark mode
 '     o fun064: checkGuiColorMode_rayWidg
 '       - checks is user is using dark or light mode, and
 '         sets the color scheme to the correct mode
@@ -406,6 +404,8 @@
 #else
    #include <stdlib.h>
 #endif
+
+#include "darkLight.h"
 
 #include <raylib.h>
 #include "rayWidg.h"
@@ -3106,109 +3106,6 @@ get_event_rayWidg(
 } /*get_event_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun063: getDarkModeState_rayWidg
-|   - detects if Mac or Windows computer is in dark mode
-| Input:
-| Output:
-|   - Returns:
-|     o def_darkMode_rayWidg for dark mode
-|     o def_lightMode_rayWidg for light mode
-|     o def_unkownMode_rayWidg if could not decide
-| Note:
-|   - this is from github co-pilot (chat gpt)
-\-------------------------------------------------------*/
-signed char
-getDarkModeState_rayWidg(
-   void
-){
-   #ifdef MAC
-      #ifdef NO_DARK_MODE_CHECK
-         return def_unkownMode_rayWidg;
-      #else
-      @autoreleasepool {
-         NSString *style =
-            [
-               [NSUserDefaults standardUserDefaults]
-               stringForKey:@"AppleInterfaceStyle"
-            ];
-         if(! style)
-            goto retUnkown_fun001;
-         else if (
-               [style caseInsensitiveCompare:@"Dark"]
-            == NSOrderedSame
-         ) goto retDark_fun001;
-         else if (
-         else
-            goto retLight_fun001;
-       } /*autoreleasepool block from objective C*/
-
-       goto retUnkown_fun001;
-          /*could not get dark/light mode*/
-
-       retUnkown_fun001:;
-          return def_unkownMode_rayWidg;
-       retLight_fun001:;
-          return def_lightMode_rayWidg;
-       retDark_fun001:;
-          return def_darkMode_rayWidg;
-      #endif
-   #else
-   #ifdef WINDOWS
-      #ifdef NO_DARK_MODE_CHECK
-         return def_unkownMode_rayWidg;
-      #else
-      HKEY hKey;
-      DWORD value = 1;
-      DWORD valueSize = sizeof(value);
-
-      /*Open the registry key*/
-      if(
-         RegOpenKeyExA(
-            HKEY_CURRENT_USER,
-            "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-            0,
-            KEY_READ,
-            &hKey
-         ) == ERROR_SUCCESS
-      ){ /*If: can open theme registory*/
-          if(
-             RegQueryValueExA(
-                hKey,
-                "AppsUseLightTheme",
-                NULL,
-                NULL,
-                (LPBYTE)&value,
-                &valueSize
-              ) == ERROR_SUCCESS
-          ){ /*If: could get dark mode status*/
-              RegCloseKey(hKey);
-
-              if (value == 0)
-                 goto retDark_fun001;
-              else
-                 goto retLight_fun001;
-          }  /*If: could get dark mode status*/
-
-          RegCloseKey(hKey);
-      } /*If: can open theme registory*/
-
-      goto retUnkown_fun001;
-         /*could not get dark/light mode*/
-
-      retUnkown_fun001:;
-         return def_unkownMode_rayWidg;
-      retLight_fun001:;
-         return def_lightMode_rayWidg;
-      retDark_fun001:;
-         return def_darkMode_rayWidg;
-      #endif
-   #else
-      return def_unkownMode_rayWidg;
-   #endif /*windows check*/
-   #endif /*mac check*/
-} /*getDarkModeState_rayWidg*/
-
-/*-------------------------------------------------------\
 | Fun064: checkGuiColorMode_rayWidg
 |   - checks is user is using dark or light mode, and
 |     sets the color scheme to the correct mode
@@ -3225,7 +3122,7 @@ checkGuiColorMode_rayWidg(
    widg_rayWidg *widgSTPtr
 ){
    /*TODO: need elevation change and border shadow*/
-   if(getDarkModeState_rayWidg() == def_darkMode_rayWidg)
+   if(getMode_darkLight() & 2)
    { /*If: dark mode is set*/
       widgSTPtr->guiColSI = def_black_rayWidg;
       widgSTPtr->focusColSI = def_white_rayWidg;

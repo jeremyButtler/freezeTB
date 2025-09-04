@@ -211,6 +211,8 @@ This structure is used with the file browser structure. It
      in the present working directory (pwdStr / varible 1)
   4. extListST: listBox\_rayWidg structure with the file
      extensions
+  5. lastWidgSI: widget was on before the file browser
+     was opened (set by `fileBrowserDraw_rayWidg()`)
 
 # Orginization
 

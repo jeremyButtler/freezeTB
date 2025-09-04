@@ -429,7 +429,7 @@ typedef struct Font (*fontFunction)(void);
    */
 
 /*TODO: work on Mac parameters (need to test)*/
-#define def_macRoundness_rayWidg 0.43f
+#define def_macRoundness_rayWidg 0.2f
 #define def_macSegments_rayWidg 100
 
 #define def_maxStrLen_rayWidg ( (signed int) (((unsigned int) -1) - 1) )

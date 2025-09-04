@@ -72,6 +72,7 @@ objFiles=\
    $(genFreezeTB)/spolST.$O \
    $(genFreezeTB)/freezeTBPaths.$O \
    $(genFreezeTB)/freezeTB.$O \
+   darkLight.$O \
    rayWidg.$O \
    ftbRayST.$O \
    ftbRay.$O
@@ -98,11 +99,16 @@ ftbRayST.$O: \
 rayWidg.$O: \
 	rayWidg.c \
 	rayWidg.h \
+	darkLight.$O \
 	$(genLib)/ulCp.$O \
 	$(genLib)/base10str.$O \
 	$(libRayLib)
 		$(CC) -I$(raylibPath) $(CFLAGS) -o rayWidg.$O \
 			rayWidg.c
+
+darkLight.$O: darkLight.h darkLight.c
+	$(CC) $(coreCFLAGS) $(CFLAGS) -o darkLight.$O \
+		darkLight.c
 
 # need to build raylib, but bit tricky
 $(libRayLib): \

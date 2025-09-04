@@ -1803,6 +1803,8 @@ checkRunEvent_ftbRayST(
                guiSTPtr->fqStrSTPtr->strAry[indexSI],
                guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
             ); /*copy fastq file name*/
+
+            ++argLenSI;
          }  /*Loop: add fastq files to ftb command*/
       } /*Else: no minimap2*/
 
