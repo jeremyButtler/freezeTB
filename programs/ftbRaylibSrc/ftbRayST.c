@@ -49,12 +49,21 @@
    #include <stdlib.h>
 #endif
 
+#include <stdio.h>
+
 #include "../genLib/ulCp.h"
 #include "../genLib/ptrAry.h"
+#include "../genLib/fileFun.h"
 
 #include "../raylib/src/raylib.h"
 #include "ftbRayST.h"
 #include "rayWidg.h"
+
+#include "../genFreezeTB/freezeTB.h"
+#include "../genFreezeTB/freezeTBPaths.h"
+
+/*.h files only*/
+#include "../genLib/endLine.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
@@ -151,7 +160,6 @@ blank_gui_ftbRayST(
       );
    guiSTPtr->prefixPosArySI[0] = 0; /*scroll*/
    guiSTPtr->prefixPosArySI[1] = 0; /*cusor position*/
-   guiSTPtr->prefixLenSI = 0;
 
    /*output button*/
    guiSTPtr->outDirStr[0] = 0;
@@ -267,7 +275,31 @@ freeHeap_gui_ftbRayST(
 void
 draw_gui_ftbRayST(
    void *voidGuiSTPtr
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun05 TOC:
+   '   - draws the gui for a gui_ftbRayST structure
+   '   o fun05 sec01:
+   '     - variable declarations
+   '   o fun05 sec02:
+   '     - get file browser and set width and height
+   '   o fun05 sec03:
+   '     - start drawing + draw buttons and entry boxes
+   '   o fun05 sec04:
+   '     - draw labels for file paths
+   '   o fun05 sec05:
+   '     - draw message box and file browser
+   '   o fun05 sec06:
+   '     - end drawing
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun05 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char tmpStr[1024];
+   signed int lenSI = 0;
+
    signed char blinkBl = 0; /*be in blink state*/
    struct Color guiCol;
    signed int heightSI = 0;
@@ -276,6 +308,11 @@ draw_gui_ftbRayST(
    struct gui_ftbRayST *guiSTPtr =
       (gui_ftbRayST *) voidGuiSTPtr;
    struct files_rayWidg *fileSTPtr = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun05 Sec02:
+   ^   - get file browser and set width and height
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    switch(guiSTPtr->browserSC)
    { /*Switch: find which browser using*/
@@ -304,6 +341,11 @@ draw_gui_ftbRayST(
    } /*Else: displaying the output GUI*/
 
    SetWindowSize(widthSI, heightSI);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun05 Sec03:
+   ^   - start drawing + draw buttons and entry boxes
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*check if blinking the cursor*/
    guiSTPtr->blinkSC =
@@ -393,6 +435,124 @@ draw_gui_ftbRayST(
          guiSTPtr->widgSTPtr    /*has widgets to draw*/
       );
 
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun05 Sec04:
+      ^   - draw labels for file paths
+      ^   o fun05 sec04 sub01:
+      ^     - draw fastq file paths label
+      ^   o fun05 sec04 sub02:
+      ^     - draw output directory label
+      ^   o fun05 sec04 sub03:
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+      /**************************************************\
+      * Fun05 Sec04 Sub01:
+      *   - draw fastq file paths label
+      \**************************************************/
+
+      if(guiSTPtr->fqStrSTPtr->lenSL)
+      { /*If: have fastq files to draw*/
+         if(guiSTPtr->fqStrSTPtr->lenSL > 1)
+         { /*If: have more than one file*/
+            lenSI =
+               cpStr_ulCp(
+                  tmpStr,
+                  guiSTPtr->fqFileSTPtr->pwdStr
+               );
+            tmpStr[lenSI++] = '*';
+            tmpStr[lenSI] = 0;
+         } /*If: have more than one file*/
+
+         else
+         { /*Else: only one file*/
+            cpStr_ulCp(
+               tmpStr,
+               guiSTPtr->fqStrSTPtr->strAry[0]
+            );
+         } /*Else: only one file*/
+
+         textDrawByCoord_rayWidg(
+            tmpStr,
+            guiSTPtr->widgSTPtr->xArySI[
+               guiSTPtr->fqButIdSI
+            ]
+               + guiSTPtr->widgSTPtr->widthArySI[
+                   guiSTPtr->fqButIdSI
+                 ],
+            guiSTPtr->widgSTPtr->yArySI[
+               guiSTPtr->fqButIdSI
+            ],
+            guiSTPtr->inWinWidthSI -
+               guiSTPtr->widgSTPtr->widthArySI[
+                  guiSTPtr->fqButIdSI
+               ],
+            guiSTPtr->widgSTPtr->textColSI,
+            3, /*pad for x and y*/
+            guiSTPtr->widgSTPtr
+         );
+      } /*If: have fastq files to draw*/
+
+      /**************************************************\
+      * Fun05 Sec04 Sub02:
+      *   - draw output directory label
+      \**************************************************/
+
+      if(guiSTPtr->outDirStr[0])
+      { /*If: have a output directory*/
+         textDrawByCoord_rayWidg(
+            guiSTPtr->outDirStr,
+            guiSTPtr->widgSTPtr->xArySI[
+               guiSTPtr->outDirIdSI
+            ]
+               + guiSTPtr->widgSTPtr->widthArySI[
+                   guiSTPtr->outDirIdSI
+                 ],
+            guiSTPtr->widgSTPtr->yArySI[
+               guiSTPtr->outDirIdSI
+            ],
+            guiSTPtr->inWinWidthSI -
+               guiSTPtr->widgSTPtr->widthArySI[
+                  guiSTPtr->outDirIdSI
+               ],
+            guiSTPtr->widgSTPtr->textColSI,
+            3, /*pad for x and y*/
+            guiSTPtr->widgSTPtr
+         );
+      } /*If: have a output directory*/
+
+      /**************************************************\
+      * Fun05 Sec04 Sub03:
+      *   - draw configuration file label
+      \**************************************************/
+
+      if(guiSTPtr->configFileStr[0])
+      { /*If: have a configuration file*/
+         textDrawByCoord_rayWidg(
+            guiSTPtr->configFileStr,
+            guiSTPtr->widgSTPtr->xArySI[
+               guiSTPtr->configIdSI
+            ]
+               + guiSTPtr->widgSTPtr->widthArySI[
+                   guiSTPtr->configIdSI
+                 ],
+            guiSTPtr->widgSTPtr->yArySI[
+               guiSTPtr->configIdSI
+            ],
+            guiSTPtr->inWinWidthSI -
+               guiSTPtr->widgSTPtr->widthArySI[
+                  guiSTPtr->configIdSI
+               ],
+            guiSTPtr->widgSTPtr->textColSI,
+            3, /*pad for x and y*/
+            guiSTPtr->widgSTPtr
+         );
+      } /*If: have a configuration file*/
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun05 Sec05:
+      ^   - draw message box and file browser
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
       mesgBoxDraw_rayWidg(
          guiSTPtr->mesgBoxIdSI,
          widthSI,
@@ -410,7 +570,12 @@ draw_gui_ftbRayST(
          fileSTPtr,
          guiSTPtr->widgSTPtr
       );
-         
+
+      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+      ^ Fun05 Sec06:
+      ^   - end drawing
+      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    EndDrawing();
 } /*draw_gui_ftbRayST*/
 
@@ -776,6 +941,12 @@ mk_gui_ftbRayST(
       )
    ) goto memErr_fun06;
 
+   cpStr_ulCp(
+      retHeapGUI->outDirStr,
+      retHeapGUI->outDirSTPtr->pwdStr
+   );
+      
+
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun06 Sec02 Sub02 Cat04:
    +   - add configuration file file browser structure
@@ -861,11 +1032,27 @@ checkRunEvent_ftbRayST(
 
    signed char *tmpHeapStr = 0;
 
+   /*for reading the config file*/
+   #define def_lineLen_fun07 1024
+   signed char lineStr[def_lineLen_fun07 + 8];
+   signed char logFileStr[def_lineLen_fun07 + 8];
+   FILE *inFILE = 0;
+   signed char refStr[def_lineLen_fun07 + 8];
+   signed long discardSL = 0; /*for reading files*/
+
+   /*for buiding freezeTB run command*/
+   signed char *argAryStr[1024];
+      /*just give more memory then I will ever need*/
+   signed int argLenSI = 0;
+
    struct event_rayWidg eventStackST;
    signed int indexSI = 0;
    signed int tmpSI = 0;
 
    struct files_rayWidg *fileSTPtr = 0;
+
+   for(tmpSI = 0; tmpSI < 1024; ++tmpSI)
+      argAryStr[tmpSI] = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun07 Sec02:
@@ -955,6 +1142,8 @@ checkRunEvent_ftbRayST(
    ^     - file browser event actions
    ^   o fun07 sec06 sub06:
    ^     - run event actions
+   ^   o fun07 sec06 sub07:
+   ^     - button pressed to build the output report
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -1207,7 +1396,32 @@ checkRunEvent_ftbRayST(
    /*****************************************************\
    * Fun07 Sec06 Sub06:
    *   - run event actions
+   *   o fun07 sec06 sub06 cat01:
+   *     - check if everything was input
+   *   o fun07 sec06 sub06 cat02:
+   *     - read in the config file
+   *   o fun07 sec06 sub06 cat03:
+   *     - build prefix & make output directory
+   *   o fun07 sec06 sub06 cat04:
+   *     - build the log file
+   *   o fun07 sec06 sub06 cat05:
+   *     - check if can run minimap2
+   *   o fun07 sec06 sub06 cat06:
+   *     - find length of minimap2 command and get memory
+   *   o fun07 sec06 sub06 cat07:
+   *     - build minimap2 command
+   *   o fun07 sec06 sub06 cat08:
+   *     - add the -sam <file>.sam entry to ftb
+   *   o fun07 sec06 sub06 cat09:
+   *     - run minimap2
+   *   o fun07 sec06 sub06 cat10:
+   *     - if cannot, copy fastq files to ftb command
    \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun07 Sec06 Sub06 Cat01:
+   +   - check if everything was input
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    runFtb_fun07_sec06_sub06:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
@@ -1246,14 +1460,418 @@ checkRunEvent_ftbRayST(
          goto done_fun07_sec07;
       } /*Else If: no prefix input*/
 
-      hidenClear_widg_rayWidg(
-         guiSTPtr->mesgBoxIdSI,
-         guiSTPtr->widgSTPtr
-      );
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat02:
+      +   - read in the config file
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      /*get path to default reference sequence*/
+      refPath_freezeTBPaths(refStr);
+
+      argLenSI = 1; /*0 is always reserved*/
+
+      if(guiSTPtr->configFileStr[0])
+      { /*If: user provided a configuration file*/
+         inFILE =
+            fopen((char *) guiSTPtr->configFileStr, "r");
+
+         while(
+            getLine_fileFun(
+               inFILE,
+               lineStr,
+               def_lineLen_fun07,
+               &discardSL
+            )
+         ){ /*Loop: read in configuration file*/
+            tmpHeapStr = lineStr;
+
+            while(*tmpHeapStr && *tmpHeapStr < 33)
+               ++tmpHeapStr;
+            if(! *tmpHeapStr)
+               continue;
+            tmpSI = endWhite_ulCp(tmpHeapStr);
+
+            argAryStr[argLenSI] =
+               malloc((tmpSI + 8) * sizeof(signed char));
+            if(! argAryStr[argLenSI])
+               goto err_fun07_sec07;
+
+            cpWhite_ulCp(argAryStr[argLenSI], tmpHeapStr);
+            ++argLenSI;
+            tmpHeapStr = 0;
+
+            /*copy the second entry (if is one)*/
+            while(*tmpHeapStr && *tmpHeapStr < 33)
+               ++tmpHeapStr;
+            if(! *tmpHeapStr)
+               continue;
+            tmpSI = endStr_ulCp(tmpHeapStr);
+
+            argAryStr[argLenSI] =
+               malloc((tmpSI + 8) * sizeof(signed char));
+            if(! argAryStr[argLenSI])
+               goto err_fun07_sec07;
+
+            cpStr_ulCp(argAryStr[argLenSI], tmpHeapStr);
+
+            /*make sure user is not changing reference*/
+            if(argAryStr[argLenSI - 1][0] != '-') ;
+            else if(argAryStr[argLenSI - 1][1] != 'r') ;
+            else if(argAryStr[argLenSI - 1][2] != 'e') ;
+            else if(argAryStr[argLenSI - 1][3] != 'f') ;
+            else
+               cpStr_ulCp(refStr, argAryStr[argLenSI]);
+               /*user input reference sequence*/
+
+            ++argLenSI;
+            tmpHeapStr = 0;
+         } /*Loop: read in configuration file*/
+
+         tmpHeapStr = 0;
+
+         fclose(inFILE);
+         inFILE = 0;
+      } /*If: user provided a configuration file*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat03:
+      +   - build prefix and make output directory
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      /*prefix tag*/
+      argAryStr[argLenSI] =
+         malloc((7 + 8) * sizeof(signed char));
+
+      if(! argAryStr[argLenSI])
+         goto err_fun07_sec07;
       cpStr_ulCp(
-         guiSTPtr->mesgStr,
-         guiSTPtr->outDirSTPtr->pwdStr
+         argAryStr[argLenSI],
+         (signed char *) "-prefix"
       );
+      ++argLenSI;
+
+      /*prefix path*/
+      tmpSI = endStr_ulCp(guiSTPtr->inPrefixStr) * 2;
+      tmpSI += endStr_ulCp(guiSTPtr->outDirStr) + 1;
+      tmpSI += 2;
+      argAryStr[argLenSI] =
+         malloc((tmpSI + 8) * sizeof(signed char));
+      if(! argAryStr[argLenSI])
+         goto err_fun07_sec07;
+      tmpSI =
+         cpStr_ulCp(
+            argAryStr[argLenSI],
+            guiSTPtr->outDirStr
+         );
+      argAryStr[argLenSI][tmpSI++] = def_pathSep_rayWidg;
+      tmpSI +=
+         cpStr_ulCp(
+            &argAryStr[argLenSI][tmpSI],
+            guiSTPtr->inPrefixStr
+         );
+      
+      if( MakeDirectory((char *) argAryStr[argLenSI]) )
+      { /*If: could not make the output directory*/
+         hidenClear_widg_rayWidg(
+            guiSTPtr->mesgBoxIdSI,
+            guiSTPtr->widgSTPtr
+         );
+         tmpSI =
+            cpStr_ulCp(
+               guiSTPtr->mesgStr,
+               (signed char *) "could not make folder: "
+            );
+         cpStr_ulCp(
+            &guiSTPtr->mesgStr[tmpSI],
+            argAryStr[argLenSI]
+         );
+         goto done_fun07_sec07;
+      } /*If: could not make the output directory*/
+
+      argAryStr[argLenSI][tmpSI++] = def_pathSep_rayWidg;
+      tmpSI +=
+         cpStr_ulCp(
+            &argAryStr[argLenSI][tmpSI],
+            guiSTPtr->inPrefixStr
+         );
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat04:
+      +   - build the log file
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      tmpSI = cpStr_ulCp(logFileStr, argAryStr[argLenSI]);
+      logFileStr[tmpSI++] = '-';
+      logFileStr[tmpSI++] = 'l';
+      logFileStr[tmpSI++] = 'o';
+      logFileStr[tmpSI++] = 'g';
+      logFileStr[tmpSI++] = '.';
+      logFileStr[tmpSI++] = 't';
+      logFileStr[tmpSI++] = 'x';
+      logFileStr[tmpSI++] = 't';
+      logFileStr[tmpSI] = 0;
+
+      ++argLenSI;
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat05:
+      +   - check if can run minimap2
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      tmpSI =
+         cpStr_ulCp(
+            lineStr,
+            (signed char *) "minimap2 --version > "
+         );
+      tmpSI += cpStr_ulCp(&lineStr[tmpSI], logFileStr);
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat06:
+      +   - find length of minimap2 command and get memory
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(! system((char *) lineStr) )
+      { /*If: minimap2 exists*/
+         tmpSI = 22;/*length of "minimap2 -a -x map-ont"*/
+         tmpSI += endStr_ulCp(refStr) + 2; /*+2 for "'s*/
+         tmpSI += endStr_ulCp(argAryStr[argLenSI - 1]);
+         tmpSI += 5; /*" > \"<out_file>.sam\""*/
+
+         for(
+            indexSI = 0;
+            indexSI < guiSTPtr->fqStrSTPtr->lenSL;
+            ++indexSI
+         ) tmpSI += 
+             guiSTPtr->fqStrSTPtr->lenAryUI[indexSI] + 3;
+             /*length for adding fastq files; + 1 for
+             `  space between files; + 2 for "'s
+             */
+         tmpHeapStr =
+            malloc((tmpSI + 8) * sizeof(signed char));
+         if(! tmpHeapStr)
+            goto err_fun07_sec07;
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun07 Sec06 Sub06 Cat07:
+         +   - build minimap2 command
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         tmpSI =
+            cpStr_ulCp(
+               tmpHeapStr,
+               (signed char *) "minimap2 -a -x map-ont \""
+            );
+         tmpSI += cpStr_ulCp(&tmpHeapStr[tmpSI], refStr);
+         tmpHeapStr[tmpSI++] = '"';
+         tmpHeapStr[tmpSI++] = ' ';
+         tmpHeapStr[tmpSI] = 0;
+
+         for(
+            indexSI = 0;
+            indexSI < guiSTPtr->fqStrSTPtr->lenSL;
+            ++indexSI
+         ){ /*Loop: copy fastq sequences*/
+            tmpHeapStr[tmpSI++] = '"';
+
+            cpLen_ulCp(
+               &tmpHeapStr[tmpSI],
+               guiSTPtr->fqStrSTPtr->strAry[indexSI],
+               guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
+            ); /*copy fastq file name*/
+
+            tmpSI +=
+               guiSTPtr->fqStrSTPtr->lenAryUI[indexSI];
+            tmpHeapStr[tmpSI++] = '"';
+            tmpHeapStr[tmpSI++] = ' ';
+         }  /*Loop: copy fastq sequences*/
+
+         tmpHeapStr[tmpSI++] = '>';
+         tmpHeapStr[tmpSI++] = ' ';
+         tmpHeapStr[tmpSI++] = '"';
+         tmpSI +=
+            cpStr_ulCp(
+               &tmpHeapStr[tmpSI],
+               argAryStr[argLenSI - 1]
+            ); /*copy output name*/
+
+         tmpHeapStr[tmpSI++] = '.';
+         tmpHeapStr[tmpSI++] = 's';
+         tmpHeapStr[tmpSI++] = 'a';
+         tmpHeapStr[tmpSI++] = 'm';
+         tmpHeapStr[tmpSI++] = '"';
+         tmpHeapStr[tmpSI] = 0;
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun07 Sec06 Sub06 Cat08:
+         +   - add the -sam <file>.sam entry to ftb
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         argAryStr[argLenSI] =
+            malloc(11 * sizeof(signed char));
+         if(! tmpHeapStr)
+            goto err_fun07_sec07;
+         argAryStr[argLenSI][0] = '-';
+         argAryStr[argLenSI][1] = 's';
+         argAryStr[argLenSI][2] = 'a';
+         argAryStr[argLenSI][3] = 'm';
+         argAryStr[argLenSI][4] = 0;
+         ++argLenSI;
+
+         tmpSI = endStr_ulCp(argAryStr[argLenSI - 2]);
+         argAryStr[argLenSI] =
+            malloc((tmpSI + 13) * sizeof(signed char));
+         if(! tmpHeapStr)
+            goto err_fun07_sec07;
+         cpLen_ulCp(
+            argAryStr[argLenSI],
+            argAryStr[argLenSI - 2],
+            tmpSI
+         );
+         argAryStr[argLenSI][tmpSI++] = '.';
+         argAryStr[argLenSI][tmpSI++] = 's';
+         argAryStr[argLenSI][tmpSI++] = 'a';
+         argAryStr[argLenSI][tmpSI++] = 'm';
+         argAryStr[argLenSI][tmpSI] = 0;
+         ++argLenSI;
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun07 Sec06 Sub06 Cat09:
+         +   - run minimap2
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         inFILE = fopen((char *) logFileStr, "a");
+         fprintf(
+            inFILE,
+            "^^^^minimap2 version^^^^%s",
+           str_endLine
+         );
+         fprintf(
+            inFILE,
+            "minimap2 cmd: %s%s",
+            tmpHeapStr,
+            str_endLine
+         );
+         fclose(inFILE);
+         inFILE = 0;
+
+         if(system((char *) tmpHeapStr))
+         { /*If: minimap2 errored out*/
+            hidenClear_widg_rayWidg(
+               guiSTPtr->mesgBoxIdSI,
+               guiSTPtr->widgSTPtr
+            );
+            tmpSI =
+               cpStr_ulCp(
+                  guiSTPtr->mesgStr,
+                  (signed char *) "minimap2 errored out"
+               );
+            cpStr_ulCp(
+               &guiSTPtr->mesgStr[tmpSI],
+               argAryStr[argLenSI]
+            );
+            goto done_fun07_sec07;
+         } /*If: minimap2 errored out*/
+
+         free(tmpHeapStr);
+         tmpHeapStr = 0;
+      } /*If: minimap2 exists*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat10:
+      +   - if cannot, copy fastq files to ftb command
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else
+      { /*Else: no minimap2*/
+         for(
+            indexSI = 0;
+            indexSI < guiSTPtr->fqStrSTPtr->lenSL;
+            ++indexSI
+         ){ /*Loop: add fastq files to ftb command*/
+            argAryStr[argLenSI] =
+               malloc(
+                 ( guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
+                  + 8 
+                 ) * sizeof(signed char)
+               );
+
+            if(! argAryStr[argLenSI])
+               goto err_fun07_sec07;
+
+            cpLen_ulCp(
+               argAryStr[argLenSI],
+               guiSTPtr->fqStrSTPtr->strAry[indexSI],
+               guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
+            ); /*copy fastq file name*/
+         }  /*Loop: add fastq files to ftb command*/
+      } /*Else: no minimap2*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec06 Sub06 Cat11:
+      +   - run freezeTB
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(tmpHeapStr)
+         free(tmpHeapStr);
+      tmpHeapStr = 0;
+
+      inFILE = fopen((char *) logFileStr, "a");
+
+      pversion_freezeTB(inFILE);
+      fprintf(inFILE, "FreezeTB cmd:%s", str_endLine);
+      fprintf(inFILE, "  freezeTB \\%s", str_endLine);
+
+      for(indexSI = 1; indexSI < argLenSI; indexSI += 2)
+      { /*Loop: print freezeTB command*/
+         if(indexSI + 2 < argLenSI)
+            fprintf(inFILE,
+               "    %s %s \\%s",
+               argAryStr[indexSI],
+               argAryStr[indexSI + 1],
+               str_endLine
+            );
+         else if(indexSI + 1 < argLenSI)
+            fprintf(inFILE,
+               "    %s %s%s",
+               argAryStr[indexSI],
+               argAryStr[indexSI + 1],
+               str_endLine
+            );
+         else
+            fprintf(inFILE,
+               "    %s%s",
+               argAryStr[indexSI],
+               str_endLine
+            );
+      } /*Loop: print freezeTB command*/
+
+      fclose(inFILE);
+      inFILE = 0;
+
+      tmpHeapStr =
+         run_freezeTB(argLenSI, (char **) argAryStr);
+
+      if(tmpHeapStr)
+      { /*If: had an error*/
+         hidenClear_widg_rayWidg(
+            guiSTPtr->mesgBoxIdSI,
+            guiSTPtr->widgSTPtr
+         );
+         cpStr_ulCp(guiSTPtr->mesgStr, tmpHeapStr);
+         goto done_fun07_sec07;
+      } /*If: had an error*/
+
+      /*remove run fastq files*/
+      blank_str_ptrAry(guiSTPtr->fqStrSTPtr);
+      goto buildOutReport_fun07_sec06_sub07;
+
+   /*****************************************************\
+   * Fun07 Sec06 Sub07:
+   *   - button pressed to build the output report
+   \*****************************************************/
+
+   /*TODO: work on the output part of the GUI*/
+   buildOutReport_fun07_sec06_sub07:;
       goto done_fun07_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1264,20 +1882,33 @@ checkRunEvent_ftbRayST(
    goto done_fun07_sec07;
 
    err_fun07_sec07:;
-      freeStack_event_rayWidg(&eventStackST);
       tmpSI = 1;
       goto ret_fun07_sec07;
 
    done_fun07_sec07:;
-      freeStack_event_rayWidg(&eventStackST);
       draw_gui_ftbRayST(guiSTPtr);
       tmpSI = 0;
       goto ret_fun07_sec07;
 
    ret_fun07_sec07:;
+      if(inFILE)
+         fclose(inFILE); /*never will be stdout/in/err*/
+      inFILE = 0;
+
+      freeStack_event_rayWidg(&eventStackST);
+
       if(tmpHeapStr)
          free(tmpHeapStr);
       tmpHeapStr = 0;
+
+      for(indexSI = 0; indexSI < argLenSI; ++indexSI)
+      { /*Loop: free c-string array*/
+         if(argAryStr[indexSI])
+            free(argAryStr[indexSI]);
+         argAryStr[indexSI] = 0;
+      } /*Loop: free c-string array*/
+
+      argLenSI = 0;
 
       return (signed char) tmpSI;
 } /*checkRunEvent_ftbRayST*/

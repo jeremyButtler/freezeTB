@@ -261,17 +261,19 @@
 '         - file browser
 '     + Sof08 Sec01:
 '       - simple widgets
-'       o fun078: drawRectByCoord_rayWidg
+'       o fun078: textDrawByCoord_rayWidg
+'         - draws one line of text by coordinate
+'       o fun079: drawRectByCoord_rayWidg
 '         - draws a rectangle with input coordinates
-'       o fun079: drawRec_rayWidg
+'       o fun080: drawRec_rayWidg
 '         - draws a rectangle for rayWidg
-'       o fun080: butDraw_rayWidg
+'       o fun081: butDraw_rayWidg
 '         - draw a button
-'       o fun081: entryDraw_rayWidg
+'       o fun082: entryDraw_rayWidg
 '         - draw an entry box and its text
-'       o fun082: entryEvent_rayWidg
+'       o fun083: entryEvent_rayWidg
 '         - handels an event for an entry box
-'       o fun083: labDraw_rayWidg
+'       o fun084: labDraw_rayWidg
 '         - draw a label
 '     + Sof08 Sec02:
 '       - message box
@@ -296,61 +298,61 @@
 '       # Sof08 Sec03 Sub01:
 '         - clear, blank, initialize, realloc, and free
 '           listBox_rayWidg functions
-'         o fun088: blank_listBox_rayWidg
+'         o fun089: blank_listBox_rayWidg
 '           - blanks a listBox_rayWidg structure
-'         o fun089: init_listBox_rayWidg
+'         o fun090: init_listBox_rayWidg
 '           - initializes a listBox_rayWidg structure
-'         o fun090: freeStack_listBox_rayWidg
+'         o fun091: freeStack_listBox_rayWidg
 '           - frees variables in a listBox_rayWidg struct
-'         o fun092: realloc_listBox_rayWidg
+'         o fun093: realloc_listBox_rayWidg
 '           - add more memory to listBox_rayWidg structure
-'         o fun093: clear_listBox_rayWidg
+'         o fun094: clear_listBox_rayWidg
 '           - removes all items from the list box
-'         o fun094: clearSelect_listBox_rayWidg
+'         o fun095: clearSelect_listBox_rayWidg
 '           - clear all selections from a list box
 '       # Sof08 Sec03 Sub02:
 '         - listBox_rayWidg set variables functions
-'         o fun095: selectMaxSet_listBox_rayWidg
+'         o fun096: selectMaxSet_listBox_rayWidg
 '           - sets maximum number of items that can be
 '             selected in a list box
-'         o fun096: widthSet_listBox_rayWidg
+'         o fun097: widthSet_listBox_rayWidg
 '           - sets maximum and minimum width of a list box
-'         o fun097: heightSet_listBox_rayWidg
+'         o fun098: heightSet_listBox_rayWidg
 '           - sets maximum & minimum height of a list box
-'         o fun098: hiddenSet_listBox_rayWidg
+'         o fun099: hiddenSet_listBox_rayWidg
 '           - sets a list box item to the hiden state
-'         o fun099: selectSet_listBox_rayWidg
+'         o fun100: selectSet_listBox_rayWidg
 '           - sets a list box item to the select state
-'         o fun100: specialSet_listBox_rayWidg
+'         o fun101: specialSet_listBox_rayWidg
 '           - sets a list box item to the special state
-'         o fun101: canSelectSet_listBox_rayWidg
+'         o fun102: canSelectSet_listBox_rayWidg
 '           - sets a list box item to the can select state
 '       # Sof08 Sec03 Sub03:
 '         - listBox_rayWidg get variables value functions
-'         o fun102: hiddenGet_listBox_rayWidg
+'         o fun103: hiddenGet_listBox_rayWidg
 '           - gets if a list box item is in hiden state
-'         o fun103: selectGet_listBox_rayWidg
+'         o fun104: selectGet_listBox_rayWidg
 '           - sets a list box item to the select state
-'         o fun104: specialGet_listBox_rayWidg
+'         o fun105: specialGet_listBox_rayWidg
 '           - sets a list box item to the special state
-'         o fun105: canSelectGet_listBox_rayWidg
+'         o fun106: canSelectGet_listBox_rayWidg
 '           - sets a list box item to the can select state
 '       # Sof08 Sec03 Sub04:
 '         - list box widget create, draw, and event
 '           handeling
-'         o fun106: mk_listBox_rayWidg
+'         o fun107: mk_listBox_rayWidg
 '           - makes/adds list box to a widg_widgST struct
-'         o fun107: addItem_listBox_rayWidg
+'         o fun108: addItem_listBox_rayWidg
 '           - adds an item to a list box
-'         o fun108: nextItem_listBox_rayWidg
+'         o fun109: nextItem_listBox_rayWidg
 '           - move to the next item or next item(s) in a
 '             listbox
-'         o fun109: toIndex_listBox_rayWidg
+'         o fun110: toIndex_listBox_rayWidg
 '           - move list box selected item till at target
 '             index
-'         o fun110: draw_listBox_rayWidg
+'         o fun111: draw_listBox_rayWidg
 '           - draws a list box widget
-'         o fun111: listBoxEvent_rayWidg
+'         o fun112: listBoxEvent_rayWidg
 '           - runs an event for a list box
 '     + Sof08 Sec04:
 '       - file browser
@@ -360,36 +362,36 @@
 '           - manipulate file browswer functions
 '       # Sof08 Sec04 Sub01:
 '         - general functions (set, get, initialize)
-'         o fun112: blank_files_rayWidg
+'         o fun113: blank_files_rayWidg
 '           - set all files in a files_rayWidg struct to
 '             no files 
-'         o fun113: init_files_rayWidg
+'         o fun114: init_files_rayWidg
 '           - initialize a files_rayWidg struct
-'         o fun114: freeStack_files_rayWidg
+'         o fun115: freeStack_files_rayWidg
 '           - frees variables in a files_rayWidg struct
-'         o fun115: freeHeap_files_rayWidg
+'         o fun116: freeHeap_files_rayWidg
 '           - frees files_rayWidg struct
-'         o fun116: setFileLim_files_rayWidg
+'         o fun117: setFileLim_files_rayWidg
 '           - sets maximum number of files user can choose
-'         o fun117: getFile_files_rayWidg
+'         o fun118: getFile_files_rayWidg
 '           - gets next selected file from a files_rayWidg
-'         o fun118: swapFiles_files_rayWidg
+'         o fun119: swapFiles_files_rayWidg
 '           - swap two files in a files_rayWidg struct
-'         o fun119: sortFiles_files_rayWidg
+'         o fun120: sortFiles_files_rayWidg
 '           - sorts files by name and if directory
-'         o fun120: scanForFiles_files_rayWidg
+'         o fun121: scanForFiles_files_rayWidg
 '           - get files in a directory
-'         o fun121: changeExt_files_rayWidg
+'         o fun122: changeExt_files_rayWidg
 '           - updates files for the change extension type
 '       # Sof08 Sec04 Sub02:
 '         - manipulate file browswer functions
-'         o fun120: addExt_files_rayWidg
+'         o fun121: addExt_files_rayWidg
 '           - add an file extension to a files_rayWidg
-'         o fun123: mkFileBrowser_rayWidg
+'         o fun124: mkFileBrowser_rayWidg
 '           - makes a file browswer widget
-'         o fun124: fileBrowserDraw_rayWidg
+'         o fun125: fileBrowserDraw_rayWidg
 '           - draws a file browswer widget
-'         o fun125: fileBrowserEvent_rayWidg
+'         o fun126: fileBrowserEvent_rayWidg
 '           - process and event for the file browser
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -918,6 +920,12 @@ checkTextWidth_rayWidg(
    signed int discardSI = 0;
    signed int indexSI = 0;
    signed char tmpSC = 0;
+
+   widthSI -= widgSTPtr->fontWidthF * 4;
+      /*I have no idea why this is needed, but for some
+      `  reason I have issues with overruning spacing
+      `  without this
+      */
 
    while(textStr[indexSI])
    { /*Loop: copy text to outStr*/
@@ -2843,13 +2851,17 @@ get_event_rayWidg(
       eventSTPtr->shiftBl = 1;
    if( IsKeyDown(KEY_RIGHT_SHIFT) )
       eventSTPtr->shiftBl |= 2;
-   if( IsKeyDown(KEY_CAPS_LOCK) )
-   { /*If: user hit caps lock*/
-      if(eventSTPtr->shiftBl)
+
+   /*ray widg does not detect when caps lock was
+   `   released, at least not on my Linux
+   */
+   /*if( IsKeyDown(KEY_CAPS_LOCK) )
+   {*/ /*If: user hit caps lock*/
+   /*   if(eventSTPtr->shiftBl)
          eventSTPtr->shiftBl = 0;
       else
          eventSTPtr->shiftBl |= 4;
-   } /*If: user hit caps lock*/
+   }*/ /*If: user hit caps lock*/
 
    if( IsKeyDown(KEY_LEFT_ALT) )
       eventSTPtr->altBl |= 1;
@@ -4222,7 +4234,9 @@ getMouseWidg_widg_rayWidg(
                    break;
             } /*Loop: check if have child widget path*/
 
-            if(hogSI == widgSTPtr->focusSI)
+            if(tmpSI == widgSTPtr->focusSI)
+               retSI = tmpSI;
+            else if(hogSI == widgSTPtr->focusSI)
                retSI = tmpSI;
             else
                retSI = -2; /*not in current hog event*/
@@ -4241,7 +4255,9 @@ getMouseWidg_widg_rayWidg(
                    break;
             } /*Loop: check if have child widget path*/
 
-            if(hogSI > widgSTPtr->focusSI)
+            if(tmpSI == widgSTPtr->focusSI)
+               retSI = tmpSI;
+            else if(hogSI > widgSTPtr->focusSI)
                retSI = tmpSI;
             else
                retSI = -2; /*not in current hog event*/
@@ -5143,16 +5159,16 @@ checkExt_rayWidg(
    signed int extPosSI = 0;
    signed int extIndexSI = 0;
 
-   if( FileExists((char *) fileStr) )
-      fileBl = 1;
-   else if( DirectoryExists((char *) fileStr) )
+   if( DirectoryExists((char *) fileStr) )
       fileBl = 0;
+   else if( FileExists((char *) fileStr) )
+      fileBl = 1; /*will count directory as file*/
    else
       goto noFile_fun077_sec06;
 
    if(! extAryStr || ! extLenSI)
    { /*If: no extensions input; assume all files*/
-      if( DirectoryExists((char *) fileStr) )
+      if( ! fileBl)
          goto noMatch_fun077_sec06;
       else
          goto match_fun077_sec06;
@@ -5241,7 +5257,110 @@ checkExt_rayWidg(
 } /*checkExt_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun078: drawRectByCoord_rayWidg
+| Fun078: textDrawByCoord_rayWidg
+|   - draws one line of text by coordinate
+| Input:
+|   - textStr:
+|     o c-string with text to draw
+|   - xSI:
+|     o x coordinate to draw at
+|   - ySI:
+|     o y coordinate to draw at
+|   - maxWidthSI:
+|     o maximum width of text (in pixels) (use 0 for any)
+|     o if x padding, the x pad is taken of maxWidthSI
+|   - colUI:
+|     o unsignd int with hex code of color to draw
+|   - padSC:
+|     o tells if to apply padding to text coordinates
+|       * 0 for no padding
+|       * 1 for x padding
+|         - padding on both ends, included in width
+|       * 2 for y padding
+|       * 3 for x and y padding
+|         - x padding on both ends, included in width
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with font to use
+| Output:
+|   - Draws:
+|     o text or shortened text to coordinates
+|   - Returns:
+|     o width of drawn text
+\-------------------------------------------------------*/
+signed int
+textDrawByCoord_rayWidg(
+   signed char *textStr,  /*text to draw*/
+   signed int xSI,        /*x coordinate*/
+   signed int ySI,        /*y coordinate*/
+   signed int maxWidthSI, /*max width of text*/
+   unsigned int colUI,    /*color to draw*/
+   signed char padSC,     /*tells if adding padding*/
+   struct widg_rayWidg *widgSTPtr /*has font*/
+){
+   signed char drawStr[512 + 8];
+   signed int lenSI = 0;
+   struct Color colorST;
+
+   /*need to convert hex color code to raylib color*/
+   colorST.r = colUI >> 24 & 0xff;   /*red*/
+   colorST.g = (colUI >> 16) & 0xff; /*green*/
+   colorST.b = (colUI >> 8) & 0xff;  /*blue*/
+   colorST.a = colUI & 0xff;         /*alpha*/
+
+   if(padSC & 1)
+      maxWidthSI -= (widgSTPtr->fontWidthF * 2);
+
+   if(maxWidthSI > 0)
+      checkTextWidth_rayWidg(
+         textStr,
+         drawStr,
+         maxWidthSI,
+         widgSTPtr
+      );
+   else
+   { /*Else: copy full text*/
+      lenSI = endStr_ulCp(textStr);
+      if(lenSI > 509)
+      { /*If: buffer overflow*/
+         lenSI = 509;
+         cpLen_ulCp(drawStr, textStr, lenSI);
+         drawStr[lenSI++] = '.';
+         drawStr[lenSI++] = '.';
+         drawStr[lenSI++] = '.';
+         drawStr[lenSI] = 0;
+      } /*If: buffer overflow*/
+
+      else
+         cpLen_ulCp(drawStr, textStr, lenSI);
+   } /*Else: copy full text*/
+
+   maxWidthSI =
+     textMeasure_widg_rayWidg(drawStr, &lenSI, widgSTPtr);
+
+   if(padSC & 1)
+   { /*If: padding x coordinate*/
+      xSI += widgSTPtr->fontWidthF;
+      maxWidthSI += widgSTPtr->fontWidthF * 2;
+   } /*If: padding x coordinate*/
+
+   if(padSC & 2)
+      ySI +=
+        widgSTPtr->fontHeightF /def_widgHeightGap_rayWidg;
+
+   DrawTextEx(
+       *widgSTPtr->fontSTPtr,
+       (char *) drawStr,
+       (Vector2) {xSI, ySI},
+       widgSTPtr->fontSizeSI,
+       widgSTPtr->spacingF,
+       colorST
+   );
+
+   return maxWidthSI;
+} /*textDrawByCoord_rayWidg*/
+
+/*-------------------------------------------------------\
+| Fun079: drawRectByCoord_rayWidg
 |   - draws a rectangle for rayWidg by input coordinates
 | Input:
 |   - xSI:
@@ -5286,22 +5405,22 @@ drawRectByCoord_rayWidg(
    unsigned int borderHexUI, /*hex color of border*/
    unsigned int focusHexUI   /*hex color of focus border*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun078 TOC:
+   ' Fun079 TOC:
    '   - draws a rectangle for with input coordinates
-   '   o fun078 sec01:
+   '   o fun079 sec01:
    '     - variable declarations
-   '   o fun078 sec02:
+   '   o fun079 sec02:
    '     - draw the rectangle
-   '   o fun078 sec03:
+   '   o fun079 sec03:
    '     - draw border around rectangle (if requested)
-   '   o fun078 sec04:
+   '   o fun079 sec04:
    '     - draw focus border (if requested)
-   '   o fun078 sec05:
+   '   o fun079 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun078 Sec01:
+   ^ Fun079 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5309,7 +5428,7 @@ drawRectByCoord_rayWidg(
    struct Color colorST;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun078 Sec02:
+   ^ Fun079 Sec02:
    ^   - draw the rectangle
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5347,7 +5466,7 @@ drawRectByCoord_rayWidg(
    } /*If: can draw a rectangle*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun078 Sec03:
+   ^ Fun079 Sec03:
    ^   - draw border around rectangle (if requested)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5390,7 +5509,7 @@ drawRectByCoord_rayWidg(
    } /*If: rectangle with border*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun078 Sec04:
+   ^ Fun079 Sec04:
    ^   - draw focus border around rectangle (if requested)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5434,7 +5553,7 @@ drawRectByCoord_rayWidg(
 } /*drawRectByCoord_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun079: drawRect_rayWidg
+| Fun080: drawRect_rayWidg
 |   - draws a rectangle for rayWidg
 | Input:
 |   - widgSTPtr:
@@ -5473,10 +5592,10 @@ drawRect_rayWidg(
    unsigned int focusHexUI   /*hex color of focus border*/
 ){
    if(idSI > widgSTPtr->lenSI)
-      goto noWidget_fun079;
+      goto noWidget_fun080;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-       goto hiddenWidget_fun079;
+       goto hiddenWidget_fun080;
 
    drawRectByCoord_rayWidg(
       widgSTPtr->xArySI[idSI],  /*x coordinate*/
@@ -5491,15 +5610,15 @@ drawRect_rayWidg(
 
    return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun079:;
+   noWidget_fun080:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun079:;
+   hiddenWidget_fun080:;
       return 0;
 } /*drawRect_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun080: butDraw_rayWidg
+| Fun081: butDraw_rayWidg
 |   - draw a button
 | Input:
 |   - maxWidthSI:
@@ -5545,22 +5664,22 @@ butDraw_rayWidg(
    signed char noDrawBl,  /*1:find size, but do not draw*/
    struct widg_rayWidg *widgSTPtr  /*has button widget*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun080 TOC:
+   ' Fun081 TOC:
    '   - draw a button
-   '   o fun080 sec01:
+   '   o fun081 sec01:
    '     - variable declarations
-   '   o fun080 sec02:
+   '   o fun081 sec02:
    '     - get color of button (state in)
-   '   o fun080 sec03:
+   '   o fun081 sec03:
    '     - get width of button
-   '   o fun080 sec04:
+   '   o fun081 sec04:
    '     - draw button
-   '   o fun080 sec05:
+   '   o fun081 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun080 Sec01:
+   ^ Fun081 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5570,24 +5689,24 @@ butDraw_rayWidg(
    struct Color textCol;
    struct Vector2 textDimVect2;
 
-   #define def_maxButText_fun080 32
+   #define def_maxButText_fun081 32
       /*max number of characters in button*/
-   signed char writeStr[def_maxButText_fun080 + 8];
+   signed char writeStr[def_maxButText_fun081 + 8];
 
    /*these are for shorting strings*/
    signed char histUC = 0;
    signed int histIndexSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun080 Sec02:
+   ^ Fun081 Sec02:
    ^   - get color of button (state in)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI > widgSTPtr->lenSI)
-      goto noWidget_fun080_sec05;
+      goto noWidget_fun081_sec05;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-       goto hiddenWidget_fun080_sec05;
+       goto hiddenWidget_fun081_sec05;
 
    else if(
       widgSTPtr->stateAryUS[idSI] & def_inactive_rayWidg
@@ -5612,7 +5731,7 @@ butDraw_rayWidg(
    } /*Else If: button is in a normal state*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun080 Sec03:
+   ^ Fun081 Sec03:
    ^   - get width of button
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5630,8 +5749,10 @@ butDraw_rayWidg(
       widgSTPtr->widthArySI[idSI] = endStr_ulCp(textStr);
 
       if(
-        widgSTPtr->widthArySI[idSI] > def_maxButText_fun080
-      )widgSTPtr->widthArySI[idSI] = def_maxButText_fun080;
+          widgSTPtr->widthArySI[idSI]
+        > def_maxButText_fun081
+      ) widgSTPtr->widthArySI[idSI] =
+           def_maxButText_fun081;
 
       cpLen_ulCp(
          writeStr,
@@ -5699,10 +5820,10 @@ butDraw_rayWidg(
       /*want a one character pad around the button*/
 
    if(noDrawBl)
-      goto done_fun080_sec05;
+      goto done_fun081_sec05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun080 Sec04:
+   ^ Fun081 Sec04:
    ^   - draw button
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5738,22 +5859,22 @@ butDraw_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun080 Sec05:
+   ^ Fun081 Sec05:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun080_sec05:;
+   done_fun081_sec05:;
       return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun080_sec05:;
+   noWidget_fun081_sec05:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun080_sec05:;
+   hiddenWidget_fun081_sec05:;
       return 0;
 } /*butDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun081: entryDraw_rayWidg
+| Fun082: entryDraw_rayWidg
 |   - draw an entry box and its text
 | Input:
 |   - widthSI:
@@ -5815,25 +5936,25 @@ entryDraw_rayWidg(
    signed char noDrawBl,  /*1: do not draw entry box*/
    struct widg_rayWidg *widgSTPtr /*has widget to draw*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun081 TOC:
+   ' Fun082 TOC:
    '   - draw an entry box, prevents typing if maxium is
    '     exceded or wrong entry type
-   '   o fun081 sec01:
+   '   o fun082 sec01:
    '     - variable declarations
-   '   o fun081 sec02:
+   '   o fun082 sec02:
    '     - check state of entry box
-   '   o fun081 sec03:
+   '   o fun082 sec03:
    '     - copy string & check/set scroll & cursor values
-   '   o fun081 sec04:
+   '   o fun082 sec04:
    '     - find text size and print cursor
-   '   o fun081 sec05:
+   '   o fun082 sec05:
    '     - draw entry box
-   '   o fun081 sec06:
+   '   o fun082 sec06:
    '     - return result
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun081 Sec01:
+   ^ Fun082 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5843,9 +5964,9 @@ entryDraw_rayWidg(
    struct Color textCol;
    struct Vector2 textDimVect2;
 
-   #define def_maxChar_fun081 256
+   #define def_maxChar_fun082 256
       /*max characters in entry box*/
-   signed char outStr[def_maxChar_fun081 + 8];
+   signed char outStr[def_maxChar_fun082 + 8];
    signed char *cpStr = 0;
    signed char *dupStr = 0;
    signed char rmStr[2] = {0, 0}; /*for adjusting length*/
@@ -5855,15 +5976,15 @@ entryDraw_rayWidg(
    signed int cursorPosSI = posArySI[1];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun081 Sec02:
+   ^ Fun082 Sec02:
    ^   - check state of entry box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidget_fun081_sec06;
+      goto noWidget_fun082_sec06;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-      goto hiddenWidget_fun081_sec06;
+      goto hiddenWidget_fun082_sec06;
       /*entry box is hidden*/
 
    else if(
@@ -5893,7 +6014,7 @@ entryDraw_rayWidg(
    } /*Else: not being used*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun081 Sec03:
+   ^ Fun082 Sec03:
    ^   - copy string & check/set scroll & cursor values
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5922,14 +6043,14 @@ entryDraw_rayWidg(
       /*set scroll position to cursor position*/
 
 
-   if(outLenSI >= def_maxChar_fun081)
-      outLenSI = def_maxChar_fun081 - 1;
+   if(outLenSI >= def_maxChar_fun082)
+      outLenSI = def_maxChar_fun082 - 1;
          /*need one character for the cursor*/
 
    cpLen_ulCp(outStr, &textStr[posArySI[0]], outLenSI);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun081 Sec04:
+   ^ Fun082 Sec04:
    ^   - find text size and print cursor
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6005,7 +6126,7 @@ entryDraw_rayWidg(
    cpLen_ulCp(outStr, cpStr, outLenSI);
 
    if(cursorPosSI < 0)
-      goto getDimensions_fun081_sec04;
+      goto getDimensions_fun082_sec04;
 
    if(cursorPosSI > outLenSI)
       cursorPosSI = outLenSI;
@@ -6032,7 +6153,7 @@ entryDraw_rayWidg(
 
    ++outLenSI;
 
-   getDimensions_fun081_sec04:;
+   getDimensions_fun082_sec04:;
 
    /*set width and height*/
    widgSTPtr->heightArySI[idSI] =
@@ -6043,10 +6164,10 @@ entryDraw_rayWidg(
       /*want a one character pad around the button*/
 
    if(noDrawBl)
-      goto done_fun081_sec06;
+      goto done_fun082_sec06;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun081 Sec05:
+   ^ Fun082 Sec05:
    ^   - draw entry box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6081,22 +6202,22 @@ entryDraw_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun081 Sec06:
+   ^ Fun082 Sec06:
    ^   - return result
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun081_sec06:;
+   done_fun082_sec06:;
       return outLenSI;
 
-   noWidget_fun081_sec06:;
+   noWidget_fun082_sec06:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun081_sec06:;
+   hiddenWidget_fun082_sec06:;
       return 0;
 } /*entryDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun082: entryEvent_rayWidg
+| Fun083: entryEvent_rayWidg
 |   - handels an event for an entry box
 | Input:
 |   - idSI:
@@ -6163,10 +6284,10 @@ entryEvent_rayWidg(
    else if( activeGet_widg_rayWidg(idSI, widgSTPtr) )
       ; /*the entry box is active, so taking input*/
    else
-      goto wrongWidget_fun082;
+      goto wrongWidget_fun083;
 
    if(eventSTPtr->scrollF == 0 && ! eventSTPtr->keySI)
-      goto noEvent_fun082;
+      goto noEvent_fun083;
    
    if(eventSTPtr->scrollF != 0)
       posArySI[0] += (signed int) eventSTPtr->scrollF;
@@ -6191,14 +6312,14 @@ entryEvent_rayWidg(
 
    return textLenSI;
 
-   noEvent_fun082:;
+   noEvent_fun083:;
       return -1;
-   wrongWidget_fun082:;
+   wrongWidget_fun083:;
       return -2;
 } /*entryEvent_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun083: labDraw_rayWidg
+| Fun084: labDraw_rayWidg
 |   - draw a label
 | Input:
 |   - maxWidthSI:
@@ -6249,54 +6370,54 @@ labDraw_rayWidg(
    signed char noDrawBl,  /*1: do not draw entry box*/
    struct widg_rayWidg *widgSTPtr /*has widget to draw*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun083 TOC:
+   ' Fun084 TOC:
    '   - draw a label
-   '   o fun083 sec01:
+   '   o fun084 sec01:
    '     - variable declarations
-   '   o fun083 sec02:
+   '   o fun084 sec02:
    '     - check state of label and copy string
-   '   o fun083 sec03:
+   '   o fun084 sec03:
    '     - find text size and pad if needed
-   '   o fun083 sec04:
+   '   o fun084 sec04:
    '     - return result
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun083 Sec01:
+   ^ Fun084 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    struct Color textCol;
    struct Vector2 textDimVect2;
 
-   #define def_maxChar_fun083 256
+   #define def_maxChar_fun084 256
       /*max characters in entry box*/
-   signed char outStr[def_maxChar_fun083 + 8];
+   signed char outStr[def_maxChar_fun084 + 8];
    signed int outLenSI = 0;
    signed int oldLenSI = 0;
    signed int tmpSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun083 Sec02:
+   ^ Fun084 Sec02:
    ^   - check state of label and copy string
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidget_fun083_sec04;
+      goto noWidget_fun084_sec04;
 
    if(widgSTPtr->stateAryUS[idSI] & def_hiden_rayWidg)
-      goto hiddenWidget_fun083_sec04;
+      goto hiddenWidget_fun084_sec04;
       /*entry box is hidden*/
 
-   if(minWidthSI > def_maxChar_fun083)
-      minWidthSI = def_maxChar_fun083;
+   if(minWidthSI > def_maxChar_fun084)
+      minWidthSI = def_maxChar_fun084;
 
    textCol = GetColor(widgSTPtr->textColSI);
    outLenSI = endStr_ulCp(textStr);
 
-   if(outLenSI >= def_maxChar_fun083)
+   if(outLenSI >= def_maxChar_fun084)
    { /*If: user input to long of string*/
-      outLenSI = def_maxChar_fun083 - 4;
+      outLenSI = def_maxChar_fun084 - 4;
          /*need on character for the cursor*/
       cpLen_ulCp(outStr, textStr, outLenSI);
       outStr[outLenSI++] = '.';
@@ -6309,7 +6430,7 @@ labDraw_rayWidg(
       cpLen_ulCp(outStr, textStr, outLenSI);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun083 Sec03:
+   ^ Fun084 Sec03:
    ^   - find text size and pad if needed
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6399,10 +6520,10 @@ labDraw_rayWidg(
       /*want a one character pad around the button*/
 
    if(noDrawBl)
-      goto done_fun083_sec04;
+      goto done_fun084_sec04;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun083 Sec04:
+   ^ Fun084 Sec04:
    ^   - draw label and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6421,18 +6542,18 @@ labDraw_rayWidg(
           textCol
       );
 
-   done_fun083_sec04:;
+   done_fun084_sec04:;
       return outLenSI;
 
-   noWidget_fun083_sec04:;
+   noWidget_fun084_sec04:;
       return def_noWidget_rayWidg;
 
-   hiddenWidget_fun083_sec04:;
+   hiddenWidget_fun084_sec04:;
       return 0;
 } /*labDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun084: mkMesgBox_rayWidg
+| Fun085: mkMesgBox_rayWidg
 |   - makes an emtpy message box widget
 | Input:
 |   - widgSTPtr:
@@ -6458,7 +6579,7 @@ mkMesgBox_rayWidg(
       idSI += (idSI >> 1);
 
       if( realloc_widg_rayWidg(idSI, widgSTPtr) )
-         goto memErr_fun085;
+         goto memErr_fun086;
    } /*If: need more memory*/
 
    idSI =
@@ -6502,12 +6623,12 @@ mkMesgBox_rayWidg(
       /*hide the message box*/
    return idSI;
 
-   memErr_fun085:;
+   memErr_fun086:;
       return -1;
 } /*mkMesgBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun085: mesgBoxDraw_rayWidg
+| Fun086: mesgBoxDraw_rayWidg
 |   - draws a message box
 | Input:
 |   - idSI:
@@ -6549,31 +6670,31 @@ mesgBoxDraw_rayWidg(
    signed char *butTextStr, /*text on button*/
    struct widg_rayWidg *widgSTPtr /*has widgets*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun085 TOC:
+   ' Fun086 TOC:
    '   - draws a message box
-   '   o fun085 sec01:
+   '   o fun086 sec01:
    '     - variable declarations
-   '   o fun085 sec02:
+   '   o fun086 sec02:
    '     - initalize and copy/edit string
-   '   o fun085 sec03:
+   '   o fun086 sec03:
    '     - find widget widths
-   '   o fun085 sec04:
+   '   o fun086 sec04:
    '     - find widget coordinates
-   '   o fun085 sec05:
+   '   o fun086 sec05:
    '     - draw message box
-   '   o fun085 sec06:
+   '   o fun086 sec06:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun085 Sec01:
+   ^ Fun086 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    Vector2 textDimVect2;
 
-   #define def_lenOut_fun085 128
-   signed char outStr[def_lenOut_fun085 + 8];
+   #define def_lenOut_fun086 128
+   signed char outStr[def_lenOut_fun086 + 8];
    signed int textLenSI = endStr_ulCp(mesgStr);
    signed int butLenSI = 0;
    signed int maxLenSI = 0;
@@ -6582,16 +6703,16 @@ mesgBoxDraw_rayWidg(
    signed char *dupStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun085 Sec02:
+   ^ Fun086 Sec02:
    ^   - initalize and copy/edit string
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidget_fun085_sec06;
+      goto noWidget_fun086_sec06;
    if( hidenGet_widg_rayWidg(idSI, widgSTPtr) )
-      goto hidden_fun085_sec06;
-   if(textLenSI > def_lenOut_fun085)
-      goto mesgErr_fun085_sec06;
+      goto hidden_fun086_sec06;
+   if(textLenSI > def_lenOut_fun086)
+      goto mesgErr_fun086_sec06;
 
    cpStr = mesgStr;
    dupStr = outStr;
@@ -6607,7 +6728,7 @@ mesgBoxDraw_rayWidg(
    *dupStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun085 Sec03:
+   ^ Fun086 Sec03:
    ^   - find widget widths
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6652,16 +6773,16 @@ mesgBoxDraw_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun085 Sec04:
+   ^ Fun086 Sec04:
    ^   - find widget coordinates
-   ^   o fun085 sec04 sub01:
+   ^   o fun086 sec04 sub01:
    ^     - find x coordinates
-   ^   o fun085 sec04 sub02:
+   ^   o fun086 sec04 sub02:
    ^     - find y coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun085 Sec04 Sub01:
+   * Fun086 Sec04 Sub01:
    *   - find x coordinates
    \*****************************************************/
 
@@ -6703,7 +6824,7 @@ mesgBoxDraw_rayWidg(
       widgSTPtr->xArySI[idSI];
 
    /*****************************************************\
-   * Fun085 Sec04 Sub02:
+   * Fun086 Sec04 Sub02:
    *   - find y coordinates
    \*****************************************************/
 
@@ -6747,7 +6868,7 @@ mesgBoxDraw_rayWidg(
    widgSTPtr->yArySI[idSI + 3] += widgSTPtr->yArySI[idSI];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun085 Sec05:
+   ^ Fun086 Sec05:
    ^   - draw message box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6792,7 +6913,7 @@ mesgBoxDraw_rayWidg(
       ); /*button to accept message*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun085 Sec06:
+   ^ Fun086 Sec06:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6820,18 +6941,18 @@ mesgBoxDraw_rayWidg(
 
    return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun085_sec06:;
+   noWidget_fun086_sec06:;
       return def_noWidget_rayWidg;
 
-   hidden_fun085_sec06:;
+   hidden_fun086_sec06:;
       return 0;
 
-   mesgErr_fun085_sec06:;
+   mesgErr_fun086_sec06:;
       return -1;
 } /*mesgBoxDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun086: mesgBoxEvent_rayWidg
+| Fun087: mesgBoxEvent_rayWidg
 |   - checks the event that was fired in a message box
 | Input:
 |   - eventSC:
@@ -6871,16 +6992,16 @@ mesgBoxEvent_rayWidg(
    if(! eventSC)
    { /*If: clearing button press*/
       pressClear_widg_rayWidg(parIdSI + 3, widgSTPtr);
-      goto noEvent_fun087;
+      goto noEvent_fun088;
    } /*If: clearing button press*/
 
    else if(childIdSI - parIdSI != 3)
-      goto emptyClick_fun087;
+      goto emptyClick_fun088;
 
    else if(eventSC == 1)
    { /*Else If: press event*/
       pressAdd_widg_rayWidg(childIdSI, widgSTPtr);
-      goto noEvent_fun087;
+      goto noEvent_fun088;
    } /*Else If: press event*/
 
    else if(eventSC == 2)
@@ -6956,14 +7077,14 @@ mesgBoxEvent_rayWidg(
 
    return 1;
 
-   noEvent_fun087:;
+   noEvent_fun088:;
       return 0;
-   emptyClick_fun087:;
+   emptyClick_fun088:;
       return 0;
 } /*mesgBoxEvent_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun088: blank_listBox_rayWidg
+| Fun089: blank_listBox_rayWidg
 |   - blanks a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -7002,7 +7123,7 @@ blank_listBox_rayWidg(
 } /*blank_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun089: init_listBox_rayWidg
+| Fun090: init_listBox_rayWidg
 |   - initializes a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -7029,7 +7150,7 @@ init_listBox_rayWidg(
 } /*init_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun090: freeStack_listBox_rayWidg
+| Fun091: freeStack_listBox_rayWidg
 |   - frees variables in a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -7068,7 +7189,7 @@ freeStack_listBox_rayWidg(
 } /*freeStack_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun091: freeHeap_listBox_rayWidg
+| Fun092: freeHeap_listBox_rayWidg
 |   - frees a heap allocated listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -7088,7 +7209,7 @@ freeHeap_listBox_rayWidg(
 } /*freeHeap_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun092: realloc_listBox_rayWidg
+| Fun093: realloc_listBox_rayWidg
 |   - add more memory to listBox_rayWidg structure
 | Input:
 |   - sizeSI:
@@ -7110,16 +7231,16 @@ realloc_listBox_rayWidg(
    struct listBox_rayWidg *listSTPtr
       /*has arrays to expand*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun092 TOC:
+   ' Fun093 TOC:
    '   - add more memory to listBox_rayWidg structure
-   '   o fun092 sec0x:
+   '   o fun093 sec0x:
    '     - return results
-   '   o fun092 sec01:
+   '   o fun093 sec01:
    '     - variable declarations and initial checks
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun092 Sec01:
+   ^ Fun093 Sec01:
    ^   - variable declarations and initial checks
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7129,7 +7250,7 @@ realloc_listBox_rayWidg(
    signed int tmpSI = 0;
 
    if(! listSTPtr)
-      goto noExpand_fun092_sec03;
+      goto noExpand_fun093_sec03;
 
    else if(sizeSI <= 0)
    { /*Else If: auto expanding*/
@@ -7141,23 +7262,23 @@ realloc_listBox_rayWidg(
    } /*Else If: auto expanding*/
 
    else if(sizeSI <= listSTPtr->sizeSI)
-      goto noExpand_fun092_sec03;
+      goto noExpand_fun093_sec03;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun092 Sec02:
+   ^ Fun093 Sec02:
    ^   - expand memory
-   ^   o fun092 sec02 sub01:
+   ^   o fun093 sec02 sub01:
    ^     - c-string array (list box entries) expansion
-   ^   o fun092 sec02 sub02:
+   ^   o fun093 sec02 sub02:
    ^     - c-string size array expansion
-   ^   o fun092 sec02 sub03:
+   ^   o fun093 sec02 sub03:
    ^     - state array expansion
-   ^   o fun092 sec02 sub04:
+   ^   o fun093 sec02 sub04:
    ^     - initialize memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun092 Sec02 Sub01:
+   * Fun093 Sec02 Sub01:
    *   - c-string array (list box entries) expansion
    \*****************************************************/
 
@@ -7166,7 +7287,7 @@ realloc_listBox_rayWidg(
       listSTPtr->textAryStr =
          malloc(sizeSI * sizeof(char *));
       if(! listSTPtr->textAryStr)
-         goto memErr_fun092_sec03;
+         goto memErr_fun093_sec03;
       listSTPtr->lenSI = 0;
    } /*If: first memory allocation*/
 
@@ -7179,12 +7300,12 @@ realloc_listBox_rayWidg(
          );
 
       if(! swapAryStr)
-         goto memErr_fun092_sec03;
+         goto memErr_fun093_sec03;
       listSTPtr->textAryStr = swapAryStr;
    } /*Else: memory reallocation*/
 
    /*****************************************************\
-   * Fun092 Sec02 Sub02:
+   * Fun093 Sec02 Sub02:
    *   - c-string size array expansion
    \*****************************************************/
 
@@ -7193,7 +7314,7 @@ realloc_listBox_rayWidg(
       listSTPtr->sizeArySI =
          malloc(sizeSI * sizeof(signed int));
       if(! listSTPtr->sizeArySI)
-         goto memErr_fun092_sec03;
+         goto memErr_fun093_sec03;
       listSTPtr->lenSI = 0;
    } /*If: first memory allocation*/
 
@@ -7206,12 +7327,12 @@ realloc_listBox_rayWidg(
          );
 
       if(! swapSIPtr)
-         goto memErr_fun092_sec03;
+         goto memErr_fun093_sec03;
       listSTPtr->sizeArySI = swapSIPtr;
    } /*Else: memory reallocation*/
 
    /*****************************************************\
-   * Fun092 Sec02 Sub03:
+   * Fun093 Sec02 Sub03:
    *   - state array expansion
    \*****************************************************/
 
@@ -7220,7 +7341,7 @@ realloc_listBox_rayWidg(
       listSTPtr->stateArySC =
          malloc(sizeSI * sizeof(signed int));
       if(! listSTPtr->stateArySC)
-         goto memErr_fun092_sec03;
+         goto memErr_fun093_sec03;
       listSTPtr->lenSI = 0;
    } /*If: first memory allocation*/
 
@@ -7233,12 +7354,12 @@ realloc_listBox_rayWidg(
          );
 
       if(! swapStr)
-         goto memErr_fun092_sec03;
+         goto memErr_fun093_sec03;
       listSTPtr->stateArySC = swapStr;
    } /*Else: memory reallocation*/
 
    /*****************************************************\
-   * Fun092 Sec02 Sub04:
+   * Fun093 Sec02 Sub04:
    *   - initialize memory
    \*****************************************************/
 
@@ -7255,20 +7376,20 @@ realloc_listBox_rayWidg(
    listSTPtr->sizeSI = sizeSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun092 Sec03:
+   ^ Fun093 Sec03:
    ^   - return results
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    return 0;
 
-   noExpand_fun092_sec03:;
+   noExpand_fun093_sec03:;
       return 0;
-   memErr_fun092_sec03:;
+   memErr_fun093_sec03:;
       return 1;
 } /*realloc_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun093: clear_listBox_rayWidg
+| Fun094: clear_listBox_rayWidg
 |   - removes all items from the list box
 | Input:
 |   - listSTPtr:
@@ -7296,7 +7417,7 @@ clear_listBox_rayWidg(
 } /*clear_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun094: clearSelect_listBox_rayWidg
+| Fun095: clearSelect_listBox_rayWidg
 |   - clear all selections from a list box
 | Input:
 |   - listSTPtr:
@@ -7321,7 +7442,7 @@ clearSelect_listBox_rayWidg(
 } /*clearSelect_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun095: selectMaxSet_listBox_rayWidg
+| Fun096: selectMaxSet_listBox_rayWidg
 |   - sets maximum number of items that can be selected in
 |     a list box
 | Input:
@@ -7342,7 +7463,7 @@ selectMaxSet_listBox_rayWidg(
 } /*selectMaxSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun096: widthSet_listBox_rayWidg
+| Fun097: widthSet_listBox_rayWidg
 |   - sets maximum and minimum width of a list box
 | Input:
 |   - maxSI:
@@ -7367,7 +7488,7 @@ widthSet_listBox_rayWidg(
 } /*widthSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun097: heightSet_listBox_rayWidg
+| Fun098: heightSet_listBox_rayWidg
 |   - sets maximum and minimum height of a list box
 | Input:
 |   - maxSI:
@@ -7392,7 +7513,7 @@ heightSet_listBox_rayWidg(
 } /*heightSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun098: hiddenSet_listBox_rayWidg
+| Fun099: hiddenSet_listBox_rayWidg
 |   - sets a list box item to the hiden state
 | Input:
 |   - itemSI:
@@ -7423,7 +7544,7 @@ hiddenSet_listBox_rayWidg(
 } /*hiddenSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun099: selectSet_listBox_rayWidg
+| Fun100: selectSet_listBox_rayWidg
 |   - sets a list box item to the select state
 | Input:
 |   - itemSI:
@@ -7454,7 +7575,7 @@ selectSet_listBox_rayWidg(
 } /*selectSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun100: specialSet_listBox_rayWidg
+| Fun101: specialSet_listBox_rayWidg
 |   - sets a list box item to the special state
 | Input:
 |   - itemSI:
@@ -7485,7 +7606,7 @@ specialSet_listBox_rayWidg(
 } /*specialSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun101: canSelectSet_listBox_rayWidg
+| Fun102: canSelectSet_listBox_rayWidg
 |   - sets a list box item to the can select state
 | Input:
 |   - itemSI:
@@ -7516,7 +7637,7 @@ canSelectSet_listBox_rayWidg(
 } /*canSelectSet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun102: hiddenGet_listBox_rayWidg
+| Fun103: hiddenGet_listBox_rayWidg
 |   - gets if a list box item is in the hiden state
 | Input:
 |   - itemSI:
@@ -7542,7 +7663,7 @@ hiddenGet_listBox_rayWidg(
 } /*hiddenGet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun103: selectGet_listBox_rayWidg
+| Fun104: selectGet_listBox_rayWidg
 |   - sets a list box item to the select state
 | Input:
 |   - itemSI:
@@ -7567,7 +7688,7 @@ selectGet_listBox_rayWidg(
 } /*selectGet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun104: specialGet_listBox_rayWidg
+| Fun105: specialGet_listBox_rayWidg
 |   - sets a list box item to the special state
 | Input:
 |   - itemSI:
@@ -7593,7 +7714,7 @@ specialGet_listBox_rayWidg(
 } /*specialGet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun105: canSelectGet_listBox_rayWidg
+| Fun106: canSelectGet_listBox_rayWidg
 |   - sets a list box item to the can select state
 | Input:
 |   - itemSI:
@@ -7619,7 +7740,7 @@ canSelectGet_listBox_rayWidg(
 } /*canSelectGet_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun106: mk_listBox_rayWidg
+| Fun107: mk_listBox_rayWidg
 |   - makes/adds a list box to a widg_widgST structure
 | Input:
 |   - xSI:
@@ -7657,7 +7778,7 @@ mk_listBox_rayWidg(
       idSI += 1 + (idSI >> 1);
 
       if( realloc_widg_rayWidg(idSI, widgSTPtr) )
-         goto memErr_fun096;
+         goto memErr_fun097;
    } /*If: need more room*/
 
    idSI =
@@ -7672,12 +7793,12 @@ mk_listBox_rayWidg(
 
    return idSI;
 
-   memErr_fun096:;
+   memErr_fun097:;
       return -1;
 } /*mk_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun107: addItem_listBox_rayWidg
+| Fun108: addItem_listBox_rayWidg
 |   - adds an item to a list box
 | Input:
 |   - textStr:
@@ -7748,7 +7869,8 @@ addItem_listBox_rayWidg(
          widgSTPtr
       );
 
-   lenSI += widgSTPtr->fontWidthF * 2;
+   lenSI += widgSTPtr->fontWidthF * 4;
+     /*times 4 because my measure text does a times 4*/
 
    if(lenSI > listSTPtr->lineWidthSI)
       listSTPtr->lineWidthSI = lenSI;
@@ -7761,7 +7883,7 @@ addItem_listBox_rayWidg(
 } /*addItem_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun108: nextItem_listBox_rayWidg
+| Fun109: nextItem_listBox_rayWidg
 |   - move to the next item or next item(s) in a listbox
 | Input:
 |   - changeSI:
@@ -7798,22 +7920,22 @@ nextItem_listBox_rayWidg(
    signed int onSI,         /*use -1 to do real change*/
    struct listBox_rayWidg *listSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun108: TOC
+   ' Fun109: TOC
    '   - move to next item or next item(s) in a listbox
-   '   o fun108 sec01:
+   '   o fun109 sec01:
    '     - variable declrations
-   '   o fun108 sec02:
+   '   o fun109 sec02:
    '     - move down list box (+ change)
-   '   o fun108 sec03:
+   '   o fun109 sec03:
    '     - move up list box (negative change)
-   '   o fun108 sec04:
+   '   o fun109 sec04:
    '     - no change
-   '   o fun108 sec05:
+   '   o fun109 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun108 Sec01:
+   ^ Fun109 Sec01:
    ^   - variable declrations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7829,7 +7951,7 @@ nextItem_listBox_rayWidg(
       listSTPtr->onSI = onSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun108 Sec02:
+   ^ Fun109 Sec02:
    ^   - move down list box (+ change)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7839,7 +7961,7 @@ nextItem_listBox_rayWidg(
       cntSI = 0;
 
       if(listSTPtr->onSI >= listSTPtr->lenSI)
-         goto moveRet_fun108_sec05;
+         goto moveRet_fun109_sec05;
 
       while(tmpSI < listSTPtr->lenSI && cntSI < changeSI)
       { /*Loop: find ending file*/
@@ -7862,7 +7984,7 @@ nextItem_listBox_rayWidg(
                if(listSTPtr->scrollSI >= listSTPtr->lenSI)
                { /*If: went past end of list*/
                   --listSTPtr->scrollSI;
-                  goto moveRet_fun108_sec05;
+                  goto moveRet_fun109_sec05;
                } /*If: went past end of list*/
 
                while(
@@ -7877,7 +7999,7 @@ nextItem_listBox_rayWidg(
                    listSTPtr->scrollSI >= listSTPtr->lenSI
                   ){ /*If: at end of list*/
                      listSTPtr->scrollSI = lastSI;
-                     goto moveRet_fun108_sec05;
+                     goto moveRet_fun109_sec05;
                   }  /*If: at end of list*/
                }  /*Loop: find next scroll position*/
             }  /*If: need to move scroll down one item*/
@@ -7887,21 +8009,21 @@ nextItem_listBox_rayWidg(
       } /*Loop: find ending file*/
 
       if(! cntSI)
-         goto noMoveRet_fun108_sec05;
+         goto noMoveRet_fun109_sec05;
          /*on last visible item*/
       else
-         goto moveRet_fun108_sec05;
+         goto moveRet_fun109_sec05;
    } /*If: moving down*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun108 Sec03:
+   ^ Fun109 Sec03:
    ^   - move up list box (negative change)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    else if(changeSI < 0)
    { /*Else If: moving down*/
       if(listSTPtr->onSI <= 0)
-         goto moveRet_fun108_sec05;
+         goto moveRet_fun109_sec05;
 
       tmpSI = listSTPtr->onSI - 1;
       cntSI = 0;
@@ -7928,7 +8050,7 @@ nextItem_listBox_rayWidg(
                if(listSTPtr->scrollSI < 0)
                { /*If: went past end of list*/
                   ++listSTPtr->scrollSI;
-                  goto moveRet_fun108_sec05;
+                  goto moveRet_fun109_sec05;
                } /*If: went past end of list*/
 
 
@@ -7943,7 +8065,7 @@ nextItem_listBox_rayWidg(
                   if(listSTPtr->scrollSI < 0)
                   { /*If: at end of list*/
                      listSTPtr->scrollSI = lastSI;
-                     goto moveRet_fun108_sec05;
+                     goto moveRet_fun109_sec05;
                   }  /*If: at end of list*/
                }  /*Loop: find next scroll position*/
             } /*If: need to move scroll one item up*/
@@ -7953,33 +8075,33 @@ nextItem_listBox_rayWidg(
       } /*Loop: find ending file*/
 
       if(! cntSI)
-         goto noMoveRet_fun108_sec05;
+         goto noMoveRet_fun109_sec05;
          /*on first visible item*/
       else
-         goto moveRet_fun108_sec05;
+         goto moveRet_fun109_sec05;
    } /*Else If: moving down*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun108 Sec04:
+   ^ Fun109 Sec04:
    ^   - no change
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    else
-      goto noMoveRet_fun108_sec05;
+      goto noMoveRet_fun109_sec05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun108 Sec05:
+   ^ Fun109 Sec05:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-    moveRet_fun108_sec05:;
+    moveRet_fun109_sec05:;
        tmpSI = listSTPtr->onSI;
-       goto ret_fun108_sec05;
+       goto ret_fun109_sec05;
 
-    noMoveRet_fun108_sec05:;
+    noMoveRet_fun109_sec05:;
        return -1;
 
-    ret_fun108_sec05:;
+    ret_fun109_sec05:;
        if(onSI >= 0)
        { /*If: need to reset list box values*/
           if(tmpSI >= 0)
@@ -7994,7 +8116,7 @@ nextItem_listBox_rayWidg(
 } /*nextItem_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun109: toIndex_listBox_rayWidg
+| Fun110: toIndex_listBox_rayWidg
 |   - move list box selected item till at target index
 | Input:
 |   - indexSI:
@@ -8017,18 +8139,18 @@ toIndex_listBox_rayWidg(
    signed int maxItemsSI,  /*maximum items in window*/
    struct listBox_rayWidg *listSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun109: TOC
+   ' Fun110: TOC
    '   - move list box selected item till at target index
-   '   o fun109 sec01:
+   '   o fun110 sec01:
    '     - variable declrations
-   '   o fun109 sec02:
+   '   o fun110 sec02:
    '     - move down list box (+ change)
-   '   o fun109 sec03:
+   '   o fun110 sec03:
    '     - move up list box (negative change)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun109 Sec01:
+   ^ Fun110 Sec01:
    ^   - variable declrations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8036,7 +8158,7 @@ toIndex_listBox_rayWidg(
    signed int lastSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun109 Sec02:
+   ^ Fun110 Sec02:
    ^   - move down list box (+ change)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8089,7 +8211,7 @@ toIndex_listBox_rayWidg(
    } /*If: moving down*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun109 Sec03:
+   ^ Fun110 Sec03:
    ^   - move up list box (negative change)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8144,7 +8266,7 @@ toIndex_listBox_rayWidg(
 } /*toIndex_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun110: draw_listBox_rayWidg
+| Fun111: draw_listBox_rayWidg
 |   - draws a list box widget
 | Input:
 |   - idSI:
@@ -8178,22 +8300,22 @@ draw_listBox_rayWidg(
    struct listBox_rayWidg *listSTPtr, /*has list box*/
    struct widg_rayWidg *widgSTPtr /*has widgets*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun110 TOC:
+   ' Fun111 TOC:
    '   - draws a list box widget
-   '   o fun110 sec01:
+   '   o fun111 sec01:
    '     - variable declarations
-   '   o fun110 sec02:
+   '   o fun111 sec02:
    '     - check if can draw and get color scheme
-   '   o fun110 sec03:
+   '   o fun111 sec03:
    '     - get dimensions
-   '   o fun110 sec04:
+   '   o fun111 sec04:
    '     - draw the list box
-   '   o fun110 sec05:
+   '   o fun111 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun110 Sec01:
+   ^ Fun111 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8208,8 +8330,8 @@ draw_listBox_rayWidg(
    signed int itemSI = 0;   /*item on in list box*/
    signed int ySI = 0;      /*y position to draw item*/
 
-   #define lenStr_fun110 512 /*max c-string length*/
-   signed char textStr[lenStr_fun110 + 8];
+   #define lenStr_fun111 512 /*max c-string length*/
+   signed char textStr[lenStr_fun111 + 8];
    signed char selectBl = 0;
 
    struct Color textCol;
@@ -8217,15 +8339,15 @@ draw_listBox_rayWidg(
    struct Color *textPickColPtr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun110 Sec02:
+   ^ Fun111 Sec02:
    ^   - check if can draw and get color scheme
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI > widgSTPtr->lenSI)
-      goto noWidget_fun110_sec0x;
+      goto noWidget_fun111_sec0x;
 
    else if( hidenGet_widg_rayWidg(idSI, widgSTPtr) )
-      goto hidenWidget_fun110_sec0x;
+      goto hidenWidget_fun111_sec0x;
 
    else if( inactiveGet_widg_rayWidg(idSI, widgSTPtr) )
    { /*Else If: list box is in an inactive state*/
@@ -8250,7 +8372,7 @@ draw_listBox_rayWidg(
    } /*Else: user is unsing list box*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun110 Sec03:
+   ^ Fun111 Sec03:
    ^   - get dimensions
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8292,19 +8414,19 @@ draw_listBox_rayWidg(
       widgSTPtr->widthArySI[idSI] = itemSI;
 
    if(noDrawBl)
-      goto noDraw_fun110_sec0x;
+      goto noDraw_fun111_sec0x;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun110 Sec04:
+   ^ Fun111 Sec04:
    ^   - draw the list box
-   ^   o fun110 sec04 sub01:
+   ^   o fun111 sec04 sub01:
    ^     - draw rectangle for list box
-   ^   o fun110 sec04 sub02:
+   ^   o fun111 sec04 sub02:
    ^     - draw each item currently shown in list box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun110 Sec04 Sub01:
+   * Fun111 Sec04 Sub01:
    *   - draw rectangle for list box
    \*****************************************************/
 
@@ -8323,22 +8445,22 @@ draw_listBox_rayWidg(
    ); /*rectangle for widget*/
 
    /*****************************************************\
-   * Fun110 Sec04 Sub02:
+   * Fun111 Sec04 Sub02:
    *   - draw each item currently shown in list box
-   *   o fun110 sec04 sub02 cat01:
+   *   o fun111 sec04 sub02 cat01:
    *     - setup and detect if can draw item (not hidden)
-   *   o fun110 sec04 sub02 cat02:
+   *   o fun111 sec04 sub02 cat02:
    *     - check if item was selected
-   *   o fun110 sec04 sub02 cat03:
+   *   o fun111 sec04 sub02 cat03:
    *     - check if user is on item
-   *   o fun110 sec04 sub02 cat04:
+   *   o fun111 sec04 sub02 cat04:
    *     - draw item
-   *   o fun110 sec04 sub02 cat05:
+   *   o fun111 sec04 sub02 cat05:
    *     - move to next item
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun110 Sec04 Sub02 Cat01:
+   + Fun111 Sec04 Sub02 Cat01:
    +   - setup and detect if can draw item (not hidden)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8354,7 +8476,7 @@ draw_listBox_rayWidg(
       selectBl = 0;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun110 Sec04 Sub02 Cat02:
+      + Fun111 Sec04 Sub02 Cat02:
       +   - check if item was selected
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8391,7 +8513,7 @@ draw_listBox_rayWidg(
             textPickColPtr = &textCol;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun110 Sec04 Sub02 Cat03:
+         + Fun111 Sec04 Sub02 Cat03:
          +   - check if user is on item
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8418,7 +8540,7 @@ draw_listBox_rayWidg(
          } /*If: need to draw box around item on*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun110 Sec04 Sub02 Cat04:
+         + Fun111 Sec04 Sub02 Cat04:
          +   - draw item
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8426,8 +8548,7 @@ draw_listBox_rayWidg(
          checkTextWidth_rayWidg(
            listSTPtr->textAryStr[itemSI],
            &textStr[1],
-           widgSTPtr->widthArySI[idSI]
-              - (widgSTPtr->fontWidthF * 4),
+           widgSTPtr->widthArySI[idSI],
            widgSTPtr
          );
 
@@ -8462,7 +8583,7 @@ draw_listBox_rayWidg(
       } /*Else: I can draw the item*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun110 Sec04 Sub02 Cat05:
+      + Fun111 Sec04 Sub02 Cat05:
       +   - move to next item
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8470,24 +8591,24 @@ draw_listBox_rayWidg(
    } /*Loop: draw the labels*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun110 Sec05:
+   ^ Fun111 Sec05:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    return widgSTPtr->widthArySI[idSI];
 
-   noDraw_fun110_sec0x:;
+   noDraw_fun111_sec0x:;
       return widgSTPtr->widthArySI[idSI];
 
-   noWidget_fun110_sec0x:;
+   noWidget_fun111_sec0x:;
       return def_noWidget_rayWidg;
 
-   hidenWidget_fun110_sec0x:;
+   hidenWidget_fun111_sec0x:;
       return 0;
 } /*draw_listBox_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun111: listBoxEvent_rayWidg
+| Fun112: listBoxEvent_rayWidg
 |   - runs an event for a list box
 | Input:
 |   - idSI:
@@ -8521,24 +8642,24 @@ listBoxEvent_rayWidg(
    struct event_rayWidg *eventSTPtr, /*events user did*/
    struct widg_rayWidg *widgSTPtr    /*widgets user made*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun111 TOC:
+   ' Fun112 TOC:
    '   - runs an event for a list box
-   '   o fun111 sec01:
+   '   o fun112 sec01:
    '     - variable declarations
-   '   o fun111 sec02:
+   '   o fun112 sec02:
    '     - check if have event + find select/display limit
-   '   o fun111 sec03:
+   '   o fun112 sec03:
    '     - deal with keyboard input
-   '   o fun111 sec04:
+   '   o fun112 sec04:
    '     - deal with scroll wheel events
-   '   o fun111 sec05:
+   '   o fun112 sec05:
    '     - deal with mouse clicks
-   '   o fun111 sec06:
+   '   o fun112 sec06:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun111 Sec01:
+   ^ Fun112 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8553,25 +8674,25 @@ listBoxEvent_rayWidg(
    signed int lastSelectSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun111 Sec02:
+   ^ Fun112 Sec02:
    ^   - check if have event + find select/display limits
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(eventSTPtr->idSI != idSI)
-      goto notListBox_fun111_sec06;
+      goto notListBox_fun112_sec06;
       /*selected widget was not a list box*/
 
    else if(eventSTPtr->idSI < 0)
-      goto noWidget_fun111_sec06;
+      goto noWidget_fun112_sec06;
       /*no widget was selected*/
       
    else if(
       hidenGet_widg_rayWidg(eventSTPtr->idSI, widgSTPtr)
-   ) goto hidenWidget_fun111_sec06;
+   ) goto hidenWidget_fun112_sec06;
 
    else if(
       inactiveGet_widg_rayWidg(eventSTPtr->idSI,widgSTPtr)
-   ) goto inactiveWidget_fun111_sec06;
+   ) goto inactiveWidget_fun112_sec06;
 
    /*find max nubmer of files to select (select limit)*/
    if(maxSelectSI < 0)
@@ -8585,28 +8706,28 @@ listBoxEvent_rayWidg(
       );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun111 Sec03:
+   ^ Fun112 Sec03:
    ^   - deal with keyboard input
-   ^   o fun111 sec03 sub01:
+   ^   o fun112 sec03 sub01:
    ^     - move down + start keyboard event if
-   ^   o fun111 sec03 sub02:
+   ^   o fun112 sec03 sub02:
    ^     - move up + start keyboard event if
-   ^   o fun111 sec03 sub03:
+   ^   o fun112 sec03 sub03:
    ^     - move to start or end of list
-   ^   o fun111 sec03 sub04:
+   ^   o fun112 sec03 sub04:
    ^     - enter key select item or trigger event
-   ^   o fun111 sec03 sub05:
+   ^   o fun112 sec03 sub05:
    ^     - space key (add selection items)
-   ^   o fun111 sec03 sub06:
+   ^   o fun112 sec03 sub06:
    ^     - ctrl-a if user wanted everything
-   ^   o fun111 sec03 sub07:
+   ^   o fun112 sec03 sub07:
    ^     - ctrl-r delesect (refresh)
-   ^   o fun111 sec03 sub08:
+   ^   o fun112 sec03 sub08:
    ^     - unknown key or no key event
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun111 Sec03 Sub01:
+   * Fun112 Sec03 Sub01:
    *   - move down + start keyboard event if
    \*****************************************************/
 
@@ -8633,14 +8754,14 @@ listBoxEvent_rayWidg(
                -1, /*use internal variables*/
                listSTPtr
             ) < 0
-         ) goto moveEvent_fun111_sec06;
+         ) goto moveEvent_fun112_sec06;
 
          else
-            goto noEvent_fun111_sec06;
+            goto noEvent_fun112_sec06;
       /*Case: moving down one item or page*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub02:
+      * Fun112 Sec03 Sub02:
       *   - move up
       \**************************************************/
 
@@ -8665,14 +8786,14 @@ listBoxEvent_rayWidg(
                -1, /*use internal variables*/
                listSTPtr
             ) < 0
-         ) goto moveEvent_fun111_sec06;
+         ) goto moveEvent_fun112_sec06;
 
          else
-            goto noEvent_fun111_sec06;
+            goto noEvent_fun112_sec06;
       /*Case: moving up one item or page*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub03:
+      * Fun112 Sec03 Sub03:
       *   - move to start or end of list
       \**************************************************/
 
@@ -8701,11 +8822,11 @@ listBoxEvent_rayWidg(
             listSTPtr
          );
 
-         goto moveEvent_fun111_sec06;
+         goto moveEvent_fun112_sec06;
       /*Case: move to start or end of list*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub04:
+      * Fun112 Sec03 Sub04:
       *   - enter key select item or trigger event
       \**************************************************/
 
@@ -8725,28 +8846,28 @@ listBoxEvent_rayWidg(
          if(
               listSTPtr->stateArySC[listSTPtr->onSI]
             & def_listSpecial_rayWidg
-         ) goto specialSelectEvent_fun111_sec06;
+         ) goto specialSelectEvent_fun112_sec06;
            /*user needs to handel this one*/
 
          else
-            goto selectEvent_fun111_sec06;
+            goto selectEvent_fun112_sec06;
       /*Case: enter key was hit*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub05:
+      * Fun112 Sec03 Sub05:
       *   - space key (add selection items)
-      *   o fun111 sec03 sub05 cat01:
+      *   o fun112 sec03 sub05 cat01:
       *     - set selection to only one item + case
-      *   o fun111 sec03 sub05 cat02:
+      *   o fun112 sec03 sub05 cat02:
       *     - add or remove item from selection
-      *   o fun111 sec03 sub05 cat03:
+      *   o fun112 sec03 sub05 cat03:
       *     - add range to selection
-      *   o fun111 sec03 sub05 cat04:
+      *   o fun112 sec03 sub05 cat04:
       *     - go to selection return
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun111 Sec03 Sub05 Cat01:
+      + Fun112 Sec03 Sub05 Cat01:
       +   - set selection to only one item + case
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8772,7 +8893,7 @@ listBoxEvent_rayWidg(
          } /*If: reseting selection to the current item*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun111 Sec03 Sub05 Cat02:
+         + Fun112 Sec03 Sub05 Cat02:
          +   - add or remove item from selection
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8809,7 +8930,7 @@ listBoxEvent_rayWidg(
          } /*Else If: adding or removing item*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun111 Sec03 Sub05 Cat03:
+         + Fun112 Sec03 Sub05 Cat03:
          +   - add range to selection
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8870,15 +8991,15 @@ listBoxEvent_rayWidg(
          } /*Else: adding a range*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun111 Sec03 Sub05 Cat04:
+         + Fun112 Sec03 Sub05 Cat04:
          +   - go to selection return
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
-         goto selectEvent_fun111_sec06;
+         goto selectEvent_fun112_sec06;
       /*Case: space key was hit*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub06:
+      * Fun112 Sec03 Sub06:
       *   - ctrl-a if user wanted everything
       \**************************************************/
 
@@ -8889,10 +9010,10 @@ listBoxEvent_rayWidg(
          if(eventSTPtr->ctrlBl)
             ;
          else
-            goto noEvent_fun111_sec06;
+            goto noEvent_fun112_sec06;
 
          if(listSTPtr->numSelectSI >= maxSelectSI)
-            goto noEvent_fun111_sec06;
+            goto noEvent_fun112_sec06;
             /*already selected everything possible*/
 
          tmpSI = 0;
@@ -8929,11 +9050,11 @@ listBoxEvent_rayWidg(
             ++tmpSI;
          } /*Loop: select as  many files as possible*/
 
-         goto selectEvent_fun111_sec06;
+         goto selectEvent_fun112_sec06;
       /*Case: a key*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub07:
+      * Fun112 Sec03 Sub07:
       *   - ctrl-r delesect (refresh)
       \**************************************************/
 
@@ -8944,32 +9065,32 @@ listBoxEvent_rayWidg(
          if(eventSTPtr->ctrlBl)
          { /*If: clearing all selected files*/
             clearSelect_listBox_rayWidg(listSTPtr);
-            goto selectEvent_fun111_sec06;
+            goto selectEvent_fun112_sec06;
          } /*If: clearing all selected files*/
 
          else
-            goto noEvent_fun111_sec06;
+            goto noEvent_fun112_sec06;
       /*Case: r key*/
 
       /**************************************************\
-      * Fun111 Sec03 Sub08:
+      * Fun112 Sec03 Sub08:
       *   - unknown key or no key event
       \**************************************************/
 
       case 0:
-          goto checkWheelEvent_fun111_sec04_sub01;
+          goto checkWheelEvent_fun112_sec04_sub01;
 
       default:
-          goto noEvent_fun111_sec06;
+          goto noEvent_fun112_sec06;
           /*unreconginzed key input*/
    } /*If: was a key event*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun111 Sec04:
+   ^ Fun112 Sec04:
    ^   - deal with scroll wheel events
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   checkWheelEvent_fun111_sec04_sub01:;
+   checkWheelEvent_fun112_sec04_sub01:;
 
    cntSI = (signed int) eventSTPtr->scrollF;
 
@@ -8984,22 +9105,22 @@ listBoxEvent_rayWidg(
          listSTPtr
       );
 
-      goto moveEvent_fun111_sec06;
+      goto moveEvent_fun112_sec06;
    } /*If: moving by scroll wheel*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun111 Sec05:
+   ^ Fun112 Sec05:
    ^   - deal with mouse clicks
-   ^   o fun111 sec05 sub01:
+   ^   o fun112 sec05 sub01:
    ^     - find the clicked on item in list box
-   ^   o fun111 sec05 sub02:
+   ^   o fun112 sec05 sub02:
    ^     - deal with click event
-   ^   o fun111 sec05 sub03:
+   ^   o fun112 sec05 sub03:
    ^     - check for right clicks; event does not capture
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun111 Sec05 Sub01:
+   * Fun112 Sec05 Sub01:
    *   - find the clicked on item in list box
    \*****************************************************/
 
@@ -9007,20 +9128,20 @@ listBoxEvent_rayWidg(
       listSTPtr->clickSI = -1;
 
    /*****************************************************\
-   * Fun111 Sec05 Sub02:
+   * Fun112 Sec05 Sub02:
    *   - deal with click release event
-   *   o fun111 sec05 sub02 cat01:
+   *   o fun112 sec05 sub02 cat01:
    *     - left release; find change to get to item
-   *   o fun111 sec05 sub02 cat01:
+   *   o fun112 sec05 sub02 cat01:
    *     - control + click; add/remove file from selection
-   *   o fun111 sec05 sub02 cat03:
+   *   o fun112 sec05 sub02 cat03:
    *     - shift + click select a range
-   *   o fun111 sec05 sub02 cat04:
+   *   o fun112 sec05 sub02 cat04:
    *     - single click; set item as only selected item
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun111 Sec05 Sub02 Cat01:
+   + Fun112 Sec05 Sub02 Cat01:
    +   - left release; find change to get to item
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9037,17 +9158,24 @@ listBoxEvent_rayWidg(
       if(ySI + listSTPtr->scrollSI >= listSTPtr->lenSI)
       { /*If: empty space was clicked*/
          listSTPtr->clickSI = -1;
-         goto noEvent_fun111_sec06;
+         goto noEvent_fun112_sec06;
       } /*If: empty space was clicked*/
 
       lastSelectSI = listSTPtr->onSI;
-      ySI =
-         nextItem_listBox_rayWidg(
-            ySI,
-            maxLinesSI,
-            listSTPtr->scrollSI,
-            listSTPtr
-         );
+      if(ySI)
+         ySI =
+            nextItem_listBox_rayWidg(
+               ySI,
+               maxLinesSI,
+               listSTPtr->scrollSI,
+               listSTPtr
+            );
+      else
+         ySI = listSTPtr->scrollSI;
+         /*in this case, it will appear to move no items
+         `  and nextItem returns -1 as a result,
+         `  so this is needed to keep scroll in position
+         */
 
       if(ySI >= 0)
       { /*If: chaning my position*/
@@ -9059,7 +9187,7 @@ listBoxEvent_rayWidg(
       } /*If: chaning my position*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun111 Sec05 Sub02 Cat02:
+      + Fun112 Sec05 Sub02 Cat02:
       +   - control+click; add/remove file from selection
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9100,11 +9228,11 @@ listBoxEvent_rayWidg(
             }  /*Else If: selecting the item*/
          }  /*If: can select the item*/
 
-         goto selectEvent_fun111_sec06;
+         goto selectEvent_fun112_sec06;
       } /*If: user wanted to add item to selection list*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun111 Sec05 Sub02 Cat03:
+      + Fun112 Sec05 Sub02 Cat03:
       +   - shift + click select a range
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9159,11 +9287,11 @@ listBoxEvent_rayWidg(
             ++tmpSI;
          } /*Loop: add files to selection*/
 
-         goto selectEvent_fun111_sec06;
+         goto selectEvent_fun112_sec06;
       } /*Else If: selecting a range of items*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun111 Sec05 Sub02 Cat04:
+      + Fun112 Sec05 Sub02 Cat04:
       +     - single click; set item as only selected item
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9192,7 +9320,7 @@ listBoxEvent_rayWidg(
             if(
                  listSTPtr->stateArySC[listSTPtr->onSI]
                & def_listSpecial_rayWidg
-            ) goto specialSelectEvent_fun111_sec06;
+            ) goto specialSelectEvent_fun112_sec06;
               /*selected a special item the user needs
               `  to do something with
               */
@@ -9201,13 +9329,13 @@ listBoxEvent_rayWidg(
          else
          { /*Else: single click*/
             listSTPtr->clickSI = listSTPtr->onSI;
-            goto selectEvent_fun111_sec06;
+            goto selectEvent_fun112_sec06;
          } /*Else: single click*/
       } /*Else: user is selecting one item*/
    } /*Else If: release event*/
 
    /*****************************************************\
-   * Fun111 Sec05 Sub03:
+   * Fun112 Sec05 Sub03:
    *   - check for right clicks (eventST does not capture)
    \*****************************************************/
 
@@ -9217,44 +9345,44 @@ listBoxEvent_rayWidg(
    else if( IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) )
       listSTPtr->clickSI = -1;
 
-   goto noEvent_fun111_sec06;
+   goto noEvent_fun112_sec06;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun111 Sec06:
+   ^ Fun112 Sec06:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   moveEvent_fun111_sec06:;
+   moveEvent_fun112_sec06:;
       return 1;
 
-   selectEvent_fun111_sec06:;
+   selectEvent_fun112_sec06:;
       return 2;
 
-   specialSelectEvent_fun111_sec06:;
+   specialSelectEvent_fun112_sec06:;
       return 4; /*is really enter on special event*/
 
    /*these are states were the widget can not be
    `  interacted with or were the widget was not selected
    */
 
-   notListBox_fun111_sec06:;
+   notListBox_fun112_sec06:;
       return -1;
 
-   noWidget_fun111_sec06:;
+   noWidget_fun112_sec06:;
       return -2;
 
-   noEvent_fun111_sec06:;
+   noEvent_fun112_sec06:;
       return 0;
 
-   hidenWidget_fun111_sec06:;
+   hidenWidget_fun112_sec06:;
       return 0;
 
-   inactiveWidget_fun111_sec06:;
+   inactiveWidget_fun112_sec06:;
       return 0;
 } /*listBoxEvent_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun112: blank_files_rayWidg
+| Fun113: blank_files_rayWidg
 |   - set all files in a files_rayWidg struct to no files 
 | Input:
 |   - fileSTPtr:
@@ -9272,6 +9400,7 @@ blank_files_rayWidg(
 
    fileSTPtr->pwdStr[0] = 0;
    fileSTPtr->showHidenSC = 0;/*do not show hidden files*/
+   fileSTPtr->lastWidgSI = -1;/*no previous widgets*/
 
    #ifdef WINDOWS
       cpStr_ulCp(
@@ -9290,7 +9419,7 @@ blank_files_rayWidg(
 } /*blank_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun113: init_files_rayWidg
+| Fun114: init_files_rayWidg
 |   - initialize a files_rayWidg struct
 | Input:
 |   - fileSTPtr:
@@ -9314,7 +9443,7 @@ init_files_rayWidg(
 } /*init_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun114: freeStack_files_rayWidg
+| Fun115: freeStack_files_rayWidg
 |   - frees variables in a files_rayWidg struct
 | Input:
 |   - fileSTPtr:
@@ -9337,7 +9466,7 @@ freeStack_files_rayWidg(
 } /*freeStack_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun115: freeHeap_files_rayWidg
+| Fun116: freeHeap_files_rayWidg
 |   - frees files_rayWidg struct
 | Input:
 |   - fileSTPtr:
@@ -9357,7 +9486,7 @@ freeHeap_files_rayWidg(
 } /*freeHeap_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun116: setFileLim_files_rayWidg
+| Fun117: setFileLim_files_rayWidg
 |   - sets the maximum number of files the user can choose
 | Input:
 |   - maxFilesSI:
@@ -9381,7 +9510,7 @@ setFileLimit_files_rayWidg(
 } /*setFileLimit_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun117: getFile_files_rayWidg
+| Fun118: getFile_files_rayWidg
 |   - gets the next selected files from a files_rayWidg
 |     struct
 | Input:
@@ -9415,6 +9544,7 @@ getFile_files_rayWidg(
    struct files_rayWidg *fileSTPtr /*has selected files*/
 ){
    signed char *retHeapStr = 0;
+   signed int lenSI = 0;
 
    retHeapStr = malloc(512 * sizeof(signed char));
    if(! retHeapStr)
@@ -9438,8 +9568,11 @@ getFile_files_rayWidg(
                 )
              )
       ){ /*If: found a selected file*/
+         lenSI = cpStr_ulCp(retHeapStr,fileSTPtr->pwdStr);
+         retHeapStr[lenSI++] = def_pathSep_rayWidg;
+
          cpStr_ulCp(
-           retHeapStr,
+           &retHeapStr[lenSI],
            &fileSTPtr->fileListST.textAryStr[
               *fileOnSIPtr
            ][4] /*4 skips "[d] " and "    " part*/
@@ -9473,7 +9606,7 @@ getFile_files_rayWidg(
 } /*getFile_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun118: swapFiles_files_rayWidg
+| Fun119: swapFiles_files_rayWidg
 |   - swap two files in a files_rayWidg struct
 | Input:
 |   - firstSI:
@@ -9517,7 +9650,7 @@ swapFiles_files_rayWidg(
 } /*swapFiles_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun119: sortFiles_files_rayWidg
+| Fun120: sortFiles_files_rayWidg
 |   - sorts files by name and if directory
 | Input:
 |   - fileSTPtr:
@@ -9534,18 +9667,18 @@ void
 sortFiles_files_rayWidg(
    struct files_rayWidg *fileSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun119 TOC:
+   ' Fun120 TOC:
    '   - sorts signed int array from least to greatest
-   '   o fun119 sec01:
+   '   o fun120 sec01:
    '     - variable declerations
-   '   o fun119 sec02:
+   '   o fun120 sec02:
    '     - find the number of rounds to sort for
-   '   o fun119 sec03:
+   '   o fun120 sec03:
    '     - sort the arrays
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun119 Sec01:
+   ^ Fun120 Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -9568,7 +9701,7 @@ sortFiles_files_rayWidg(
    signed long slElm = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun119 Sec02:
+   ^ Fun120 Sec02:
    ^   - find the max search value (number rounds to sort)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -9582,7 +9715,7 @@ sortFiles_files_rayWidg(
       subSL = (3 * subSL) + 1;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun119 Sec03:
+   ^ Fun120 Sec03:
    ^   - sort arrays
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -9602,7 +9735,9 @@ sortFiles_files_rayWidg(
          ){ /*Loop: swap elements in subarray*/
             nextSL = slElm + subSL;
 
-            if(
+            if(! slElm)
+               ; /*do not want to sort the first element*/
+            else if(
                   ! specialGet_listBox_rayWidg(
                      slElm,
                      listSTPtr
@@ -9612,7 +9747,7 @@ sortFiles_files_rayWidg(
                      nextSL,
                      listSTPtr
                   )
-            ) goto swap_fun119_sec03;
+            ) goto swap_fun120_sec03;
 
             else if(
                eqlNull_ulCp(
@@ -9620,7 +9755,7 @@ sortFiles_files_rayWidg(
                   listSTPtr->textAryStr[nextSL]
                ) > 0
             ){ /*Else If: I need to swap an element*/
-               swap_fun119_sec03:;
+               swap_fun120_sec03:;
 
                swapFiles_files_rayWidg(
                   slElm,
@@ -9634,6 +9769,8 @@ sortFiles_files_rayWidg(
                while(lastSL >= subSL)
                { /*loop: move swapped element back*/
                   lastSL -= subSL;
+                  if(! lastSL)
+                     break;
 
                   if(
                         ! specialGet_listBox_rayWidg(
@@ -9671,7 +9808,7 @@ sortFiles_files_rayWidg(
 } /*sortFiles_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun120: scanForFiles_files_rayWidg
+| Fun121: scanForFiles_files_rayWidg
 |   - get files in a directory
 | Input:
 |   - dirStr:
@@ -9826,7 +9963,7 @@ scanForFiles_files_rayWidg(
 } /*scanForFiles_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun121: changeExt_files_rayWidg
+| Fun122: changeExt_files_rayWidg
 |   - updates files for the change extension type
 | Input:
 |   - fileSTPtr:
@@ -9849,10 +9986,22 @@ changeExt_files_rayWidg(
    fileSTPtr->fileListST.lastScrollSI = 0;
 
    for(
-      siIndex = 0;
+      siIndex = 1; /*0 is always back one dir*/
       siIndex < fileSTPtr->fileListST.lenSI;
       ++siIndex
    ){ /*Loop: check if should be hidden or not*/
+      if(
+              fileSTPtr->fileListST.textAryStr[siIndex][4]
+            == '.'
+         && ! fileSTPtr->showHidenSC
+      ){ /*If: is a hidden file & ignoring hidden files*/
+         fileSTPtr->fileListST.stateArySC[siIndex] |=
+            def_listHidden_rayWidg;
+         fileSTPtr->fileListST.stateArySC[siIndex] &=
+            ~def_listCanSelect_rayWidg;
+         continue;
+      }  /*If: is a hidden file & ignoring hidden files*/
+
       lenSI = cpStr_ulCp(tmpFileStr, fileSTPtr->pwdStr);
       tmpFileStr[lenSI++] = def_pathSep_rayWidg;
 
@@ -9899,7 +10048,7 @@ changeExt_files_rayWidg(
 } /*changeExt_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun122: addExt_files_rayWidg
+| Fun123: addExt_files_rayWidg
 |   - add an file extension to a files_rayWidg struct
 | Input:
 |   - extStr:
@@ -9967,7 +10116,7 @@ addExt_files_rayWidg(
 } /*addExt_files_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun123: mkFileBrowser_rayWidg
+| Fun124: mkFileBrowser_rayWidg
 |   - makes a file browswer widget
 | Input:
 |   - widgSTPtr:
@@ -10043,7 +10192,7 @@ mkFileBrowser_rayWidg(
 } /*mkFileBrowser_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun124: fileBrowserDraw_rayWidg
+| Fun125: fileBrowserDraw_rayWidg
 |   - draws a file browswer widget
 | Input:
 |   - idSI:
@@ -10083,31 +10232,31 @@ fileBrowserDraw_rayWidg(
    struct files_rayWidg *fileSTPtr,/*has files*/
    struct widg_rayWidg *widgSTPtr  /*has browser widget*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun124 TOC:
+   ' Fun125 TOC:
    '   - draws a file browswer widget
-   '   o fun124 sec01:
+   '   o fun125 sec01:
    '     - variable declarations
-   '   o fun124 sec02:
+   '   o fun125 sec02:
    '     - check if can draw file browswer
-   '   o fun124 sec03:
+   '   o fun125 sec03:
    '     - get coordinates and dimensions for all widgets
-   '   o fun124 sec04:
+   '   o fun125 sec04:
    '     - draw file browswer
-   '   o fun124 sec05:
+   '   o fun125 sec05:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun124 Sec01:
+   ^ Fun125 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed int tmpSI = 0;
 
-   #define def_maxStrLen_fun124 512
-   signed char pwdOutStr[def_maxStrLen_fun124 + 8];
+   #define def_maxStrLen_fun125 512
+   signed char pwdOutStr[def_maxStrLen_fun125 + 8];
       /*holds modified pwdStr*/
-   signed char mesgOutStr[def_maxStrLen_fun124 + 8];
+   signed char mesgOutStr[def_maxStrLen_fun125 + 8];
       /*holds modified message*/
 
    signed int mesgWidthSI = 0;  /*width of message*/
@@ -10124,21 +10273,28 @@ fileBrowserDraw_rayWidg(
    signed int widgPadSI = widgSTPtr->fontWidthF * 2;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun124 Sec02:
+   ^ Fun125 Sec02:
    ^   - check if can draw file browswer
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI >= widgSTPtr->lenSI)
-      goto noWidg_fun124_sec05;
+      goto noWidg_fun125_sec05;
    else if(idSI < 0)
-      goto noWidg_fun124_sec05;
+      goto noWidg_fun125_sec05;
    else if( hidenGet_widg_rayWidg(idSI, widgSTPtr) )
-      goto hiden_fun124_sec05;
+      goto hiden_fun125_sec05;
 
    if(widgSTPtr->focusSI < idSI)
+   { /*If: message box is not in focus*/
+      fileSTPtr->lastWidgSI = widgSTPtr->focusSI;
       widgSTPtr->focusSI = idSI + 1;
+   } /*If: message box is not in focus*/
+
    else if(widgSTPtr->focusSI > idSI + 4)
+   { /*Else If: message box is not in focus*/
+      fileSTPtr->lastWidgSI = widgSTPtr->focusSI;
       widgSTPtr->focusSI = idSI + 1;
+   } /*Else If: message box is not in focus*/
 
    if(! fileSTPtr->fileListST.lenSI && *fileSTPtr->pwdStr)
    { /*If: no files were loaded*/
@@ -10149,28 +10305,28 @@ fileBrowserDraw_rayWidg(
             fileSTPtr,
             widgSTPtr
          )
-      ) goto noWidg_fun124_sec05;
+      ) goto noWidg_fun125_sec05;
    }  /*If: no files were loaded*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun124 Sec03:
+   ^ Fun125 Sec03:
    ^   - get coordinates and dimensions for all widgets
-   ^   o fun124 sec03 sub01:
+   ^   o fun125 sec03 sub01:
    ^     - find file browswer rectangle dimensions
-   ^   o fun124 sec03 sub02:
+   ^   o fun125 sec03 sub02:
    ^     - find present working directory label dimensions
-   ^   o fun124 sec03 sub03:
+   ^   o fun125 sec03 sub03:
    ^     - find file list box dimensions
-   ^   o fun124 sec03 sub04:
+   ^   o fun125 sec03 sub04:
    ^     - extension list box dimensions
-   ^   o fun124 sec03 sub05:
+   ^   o fun125 sec03 sub05:
    ^     - message box dimensions
-   ^   o fun124 sec03 sub06:
+   ^   o fun125 sec03 sub06:
    ^     - get button coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun124 Sec03 Sub01:
+   * Fun125 Sec03 Sub01:
    *   - find file browswer rectangle dimensions
    \*****************************************************/
 
@@ -10184,17 +10340,17 @@ fileBrowserDraw_rayWidg(
    widgSTPtr->xArySI[idSI] = widgPadSI / 2;
 
    /*****************************************************\
-   * Fun124 Sec03 Sub02:
+   * Fun125 Sec03 Sub02:
    *   - find present working directory label dimensions
-   *   o fun124 sec03 sub02 cat01:
+   *   o fun125 sec03 sub02 cat01:
    *     - pwd general dimensions
-   *   o fun124 sec03 sub02 cat02:
+   *   o fun125 sec03 sub02 cat02:
    *     - copy pwd string and shorten (if needed)
-   *   o fun124 sec03 sub02 cat03:
+   *   o fun125 sec03 sub02 cat03:
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun124 Sec03 Sub02 Cat01:
+   + Fun125 Sec03 Sub02 Cat01:
    +   - pwd rectangle general dimensions
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -10208,7 +10364,7 @@ fileBrowserDraw_rayWidg(
    pwdWidthSI = widgSTPtr->widthArySI[idSI];
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun124 Sec03 Sub02 Cat02:
+   + Fun125 Sec03 Sub02 Cat02:
    +   - copy pwd string and shorten (if needed)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -10251,7 +10407,7 @@ fileBrowserDraw_rayWidg(
    } /*Else If: shortned the file path*/
 
    /*****************************************************\
-   * Fun124 Sec03 Sub03:
+   * Fun125 Sec03 Sub03:
    *   - find file list box dimensions
    \*****************************************************/
 
@@ -10273,7 +10429,7 @@ fileBrowserDraw_rayWidg(
    widgSTPtr->yArySI[idSI + 1] = pwdHeightSI + widgGapSI;
 
    /*****************************************************\
-   * Fun124 Sec03 Sub04:
+   * Fun125 Sec03 Sub04:
    *   - extension list box dimensions
    \*****************************************************/
 
@@ -10301,13 +10457,13 @@ fileBrowserDraw_rayWidg(
       fileSTPtr->extListST.minHeightSI;
 
    /*****************************************************\
-   * Fun124 Sec03 Sub05:
+   * Fun125 Sec03 Sub05:
    *   - message dimensions
-   *   o fun124 sec03 sub05 cat01:
+   *   o fun125 sec03 sub05 cat01:
    *     - find space avaliable for the message
-   *   o fun124 sec03 sub05 cat02:
+   *   o fun125 sec03 sub05 cat02:
    *     - copy message and break into lines as needed
-   *   o fun124 sec03 sub05 cat03:
+   *   o fun125 sec03 sub05 cat03:
    *     - shorten message if needed
    \*****************************************************/
 
@@ -10326,7 +10482,7 @@ fileBrowserDraw_rayWidg(
    );
 
    /*****************************************************\
-   * Fun124 Sec03 Sub06:
+   * Fun125 Sec03 Sub06:
    *   - get button coordinates
    \*****************************************************/
 
@@ -10355,7 +10511,7 @@ fileBrowserDraw_rayWidg(
    widgSTPtr->yArySI[idSI +3] = widgSTPtr->yArySI[idSI+2];
       
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun124 Sec04:
+   ^ Fun125 Sec04:
    ^   - draw file browswer
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -10440,20 +10596,20 @@ fileBrowserDraw_rayWidg(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun124 Sec05:
+   ^ Fun125 Sec05:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    return widgSTPtr->widthArySI[idSI];
 
-   noWidg_fun124_sec05:;
+   noWidg_fun125_sec05:;
      tmpSI = def_noWidget_rayWidg;
-     goto retNoDraw_fun124_sec05;
-   hiden_fun124_sec05:;
+     goto retNoDraw_fun125_sec05;
+   hiden_fun125_sec05:;
      tmpSI = 0;
-     goto retNoDraw_fun124_sec05;
+     goto retNoDraw_fun125_sec05;
 
-   retNoDraw_fun124_sec05:;
+   retNoDraw_fun125_sec05:;
      if(widgSTPtr->focusSI < idSI)
         ;
      else if(widgSTPtr->focusSI > idSI + 4)
@@ -10466,7 +10622,7 @@ fileBrowserDraw_rayWidg(
 } /*fileBrowserDraw_rayWidg*/
 
 /*-------------------------------------------------------\
-| Fun125: fileBrowserEvent_rayWidg
+| Fun126: fileBrowserEvent_rayWidg
 |   - process and event for the file browser
 | Input:
 |   - idSI:
@@ -10504,20 +10660,20 @@ fileBrowserEvent_rayWidg(
    struct files_rayWidg *fileSTPtr, /*has files/extions*/
    struct widg_rayWidg *widgSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun125:
+   ' Fun126:
    '   - process and event for the file browser
-   '   o fun125 sec01:
+   '   o fun126 sec01:
    '     - variable declarations
-   '   o fun125 sec02:
+   '   o fun126 sec02:
    '     - check if widget can take events
-   '   o fun125 sec03:
+   '   o fun126 sec03:
    '     - find the event
-   '   o fun125 sec04:
+   '   o fun126 sec04:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun125 Sec01:
+   ^ Fun126 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -10526,7 +10682,7 @@ fileBrowserEvent_rayWidg(
    signed char *dirHeapStr = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun125 Sec02:
+   ^ Fun126 Sec02:
    ^   - check if widget can take events
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -10547,33 +10703,33 @@ fileBrowserEvent_rayWidg(
                   fileSTPtr,
                   widgSTPtr
                )
-            ) goto err_fun125_sec04;
+            ) goto err_fun126_sec04;
          } /*If: no files were loaded*/
       } /*Else: make sure have file list to show*/
 
-      goto notFileBrowser_fun125_sec04;
+      goto notFileBrowser_fun126_sec04;
    } /*If: not file browser event*/
 
    else if(eventSTPtr->idSI < 0)
-      goto noEvent_fun125_sec04;
+      goto noEvent_fun126_sec04;
 
    else if(eventSTPtr->parIdSI < 0)
-      goto noWidg_fun125_sec04;
+      goto noWidg_fun126_sec04;
 
    else if(
       hidenGet_widg_rayWidg(eventSTPtr->idSI, widgSTPtr)
-   ) goto hiden_fun125_sec04;
+   ) goto hiden_fun126_sec04;
 
    else if(eventSTPtr->parIdSI >= widgSTPtr->lenSI)
-      goto noWidg_fun125_sec04;
+      goto noWidg_fun126_sec04;
 
    else if(
       hidenGet_widg_rayWidg(eventSTPtr->idSI, widgSTPtr)
-   ) goto hiden_fun125_sec04;
+   ) goto hiden_fun126_sec04;
 
    else if(
       inactiveGet_widg_rayWidg(eventSTPtr->idSI,widgSTPtr)
-   ) goto noEvent_fun125_sec04;
+   ) goto noEvent_fun126_sec04;
 
    else if(
          ! fileSTPtr->fileListST.lenSI
@@ -10586,22 +10742,22 @@ fileBrowserEvent_rayWidg(
             fileSTPtr,
             widgSTPtr
          )
-      ) goto err_fun125_sec04;
+      ) goto err_fun126_sec04;
 
-      goto noEvent_fun125_sec04;
+      goto noEvent_fun126_sec04;
    }  /*Else If: no files were loaded*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun125 Sec03:
+   ^ Fun126 Sec03:
    ^   - find the event
-   ^   o fun125 sec03 sub01:
+   ^   o fun126 sec03 sub01:
    ^     - check for button events
-   ^   o fun125 sec03 sub02:
+   ^   o fun126 sec03 sub02:
    ^     - check for file list box events
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun125 Sec03 Sub01:
+   * Fun126 Sec03 Sub01:
    *   - check for button events
    \*****************************************************/
 
@@ -10610,10 +10766,10 @@ fileBrowserEvent_rayWidg(
       if(
             eventSTPtr->leftReleaseBl
          || eventSTPtr->keySI == KEY_ENTER
-      ) goto seletectedFiles_fun125_sec04;
+      ) goto seletectedFiles_fun126_sec04;
 
       else
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
    } /*If: select files button hit*/
 
    else if(eventSTPtr->idSI == eventSTPtr->parIdSI + 3)
@@ -10621,27 +10777,27 @@ fileBrowserEvent_rayWidg(
       if(
             eventSTPtr->leftReleaseBl
          || eventSTPtr->keySI == KEY_ENTER
-      ) goto cancle_fun125_sec04;
+      ) goto cancle_fun126_sec04;
 
       else
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
    } /*Else If: cancel files button hit*/
 
    /*****************************************************\
-   * Fun125 Sec03 Sub02:
+   * Fun126 Sec03 Sub02:
    *   - check for file list box events
-   *   o fun125 sec03 sub02 cat01:
+   *   o fun126 sec03 sub02 cat01:
    *     - get file list box event type
-   *   o fun125 sec03 sub02 cat02:
+   *   o fun126 sec03 sub02 cat02:
    *     - one directory up case
-   *   o fun125 sec03 sub02 cat03:
+   *   o fun126 sec03 sub02 cat03:
    *     - moving to next directory
-   *   o fun125 sec03 sub02 cat04:
+   *   o fun126 sec03 sub02 cat04:
    *     - get files in new directory
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun125 Sec03 Sub02 Cat01:
+   + Fun126 Sec03 Sub02 Cat01:
    +   - get file list box event type
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -10656,9 +10812,9 @@ fileBrowserEvent_rayWidg(
          );
 
       if(! tmpSI)
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       else if(tmpSI == 1)
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       else if(tmpSI == 2)
       { /*Else If: user selected something*/
          if(
@@ -10675,11 +10831,11 @@ fileBrowserEvent_rayWidg(
             */
          }  /*If: all files selected*/
 
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       } /*Else If: user selected something*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun125 Sec03 Sub02 Cat02:
+      + Fun126 Sec03 Sub02 Cat02:
       +   - one directory up case
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -10701,7 +10857,7 @@ fileBrowserEvent_rayWidg(
               /*If: Uinux root directory*/
 
             else if(! tmpSI)
-               goto noEvent_fun125_sec04;
+               goto noEvent_fun126_sec04;
                /*can  not go further back in history*/
 
             else
@@ -10717,14 +10873,14 @@ fileBrowserEvent_rayWidg(
                else
                { /*Else: hit end of directory list*/
                   fileSTPtr->pwdStr[tmpSI] = tmpSC;
-                  goto noEvent_fun125_sec04;
+                  goto noEvent_fun126_sec04;
                } /*Else: hit end of directory list*/
             } /*Else: windows root or not root*/
 
          } /*If: going back one directory*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun125 Sec03 Sub02 Cat03:
+         + Fun126 Sec03 Sub02 Cat03:
          +   - moving to next directory
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -10736,7 +10892,7 @@ fileBrowserEvent_rayWidg(
             if(
                   tmpSI < 0
                || tmpSI > fileSTPtr->fileListST.lenSI
-            ) goto noEvent_fun125_sec04;
+            ) goto noEvent_fun126_sec04;
 
             dirHeapStr =
                getFile_files_rayWidg(
@@ -10744,21 +10900,13 @@ fileBrowserEvent_rayWidg(
                   1, /*want even if not selected*/
                   fileSTPtr
                );
-            if(! dirHeapStr)
-               goto err_fun125_sec04;
-            tmpSI = endStr_ulCp(fileSTPtr->pwdStr);
-
-            fileSTPtr->pwdStr[tmpSI++] =
-               def_pathSep_rayWidg;
-
-            cpStr_ulCp(
-               &fileSTPtr->pwdStr[tmpSI],
-               dirHeapStr
-            );
+            cpStr_ulCp(fileSTPtr->pwdStr, dirHeapStr);
+            free(dirHeapStr);
+            dirHeapStr = 0;
          } /*Else: adding another directory*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun125 Sec03 Sub02 Cat04:
+         + Fun126 Sec03 Sub02 Cat04:
          +   - get files in new directory
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -10769,14 +10917,14 @@ fileBrowserEvent_rayWidg(
                fileSTPtr,
                widgSTPtr
             )
-         ) goto err_fun125_sec04;
+         ) goto err_fun126_sec04;
 
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       } /*Else: directory selected*/
    } /*Else If: user did something with a file*/
 
    /*****************************************************\
-   * Fun125 Sec03 Sub03:
+   * Fun126 Sec03 Sub03:
    *   - check for extension list box events
    \*****************************************************/
 
@@ -10793,64 +10941,66 @@ fileBrowserEvent_rayWidg(
          );
 
       if(! tmpSI)
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       else if(tmpSI == 1)
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       else
       { /*Else: change in selection*/
          changeExt_files_rayWidg(fileSTPtr);
-         goto noEvent_fun125_sec04;
+         goto noEvent_fun126_sec04;
       } /*Else: change in selection*/
    } /*Else If: is the file extension box*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun125 Sec04:
+   ^ Fun126 Sec04:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto noEvent_fun125_sec04;
+   goto noEvent_fun126_sec04;
       /*user did an event, but it was not a button*/
 
-   seletectedFiles_fun125_sec04:;
+   seletectedFiles_fun126_sec04:;
       tmpSI = 1;
       hidenAdd_widg_rayWidg(
          eventSTPtr->parIdSI,
          widgSTPtr
       );
-      widgSTPtr->focusSI = 0;
-      goto ret_fun125_sec04;
+      widgSTPtr->focusSI = fileSTPtr->lastWidgSI;
+      fileSTPtr->lastWidgSI = -1;
+      goto ret_fun126_sec04;
 
-   cancle_fun125_sec04:;
+   cancle_fun126_sec04:;
       tmpSI = 3;
       clearSelect_listBox_rayWidg(&fileSTPtr->fileListST);
       hidenAdd_widg_rayWidg(
          eventSTPtr->parIdSI,
          widgSTPtr
       );
-      widgSTPtr->focusSI = 0;
-      goto ret_fun125_sec04;
+      widgSTPtr->focusSI = fileSTPtr->lastWidgSI;
+      fileSTPtr->lastWidgSI = -1;
+      goto ret_fun126_sec04;
 
-   hiden_fun125_sec04:;
+   hiden_fun126_sec04:;
       tmpSI = 0;
-      goto ret_fun125_sec04;
+      goto ret_fun126_sec04;
 
-   noEvent_fun125_sec04:;
+   noEvent_fun126_sec04:;
       tmpSI = 0;
-      goto ret_fun125_sec04;
+      goto ret_fun126_sec04;
 
-   notFileBrowser_fun125_sec04:;
+   notFileBrowser_fun126_sec04:;
       tmpSI = -1;
-      goto ret_fun125_sec04;
+      goto ret_fun126_sec04;
 
-   noWidg_fun125_sec04:;
+   noWidg_fun126_sec04:;
       tmpSI = -2;
-      goto ret_fun125_sec04;
+      goto ret_fun126_sec04;
 
-   err_fun125_sec04:;
+   err_fun126_sec04:;
       tmpSI = -3;
-      goto ret_fun125_sec04;
+      goto ret_fun126_sec04;
 
-   ret_fun125_sec04:;
+   ret_fun126_sec04:;
       if(dirHeapStr)
          free(dirHeapStr);
       dirHeapStr = 0;

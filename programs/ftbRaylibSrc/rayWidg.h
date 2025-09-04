@@ -261,17 +261,19 @@
 '         - file browser
 '     + Sof08 Sec01:
 '       - simple widgets
-'       o fun078: drawRectByCoord_rayWidg
+'       o fun078: textDrawByCoord_rayWidg
+'         - draws one line of text by coordinate
+'       o fun079: drawRectByCoord_rayWidg
 '         - draws a rectangle with input coordinates
-'       o fun079: drawRec_rayWidg
+'       o fun080: drawRec_rayWidg
 '         - draws a rectangle for rayWidg
-'       o fun080: butDraw_rayWidg
+'       o fun081: butDraw_rayWidg
 '         - draw a button
-'       o fun081: entryDraw_rayWidg
+'       o fun082: entryDraw_rayWidg
 '         - draw an entry box and its text
-'       o fun082: entryEvent_rayWidg
+'       o fun083: entryEvent_rayWidg
 '         - handels an event for an entry box
-'       o fun083: labDraw_rayWidg
+'       o fun084: labDraw_rayWidg
 '         - draw a label
 '     + Sof08 Sec02:
 '       - message box
@@ -296,61 +298,61 @@
 '       # Sof08 Sec03 Sub01:
 '         - clear, blank, initialize, realloc, and free
 '           listBox_rayWidg functions
-'         o fun088: blank_listBox_rayWidg
+'         o fun089: blank_listBox_rayWidg
 '           - blanks a listBox_rayWidg structure
-'         o fun089: init_listBox_rayWidg
+'         o fun090: init_listBox_rayWidg
 '           - initializes a listBox_rayWidg structure
-'         o fun090: freeStack_listBox_rayWidg
+'         o fun091: freeStack_listBox_rayWidg
 '           - frees variables in a listBox_rayWidg struct
-'         o fun092: realloc_listBox_rayWidg
+'         o fun093: realloc_listBox_rayWidg
 '           - add more memory to listBox_rayWidg structure
-'         o fun093: clear_listBox_rayWidg
+'         o fun094: clear_listBox_rayWidg
 '           - removes all items from the list box
-'         o fun094: clearSelect_listBox_rayWidg
+'         o fun095: clearSelect_listBox_rayWidg
 '           - clear all selections from a list box
 '       # Sof08 Sec03 Sub02:
 '         - listBox_rayWidg set variables functions
-'         o fun095: selectMaxSet_listBox_rayWidg
+'         o fun096: selectMaxSet_listBox_rayWidg
 '           - sets maximum number of items that can be
 '             selected in a list box
-'         o fun096: widthSet_listBox_rayWidg
+'         o fun097: widthSet_listBox_rayWidg
 '           - sets maximum and minimum width of a list box
-'         o fun097: heightSet_listBox_rayWidg
+'         o fun098: heightSet_listBox_rayWidg
 '           - sets maximum & minimum height of a list box
-'         o fun098: hiddenSet_listBox_rayWidg
+'         o fun099: hiddenSet_listBox_rayWidg
 '           - sets a list box item to the hiden state
-'         o fun099: selectSet_listBox_rayWidg
+'         o fun100: selectSet_listBox_rayWidg
 '           - sets a list box item to the select state
-'         o fun100: specialSet_listBox_rayWidg
+'         o fun101: specialSet_listBox_rayWidg
 '           - sets a list box item to the special state
-'         o fun101: canSelectSet_listBox_rayWidg
+'         o fun102: canSelectSet_listBox_rayWidg
 '           - sets a list box item to the can select state
 '       # Sof08 Sec03 Sub03:
 '         - listBox_rayWidg get variables value functions
-'         o fun102: hiddenGet_listBox_rayWidg
+'         o fun103: hiddenGet_listBox_rayWidg
 '           - gets if a list box item is in hiden state
-'         o fun103: selectGet_listBox_rayWidg
+'         o fun104: selectGet_listBox_rayWidg
 '           - sets a list box item to the select state
-'         o fun104: specialGet_listBox_rayWidg
+'         o fun105: specialGet_listBox_rayWidg
 '           - sets a list box item to the special state
-'         o fun105: canSelectGet_listBox_rayWidg
+'         o fun106: canSelectGet_listBox_rayWidg
 '           - sets a list box item to the can select state
 '       # Sof08 Sec03 Sub04:
 '         - list box widget create, draw, and event
 '           handeling
-'         o fun106: mk_listBox_rayWidg
+'         o fun107: mk_listBox_rayWidg
 '           - makes/adds list box to a widg_widgST struct
-'         o fun107: addItem_listBox_rayWidg
+'         o fun108: addItem_listBox_rayWidg
 '           - adds an item to a list box
-'         o fun108: nextItem_listBox_rayWidg
+'         o fun109: nextItem_listBox_rayWidg
 '           - move to the next item or next item(s) in a
 '             listbox
-'         o fun109: toIndex_listBox_rayWidg
+'         o fun110: toIndex_listBox_rayWidg
 '           - move list box selected item till at target
 '             index
-'         o fun110: draw_listBox_rayWidg
+'         o fun111: draw_listBox_rayWidg
 '           - draws a list box widget
-'         o fun111: listBoxEvent_rayWidg
+'         o fun112: listBoxEvent_rayWidg
 '           - runs an event for a list box
 '     + Sof08 Sec04:
 '       - file browser
@@ -360,36 +362,36 @@
 '           - manipulate file browswer functions
 '       # Sof08 Sec04 Sub01:
 '         - general functions (set, get, initialize)
-'         o fun112: blank_files_rayWidg
+'         o fun113: blank_files_rayWidg
 '           - set all files in a files_rayWidg struct to
 '             no files 
-'         o fun113: init_files_rayWidg
+'         o fun114: init_files_rayWidg
 '           - initialize a files_rayWidg struct
-'         o fun114: freeStack_files_rayWidg
+'         o fun115: freeStack_files_rayWidg
 '           - frees variables in a files_rayWidg struct
-'         o fun115: freeHeap_files_rayWidg
+'         o fun116: freeHeap_files_rayWidg
 '           - frees files_rayWidg struct
-'         o fun116: setFileLim_files_rayWidg
+'         o fun117: setFileLim_files_rayWidg
 '           - sets maximum number of files user can choose
-'         o fun117: getFile_files_rayWidg
+'         o fun118: getFile_files_rayWidg
 '           - gets next selected file from a files_rayWidg
-'         o fun118: swapFiles_files_rayWidg
+'         o fun119: swapFiles_files_rayWidg
 '           - swap two files in a files_rayWidg struct
-'         o fun119: sortFiles_files_rayWidg
+'         o fun120: sortFiles_files_rayWidg
 '           - sorts files by name and if directory
-'         o fun120: scanForFiles_files_rayWidg
+'         o fun121: scanForFiles_files_rayWidg
 '           - get files in a directory
-'         o fun121: changeExt_files_rayWidg
+'         o fun122: changeExt_files_rayWidg
 '           - updates files for the change extension type
 '       # Sof08 Sec04 Sub02:
 '         - manipulate file browswer functions
-'         o fun120: addExt_files_rayWidg
+'         o fun121: addExt_files_rayWidg
 '           - add an file extension to a files_rayWidg
-'         o fun123: mkFileBrowser_rayWidg
+'         o fun124: mkFileBrowser_rayWidg
 '           - makes a file browswer widget
-'         o fun124: fileBrowserDraw_rayWidg
+'         o fun125: fileBrowserDraw_rayWidg
 '           - draws a file browswer widget
-'         o fun125: fileBrowserEvent_rayWidg
+'         o fun126: fileBrowserEvent_rayWidg
 '           - process and event for the file browser
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -664,6 +666,10 @@ files_rayWidg{
    signed char showHidenSC; /*show hidden files (unix)*/
    struct listBox_rayWidg fileListST;/*has files*/
    struct listBox_rayWidg extListST; /*file extensions*/
+
+   signed int lastWidgSI;   /*widget that fired message
+                            `  box
+                            */
 }files_rayWidg;
 
 /*-------------------------------------------------------\
@@ -2460,7 +2466,49 @@ checkExt_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun078: drawRectByCoord_rayWidg
+| Fun078: textDrawByCoord_rayWidg
+|   - draws one line of text by coordinate
+| Input:
+|   - textStr:
+|     o c-string with text to draw
+|   - xSI:
+|     o x coordinate to draw at
+|   - ySI:
+|     o y coordinate to draw at
+|   - maxWidthSI:
+|     o maximum width of text (in pixels) (use 0 for any)
+|     o if x padding, the x pad is taken of maxWidthSI
+|   - colUI:
+|     o unsignd int with hex code of color to draw
+|   - padSC:
+|     o tells if to apply padding to text coordinates
+|       * 0 for no padding
+|       * 1 for x padding
+|         - padding on both ends, included in width
+|       * 2 for y padding
+|       * 3 for x and y padding
+|         - x padding on both ends, included in width
+|   - widgSTPtr:
+|     o widg_rayWidg struct pointer with font to use
+| Output:
+|   - Draws:
+|     o text or shortened text to coordinates
+|   - Returns:
+|     o width of drawn text
+\-------------------------------------------------------*/
+signed int
+textDrawByCoord_rayWidg(
+   signed char *textStr,  /*text to draw*/
+   signed int xSI,        /*x coordinate*/
+   signed int ySI,        /*y coordinate*/
+   signed int maxWidthSI, /*max width of text*/
+   unsigned int colUI,    /*color to draw*/
+   signed char padSC,     /*tells if adding padding*/
+   struct widg_rayWidg *widgSTPtr /*has font*/
+);
+
+/*-------------------------------------------------------\
+| Fun079: drawRectByCoord_rayWidg
 |   - draws a rectangle for rayWidg by input coordinates
 | Input:
 |   - xSI:
@@ -2507,7 +2555,7 @@ drawRectByCoord_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun079: drawRec_rayWidg
+| Fun080: drawRec_rayWidg
 |   - draws a rectangle for rayWidg
 | Input:
 |   - widgSTPtr:
@@ -2547,7 +2595,7 @@ drawRec_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun080: butDraw_rayWidg
+| Fun081: butDraw_rayWidg
 |   - draw a button
 | Input:
 |   - maxWidthSI:
@@ -2595,7 +2643,7 @@ butDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun081: entryDraw_rayWidg
+| Fun082: entryDraw_rayWidg
 |   - draw an entry box and its text
 | Input:
 |   - widthSI:
@@ -2659,7 +2707,7 @@ entryDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun082: entryEvent_rayWidg
+| Fun083: entryEvent_rayWidg
 |   - handels an event for an entry box
 | Input:
 |   - idSI:
@@ -2719,7 +2767,7 @@ entryEvent_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun083: labDraw_rayWidg
+| Fun084: labDraw_rayWidg
 |   - draw a label
 | Input:
 |   - maxWidthSI:
@@ -2872,7 +2920,7 @@ mesgBoxEvent_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun088: blank_listBox_rayWidg
+| Fun089: blank_listBox_rayWidg
 |   - blanks a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2889,7 +2937,7 @@ blank_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun089: init_listBox_rayWidg
+| Fun090: init_listBox_rayWidg
 |   - initializes a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2905,7 +2953,7 @@ init_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun090: freeStack_listBox_rayWidg
+| Fun091: freeStack_listBox_rayWidg
 |   - frees variables in a listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2923,7 +2971,7 @@ freeStack_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun091: freeHeap_listBox_rayWidg
+| Fun092: freeHeap_listBox_rayWidg
 |   - frees a heap allocated listBox_rayWidg structure
 | Input:
 |   - listSTPtr:
@@ -2938,7 +2986,7 @@ freeHeap_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun092: realloc_listBox_rayWidg
+| Fun093: realloc_listBox_rayWidg
 |   - add more memory to listBox_rayWidg structure
 | Input:
 |   - sizeSI:
@@ -2962,7 +3010,7 @@ realloc_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun093: clear_listBox_rayWidg
+| Fun094: clear_listBox_rayWidg
 |   - removes all items from the list box
 | Input:
 |   - listSTPtr:
@@ -2978,7 +3026,7 @@ clear_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun094: clearSelect_listBox_rayWidg
+| Fun095: clearSelect_listBox_rayWidg
 |   - clear all selections from a list box
 | Input:
 |   - listSTPtr:
@@ -2993,7 +3041,7 @@ clearSelect_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun095: selectMaxSet_listBox_rayWidg
+| Fun096: selectMaxSet_listBox_rayWidg
 |   - sets maximum number of items that can be selected in
 |     a list box
 | Input:
@@ -3012,7 +3060,7 @@ selectMaxSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun096: widthSet_listBox_rayWidg
+| Fun097: widthSet_listBox_rayWidg
 |   - sets maximum and minimum width of a list box
 | Input:
 |   - maxSI:
@@ -3034,7 +3082,7 @@ widthSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun097: heightSet_listBox_rayWidg
+| Fun098: heightSet_listBox_rayWidg
 |   - sets maximum and minimum height of a list box
 | Input:
 |   - maxSI:
@@ -3056,7 +3104,7 @@ heightSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun098: hiddenSet_listBox_rayWidg
+| Fun099: hiddenSet_listBox_rayWidg
 |   - sets a list box item to the hiden state
 | Input:
 |   - itemSI:
@@ -3078,7 +3126,7 @@ hiddenSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun099: selectSet_listBox_rayWidg
+| Fun100: selectSet_listBox_rayWidg
 |   - sets a list box item to the select state
 | Input:
 |   - itemSI:
@@ -3100,7 +3148,7 @@ selectSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun100: specialSet_listBox_rayWidg
+| Fun101: specialSet_listBox_rayWidg
 |   - sets a list box item to the special state
 | Input:
 |   - itemSI:
@@ -3122,7 +3170,7 @@ specialSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun101: canSelectSet_listBox_rayWidg
+| Fun102: canSelectSet_listBox_rayWidg
 |   - sets a list box item to the can select state
 | Input:
 |   - itemSI:
@@ -3144,7 +3192,7 @@ canSelectSet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun102: hiddenGet_listBox_rayWidg
+| Fun103: hiddenGet_listBox_rayWidg
 |   - gets if a list box item is in the hiden state
 | Input:
 |   - itemSI:
@@ -3163,7 +3211,7 @@ hiddenGet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun103: selectGet_listBox_rayWidg
+| Fun104: selectGet_listBox_rayWidg
 |   - sets a list box item to the select state
 | Input:
 |   - itemSI:
@@ -3182,7 +3230,7 @@ selectGet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun104: specialGet_listBox_rayWidg
+| Fun105: specialGet_listBox_rayWidg
 |   - sets a list box item to the special state
 | Input:
 |   - itemSI:
@@ -3201,7 +3249,7 @@ specialGet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun105: canSelectGet_listBox_rayWidg
+| Fun106: canSelectGet_listBox_rayWidg
 |   - sets a list box item to the can select state
 | Input:
 |   - itemSI:
@@ -3220,7 +3268,7 @@ canSelectGet_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun106: mk_listBox_rayWidg
+| Fun107: mk_listBox_rayWidg
 |   - makes/adds a list box to a widg_widgST structure
 | Input:
 |   - xSI:
@@ -3252,7 +3300,7 @@ mk_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun107: addItem_listBox_rayWidg
+| Fun108: addItem_listBox_rayWidg
 |   - adds an item to a list box
 | Input:
 |   - textStr:
@@ -3285,7 +3333,7 @@ addItem_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun108: nextItem_listBox_rayWidg
+| Fun109: nextItem_listBox_rayWidg
 |   - move to the next item or next item(s) in a listbox
 | Input:
 |   - changeSI:
@@ -3324,7 +3372,7 @@ nextItem_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun109: toIndex_listBox_rayWidg
+| Fun110: toIndex_listBox_rayWidg
 |   - move list box selected item till at target index
 | Input:
 |   - indexSI:
@@ -3349,7 +3397,7 @@ toIndex_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun110: draw_listBox_rayWidg
+| Fun111: draw_listBox_rayWidg
 |   - draws a list box widget
 | Input:
 |   - idSI:
@@ -3385,7 +3433,7 @@ draw_listBox_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun111: listBoxEvent_rayWidg
+| Fun112: listBoxEvent_rayWidg
 |   - runs an event for a list box
 | Input:
 |   - idSI:
@@ -3419,7 +3467,7 @@ listBoxEvent_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun112: blank_files_rayWidg
+| Fun113: blank_files_rayWidg
 |   - set all files in a files_rayWidg struct to no files 
 | Input:
 |   - fileSTPtr:
@@ -3434,7 +3482,7 @@ blank_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun113: init_files_rayWidg
+| Fun114: init_files_rayWidg
 |   - initialize a files_rayWidg struct
 | Input:
 |   - fileSTPtr:
@@ -3449,7 +3497,7 @@ init_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun114: freeStack_files_rayWidg
+| Fun115: freeStack_files_rayWidg
 |   - frees variables in a files_rayWidg struct
 | Input:
 |   - fileSTPtr:
@@ -3464,7 +3512,7 @@ freeStack_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun115: freeHeap_files_rayWidg
+| Fun116: freeHeap_files_rayWidg
 |   - frees files_rayWidg struct
 | Input:
 |   - fileSTPtr:
@@ -3478,7 +3526,7 @@ freeHeap_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun116: setFileLim_files_rayWidg
+| Fun117: setFileLim_files_rayWidg
 |   - sets the maximum number of files the user can choose
 | Input:
 |   - maxFilesSI:
@@ -3497,7 +3545,7 @@ setFileLimit_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun117: getFile_files_rayWidg
+| Fun118: getFile_files_rayWidg
 |   - gets the next selected files from a files_rayWidg
 |     struct
 | Input:
@@ -3532,7 +3580,7 @@ getFile_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun118: swapFiles_files_rayWidg
+| Fun119: swapFiles_files_rayWidg
 |   - swap two files in a files_rayWidg struct
 | Input:
 |   - firstSI:
@@ -3554,7 +3602,7 @@ swapFiles_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun119: sortFiles_files_rayWidg
+| Fun120: sortFiles_files_rayWidg
 |   - sorts files by name and if directory
 | Input:
 |   - fileSTPtr:
@@ -3573,7 +3621,7 @@ sortFiles_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun120: scanForFiles_files_rayWidg
+| Fun121: scanForFiles_files_rayWidg
 |   - get files in a directory
 | Input:
 |   - dirStr:
@@ -3607,7 +3655,7 @@ scanForFiles_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun121: changeExt_files_rayWidg
+| Fun122: changeExt_files_rayWidg
 |   - updates files for the change extension type
 | Input:
 |   - fileSTPtr:
@@ -3623,7 +3671,7 @@ changeExt_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun122: addExt_files_rayWidg
+| Fun123: addExt_files_rayWidg
 |   - add an file extension to a files_rayWidg struct
 | Input:
 |   - extStr:
@@ -3655,7 +3703,7 @@ addExt_files_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun123: mkFileBrowser_rayWidg
+| Fun124: mkFileBrowser_rayWidg
 |   - makes a file browswer widget
 | Input:
 |   - widgSTPtr:
@@ -3675,7 +3723,7 @@ mkFileBrowser_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun124: fileBrowserDraw_rayWidg
+| Fun125: fileBrowserDraw_rayWidg
 |   - draws a file browswer widget
 | Input:
 |   - idSI:
@@ -3717,7 +3765,7 @@ fileBrowserDraw_rayWidg(
 );
 
 /*-------------------------------------------------------\
-| Fun125: fileBrowserEvent_rayWidg
+| Fun126: fileBrowserEvent_rayWidg
 |   - process and event for the file browser
 | Input:
 |   - idSI:

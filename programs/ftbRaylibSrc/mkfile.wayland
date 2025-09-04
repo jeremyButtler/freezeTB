@@ -2,25 +2,25 @@
 #  this is because GL (-lGL) is often installed
 #  as a shared library (no .a file)
 
-CC=clang
-LD=clang
+CC=cc
+LD=cc
 MAKE=make
-CFLAGS=-DNONE
-coreCFLAGS=-DMAC -c -static -O3 -g -Wall -Wextra
-O=o.mac
+CFLAGS=-c -static -O0 -ggdb -Wall -Wextra
+#CFLAGS=-c -static -O3 -Wall -Wextra
+O=o.bug
+PREFIX=/usr/local/bin
 raylibPath=../raylib/src
+libRayLib=$(raylibPath)/libraylib.a
 genLib=../genLib
-LDMacFlags=\
-   -framework Foundation \
-   -framework CoreVideo \
-   -framework IOKit \
-   -framework Cocoa \
-  	-framework GLUT \
-   -framework OpenGL \
-   ../raylib/src/libraylib.a
-
-# foundation is so I can detect dark and light mode in
-#   widgets
+RAYFLAGS=\
+   $(libRayLib) \
+   -lGL \
+   -lm \
+   -lpthread \
+   -ldl \
+   -lrt \
+   -lX11
+#   -L/usr/local/lib
 
 genFreezeTB=../genFreezeTB
 genLib=../genLib
@@ -77,16 +77,10 @@ objFiles=\
    ftbRay.$O
 
 ftbRay: ftbRay.$O
-		$(LD) $(LDMacFlags) -o ftbRay $(objFiles)
+		$(LD) -o ftbRay $(objFiles) $(RAYFLAGS)
 	# note, ray lib file should come last. Also, if
 	# possible, use local location so the user does not
 	# need to install raylib (may not be possible)
-
-# need to build raylib, but bit tricky
-$(libRayLib): $(raylibPath)/raylib.h
-	export MACOSX_DEPLOYMENT_TARGET=10.9 \
-	xcode-select --install && \
-	$(MAKE) PLATFORM=PLATFORM_DESKTOP -C ../raylib/src;
 
 ftbRay.$O: \
 	ftbRay.c \
@@ -109,6 +103,20 @@ rayWidg.$O: \
 	$(libRayLib)
 		$(CC) -I$(raylibPath) $(CFLAGS) -o rayWidg.$O \
 			rayWidg.c
+
+# need to build raylib, but bit tricky
+$(libRayLib): \
+	$(raylibPath)/raylib.h
+	$(MAKE) \
+		PLATFORM=PLATFORM_DESKTOP \
+		-C ../raylib/src;
+		# need a shared library, because GL is often a
+		#  shared library on linux
+	#sudo $(MAKE) \
+	#	PLATFORM=PLATFORM_DESKTOP \
+	#	-C ../raylib/src \
+	#	install;
+
 
 $(genLib)/ptrAry.$O: \
 	$(genLib)/ptrAry.c \
@@ -501,20 +509,20 @@ install:
 	mv ftbRay $(PREFIX);
 	chmod a+x $(PREFIX)/ftbRay;
 
-
 clean:
 	rm $(objFiles);
 	#objStr="$(objFiles)"; \
 	#	fileStr="$${objStr%% *}"; \
 	#	while [ ! "$$fileStr" = "" ]; \
 	#	do \
+   #      printf "%s\n" "$$fileStr"; \
 	#		if [ -f "$$fileStr" ]; then rm "$$fileStr"; fi; \
 	#		objStr="$${objStr#"$${objStr%%[[:space:]]*}"}"; \
 	#		objStr="$${objStr#"$${objStr%%[![:space:]]*}"}";\
 	#		objStr="$${objStr%% *}"; \
 	#		fileStr="$${objStr%% *}"; \
 	#	done;
-	$(MAKE) -C ../raylib/src clean 
 			# this clean up step is more complex, but it also
 			# avoids trying to deleting files that do not
 			# exist. So, it never errors out
+	$(MAKE) -C ../raylib/src clean 
