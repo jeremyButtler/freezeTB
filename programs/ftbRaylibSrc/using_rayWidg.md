@@ -868,14 +868,74 @@ For non-tileling or tileing you will also call these
   and `ClearBackgound()`. You should end
   with `EndDrawing()`.
 
-Functions:
+- Functions:
+  - non-widget (by coorinate) drawing functions: these
+    are not used in any tiling steps
+    - textDrawByCoord\_rayWidg: draws some text to the
+      screen based on input x,y coordinates
+      - this is not a widget, but a drawing function
+        (really a wrapper)
+    - drawRectByCoord\_rayWidg: draws a rectangle by x,y
+      coordinates
+      - this is not a widget, but a drawing function
+        (really a wrapper)
+  - widget functions: these can be tiled or the x,y
+    coordinates are used in the tileing step
+    - drawRect\_rayWidg: draws a widget as a rectangle
+    - butDraw\_rayWidg: draws a button and/or updates
+      height and width of a button widget
+    - entryDraw\_rayWidg: draws an entry box and/or
+      updates height of entry box
+    - labDraw\_rayWidg: draws a lable and/or updates
+      height and width of label
 
-- butDraw\_rayWidg: draws a button and/or updates height
-  and width of a button widget
-- entryDraw\_rayWidg: draws an entry box and/or updates
-  height of entry box
-- labDraw\_rayWidg: draws a lable and/or updates height and
-  width of label
+### non-widgets; drawing text
+
+The `textDrawByCoord_rayWidg()` will draw a string of text
+  at the input coordinates. It will also shorten the
+  output text if needed.
+
+- Input:
+  1. c-string with text to draw
+  2. x coordinate
+  3. y coordinate
+  4. maximum width in pixels for the text before
+     shortening
+  5. color (as unsigned int in hex format [0xFFFFFFFF]) to
+     draw
+  6. value of 0 to 1 to tell if padding the text
+     - 0 no padding
+     - 1 pad the width (x, start and end)
+     - 2 pad the height (y, top and bottom)
+     - pad width and height
+  7. widg\_rayWidg structure pointer with text variables
+- Output:
+  - Returns: width of drawn text
+
+### non-widgets; drawing rectangle
+
+The `rectDrawByCoord_rayWidg()` will draw a rectangle
+  at the input coordinates.
+
+- Input:
+  1. x coordinate
+  2. y coordinate
+  3. width of rectangle to draw
+  4. height of rectangle to draw
+  5. number telling if rectangle has a border
+     - 0 no border
+     - 1 regular border
+     - 2 focus border
+     - 3 both regular and focus border
+     - 4 do not draw the rectangle
+     - 5 only draw the regular border (no rectangle)
+     - 6 only draw the focus border (no rectangle)
+     - 7 draw focuse and regular border, but no rectangle
+  6. color of rectangle (as hex code)
+  7. color of regular border (as hex code)
+  8. color of focus border (as hex code)
+  5. color (as unsigned int in hex format [0xFFFFFFFF]) to
+     draw
 
 ### tile widgets
 
@@ -902,7 +962,7 @@ The output is 0 for no errors and 1 for memeory errors.
 
 The most basic widget, that makes up most other widgets is
   the rectangle. You can draw a rectangle
-  with `drawRec_rayWidg()`.
+  with `drawRect_rayWidg()`.
 
 For Macs or with `-DMAC` it will draw a rectangle with
   rounded corners.

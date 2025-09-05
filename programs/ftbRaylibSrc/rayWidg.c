@@ -2736,6 +2736,9 @@ freeHeap_event_rayWidg(
 |   - Modifies:
 |     o all variables in eventSTPtr to hold a list of
 |       events
+|     o modifies colors in widgSTPtr to be dark or light
+|       depening on current OS (Mac/Windows) light/dark
+|       state
 |   - Returns:
 |     o 0 if no events happened
 |     o def_keyEvent_rayWidg if a keyboard event happened
@@ -5290,10 +5293,6 @@ textDrawByCoord_rayWidg(
 |   - focusHexUI:
 |     o has hex color code for the focus borders color
 | Output:
-|   - Returns:
-|     o width of widget (without borders) for success
-|     o 0 if widget is hidden
-|     o def_noWidget_rayWidg if widget does not exits
 \-------------------------------------------------------*/
 void
 drawRectByCoord_rayWidg(
