@@ -23,7 +23,7 @@
    #include <libc.h>
 #endif
 
-#include "../raylib/src/raylib.h"
+#include <raylib.h>
 #include "ftbRayST.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\

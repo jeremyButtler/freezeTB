@@ -3,6 +3,10 @@
 `  detecting light and dark mode for windows
 */
 
+#ifdef WINDOWS
+   #include <windows.h>
+#endif
+
 signed char
 getMode_darkLight(
    void

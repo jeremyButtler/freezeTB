@@ -405,9 +405,9 @@
    #include <stdlib.h>
 #endif
 
-#include "darkLight.h"
-
 #include <raylib.h>
+
+#include "darkLight.h"
 #include "rayWidg.h"
 #include "ibmPlexMono.h" /*default font*/
 
@@ -2802,6 +2802,10 @@ get_event_rayWidg(
    *   - get events and focused widget
    \*****************************************************/
 
+   /*check if user changed the light/dark mode state*/
+   checkGuiColorMode_rayWidg(widgSTPtr);
+
+   /*get pressed keys*/
    eventSTPtr->keySI = GetKeyPressed();
 
    eventSTPtr->xSI = GetMouseX();

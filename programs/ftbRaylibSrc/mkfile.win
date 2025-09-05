@@ -1,0 +1,506 @@
+# NOTE on linux you need a shared library ray lib install
+#  this is because GL (-lGL) is often installed
+#  as a shared library (no .a file)
+
+CC=cl.exe
+LD=link.exe
+coreCFLAGS= /DWINDOWS /c /O2 /Ot
+O=o.win
+PREFIX="%localAppData%"
+raylibPath=..\raylib_win64_msvc\include
+libRayLib=..\raylib_win64_msvc\lib
+genLib=..\genLib
+
+genFreezeTB=..\genFreezeTB
+genLib=..\genLib
+genBio=..\genBio
+genAln=..\genAln
+genClust=..\genClust
+
+objFiles=\
+   $(genLib)\numToStr.$O \
+   $(genLib)\ulCp.$O \
+   $(genLib)\base10str.$O \
+   $(genLib)\charCp.$O \
+   $(genLib)\strAry.$O \
+   $(genLib)\genMath.$O \
+   $(genLib)\shellSort.$O \
+   $(genLib)\ptrAry.$O \
+   $(genLib)\fileFun.$O \
+   $(genBio)\codonFun.$O \
+   $(genBio)\kmerFun.$O \
+   $(genBio)\seqST.$O \
+   $(genBio)\gzSeqST.$O \
+   $(genBio)\samEntry.$O \
+   $(genBio)\trimSam.$O \
+   $(genBio)\maskPrim.$O \
+   $(genBio)\ampDepth.$O \
+   $(genBio)\geneCoord.$O \
+   $(genBio)\adjCoords.$O \
+   $(genBio)\rmHomo.$O \
+   $(genBio)\tbCon.$O \
+   $(genBio)\edDist.$O \
+   $(genAln)\indexToCoord.$O \
+   $(genAln)\alnSet.$O \
+   $(genAln)\dirMatrix.$O \
+   $(genAln)\kmerFind.$O \
+   $(genAln)\memwater.$O \
+   $(genAln)\water.$O \
+   $(genAln)\needle.$O \
+   $(genAln)\mapRead.$O \
+   $(genLib)\inflate.$O \
+   $(genLib)\checkSum.$O \
+   $(genLib)\endin.$O \
+   $(genClust)\clustST.$O \
+   $(genClust)\edClust.$O \
+   $(genFreezeTB)\amrST.$O \
+   $(genFreezeTB)\drugAry.$O \
+   $(genFreezeTB)\checkAmr.$O \
+   $(genFreezeTB)\miruTbl.$O \
+   $(genFreezeTB)\spolFind.$O \
+   $(genFreezeTB)\spolST.$O \
+   $(genFreezeTB)\freezeTBPaths.$O \
+   $(genFreezeTB)\freezeTB.$O \
+   darkLight.$O \
+   rayWidg.$O \
+   ftbRayST.$O \
+   ftbRay.$O
+
+# note, ray lib file should come last. Also, if
+	# possible, use local location so the user does not
+	# need to install raylib (may not be possible)
+	# most of the .lib files are windows system lib
+	# files. The nodefaultlib disables defaults, I
+	#   think it is to allow static compile
+	# libpath is the path to the  library
+	# Advapi32 is for registery functions
+ftbRay: ftbRay.$O
+		$(LD) /out:ftbRay.exe \
+			gdi32.lib \
+			msvcrt.lib \
+			raylib.lib \
+			winmm.lib \
+			user32.lib \
+			shell32.lib \
+			Advapi32.lib \
+			$(objFiles) \
+			/libpath:$(libRayLib) \
+			/NODEFAULTLIB:libcmt
+
+ftbRay.$O: \
+	ftbRay.c \
+	ftbRayST.$O
+		$(CC) -I$(raylibPath) \
+			$(CFLAGS) $(coreCFLAGS) \
+			/Fo:ftbRay.$O  ftbRay.c
+
+ftbRayST.$O: \
+	ftbRayST.c \
+	ftbRayST.h \
+	rayWidg.$O \
+	$(genFreezeTB)\freezeTB.$O \
+	$(genLib)\ptrAry.$O
+		$(CC) -I$(raylibPath) $(CFLAGS) $(coreCFLAGS) /Fo:ftbRayST.$O ftbRayST.c
+
+rayWidg.$O: \
+	rayWidg.c \
+	rayWidg.h \
+	darkLight.$O \
+	$(genLib)\ulCp.$O \
+	$(genLib)\base10str.$O 
+		$(CC) -I$(raylibPath) $(CFLAGS) $(coreCFLAGS) \
+			/Fo:rayWidg.$O rayWidg.c
+
+darkLight.$O: darkLight.h darkLight.c
+	$(CC) $(CFLAGS) $(coreCFLAGS) /Fo:darkLight.$O \
+		darkLight.c
+
+$(genLib)\ptrAry.$O: \
+	$(genLib)\ptrAry.c \
+	$(genLib)\ptrAry.h \
+	$(genLib)\ulCp.$O
+		$(CC) $(CFLAGS) $(coreCFLAGS) /Fo:$(genLib)\ptrAry.$O \
+			$(genLib)\ptrAry.c
+
+$(genLib)\base10str.$O: \
+	$(genLib)\base10str.c \
+	$(genLib)\base10str.h
+		$(CC) $(CFLAGS) $(coreCFLAGS) /Fo:$(genLib)\base10str.$O \
+			$(genLib)\base10str.c
+
+$(genLib)\ulCp.$O: \
+	$(genLib)\ulCp.c \
+	$(genLib)\ulCp.h
+		$(CC) $(CFLAGS) $(coreCFLAGS) /Fo:$(genLib)\ulCp.$O \
+			$(genLib)\ulCp.c
+
+$(genFreezeTB)\freezeTB.$O: \
+	$(genFreezeTB)\freezeTB.c \
+	$(genFreezeTB)\freezeTB.h \
+	$(genFreezeTB)\checkAmr.$O \
+	$(genFreezeTB)\miruTbl.$O \
+	$(genFreezeTB)\spolFind.$O \
+	$(genFreezeTB)\freezeTBPaths.$O \
+	$(genAln)\mapRead.$O \
+	$(genBio)\gzSeqST.$O \
+	$(genBio)\trimSam.$O \
+	$(genBio)\maskPrim.$O \
+	$(genBio)\ampDepth.$O \
+	$(genBio)\adjCoords.$O \
+	$(genBio)\rmHomo.$O \
+	$(genBio)\tbCon.$O \
+	$(genClust)\edClust.$O \
+	$(genFreezeTB)\freezeTBDefs.h \
+	$(genFreezeTB)\tbAmrDefs.h \
+	$(genFreezeTB)\tbMiruDefs.h \
+	$(genFreezeTB)\tbSpolDefs.h \
+	$(genBio)\tbConDefs.h \
+	$(genLib)\charCp.h \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h \
+	..\ftbVersion.h
+		$(CC) /Fo:$(genFreezeTB)\freezeTB.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\freezeTB.c
+
+$(genFreezeTB)\freezeTBPaths.$O: \
+	$(genFreezeTB)\freezeTBPaths.c \
+	$(genFreezeTB)\freezeTBPaths.h \
+	$(genLib)\ulCp.$O
+		$(CC) \
+			/Fo:$(genFreezeTB)\freezeTBPaths.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\freezeTBPaths.c
+
+$(genFreezeTB)\checkAmr.$O: \
+	$(genFreezeTB)\checkAmr.c \
+	$(genFreezeTB)\checkAmr.h \
+	$(genFreezeTB)\amrST.$O \
+	$(genBio)\samEntry.$O \
+	$(genBio)\codonFun.$O \
+	$(genLib)\genMath.$O
+		$(CC) /Fo:$(genFreezeTB)\checkAmr.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\checkAmr.c
+
+$(genFreezeTB)\amrST.$O: \
+	$(genFreezeTB)\amrST.c \
+	$(genFreezeTB)\amrST.h \
+	$(genFreezeTB)\drugAry.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genFreezeTB)\amrST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\amrST.c
+
+$(genFreezeTB)\drugAry.$O: \
+	$(genFreezeTB)\drugAry.c $(genFreezeTB)\drugAry.h
+		$(CC) /Fo:$(genFreezeTB)\drugAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\drugAry.c
+
+$(genLib)\fileFun.$O: \
+	$(genLib)\fileFun.c \
+	$(genLib)\fileFun.h \
+	$(genLib)\ulCp.$O
+		$(CC) /Fo:$(genLib)\fileFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\fileFun.c
+
+$(genLib)\charCp.$O: \
+	$(genLib)\charCp.c \
+	$(genLib)\charCp.h
+		$(CC) /Fo:$(genLib)\charCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\charCp.c
+
+$(genBio)\samEntry.$O: \
+	$(genBio)\samEntry.c 	$(genBio)\samEntry.h \
+	$(genLib)\fileFun.$O \
+	$(genLib)\strAry.$O \
+	$(genLib)\base10str.$O \
+	$(genLib)\numToStr.$O \
+	$(genBio)\ntTo5Bit.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genBio)\samEntry.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\samEntry.c
+
+$(genLib)\strAry.$O: \
+	$(genLib)\strAry.c \
+	$(genLib)\strAry.h \
+	$(genLib)\ulCp.$O
+		$(CC) /Fo:$(genLib)\strAry.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\strAry.c
+
+$(genBio)\codonFun.$O: \
+	$(genBio)\codonFun.c \
+	$(genBio)\codonFun.h \
+	$(genBio)\codonTbl.h \
+	$(genBio)\ntTo2Bit.h \
+	$(genBio)\revNtTo2Bit.h
+		$(CC) /Fo:$(genBio)\codonFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\codonFun.c
+
+$(genLib)\genMath.$O: \
+	$(genLib)\genMath.c \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genLib)\genMath.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\genMath.c
+
+$(genFreezeTB)\miruTbl.$O: \
+	$(genFreezeTB)\miruTbl.c \
+	$(genFreezeTB)\miruTbl.h \
+	$(genBio)\samEntry.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\genMath.h \
+	$(genFreezeTB)\tbMiruDefs.h
+		$(CC) /Fo:$(genFreezeTB)\miruTbl.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\miruTbl.c
+
+$(genFreezeTB)\spolFind.$O: \
+	$(genFreezeTB)\spolFind.c \
+	$(genFreezeTB)\spolFind.h \
+	$(genFreezeTB)\spolST.$O \
+	$(genBio)\seqST.$O \
+	$(genBio)\samEntry.$O \
+	$(genAln)\kmerFind.$O
+		$(CC) /Fo:$(genFreezeTB)\spolFind.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\spolFind.c
+
+$(genFreezeTB)\spolST.$O: \
+	$(genFreezeTB)\spolST.c \
+	$(genFreezeTB)\spolST.h \
+	$(genLib)\numToStr.$O \
+	$(genLib)\fileFun.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h \
+	$(genFreezeTB)\tbSpolDefs.h
+		$(CC) /Fo:$(genFreezeTB)\spolST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\spolST.c
+
+$(genBio)\seqST.$O: \
+	$(genBio)\seqST.c \
+	$(genBio)\seqST.h \
+	$(genLib)\fileFun.$O
+		$(CC) /Fo:$(genBio)\seqST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\seqST.c
+
+$(genAln)\kmerFind.$O: \
+	$(genAln)\kmerFind.c \
+	$(genAln)\memwater.$O \
+	$(genLib)\shellSort.$O \
+	$(genLib)\genMath.h \
+	$(genBio)\kmerBit.h
+		$(CC) /Fo:$(genAln)\kmerFind.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\kmerFind.c
+
+$(genAln)\memwater.$O: \
+	$(genAln)\memwater.c \
+	$(genAln)\alnSet.$O \
+	$(genAln)\indexToCoord.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\memwater.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\memwater.c
+
+$(genAln)\alnSet.$O: \
+	$(genAln)\alnSet.c \
+	$(genAln)\alnDefs.h \
+	$(genLib)\fileFun.$O \
+	$(genLib)\ulCp.$O \
+	$(genLib)\base10str.$O \
+	$(genAln)\alnDefs.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genAln)\alnSet.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\alnSet.c
+
+$(genAln)\indexToCoord.$O: \
+	$(genAln)\indexToCoord.c \
+	$(genAln)\indexToCoord.h
+		$(CC) /Fo:$(genAln)\indexToCoord.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAln)\indexToCoord.c
+
+$(genLib)\shellSort.$O: \
+	$(genLib)\shellSort.c \
+	$(genLib)\shellSort.h
+		$(CC) /Fo:$(genLib)\shellSort.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\shellSort.c
+
+$(genBio)\trimSam.$O: \
+	$(genBio)\trimSam.c \
+	$(genBio)\trimSam.h \
+	$(genBio)\samEntry.$O
+		$(CC) /Fo:$(genBio)\trimSam.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\trimSam.c
+
+$(genBio)\maskPrim.$O: \
+	$(genBio)\maskPrim.c \
+	$(genBio)\maskPrim.h \
+	$(genBio)\samEntry.$O \
+	$(genLib)\shellSort.$O
+		$(CC) /Fo:$(genBio)\maskPrim.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\maskPrim.c
+
+$(genBio)\ampDepth.$O: \
+	$(genBio)\ampDepth.c \
+	$(genBio)\ampDepth.h \
+	$(genBio)\geneCoord.$O \
+	$(genBio)\samEntry.$O
+		$(CC) /Fo:$(genBio)\ampDepth.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\ampDepth.c
+
+$(genBio)\geneCoord.$O: \
+	$(genBio)\geneCoord.c \
+	$(genBio)\geneCoord.h \
+	$(genLib)\fileFun.$O \
+	$(genLib)\base10str.$O \
+	$(genLib)\charCp.$O \
+	$(genLib)\genMath.h
+	$(CC) /Fo:$(genBio)\geneCoord.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genBio)\geneCoord.c
+
+$(genBio)\adjCoords.$O: \
+	$(genBio)\adjCoords.c \
+	$(genBio)\adjCoords.h \
+	$(genBio)\geneCoord.$O \
+	$(genBio)\samEntry.$O
+		$(CC) /Fo:$(genBio)\adjCoords.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genBio)\adjCoords.c
+
+$(genBio)\rmHomo.$O: \
+	$(genBio)\rmHomo.c \
+	$(genBio)\rmHomo.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\seqST.$O
+		$(CC) /Fo:$(genBio)\rmHomo.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\rmHomo.c
+
+$(genClust)\edClust.$O: \
+	$(genClust)\edClust.c \
+	$(genClust)\edClust.h \
+	$(genClust)\clustST.$O
+		$(CC) /Fo:$(genClust)\edClust.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genClust)\edClust.c
+
+
+$(genClust)\clustST.$O: \
+	$(genClust)\clustST.c \
+	$(genClust)\clustST.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\tbCon.$O \
+	$(genBio)\edDist.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genClust)\clustST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genClust)\clustST.c
+
+
+$(genBio)\tbCon.$O: \
+	$(genBio)\tbCon.c \
+	$(genBio)\tbCon.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\tbConDefs.h \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genBio)\tbCon.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\tbCon.c
+
+$(genBio)\edDist.$O: \
+	$(genBio)\edDist.c \
+	$(genBio)\edDist.h \
+	$(genBio)\samEntry.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\genMath.h \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genBio)\edDist.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genBio)\edDist.c
+
+$(genAln)\mapRead.$O: \
+	$(genAln)\mapRead.c \
+	$(genAln)\mapRead.h \
+	$(genAln)\needle.$O \
+	$(genAln)\water.$O \
+	$(genAln)\dirMatrix.$O \
+	$(genBio)\kmerFun.$O \
+	$(genLib)\shellSort.$O \
+	$(genAln)\defsMapRead.h  \
+	$(genLib)\genMath.h
+	 	$(CC) /Fo:$(genAln)\mapRead.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\mapRead.c
+
+$(genAln)\needle.$O: \
+	$(genAln)\needle.c \
+	$(genAln)\dirMatrix.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\needle.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\needle.c
+
+$(genAln)\dirMatrix.$O: \
+	$(genAln)\dirMatrix.c \
+	$(genAln)\alnSet.$O \
+	$(genAln)\indexToCoord.$O \
+	$(genBio)\samEntry.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\charCp.$O
+		$(CC) /Fo:$(genAln)\dirMatrix.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAln)\dirMatrix.c
+
+$(genAln)\water.$O: $(genAln)\water.c \
+	$(genAln)\dirMatrix.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\water.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genAln)\water.c
+
+$(genBio)\kmerFun.$O: \
+	$(genBio)\kmerFun.c \
+	$(genBio)\kmerFun.h \
+	$(genBio)\kmerBit.h
+		$(CC) /Fo:$(genBio)\kmerFun.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\kmerFun.c
+
+$(genBio)\gzSeqST.$O: \
+	$(genBio)\gzSeqST.c \
+	$(genBio)\gzSeqST.h \
+	$(genBio)\seqST.$O \
+ 	$(genLib)\inflate.$O
+		$(CC) /Fo:$(genBio)\gzSeqST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genBio)\gzSeqST.c
+
+$(genLib)\inflate.$O: \
+	$(genLib)\inflate.c \
+	$(genLib)\inflate.h \
+	$(genLib)\checkSum.$O \
+	$(genLib)\ulCp.$O \
+	$(genLib)\genMath.$O \
+	$(genLib)\endLine.h
+		$(CC) /Fo:$(genLib)\inflate.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\inflate.c
+
+$(genLib)\checkSum.$O: \
+	$(genLib)\checkSum.c \
+	$(genLib)\checkSum.h \
+	$(genLib)\endin.$O
+	$(CC) /Fo:$(genLib)\checkSum.$O \
+		$(CFLAGS) $(coreCFLAGS) $(genLib)\checkSum.c
+
+$(genLib)\endin.$O: \
+	$(genLib)\endin.c \
+	$(genLib)\endin.h
+		$(CC) /Fo:$(genLib)\endin.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\endin.c
+
+$(genLib)\numToStr.$O: \
+	$(genLib)\numToStr.c \
+	$(genLib)\numToStr.h
+		$(CC) /Fo:$(genLib)\numToStr.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)\numToStr.c
+
+
+clean:
+	del $(objFiles);

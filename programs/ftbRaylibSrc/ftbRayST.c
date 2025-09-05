@@ -50,12 +50,12 @@
 #endif
 
 #include <stdio.h>
+#include <raylib.h>
 
 #include "../genLib/ulCp.h"
 #include "../genLib/ptrAry.h"
 #include "../genLib/fileFun.h"
 
-#include "../raylib/src/raylib.h"
 #include "ftbRayST.h"
 #include "rayWidg.h"
 
@@ -359,9 +359,6 @@ draw_gui_ftbRayST(
 
    BeginDrawing();
       ClearBackground(guiCol);
-
-      /*check if light/dark*/
-		checkGuiColorMode_rayWidg(guiSTPtr->widgSTPtr);
 
       /*for most of the draw functions, the return value
       `  is either, width, 0 for hidden buton, or
