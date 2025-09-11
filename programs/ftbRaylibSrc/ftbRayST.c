@@ -23,9 +23,23 @@
 '     - draws the gui for a gui_ftbRayST structure
 '   o fun06: initRayGui_ftbRayST
 '     - initialize raylibs GUI
-'   o fun07: checkRunEvent_ftbRayST
-'    - checks for an event, and if can runs found event
-'    - also redraws the GUI
+'   o .c fun07: hideInput_ftbRayST
+'     - hides the input menu
+'   o .c fun08: hideOutput_ftbRayST
+'     - hides the ouput menu
+'   o .c fun09: hideReport_ftbRayST
+'     - hides the report menu
+'   o .c fun10: hideTable_ftbRayST
+'     - hides the amr table menu
+'   o .c fun12: spoligoLinGet_ftbRayST
+'     - gets the spoligotype lineage and sets the spoligo
+'   o .c fun13: miruLinGet_ftbRayST
+'     - gets the MIRU-VNTR lineage & sets miru text output
+'   o .c fun14: checkDrugs_ftbRayST
+'     - builds the drug resistance part of the ftb report
+'   o fun15: checkRunEvent_ftbRayST
+'     - checks for an event, and if can runs found event
+'     - also redraws the GUI
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -52,6 +66,8 @@
 #include <stdio.h>
 #include <raylib.h>
 
+#include "../genLib/numToStr.h"
+#include "../genLib/base10str.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/ptrAry.h"
 #include "../genLib/fileFun.h"
@@ -64,11 +80,13 @@
 
 /*.h files only*/
 #include "../genLib/endLine.h"
+#include "../genFreezeTB/freezeTBDefs.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   - .c  #include "../genLib/ulCp.h"
 !   - .h  #include "ibmPlexMono.h"
+!   - everything in freezeTB
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -77,10 +95,70 @@
 \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
 /*main window settings*/
-#define def_winWidth_ftbRayST 420
-#define def_winHeight_ftbRayST 320
+signed int glob_maxWidgWidthSI = 240;
 
-#define def_maxWidgetWidth_ftbRayST 240
+/*entry box dimensions*/
+#define def_entryWidth_ftbRayST 200
+signed int glob_widthPrefixEntrySI =
+   def_entryWidth_ftbRayST;
+
+
+/*do not mess with drug tables. If you are adding
+`  or removing something, then make sure to also change
+`  the gene coverage step in checkDrugs_ftbRayST (fun14)
+*/
+signed char
+   glob_drugFullStrAry[def_numDrugs_ftbRayST][32] =
+   {
+      "amikacin",
+      "bedaquiline",
+      "capreomycin",
+      "clofazimine",
+      "delamanid",
+      "ethambutol",
+      "ethionamide",
+      "fluoroquine",
+      "isoniazid",
+      "kanamycin",
+      "levofloxacin",
+      "linezolid",
+      "moxifloxacin",
+      "protonimid",
+      "pyrazinamide",
+      "rifampicin",
+      "streptomycin"
+   }; /*the full names of each drug*/
+
+signed char glob_drugStrAry[def_numDrugs_ftbRayST][32] =
+   {
+     "Amk",/*0 amikacin*/
+     "Bdq",/*1 bedaquiline*/
+     "Cap",/*2 capreomycin*/
+     "Cfz",/*3 clorfazimine*/
+     "Dlm",/*4 delamanid*/
+     "Emb",/*5 ethambutol*/
+     "Eto",/*6 ethionamide*/
+     "Flq",/*7 fluoroquine*/
+     "Inh",/*8 isoniazid;Iso,Inz,Inh*/
+     "Kan",/*9 kanamycin*/
+     "Lfx",/*10 levofloxacin*/
+     "Lzd",/*11 linezolid*/
+     "Mfx",/*12 moxifloxacin*/
+     "Pmd",/*13 protonimid*/
+     "Pza",/*14 pyrazinamide;Pyz,Pza,Pyr*/
+     "Rif",/*15 rifampicin;Rif,Rmp,Rfm*/
+     "Stm",/*16 streptomycin;Str,Stp,Stm*/
+   }; /*the shorthand name for each drug*/
+
+/*colors of drug resistnace*/
+#define def_noAmrBackCol_ftbRayST 0x000004ff
+#define def_noAmrTextCol_ftbRayST 0xFDE725ff
+
+#define def_amrBackCol_ftbRayST 0xF1605Dff
+#define def_amrTextCol_ftbRayST 0x000004ff
+
+#define def_lowDepthBackCol_ftbRayST 0xFDE725ff
+#define def_lowDepthTextCol_ftbRayST 0x000004ff
 
 /*cursor blink settings*/
 #define def_blinkInterval_ftbRayST 10
@@ -141,15 +219,22 @@ void
 blank_gui_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){
+   signed int siDrug = 0;
+
    if(! guiSTPtr)
       return;
 
+   for(siDrug=0; siDrug < def_numDrugs_ftbRayST; ++siDrug)
+   { /*Loop: blank the drug colors*/
+      guiSTPtr->drugBackColUI[siDrug] =
+         def_noAmrBackCol_ftbRayST;
+      guiSTPtr->drugTextColUI[siDrug] =
+         def_noAmrTextCol_ftbRayST;
+   } /*Loop: blank the drug colors*/
+
    guiSTPtr->mesgStr[0] = 0;
 
-   guiSTPtr->inputBl = 1;
-   guiSTPtr->inWinWidthSI = def_winWidth_ftbRayST;
-   guiSTPtr->inWinHeightSI= def_winHeight_ftbRayST;
-   guiSTPtr->focusSI = 5;
+   guiSTPtr->screenIndexSC = 0;
    guiSTPtr->blinkSC = 0;
 
    /*prefix button defaults*/
@@ -169,6 +254,38 @@ blank_gui_ftbRayST(
 
    /*configuration file button*/
    guiSTPtr->configFileStr[0] = 0;
+
+   /*___________________output GUI______________________*/
+
+   guiSTPtr->amrSupLenSI =
+      double_numToStr(
+         guiSTPtr->amrSupStr,
+         def_minPercMapped_freezeTBDefs,
+         2
+      );
+   guiSTPtr->amrSupPosArySI[0] = 0;
+   guiSTPtr->amrSupPosArySI[1] = 0;
+
+   guiSTPtr->indelSupLenSI =
+      double_numToStr(
+         guiSTPtr->indelSupStr,
+         def_amrIndelSup_freezeTBDefs,
+         2
+      );
+   guiSTPtr->indelSupPosArySI[0] = 0;
+   guiSTPtr->indelSupPosArySI[1] = 0;
+
+   guiSTPtr->filePrefixStr[0] = 0;
+
+   /*____________________report_GUI_____________________*/
+   guiSTPtr->spoligoStr[0] = 0;
+   guiSTPtr->spoligoStrainStr[0] = 0;
+   guiSTPtr->spoligoLineageStr[0] = 0;
+   guiSTPtr->miruStr[0] = 0;
+
+   /*____________________table GUI______________________*/
+   if(guiSTPtr->amrListSTPtr)
+      clear_listBox_rayWidg(guiSTPtr->amrListSTPtr);
 } /*blank_gui_ftbRayST*/
 
 /*-------------------------------------------------------\
@@ -192,12 +309,20 @@ init_gui_ftbRayST(
    guiSTPtr->fqStrSTPtr = 0;
    guiSTPtr->widgSTPtr = 0;
 
+   guiSTPtr->inputGuiIdSI = 0;
+   guiSTPtr->outGuiIdSI = 0;
+   guiSTPtr->reportGuiIdSI = 0;
+   guiSTPtr->amrsGuiIdSI = 0;
+
    guiSTPtr->mesgBoxIdSI = 0;
    guiSTPtr->fqButIdSI = 0;
+   guiSTPtr->fqLabIdSI = 0;
    guiSTPtr->prefixLabIdSI = 0;
    guiSTPtr->prefixEntryIdSI = 0;
    guiSTPtr->outDirIdSI = 0;
+   guiSTPtr->outDirLabIdSI = 0;
    guiSTPtr->configIdSI = 0;
+   guiSTPtr->configLabIdSI = 0;
    guiSTPtr->runIdSI = 0;
    guiSTPtr->fileBrowserIdSI = 0;
 
@@ -205,6 +330,19 @@ init_gui_ftbRayST(
    guiSTPtr->outDirSTPtr = 0;
    guiSTPtr->configFileSTPtr = 0;
    guiSTPtr->browserSC = -1;
+
+   guiSTPtr->oldFtbFileSTPtr = 0;
+   guiSTPtr->getPrefixButIdSI = 0;
+   guiSTPtr->minAmrPercEntryIdSI = 0;
+   guiSTPtr->minAmrIndelPercEntryIdSI = 0;
+
+   guiSTPtr->miruLabIdSI = 0;
+   guiSTPtr->spoligoLabIdSI = 0;
+   guiSTPtr->drugResRectIdSI = 0;
+
+   guiSTPtr->amrTblIdSI = 0;
+   guiSTPtr->amrLabIdSI = 0;
+   guiSTPtr->amrListSTPtr = 0;
 
    blank_gui_ftbRayST(guiSTPtr);
 } /*init_gui_ftbRayST*/
@@ -236,6 +374,10 @@ freeStack_gui_ftbRayST(
       freeHeap_files_rayWidg(guiSTPtr->outDirSTPtr);
    if(guiSTPtr->configFileSTPtr)
       freeHeap_files_rayWidg(guiSTPtr->configFileSTPtr);
+   if(guiSTPtr->oldFtbFileSTPtr)
+      freeHeap_files_rayWidg(guiSTPtr->oldFtbFileSTPtr);
+   if(guiSTPtr->amrListSTPtr)
+      freeHeap_listBox_rayWidg(guiSTPtr->amrListSTPtr);
 
    init_gui_ftbRayST(guiSTPtr);
 } /*freeStack_gui_ftbRayST*/
@@ -297,13 +439,17 @@ draw_gui_ftbRayST(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   signed char tmpStr[1024];
+   signed char fqFileStr[1024];
    signed int lenSI = 0;
+   signed char tileBl = 1;
 
    signed char blinkBl = 0; /*be in blink state*/
    struct Color guiCol;
    signed int heightSI = 0;
    signed int widthSI = 0;
+   signed int padSI = 0;
+   signed int oneRowSI = 0;
+   signed int ySI = 0;
 
    struct gui_ftbRayST *guiSTPtr =
       (gui_ftbRayST *) voidGuiSTPtr;
@@ -319,6 +465,7 @@ draw_gui_ftbRayST(
       case 0: fileSTPtr = guiSTPtr->fqFileSTPtr; break;
       case 1: fileSTPtr = guiSTPtr->outDirSTPtr; break;
       case 2: fileSTPtr =guiSTPtr->configFileSTPtr; break;
+      case 3: fileSTPtr =guiSTPtr->oldFtbFileSTPtr; break;
 
       default: fileSTPtr = guiSTPtr->fqFileSTPtr; break;
          /*file browser is hidden, just give something*/
@@ -326,19 +473,14 @@ draw_gui_ftbRayST(
 
    guiCol = GetColor(guiSTPtr->widgSTPtr->guiColSI);
 
-   if(guiSTPtr->inputBl)
-   { /*If: displaying the input GUI*/
-      heightSI = guiSTPtr->inWinHeightSI;
-      widthSI = guiSTPtr->inWinWidthSI;
+   if(guiSTPtr->screenIndexSC)
       SetWindowTitle((char *) inputStr);
-   } /*If: displaying the input GUI*/
 
    else
-   { /*Else: displaying the output GUI*/
-      heightSI = guiSTPtr->outWinHeightSI;
-      widthSI = guiSTPtr->outWinWidthSI;
       SetWindowTitle((char *) outputStr);
-   } /*Else: displaying the output GUI*/
+
+   widthSI = guiSTPtr->widgSTPtr->winWidthSI;
+   heightSI = guiSTPtr->widgSTPtr->winHeightSI;
 
    SetWindowSize(widthSI, heightSI);
 
@@ -356,9 +498,231 @@ draw_gui_ftbRayST(
       );
    ++guiSTPtr->blinkSC;
 
+   if(guiSTPtr->fqStrSTPtr->lenSL)
+   { /*If: have fastq files to draw*/
+      if(guiSTPtr->fqStrSTPtr->lenSL > 1)
+      { /*If: have more than one file*/
+         lenSI =
+            cpStr_ulCp(
+               fqFileStr,
+               guiSTPtr->fqFileSTPtr->pwdStr
+            );
+         fqFileStr[lenSI++] = '*';
+         fqFileStr[lenSI] = 0;
+      } /*If: have more than one file*/
+
+      else
+      { /*Else: only one file*/
+         cpStr_ulCp(
+            fqFileStr,
+            guiSTPtr->fqStrSTPtr->strAry[0]
+         );
+      } /*Else: only one file*/
+   } /*If: have fastq files to draw*/
+
+   else
+      fqFileStr[0] = 0;
+
+   ySI = 
+      def_getTotalPad_rayWidg(
+         guiSTPtr->widgSTPtr->fontHeightF
+      ) / 2;
+   padSI =
+      def_getTotalPad_rayWidg(
+         guiSTPtr->widgSTPtr->fontHeightF
+      ) * 2 + guiSTPtr->widgSTPtr->fontHeightF;
+   oneRowSI = padSI;
+   padSI += ySI;
+
+   widthSet_listBox_rayWidg(
+      guiSTPtr->widgSTPtr->winWidthSI
+         - guiSTPtr->widgSTPtr->fontWidthF * 2,
+      20,
+      guiSTPtr->amrListSTPtr
+   );
+
+   heightSet_listBox_rayWidg(
+      guiSTPtr->widgSTPtr->winHeightSI - oneRowSI * 2,
+      20,
+      guiSTPtr->amrListSTPtr
+   );
 
    BeginDrawing();
       ClearBackground(guiCol);
+
+      /*______________menu_buttons___________________*/
+
+      widthSI = guiSTPtr->widgSTPtr->fontWidthF;
+
+      guiSTPtr->widgSTPtr->xArySI[
+         guiSTPtr->inputGuiIdSI
+      ] = widthSI;
+      guiSTPtr->widgSTPtr->yArySI[
+         guiSTPtr->inputGuiIdSI
+      ] = ySI;
+      widthSI +=
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->inputGuiIdSI,
+            (signed char *) "input",
+            0,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+      widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+      guiSTPtr->widgSTPtr->xArySI[
+         guiSTPtr->outGuiIdSI
+      ] = widthSI;
+      guiSTPtr->widgSTPtr->yArySI[
+         guiSTPtr->outGuiIdSI
+      ] = ySI;
+      widthSI +=
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->outGuiIdSI,
+            (signed char *) "output",
+            0,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+      widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+      guiSTPtr->widgSTPtr->xArySI[
+         guiSTPtr->reportGuiIdSI
+      ] = widthSI;
+      guiSTPtr->widgSTPtr->yArySI[
+         guiSTPtr->reportGuiIdSI
+      ] = ySI;
+      widthSI +=
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->reportGuiIdSI,
+            (signed char *) "report",
+            0,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+      widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+      guiSTPtr->widgSTPtr->xArySI[
+         guiSTPtr->amrsGuiIdSI
+      ] = widthSI;
+      guiSTPtr->widgSTPtr->yArySI[
+         guiSTPtr->amrsGuiIdSI
+      ] = ySI;
+      widthSI +=
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->amrsGuiIdSI,
+            (signed char *) "table",
+            0,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+      /*_______________report_amr_resistance____________*/
+      if(
+         ! hidenGet_widg_rayWidg(
+            guiSTPtr->drugResRectIdSI,
+            guiSTPtr->widgSTPtr
+         )
+      ){ /*If: drawing the report page*/
+         widthSI = guiSTPtr->widgSTPtr->fontWidthF;
+
+         heightSI =
+              padSI
+            + def_getTotalPad_rayWidg(
+                 guiSTPtr->widgSTPtr->fontHeightF
+              );
+
+         for(
+            lenSI = 0;
+            lenSI < def_numDrugs_ftbRayST;
+            ++lenSI
+         ){ /*Loop: draw the amr report*/
+            if(lenSI && ! (lenSI % 7) )
+            { /*If: need another row (8 drugs per row)*/
+               heightSI += oneRowSI;
+               padSI += oneRowSI;
+               widthSI = guiSTPtr->widgSTPtr->fontWidthF;
+            } /*If: need another row (8 drugs per row)*/
+
+            widthSI +=
+               rectTextDrawByCoord_rayWidg(
+                  glob_drugStrAry[lenSI],
+                  widthSI, /*has x coordinate*/
+                  heightSI, /*y cooradinate*/
+                  glob_maxWidgWidthSI,
+                  20,  /*at least 20 pixels*/
+                  0,   /*no borders*/
+                  guiSTPtr->drugTextColUI[lenSI],
+                  guiSTPtr->drugBackColUI[lenSI],
+                  0, /*not drawing the border*/
+                  0, /*not drawing the focus border*/
+                  guiSTPtr->widgSTPtr
+               );
+            widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+         }  /*Loop: draw the amr report*/
+
+         heightSI += oneRowSI;
+         padSI += oneRowSI;
+         widthSI = guiSTPtr->widgSTPtr->fontWidthF * 4;
+
+         widthSI +=
+            rectTextDrawByCoord_rayWidg(
+               (signed char *) "no resistance",
+               widthSI, /*has x coordinate*/
+               heightSI, /*y cooradinate*/
+               glob_maxWidgWidthSI,
+               20,  /*at least 20 pixels*/
+               0,   /*no borders*/
+               def_noAmrTextCol_ftbRayST,
+               def_noAmrBackCol_ftbRayST,
+               0, /*not drawing the border*/
+               0, /*not drawing the focus border*/
+               guiSTPtr->widgSTPtr
+            );
+         widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+
+         widthSI +=
+            rectTextDrawByCoord_rayWidg(
+               (signed char *) "low depth",
+               widthSI, /*has x coordinate*/
+               heightSI, /*y cooradinate*/
+               glob_maxWidgWidthSI,
+               20,  /*at least 20 pixels*/
+               0,   /*no borders*/
+               def_lowDepthTextCol_ftbRayST,
+               def_lowDepthBackCol_ftbRayST,
+               0, /*not drawing the border*/
+               0, /*not drawing the focus border*/
+               guiSTPtr->widgSTPtr
+            );
+         widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+
+         widthSI +=
+            rectTextDrawByCoord_rayWidg(
+               (signed char *) "resistance",
+               widthSI, /*has x coordinate*/
+               heightSI, /*y cooradinate*/
+               glob_maxWidgWidthSI,
+               20,  /*at least 20 pixels*/
+               0,   /*no borders*/
+               def_amrTextCol_ftbRayST,
+               def_amrBackCol_ftbRayST,
+               0, /*not drawing the border*/
+               0, /*not drawing the focus border*/
+               guiSTPtr->widgSTPtr
+            );
+         widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+
+
+         padSI += oneRowSI; /*add another row in*/
+         padSI +=
+             (oneRowSI - guiSTPtr->widgSTPtr->fontHeightF)
+           / 4;
+      }  /*If: drawing the report page*/
 
       /*for most of the draw functions, the return value
       `  is either, width, 0 for hidden buton, or
@@ -368,182 +732,255 @@ draw_gui_ftbRayST(
       `  return values
       */
 
-      /*fastq file input*/
-      butDraw_rayWidg(
-         def_maxWidgetWidth_ftbRayST,
-         0,                /*minumum width = any size*/
-         guiSTPtr->fqButIdSI,  /*button id in array*/
-         textFqButStr,
-         0,                     /*drawing button*/
-         guiSTPtr->widgSTPtr    /*has widgets to draw*/
-      );
+      tileBl = 2;
 
-      /*prefix entry box*/
-      labDraw_rayWidg(
-         def_maxWidgetWidth_ftbRayST,
-         0,                        /*no min width*/
-         guiSTPtr->prefixLabIdSI,
-         textPrefixLabStr,
-         ' ',                      /*padding with spaces*/
-         2,                        /*right pad if needed*/
-         0,                        /*draw label*/
-         guiSTPtr->widgSTPtr
-      ); /*label for entry box*/
+      while(tileBl)
+      { /*Loop: get tiles and draw widgets*/
+         --tileBl;
 
-      entryDraw_rayWidg(
-         def_widthPrefixEntry_ftbRayST,
-         guiSTPtr->prefixEntryIdSI,
-         guiSTPtr->prefixPosArySI, /*cursor + scroll pos*/
-         blinkBl,                  /*blink cursor*/
-         guiSTPtr->inPrefixStr,    /*current user input*/
-         0,                        /*drawing coordinates*/
-         guiSTPtr->widgSTPtr
-      );
+         /*fastq file input*/
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->fqButIdSI,  /*button id in array*/
+            textFqButStr,
+            tileBl,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->fqLabIdSI,
+            fqFileStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
 
-      /*output directory button*/
-      butDraw_rayWidg(
-         def_maxWidgetWidth_ftbRayST,
-         0,                /*minumum width = any size*/
-         guiSTPtr->outDirIdSI,  /*button id in array*/
-         textOutButStr,
-         0,                     /*drawing button*/
-         guiSTPtr->widgSTPtr    /*has widgets to draw*/
-      );
+         /*prefix entry box*/
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->prefixLabIdSI,
+            textPrefixLabStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
 
-      /*TODO: add illumina check box*/
-
-      /*confituration button*/
-      butDraw_rayWidg(
-         def_maxWidgetWidth_ftbRayST,
-         0,                /*minumum width = any size*/
-         guiSTPtr->configIdSI,  /*button id in array*/
-         textConfigButStr,
-         0,                     /*drawing button*/
-         guiSTPtr->widgSTPtr    /*has widgets to draw*/
-      );
-
-      /*run button*/
-      butDraw_rayWidg(
-         def_maxWidgetWidth_ftbRayST,
-         0,                /*minumum width = any size*/
-         guiSTPtr->runIdSI,  /*button id in array*/
-         textRunButStr,
-         0,                     /*drawing button*/
-         guiSTPtr->widgSTPtr    /*has widgets to draw*/
-      );
-
-      /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-      ^ Fun05 Sec04:
-      ^   - draw labels for file paths
-      ^   o fun05 sec04 sub01:
-      ^     - draw fastq file paths label
-      ^   o fun05 sec04 sub02:
-      ^     - draw output directory label
-      ^   o fun05 sec04 sub03:
-      \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-      /**************************************************\
-      * Fun05 Sec04 Sub01:
-      *   - draw fastq file paths label
-      \**************************************************/
-
-      if(guiSTPtr->fqStrSTPtr->lenSL)
-      { /*If: have fastq files to draw*/
-         if(guiSTPtr->fqStrSTPtr->lenSL > 1)
-         { /*If: have more than one file*/
-            lenSI =
-               cpStr_ulCp(
-                  tmpStr,
-                  guiSTPtr->fqFileSTPtr->pwdStr
-               );
-            tmpStr[lenSI++] = '*';
-            tmpStr[lenSI] = 0;
-         } /*If: have more than one file*/
-
-         else
-         { /*Else: only one file*/
-            cpStr_ulCp(
-               tmpStr,
-               guiSTPtr->fqStrSTPtr->strAry[0]
-            );
-         } /*Else: only one file*/
-
-         textDrawByCoord_rayWidg(
-            tmpStr,
-            guiSTPtr->widgSTPtr->xArySI[
-               guiSTPtr->fqButIdSI
-            ]
-               + guiSTPtr->widgSTPtr->widthArySI[
-                   guiSTPtr->fqButIdSI
-                 ],
-            guiSTPtr->widgSTPtr->yArySI[
-               guiSTPtr->fqButIdSI
-            ],
-            guiSTPtr->inWinWidthSI -
-               guiSTPtr->widgSTPtr->widthArySI[
-                  guiSTPtr->fqButIdSI
-               ],
-            guiSTPtr->widgSTPtr->textColSI,
-            3, /*pad for x and y*/
+         entryDraw_rayWidg(
+            glob_widthPrefixEntrySI,
+            guiSTPtr->prefixEntryIdSI,
+            guiSTPtr->prefixPosArySI,/*cursor+scroll pos*/
+            blinkBl,                 /*blink cursor*/
+            guiSTPtr->inPrefixStr,   /*current input*/
+            tileBl,
             guiSTPtr->widgSTPtr
          );
-      } /*If: have fastq files to draw*/
 
-      /**************************************************\
-      * Fun05 Sec04 Sub02:
-      *   - draw output directory label
-      \**************************************************/
-
-      if(guiSTPtr->outDirStr[0])
-      { /*If: have a output directory*/
-         textDrawByCoord_rayWidg(
+         /*output directory button*/
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->outDirIdSI,  /*button id in array*/
+            textOutButStr,
+            tileBl,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->outDirLabIdSI,
             guiSTPtr->outDirStr,
-            guiSTPtr->widgSTPtr->xArySI[
-               guiSTPtr->outDirIdSI
-            ]
-               + guiSTPtr->widgSTPtr->widthArySI[
-                   guiSTPtr->outDirIdSI
-                 ],
-            guiSTPtr->widgSTPtr->yArySI[
-               guiSTPtr->outDirIdSI
-            ],
-            guiSTPtr->inWinWidthSI -
-               guiSTPtr->widgSTPtr->widthArySI[
-                  guiSTPtr->outDirIdSI
-               ],
-            guiSTPtr->widgSTPtr->textColSI,
-            3, /*pad for x and y*/
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
             guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+
+         /*TODO: add illumina check box*/
+
+         /*confituration button*/
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->configIdSI,  /*button id in array*/
+            textConfigButStr,
+            tileBl,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
-      } /*If: have a output directory*/
-
-      /**************************************************\
-      * Fun05 Sec04 Sub03:
-      *   - draw configuration file label
-      \**************************************************/
-
-      if(guiSTPtr->configFileStr[0])
-      { /*If: have a configuration file*/
-         textDrawByCoord_rayWidg(
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->configLabIdSI,
             guiSTPtr->configFileStr,
-            guiSTPtr->widgSTPtr->xArySI[
-               guiSTPtr->configIdSI
-            ]
-               + guiSTPtr->widgSTPtr->widthArySI[
-                   guiSTPtr->configIdSI
-                 ],
-            guiSTPtr->widgSTPtr->yArySI[
-               guiSTPtr->configIdSI
-            ],
-            guiSTPtr->inWinWidthSI -
-               guiSTPtr->widgSTPtr->widthArySI[
-                  guiSTPtr->configIdSI
-               ],
-            guiSTPtr->widgSTPtr->textColSI,
-            3, /*pad for x and y*/
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+
+         /*run button*/
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->runIdSI,  /*button id in array*/
+            textRunButStr,
+            tileBl,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+         /*____________output_menu______________________*/
+
+         /*get the file prefix button*/
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->getPrefixButIdSI,
+            (signed char *) "get prefix",
+            tileBl,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->getPrefixLabIdSI,
+            guiSTPtr->filePrefixStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
             guiSTPtr->widgSTPtr
          );
-      } /*If: have a configuration file*/
+
+         /*mininum AMR percent support*/
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->minAmrPercLabIdSI,
+            (signed char *) "AMR support %:",
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         );
+         entryDraw_rayWidg(
+            glob_widthPrefixEntrySI,
+            guiSTPtr->minAmrPercEntryIdSI,
+            guiSTPtr->amrSupPosArySI,/*cursor+scroll pos*/
+            blinkBl,                 /*blink cursor*/
+            guiSTPtr->amrSupStr,     /*current input*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         );
+
+
+         /*mininum AMR indel percent support*/
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->minAmrIndelPercLabIdSI,
+            (signed char *) "AMR indel support %:",
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+         entryDraw_rayWidg(
+            glob_widthPrefixEntrySI,
+            guiSTPtr->minAmrIndelPercEntryIdSI,
+            guiSTPtr->indelSupPosArySI,
+            blinkBl,                 /*blink cursor*/
+            guiSTPtr->indelSupStr,   /*current input*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         );
+
+         /*get report button*/
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->getOutButSI,
+            (signed char *) "build report",
+            tileBl,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+         /*_____________report_menu_lineages____________*/
+         labDraw_rayWidg(
+            guiSTPtr->widgSTPtr->winWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->spoligoLabIdSI,
+            guiSTPtr->spoligoStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+
+         labDraw_rayWidg(
+            guiSTPtr->widgSTPtr->winWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->spoligoLineageLabIdSI,
+            guiSTPtr->spoligoLineageStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+
+
+         labDraw_rayWidg(
+            guiSTPtr->widgSTPtr->winWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->spoligoStrainLabIdSI,
+            guiSTPtr->spoligoStrainStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+
+
+         /*labDraw_rayWidg(
+            guiSTPtr->widgSTPtr->winWidthSI,
+            0,
+            guiSTPtr->miruLabIdSI,
+            guiSTPtr->miruStr,
+            ' ',
+            2,
+            tileBl,
+            guiSTPtr->widgSTPtr
+         );*/ /*label for entry box*/
+
+         /*_____________table_menu______________________*/
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->amrLabIdSI,
+            guiSTPtr->filePrefixStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+         draw_listBox_rayWidg(
+            guiSTPtr->amrTblIdSI,
+            tileBl,
+            guiSTPtr->amrListSTPtr,
+            guiSTPtr->widgSTPtr
+         );
+
+         if(tileBl)
+         { /*If: need to apply tiling coordinates*/
+            tile_widg_rayWidg(
+               guiSTPtr->widgSTPtr,
+               padSI,
+               guiSTPtr->widgSTPtr->fontWidthF
+             );
+         } /*If: need to apply tiling coordinates*/
+      } /*Loop: get tiles and draw widgets*/
 
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
       ^ Fun05 Sec05:
@@ -552,8 +989,6 @@ draw_gui_ftbRayST(
 
       mesgBoxDraw_rayWidg(
          guiSTPtr->mesgBoxIdSI,
-         widthSI,
-         heightSI,
          guiSTPtr->mesgStr,
          (signed char *) "Ok",
          guiSTPtr->widgSTPtr
@@ -562,8 +997,6 @@ draw_gui_ftbRayST(
       fileBrowserDraw_rayWidg(
          guiSTPtr->fileBrowserIdSI,
          guiSTPtr->fileMesgStr,
-         widthSI,
-         heightSI,
          fileSTPtr,
          guiSTPtr->widgSTPtr
       );
@@ -599,12 +1032,10 @@ mk_gui_ftbRayST(
    '    - variable declarations
    '  o fun06 sec02:
    '    - add widgets
-   '  o fun06 sec03:
-   '    - draw initial GUI
-   '  o fun06 sec04:
-   '    - convert tile coordinates to x,y coordinates
-   '  o fun06 sec05:
-   '    - draw the GUI and return
+   '   o fun06 sec06:
+   '     - add file broswer structures and extensions
+   '   o fun06 sec07:
+   '     - draw gui and return results
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -612,6 +1043,11 @@ mk_gui_ftbRayST(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   signed int siWidg = 0;
+   signed int tmpSI = 0;
+   signed int padSI = 0;
+
+   struct widg_rayWidg *widgSTPtr = 0;
    struct gui_ftbRayST *retHeapGUI = 0;
    /*Image ftbIconImg = 0;*/
 
@@ -621,259 +1057,302 @@ mk_gui_ftbRayST(
    ^   o fun06 sec02 sub01:
    ^     - initialize the gui
    ^   o fun06 sec02 sub02:
-   ^     - add input buttons and entry boxes
+   ^     - add menu buttons
    ^   o fun06 sec02 sub03:
-   ^     - add input file browsers
+   ^     - add input buttons and entry boxes
+   ^   o fun06 sec02 sub04:
+   ^     - add output screen widgets
+   ^   o fun06 sec02 sub05:
+   ^     - add amr table widgets
+   ^   o fun06 sec02 sub07:
+   ^     - add report screen widgets (last for rectangles)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun06 Sec02 Sub02:
+   * Fun06 Sec02 Sub01:
    *   - initialize the gui
    \*****************************************************/
 
    retHeapGUI = malloc(sizeof(struct gui_ftbRayST));
    if(! retHeapGUI)
-      goto memErr_fun06;
+      goto memErr_fun06_sec07;
    init_gui_ftbRayST(retHeapGUI);
+
+   retHeapGUI->fqStrSTPtr = mk_str_ptrAry(32);
+   if(! retHeapGUI->fqStrSTPtr)
+      goto memErr_fun06_sec07;
+
+   retHeapGUI->amrListSTPtr =
+      malloc(sizeof(struct listBox_rayWidg));
+   if(! retHeapGUI->amrListSTPtr)
+      goto memErr_fun06_sec07;
+   init_listBox_rayWidg(retHeapGUI->amrListSTPtr);
 
    retHeapGUI->widgSTPtr =
       malloc(sizeof(struct widg_rayWidg));
    if(! retHeapGUI->widgSTPtr)
-      goto memErr_fun06;
+      goto memErr_fun06_sec07;
    init_widg_rayWidg(retHeapGUI->widgSTPtr);
-
-   retHeapGUI->fqStrSTPtr = mk_str_ptrAry(32);
-   if(! retHeapGUI->fqStrSTPtr)
-      goto memErr_fun06;
+   widgSTPtr = retHeapGUI->widgSTPtr;
 
 
-   InitWindow(
-      retHeapGUI->inWinWidthSI,
-      retHeapGUI->inWinHeightSI,
-      (char *) inputStr
-   );
+   if( setup_widg_rayWidg(widgSTPtr,inputStr,1) )
+      goto memErr_fun06_sec07;
+      /*1 is for scaling for HDPI screens*/
 
    /*SetWindowIcon(ftbIconImg)*/
 
-   SetTargetFPS(60);
+   padSI =
+      def_getTotalPad_rayWidg(widgSTPtr->fontHeightF);
+   if(widgSTPtr->xScaleF > 0)
+      padSI *= widgSTPtr->xScaleF;
 
    /*****************************************************\
    * Fun06 Sec02 Sub02:
+   *   - add menu buttons
+   \*****************************************************/
+
+   /*menu buttons*/
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   inactiveAdd_widg_rayWidg(tmpSI, widgSTPtr);
+   retHeapGUI->inputGuiIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->outGuiIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->reportGuiIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->amrsGuiIdSI = tmpSI;
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub03:
    *   - add input buttons and entry boxes
    \*****************************************************/
 
-   retHeapGUI->mesgBoxIdSI =
-      mkMesgBox_rayWidg(retHeapGUI->widgSTPtr);
-   if(retHeapGUI->mesgBoxIdSI < 0)
-      goto memErr_fun06;
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+      /*0 column and row 0, 1 = tile, -1's are for later
+      `  function to get width and height
+      */
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->fqButIdSI = tmpSI;
 
-   retHeapGUI->fqButIdSI =
-      addWidget_widg_rayWidg(
-         def_xFqBut_ftbRayST,
-         def_yFqBut_ftbRayST,
-         1,  /*tileing*/
-         -1, /*auto set width of widget*/
-         -1, /*auto set height of widget*/
-         retHeapGUI->widgSTPtr
-      );
-   if(retHeapGUI->fqButIdSI < 0)
-      goto memErr_fun06;
+   tmpSI = addWidget_widg_rayWidg(0,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->fqLabIdSI = tmpSI;
 
-   retHeapGUI->prefixLabIdSI =
-      addWidget_widg_rayWidg(
-         def_xPrefixLab_ftbRayST,
-         def_yPrefixLab_ftbRayST,
-         1,  /*tileing*/
-         -1, /*auto set width of widget*/
-         -1, /*auto set height of widget*/
-         retHeapGUI->widgSTPtr
-      );
-   if(retHeapGUI->prefixLabIdSI < 0)
-      goto memErr_fun06;
+   /*prefix entry box*/
+   tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->prefixLabIdSI = tmpSI;
 
-   retHeapGUI->prefixEntryIdSI =
-      addWidget_widg_rayWidg(
-         def_xPrefixEntry_ftbRayST,
-         def_yPrefixEntry_ftbRayST,
-         1,  /*tileing*/
-         -1, /*auto set width of widget*/
-         -1, /*auto set height of widget*/
-         retHeapGUI->widgSTPtr
-      );
-   if(retHeapGUI->prefixEntryIdSI < 0)
-      goto memErr_fun06;
+   tmpSI = addWidget_widg_rayWidg(1,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->prefixEntryIdSI = tmpSI;
 
-   retHeapGUI->outDirIdSI =
-      addWidget_widg_rayWidg(
-         def_xOutBut_ftbRayST,
-         def_yOutBut_ftbRayST,
-         1,  /*tileing*/
-         -1, /*auto set width of widget*/
-         -1, /*auto set height of widget*/
-         retHeapGUI->widgSTPtr
-      );
-   if(retHeapGUI->outDirIdSI < 0)
-      goto memErr_fun06;
+   /*output directory button*/
+   tmpSI = addWidget_widg_rayWidg(2,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->outDirIdSI = tmpSI;
 
-   retHeapGUI->configIdSI =
-      addWidget_widg_rayWidg(
-         def_xConfigBut_ftbRayST,
-         def_yConfigBut_ftbRayST,
-         1,  /*tileing*/
-         -1, /*auto set width of widget*/
-         -1, /*auto set height of widget*/
-         retHeapGUI->widgSTPtr
-      );
-   if(retHeapGUI->configIdSI < 0)
-      goto memErr_fun06;
+   tmpSI = addWidget_widg_rayWidg(2,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->outDirLabIdSI = tmpSI;
+
+   /*configuration file button*/
+   tmpSI = addWidget_widg_rayWidg(3,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->configIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(3,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->configLabIdSI = tmpSI;
 
    /*TODO: add illumin check box*/
 
-   retHeapGUI->runIdSI =
-      addWidget_widg_rayWidg(
-         def_xRunBut_ftbRayST,
-         def_yRunBut_ftbRayST,
-         1,  /*tileing*/
-         -1, /*auto set width of widget*/
-         -1, /*auto set height of widget*/
-         retHeapGUI->widgSTPtr
-      );
-   if(retHeapGUI->runIdSI < 0)
-      goto memErr_fun06;
+   /*run freezeTB button*/
+   tmpSI = addWidget_widg_rayWidg(4,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->runIdSI = tmpSI;
 
    /*****************************************************\
-   * Fun06 Sec02 Sub02:
-   *   - add input file browsers
-   *   o fun06 sec02 sub02 cat01:
-   *     - add file browswer widget
-   *   o fun06 sec02 sub02 cat02:
-   *     - add fastq file browser structure
-   *   o fun06 sec02 sub02 cat03:
-   *     - add output directory file browser structure
-   *   o fun06 sec02 sub02 cat04:
-   *     - add configuration file file browser structure
+   * Fun06 Sec02 Sub04:
+   *   - add output screen widgets
    \*****************************************************/
 
-   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun06 Sec02 Sub02 Cat01:
-   +   - add file browswer widget
-   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+   if(retHeapGUI->getPrefixButIdSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->getPrefixButIdSI = tmpSI;
 
-   retHeapGUI->fileBrowserIdSI =
-      mkFileBrowser_rayWidg(retHeapGUI->widgSTPtr);
+   tmpSI = addWidget_widg_rayWidg(0,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->getPrefixLabIdSI = tmpSI;
 
+
+   tmpSI = addWidget_widg_rayWidg(1,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->minAmrPercEntryIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->minAmrPercLabIdSI = tmpSI;
+
+
+   tmpSI = addWidget_widg_rayWidg(2,1,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->minAmrIndelPercEntryIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(2,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->minAmrIndelPercLabIdSI = tmpSI;
+
+
+   tmpSI = addWidget_widg_rayWidg(3,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->getOutButSI = tmpSI;
+
+   /*make file browser and message box widget*/
+   tmpSI = mkMesgBox_rayWidg(retHeapGUI->widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->mesgBoxIdSI = tmpSI;
+
+   tmpSI = mkFileBrowser_rayWidg(retHeapGUI->widgSTPtr);
    if(retHeapGUI->fileBrowserIdSI < 0)
-      goto memErr_fun06;
+      goto memErr_fun06_sec07;
+   retHeapGUI->fileBrowserIdSI = tmpSI;
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub05:
+   *   - add amr table widgets
+   \*****************************************************/
+
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->amrLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->amrTblIdSI = tmpSI;
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub07:
+   *   - add report screen widgets (last for rectangles)
+   *   - last because requires creating a large number of
+   *     untracked widgets for the drugs
+   \*****************************************************/
+
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->spoligoLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->spoligoStrainLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(2,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->spoligoLineageLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(3,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->miruLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->drugResRectIdSI = tmpSI;
+
+   for(siWidg=1; siWidg < def_numDrugs_ftbRayST; ++siWidg)
+   { /*Loop: add the drug resistance rectangles*/
+      tmpSI=addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+      if(tmpSI < 0)
+         goto memErr_fun06_sec07;
+      hidenAdd_widg_rayWidg(tmpSI,retHeapGUI->widgSTPtr);
+      inactiveAdd_widg_rayWidg(
+         tmpSI,
+         retHeapGUI->widgSTPtr
+      );
+   } /*Loop: add the drug resistance rectangles*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun06 Sec03:
-   ^   - draw initial GUI
+   ^ Fun06 Sec06:
+   ^   - add file broswer structures and extensions
+   ^   o fun06 sec06 sub01:
+   ^     - add fastq file browser structure
+   ^   o fun06 sec06 sub02:
+   ^     - add output directory file browser structure
+   ^   o fun06 sec06 sub03:
+   ^     - add configuration file file browser structure
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   inactiveAdd_widg_rayWidg(
-      retHeapGUI->prefixLabIdSI,
-      retHeapGUI->widgSTPtr
-   ); /*make sure label is in inactive state (no focus)*/
-
-   if( setup_widg_rayWidg(retHeapGUI->widgSTPtr) )
-      goto memErr_fun06;
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun06 Sec04:
-   ^   - convert tile coordinates to x,y coordinates
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-
-   /*this needs to come after window initialization step,
-   `  otherwise I can not measure size of text
-   */
-
-   /*fastq file input*/
-   butDraw_rayWidg(
-      def_maxWidgetWidth_ftbRayST,
-      0,                /*minumum width = any size*/
-      retHeapGUI->fqButIdSI,  /*button id in array*/
-      textFqButStr,
-      1,                     /*finding coordinates*/
-      retHeapGUI->widgSTPtr    /*has widgets to draw*/
-   );
-
-   /*prefix entry box*/
-   labDraw_rayWidg(
-      def_maxWidgetWidth_ftbRayST,
-      0,                        /*no min width*/
-      retHeapGUI->prefixLabIdSI,
-      textPrefixLabStr,
-      ' ',                      /*padding with spaces*/
-      2,                        /*right pad if needed*/
-      1,                     /*finding coordinates*/
-      retHeapGUI->widgSTPtr
-   ); /*label for entry box*/
-
-   entryDraw_rayWidg(
-      def_widthPrefixEntry_ftbRayST,
-      retHeapGUI->prefixEntryIdSI,
-      retHeapGUI->prefixPosArySI, /*cursor + scroll pos*/
-      1,                          /*draw cursor*/
-      retHeapGUI->inPrefixStr,    /*current user input*/
-      1,                        /*finding coordinates*/
-      retHeapGUI->widgSTPtr
-   );
-
-   /*output directory button*/
-   butDraw_rayWidg(
-      def_maxWidgetWidth_ftbRayST,
-      0,                /*minumum width = any size*/
-      retHeapGUI->outDirIdSI,  /*button id in array*/
-      textOutButStr,
-      1,                        /*finding coordinates*/
-      retHeapGUI->widgSTPtr    /*has widgets to draw*/
-   );
-
-   /*TODO: add illumina check box*/
-
-   /*confituration button*/
-   butDraw_rayWidg(
-      def_maxWidgetWidth_ftbRayST,
-      0,                /*minumum width = any size*/
-      retHeapGUI->configIdSI,  /*button id in array*/
-      textConfigButStr,
-      1,                        /*finding coordinates*/
-      retHeapGUI->widgSTPtr    /*has widgets to draw*/
-   );
-
-   /*run button*/
-   butDraw_rayWidg(
-      def_maxWidgetWidth_ftbRayST,
-      0,                /*minumum width = any size*/
-      retHeapGUI->runIdSI,  /*button id in array*/
-      textRunButStr,
-      1,                        /*finding coordinates*/
-      retHeapGUI->widgSTPtr    /*has widgets to draw*/
-   );
-
-   /*only need to tile once, since I do not dyamically
-   `  change any widget sizes
-   */
-   tile_widg_rayWidg(retHeapGUI->widgSTPtr, -1, -1);
-      /*using -1 because I want default spacing*/
-
-   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun06 Sec05:
-   ^   - draw the GUI and return
-   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   draw_gui_ftbRayST(retHeapGUI);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun06 Sec02 Sub02 Cat02:
+   + Fun06 Sec06 Sub01:
    +   - add fastq file browser structure
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    retHeapGUI->fqFileSTPtr =
       malloc(sizeof(struct files_rayWidg));
    if(! retHeapGUI->fqFileSTPtr)
-      goto memErr_fun06;
+      goto memErr_fun06_sec07;
    init_files_rayWidg(retHeapGUI->fqFileSTPtr);
 
    if(
@@ -884,7 +1363,7 @@ mk_gui_ftbRayST(
          retHeapGUI->fqFileSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
    if(
       addExt_files_rayWidg(
@@ -894,7 +1373,7 @@ mk_gui_ftbRayST(
          retHeapGUI->fqFileSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
    if(
       addExt_files_rayWidg(
@@ -904,7 +1383,7 @@ mk_gui_ftbRayST(
          retHeapGUI->fqFileSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
    if(
       addExt_files_rayWidg(
@@ -914,45 +1393,44 @@ mk_gui_ftbRayST(
          retHeapGUI->fqFileSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun06 Sec02 Sub02 Cat03:
+   + Fun06 Sec06 Sub02:
    +   - add output directory file browser structure
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    retHeapGUI->outDirSTPtr =
       malloc(sizeof(struct files_rayWidg));
    if(! retHeapGUI->outDirSTPtr)
-      goto memErr_fun06;
+      goto memErr_fun06_sec07;
    init_files_rayWidg(retHeapGUI->outDirSTPtr);
    setFileLimit_files_rayWidg(1, retHeapGUI->outDirSTPtr);
 
    if(
       addExt_files_rayWidg(
          (signed char *) "dir",
-         1, /*cloear old extensions*/
+         1, /*clear old extensions*/
          1, /*select this extension*/
          retHeapGUI->outDirSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
    cpStr_ulCp(
       retHeapGUI->outDirStr,
       retHeapGUI->outDirSTPtr->pwdStr
    );
-      
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun06 Sec02 Sub02 Cat04:
+   + Fun06 Sec06 Sub03:
    +   - add configuration file file browser structure
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    retHeapGUI->configFileSTPtr =
       malloc(sizeof(struct files_rayWidg));
    if(! retHeapGUI->configFileSTPtr)
-      goto memErr_fun06;
+      goto memErr_fun06_sec07;
    init_files_rayWidg(retHeapGUI->configFileSTPtr);
 
    setFileLimit_files_rayWidg(
@@ -968,7 +1446,7 @@ mk_gui_ftbRayST(
          retHeapGUI->configFileSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
    if(
       addExt_files_rayWidg(
@@ -978,11 +1456,43 @@ mk_gui_ftbRayST(
          retHeapGUI->configFileSTPtr,
          retHeapGUI->widgSTPtr
       )
-   ) goto memErr_fun06;
+   ) goto memErr_fun06_sec07;
 
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun06 Sec06 Sub04:
+   +   - add old results prefix (for checking old reports)
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   retHeapGUI->oldFtbFileSTPtr =
+      malloc(sizeof(struct files_rayWidg));
+   if(! retHeapGUI->oldFtbFileSTPtr)
+      goto memErr_fun06_sec07;
+   init_files_rayWidg(retHeapGUI->oldFtbFileSTPtr);
+
+   setFileLimit_files_rayWidg(
+      1,
+      retHeapGUI->oldFtbFileSTPtr
+   );
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "depths.tsv",
+         0, /*do not clear old extensions*/
+         1, /*select this extension*/
+         retHeapGUI->oldFtbFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06_sec07;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec07:
+   ^   - draw gui and return results
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   draw_gui_ftbRayST(retHeapGUI);
    return retHeapGUI;
 
-   memErr_fun06:;
+   memErr_fun06_sec07:;
       if(retHeapGUI)
          freeHeap_gui_ftbRayST(retHeapGUI);
       retHeapGUI = 0;
@@ -990,7 +1500,1441 @@ mk_gui_ftbRayST(
 } /*initRayGui_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun07: checkRunEvent_ftbRayST
+| Fun07: hideInput_ftbRayST
+|   - hides the input menu
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Mofidies:
+|     o all input GUI widgets to be hidden and the input
+|       menu button to have the inactive state removed
+\-------------------------------------------------------*/
+void
+hideInput_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->fqButIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->fqLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->prefixEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->prefixLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->outDirIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->outDirLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->configIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->configLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->runIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      inactiveClear_widg_rayWidg(
+         guiSTPtr->inputGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+} /*hideInput_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun08: hideOutput_ftbRayST
+|   - hides the ouput menu
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Mofidies:
+|     o all output GUI widgets to be hidden and the output
+|       menu button to have the inactive state removed
+\-------------------------------------------------------*/
+void
+hideOutput_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->getPrefixButIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->getPrefixLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->minAmrPercEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->minAmrPercLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->minAmrIndelPercEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->minAmrIndelPercLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->getOutButSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      inactiveClear_widg_rayWidg(
+         guiSTPtr->outGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+} /*hideOutput_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun09: hideReport_ftbRayST
+|   - hides the report menu
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Mofidies:
+|     o all output GUI widgets to be hidden and the output
+|       menu button to have the inactive state removed
+\-------------------------------------------------------*/
+void
+hideReport_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+   signed int lenSI = 0;
+
+   inactiveClear_widg_rayWidg(
+      guiSTPtr->reportGuiIdSI,
+      guiSTPtr->widgSTPtr
+   );
+
+   hidenAdd_widg_rayWidg(
+      guiSTPtr->miruLabIdSI,
+      guiSTPtr->widgSTPtr
+   );
+   hidenAdd_widg_rayWidg(
+      guiSTPtr->spoligoLabIdSI,
+      guiSTPtr->widgSTPtr
+   );
+
+   hidenAdd_widg_rayWidg(
+      guiSTPtr->spoligoLineageLabIdSI,
+      guiSTPtr->widgSTPtr
+   );
+   hidenAdd_widg_rayWidg(
+      guiSTPtr->spoligoStrainLabIdSI,
+      guiSTPtr->widgSTPtr
+   );
+
+   for(lenSI = 0; lenSI < def_numDrugs_ftbRayST; ++lenSI)
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->drugResRectIdSI + lenSI,
+         guiSTPtr->widgSTPtr
+      );
+} /*hideReport_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun10: hideTable_ftbRayST
+|   - hides the amr table menu
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Mofidies:
+|     o all output GUI widgets to be hidden and the output
+|       menu button to have the inactive state removed
+\-------------------------------------------------------*/
+void
+hideTable_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+      inactiveClear_widg_rayWidg(
+         guiSTPtr->amrsGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->amrTblIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->amrLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+} /*hideTable_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun12: spoligoLinGet_ftbRayST
+|   - gets the spoligotype lineage and sets the spoligo
+|     output text (for report)
+| Input:
+|   - guiSTPtr
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Modifies:
+|     o spoligoStr in guiSTPtr to have the spoligotype
+\-------------------------------------------------------*/
+void
+spoligoLinGet_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+   signed char fileStr[256];
+   signed char lineStr[1024];
+   signed int lenSI = 0;
+   signed int outLenSI = 0;
+
+   FILE *inFILE = 0;
+
+   cpStr_ulCp(
+      guiSTPtr->spoligoStr,
+      (signed char *) "spoligotype:"
+   );
+   cpStr_ulCp(
+      guiSTPtr->spoligoLineageStr,
+      (signed char *) "   lineage:"
+   );
+   cpStr_ulCp(
+      guiSTPtr->spoligoStrainStr,
+      (signed char *) "   strain:"
+   ); /*strain*/
+
+   lenSI = cpStr_ulCp(fileStr, guiSTPtr->filePrefixStr);
+   cpStr_ulCp(
+      &fileStr[lenSI],
+      (signed char *) "-read-spoligo.tsv"
+   );
+   
+   inFILE = fopen((char *) fileStr, "r");
+   if(! inFILE)
+     return;
+
+   lenSI = 0;
+
+   if(! fgets((char *) lineStr, 1000, inFILE) )
+      return; /*no header*/
+   if(! fgets((char *) lineStr, 1000, inFILE) )
+      return; /*no lineage*/
+
+   while(lineStr[lenSI++] > 32) ; /*skip file path*/
+
+   outLenSI =
+      cpStr_ulCp(
+         guiSTPtr->spoligoStrainStr,
+         (signed char *) "   strain:"
+      ); /*strain*/
+   lenSI +=
+      cpWhite_ulCp(
+         &guiSTPtr->spoligoStrainStr[outLenSI],
+         &lineStr[lenSI]
+      ); /*strain*/
+   ++lenSI;
+
+   while(lineStr[lenSI++] > 32) ; /*skip barcode*/
+
+   ++lenSI; /*get off "'"*/
+   outLenSI =
+      cpStr_ulCp(
+         guiSTPtr->spoligoStr,
+         (signed char *) "spoligotype: "
+      );
+   lenSI +=
+      cpWhite_ulCp(
+         &guiSTPtr->spoligoStr[outLenSI],
+         &lineStr[lenSI]
+      ); /*octal*/
+   ++lenSI;
+
+   outLenSI =
+      cpStr_ulCp(
+         guiSTPtr->spoligoLineageStr,
+         (signed char *) "   lineage: "
+      );
+   lenSI +=
+      cpWhite_ulCp(
+         &guiSTPtr->spoligoLineageStr[outLenSI],
+         &lineStr[lenSI]
+      ); /*lineage*/
+   ++lenSI;
+
+   fclose(inFILE);
+   inFILE = 0;
+
+   /*want nothing more*/
+   return;
+} /*spoligoLinGet_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun13: miruLinGet_ftbRayST
+|   - gets the MIRU-VNTR lineage and sets miru text output
+| Input:
+|   - guiSTPtr
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Modifies:
+|     o miruStr in guiSTPtr to have the spoligotype
+\-------------------------------------------------------*/
+void
+miruLinGet_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+   signed char fileStr[256];
+   signed char lineStr[1024];
+   signed int lenSI = 0;
+   signed int outLenSI = 0;
+   signed int tmpSI = 0;
+
+   FILE *inFILE = 0;
+
+   outLenSI =
+      cpStr_ulCp(
+         guiSTPtr->miruStr,
+         (signed char *) "MIRU-VNTR: "
+      );
+
+   lenSI = cpStr_ulCp(fileStr, guiSTPtr->filePrefixStr);
+   cpStr_ulCp(
+      &fileStr[lenSI],
+      (signed char *) "-read-mirulin.tsv"
+   );
+   
+   inFILE = fopen((char *) fileStr, "r");
+   if(! inFILE)
+     return;
+
+   lenSI = 0;
+   if(! fgets((char *) lineStr, 1000, inFILE) )
+      return; /*no header*/
+   if(! fgets((char *) lineStr, 1000, inFILE) )
+      return; /*no lineage*/
+
+   while(lineStr[lenSI++] > 32) ; /*skip lineage col*/
+
+   while(lineStr[lenSI])
+   { /*Loop: copy the lineages*/
+      tmpSI =
+         cpWhite_ulCp(
+            &guiSTPtr->miruStr[outLenSI],
+            &lineStr[lenSI]
+         ); /*strain*/
+      outLenSI += tmpSI;
+      lenSI += tmpSI + 1;
+      guiSTPtr->miruStr[outLenSI++] = '_';
+   } /*Loop: copy the lineages*/
+
+   fclose(inFILE);
+   inFILE = 0;
+   return;
+} /*miruLinGet_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun14: checkDrugs_ftbRayST
+|   - builds the drug resistance part of the ftb report
+| Input:
+|   - guiSTPtr
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Draws:
+|     o drug resistance to screen as colored rectangles
+\-------------------------------------------------------*/
+void
+checkDrugs_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun14 TOC:
+   '   - builds the drug resistance part of the ftb report
+   '   o fun14 sec01:
+   '     - variable declarations
+   '   o fun14 sec02:
+   '     - initialize
+   '   o fun14 sec03:
+   '     - get coverage of reads
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char fileStr[256];
+   signed char lineStr[1024];
+   signed int lenSI = 0;
+   signed char *tmpStr = 0;
+
+   signed char geneStr[128];
+   signed int startSI = 0;
+   signed int endSI = 0;
+
+   signed int refStartSI = 0;
+   signed int refEndSI = 0;
+
+   unsigned int backColUI = 0;
+   unsigned int textColUI = 0;
+
+   signed char resAryBl[def_numDrugs_ftbRayST];
+
+   /*has drugs resistance to (first is always primary*/
+   float minPerSupF = def_minPercMapped_freezeTBDefs;
+   float minIndelPerSupF = def_amrIndelSup_freezeTBDefs;
+
+   /*these are for recording the hits in the table*/
+   signed char colStr[128]; /*holds one column*/
+   signed char typeStr[32]; /*holds one column*/
+   signed char varIdStr[128];
+   signed char resLevelStr[16];
+   signed char resAdditiveStr[16];
+   signed char needsGeneStr[64];
+   signed int gradeSI = 0;
+   signed int refPosSI = 0;
+   signed int numSupReadsSI = 0;
+   signed int numMapReadsSI = 0;
+   float percSupReadsF = 0;
+   signed char drugAryStr[def_numDrugs_ftbRayST * 4];
+   signed int drugLenSI = 0;
+
+   FILE *inFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec02:
+   ^   - initialize
+   ^   o fun14 sec02 sub01:
+   ^     - get default filters and clear AMRs
+   ^   o fun14 sec02 sub02:
+   ^     - add the header to the amr table
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun14 Sec02 Sub01:
+   *   - get default filters and clear AMRs
+   \*****************************************************/
+   
+   if(! guiSTPtr->filePrefixStr[0])
+      return;
+
+   if(guiSTPtr->amrSupStr[0])
+      strToF_base10str(guiSTPtr->amrSupStr, &minPerSupF);
+   if(guiSTPtr->indelSupStr[0])
+      strToF_base10str(
+         guiSTPtr->indelSupStr,
+         &minIndelPerSupF
+      );
+
+   clear_listBox_rayWidg(guiSTPtr->amrListSTPtr);
+
+   for(lenSI = 0; lenSI < def_numDrugs_ftbRayST; ++lenSI)
+   { /*Loop: blank the drug colors*/
+      guiSTPtr->drugBackColUI[lenSI] =
+         def_lowDepthBackCol_ftbRayST;
+      guiSTPtr->drugTextColUI[lenSI] =
+         def_lowDepthTextCol_ftbRayST;
+   } /*Loop: blank the drug colors*/
+
+   /*****************************************************\
+   * Fun14 Sec02 Sub02:
+   *   - add the header to the amr table
+   \*****************************************************/
+
+   /*build header for list box*/
+   lenSI = 0;
+   lenSI +=
+      cpStr_ulCp(&lineStr[lenSI], (signed char *)" drug");
+        /*space is frist alphabetcially, so I can use it
+        `  to keep the header at the top during the sort
+        */
+   lineStr[lenSI++] = ' '; /*set lenSI to 4*/
+
+   lenSI +=
+      cpStr_ulCp(
+         &lineStr[lenSI],
+         (signed char *) "variant"
+      );
+   while(lenSI < 24)
+      lineStr[lenSI++] = ' ';
+   lineStr[lenSI++] = ' '; /*make 25*/
+
+   lenSI +=
+      cpStr_ulCp(
+         &lineStr[lenSI],
+         (signed char *) "other_drugs"
+      );
+   while(lenSI < 36)
+      lineStr[lenSI++] = ' ';
+   lineStr[lenSI++] = ' '; /*make 37*/
+
+   lenSI +=
+      cpStr_ulCp(
+         &lineStr[lenSI],
+         (signed char *) "read_depth"
+      );
+   while(lenSI < 47)
+      lineStr[lenSI++] = ' ';
+   lineStr[lenSI++] = ' '; /*make 48*/
+
+   lenSI +=
+      cpStr_ulCp(
+         &lineStr[lenSI],
+         (signed char *) "%_support"
+      );
+   while(lenSI < 56)
+      lineStr[lenSI++] = ' ';
+   lineStr[lenSI++] = ' '; /*make 57*/
+
+   lenSI +=
+      cpStr_ulCp(
+         &lineStr[lenSI],
+         (signed char *) "needs"
+      );
+
+   /*add header to list box*/
+   if(
+      addItem_listBox_rayWidg(
+         lineStr,
+         def_listSpecial_rayWidg, /*does nothing*/
+         guiSTPtr->amrListSTPtr,
+         guiSTPtr->widgSTPtr
+      )
+   ) return; /*memory error*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec03:
+   ^   - get coverage of reads
+   ^   o fun14 sec03 sub01:
+   ^     - open depths file
+   ^   o fun14 sec03 sub02:
+   ^     - get the coverage, gene name, & expected length
+   ^   o fun14 sec03 sub03:
+   ^     - check if AMR gene & flag if low coverage
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun14 Sec03 Sub01:
+   *   - open depths file
+   \*****************************************************/
+
+   lenSI = cpStr_ulCp(fileStr, guiSTPtr->filePrefixStr);
+   cpStr_ulCp(
+      &fileStr[lenSI],
+      (signed char *) "-depths.tsv"
+   );
+
+   
+   inFILE = fopen((char *) fileStr, "r");
+   if(! inFILE)
+     return;
+
+   /*****************************************************\
+   * Fun14 Sec03 Sub02:
+   *   - get the coverage, gene name, and expected length
+   \*****************************************************/
+
+   if(fgets((char *) lineStr, 1000, inFILE))
+   { /*If: have header*/
+      while( fgets((char *) lineStr, 1000, inFILE) )
+      { /*Loop: get depths for each gene*/
+         tmpStr = lineStr;
+         lenSI = 0;
+
+         while(*tmpStr && lenSI < 4)
+         { /*Loop: get to amplicon start*/
+            if(*tmpStr == '\t')
+               ++lenSI;
+            ++tmpStr;
+         } /*Loop: get to amplicon start*/
+
+         /*get start and end of amplicon*/
+         tmpStr += strToSI_base10str(tmpStr, &startSI);
+         if(! *tmpStr) break;
+         ++tmpStr;
+
+         tmpStr += strToSI_base10str(tmpStr, &endSI);
+         if(! *tmpStr) break;
+         ++tmpStr;
+
+         lenSI = 0;
+         while(*tmpStr && lenSI < 3)
+         { /*Loop: get to gene name*/
+            if(*tmpStr == '\t')
+               ++lenSI;
+            ++tmpStr;
+         } /*Loop: get to amplicon start*/
+
+         tmpStr += cpWhite_ulCp(geneStr, tmpStr) ;
+         if(! *tmpStr) break;
+         ++tmpStr;
+
+       
+         /*get start and end of amplicon*/
+         tmpStr += strToSI_base10str(tmpStr, &refStartSI);
+         if(! *tmpStr) break;
+         ++tmpStr;
+
+         tmpStr += strToSI_base10str(tmpStr, &refEndSI);
+         if(! *tmpStr) break;
+         ++tmpStr;
+
+         if(startSI > refStartSI || endSI < refEndSI)
+         { /*If: incomplete gene coverage*/
+            backColUI = def_lowDepthBackCol_ftbRayST;
+            textColUI = def_lowDepthTextCol_ftbRayST;
+         } /*If: incomplete gene coverage*/
+
+         else
+         { /*If: incomplete gene coverage*/
+            backColUI = def_noAmrBackCol_ftbRayST;
+            textColUI = def_noAmrTextCol_ftbRayST;
+         } /*If: incomplete gene coverage*/
+
+         /***********************************************\
+         * Fun14 Sec03 Sub03:
+         *   - check if gene is an AMR gene and flag if
+         *     low coverage
+         \***********************************************/
+
+         if(!eqlNull_ulCp((signed char *) "atpE",geneStr))
+         { /*If: is atpE gene (Bdq)*/
+            if(startSI > 1461125 || endSI < 1461242)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[1] = backColUI;
+            guiSTPtr->drugTextColUI[1] = textColUI;
+         } /*If: is atpE gene (Bdq)*/
+
+         else if(
+            ! eqlNull_ulCp((signed char *) "ddn", geneStr)
+         ){ /*Else If: is ddn gene (Dlm and Pmd)*/
+            if(startSI > 3986737 || endSI < 3987298)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[4] = backColUI;
+            guiSTPtr->drugTextColUI[4] = textColUI;
+            guiSTPtr->drugBackColUI[13] = backColUI;
+            guiSTPtr->drugTextColUI[13] = textColUI;
+         } /*Else If: is ddn gene (Dlm and Pmd)*/
+
+         else if(
+            ! eqlNull_ulCp((signed char *) "eis", geneStr)
+         ){ /*Else If: is eis gene (Amk and Kan)*/
+            if(startSI > 2715339 || endSI < 2715369)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[0] = backColUI;
+            guiSTPtr->drugTextColUI[0] = textColUI;
+            guiSTPtr->drugBackColUI[9] = backColUI;
+            guiSTPtr->drugTextColUI[9] = textColUI;
+         } /*Else If: is eis gene (Amk and Kan)*/
+
+         else if(
+            ! eqlNull_ulCp((signed char *) "embA",geneStr)
+         ) ; /*not in WHO 2023: embA eis gene (Emb)*/
+
+         else if(
+            ! eqlNull_ulCp((signed char *) "embB",geneStr)
+         ){ /*Else If: embB eis gene (Emb)*/
+            if(startSI > 4247429 || endSI < 4248003)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[5] = backColUI;
+            guiSTPtr->drugTextColUI[5] = textColUI;
+         } /*Else If: embB eis gene (Emb)*/
+
+         else if(
+            ! eqlNull_ulCp((signed char *) "ethA",geneStr)
+         ){ /*Else If: ethA eis gene (Eto)*/
+            if(startSI > 4325970 || endSI < 4327480)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[6] = backColUI;
+            guiSTPtr->drugTextColUI[6] = textColUI;
+         } /*Else If: ethA eis gene (Eto)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "fabG1",geneStr)
+         ){ /*Else If: fabG1 eis gene (Eto Inh)*/
+            if(startSI > 1673423 || endSI < 1674048)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[6] = backColUI;
+            guiSTPtr->drugTextColUI[6] = textColUI;
+
+            guiSTPtr->drugBackColUI[8] = backColUI;
+            guiSTPtr->drugTextColUI[8] = textColUI;
+         } /*Else If: fabG1 eis gene (Eto Inh)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "fbiA", geneStr)
+         ){ /*Else If: fbiA eis gene (Cfz Dlm Pmd)*/
+            if(startSI > 3640145 || endSI < 3641537)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[3] = backColUI;
+            guiSTPtr->drugTextColUI[3] = textColUI;
+
+            guiSTPtr->drugBackColUI[4] = backColUI;
+            guiSTPtr->drugTextColUI[4] = textColUI;
+
+            guiSTPtr->drugBackColUI[13] = backColUI;
+            guiSTPtr->drugTextColUI[13] = textColUI;
+         } /*Else If: fbiA eis gene (Cfz Dlm Pmd)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "fbiB", geneStr)
+         ){ /*Else If: fbiB eis gene (Cfz Dlm Pmd)*/
+            if(startSI > 3641538 || endSI < 3642880)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[3] = backColUI;
+            guiSTPtr->drugTextColUI[3] = textColUI;
+
+            guiSTPtr->drugBackColUI[4] = backColUI;
+            guiSTPtr->drugTextColUI[4] = textColUI;
+
+            guiSTPtr->drugBackColUI[13] = backColUI;
+            guiSTPtr->drugTextColUI[13] = textColUI;
+         } /*Else If: fbiB eis gene (Cfz Dlm Pmd)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "fbiC", geneStr)
+         ){ /*Else If: fbiC eis gene (Cfz Dlm Pmd)*/
+            if(startSI > 1302695 || endSI < 1305501)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[3] = backColUI;
+            guiSTPtr->drugTextColUI[3] = textColUI;
+
+            guiSTPtr->drugBackColUI[4] = backColUI;
+            guiSTPtr->drugTextColUI[4] = textColUI;
+
+            guiSTPtr->drugBackColUI[13] = backColUI;
+            guiSTPtr->drugTextColUI[13] = textColUI;
+         } /*Else If: fbiC eis gene (Cfz Dlm Pmd)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "fgd1", geneStr)
+         ) ; /*not in WHO 2023 or at least not as  fgd1
+             `  gene (Cfz Dlm Pmd)
+             */
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "gidB", geneStr)
+         ) ; /*not in WHO 2023 gidB gene (Stm)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "gyrA", geneStr)
+         ){ /*Else If: gyrA gene (Flq Lfx Mfx)*/
+            if(startSI > 7563 || endSI < 7582)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[7] = backColUI;
+            guiSTPtr->drugTextColUI[7] = textColUI;
+
+            guiSTPtr->drugBackColUI[10] = backColUI;
+            guiSTPtr->drugTextColUI[10] = textColUI;
+
+            guiSTPtr->drugBackColUI[12] = backColUI;
+            guiSTPtr->drugTextColUI[12] = textColUI;
+         } /*Else If: gyrA gene (Flq Lfx Mfx)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "gyrB", geneStr)
+         ){ /*Else If: gyrB gene (Flq Lfx Mfx)*/
+            if(startSI > 6579 || endSI < 6750)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[7] = backColUI;
+            guiSTPtr->drugTextColUI[7] = textColUI;
+
+            guiSTPtr->drugBackColUI[10] = backColUI;
+            guiSTPtr->drugTextColUI[10] = textColUI;
+
+            guiSTPtr->drugBackColUI[12] = backColUI;
+            guiSTPtr->drugTextColUI[12] = textColUI;
+         } /*Else If: gyrB gene (Flq Lfx Mfx)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "inhA", geneStr)
+         ){ /*Else If: inhA gene (Eto Inh)*/
+            if(startSI > 1673423 || endSI < 1674481)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[6] = backColUI;
+            guiSTPtr->drugTextColUI[6] = textColUI;
+
+            guiSTPtr->drugBackColUI[8] = backColUI;
+            guiSTPtr->drugTextColUI[8] = textColUI;
+         } /*Else If: inhA gene (Eto Inh)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "katG", geneStr)
+         ){ /*Else If: katG gene (Inh)*/
+            if(startSI > 2153926 || endSI < 2156110)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[8] = backColUI;
+            guiSTPtr->drugTextColUI[8] = textColUI;
+         } /*Else If: katG gene (Inh)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "pncA", geneStr)
+         ){ /*Else If: pncA gene (Pza)*/
+            if(startSI > 2288680 || endSI < 228953)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[14] = backColUI;
+            guiSTPtr->drugTextColUI[14] = textColUI;
+         } /*Else If: pncA gene (Pza)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "pepQ", geneStr)
+         ){ /*Else If: pepQ gene (Bdq Cfz)*/
+            if(startSI > 2859292 || endSI < 2860417)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*If: incomplete gene coverage*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            guiSTPtr->drugBackColUI[1] = backColUI;
+            guiSTPtr->drugTextColUI[1] = textColUI;
+
+            guiSTPtr->drugBackColUI[3] = backColUI;
+            guiSTPtr->drugTextColUI[3] = textColUI;
+         } /*Else If: pepQ gene (Bdq Cfz)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "rpoB", geneStr)
+         ){ /*Else If: rpoB gene (Rif)*/
+            if(startSI > 760314 || endSI < 761277)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*Else: covered amr region*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*Else: covered amr region*/
+
+            guiSTPtr->drugBackColUI[15] = backColUI;
+            guiSTPtr->drugTextColUI[15] = textColUI;
+         } /*Else If: rpoB gene (Rif)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "rpsL", geneStr)
+         ){ /*Else If: rpsL gene (Stm)*/
+            if(startSI > 781682 || endSI < 781822)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*Else: covered amr region*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*Else: covered amr region*/
+
+            guiSTPtr->drugBackColUI[16] = backColUI;
+            guiSTPtr->drugTextColUI[16] = textColUI;
+         } /*Else If: rpsL gene (Stm)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "rrs", geneStr)
+         ){ /*Else If: rrs gene (Amk Cap Kan Stm)*/
+            if(startSI > 1472359 || endSI < 1473329)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*Else: covered amr region*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*Else: covered amr region*/
+
+            guiSTPtr->drugBackColUI[0] = backColUI;
+            guiSTPtr->drugTextColUI[0] = textColUI;
+
+            guiSTPtr->drugBackColUI[2] = backColUI;
+            guiSTPtr->drugTextColUI[2] = textColUI;
+
+            guiSTPtr->drugBackColUI[9] = backColUI;
+            guiSTPtr->drugTextColUI[9] = textColUI;
+
+            guiSTPtr->drugBackColUI[16] = backColUI;
+            guiSTPtr->drugTextColUI[16] = textColUI;
+         } /*Else If: rrs gene (Amk Cap Kan Stm)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "rrl", geneStr)
+         ){ /*Else If: rrl gene (Cap Lzd)*/
+            if(startSI > 1475926 || endSI < 1476471)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*Else: covered amr region*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*Else: covered amr region*/
+
+            guiSTPtr->drugBackColUI[2] = backColUI;
+            guiSTPtr->drugTextColUI[2] = textColUI;
+
+            guiSTPtr->drugBackColUI[11] = backColUI;
+            guiSTPtr->drugTextColUI[11] = textColUI;
+         } /*Else If: rrl gene (Cap Lzd)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "rplC", geneStr)
+         ){ /*Else If: rplC gene (Lzd)*/
+            if(startSI > 801266 || endSI < 801268)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*Else: covered amr region*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*Else: covered amr region*/
+
+            guiSTPtr->drugBackColUI[11] = backColUI;
+            guiSTPtr->drugTextColUI[11] = textColUI;
+         } /*Else If: rplC gene (Lzd)*/
+
+         else if(
+           !eqlNull_ulCp((signed char *) "rv0678",geneStr)
+         ){ /*Else If: rv0678 gene (Bdq Cfz)*/
+            /*likely different name in 2023 catalog*/
+            /*guiSTPtr->drugBackColUI[1] = backColUI;
+            guiSTPtr->drugTextColUI[1] = textColUI;
+
+            guiSTPtr->drugBackColUI[3] = backColUI;
+            guiSTPtr->drugTextColUI[3] = textColUI;*/
+         } /*Else If: rv0678 gene (Bdq Cfz)*/
+
+         else if(
+           !eqlNull_ulCp((signed char *) "rv2983",geneStr)
+         ){ /*Else If: rv2983 gene (Dlm Pmd)*/
+            /*likely different name in 2023 catalog*/
+            /*guiSTPtr->drugBackColUI[4] = backColUI;
+            guiSTPtr->drugTextColUI[4] = textColUI;
+
+            guiSTPtr->drugBackColUI[13] = backColUI;
+            guiSTPtr->drugTextColUI[13] = textColUI;*/
+         } /*Else If: rv2983 gene (Dlm Pmd)*/
+
+         else if(
+           ! eqlNull_ulCp((signed char *) "tlyA", geneStr)
+         ){ /*Else If: tlyA gene (Cap)*/
+            if(startSI > 1917933 || endSI < 1918741)
+            { /*If: incomplete gene coverage*/
+               backColUI = def_lowDepthBackCol_ftbRayST;
+               textColUI = def_lowDepthTextCol_ftbRayST;
+            } /*If: incomplete gene coverage*/
+
+            else
+            { /*Else: covered amr region*/
+               backColUI = def_noAmrBackCol_ftbRayST;
+               textColUI = def_noAmrTextCol_ftbRayST;
+            } /*Else: covered amr region*/
+
+            guiSTPtr->drugBackColUI[2] = backColUI;
+            guiSTPtr->drugTextColUI[2] = textColUI;
+         }  /*Else If: tlyA gene (Cap)*/
+      } /*Loop: get depths for each gene*/
+   } /*If: have header*/
+
+   fclose(inFILE);
+   inFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun14 Sec04:
+   ^   - find AMRs
+   ^   o fun14 sec04 sub01:
+   ^     - open amr file (reads)
+   ^   o fun14 sec04 sub02:
+   ^     - get gene name + start loop
+   ^   o fun14 sec04 sub03:
+   ^     - check for resistance
+   ^   o fun14 sec04 sub04:
+   ^     - check for cross resistance (loops to sub03)
+   ^   o fun14 sec04 sub05:
+   ^     - get variant id, grade, and support
+   ^   o fun14 sec04 sub06:
+   ^     - check if amr has enough support
+   ^   o fun14 sec04 sub07:
+   ^     - if enough support, set resistance colors
+   ^   o fun14 sec04 sub08:
+   ^     - get high/low res, additive res, and genes
+   ^   o fun14 sec04 sub09:
+   ^     - build amr table entry
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun14 Sec04 Sub01:
+   *   - open amr file (reads)
+   \*****************************************************/
+
+   lenSI = cpStr_ulCp(fileStr, guiSTPtr->filePrefixStr);
+   cpStr_ulCp(
+      &fileStr[lenSI],
+      (signed char *) "-read-amrs.tsv"
+   );
+
+   inFILE = fopen((char *) fileStr, "r");
+   if(! inFILE)
+      return;
+
+   /*****************************************************\
+   * Fun14 Sec04 Sub02:
+   *   - get gene name + start loop
+   \*****************************************************/
+
+   if(fgets((char *) lineStr, 1000, inFILE))
+   { /*If: have header*/
+      while( fgets((char *) lineStr, 1000, inFILE) )
+      { /*Loop: get drug resistance*/
+         tmpStr = lineStr;
+
+         tmpStr += cpWhite_ulCp(geneStr, tmpStr);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         tmpStr += cpWhite_ulCp(colStr, tmpStr);
+         ++tmpStr;
+         drugLenSI = 0;
+
+         /***********************************************\
+         * Fun14 Sec04 Sub03:
+         *   - check for resistance
+         \***********************************************/
+
+         if(
+               colStr[0] == 'N'
+            && colStr[1] == 'A'
+            && ! colStr[2]
+         ) tmpStr += 2; /*no drug to check*/
+
+         else
+         { /*Else: check what drug am resistant to*/
+            checkDrug_fun14_sec04:;
+               drugLenSI = 0;
+               while(colStr[drugLenSI])
+                  colStr[drugLenSI++] |= 32;/*lower case*/
+               drugLenSI = 0;
+
+               for(
+                  lenSI = 0;
+                  lenSI < def_numDrugs_ftbRayST;
+                  ++lenSI
+               ){ /*Loop: check all drugs*/
+                  resAryBl[lenSI] = 0;
+                  drugAryStr[lenSI] = 0;
+
+                  if(
+                        ! eqlNull_ulCp(
+                           colStr,
+                           glob_drugFullStrAry[lenSI]
+                        ) /*check if full drug name used*/
+                     || ! eqlNull_ulCp(
+                           colStr,
+                           glob_drugStrAry[lenSI]
+                        ) /*check if shorthand instead*/
+                  ){ /*If: found resistance*/
+                     resAryBl[lenSI] = 1;
+
+                     drugAryStr[drugLenSI * 4] =
+                        glob_drugStrAry[lenSI][0];
+                     drugAryStr[drugLenSI * 4 + 1] =
+                        glob_drugStrAry[lenSI][1];
+                     drugAryStr[drugLenSI * 4 + 2] =
+                        glob_drugStrAry[lenSI][2];
+                     drugAryStr[drugLenSI * 4 + 3] = '_';
+                     ++drugLenSI;
+                  }  /*If: found resistance*/
+               }  /*Loop: check all drugs*/
+         } /*Else: check what drug am resistant to*/
+
+         /***********************************************\
+         * Fun14 Sec04 Sub04:
+         *   - check for cross resistance (loops to sub03)
+         \***********************************************/
+
+         if(
+               tmpStr[0] == 'N'
+            && tmpStr[1] == 'A'
+            && tmpStr[2] < 33
+         ) tmpStr += 2; /*no cross resistance*/
+
+         else if(*tmpStr > 32)
+         { /*Else If: have cross resistance*/
+            if(*tmpStr == '_')
+               ++tmpStr;
+
+            lenSI = 0;
+            while(*tmpStr > 32 && *tmpStr != '_')
+               colStr[lenSI++] = *tmpStr++;
+            goto checkDrug_fun14_sec04;
+         } /*Else If: have cross resistance*/
+
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         if(drugLenSI > 0)
+         { /*If: resistance, break into two c-strings*/
+            if(drugLenSI <= 3)
+            { /*If: not cross resistance*/
+               drugAryStr[3] = 0;
+               drugAryStr[4] = 'N';
+               drugAryStr[5] = 'A';
+               drugAryStr[6] = 0;
+            } /*If: not cross resistance*/
+
+            else
+            { /*Else: had cross resistance*/
+               drugAryStr[(drugLenSI - 1) * 4 + 3] = 0;
+               drugAryStr[3] = 0; /*store two c-strings*/
+            } /*Else: had cross resistance*/
+         } /*If: resistance, break into two c-strings*/
+
+         /***********************************************\
+         * Fun14 Sec04 Sub05:
+         *   - get variant id, grade, and support
+         \***********************************************/
+
+         /*get the variant id*/
+         tmpStr += cpWhite_ulCp(varIdStr, tmpStr);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get mutation type entry*/
+         tmpStr += cpWhite_ulCp(typeStr, tmpStr);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get the grade of the AMR*/
+         tmpStr += strToSI_base10str(tmpStr, &gradeSI);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get the reference position*/
+         tmpStr += strToSI_base10str(tmpStr, &refPosSI);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get number of supporting reads for the AMR*/
+         tmpStr+=strToSI_base10str(tmpStr,&numSupReadsSI);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get percentage of reads supported AMR*/
+         tmpStr+=strToF_base10str(tmpStr, &percSupReadsF);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /***********************************************\
+         * Fun14 Sec04 Sub06:
+         *   - check if amr has enough support
+         \***********************************************/
+
+         /*check if keeping AMR*/
+         if(
+               (typeStr[0] & ~32) == 's'
+            && (typeStr[1] & ~32) == 'n'
+            && (typeStr[2] & ~32) == 'p'
+            && typeStr[3] < 33
+         ){ /*If: snp variant*/
+            if(percSupReadsF < minPerSupF)
+               continue;
+         }  /*If: snp variant*/
+
+         else
+         { /*Else: frameshift or indel*/
+            if(percSupReadsF < minIndelPerSupF)
+               continue;
+         } /*Else: frameshift or indel*/
+
+         /***********************************************\
+         * Fun14 Sec04 Sub07:
+         *   - if enough support, set resistance colors
+         \***********************************************/
+
+         for(
+            lenSI = 0;
+            lenSI < def_numDrugs_ftbRayST;
+            ++lenSI
+         ){ /*Loop: set resistance*/
+            if(resAryBl[lenSI])
+            { /*If: had resistance*/
+               guiSTPtr->drugBackColUI[lenSI] =
+                  def_amrBackCol_ftbRayST;
+               guiSTPtr->drugTextColUI[lenSI] =
+                  def_amrTextCol_ftbRayST;
+            } /*If: had resistance*/
+         }  /*Loop: set resistance*/
+
+         /*get the number of mapped reads*/
+         tmpStr+=strToSI_base10str(tmpStr,&numMapReadsSI);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /***********************************************\
+         * Fun14 Sec04 Sub08:
+         *   - get high/low res, additive res, and genes
+         \***********************************************/
+
+         /*get if high or low resistance*/
+         tmpStr+=cpWhite_ulCp(resLevelStr, tmpStr);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get if resistance is additive or not*/
+         tmpStr+=cpWhite_ulCp(resAdditiveStr, tmpStr);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /*get if needs another gene to support*/
+         tmpStr += cpWhite_ulCp(needsGeneStr, tmpStr);
+         if(! *tmpStr)
+            continue;
+         ++tmpStr;
+
+         /***********************************************\
+         * Fun14 Sec04 Sub09:
+         *   - build amr table entry
+         \***********************************************/
+
+         lenSI = 0;
+
+         /*copy the drug name*/
+         lenSI +=
+            cpStr_ulCp(&lineStr[lenSI], &drugAryStr[0]);
+         lineStr[lenSI++] = ' '; /*set lenSI to 4*/
+         lineStr[lenSI++] = ' '; /*set lenSI to 5*/
+
+         lenSI +=
+            cpStr_ulCp(&lineStr[lenSI], varIdStr);
+
+         while(lenSI < 25)
+            lineStr[lenSI++] = ' ';
+         lineStr[lenSI++] = ' '; /*make 26*/
+
+         lenSI +=
+            cpStr_ulCp(&lineStr[lenSI], &drugAryStr[4]);
+         while(lenSI < 37)
+            lineStr[lenSI++] = ' ';
+         lineStr[lenSI++] = ' '; /*sets to 38*/
+
+         lenSI += numToStr(&lineStr[lenSI],numSupReadsSI);
+         while(lenSI < 48)
+            lineStr[lenSI++] = ' ';
+         lineStr[lenSI++] = ' '; /*sets to 49*/
+
+         lenSI +=
+            double_numToStr(
+               &lineStr[lenSI],
+               percSupReadsF,
+               2
+            );
+         while(lenSI < 57)
+            lineStr[lenSI++] = ' ';
+         lineStr[lenSI++] = ' '; /*sets to 58*/
+
+         lenSI +=
+            cpStr_ulCp(&lineStr[lenSI], needsGeneStr);
+
+         if(
+            addItem_listBox_rayWidg(
+               lineStr,
+               def_listSpecial_rayWidg, /*does nothing*/
+               guiSTPtr->amrListSTPtr,
+               guiSTPtr->widgSTPtr
+            )
+         ) return; /*memory error*/
+      } /*Loop: get drug resistance*/
+
+      sort_listBox_rayWidg(guiSTPtr->amrListSTPtr);
+
+      cpStr_ulCp(
+         guiSTPtr->amrListSTPtr->textAryStr[0],
+         &guiSTPtr->amrListSTPtr->textAryStr[0][1]
+      ); /*remove the space keeping header at top*/
+   } /*If: have header*/
+
+   fclose(inFILE);
+   inFILE = 0;
+} /*checkDrugs_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun15: checkRunEvent_ftbRayST
 |   - checks for an event, and if can runs the found event
 |   - also redraws the GUI
 | Input:
@@ -1010,31 +2954,32 @@ signed char
 checkRunEvent_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun07 TOC:
+   ' Fun15 TOC:
    '   - checks for an event, and if can runs found event
-   '   o fun07 sec01:
+   '   o fun15 sec01:
    '     - variable declarations
-   '   o fun07 sec02:
+   '   o fun15 sec02:
    '     - get and check events
-   '   o fun07 sec06:
+   '   o fun15 sec06:
    '     - handle running button events
-   '   o fun07 sec07:
+   '   o fun15 sec07:
    '     - return results and redraw gui
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec01:
+   ^ Fun15 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed char *tmpHeapStr = 0;
+   signed char buildReportBl = 0;
 
    /*for reading the config file*/
-   #define def_lineLen_fun07 1024
-   signed char lineStr[def_lineLen_fun07 + 8];
-   signed char logFileStr[def_lineLen_fun07 + 8];
+   #define def_lineLen_fun15 1024
+   signed char lineStr[def_lineLen_fun15 + 8];
+   signed char logFileStr[def_lineLen_fun15 + 8];
    FILE *inFILE = 0;
-   signed char refStr[def_lineLen_fun07 + 8];
+   signed char refStr[def_lineLen_fun15 + 8];
    signed long discardSL = 0; /*for reading files*/
 
    /*for buiding freezeTB run command*/
@@ -1045,6 +2990,7 @@ checkRunEvent_ftbRayST(
    struct event_rayWidg eventStackST;
    signed int indexSI = 0;
    signed int tmpSI = 0;
+   signed int siCnt = 0;
 
    struct files_rayWidg *fileSTPtr = 0;
 
@@ -1052,16 +2998,16 @@ checkRunEvent_ftbRayST(
       argAryStr[tmpSI] = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec02:
+   ^ Fun15 Sec02:
    ^   - get and check events
-   ^   o fun07 sec02 sub01:
+   ^   o fun15 sec02 sub01:
    ^     - get event and check entery event
-   ^   o fun07 sec02 sub02:
+   ^   o fun15 sec02 sub02:
    ^     - check which event I am running
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun07 Sec02 Sub01:
+   * Fun15 Sec02 Sub01:
    *   - get event and check entery event
    \*****************************************************/
 
@@ -1069,12 +3015,23 @@ checkRunEvent_ftbRayST(
 
    indexSI =
       get_event_rayWidg(
-         1,                  /*handel focus changes*/
-         draw_gui_ftbRayST,  /*redraw GUI for presses*/
-         guiSTPtr,           /*has GUI to redraw*/
-         &eventStackST,      /*has events*/
-         guiSTPtr->widgSTPtr /*has widgets*/
+         1,                 /*handel focus changes*/
+         draw_gui_ftbRayST, /*redraw GUI for presses*/
+         guiSTPtr,          /*has GUI to redraw*/
+         1,                 /*only scale for HDPI screen*/
+         &eventStackST,     /*has events*/
+         guiSTPtr->widgSTPtr/*has widgets*/
       );
+
+   glob_maxWidgWidthSI = 240;
+   glob_widthPrefixEntrySI = def_entryWidth_ftbRayST;
+
+   if(guiSTPtr->widgSTPtr->xScaleF > 1)
+   { /*If: need to scale widget size*/
+      glob_maxWidgWidthSI *= guiSTPtr->widgSTPtr->xScaleF;
+      glob_widthPrefixEntrySI *=
+         guiSTPtr->widgSTPtr->xScaleF;
+   } /*If: need to scale widget size*/
 
    /*not worried, bucause this will check if the entry
    `  box id matches the found id or is not active. So, it
@@ -1095,62 +3052,135 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun07_sec07;
+      goto done_fun15_sec07;
+   } /*If: was a entry box input event*/
+
+
+   /*entry box's for getting AMR support settings for
+   `  buildind the output
+   */
+   tmpSI =
+      entryEvent_rayWidg(
+         guiSTPtr->minAmrPercEntryIdSI,/*id of entry box*/
+         guiSTPtr->amrSupPosArySI,/*cursor/scroll pos*/
+         guiSTPtr->amrSupStr,   /*text in entry box*/
+         guiSTPtr->amrSupLenSI,   /*string length*/
+         100,                   /*max percent allowd*/
+         floatStrCheck_rayWidg,    /*check function*/
+         &eventStackST,
+         guiSTPtr->widgSTPtr
+      ); /*add any keyboard inputs to entry box*/
+
+   if(tmpSI >= 0)
+   { /*If: was a entry box input event*/
+      guiSTPtr->amrSupLenSI = tmpSI;
+      goto done_fun15_sec07;
+   } /*If: was a entry box input event*/
+
+   tmpSI =
+      entryEvent_rayWidg(
+         guiSTPtr->minAmrIndelPercEntryIdSI,
+         guiSTPtr->indelSupPosArySI,/*cursor/scroll pos*/
+         guiSTPtr->indelSupStr,   /*text in entry box*/
+         guiSTPtr->indelSupLenSI,   /*string length*/
+         100,                   /*max percent allowd*/
+         floatStrCheck_rayWidg,    /*check function*/
+         &eventStackST,
+         guiSTPtr->widgSTPtr
+      ); /*add any keyboard inputs to entry box*/
+
+   if(tmpSI >= 0)
+   { /*If: was a entry box input event*/
+      guiSTPtr->indelSupLenSI = tmpSI;
+      goto done_fun15_sec07;
+   } /*If: was a entry box input event*/
+
+   tmpSI =
+      listBoxEvent_rayWidg(
+         guiSTPtr->amrTblIdSI,   /*id of list box*/
+         guiSTPtr->amrListSTPtr, /*has list box items*/
+         &eventStackST,
+         guiSTPtr->widgSTPtr
+      ); /*add any keyboard inputs to entry box*/
+
+   if(tmpSI >= 0)
+   { /*If: was a entry box input event*/
+      guiSTPtr->prefixLenSI = tmpSI;
+      goto done_fun15_sec07;
    } /*If: was a entry box input event*/
 
    /*****************************************************\
-   * Fun07 Sec02 Sub02:
+   * Fun15 Sec02 Sub02:
    *   - check which event I am running
    \*****************************************************/
 
    if(eventStackST.idSI == guiSTPtr->fqButIdSI)
-      goto getFqFiles_fun07_sec06_sub02;
+      goto getFqFiles_fun15_sec06_sub02;
 
    else if(eventStackST.idSI == guiSTPtr->outDirIdSI)
-      goto getOutDir_fun07_sec06_sub03;
+      goto getOutDir_fun15_sec06_sub03;
 
    else if(eventStackST.idSI == guiSTPtr->configIdSI)
-      goto getConfigFile_fun07_sec06_sub04;
+      goto getConfigFile_fun15_sec06_sub04;
 
    else if(eventStackST.idSI == guiSTPtr->runIdSI)
-      goto runFtb_fun07_sec06_sub06;
+      goto runFtb_fun15_sec06_sub06;
+
+   else if(
+      eventStackST.idSI == guiSTPtr->reportGuiIdSI
+   ) goto reportMenu_fun15_sec06_sub10;
+
+   else if(eventStackST.idSI==guiSTPtr->inputGuiIdSI)
+      goto inputMenu_fun15_sec06_sub07;
+
+   else if(eventStackST.idSI == guiSTPtr->outGuiIdSI)
+      goto outputMenu_fun15_sec06_sub08;
+
+   else if(eventStackST.idSI == guiSTPtr->amrsGuiIdSI)
+      goto amrTblMenu_fun15_sec06_sub0y;
+
+   else if(eventStackST.idSI==guiSTPtr->getPrefixButIdSI)
+       goto getFtbPrefix_fun15_sec06_sub11;
+
+   else if(eventStackST.idSI == guiSTPtr->getOutButSI)
+      goto buildOutReport_fun15_sec06_sub0x;
 
    else if(eventStackST.parIdSI == guiSTPtr->mesgBoxIdSI)
-      goto mesgBox_fun07_sec06_sub01;
+      goto mesgBox_fun15_sec06_sub01;
 
    else if(
       eventStackST.parIdSI == guiSTPtr->fileBrowserIdSI
-   ) goto fileBrowser_fun07_sec06_sub05;
+   ) goto fileBrowser_fun15_sec06_sub05;
 
-   goto done_fun07_sec07;
+   goto done_fun15_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec06:
+   ^ Fun15 Sec06:
    ^   - handle running button events
-   ^   o fun07 sec06 sub01:
+   ^   o fun15 sec06 sub01:
    ^     - message box event
-   ^   o fun07 sec06 sub02:
+   ^   o fun15 sec06 sub02:
    ^     - get fastq files event
-   ^   o fun07 sec06 sub03:
+   ^   o fun15 sec06 sub03:
    ^     - get output directory event
-   ^   o fun07 sec06 sub04:
+   ^   o fun15 sec06 sub04:
    ^     - get configuration file event
-   ^   o fun07 sec06 sub05:
+   ^   o fun15 sec06 sub05:
    ^     - file browser event actions
-   ^   o fun07 sec06 sub06:
+   ^   o fun15 sec06 sub06:
    ^     - run event actions
-   ^   o fun07 sec06 sub07:
+   ^   o fun15 sec06 sub07:
    ^     - button pressed to build the output report
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun07 Sec06 Sub01:
+   * Fun15 Sec06 Sub01:
    *   - message box event
    \*****************************************************/
 
-   mesgBox_fun07_sec06_sub01:;
+   mesgBox_fun15_sec06_sub01:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
 
       mesgBoxEvent_rayWidg(
          2, /*rease key event*/
@@ -1158,16 +3188,16 @@ checkRunEvent_ftbRayST(
          eventStackST.idSI,
          guiSTPtr->widgSTPtr
       );
-      goto done_fun07_sec07;
+      goto done_fun15_sec07;
 
    /*****************************************************\
-   * Fun07 Sec06 Sub02:
+   * Fun15 Sec06 Sub02:
    *   - get fastq files event
    \*****************************************************/
 
-   getFqFiles_fun07_sec06_sub02:;
+   getFqFiles_fun15_sec06_sub02:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -1180,16 +3210,16 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select fastq files to run"
       );
-      goto done_fun07_sec07;
+      goto done_fun15_sec07;
 
    /*****************************************************\
-   * Fun07 Sec06 Sub03:
+   * Fun15 Sec06 Sub03:
    *   - get output directory event
    \*****************************************************/
 
-   getOutDir_fun07_sec06_sub03:;
+   getOutDir_fun15_sec06_sub03:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -1202,16 +3232,16 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select output folder"
       );
-      goto done_fun07_sec07;
+      goto done_fun15_sec07;
 
    /*****************************************************\
-   * Fun07 Sec06 Sub04:
+   * Fun15 Sec06 Sub04:
    *   - get configuration file event
    \*****************************************************/
 
-   getConfigFile_fun07_sec06_sub04:;
+   getConfigFile_fun15_sec06_sub04:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -1224,39 +3254,43 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select FTB configuration file"
       );
-      goto done_fun07_sec07;
+      goto done_fun15_sec07;
 
    /*****************************************************\
-   * Fun07 Sec06 Sub05:
+   * Fun15 Sec06 Sub05:
    *   - file browser event actions
-   *   o fun07 sec06 sub05 cat01:
+   *   o fun15 sec06 sub05 cat01:
    *     - run file brower event
-   *   o fun07 sec06 sub05 cat02:
+   *   o fun15 sec06 sub05 cat02:
    *     - cancel event
-   *   o fun07 sec06 sub05 cat03:
+   *   o fun15 sec06 sub05 cat03:
    *     - selected output directory
-   *   o fun07 sec06 sub05 cat04:
+   *   o fun15 sec06 sub05 cat04:
    *     - selected configuration file
-   *   o fun07 sec06 sub05 cat05:
+   *   o fun15 sec06 sub05 cat05:
    *     - selected fastq files
-   *   o fun07 sec06 sub05 cat05:
+   *   o fun15 sec06 sub05 cat05:
    *     - error or no event
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec06 Sub05 Cat01:
+   + Fun15 Sec06 Sub05 Cat01:
    +   - run file brower event
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fileBrowser_fun07_sec06_sub05:;
+   fileBrowser_fun15_sec06_sub05:;
       switch(guiSTPtr->browserSC)
       { /*Switch: find which browser using*/
-         case 0: fileSTPtr = guiSTPtr->fqFileSTPtr; break;
-         case 1: fileSTPtr = guiSTPtr->outDirSTPtr; break;
+         case 0: fileSTPtr = guiSTPtr->fqFileSTPtr;
+                 break;
+         case 1: fileSTPtr = guiSTPtr->outDirSTPtr;
+                 break;
          case 2: fileSTPtr = guiSTPtr->configFileSTPtr;
                  break;
+         case 3: fileSTPtr = guiSTPtr->oldFtbFileSTPtr;
+                 break;
 
-         default: goto done_fun07_sec07;
+         default: goto done_fun15_sec07;
            /*invalid option*/
       } /*Switch: find which browser using*/
 
@@ -1269,7 +3303,7 @@ checkRunEvent_ftbRayST(
          );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub05 Cat02:
+      + Fun15 Sec06 Sub05 Cat02:
       +   - cancel event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1280,11 +3314,11 @@ checkRunEvent_ftbRayST(
             guiSTPtr->widgSTPtr
           ); /*use hit cancel*/
 
-          goto done_fun07_sec07;
+          goto done_fun15_sec07;
       } /*If: hit cancel*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub05 Cat03:
+      + Fun15 Sec06 Sub05 Cat03:
       +   - selected output directory
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1307,16 +3341,16 @@ checkRunEvent_ftbRayST(
                      fileSTPtr
                   );
                if(! tmpHeapStr)
-                  goto err_fun07_sec07;
+                  goto err_fun15_sec07;
 
                cpStr_ulCp(guiSTPtr->outDirStr,tmpHeapStr);
                free(tmpHeapStr);
                tmpHeapStr = 0;
-               goto done_fun07_sec07;
+               goto done_fun15_sec07;
             /*Case: output directory selected*/
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun07 Sec06 Sub05 Cat04:
+            + Fun15 Sec06 Sub05 Cat04:
             +   - selected configuration file
             \+++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1330,7 +3364,7 @@ checkRunEvent_ftbRayST(
                      fileSTPtr
                   );
                if(! tmpHeapStr)
-                  goto err_fun07_sec07;
+                  goto err_fun15_sec07;
 
                cpStr_ulCp(
                   guiSTPtr->configFileStr,
@@ -1338,11 +3372,44 @@ checkRunEvent_ftbRayST(
                );
                free(tmpHeapStr);
                tmpHeapStr = 0;
-               goto done_fun07_sec07;
+               goto done_fun15_sec07;
             /*Case: configuration file selected*/
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun07 Sec06 Sub05 Cat05:
+            + Fun15 Sec06 Sub05 Cat05:
+            +   - get old ftb prefix
+            \+++++++++++++++++++++++++++++++++++++++++++*/
+
+            case 3:
+            /*Case: select old ftb prefix*/
+               tmpSI = 0;
+               tmpHeapStr =
+                  getFile_files_rayWidg(
+                     &tmpSI,
+                     0, /*only selected items*/
+                     fileSTPtr
+                  );
+               if(! tmpHeapStr)
+                  goto err_fun15_sec07;
+
+               cpStr_ulCp(
+                  guiSTPtr->filePrefixStr,
+                  tmpHeapStr
+               );
+               free(tmpHeapStr);
+               tmpHeapStr = 0;
+
+               /*remove suffix ("-depths.tsv") ftb adds*/
+               tmpHeapStr = guiSTPtr->filePrefixStr;
+               tmpHeapStr += endStr_ulCp(tmpHeapStr) - 11;
+               *tmpHeapStr = 0;
+               tmpHeapStr = 0;
+
+               goto done_fun15_sec07;
+            /*Case: select old ftb prefix*/
+
+            /*+++++++++++++++++++++++++++++++++++++++++++\
+            + Fun15 Sec06 Sub05 Cat06:
             +   - selected fastq files
             \+++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1361,7 +3428,7 @@ checkRunEvent_ftbRayST(
                   if(tmpSI < 0)
                       break;
                   else if(! tmpHeapStr)
-                     goto err_fun07_sec07;
+                     goto err_fun15_sec07;
 
                   if(
                      add_str_ptrAry(
@@ -1369,60 +3436,60 @@ checkRunEvent_ftbRayST(
                         guiSTPtr->fqStrSTPtr,
                         guiSTPtr->fqStrSTPtr->lenSL
                      )
-                  ) goto err_fun07_sec07;
+                  ) goto err_fun15_sec07;
 
                   free(tmpHeapStr);
                   tmpHeapStr = 0;
                } /*Loop: get fastq files*/
 
-               goto done_fun07_sec07;
+               goto done_fun15_sec07;
             /*Case: fastq files selected*/
          } /*Switch: find which browser using*/
       } /*Else If: files were selected*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub05 Cat05:
+      + Fun15 Sec06 Sub05 Cat05:
       +   - error or no event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       else if(tmpSI < -2)
-         goto err_fun07_sec07;
+         goto err_fun15_sec07;
 
-      goto done_fun07_sec07;
+      goto done_fun15_sec07;
 
    /*****************************************************\
-   * Fun07 Sec06 Sub06:
+   * Fun15 Sec06 Sub06:
    *   - run event actions
-   *   o fun07 sec06 sub06 cat01:
+   *   o fun15 sec06 sub06 cat01:
    *     - check if everything was input
-   *   o fun07 sec06 sub06 cat02:
+   *   o fun15 sec06 sub06 cat02:
    *     - read in the config file
-   *   o fun07 sec06 sub06 cat03:
+   *   o fun15 sec06 sub06 cat03:
    *     - build prefix & make output directory
-   *   o fun07 sec06 sub06 cat04:
+   *   o fun15 sec06 sub06 cat04:
    *     - build the log file
-   *   o fun07 sec06 sub06 cat05:
+   *   o fun15 sec06 sub06 cat05:
    *     - check if can run minimap2
-   *   o fun07 sec06 sub06 cat06:
+   *   o fun15 sec06 sub06 cat06:
    *     - find length of minimap2 command and get memory
-   *   o fun07 sec06 sub06 cat07:
+   *   o fun15 sec06 sub06 cat07:
    *     - build minimap2 command
-   *   o fun07 sec06 sub06 cat08:
+   *   o fun15 sec06 sub06 cat08:
    *     - add the -sam <file>.sam entry to ftb
-   *   o fun07 sec06 sub06 cat09:
+   *   o fun15 sec06 sub06 cat09:
    *     - run minimap2
-   *   o fun07 sec06 sub06 cat10:
+   *   o fun15 sec06 sub06 cat10:
    *     - if cannot, copy fastq files to ftb command
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec06 Sub06 Cat01:
+   + Fun15 Sec06 Sub06 Cat01:
    +   - check if everything was input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   runFtb_fun07_sec06_sub06:;
+   runFtb_fun15_sec06_sub06:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
 
       if(guiSTPtr->fqStrSTPtr->lenSL <= 0)
       { /*If: no fastq files input*/
@@ -1435,7 +3502,7 @@ checkRunEvent_ftbRayST(
             (signed char *) "no fastq files input"
          );
 
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
       } /*If: no fastq files input*/
 
       else if(guiSTPtr->prefixLenSI <= 0)
@@ -1454,11 +3521,11 @@ checkRunEvent_ftbRayST(
                guiSTPtr->inPrefixStr,
                (signed char *) "FTB_OUT"
             );
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
       } /*Else If: no prefix input*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat02:
+      + Fun15 Sec06 Sub06 Cat02:
       +   - read in the config file
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1476,7 +3543,7 @@ checkRunEvent_ftbRayST(
             getLine_fileFun(
                inFILE,
                lineStr,
-               def_lineLen_fun07,
+               def_lineLen_fun15,
                &discardSL
             )
          ){ /*Loop: read in configuration file*/
@@ -1491,25 +3558,35 @@ checkRunEvent_ftbRayST(
             argAryStr[argLenSI] =
                malloc((tmpSI + 8) * sizeof(signed char));
             if(! argAryStr[argLenSI])
-               goto err_fun07_sec07;
+               goto err_fun15_sec07;
 
-            cpWhite_ulCp(argAryStr[argLenSI], tmpHeapStr);
+            tmpHeapStr +=
+               cpWhite_ulCp(
+                 argAryStr[argLenSI],
+                 tmpHeapStr
+               );
             ++argLenSI;
-            tmpHeapStr = 0;
 
             /*copy the second entry (if is one)*/
             while(*tmpHeapStr && *tmpHeapStr < 33)
                ++tmpHeapStr;
             if(! *tmpHeapStr)
+            { /*If: no more arguments on this line*/
+               tmpHeapStr = 0;
                continue;
+            } /*If: no more arguments on this line*/
+
             tmpSI = endStr_ulCp(tmpHeapStr);
 
             argAryStr[argLenSI] =
                malloc((tmpSI + 8) * sizeof(signed char));
             if(! argAryStr[argLenSI])
-               goto err_fun07_sec07;
+            { /*If: memory error*/
+               tmpHeapStr = 0;
+               goto err_fun15_sec07;
+            } /*If: memory error*/
 
-            cpStr_ulCp(argAryStr[argLenSI], tmpHeapStr);
+            cpWhite_ulCp(argAryStr[argLenSI], tmpHeapStr);
 
             /*make sure user is not changing reference*/
             if(argAryStr[argLenSI - 1][0] != '-') ;
@@ -1531,7 +3608,7 @@ checkRunEvent_ftbRayST(
       } /*If: user provided a configuration file*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat03:
+      + Fun15 Sec06 Sub06 Cat03:
       +   - build prefix and make output directory
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1540,7 +3617,7 @@ checkRunEvent_ftbRayST(
          malloc((7 + 8) * sizeof(signed char));
 
       if(! argAryStr[argLenSI])
-         goto err_fun07_sec07;
+         goto err_fun15_sec07;
       cpStr_ulCp(
          argAryStr[argLenSI],
          (signed char *) "-prefix"
@@ -1554,7 +3631,7 @@ checkRunEvent_ftbRayST(
       argAryStr[argLenSI] =
          malloc((tmpSI + 8) * sizeof(signed char));
       if(! argAryStr[argLenSI])
-         goto err_fun07_sec07;
+         goto err_fun15_sec07;
       tmpSI =
          cpStr_ulCp(
             argAryStr[argLenSI],
@@ -1582,7 +3659,7 @@ checkRunEvent_ftbRayST(
             &guiSTPtr->mesgStr[tmpSI],
             argAryStr[argLenSI]
          );
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
       } /*If: could not make the output directory*/
 
       argAryStr[argLenSI][tmpSI++] = def_pathSep_rayWidg;
@@ -1593,7 +3670,7 @@ checkRunEvent_ftbRayST(
          );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat04:
+      + Fun15 Sec06 Sub06 Cat04:
       +   - build the log file
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1611,7 +3688,7 @@ checkRunEvent_ftbRayST(
       ++argLenSI;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat05:
+      + Fun15 Sec06 Sub06 Cat05:
       +   - check if can run minimap2
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1623,7 +3700,7 @@ checkRunEvent_ftbRayST(
       tmpSI += cpStr_ulCp(&lineStr[tmpSI], logFileStr);
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat06:
+      + Fun15 Sec06 Sub06 Cat06:
       +   - find length of minimap2 command and get memory
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1635,21 +3712,21 @@ checkRunEvent_ftbRayST(
          tmpSI += 5; /*" > \"<out_file>.sam\""*/
 
          for(
-            indexSI = 0;
-            indexSI < guiSTPtr->fqStrSTPtr->lenSL;
-            ++indexSI
+            siCnt = 0;
+            siCnt < guiSTPtr->fqStrSTPtr->lenSL;
+            ++siCnt
          ) tmpSI += 
-             guiSTPtr->fqStrSTPtr->lenAryUI[indexSI] + 3;
+             guiSTPtr->fqStrSTPtr->lenAryUI[siCnt] + 3;
              /*length for adding fastq files; + 1 for
              `  space between files; + 2 for "'s
              */
          tmpHeapStr =
             malloc((tmpSI + 8) * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun07_sec07;
+            goto err_fun15_sec07;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun07 Sec06 Sub06 Cat07:
+         + Fun15 Sec06 Sub06 Cat07:
          +   - build minimap2 command
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1664,20 +3741,20 @@ checkRunEvent_ftbRayST(
          tmpHeapStr[tmpSI] = 0;
 
          for(
-            indexSI = 0;
-            indexSI < guiSTPtr->fqStrSTPtr->lenSL;
-            ++indexSI
+            siCnt = 0;
+            siCnt < guiSTPtr->fqStrSTPtr->lenSL;
+            ++siCnt
          ){ /*Loop: copy fastq sequences*/
             tmpHeapStr[tmpSI++] = '"';
 
             cpLen_ulCp(
                &tmpHeapStr[tmpSI],
-               guiSTPtr->fqStrSTPtr->strAry[indexSI],
-               guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
+               guiSTPtr->fqStrSTPtr->strAry[siCnt],
+               guiSTPtr->fqStrSTPtr->lenAryUI[siCnt]
             ); /*copy fastq file name*/
 
             tmpSI +=
-               guiSTPtr->fqStrSTPtr->lenAryUI[indexSI];
+               guiSTPtr->fqStrSTPtr->lenAryUI[siCnt];
             tmpHeapStr[tmpSI++] = '"';
             tmpHeapStr[tmpSI++] = ' ';
          }  /*Loop: copy fastq sequences*/
@@ -1699,14 +3776,14 @@ checkRunEvent_ftbRayST(
          tmpHeapStr[tmpSI] = 0;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun07 Sec06 Sub06 Cat08:
+         + Fun15 Sec06 Sub06 Cat08:
          +   - add the -sam <file>.sam entry to ftb
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
          argAryStr[argLenSI] =
             malloc(11 * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun07_sec07;
+            goto err_fun15_sec07;
          argAryStr[argLenSI][0] = '-';
          argAryStr[argLenSI][1] = 's';
          argAryStr[argLenSI][2] = 'a';
@@ -1718,7 +3795,7 @@ checkRunEvent_ftbRayST(
          argAryStr[argLenSI] =
             malloc((tmpSI + 13) * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun07_sec07;
+            goto err_fun15_sec07;
          cpLen_ulCp(
             argAryStr[argLenSI],
             argAryStr[argLenSI - 2],
@@ -1732,7 +3809,7 @@ checkRunEvent_ftbRayST(
          ++argLenSI;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun07 Sec06 Sub06 Cat09:
+         + Fun15 Sec06 Sub06 Cat09:
          +   - run minimap2
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1766,7 +3843,7 @@ checkRunEvent_ftbRayST(
                &guiSTPtr->mesgStr[tmpSI],
                argAryStr[argLenSI]
             );
-            goto done_fun07_sec07;
+            goto done_fun15_sec07;
          } /*If: minimap2 errored out*/
 
          free(tmpHeapStr);
@@ -1774,31 +3851,31 @@ checkRunEvent_ftbRayST(
       } /*If: minimap2 exists*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat10:
+      + Fun15 Sec06 Sub06 Cat10:
       +   - if cannot, copy fastq files to ftb command
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       else
       { /*Else: no minimap2*/
          for(
-            indexSI = 0;
-            indexSI < guiSTPtr->fqStrSTPtr->lenSL;
-            ++indexSI
+            siCnt = 0;
+            siCnt < guiSTPtr->fqStrSTPtr->lenSL;
+            ++siCnt
          ){ /*Loop: add fastq files to ftb command*/
             argAryStr[argLenSI] =
                malloc(
-                 ( guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
+                 ( guiSTPtr->fqStrSTPtr->lenAryUI[siCnt]
                   + 8 
                  ) * sizeof(signed char)
                );
 
             if(! argAryStr[argLenSI])
-               goto err_fun07_sec07;
+               goto err_fun15_sec07;
 
             cpLen_ulCp(
                argAryStr[argLenSI],
-               guiSTPtr->fqStrSTPtr->strAry[indexSI],
-               guiSTPtr->fqStrSTPtr->lenAryUI[indexSI]
+               guiSTPtr->fqStrSTPtr->strAry[siCnt],
+               guiSTPtr->fqStrSTPtr->lenAryUI[siCnt]
             ); /*copy fastq file name*/
 
             ++argLenSI;
@@ -1806,7 +3883,7 @@ checkRunEvent_ftbRayST(
       } /*Else: no minimap2*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun07 Sec06 Sub06 Cat11:
+      + Fun15 Sec06 Sub06 Cat11:
       +   - run freezeTB
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1820,26 +3897,26 @@ checkRunEvent_ftbRayST(
       fprintf(inFILE, "FreezeTB cmd:%s", str_endLine);
       fprintf(inFILE, "  freezeTB \\%s", str_endLine);
 
-      for(indexSI = 1; indexSI < argLenSI; indexSI += 2)
+      for(siCnt = 1; siCnt < argLenSI; siCnt += 2)
       { /*Loop: print freezeTB command*/
-         if(indexSI + 2 < argLenSI)
+         if(siCnt + 2 < argLenSI)
             fprintf(inFILE,
                "    %s %s \\%s",
-               argAryStr[indexSI],
-               argAryStr[indexSI + 1],
+               argAryStr[siCnt],
+               argAryStr[siCnt + 1],
                str_endLine
             );
-         else if(indexSI + 1 < argLenSI)
+         else if(siCnt + 1 < argLenSI)
             fprintf(inFILE,
                "    %s %s%s",
-               argAryStr[indexSI],
-               argAryStr[indexSI + 1],
+               argAryStr[siCnt],
+               argAryStr[siCnt + 1],
                str_endLine
             );
          else
             fprintf(inFILE,
                "    %s%s",
-               argAryStr[indexSI],
+               argAryStr[siCnt],
                str_endLine
             );
       } /*Loop: print freezeTB command*/
@@ -1857,39 +3934,259 @@ checkRunEvent_ftbRayST(
             guiSTPtr->widgSTPtr
          );
          cpStr_ulCp(guiSTPtr->mesgStr, tmpHeapStr);
-         goto done_fun07_sec07;
+         goto done_fun15_sec07;
       } /*If: had an error*/
 
       /*remove run fastq files*/
       blank_str_ptrAry(guiSTPtr->fqStrSTPtr);
-      goto buildOutReport_fun07_sec06_sub07;
+      siCnt =
+         cpStr_ulCp(
+            guiSTPtr->filePrefixStr,
+            guiSTPtr->outDirStr
+         );
+      guiSTPtr->filePrefixStr[siCnt++] =
+         def_pathSep_rayWidg;
+      siCnt +=
+         cpStr_ulCp(
+            &guiSTPtr->filePrefixStr[siCnt],
+            guiSTPtr->inPrefixStr
+         );
+      guiSTPtr->filePrefixStr[siCnt++] =
+         def_pathSep_rayWidg;
+      cpStr_ulCp(
+         &guiSTPtr->filePrefixStr[siCnt],
+         guiSTPtr->inPrefixStr
+      );
+      goto buildOutReport_fun15_sec06_sub0x;
 
    /*****************************************************\
-   * Fun07 Sec06 Sub07:
-   *   - button pressed to build the output report
+   * Fun15 Sec06 Sub07:
+   *   - got to input menu
    \*****************************************************/
 
-   /*TODO: work on the output part of the GUI*/
-   buildOutReport_fun07_sec06_sub07:;
-      goto done_fun07_sec07;
+   inputMenu_fun15_sec06_sub07:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun15_sec07;
+      hideOutput_ftbRayST(guiSTPtr);
+      hideReport_ftbRayST(guiSTPtr);
+      hideTable_ftbRayST(guiSTPtr);
+
+      inactiveAdd_widg_rayWidg(
+         guiSTPtr->inputGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      
+      hidenClear_widg_rayWidg(
+         guiSTPtr->fqButIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->fqLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->prefixEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->prefixLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->outDirIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->outDirLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->configIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->configLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->runIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      goto done_fun15_sec07;
+
+   /*****************************************************\
+   * Fun15 Sec06 Sub08:
+   *   - goto output menu
+   \*****************************************************/
+
+   outputMenu_fun15_sec06_sub08:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun15_sec07;
+      hideInput_ftbRayST(guiSTPtr);
+      hideReport_ftbRayST(guiSTPtr);
+      hideTable_ftbRayST(guiSTPtr);
+
+      inactiveAdd_widg_rayWidg(
+         guiSTPtr->outGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      if(buildReportBl)
+         goto buildOutReport_fun15_sec06_sub0x;
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->getPrefixButIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->getPrefixLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->minAmrPercEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->minAmrPercLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->minAmrIndelPercEntryIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->minAmrIndelPercLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->getOutButSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      goto done_fun15_sec07;
+
+   buildOutReport_fun15_sec06_sub0x:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun15_sec07;
+      if(! guiSTPtr->filePrefixStr[0])
+         goto done_fun15_sec07;
+
+      /*build drug resistance report*/
+      checkDrugs_ftbRayST(guiSTPtr);
+      spoligoLinGet_ftbRayST(guiSTPtr);
+      miruLinGet_ftbRayST(guiSTPtr);
+
+      goto reportMenu_fun15_sec06_sub10;
+
+   /*****************************************************\
+   * Fun15 Sec06 Sub10:
+   *   - got to report
+   \*****************************************************/
+
+   reportMenu_fun15_sec06_sub10:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun15_sec07;
+
+      hideInput_ftbRayST(guiSTPtr);
+      hideOutput_ftbRayST(guiSTPtr);
+      hideTable_ftbRayST(guiSTPtr);
+
+      inactiveAdd_widg_rayWidg(
+         guiSTPtr->reportGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->miruLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->spoligoLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->spoligoLineageLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->spoligoStrainLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      for(tmpSI=0; tmpSI < def_numDrugs_ftbRayST; ++tmpSI)
+         hidenClear_widg_rayWidg(
+            guiSTPtr->drugResRectIdSI + tmpSI,
+            guiSTPtr->widgSTPtr
+         );
+      goto done_fun15_sec07;
+
+   /*****************************************************\
+   * Fun15 Sec06 Sub11:
+   *   - get ftb prefix
+   \*****************************************************/
+
+   getFtbPrefix_fun15_sec06_sub11:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun15_sec07;
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->fileBrowserIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      cpStr_ulCp(
+         guiSTPtr->fileMesgStr,
+         (signed char *) "select a FTB output file"
+      );
+      guiSTPtr->browserSC = 3;
+      goto fileBrowser_fun15_sec06_sub05;
+
+   /*****************************************************\
+   * Fun15 Sec06 Sub0y:
+   *   - goto to the amr table
+   \*****************************************************/
+
+   amrTblMenu_fun15_sec06_sub0y:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun15_sec07;
+
+      hideInput_ftbRayST(guiSTPtr);
+      hideOutput_ftbRayST(guiSTPtr);
+      hideReport_ftbRayST(guiSTPtr);
+
+      inactiveAdd_widg_rayWidg(
+         guiSTPtr->amrsGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->amrTblIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->amrLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      goto done_fun15_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec07:
+   ^ Fun15 Sec07:
    ^   - return results and redraw gui
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto done_fun07_sec07;
+   goto done_fun15_sec07;
 
-   err_fun07_sec07:;
+   err_fun15_sec07:;
       tmpSI = 1;
-      goto ret_fun07_sec07;
+      goto ret_fun15_sec07;
 
-   done_fun07_sec07:;
+   done_fun15_sec07:;
       draw_gui_ftbRayST(guiSTPtr);
       tmpSI = 0;
-      goto ret_fun07_sec07;
+      goto ret_fun15_sec07;
 
-   ret_fun07_sec07:;
+   ret_fun15_sec07:;
       if(inFILE)
          fclose(inFILE); /*never will be stdout/in/err*/
       inFILE = 0;

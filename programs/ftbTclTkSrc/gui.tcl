@@ -129,7 +129,7 @@ set glob_lowDepthTextCol "#000004" ; # magma dark purple
       "levofloxacin"
       "linezolid"
       "moxifloxacin"
-      "penicillin-myceial-dreg"
+      "protonimid"
       "pyrazinamide"
       "rifampicin"
       "streptomycin"

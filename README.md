@@ -79,20 +79,23 @@ Here are the order of Merlin winners:
         Apr;35(4):907-14.
         doi: 10.1128/jcm.35.4.907-914.1997.
         PMID: 9157152; PMCID: PMC229700.
-  - minimap2: included for unix, recommend for windows
+  - minimap2: recommend; auto installed for Mac scripts
+    - Under the MIT license
     - [https://github.com/lh3/minimap2](
        https://github.com/lh3/minimap2)
-  - raylib: not used yet, but hoping to replace tcltk with
-    raylib for the GUI (under zlib licenense)
+  - raylib: is the base for the ftbRay GUI (graphical user
+    interface [the window])
+    - Raylib is under the zlib licenense
     - [https://github.com/raysan5/raylib](
        https://github.com/raysan5/raylib)
   - IBM Plex Mono font from fontshare.org
-    - Used in my raylib GUI I am developing
+    - Used in the raylib GUI (ftbRay)
     - Under SIL Open Font License Version 1.1
     - [https://www.fontspace.com/search?q=IBM%20Plex%20Mono](
        https://www.fontspace.com/search?q=IBM%20Plex%20Mono)
-  - tcltk to make the GUI (graphical user interface [the
-    window])
+  - tcltk was used to make the ftbTcltk GUI (graphical
+    user interface [the window])
+    - Tcltk is under the MIT license
     - [https://github.com/tcltk/tk](
        https://github.com/tcltk/tk)
     - [https://github.com/tcltk/tcl](
@@ -105,7 +108,87 @@ Here are the order of Merlin winners:
 
 # Install
 
+For the graphical user interface (GUI), you have two
+  choices. One GUI which uses TclTk or another GUI that
+  uses raylib.
+
+For Windows and Mac you also have binaries (in bin) you 
+  can install. I also included the Linux binary, but I
+  am not sure it will work.
+
+For the command line programs, installation is not
+  covered here. You can do `cd programs/<program>Src` and
+  then build the program using the make file.
+  Use `mkfile.unix` for Linux/BSD/Mac. Use `mkfile.win`
+  with `nmake` for windows.
+
 ## Linux:
+
+### raylib Linux
+
+For the acutual installtion steps, I have two options. The
+  global install and local installs. Pick the one that
+  works best for you.
+
+Install the dependiences listed in
+  [https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux](
+   https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux).
+
+Once you have installed the dependencies:
+
+```
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB/programs/ftbRaylibSrc;
+make -f mkfile.linux
+
+# this does a global install
+sudo make -f mkfile.linux install
+sudo cp -r ../../freezeTBFiles /usr/local/share;
+sudo chmod -R a+r /usr/local/share/freezeTBFiles;
+
+# for a local install do
+if [ ! -d ~/local/bin ];
+then
+   mkdir -p ~/local/bin;
+   export PATH="$PATH:~/local/bin";
+   printf 'PATH="$PATH:~/local/bin"\n' >> ~/.bashrc;
+fi; # setup your local install location
+
+make -f mkfile.linux PREFIX=~/local/bin install;
+cp -r ../../freezeTBFiles ~/Documents;
+sudo chmod -R a+r ~/Documents/freezeTBFiles;
+```
+
+I recommend installing minimap2, it is more sensitive and
+  faster then freezeTB's internal read mapper. For a
+  Debain based system (ex Ubuntu)
+  do `sudo apt-get install minimap2;`.
+
+Otherwise:
+
+```
+cd ~/Downloads;
+git clone https://github.com/lh3/mininmap2 ~/Downloads/minimap2;
+cd minimap2;
+make;
+
+# this does a global install
+sudo cp minimap2 /usr/local/bin;
+sudo chmod a+x /usr/local/bin/minimap2;
+
+# for a local install
+if [ ! -d ~/local/bin ];
+then
+   mkdir -p ~/local/bin;
+   export PATH="$PATH:~/local/bin";
+   printf 'PATH="$PATH:~/local/bin"\n' >> ~/.bashrc;
+fi; # setup your local install location
+
+# this installs the manpage for minimap2, optional
+sudo cp minimap2.1 /usr/share/man/man1;
+```
+
+### TclTk Linux
 
 For Linux I am assuming you are using a Debian based
   distribution, such as Ubuntu. However, I have not been
@@ -121,20 +204,25 @@ For Linux I am assuming you are using a Debian based
 
 ```
 git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
-cd ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB/programs/ftbTclTkSrc;
 make -f mkfile.unix
 sudo make -f mkfile.unix install
 ```
 
 ## Mac
 
+There are binararies in the `bin` folder. However, Mac has
+  requires apps/programs to be signed by a person with a
+  developer account or the user to manually flag it as ok.
+
 You can install freezTB in multiple ways. The easiest way
-  is using the Mac installer script. The harder way is
-  from source.
+  is using one of the Mac installer scripts. Both the
+  raylib and TclTk install scripts install freezeTB and
+  minimap2 locally.
 
-## Easy way:
+The harder way is from source (not covered here).
 
-### To install freezeTB
+### Mac; easy way pre-steps
 
 You may get a request to install xcode. This is Mac
   developer software and is needed to compile the code.
@@ -143,12 +231,31 @@ Xcode may take a bit to install and you may have to
   retry a few times. After xcode is installed then
   run `cd ~/Downloads/freezeTB; sh macInstall;` again.
 
-This is the local install method.
+You can check/install xcode by running this command here.
 
-Download freezeTB from github and then use the
-  `macInstall` script to install freezeTB, TclTk, and
-  minimap2. Then if you want graphs, install R with
-  PNG support.
+```
+export MACOSX_DEPLOYMENT_TARGET=10.9 && \
+xcodeHere="$(xcode-select -p 1/dev/null;echo $?)"; \
+if [ "$xcodeHere" -ne 0 ]; then\
+   xcode-select --install; \
+fi; \
+```
+
+### Mac raylib Easy way:
+
+Open a terminal (apps->terminal). Then copy the code
+  beneath into the terminal and hit enter/return.
+
+```
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB;
+sh macRayInstall;
+```
+
+Do not worry about the Rec errors at the end. This is
+  a failed attempt to setup the icon.
+
+### Mac TclTk Easy way:
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.
@@ -162,249 +269,18 @@ sh macInstall
 Do not worry about the Rec errors at the end. This is
   a failed attempt to setup the icon.
 
-For a global install (every user) you need `sudo` (root)
-  privleges. Here are the commands.
-
-```
-git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
-cd ~/Downloads/freezeTB;
-sed '3s/^/#/; 7,$s/^#//;' macInstall > tmp.sh;
-sh tmp.sh;
-rm tmp.sh;
-```
-
-Enter your password when prompted.
-
-## Harder way:
-
-1. Install homebrew [https://brew.sh/](https://brew.sh/)
-2. Install X11 (xquartz) `brew install xquartz`
-3. Install tcltk `brew install tcl-tk`
-4. Install R `brew install R`
-5. I recommend minimap2 `brew install minimap2`
-   - Otherwise freezeTB is slow
-
-Then you can install freezeTB:
-
-```
-git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
-cd ~/Downloads/freezeTB;
-make -f mkfile.unix;
-sudo make -f mkfile.unix install;
-```
-
-This is really painfull.
-
-If you are having issues linking to tcltk, then edit the
-  `mkfile.unix` in `programs/ftbTclTkSrc`. You will see
-  three gaint if statments that are looking for X11, Tcl,
-  and Tk. Copy an `elif` line and add your paths
-  (locations) to X11, Tcl, and Tk to these if statements.
-
-You will also have another if statement looking for the
-  include directory. Make sure you path is in there.
-
-### Mac minimap2 from source
-
-If you do not want to use the brew install for minimap2
-  then you can install it from source. Linux is very
-  similar, except for x86 CPUs (non-ARM) remove
-  do `make` instead of `make arm_neon=1 aarch64=1`.
-
-```
-if [[ ! -d "/usr/local/bin" ]]; then
-   sudo mkdir -p "/usr/local/bin";
-fi
-
-if [[ ! -d "/usr/local/share" ]]; then
-   sudo mkdir -p "/usr/local/share";
-fi
-
-cd ~/Downloads
-git clone https://github.com/lh3/minimap2
-cd minimap2
-make arm_neon=1 aarch64=1
-sudo cp minimap2 /usr/local/bin
-sudo chmod a+x /usr/local/bin/minimap2
-```
+If you want graphs, install R with PNG support.
 
 ## Windows
 
-I have setup my install script to find the tcltk libraries
-  installed by magic splat. Sadly, there is no support
-  for ARM (snapdragon CPUs). So, you can only use the
-  command line version on ARM Windows.
+I would reccomend using the windows raylib exe (binary) in
+  the `bin` folder. Copy `ftbRay.exe` (may be `ftbRay`) to
+  your desktop. Then copy the `freezeTBFiles` to your
+  desktop.
 
-### current method
-
-Best way I found. It relies on visual 2022 build tools
-  being installed.
-
-- install tctlk 8.6 from magic splat
-  - [https://sourceforge.net/projects/magicsplat/files/magicsplat-tcl/](
-     https://sourceforge.net/projects/magicsplat/files/magicsplat-tcl/)
-  - download the tcl-8.616-installer-1.16.0-x64.msi file
-- Install visual studio or at least the developer console
-   from visual studio
-   - [https://visualstudio.microsoft.com/downloads/](
-      https://visualstudio.microsoft.com/downloads/)
-   - You can either install the full visual studio
-     program or if you just want the tools go
-     to `tools for visual studio`
-     then select `build tools for visual studio`
-   - While installing it will prompt you for what options
-     you want to install, select the c++ development, it
-     should be the computer monitor picture in the upper
-     left corner
-- Double click `winInstall.bat` in the `windows` folder
-  - to install globaly; run as administratory
-   (right click->run as administrator)
-
-If you are on an ARM CPU, open a developer console (see if
-  failed). Then `cd "%homePath%\Downloads\freezeTB\programs\freezeTBSrc\`.
-  After that do `nmake /F mkfile.win`. Copy
-  the `freezeTB.exe` to a convient location. This will
-  give you the command line freezeTB program.
-
-### if failed
-
-Likley because the `winInstall.bat` script could not
-  activate the developer enviroment. You can activate
-  this by opening a developer console.
-
-If it did not install, then open a developer console (run
-  as administrator for a global install)
-  (start menu->visual studio->x64 native tools command prompt).
-  Then type `"cd %homePath%\freezeTB\windows"` and hit
-  enter.  Then type `winInstall.bat` and hit enter. At this
-  point freezeTB should be installed. Type `exit` and hit
-  enter.
-
-Currently the graphing step does not work in windows due
-  to a windows error that causes Rscript to error out
-  when called by tcl. However, you can build the graphs
-  manually by opening the windows terminal.
-
-```"%PROGRAMFILES%\R\R-<R version>\bin\Rscript.exe" "%PROGRAMFILES%\freezeTB\graphAmpDepth.r" -who "%HOMEPATH%\Documents\freezeTBFiles\amrDb.tsv" -stats "%HOMEPATH%/path/to/FTB_output/<prefix>-depths.tsv -prefix "%HOMEPATH%/path/to/FTB_output/<prefix>```
-
-The <R version> needs to be filled with the version
-  number of R. You can find this by going
-  to `C:\Program Files\R`.
-
-The <prefix> is the prefix for the output files from
-  freezTB.
-
-![
-  Picture showing how to open developer console
-](windows10devConsole.png)
-
-### Windows Minimap2
-
-I do not include a minimap2.exe compiled binary in
-  the `windows` folder to avoid any weird issues. So, if
-  you want minimap2, you will have to build it your self.
-
-If your computer's CPU is an ARM CPU, such as a snapdragon
-  CPU, you will need to compile minimap2 from source using
-  the `-neon=1` and `-aarch64=1` flags (assuming minigw
-  has an ARM release).
-
-First install Cygwin using the setup-x86_64.exe (is a
-  link):
-
-[https://cygwin.com/install.html](
-  https://cygwin.com/install.html)
-
-When at "Select Packages" menu for Cygwin install:
-
-- Search for "make" then select the package named make.
-  - Ensure you are looking at the "full" and not the
-    "pending list"
-  - Change "Skip" to make version number with dropdown
-    menu (choose most recent non-testing version)
-  - Do not install gcc (it cannot statically link)
-- Select the mingw64-x86_64-gcc-core entry
-- Select the mingw64-x86_64-zlib entry
-
-Download minimap2 to your downloads folder
-
-[https://github.com/lh3/minimap2](
- https://github.com/lh3/minimap2)
-
-Unzip the minimap2-master folder (right click->extract)
-
-Open a Cygwin terminal (run Cygwin). Then move into
-  minimap2's directory 
-  (`cd c:/Users/<user name>/Downloads/minimap2-master/minimap2-master`).
-  - For me `cd c:/Users/Jeremy/Downloads/minimap2-master/minimap2-master`
-
-Build minimap2 (x86 [intel/amd])
-  with `make CC=x86_64-w64-mingw32-gcc CFLAGS=--static`.
-  You will need --static here to avoid needing .dll files.
-
-Copy minimap2 to your freezeTB install location or into
-  your PATH.
-
-`copy minimap2.exe "C:\Users\<user_name>\Downloads\freezeTB\winBin"`
-
-Or, if you already installed freezeTB, copy minimap2.exe
-  to your install location. It is
-  either `"C:\Users\<user_name>\appData\local\freezeTB"`
-  or if you ran the winInstall script as an administrator
-  it is in `"C:\Program Files\freezeTB"`.
-
-For appData do
-   do `copy minimap2.exe "C:\Users\<user_name>\appData\local\freezeTB"`
-
-For program files (global) do
-   do `copy minimap2.exe "C:\Program Files\freezeTB"`
-
-# Uninstalling freezeTB
-
-The uninstall scripts will uninstall the freezeTB
-  programs, but will not uninstall the depenencies/auto
-  installed programs. For Mac this is homebrew, minimap2, 
-  R, xQuartz, and TclTk. For Linux and windows you will
-  not remove TclTk, visual studio build tools (windows),
-  R, and minimap2 (windows will remove).
-
-## Mac
-
-```
-cd ~/Downloads/freezeTB;
-sh macUninstall;
-```
-
-## Unix (Linux)
-
-```
-cd ~/Downloads/freezeTB
-sudo make -f mkfile.unixUninstall
-```
-
-To uninstall, but not remove the freezeTB databases in you
-  Documents directory, do.
-
-```
-cd ~/Downloads/freezeTB
-sudo make -f mkfile.unixUninstall rmInstall
-```
-
-If you installed freezeTB to a different location using
-  `make PREFIX=/path/to/new/location -f mkfile.unix install`,
-  then do
-
-```
-cd ~/Downloads/freezeTB
-sudo make PREFIX=/path/to/install/location -f mkfile.unixUninstall
-```
-
-## Windows
-
-To uninstall; double click `winUninstall.bat` in `windows`
-  folder.
-  - to remove globaly; run as administratory
-   (right click->run as administrator)
+There is a TclTk version, but it requires installing Magic
+  splat and visual studio build tools. The raylib version
+  is the binary.
 
 # Run
 

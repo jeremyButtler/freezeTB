@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+
+# make install location
+if [ ! -d "${HOME}/local/bin" ];
+then
+   mkdir "${HOME}/local/bin";
+   export PATH="$PATH:${HOME}/local/bin";
+   printf 'PATH="$PATH:${HOME}/local/bin"\n' >> ~/.bashrc;
+fi;
+
+# compile ftbRay
+make -f mkfile.mac -C programs/ftbRaylibSrc;
+make \
+    -f mkfile.mac \
+    -C programs/ftbRaylibSrc \
+    PREFIX="${HOME}/local/bin" \
+    install;
+
+cp -r freezeTBFiles ~/Documents;
+chmod -R a+r ~/Documents/freezeTBFiles;
+
+# install minimap2
+git clone https://github.com/lh3/minimap2;
+cd minimap2;
+make arm_neon=1 aarch64=1;
+cp minimap2 "${HOME}/local/bin";
+chmod a+x "${HOME}/local/bin/minimap2";
+
+# make the icon (or well, try to, it always fails)
+ln -s "$HOME/local/bin/ftbRay" "${HOME}/Desktop/freezeTB";
+cp FTB-icon.ico /tmp/FTB-icon.ico;
+sips -i /tmp/FTB-icon.ico;
+DeRez -only icns /tmp/FTB-icon.ico > /tmp/FTB-icon.rsrc;
+Rez -append /tmp/FTB-icon.rsrc -o "${HOME}/Desktop/freezeTB";
+SetFile -a C "${HOME}/Desktop/freezeTB";
+rm /tmp/FTB-icon.*;
