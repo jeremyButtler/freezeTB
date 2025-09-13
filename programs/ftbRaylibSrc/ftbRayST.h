@@ -37,7 +37,9 @@
 '     - gets the MIRU-VNTR lineage & sets miru text output
 '   o .c fun14: checkDrugs_ftbRayST
 '     - builds the drug resistance part of the ftb report
-'   o fun15: checkRunEvent_ftbRayST
+'   o .c fun15: getDatabases_ftbRayST
+'     - get database files for freezeTB (currently Mac)
+'   o fun16: checkRunEvent_ftbRayST
 '     - checks for an event, and if can runs found event
 '     - also redraws the GUI
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -76,6 +78,7 @@ typedef struct gui_ftbRayST
       ` 3: on output amr table screen
       ` 4: on output graph screen (does not exist)
       */
+   signed char appDirStr[1024]; /*directory of ftbRay*/
    signed char curDirStr[4096]; /*current location*/
 
    signed char blinkSC;       /*status of cursor blink*/
@@ -277,7 +280,7 @@ mk_gui_ftbRayST(
 );
 
 /*-------------------------------------------------------\
-| Fun15: checkRunEvent_ftbRayST
+| Fun16: checkRunEvent_ftbRayST
 |   - checks for an event, and if can runs the found event
 |   - also redraws the GUI
 | Input:

@@ -103,7 +103,8 @@ Here are the order of Merlin winners:
 
 - Unique to freezeTB:
   - Most of the stuff in programs
-  - The icon
+    - exception is raylib and the ibmPlexMono.h file
+  - The icon and `FTB-digram.svg`
   - Everything in scripts
 
 # Install
@@ -113,8 +114,8 @@ For the graphical user interface (GUI), you have two
   uses raylib.
 
 For Windows and Mac you also have binaries (in bin) you 
-  can install. I also included the Linux binary, but I
-  am not sure it will work.
+  can install. For Linux, things are not as reliable, so
+  it is better to build from source.
 
 For the command line programs, installation is not
   covered here. You can do `cd programs/<program>Src` and
@@ -211,14 +212,15 @@ sudo make -f mkfile.unix install
 
 ## Mac
 
-There are binararies in the `bin` folder. However, Mac has
-  requires apps/programs to be signed by a person with a
-  developer account or the user to manually flag it as ok.
-
-You can install freezTB in multiple ways. The easiest way
-  is using one of the Mac installer scripts. Both the
-  raylib and TclTk install scripts install freezeTB and
-  minimap2 locally.
+The easy way is to unzip the `freezeTB.app.zip` folder,
+  copy it to your desired location (ex: your Desktop),
+  then get around Mac's gatekeeper system
+  with `sudo xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
+  This will install the raylib system.
+  
+For a source install, the easiest way is using one of the
+  Mac installer scripts. Both the raylib and TclTk install
+  scripts install freezeTB and minimap2 locally.
 
 The harder way is from source (not covered here).
 
@@ -282,13 +284,33 @@ There is a TclTk version, but it requires installing Magic
   splat and visual studio build tools. The raylib version
   is the binary.
 
+**TODO: add the binary**
+
+Harder way, install the visual studio build tools, then
+  open a developer terminal, then you might be able to
+  double click `winRayInstall.bat` script in the `windows`
+  directory.
+
+If that fails, in a developer terminal, try:
+
+```
+cd /path/to/freezeTB;
+cd programs/ftbRaylibSrc;
+nmake /F mkfile.win
+```
+
+Put the ftbRay.exe file
+  in `/path/to/freezeTB/programs/ftbRaylibSrc` on your
+  desktop. Also, copy the `freezeTBFiles` to your desktop.
+  At this point ftbRay should run.
+
 # Run
 
 ## GUI
 
-The freezeTB icon should be on your desktop.
-
-For Windows, the freezeTB GUI needs some work.
+Doulbe click the installed freezeTB/ftbRay/ftbTclTk icon
+  to launch. Provide the fastq files by hitting
+  the `fastq` button and then hit the run button.
 
 ## Command line:
 

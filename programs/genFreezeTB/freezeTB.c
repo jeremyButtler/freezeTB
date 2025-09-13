@@ -327,9 +327,7 @@ init_set_freezeTB(
    maskPath_freezeTBPaths(setFTBST->maskPrimFileStr);
    refPath_freezeTBPaths(setFTBST->refFileStr);
    spolLineagePath_freezeTBPaths(setFTBST->spolDBFileStr);
-   spolSpacerPath_freezeTBPaths(
-      setFTBST->spolRefFileStr
-   );
+   spolSpacerPath_freezeTBPaths(setFTBST->spolRefFileStr);
 
    cpStr_ulCp(
       setFTBST->depthFlagStr,

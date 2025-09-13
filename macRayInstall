@@ -3,19 +3,20 @@
 # make install location
 if [ ! -d "${HOME}/local/bin" ];
 then
-   mkdir "${HOME}/local/bin";
+   mkdir -p "${HOME}/local/bin";
    export PATH="$PATH:${HOME}/local/bin";
    printf 'PATH="$PATH:${HOME}/local/bin"\n' >> ~/.bashrc;
 fi;
 
 # compile ftbRay
-make -f mkfile.mac -C programs/ftbRaylibSrc;
+cd programs/ftbRaylibSrc;
+make -f mkfile.mac;
 make \
     -f mkfile.mac \
-    -C programs/ftbRaylibSrc \
     PREFIX="${HOME}/local/bin" \
     install;
 
+cd ../../;
 cp -r freezeTBFiles ~/Documents;
 chmod -R a+r ~/Documents/freezeTBFiles;
 

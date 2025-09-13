@@ -6,9 +6,9 @@ CC=clang
 LD=clang
 MAKE=make
 CFLAGS=-DNONE
-coreCFLAGS=-DMAC -c -static -O3 -g -Wall -Wextra
 O=o.mac
 raylibPath=../raylib/src
+coreCFLAGS=-DMAC -c -static -O3 -g -Wall -Wextra -I$(raylibPath)
 libRayLib=$(raylibPath)/libraylib.a
 
 LDMacFlags=\

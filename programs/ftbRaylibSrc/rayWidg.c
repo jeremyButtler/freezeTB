@@ -3069,6 +3069,17 @@ get_event_rayWidg(
 
    if(eventSTPtr->keySI || eventSTPtr->scrollF != 0)
    { /*If: event using a focused widget*/
+      /*need to reduce to one movement because Mac does
+      `  not return integers. With raylib the scroll
+      `  wheel resigtars for every click, so it is always
+      `  one movement
+      */
+      if(eventSTPtr->scrollF <0 &&eventSTPtr->scrollF >-1)
+         eventSTPtr->scrollF = -1;
+      else if(
+         eventSTPtr->scrollF >0 && eventSTPtr->scrollF <1
+      ) eventSTPtr->scrollF = 1;
+
       eventSTPtr->idSI = widgSTPtr->focusSI;
 
       eventSTPtr->parIdSI =
