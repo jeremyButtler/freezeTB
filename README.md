@@ -125,17 +125,28 @@ For the command line programs, installation is not
 
 ## Linux:
 
+Bit of a pain, but it works. Would like to do binraries,
+  but I suspect I might have issues on different Linux
+  distros.
+
+I recommend installing minimap2, it is more sensitive and
+  faster then freezeTB's internal read mapper. For a
+  Debain based system (ex Ubuntu)
+  do `sudo apt-get install minimap2;`.
+
 ### raylib Linux
 
-For the acutual installtion steps, I have two options. The
-  global install and local installs. Pick the one that
-  works best for you.
+For the acutual installtion steps, you have two options.
+  The global install (all users) and local installs (only
+  you).
 
 Install the dependiences listed in
   [https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux](
    https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux).
 
 Once you have installed the dependencies:
+
+#### global install:
 
 ```
 git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
@@ -146,6 +157,14 @@ make -f mkfile.linux
 sudo make -f mkfile.linux install
 sudo cp -r ../../freezeTBFiles /usr/local/share;
 sudo chmod -R a+r /usr/local/share/freezeTBFiles;
+```
+
+#### local install:
+
+```
+git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+cd ~/Downloads/freezeTB/programs/ftbRaylibSrc;
+make -f mkfile.linux
 
 # for a local install do
 if [ ! -d ~/local/bin ];
@@ -157,36 +176,7 @@ fi; # setup your local install location
 
 make -f mkfile.linux PREFIX=~/local/bin install;
 cp -r ../../freezeTBFiles ~/Documents;
-sudo chmod -R a+r ~/Documents/freezeTBFiles;
-```
-
-I recommend installing minimap2, it is more sensitive and
-  faster then freezeTB's internal read mapper. For a
-  Debain based system (ex Ubuntu)
-  do `sudo apt-get install minimap2;`.
-
-Otherwise:
-
-```
-cd ~/Downloads;
-git clone https://github.com/lh3/mininmap2 ~/Downloads/minimap2;
-cd minimap2;
-make;
-
-# this does a global install
-sudo cp minimap2 /usr/local/bin;
-sudo chmod a+x /usr/local/bin/minimap2;
-
-# for a local install
-if [ ! -d ~/local/bin ];
-then
-   mkdir -p ~/local/bin;
-   export PATH="$PATH:~/local/bin";
-   printf 'PATH="$PATH:~/local/bin"\n' >> ~/.bashrc;
-fi; # setup your local install location
-
-# this installs the manpage for minimap2, optional
-sudo cp minimap2.1 /usr/share/man/man1;
+chmod -R a+r ~/Documents/freezeTBFiles;
 ```
 
 ### TclTk Linux
@@ -213,10 +203,12 @@ sudo make -f mkfile.unix install
 ## Mac
 
 The easy way is to unzip the `freezeTB.app.zip` folder,
-  copy it to your desired location (ex: your Desktop),
-  then get around Mac's gatekeeper system
+  copy it to your Desktop (or other desired location),
+  then you need to get around Mac's gatekeeper system
   with `sudo xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
-  This will install the raylib system.
+  The other option that might work, would bo to start
+  freezeTB from the command
+  line `~/Desktop/freezeTB.app/Contents/MacOS/ftbRay`.
   
 For a source install, the easiest way is using one of the
   Mac installer scripts. Both the raylib and TclTk install
@@ -257,7 +249,7 @@ sh macRayInstall;
 Do not worry about the Rec errors at the end. This is
   a failed attempt to setup the icon.
 
-### Mac TclTk Easy way:
+### Mac TclTk:
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.

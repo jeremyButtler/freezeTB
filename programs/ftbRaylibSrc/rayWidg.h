@@ -540,19 +540,27 @@ typedef struct Font (*fontFunction)(void);
 #define def_focusBorder_rayWidg 3
    /*how many pixels to offset focus border by*/
 
-#ifdef MAC
-   /*TODO: get offical Mac colors in here*/
-   #define def_lightGrey_rayWidg 0xE1dFE1FF /*platinum*/
-   #define def_darkGrey_rayWidg 0xC0BFC0FF  /*argent*/
-   #define def_white_rayWidg 0xF5F5F5FF     /*cultured*/
-   #define def_black_rayWidg 0x333436FF
-#else
-   /*TODO: find windows offical colors*/
-   #define def_lightGrey_rayWidg 0xBEBEBEFF
-   #define def_darkGrey_rayWidg 0x7E7E7EFF
-   #define def_white_rayWidg 0xFFFFFFFF
-   #define def_black_rayWidg 0x000000FF
-#endif
+/*darkmode color scheme*/
+#define def_backFocusDarkCol_rayWidg 0x101010ff
+   /*bacground; gui is in focus (lighter) for darkmode*/
+#define def_backDarkCol_rayWidg 0x050505ff
+   /*background; gui not in focus (darker) for darkmode*/
+
+#define def_forFocusDarkCol_rayWidg 0xdfdfdfff
+   /*forground; gui is in focus (lighter) for darkmode*/
+#define def_forDarkCol_rayWidg 0xbfbfbfff
+   /*forground; gui not in focus (lighter) for darkmode*/
+
+/*lightmode color scheme*/
+#define def_backFocusLightCol_rayWidg 0xe5e5e5ff
+   /*bacground; gui is in focus (darker) for light mode*/
+#define def_backLightCol_rayWidg 0xf5f5f5ff
+   /*background; gui not in focus for light mode*/
+
+#define def_forFocusLightCol_rayWidg 0x303030ff
+   /*forground; gui is in focus (lighter) for darkmode*/
+#define def_forLightCol_rayWidg 0x505050ff
+   /*forground; gui not in focus (lighter) for darkmode*/
 
 /*-------------------------------------------------------\
 | ST01: widg_rayWidg
@@ -603,7 +611,6 @@ widg_rayWidg{
 
    /*__________________color_scheme varaibles___________*/
    signed int guiColSI;    /*background color of GUI*/
-   signed int focusColSI;  /*color of focused border*/
 
    signed int textColSI;    /*primary text color*/
    signed int textAltColSI;
@@ -611,9 +618,6 @@ widg_rayWidg{
 
    signed int widgColSI;  /*color of a widget*/
    signed int borderColSI;/*color of the border*/
-   signed int pressColSI; /*color of widget when pressed*/
-   signed int pressBorderColSI;
-      /*color of wiget border when pressed*/
 
    signed int activeColSI; /*color of widget when active*/
    signed int activeTextColSI;

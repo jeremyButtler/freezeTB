@@ -488,20 +488,7 @@ blank_widg_rayWidg(
    widgSTPtr->winOriginalHeightSI = def_winHeight_rayWidg;
 
    /*reset the color scheme to light mode*/
-   widgSTPtr->guiColSI = def_white_rayWidg;
-   widgSTPtr->focusColSI = def_black_rayWidg;
-
-   widgSTPtr->textColSI = def_black_rayWidg;
-   widgSTPtr->textAltColSI = def_white_rayWidg;
-
-   widgSTPtr->widgColSI = def_lightGrey_rayWidg;
-   widgSTPtr->borderColSI = def_darkGrey_rayWidg;
-   widgSTPtr->pressColSI = def_darkGrey_rayWidg;
-   widgSTPtr->pressBorderColSI = def_lightGrey_rayWidg;
-
-   widgSTPtr->widgColSI = def_darkGrey_rayWidg;
-   widgSTPtr->borderColSI = def_lightGrey_rayWidg;
-   widgSTPtr->activeColSI = def_lightGrey_rayWidg;
+   checkGuiColorMode_rayWidg(widgSTPtr);
 } /*blank_widg_rayWidg*/
 
 /*-------------------------------------------------------\
@@ -1162,14 +1149,16 @@ checkTextWidth_rayWidg(
    { /*Loop: finish finding the width*/
       if(textWidthSI > widthSI)
       { /*If: hit end of text lenth*/
-         outStr[indexSI--] = 0;
-
+         if(indexSI >= 0)
+            outStr[indexSI--] = 0;
          if(indexSI >= 0)
             outStr[indexSI] = '.';
          if(indexSI >= 0)
             outStr[indexSI - 1] = '.';
          if(indexSI >= 0)
             outStr[indexSI - 2] = '.';
+         if(indexSI <= 0)
+            break;
       } /*If: hit end of text lenth*/
 
       textWidthSI =
@@ -3384,46 +3373,64 @@ void
 checkGuiColorMode_rayWidg(
    widg_rayWidg *widgSTPtr
 ){
-   /*TODO: need elevation change and border shadow*/
    if(getMode_darkLight() & 2)
    { /*If: dark mode is set*/
-      widgSTPtr->guiColSI = def_black_rayWidg;
-      widgSTPtr->focusColSI = def_white_rayWidg;
+      if( IsWindowFocused() )
+      { /*If: user is interacting with window*/
+         widgSTPtr->guiColSI =
+            def_backFocusDarkCol_rayWidg;
 
-      widgSTPtr->textColSI = def_white_rayWidg;
-      widgSTPtr->textAltColSI = def_lightGrey_rayWidg;
+         widgSTPtr->textColSI =
+            def_forFocusDarkCol_rayWidg;
+         widgSTPtr->textAltColSI =
+            def_backFocusDarkCol_rayWidg;
 
-      widgSTPtr->widgColSI = def_darkGrey_rayWidg;
-      widgSTPtr->borderColSI = def_lightGrey_rayWidg;
-      widgSTPtr->pressColSI = def_darkGrey_rayWidg;
-      widgSTPtr->pressBorderColSI =
-         def_lightGrey_rayWidg;
+         widgSTPtr->borderColSI =
+            def_forFocusDarkCol_rayWidg;
+         widgSTPtr->activeColSI =
+            def_forFocusDarkCol_rayWidg;
+      } /*If: user is interacting with window*/
 
-      widgSTPtr->widgColSI = def_darkGrey_rayWidg;
-      widgSTPtr->borderColSI= def_lightGrey_rayWidg;
-      widgSTPtr->activeColSI= def_black_rayWidg;
-      widgSTPtr->pressBorderColSI =
-         def_lightGrey_rayWidg;
+      else
+      { /*Else: window is in the background*/
+         widgSTPtr->guiColSI = def_backDarkCol_rayWidg;
+
+         widgSTPtr->textColSI = def_forDarkCol_rayWidg;
+         widgSTPtr->textAltColSI=def_backDarkCol_rayWidg;
+
+         widgSTPtr->borderColSI = def_forDarkCol_rayWidg;
+         widgSTPtr->activeColSI = def_forDarkCol_rayWidg;
+      } /*Else: window is in the background*/
    } /*If: dark mode is set*/
 
    else
    { /*Else: light mode is set*/
-      widgSTPtr->guiColSI = def_white_rayWidg;
-      widgSTPtr->focusColSI = def_black_rayWidg;
+      if( IsWindowFocused() )
+      { /*If: user is interacting with window*/
+         widgSTPtr->guiColSI =
+            def_backFocusLightCol_rayWidg;
 
-      widgSTPtr->textColSI = def_black_rayWidg;
-      widgSTPtr->textAltColSI = def_white_rayWidg;
+         widgSTPtr->textColSI =
+            def_forFocusLightCol_rayWidg;
+         widgSTPtr->textAltColSI =
+            def_backFocusLightCol_rayWidg;
 
-      widgSTPtr->widgColSI = def_lightGrey_rayWidg;
-      widgSTPtr->borderColSI = def_darkGrey_rayWidg;
-      widgSTPtr->pressColSI = def_darkGrey_rayWidg;
-      widgSTPtr->pressBorderColSI =
-         def_lightGrey_rayWidg;
+         widgSTPtr->borderColSI =
+            def_forFocusLightCol_rayWidg;
+         widgSTPtr->activeColSI =
+            def_forFocusLightCol_rayWidg;
+      } /*If: user is interacting with window*/
 
-      widgSTPtr->widgColSI = def_lightGrey_rayWidg;
-      widgSTPtr->borderColSI = def_darkGrey_rayWidg;
-      widgSTPtr->pressBorderColSI = def_lightGrey_rayWidg;
-      widgSTPtr->activeColSI = def_darkGrey_rayWidg;
+      else
+      { /*Else: window is in the background*/
+         widgSTPtr->guiColSI = def_backLightCol_rayWidg;
+
+         widgSTPtr->textColSI = def_forLightCol_rayWidg;
+         widgSTPtr->textAltColSI=def_backLightCol_rayWidg;
+
+         widgSTPtr->borderColSI = def_forLightCol_rayWidg;
+         widgSTPtr->activeColSI = def_forLightCol_rayWidg;
+      } /*Else: window is in the background*/
    } /*Else: light mode is set*/
 } /*checkGuiColorMode_rayWidg*/
 
@@ -5770,7 +5777,6 @@ rectDrawByCoord_rayWidg(
       #endif
    } /*If: drawing a focus border*/
 
-
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun081 Sec03:
    ^   - draw border around rectangle (if requested)
@@ -6157,7 +6163,7 @@ butDraw_rayWidg(
 
    unsigned int colorUI = 0;
    unsigned int borderColorUI = 0;
-   unsigned int focusColorUI = widgSTPtr->focusColSI;
+   unsigned int focusColorUI = 0;
    struct Color textCol;
 
    #define def_maxButText_fun084 32
@@ -6179,21 +6185,27 @@ butDraw_rayWidg(
    else if(
       widgSTPtr->stateAryUS[idSI] & def_inactive_rayWidg
    ){ /*Else If: button is in a disabled state*/
+      typeSC = 0; /*want both borders*/
       colorUI = widgSTPtr->guiColSI;
       borderColorUI = widgSTPtr->borderColSI;
+      focusColorUI = widgSTPtr->textAltColSI;
       textCol = GetColor(widgSTPtr->textColSI);
    } /*Else If: button is in a disabled state*/
 
-   else if(widgSTPtr->stateAryUS[idSI] &def_press_rayWidg)
-   { /*Else If: button is in a press state*/
-      colorUI = widgSTPtr->pressColSI;
-      borderColorUI = widgSTPtr->pressBorderColSI;
+   else if(
+         widgSTPtr->stateAryUS[idSI] & def_press_rayWidg
+      || widgSTPtr->stateAryUS[idSI] & def_focus_rayWidg
+   ){ /*Else If: button is in a press state*/
+      typeSC = 0; /*want border*/
+      colorUI = widgSTPtr->activeColSI;
+      borderColorUI = widgSTPtr->borderColSI;
       textCol = GetColor(widgSTPtr->textAltColSI);
    } /*Else If: button is in a press state*/
 
    else
    { /*Else If: button is in a normal state*/
-      colorUI = widgSTPtr->widgColSI;
+      typeSC = 1; /*want border*/
+      colorUI = widgSTPtr->guiColSI;
       borderColorUI = widgSTPtr->borderColSI;
       textCol = GetColor(widgSTPtr->textColSI);
    } /*Else If: button is in a normal state*/
@@ -6233,24 +6245,25 @@ butDraw_rayWidg(
    widgSTPtr->heightArySI[idSI] =
         widgSTPtr->fontHeightF
       + widgSTPtr->fontHeightF
-      / (def_widgHeightGap_rayWidg / 2);
+      / (def_widgHeightGap_rayWidg);
 
    widgSTPtr->widthArySI[idSI] +=
       widgSTPtr->fontWidthF * 2;
       /*want a one character pad around the button*/
 
    if(noDrawBl)
+   { /*If: getting coordinates only*/
+      widgSTPtr->heightArySI[idSI] +=
+         + widgSTPtr->fontHeightF
+         / (def_widgHeightGap_rayWidg);
+
       goto done_fun084_sec05;
+   } /*If: getting coordinates only*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun084 Sec04:
    ^   - draw button
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   if(widgSTPtr->stateAryUS[idSI] & def_focus_rayWidg)
-      typeSC = 3;
-   else
-      typeSC = 1;
 
    rectDraw_rayWidg(
       widgSTPtr,
@@ -6260,6 +6273,11 @@ butDraw_rayWidg(
       borderColorUI,
       focusColorUI
    );
+
+   widgSTPtr->heightArySI[idSI] +=
+      + widgSTPtr->fontHeightF
+      / (def_widgHeightGap_rayWidg);
+
 
    if(textStr)
       DrawTextEx(
@@ -6271,7 +6289,7 @@ butDraw_rayWidg(
                /*center text in x*/
             widgSTPtr->yArySI[idSI]
               + widgSTPtr->fontHeightF
-              / def_widgHeightGap_rayWidg
+              / (def_widgHeightGap_rayWidg * 2)
                /*center text on y*/
          },
          widgSTPtr->fontSizeSI,
@@ -6381,7 +6399,7 @@ entryDraw_rayWidg(
 
    unsigned int colorUI = 0;
    unsigned int borderColorUI = 0;
-   unsigned int focusColorUI = widgSTPtr->focusColSI;
+   unsigned int focusColorUI = 0;
    struct Color textCol;
    struct Vector2 textDimVect2;
 
@@ -6395,6 +6413,8 @@ entryDraw_rayWidg(
    signed int tmpSI = 0;
    signed int outLenSI = 0;
    signed int cursorPosSI = posArySI[1];
+
+   signed char typeSC = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun085 Sec02:
@@ -6411,27 +6431,31 @@ entryDraw_rayWidg(
    else if(
       widgSTPtr->stateAryUS[idSI] & def_inactive_rayWidg
    ){ /*Else If: entry box is being used*/
+      typeSC = 0; /*want no borders*/
       colorUI = widgSTPtr->guiColSI;
       borderColorUI = widgSTPtr->borderColSI;
-      textCol = GetColor(widgSTPtr->textColSI);
+      focusColorUI = widgSTPtr->textAltColSI;
+      textCol = GetColor(widgSTPtr->textAltColSI);
       cursorPosSI = -1; /*not showing cursor*/
    } /*Else If: entry box is being used*/
 
    /*will likely remove, or use lighter shade difference*/
    else if(
-      widgSTPtr->stateAryUS[idSI] & def_active_rayWidg
+         widgSTPtr->stateAryUS[idSI] & def_active_rayWidg
+      || widgSTPtr->stateAryUS[idSI] & def_focus_rayWidg
    ){ /*Else If: entry box is being used*/
+      typeSC = 0; /*want border*/
       colorUI = widgSTPtr->activeColSI;
-      borderColorUI = widgSTPtr->pressBorderColSI;
+      borderColorUI = widgSTPtr->borderColSI;
       textCol = GetColor(widgSTPtr->textAltColSI);
    } /*Else If: entry box is being used*/
 
    else
    { /*Else: not being used*/
-      colorUI = widgSTPtr->widgColSI;
+      typeSC = 1; /*want border*/
+      colorUI = widgSTPtr->guiColSI;
       borderColorUI = widgSTPtr->borderColSI;
       textCol = GetColor(widgSTPtr->textColSI);
-      cursorPosSI = -1; /*not showing cursor*/
    } /*Else: not being used*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -6592,15 +6616,10 @@ entryDraw_rayWidg(
    ^   - draw entry box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(widgSTPtr->stateAryUS[idSI] & def_focus_rayWidg)
-      tmpSI = 3;
-   else
-      tmpSI = 1;
-
    rectDraw_rayWidg(
       widgSTPtr,
       idSI,
-      (signed char) tmpSI,
+      typeSC,
       colorUI,
       borderColorUI,
       focusColorUI
@@ -7292,22 +7311,44 @@ mesgBoxDraw_rayWidg(
    ^   - draw message box
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   /*this widget's button is in hog state, so it should
+   `  take over the GUI
+   */
+   if(widgSTPtr->focusSI != idSI + 3)
+   { /*If: message box is not the priority*/
+      activeClear_widg_rayWidg(
+         widgSTPtr->focusSI,
+         widgSTPtr
+      );
+      pressClear_widg_rayWidg(
+         widgSTPtr->focusSI,
+         widgSTPtr
+      );
+      focusClear_widg_rayWidg(
+        widgSTPtr->focusSI,
+        widgSTPtr
+      );
+
+      widgSTPtr->focusSI = idSI + 3;
+      focusAdd_widg_rayWidg(idSI + 3, widgSTPtr);
+   } /*If: message box is not the priority*/
+
    rectDraw_rayWidg(
       widgSTPtr,
       idSI,
       1,       /*only draw the inner border*/
       widgSTPtr->guiColSI,
       widgSTPtr->borderColSI,
-      widgSTPtr->focusColSI
+      0
    ); /*rectangle holding message box*/
 
    rectDraw_rayWidg(
       widgSTPtr,
       idSI + 1,
       1,       /*only draw the inner border*/
-      widgSTPtr->widgColSI,
+      widgSTPtr->activeColSI,
       widgSTPtr->borderColSI,
-      widgSTPtr->focusColSI
+      0
    ); /*top border of message box*/
 
    widgSTPtr->widthArySI[idSI + 2] =
@@ -7336,28 +7377,6 @@ mesgBoxDraw_rayWidg(
    ^ Fun089 Sec06:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*this widget's button is in hog state, so it should
-   `  take over the GUI
-   */
-   if(widgSTPtr->focusSI != idSI + 3)
-   { /*If: message box is not the priority*/
-      activeClear_widg_rayWidg(
-         widgSTPtr->focusSI,
-         widgSTPtr
-      );
-      pressClear_widg_rayWidg(
-         widgSTPtr->focusSI,
-         widgSTPtr
-      );
-      focusClear_widg_rayWidg(
-        widgSTPtr->focusSI,
-        widgSTPtr
-      );
-
-      widgSTPtr->focusSI = idSI + 3;
-      focusAdd_widg_rayWidg(idSI + 3, widgSTPtr);
-   } /*If: message box is not the priority*/
 
    return widgSTPtr->widthArySI[idSI];
 
@@ -8916,6 +8935,10 @@ draw_listBox_rayWidg(
    signed char textStr[lenStr_fun115 + 8];
    signed char tmpTextStr[lenStr_fun115 + 8];
    signed char selectBl = 0;
+   unsigned int onColUI = 0;
+   unsigned int onBorderUI = 0;
+
+   signed char typeSC = 0;
 
    struct Color textCol;
    struct Color selectTextCol;
@@ -8934,25 +8957,43 @@ draw_listBox_rayWidg(
 
    else if( inactiveGet_widg_rayWidg(idSI, widgSTPtr) )
    { /*Else If: list box is in an inactive state*/
-       colorUI = (unsigned int) widgSTPtr->guiColSI;
-       borderColorUI = (unsigned int)
-          widgSTPtr->borderColSI;
+       typeSC = 0;
+
+       colorUI = widgSTPtr->guiColSI;
+       borderColorUI = widgSTPtr->borderColSI;
        textCol = GetColor(widgSTPtr->textColSI);
 
-       selectColUI =(unsigned int) widgSTPtr->activeColSI;
-       selectTextCol = GetColor(widgSTPtr->textAltColSI);
+       selectColUI = widgSTPtr->textAltColSI;
+       selectTextCol = GetColor(widgSTPtr->guiColSI);
+
+       focusColorUI = widgSTPtr->textAltColSI;
    } /*Else If: list box is in an inactive state*/
 
+   else if(
+         widgSTPtr->stateAryUS[idSI] & def_focus_rayWidg
+      || widgSTPtr->stateAryUS[idSI] & def_active_rayWidg
+   ){ /*Else If: user is unsing list box*/
+       typeSC = 0;
+
+       colorUI = widgSTPtr->activeColSI;
+       borderColorUI = widgSTPtr->borderColSI;
+       textCol = GetColor(widgSTPtr->textAltColSI);
+
+       selectColUI = widgSTPtr->guiColSI;
+       selectTextCol = GetColor(widgSTPtr->textColSI);
+   } /*Else If: user is unsing list box*/
+
    else
-   { /*Else: user is unsing list box*/
-       colorUI = (unsigned int) widgSTPtr->widgColSI;
-       borderColorUI = (unsigned int)
-          widgSTPtr->borderColSI;
+   { /*Else: not working with list box*/
+       typeSC = 1;
+
+       colorUI = widgSTPtr->guiColSI;
+       borderColorUI = widgSTPtr->borderColSI;
        textCol = GetColor(widgSTPtr->textColSI);
 
-       selectColUI =(unsigned int) widgSTPtr->activeColSI;
+       selectColUI = widgSTPtr->activeColSI;
        selectTextCol = GetColor(widgSTPtr->textAltColSI);
-   } /*Else: user is unsing list box*/
+   } /*Else: not working with list box*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun115 Sec03:
@@ -9039,7 +9080,7 @@ draw_listBox_rayWidg(
    /*find the width of the list box*/
    itemSI =
         listSTPtr->lineWidthSI
-      + widgSTPtr->fontWidthF * 2;
+      + widgSTPtr->fontWidthF * 3; /**3 for # and >*/
 
    if(listSTPtr->maxWidthSI <= 0)
       widgSTPtr->widthArySI[idSI] = itemSI;
@@ -9067,15 +9108,10 @@ draw_listBox_rayWidg(
    *   - draw rectangle for list box
    \*****************************************************/
 
-   if( focusGet_widg_rayWidg(idSI, widgSTPtr) )
-      siLine = 3; /*with all borders (focus/regualr)*/
-   else
-      siLine = 1; /*only with regular border*/
-
    rectDraw_rayWidg(
       widgSTPtr,
       idSI,
-      (signed char) siLine,      
+      typeSC,
       colorUI,
       borderColorUI,
       focusColorUI
@@ -9126,15 +9162,13 @@ draw_listBox_rayWidg(
          { /*If: item was selected*/
             rectDrawByCoord_rayWidg(
                (widgSTPtr->xArySI[idSI] + 1)
-                  + widgSTPtr->fontWidthF / 4,
-               (ySI + 1)
-                  + widgSTPtr->fontHeightF
-                  / def_widgHeightGap_rayWidg,
-               (widgSTPtr->widthArySI[idSI] - 2)
-                  - widgSTPtr->fontWidthF / 4,
-               (widgSTPtr->fontHeightF - 2)
-                  + widgSTPtr->fontHeightF
-                  / (def_widgHeightGap_rayWidg * 2),
+                  + widgSTPtr->fontWidthF,
+               ySI + widgSTPtr->fontHeightF
+                  / (def_widgHeightGap_rayWidg / 1.25),
+               widgSTPtr->widthArySI[idSI] - 2
+                  - widgSTPtr->fontWidthF * 1.5,
+               widgSTPtr->fontHeightF
+                  - (widgSTPtr->fontHeightF * 0.1),
                   /*color half of gap with select color*/
                0, /*just rectangle, no borders*/
                selectColUI,
@@ -9144,11 +9178,19 @@ draw_listBox_rayWidg(
             );
 
             selectBl = 1;
+            onColUI = selectColUI;
             textPickColPtr = &selectTextCol;
+            onBorderUI = colorUI;
+            typeSC = 3;
          } /*If: item was selected*/
 
          else
+         { /*Else: item not selected*/
+            onBorderUI = selectColUI;
             textPickColPtr = &textCol;
+            onColUI = colorUI;
+            typeSC = 1;
+         } /*Else: item not selected*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
          + Fun115 Sec04 Sub02 Cat03:
@@ -9159,21 +9201,18 @@ draw_listBox_rayWidg(
          { /*If: need to draw box around item on*/
             rectDrawByCoord_rayWidg(
                widgSTPtr->xArySI[idSI]
-                  + widgSTPtr->fontWidthF / 4,
-               ySI
-                  + widgSTPtr->fontHeightF
-                  / def_widgHeightGap_rayWidg,
+                  + widgSTPtr->fontWidthF,
+               ySI + widgSTPtr->fontHeightF
+                  / (def_widgHeightGap_rayWidg / 1.25),
                widgSTPtr->widthArySI[idSI]
-                  - widgSTPtr->fontWidthF / 4,
+                  - widgSTPtr->fontWidthF * 1.5,
                widgSTPtr->fontHeightF
-                  + widgSTPtr->fontHeightF
-                  / (def_widgHeightGap_rayWidg * 2),
+                  - (widgSTPtr->fontHeightF * 0.1),
                   /*color half of gap with select color*/
-               5, /*just border (no rectangle)*/
-               selectColUI, /*box color (not used)*/
-               (unsigned int) widgSTPtr->borderColSI,
-                   /*border color*/
-               selectColUI, /*no focus color*/
+               typeSC, /*both border and rectangle*/
+               onColUI,  /*make same color as background*/
+               onBorderUI, /*border color*/
+               onColUI,  /*outer border color*/
                widgSTPtr
             );
          } /*If: need to draw box around item on*/
@@ -9465,21 +9504,22 @@ listBoxEvent_rayWidg(
       case KEY_H:
       case KEY_LEFT:
       /*Case: moving left*/
-         if(eventSTPtr->shiftBl)
-         { /*If: jumping by width*/
-            listSTPtr->sideScrollSI -=
-               (
-                    widgSTPtr->widthArySI[idSI]
-                  - widgSTPtr->fontWidthF * 2
-               ) / widgSTPtr->fontWidthF;
-         } /*If: jumping by width*/
+         moveLeft_fun116_sec03_sub03:;
+            if(eventSTPtr->shiftBl)
+            { /*If: jumping by width*/
+               listSTPtr->sideScrollSI -=
+                  (
+                       widgSTPtr->widthArySI[idSI]
+                     - widgSTPtr->fontWidthF * 2
+                  ) / widgSTPtr->fontWidthF;
+            } /*If: jumping by width*/
 
-         else
-            listSTPtr->sideScrollSI -= 1;
+            else
+               listSTPtr->sideScrollSI -= 1;
 
-         if(listSTPtr->sideScrollSI < 0)
-            listSTPtr->sideScrollSI = 0;
-         goto sideMoveEvent_fun116_sec06;
+            if(listSTPtr->sideScrollSI < 0)
+               listSTPtr->sideScrollSI = 0;
+            goto sideMoveEvent_fun116_sec06;
       /*Case: moving left*/
 
       case KEY_S:
@@ -9503,30 +9543,31 @@ listBoxEvent_rayWidg(
       case KEY_L:
       case KEY_RIGHT:
       /*Case: moving right*/
-         tmpSI = listSTPtr->lineLenSI;
-         tmpSI -=
-            (
-                 widgSTPtr->widthArySI[idSI]
-               - widgSTPtr->fontWidthF * 8
-            ) / widgSTPtr->fontWidthF;
-            /*last full window*/
-
-         if(eventSTPtr->shiftBl)
-         { /*If: jumping by width*/
-            listSTPtr->sideScrollSI +=
+         moveRight_fun116_sec03_sub04:;
+            tmpSI = listSTPtr->lineLenSI;
+            tmpSI -=
                (
                     widgSTPtr->widthArySI[idSI]
-                  - widgSTPtr->fontWidthF * 2
+                  - widgSTPtr->fontWidthF * 8
                ) / widgSTPtr->fontWidthF;
-         } /*If: jumping by width*/
+               /*last full window*/
 
-         else
-            listSTPtr->sideScrollSI += 1;
+            if(eventSTPtr->shiftBl)
+            { /*If: jumping by width*/
+               listSTPtr->sideScrollSI +=
+                  (
+                       widgSTPtr->widthArySI[idSI]
+                     - widgSTPtr->fontWidthF * 2
+                  ) / widgSTPtr->fontWidthF;
+            } /*If: jumping by width*/
 
-         if(listSTPtr->sideScrollSI > tmpSI)
-            listSTPtr->sideScrollSI = tmpSI;
+            else
+               listSTPtr->sideScrollSI += 1;
 
-         goto sideMoveEvent_fun116_sec06;
+            if(listSTPtr->sideScrollSI > tmpSI)
+               listSTPtr->sideScrollSI = tmpSI;
+
+            goto sideMoveEvent_fun116_sec06;
       /*Case: moving right*/
 
       case KEY_E:
@@ -9854,6 +9895,14 @@ listBoxEvent_rayWidg(
 
    if(cntSI != 0)
    { /*If: moving by scroll wheel*/
+      if(eventSTPtr->ctrlBl)
+      { /*If: controll used with scroll*/
+         if(cntSI > 0)
+            goto moveLeft_fun116_sec03_sub03;
+         else
+            goto moveRight_fun116_sec03_sub04;
+      } /*If: controll used with scroll*/
+
       listSTPtr->clickSI = -1;
 
       nextItem_listBox_rayWidg(
@@ -11018,16 +11067,18 @@ fileBrowserDraw_rayWidg(
       goto hiden_fun129_sec05;
 
    if(widgSTPtr->focusSI < idSI)
-   { /*If: message box is not in focus*/
+   { /*If: file browser is not in focus*/
       fileSTPtr->lastWidgSI = widgSTPtr->focusSI;
       widgSTPtr->focusSI = idSI + 1;
-   } /*If: message box is not in focus*/
+      focusAdd_widg_rayWidg(idSI + 1, widgSTPtr);
+   } /*If: file browser is not in focus*/
 
    else if(widgSTPtr->focusSI > idSI + 4)
-   { /*Else If: message box is not in focus*/
+   { /*Else If: file browser is not in focus*/
       fileSTPtr->lastWidgSI = widgSTPtr->focusSI;
       widgSTPtr->focusSI = idSI + 1;
-   } /*Else If: message box is not in focus*/
+      focusAdd_widg_rayWidg(idSI + 1, widgSTPtr);
+   } /*Else If: file browser is not in focus*/
 
    if(! fileSTPtr->fileListST.lenSI && *fileSTPtr->pwdStr)
    { /*If: no files were loaded*/
@@ -11168,7 +11219,8 @@ fileBrowserDraw_rayWidg(
 
    fileSTPtr->extListST.minWidthSI =
           fileSTPtr->extListST.lineWidthSI
-        + widgSTPtr->fontWidthF;
+        + 3
+        + widgSTPtr->fontWidthF * 3; /*+ 3 for # and >*/
    fileSTPtr->extListST.maxWidthSI =
      fileSTPtr->extListST.minWidthSI;
 
@@ -11255,7 +11307,7 @@ fileBrowserDraw_rayWidg(
       1, /*has border, but not in focus*/
       widgSTPtr->guiColSI,
       widgSTPtr->borderColSI,
-      widgSTPtr->focusColSI
+      0
    ); /*background rectangle to hold file browser*/
 
    rectDrawByCoord_rayWidg(
@@ -11266,7 +11318,7 @@ fileBrowserDraw_rayWidg(
       1, /*has border, but not in focus*/
       widgSTPtr->guiColSI,
       widgSTPtr->borderColSI,
-      widgSTPtr->focusColSI,
+      0,
       widgSTPtr
    ); /*rectangle for the present working directory*/
 

@@ -57,6 +57,10 @@ getMode_darkLight(
       retDark_fun001:;
          return 2;
    #else
-      return 0;
+      #ifdef DARK_MODE
+         return 2;
+      #else
+         return 0;
+      #endif
    #endif /*windows check*/
 }/*getMode_darkLight*/

@@ -5,8 +5,8 @@
 CC=cc
 LD=cc
 MAKE=make
-CFLAGS=-c -static -O0 -ggdb -Wall -Wextra
-#CFLAGS=-c -static -O3 -Wall -Wextra
+coreCFLAGS=-c -static -O0 -ggdb -Wall -Wextra
+CFLAGS=-DDARK_MODE
 O=o.linux
 PREFIX=/usr/local/bin
 raylibPath=../raylib/src
@@ -129,19 +129,19 @@ $(genLib)/ptrAry.$O: \
 	$(genLib)/ptrAry.c \
 	$(genLib)/ptrAry.h \
 	$(genLib)/ulCp.$O
-		$(CC) $(CFLAGS) -o $(genLib)/ptrAry.$O \
-			$(genLib)/ptrAry.c
+		$(CC) $(coreCFLAGS) $(CFLAGS) \
+			-o $(genLib)/ptrAry.$O $(genLib)/ptrAry.c
 
 $(genLib)/base10str.$O: \
 	$(genLib)/base10str.c \
 	$(genLib)/base10str.h
-		$(CC) $(CFLAGS) -o $(genLib)/base10str.$O \
-			$(genLib)/base10str.c
+		$(CC) $(coreCFLAGS) $(CFLAGS) \
+			-o $(genLib)/base10str.$O $(genLib)/base10str.c
 
 $(genLib)/ulCp.$O: \
 	$(genLib)/ulCp.c \
 	$(genLib)/ulCp.h
-		$(CC) $(CFLAGS) -o $(genLib)/ulCp.$O \
+		$(CC) $(coreCFLAGS) $(CFLAGS) -o $(genLib)/ulCp.$O \
 			$(genLib)/ulCp.c
 
 $(genFreezeTB)/freezeTB.$O: \
@@ -170,7 +170,7 @@ $(genFreezeTB)/freezeTB.$O: \
 	$(genLib)/endLine.h \
 	../ftbVersion.h
 		$(CC) -o $(genFreezeTB)/freezeTB.$O \
-			$(CFLAGS) $(coreCFLAGS) \
+			$(coreCFLAGS) $(CFLAGS) \
 			$(genFreezeTB)/freezeTB.c
 
 $(genFreezeTB)/freezeTBPaths.$O: \
