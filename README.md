@@ -151,10 +151,11 @@ Once you have installed the dependencies:
 ```
 git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
 cd ~/Downloads/freezeTB/programs/ftbRaylibSrc;
-make -f mkfile.linux
+make -f mkfile.linux; # make -DDARK_MODE -f mkfile.linux
+                      # will build ftbRay in darkmode
 
 # this does a global install
-sudo make -f mkfile.linux install
+sudo make -f mkfile.linux install;
 sudo cp -r ../../freezeTBFiles /usr/local/share;
 sudo chmod -R a+r /usr/local/share/freezeTBFiles;
 ```
@@ -164,7 +165,8 @@ sudo chmod -R a+r /usr/local/share/freezeTBFiles;
 ```
 git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
 cd ~/Downloads/freezeTB/programs/ftbRaylibSrc;
-make -f mkfile.linux
+make -f mkfile.linux; # make -DDARK_MODE -f mkfile.linux
+                      # will build ftbRay in darkmode
 
 # for a local install do
 if [ ! -d ~/local/bin ];
