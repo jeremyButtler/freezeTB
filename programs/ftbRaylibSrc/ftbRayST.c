@@ -163,7 +163,7 @@ signed char glob_drugStrAry[def_numDrugs_ftbRayST][32] =
 #define def_lowDepthTextCol_ftbRayST 0x000004ff
 
 /*cursor blink settings*/
-#define def_blinkInterval_ftbRayST 10
+#define def_blinkInterval_ftbRayST 55
    /*how many frames for blink*/
 #define def_blinkTime_ftbRayST (def_blinkInterval_ftbRayST>>1)
    /*how long a blink lasts; using
@@ -192,10 +192,8 @@ signed char glob_drugStrAry[def_numDrugs_ftbRayST][32] =
 /*labels for each widget*/
 static signed char *textFqButStr =
    (signed char *) "fastq files:";
-static signed char *inputStr =
-   (signed char *) "FTB Input:";
-static signed char *outputStr =
-   (signed char *) "FTB Output:";
+static signed char *guiTitleStr =
+   (signed char *) "FreezeTB";
 static signed char *textConfigButStr =
    (signed char *) "Config File:";
 /*static signed char *textIlluminaStr =
@@ -238,6 +236,7 @@ blank_gui_ftbRayST(
 
    guiSTPtr->screenIndexSC = 0;
    guiSTPtr->blinkSC = 0;
+   guiSTPtr->numFramesSI = 0;
 
    /*prefix button defaults*/
    guiSTPtr->prefixLenSI =
@@ -445,7 +444,6 @@ draw_gui_ftbRayST(
    signed int lenSI = 0;
    signed char tileBl = 1;
 
-   signed char blinkBl = 0; /*be in blink state*/
    struct Color guiCol;
    signed int heightSI = 0;
    signed int widthSI = 0;
@@ -475,12 +473,6 @@ draw_gui_ftbRayST(
 
    guiCol = GetColor(guiSTPtr->widgSTPtr->guiColSI);
 
-   if(guiSTPtr->screenIndexSC)
-      SetWindowTitle((char *) inputStr);
-
-   else
-      SetWindowTitle((char *) outputStr);
-
    widthSI = guiSTPtr->widgSTPtr->winWidthSI;
    heightSI = guiSTPtr->widgSTPtr->winHeightSI;
 
@@ -491,14 +483,15 @@ draw_gui_ftbRayST(
    ^   - start drawing + draw buttons and entry boxes
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   ++guiSTPtr->numFramesSI;
+
    /*check if blinking the cursor*/
    guiSTPtr->blinkSC =
       blinkGet_rayWidg(
-         guiSTPtr->blinkSC,
+         guiSTPtr->numFramesSI,
          def_blinkInterval_ftbRayST,
          def_blinkTime_ftbRayST
       );
-   ++guiSTPtr->blinkSC;
 
    if(guiSTPtr->fqStrSTPtr->lenSL)
    { /*If: have fastq files to draw*/
@@ -776,7 +769,7 @@ draw_gui_ftbRayST(
             glob_widthPrefixEntrySI,
             guiSTPtr->prefixEntryIdSI,
             guiSTPtr->prefixPosArySI,/*cursor+scroll pos*/
-            blinkBl,                 /*blink cursor*/
+            guiSTPtr->blinkSC,       /*blink cursor*/
             guiSTPtr->inPrefixStr,   /*current input*/
             tileBl,
             guiSTPtr->widgSTPtr
@@ -868,10 +861,11 @@ draw_gui_ftbRayST(
             guiSTPtr->widgSTPtr
          );
          entryDraw_rayWidg(
-            glob_widthPrefixEntrySI,
+            glob_widthPrefixEntrySI
+               - 50 * guiSTPtr->widgSTPtr->xScaleF,
             guiSTPtr->minAmrPercEntryIdSI,
             guiSTPtr->amrSupPosArySI,/*cursor+scroll pos*/
-            blinkBl,                 /*blink cursor*/
+            guiSTPtr->blinkSC,       /*blink cursor*/
             guiSTPtr->amrSupStr,     /*current input*/
             tileBl,
             guiSTPtr->widgSTPtr
@@ -890,10 +884,11 @@ draw_gui_ftbRayST(
             guiSTPtr->widgSTPtr
          ); /*label for entry box*/
          entryDraw_rayWidg(
-            glob_widthPrefixEntrySI,
+            glob_widthPrefixEntrySI
+               - 50 * guiSTPtr->widgSTPtr->xScaleF,
             guiSTPtr->minAmrIndelPercEntryIdSI,
             guiSTPtr->indelSupPosArySI,
-            blinkBl,                 /*blink cursor*/
+            guiSTPtr->blinkSC,       /*blink cursor*/
             guiSTPtr->indelSupStr,   /*current input*/
             tileBl,
             guiSTPtr->widgSTPtr
@@ -1097,7 +1092,7 @@ mk_gui_ftbRayST(
    widgSTPtr = retHeapGUI->widgSTPtr;
 
 
-   if( setup_widg_rayWidg(widgSTPtr,inputStr,1) )
+   if( setup_widg_rayWidg(widgSTPtr,guiTitleStr,1) )
       goto memErr_fun06_sec07;
       /*1 is for scaling for HDPI screens*/
 

@@ -490,6 +490,8 @@ typedef struct Font (*fontFunction)(void);
 
 #define def_cursor_rayWidg '|'
 #define def_blinkCursor_rayWidg ' '
+#define def_cursorBlinkInvterval_rayWidg 25
+   /*change the state every 25 frames*/
 
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
 ^ Header Sec03:
@@ -585,6 +587,8 @@ widg_rayWidg{
    signed int sizeSI; /*maximum widgets before realloc*/
    signed int focusSI;/*id (index) focus is set to*/
 
+   signed int blinkRateSI;
+      /*number of cycles between cursor blinks*/
 
    /*__________________window_variables_________________*/
    signed int winWidthSI;   /*width of the widow*/
@@ -663,6 +667,12 @@ event_rayWidg{
    signed char leftReleaseBl; /*1: mouse was released*/
 
    float scrollF;         /*how much scroll whell moved*/
+
+   /*timed events*/
+   signed char cursorBlinkBl; /*blink cursor*/
+   signed char blinkCntSI;    /*number intervels
+                              `  since last blink
+                              */
 }event_rayWidg;
 
 /*-------------------------------------------------------\

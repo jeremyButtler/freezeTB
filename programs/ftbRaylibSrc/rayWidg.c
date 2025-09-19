@@ -487,6 +487,9 @@ blank_widg_rayWidg(
    widgSTPtr->winOriginalWidthSI = def_winWidth_rayWidg;
    widgSTPtr->winOriginalHeightSI = def_winHeight_rayWidg;
 
+   widgSTPtr->blinkRateSI =
+      def_cursorBlinkInvterval_rayWidg;
+
    /*reset the color scheme to light mode*/
    checkGuiColorMode_rayWidg(widgSTPtr);
 } /*blank_widg_rayWidg*/
@@ -1109,35 +1112,38 @@ checkTextWidth_rayWidg(
    signed int textWidthSI = 0;
    signed int tmpSI = 0;
    signed int indexSI = 0;
+   signed char tmpStr[2] = {0, 0};
 
    while(textStr[indexSI])
    { /*Loop: copy text to outStr*/
-      outStr[indexSI] = textStr[indexSI];
-      outStr[indexSI + 1] = 0;
+      tmpStr[0] = textStr[indexSI];
 
       textWidthSI +=
          textMeasure_widg_rayWidg(
-            &outStr[indexSI],
+            tmpStr,
             &tmpSI,
             widgSTPtr
          );
 
       if(textWidthSI > widthSI)
       { /*If: hit end of text lenth*/
-         outStr[indexSI--] = 0;
-
-         if(indexSI >= 0)
-            outStr[indexSI] = '.';
-         if(indexSI >= 0)
+         if(indexSI > 0)
             outStr[indexSI - 1] = '.';
-         if(indexSI >= 0)
+         if(indexSI > 1)
             outStr[indexSI - 2] = '.';
+         if(indexSI > 2)
+            outStr[indexSI - 3] = '.';
 
          break;
       } /*If: hit end of text lenth*/
 
+      else
+         outStr[indexSI] = textStr[indexSI];
+
       ++indexSI;
    } /*Loop: copy text to outStr*/
+
+   outStr[indexSI] = 0;
 
    /*this is needed to finalize the measurment, otherwise
    `  the width is always off
@@ -1148,7 +1154,7 @@ checkTextWidth_rayWidg(
    while(textWidthSI > widthSI && indexSI)
    { /*Loop: finish finding the width*/
       if(textWidthSI > widthSI)
-      { /*If: hit end of text lenth*/
+      { /*If: hit end of text length*/
          if(indexSI >= 0)
             outStr[indexSI--] = 0;
          if(indexSI >= 0)
@@ -1159,7 +1165,7 @@ checkTextWidth_rayWidg(
             outStr[indexSI - 2] = '.';
          if(indexSI <= 0)
             break;
-      } /*If: hit end of text lenth*/
+      } /*If: hit end of text length*/
 
       textWidthSI =
         textMeasure_widg_rayWidg(outStr,&tmpSI,widgSTPtr);
@@ -2867,6 +2873,8 @@ blank_event_rayWidg(
    eventSTPtr->leftReleaseBl = 0;
 
    eventSTPtr->scrollF = 0;
+
+   eventSTPtr->cursorBlinkBl = 0;
 } /*blank_event_rayWidg*/
 
 /*-------------------------------------------------------\
@@ -2887,6 +2895,7 @@ init_event_rayWidg(
    if(! eventSTPtr)
       return;
    blank_event_rayWidg(eventSTPtr);
+   eventSTPtr->blinkCntSI = 0;
 } /*init_event_rayWidg*/
 
 /*-------------------------------------------------------\
@@ -3036,6 +3045,16 @@ get_event_rayWidg(
    * Fun064 Sec02:
    *   - get events and focused widget
    \*****************************************************/
+
+   ++eventSTPtr->blinkCntSI;
+
+   if(eventSTPtr->blinkCntSI >= widgSTPtr->blinkRateSI)
+   { /*If: need to change the cursor state*/
+      eventSTPtr->blinkCntSI = 0; /*reset*/
+
+      eventSTPtr->cursorBlinkBl =
+         ! eventSTPtr->cursorBlinkBl;
+   } /*If: need to change the cursor state*/
 
    getScale_widg_rayWidg(widgSTPtr, scaleSC);
 
@@ -4607,7 +4626,7 @@ getMouseWidg_widg_rayWidg(
 |     o how many cycles in one blink
 |       * ex: 10 frame redraws
 |   - timeSI:
-|     o how many cycles the blink will last
+|     o time interval between one blink
 |       * ex: 5 frame redraws (out of 10 frames)
 | Output:
 |   - Returns:
@@ -4618,7 +4637,7 @@ signed char
 blinkGet_rayWidg(
    signed int blinkSI,    /*current interval blink is on*/
    signed int intervalSI, /*redraws for a blink cycle*/
-   signed int timeSI      /*number cycles to blink*/
+   signed int timeSI      /*number cycles between blinks*/
 ){
    timeSI = intervalSI - timeSI; /*get number of cycles*/
 
@@ -5012,14 +5031,12 @@ addCharToEntry_rayWidg(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed int posSI = posArySI[1];
-   Vector2 textDimVect2;
    signed int lenSI = 0;   /*find final output length*/
    signed char shiftBl = 0;
+   signed char tmpStr[256];
 
    /*for measuring final string width*/
    signed char swapArySC[3] = {0, 0, 0};
-   signed char rmArySC[2] = {0, 0};
-   signed int textWidthSI = 0;
 
    shiftBl = IsKeyDown(KEY_LEFT_SHIFT);
    shiftBl |= IsKeyDown(KEY_RIGHT_SHIFT);
@@ -5325,35 +5342,16 @@ addCharToEntry_rayWidg(
       swapArySC[2] = textStr[posArySI[1] + 2];
       textStr[posArySI[1] + 2] = 0;
 
-      textDimVect2 =
-         MeasureTextEx(
-            *widgSTPtr->fontSTPtr,
-            (char *) &textStr[posArySI[0]],
-            widgSTPtr->fontSizeSI,
-            widgSTPtr->spacingF
-         );
+      checkTextWidth_rayWidg(
+         textStr,
+         tmpStr,
+         widthSI,
+         widgSTPtr
+      );
 
-      textWidthSI = textDimVect2.x;
-
-      while(textWidthSI > widthSI)
-      { /*Loop: find text length*/
-         if(posArySI[0] == posArySI[1])
-            break; /*width only allows one character*/
-
-         rmArySC[0] = textStr[posArySI[0]];
-         ++posArySI[0];
-            /*cursor moved out of window, so need to
-            `  move window one forward
-            */
-         textDimVect2 =
-            MeasureTextEx(
-               *widgSTPtr->fontSTPtr,
-               (char *) rmArySC,
-               widgSTPtr->fontSizeSI,
-               widgSTPtr->spacingF
-            );
-         textWidthSI -= textDimVect2.x;
-      } /*Loop: find text length*/
+      lenSI = endStr_ulCp(tmpStr);
+      if(lenSI + posArySI[0] < posArySI[1])
+         posArySI[0] = posArySI[1] - lenSI;
 
       textStr[posArySI[1]] = swapArySC[0];
       textStr[posArySI[1] + 1] = swapArySC[1];
@@ -6401,16 +6399,13 @@ entryDraw_rayWidg(
    unsigned int borderColorUI = 0;
    unsigned int focusColorUI = 0;
    struct Color textCol;
-   struct Vector2 textDimVect2;
 
    #define def_maxChar_fun085 256
       /*max characters in entry box*/
    signed char outStr[def_maxChar_fun085 + 8];
    signed char *cpStr = 0;
    signed char *dupStr = 0;
-   signed char rmStr[2] = {0, 0}; /*for adjusting length*/
 
-   signed int tmpSI = 0;
    signed int outLenSI = 0;
    signed int cursorPosSI = posArySI[1];
 
@@ -6467,138 +6462,75 @@ entryDraw_rayWidg(
 
    if(posArySI[0] > outLenSI)
       posArySI[0] = outLenSI;
+   else if(posArySI[0] < 0)
+      posArySI[0] = 0;
       /*scroll position is past end of string*/
+
+   /*cursor position is past end of string*/
    if(posArySI[1] > outLenSI)
       posArySI[1] = outLenSI;
-      /*cursor position is past end of string*/
-
-   outLenSI -= posArySI[0];
-
-   if(posArySI[1] < 0 && posArySI[0] < 0)
-   { /*If: user wants position 0*/
-      posArySI[1] = 0; /*cursor position*/
-      posArySI[0] = 0; /*scroll position*/
-   } /*If: user wants position 0*/
-
    else if(posArySI[1] < 0)
-      posArySI[1] = posArySI[0];
-      /*set cursor position to scroll position*/
-   else if(posArySI[0] < 0)
+      posArySI[1] = 0;
+
+   outLenSI = posArySI[1] - posArySI[0];
+
+   if(outLenSI < 0)
       posArySI[0] = posArySI[1];
-      /*set scroll position to cursor position*/
 
+   checkTextWidth_rayWidg(
+       &textStr[posArySI[0]],
+       outStr,
+       widthSI,
+       widgSTPtr
+   );
 
-   if(outLenSI >= def_maxChar_fun085)
-      outLenSI = def_maxChar_fun085 - 1;
-         /*need one character for the cursor*/
+   outLenSI = endStr_ulCp(outStr);
 
-   cpLen_ulCp(outStr, &textStr[posArySI[0]], outLenSI);
+   if(outLenSI + posArySI[0] < posArySI[1])
+   { /*If: position is out of bounds*/
+      posArySI[0] = posArySI[1] - outLenSI;
+
+      checkTextWidth_rayWidg(
+          outStr,
+          outStr,
+          widthSI,
+          widgSTPtr
+      );
+
+      outLenSI = endStr_ulCp(outStr);
+   } /*If: position is out of bounds*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun085 Sec04:
    ^   - find text size and print cursor
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*get cursor in measurment*/
    if(cursorPosSI >= 0)
    { /*If: adding in a cursor*/
-      cursorPosSI = posArySI[1];
-      outStr[outLenSI] = def_cursor_rayWidg;
-      outStr[outLenSI + 1] = 0;
+      dupStr = &outStr[posArySI[1] - posArySI[0]];
+      cpStr = &outStr[outLenSI];
+      cpStr[2] = 0;
 
-      textDimVect2 =
-         MeasureTextEx(
-            *widgSTPtr->fontSTPtr,
-            (char *) outStr,
-            widgSTPtr->fontSizeSI,
-            widgSTPtr->spacingF
-         );
-      tmpSI = textDimVect2.x;
+      while(cpStr > dupStr)
+      { /*Loop: add cursor in*/
+         cpStr[1] = cpStr[0];
+         --cpStr;
+      } /*Loop: add cursor in*/
 
-      outStr[outLenSI] = 0;
-         /*will add cursor back in later*/
-      --outLenSI;
-      cpStr = outStr;
-   } /*If: adding in a cursor*/
+      cpStr[1] = cpStr[0];
 
-   else
-   { /*Else: not adding a cursor*/
-      textDimVect2 =
-         MeasureTextEx(
-            *widgSTPtr->fontSTPtr,
-            (char *) outStr,
-            widgSTPtr->fontSizeSI,
-            widgSTPtr->spacingF
-         );
-      tmpSI = textDimVect2.x;
-
-      --outLenSI;
-      cpStr = outStr;
-   } /*Else: not adding a cursor*/
-
-   while(tmpSI > widthSI)
-   { /*Loop: shorten string down*/
-      if(outLenSI <= 1)
-         break; /*width must be at least one character*/
-
-      if(cursorPosSI < outLenSI)
-      { /*If: removing last character*/
-         rmStr[0] = cpStr[outLenSI];
-         cpStr[outLenSI] = 0;
-      } /*If: removing last character*/
-
+      if(blinkBl)
+         *cpStr = def_blinkCursor_rayWidg;
       else
-      { /*Else: need to adjust scroll by one character*/
-         rmStr[0] = cpStr[0];
-         ++cpStr;
-         --cursorPosSI;
-      } /*Else: need to adjust scroll by one character*/
+         *cpStr = def_cursor_rayWidg;
 
-      --outLenSI;
-
-      textDimVect2 =
-        MeasureTextEx(
-           *widgSTPtr->fontSTPtr,
-           (char *) rmStr,
-           widgSTPtr->fontSizeSI,
-           widgSTPtr->spacingF
-        );
-
-      tmpSI -= textDimVect2.x;
-   } /*Loop: shorten string down*/
-
-   ++outLenSI;
-   cpLen_ulCp(outStr, cpStr, outLenSI);
-
-   if(cursorPosSI < 0)
-      goto getDimensions_fun085_sec04;
-
-   if(cursorPosSI > outLenSI)
-      cursorPosSI = outLenSI;
-
-   if(cursorPosSI == outLenSI)
-      outStr[outLenSI + 1] = 0;
-      /*cursor comes at end*/
-
-   else
-   { /*Else: cursor is not at end of string*/
-      dupStr = &outStr[outLenSI];
-      dupStr[1] = 0;
-      cpStr = &outStr[outLenSI - 1];
-
-      while(cpStr >= outStr + cursorPosSI)
-         *dupStr-- = *cpStr--;
-   } /*Else: cursor is not at end of string*/
-
-   
-   if(blinkBl)
-      outStr[cursorPosSI] = def_blinkCursor_rayWidg;
-   else
-      outStr[cursorPosSI] = def_cursor_rayWidg;
-
-   ++outLenSI;
-
-   getDimensions_fun085_sec04:;
+      checkTextWidth_rayWidg(
+          outStr,
+          outStr,
+          widthSI,
+          widgSTPtr
+      );
+   } /*If: adding in a cursor*/
 
    /*set width and height*/
    widgSTPtr->heightArySI[idSI] =
@@ -6606,7 +6538,7 @@ entryDraw_rayWidg(
       + widgSTPtr->fontHeightF
       / (def_widgHeightGap_rayWidg / 2);
    widgSTPtr->widthArySI[idSI] = widthSI;
-      /*want a one character pad around the button*/
+      /*want a one character pad around the entry box*/
 
    if(noDrawBl)
       goto done_fun085_sec06;
@@ -6647,7 +6579,7 @@ entryDraw_rayWidg(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    done_fun085_sec06:;
-      return outLenSI;
+      return widgSTPtr->widthArySI[idSI];
 
    noWidget_fun085_sec06:;
       return def_noWidget_rayWidg;
@@ -6715,7 +6647,34 @@ entryEvent_rayWidg(
    ), /*function to check if input is valid*/
    struct event_rayWidg *eventSTPtr, /*has event to add*/
    struct widg_rayWidg *widgSTPtr /*has entry box widget*/
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun086 TOC:
+   '   - handels an event for an entry box
+   '   o fun086 sec01:
+   '     - variable declarations
+   '   o fun086 sec02:
+   '     - check if have inuput
+   '   o fun086 sec03:
+   '     - handel scroll wheel events
+   '   o fun086 sec05:
+   '     - handel key input event
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun086 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int cpSI = 0;
+   signed int tmpSI = 0;
+   signed int maxCharInBoxSI = 0;
+   signed char tmpStr[257];
+   signed char checkStr[257];
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun086 Sec02:
+   ^   - check if have inuput
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(idSI == eventSTPtr->parIdSI)
       ;
@@ -6726,13 +6685,97 @@ entryEvent_rayWidg(
    else
       goto wrongWidget_fun086;
 
-   if(eventSTPtr->scrollF == 0 && ! eventSTPtr->keySI)
-      goto noEvent_fun086;
-   
-   if(eventSTPtr->scrollF != 0)
-      posArySI[0] += (signed int) eventSTPtr->scrollF;
+   if(
+         ! eventSTPtr->scrollF
+      && ! eventSTPtr->leftReleaseBl
+      && ! eventSTPtr->keySI
+   ) goto noEvent_fun086;
 
-   if(eventSTPtr->keySI)
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun086 Sec03:
+   ^   - handel scroll wheel events
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(eventSTPtr->scrollF != 0)
+   { /*If: have scroll wheel input*/
+      checkTextWidth_rayWidg(
+         &textStr[posArySI[0]],
+         tmpStr,
+         maxLenSI,
+         widgSTPtr
+      );
+      maxLenSI = endStr_ulCp(tmpStr);
+      maxCharInBoxSI = maxLenSI;
+
+      if(! eventSTPtr->shiftBl)
+        maxLenSI = 1;
+
+      if(eventSTPtr->scrollF < 0)
+        maxLenSI *= -1;
+
+      posArySI[1] += maxLenSI;
+
+      if(posArySI[1] < 0)
+         posArySI[1] = 0;
+      else if(posArySI[1] > textLenSI)
+         posArySI[1] = textLenSI; /*scroll is at end*/
+
+      if(posArySI[1] < posArySI[0])
+         posArySI[0] = posArySI[1];
+      else if(posArySI[1] > posArySI[0] + maxCharInBoxSI)
+         posArySI[0] = posArySI[1] - maxCharInBoxSI;
+
+      if(posArySI[0] < 0)
+         posArySI[0] = 0;
+      if(posArySI[1] >= textLenSI)
+         posArySI[0] = textLenSI - 1;
+   } /*If: have scroll wheel input*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun086 Sec04:
+   ^   - handel mouse click
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   else if(eventSTPtr->leftReleaseBl)
+   { /*Else If: left click event*/
+      /*get width to selected item*/
+      maxCharInBoxSI =
+         eventSTPtr->xSI -widgSTPtr->xArySI[idSI];
+
+      if(maxCharInBoxSI < widgSTPtr->fontWidthF)
+         posArySI[1] = 0;
+
+      else
+      { /*Else: need to find position of characters*/
+         tmpSI = 0;
+         cpSI = 0;
+
+         while(textStr[cpSI])
+         { /*Loop: copy c-string in entry box*/
+            if(cpSI == posArySI[1])
+               tmpStr[tmpSI++] = def_cursor_rayWidg;
+            tmpStr[tmpSI++] = textStr[cpSI++];
+         } /*Loop: copy c-string in entry box*/
+
+         checkTextWidth_rayWidg(
+            &tmpStr[posArySI[0]],
+            checkStr,
+            maxCharInBoxSI,
+            widgSTPtr
+         );
+
+         tmpSI = endStr_ulCp(checkStr);
+         posArySI[1] = tmpSI - 1;
+            /*-1 to convert index 1 to index 0*/
+      } /*Else: need to find position of characters*/
+   } /*Else If: left click event*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun086 Sec05:
+   ^   - handel key input event
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   else if(eventSTPtr->keySI)
    { /*If: had a keyboard event*/
       addCharToEntry_rayWidg(
          eventSTPtr->keySI,
@@ -9441,27 +9484,28 @@ listBoxEvent_rayWidg(
       case KEY_DOWN:
       case KEY_PAGE_DOWN:
       /*Case: moving down one item or page*/
-         listSTPtr->clickSI = -1;
+         moveDown_fun116_sec03_sub01:;
+            listSTPtr->clickSI = -1;
 
-         if(
-               eventSTPtr->shiftBl
-            || eventSTPtr->keySI == KEY_PAGE_DOWN
-         ) changeSI = maxLinesSI;
-         else
-            changeSI = 1;
+            if(
+                  eventSTPtr->shiftBl
+               || eventSTPtr->keySI == KEY_PAGE_DOWN
+            ) changeSI = maxLinesSI;
+            else
+               changeSI = 1;
 
 
-         if(
-            nextItem_listBox_rayWidg(
-               changeSI,
-               maxLinesSI,
-               -1, /*use internal variables*/
-               listSTPtr
-            ) < 0
-         ) goto moveEvent_fun116_sec06;
+            if(
+               nextItem_listBox_rayWidg(
+                  changeSI,
+                  maxLinesSI,
+                  -1, /*use internal variables*/
+                  listSTPtr
+               ) < 0
+            ) goto moveEvent_fun116_sec06;
 
-         else
-            goto noEvent_fun116_sec06;
+            else
+               goto noEvent_fun116_sec06;
       /*Case: moving down one item or page*/
 
       /**************************************************\
@@ -9473,27 +9517,28 @@ listBoxEvent_rayWidg(
       case KEY_UP:
       case KEY_PAGE_UP:
       /*Case: moving up one item or page*/
-         listSTPtr->clickSI = -1;
+         moveUp_fun116_sec03_sub02:;
+            listSTPtr->clickSI = -1;
 
-         if(
-               eventSTPtr->shiftBl
-            || eventSTPtr->keySI == KEY_PAGE_UP
-         ) changeSI = maxLinesSI * -1;
-         else
-            changeSI = -1;
+            if(
+                  eventSTPtr->shiftBl
+               || eventSTPtr->keySI == KEY_PAGE_UP
+            ) changeSI = maxLinesSI * -1;
+            else
+               changeSI = -1;
 
 
-         if(
-            nextItem_listBox_rayWidg(
-               changeSI,
-               maxLinesSI,
-               -1, /*use internal variables*/
-               listSTPtr
-            ) < 0
-         ) goto moveEvent_fun116_sec06;
+            if(
+               nextItem_listBox_rayWidg(
+                  changeSI,
+                  maxLinesSI,
+                  -1, /*use internal variables*/
+                  listSTPtr
+               ) < 0
+            ) goto moveEvent_fun116_sec06;
 
-         else
-            goto noEvent_fun116_sec06;
+            else
+               goto noEvent_fun116_sec06;
       /*Case: moving up one item or page*/
 
       /**************************************************\
@@ -9505,6 +9550,8 @@ listBoxEvent_rayWidg(
       case KEY_LEFT:
       /*Case: moving left*/
          moveLeft_fun116_sec03_sub03:;
+            listSTPtr->clickSI = -1;
+
             if(eventSTPtr->shiftBl)
             { /*If: jumping by width*/
                listSTPtr->sideScrollSI -=
@@ -9526,6 +9573,8 @@ listBoxEvent_rayWidg(
       case KEY_ZERO:
       case KEY_SIX: /*with shift is ^*/
       /*Case: moving to start*/
+         listSTPtr->clickSI = -1;
+
          if(
                eventSTPtr->keySI == KEY_SIX
             && ! eventSTPtr->shiftBl
@@ -9544,6 +9593,8 @@ listBoxEvent_rayWidg(
       case KEY_RIGHT:
       /*Case: moving right*/
          moveRight_fun116_sec03_sub04:;
+            listSTPtr->clickSI = -1;
+
             tmpSI = listSTPtr->lineLenSI;
             tmpSI -=
                (
@@ -9573,6 +9624,8 @@ listBoxEvent_rayWidg(
       case KEY_E:
       case KEY_FOUR: /*with shift is $*/
       /*Case: moving to start*/
+         listSTPtr->clickSI = -1;
+
          if(
                eventSTPtr->keySI == KEY_FOUR
             && ! eventSTPtr->shiftBl
@@ -9903,16 +9956,10 @@ listBoxEvent_rayWidg(
             goto moveRight_fun116_sec03_sub04;
       } /*If: controll used with scroll*/
 
-      listSTPtr->clickSI = -1;
-
-      nextItem_listBox_rayWidg(
-         cntSI * -1, /*input is Mac scroll style*/
-         maxLinesSI,
-         -1,         /*use internal variables*/
-         listSTPtr
-      );
-
-      goto moveEvent_fun116_sec06;
+      else if(eventSTPtr->scrollF < 0)
+         goto moveUp_fun116_sec03_sub02;
+      else
+         goto moveDown_fun116_sec03_sub01;
    } /*If: moving by scroll wheel*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

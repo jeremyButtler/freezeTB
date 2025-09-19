@@ -82,6 +82,7 @@ typedef struct gui_ftbRayST
    signed char curDirStr[4096]; /*current location*/
 
    signed char blinkSC;       /*status of cursor blink*/
+   signed int numFramesSI;    /*number of frames*/
 
    /*_________________menu buttons______________________*/
 
