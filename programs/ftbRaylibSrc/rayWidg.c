@@ -4913,6 +4913,16 @@ fileStrCheck_rayWidg(
    signed char *cpStr = textStr;
    signed char *dupStr = textStr;
 
+   while(
+         ! (*cpStr >= 48 && *cpStr <= 57) /*number*/
+      && ! (*cpStr >= 64 && *cpStr <= 90) /*uppercase*/
+      && ! (*cpStr >= 97 && *cpStr <= 122)/*lower case*/
+   ){ /*Loop: skip dashes and underscores at start*/
+      if(! *cpStr)
+         break;
+      ++cpStr;
+   }  /*Loop: skip dashes and underscores at start*/
+
    while(*cpStr)
    { /*Loop: check characters in string*/
       if(*cpStr == '.')
@@ -4925,7 +4935,7 @@ fileStrCheck_rayWidg(
          *dupStr++ = *cpStr++; /*underscore*/
       else if(*cpStr > 64 && *cpStr < 91)
          *dupStr++ = *cpStr++; /*capital letters*/
-      else if(*cpStr > 96 && *cpStr < 122)
+      else if(*cpStr > 96 && *cpStr < 123)
          *dupStr++ = *cpStr++; /*lowercase letters*/
       else if(*cpStr == ' ' || *cpStr == '\t')
       { /*Else If: space or tab*/
