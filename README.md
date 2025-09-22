@@ -216,7 +216,9 @@ For a source install, the easiest way is using one of the
   Mac installer scripts. Both the raylib and TclTk install
   scripts install freezeTB and minimap2 locally.
 
-The harder way is from source (not covered here).
+The harder way is from source (not covered here), but is
+  the same as Linux, except replace `mkfile.linux`
+  with `mkfile.mac`.
 
 ### Mac; easy way pre-steps
 
@@ -248,8 +250,8 @@ cd ~/Downloads/freezeTB;
 sh macRayInstall;
 ```
 
-Do not worry about the Rec errors at the end. This is
-  a failed attempt to setup the icon.
+This should install freezeTB as an app `freezeTB.app` to
+  your desktop.
 
 ### Mac TclTk:
 
