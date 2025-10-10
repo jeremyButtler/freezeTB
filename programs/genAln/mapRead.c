@@ -4813,7 +4813,7 @@ mergeToSam_mapRead(
 |         than 0 (unlikley)
 |       * def_memErr_mapRead for memory errors
 |   - Returns:
-|     o score for best sub-alignment or if subSl is 0, for
+|     o score for best sub-alignment or if subSL is 0, for
 |       the entire samEntry
 \-------------------------------------------------------*/
 signed long

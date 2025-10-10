@@ -66,7 +66,7 @@
 ! Hidden libraries:
 !   - .c  #include "../genLib/ulCp.h"
 !   - .c  #include "../genLib/fileFun.h"
-!   - .h  #include "../genLib/endin.h"
+!   - .h  #include "../genLib/endLine.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*-------------------------------------------------------\

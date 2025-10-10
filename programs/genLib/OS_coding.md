@@ -417,9 +417,7 @@ There is probably more, but this is what stands out to me.
 
 ## Mac:
 
-Most stuff works well between linux and Mac. Just remember
-  on Macs (at least old Macs) you may get `\r` instead of
-  `\n` for line endings.
+Most stuff works well between linux and Mac.
 
 ## Windows:
 
@@ -430,6 +428,12 @@ The linux `popen` library is under a different name. As a
 
 The only bug I know on windows is never use `fgets` with
   `fseek` or `ftell`.
+
+Also, in Linux fread functions like a binrary reader,
+   however, in Windows fread does not. Always use
+   `fopen(<file>, "rb");` when you want to read a file
+   byte by byte (likely keeps `\r\n` line endings) instead
+   of getting c-strings.
 
 DO NOT DO:
 

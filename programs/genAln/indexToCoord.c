@@ -8,7 +8,7 @@
 '   o fun02: refCoord_water
 '     - gets the coordinates of the reference sequence in
 '       in an matrix.
-'   o fun03: indexToCoord_water
+'   o fun03: indexToCoord
 '     - gets the coordinates of the reference and query
 '       sequence in an matrix.
 '   o license:

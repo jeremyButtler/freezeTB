@@ -4,10 +4,8 @@
 '     string pointers
 '   o header:
 '     - defined variables and guards
-'   o .h st01: strPtrAry
+'   o .h st01: str_ptrAry
 '     - struct holding string pointer array & string sizes
-'   o st01: str_ptrAry
-'     - struct holding string pointer array and string sizes
 '   o fun01: blank_str_ptrAry
 '     - blanks a str_ptrAry struct
 '   o fun02: init_str_ptrAry
@@ -190,7 +188,7 @@ add_str_ptrAry(
 );
 
 /*-------------------------------------------------------\
-| Fun08: findClose_str_ptraRy
+| Fun08: findClose_str_ptrRy
 |  - finds location to insert query in string ptr array
 |    (must be sorted)
 | Input:

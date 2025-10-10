@@ -23,7 +23,7 @@
 '     - sets all variables in conNt_tbCon structure to 0
 '   o fun05: init_conNt_tbCon
 '     - initializes a conNt_tbCon structure
-'   o fun06: mk_conBase_tbCon
+'   o fun06: mk_conNt_tbCon
 '     - Makes an initialized, heap allocated conNt_tbCon
 '       structure
 '   o fun07: freeStack_conNt_tbCon
@@ -184,7 +184,7 @@ init_conNt_tbCon(
 );
 
 /*-------------------------------------------------------\
-| Fun06: mk_conBase_tbCon
+| Fun06: mk_conNt_tbCon
 |   - makes initialized, heap allocated conNt_tbCon struct
 | Input:
 | Output:
@@ -193,7 +193,7 @@ init_conNt_tbCon(
 |     o 0 for memory errors
 \-------------------------------------------------------*/
 struct conNt_tbCon *
-mk_conBase_tbCon(
+mk_conNt_tbCon(
    void
 );
 
@@ -214,6 +214,7 @@ void
 freeStack_conNt_tbCon(
    struct conNt_tbCon *conNtSTPtr
 );
+
 /*-------------------------------------------------------\
 | Fun08: freeHeap_conNt_tbCon
 |   - Frees a conNt_tbCon structure
@@ -245,27 +246,6 @@ void
 freeHeapAry_conNt_tbCon(
    struct conNt_tbCon *conNtAryST,
    signed int lenArySI
-);
-
-/*-------------------------------------------------------\
-| Fun09: freeHeap_conNt_tbConAry
-|   - Frees an array of conNt_tbCon structures (assumes heap)
-| Input:
-|   - conNtSTPtr:
-|     o Pointer to an pointer to the start of an conNt_tbCon
-|       structure array to free
-|   - lenAryI:
-|     o Number of conNt_tbCon structurs in the array
-| Output:
-|   - Frees:
-|     o The array in conNtSTPtr
-|   - Sets:
-|     o conNt_tbConST to 0
-\-------------------------------------------------------*/
-void
-freeHeap_conNt_tbConAry(
-   struct conNt_tbCon **conNtSTPtrPtr,
-   int lenAryI
 );
 
 /*-------------------------------------------------------\

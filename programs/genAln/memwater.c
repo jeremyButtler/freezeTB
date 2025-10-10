@@ -231,9 +231,7 @@ memwater(
    ^  o fun01 sec04 sub04:
    ^    - check if keep score (score > 0)
    ^  o fun01 sec04 sub05:
-   ^    - find next deletion score
-   ^  o fun01 sec04 sub06:
-   ^    - check if have new high score
+   ^    - find deletion score and move to next index
    ^  o fun01 sec04 sub07:
    ^    - prepare to score the next row in the matrix
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -371,6 +369,14 @@ memwater(
             /*always one off for new index's*/
          }
 
+         else if(scoreSL < scoreHeapArySL[slRef])
+         { /*Else If: this is the best score*/
+            scoreSL = scoreHeapArySL[slRef];
+            bestStartSL = indexHeapSL[slRef];
+            bestEndSL = indexSL;
+         } /*Else If: this was an snp or match*/
+
+
          /* branchless method is slower here
          keepSL =
              (signed long) -(scoreHeapArySL[slRef] > 0);
@@ -383,7 +389,7 @@ memwater(
 
          /***********************************************\
          * Fun02 Sec04 Sub05:
-         *   - find next deletion score
+         *   - find deletion score and move to next index
          \***********************************************/
 
          #ifdef NOEXTEND
@@ -394,18 +400,6 @@ memwater(
             delScoreSL +=
                settings->delArySS[dirRowHeapSC[slRef]];
          #endif
-
-         /***********************************************\
-         * Fun02 Sec04 Sub06:
-         *   - check if have new high score
-         \***********************************************/
-
-         if(scoreSL < scoreHeapArySL[slRef])
-         { /*If: this is the best score*/
-            scoreSL = scoreHeapArySL[slRef];
-            bestStartSL = indexHeapSL[slRef];
-            bestEndSL = indexSL;
-         } /*If: this was an snp or match*/
 
          ++indexSL;
       } /*loop; compare one query to one reference base*/

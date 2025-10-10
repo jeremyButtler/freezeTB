@@ -8,9 +8,15 @@
 '     - adds a read to an amp depth arrary (histogram)
 '   o fun02: phead_ampDepth
 '     - Prints the header for an ampDepth tsv file
-'   o fun03: phist_ampDepth
+'   o fun03: pDepthHead_ampDepth
+'     - prints the header for the read depth output
+'   o fun04: phist_ampDepth
 '     - Prints an histogram of read depths as an tsv with
 '       individual genes for ampDepth
+'   o fun05: pDepthHead_ampDepth
+'     - prints the header for the read depth output
+'   o fun06: pdepth_ampDepth
+'     - prints the read depth of each base
 '   o license:
 '     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -58,6 +64,7 @@
 |   - coordsSTPtr:
 |     o geneCoord struct pointer with gene/target
 |       coordinates want to extract
+|     o input 0/null to not filter by genes
 |   - numGenesSI:
 |     o number of genes in coordsSTPtr (index 1)
 |   - depthArySI:
@@ -82,46 +89,57 @@ addRead_ampDepth(
    signed int siIndex = 0;
    signed int endSI = 0;
 
-   siIndex =
-      findRange_geneCoord(
-         coordsSTPtr,
-         samSTPtr->refStartUI,
-         samSTPtr->refEndUI,
-         numGenesSI
-      );
+   if(coordsSTPtr)
+   { /*If: doing coordinate filtering*/
+      siIndex =
+         findRange_geneCoord(
+            coordsSTPtr,
+            samSTPtr->refStartUI,
+            samSTPtr->refEndUI,
+            numGenesSI
+         );
 
-   if(siIndex < 0)
-      ++*numOffTargSI;
+      if(siIndex < 0)
+         ++*numOffTargSI;
+      else
+      { /*Else: gene has some on target coordiantes*/
+         addBases_fun01:;
+         siBase =
+            max_genMath(
+                (signed int) samSTPtr->refStartUI,
+                (signed int)
+                   coordsSTPtr->startAryUI[siIndex]
+            );
+
+         endSI =
+            min_genMath(
+               (signed int) samSTPtr->refEndUI,
+               (signed int) coordsSTPtr->endAryUI[siIndex]
+            );
+
+         while(siBase <= endSI)
+            ++depthArySI[siBase++];
+
+
+         /*see if read has muttiple genes*/
+         ++siIndex;
+
+         if(siIndex >= numGenesSI)
+            ; /*end of genes list*/
+         else if(
+              samSTPtr->refEndUI
+            > coordsSTPtr->startAryUI[siIndex]
+         ) goto addBases_fun01; /*have another gene*/
+      } /*Else: gene has some on target coordiantes*/
+   } /*If: doing coordinate filtering*/
+
    else
-   { /*Else: gene has some on target coordiantes*/
-      addBases_fun01:;
-      siBase =
-         max_genMath(
-             (signed int) samSTPtr->refStartUI,
-             (signed int) coordsSTPtr->startAryUI[siIndex]
-         );
-
-      endSI =
-         min_genMath(
-             (signed int) samSTPtr->refEndUI,
-             (signed int) coordsSTPtr->endAryUI[siIndex]
-         );
-
-      while(siBase <= endSI)
-         ++depthArySI[siBase++];
-
-
-      /*see if read has muttiple genes*/
-      ++siIndex;
-
-      if(siIndex >= numGenesSI)
-         ; /*end of genes list*/
-      else if(
-           samSTPtr->refEndUI
-         > coordsSTPtr->startAryUI[siIndex]
-      ) goto addBases_fun01; /*have another gene*/
-   } /*Else: gene has some on target coordiantes*/
-} /*addBaseToAmDepth*/
+   { /*Else: not doing coordinate filtering*/
+      siIndex = samSTPtr->refStartUI;
+      while(siIndex <= (signed int) samSTPtr->refEndUI)
+        ++depthArySI[siIndex++];
+   } /*Else: not doing coordinate filtering*/
+} /*addRead_ampDepth*/
 
 /*-------------------------------------------------------\
 | Fun02: phead_ampDepth
@@ -156,7 +174,7 @@ phead_ampDepth(
 } /*phead_ampDepth*/
 
 /*-------------------------------------------------------\
-| Fun03: phist_ampDepth
+| Fun04: phist_ampDepth
 |   - prints an histogram of read depths as an tsv with
 |     individual genes for ampDepth
 | Input:
@@ -193,18 +211,18 @@ phist_ampDepth(
    signed char *extraColStr,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun03: phist_ampDepth
+   ' Fun04: phist_ampDepth
    '    - prints out an ampDepth histogram to file
-   '    o fun03 sec01:
+   '    o fun04 sec01:
    '      - variable declerations
-   '    o fun03 sec02:
+   '    o fun04 sec02:
    '      - find the mapping positions
-   '    o fun03 sec03:
+   '    o fun04 sec03:
    '      - print out the off targets an unampped reads
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec01:
+   ^ Fun04 Sec01:
    ^  - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -234,20 +252,20 @@ phist_ampDepth(
     signed int ampMinReadSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec02:
+   ^ Fun04 Sec02:
    ^   - find the mapping positions
-   ^   o fun03 sec02 sub01:
+   ^   o fun04 sec02 sub01:
    ^     - check if positon has enough depth to keep
-   ^   o fun03 sec02 sub02:
+   ^   o fun04 sec02 sub02:
    ^     - find the amplicon stats
-   ^  o fun03 sec02 sub03:
+   ^  o fun04 sec02 sub03:
    ^    - find the stats for each gene in the amplicon
-   ^  o fun03 sec02 sub04:
+   ^  o fun04 sec02 sub04:
    ^    - print the stats for each gene in the amplicon
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun03 Sec02 Sub01:
+   * Fun04 Sec02 Sub01:
    *   - check if positon has enough depth to keep
    \*****************************************************/
 
@@ -279,7 +297,7 @@ phist_ampDepth(
          continue;
 
       /**************************************************\
-      * Fun03 Sec02 Sub02:
+      * Fun04 Sec02 Sub02:
       *   - find amplicon stats
       \**************************************************/
 
@@ -334,13 +352,13 @@ phist_ampDepth(
          ampAvgDepthSL /= tmpSI;
 
       /**************************************************\
-      * Fun03 Sec02 Sub03:
+      * Fun04 Sec02 Sub03:
       *   - find the stats for each gene in the amplicon
       \**************************************************/
 
       tmpSI = 0;
 
-      nextGene_fun03_sec02_sub03:
+      nextGene_fun04_sec02_sub03:
 
       ++tmpSI;
       tmpStartSI = mapStartSI;
@@ -382,7 +400,7 @@ phist_ampDepth(
          avgDepthSL /= tmpSI;
 
       /**************************************************\
-      * Fun03 Sec02 Sub04:
+      * Fun04 Sec02 Sub04:
       *   - print the stats for each gene in the amplicon
       \**************************************************/
 
@@ -447,12 +465,12 @@ phist_ampDepth(
          if(histArySI[mapStartSI] < minDepthSI)
             continue;
  
-         goto nextGene_fun03_sec02_sub03;
+         goto nextGene_fun04_sec02_sub03;
       } /*If: I have another gene*/
    } /*Loop: Get the gene positions that mapped*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun03 Sec03:
+   ^ Fun04 Sec03:
    ^  - print off targets and unampped reads
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -513,6 +531,325 @@ phist_ampDepth(
    );
 } /*phist_ampDepth*/
 
+/*-------------------------------------------------------\
+| Fun05: pDepthHead_ampDepth
+|   - prints the header for the read depth output
+| Input:
+|   - outFILE:
+|     o file to print the header to
+| Output:
+|   - Prints:
+|     o read depth header to outFILE
+\-------------------------------------------------------*/
+void
+pDepthHead_ampDepth(
+   void *outFILE
+){
+   fprintf((FILE *) outFILE, "flag\treference\tbase");
+   fprintf((FILE *) outFILE, "\tdepth%s", str_endLine);
+} /*pDepthHead_ampDepth*/
+
+/*-------------------------------------------------------\
+| Fun06: pdepth_ampDepth
+|   - prints the read depth of each base
+| Input:
+|   - depthArySI:
+|     o integer array with the depthogram to print out
+|   - depthLenSI:
+|     o number of bases (length) of depthArySI (index 1)
+|   - minDepthSI:
+|     o integer with the min depth to keep an depthogram
+|       entry
+|   - refStr:
+|     o c-string with name of reference sequence
+|     o if 0/null then "reference"
+|   - flagStr:
+|     o c-string with flag to go in left column
+|     o if 0/null then "out"
+|   - outFILE:
+|     o file to print to
+| Output:
+|   - Prints:
+|     o depth for each base to outFILE
+\-------------------------------------------------------*/
+void
+pdepth_ampDepth(
+   signed int *depthArySI,  /*has read depths*/
+   signed int depthLenSI,   /*number bases in depthArySI*/
+   signed int minDepthSI,   /*minimum read depth*/
+   signed char *refStr,     /*name of reference*/
+   signed char *flagStr,    /*flag to go in left column*/
+   void *outFILE            /*output file*/
+){
+
+   signed int indexSI = 0;
+
+   if(! flagStr)
+      flagStr = (signed char *) "out";
+   if(! refStr)
+      flagStr = (signed char *) "reference";
+
+   while(indexSI < depthLenSI)
+   { /*Loop: print bases*/
+      if(depthArySI[indexSI] < minDepthSI)
+      { /*Else If: position is filtered by read depth*/
+         ++indexSI;
+         continue;
+      } /*Else If: position is filtered by read depth*/
+
+      fprintf(
+         (FILE *) outFILE,
+         "%s\t%s\t%i\t%i%s",
+         flagStr,
+         refStr,
+         indexSI,
+         depthArySI[indexSI],
+         str_endLine
+      );
+      ++indexSI;
+   } /*Loop: print bases*/
+} /*pdepth_ampDepth*/
+
+/*-------------------------------------------------------\
+| Fun07: pGeneCoverage_ampDepth
+|   - prints percent gene coverage and start/mid/end
+| Input
+|   - depthArySI:
+|     o signed int array with read depths
+|   - minDepthSI:
+|     o minimum read depth to count as covered
+|   - geneCoordSTPtr:
+|     o geneCoord struct with gene coordinates to print
+|   - numGenesSI:
+|     o number of genes in geneCoordSTPtr
+|   - outFILE:
+|     o FILE * pointer to print to
+| Output:
+|   - Prints:
+|     o percent coverage and starts/ends to outFILE
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+\-------------------------------------------------------*/
+signed char
+pGeneCoverage_ampDepth(
+   signed int *depthArySI, /*histogram of read depths*/
+   signed int minDepthSI,  /*min depth to print*/
+   struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
+   signed int numGenesSI,            /*number of genes*/
+   void *outFILE           /*file to print to*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun07 TOC:
+   '   - prints percent gene coverage and start/mid/end
+   '   o fun07 sec01:
+   '     - variable declarations
+   '   o fun07 sec02:
+   '     - memory allocation and print header
+   '   o fun07 sec03:
+   '     - find gene coverage
+   '   o fun07 sec04:
+   '     - clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun07 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int *startHeapArySI = 0;
+   signed int *endHeapArySI = 0;
+   signed int *swapSIPtr = 0;
+   signed int aryLenSI = 0;
+   signed int arySizeSI = 0;
+   signed char lowDepthBl = 0;
+
+   signed int ntSI = 0;
+   signed int geneSI = 0;
+   signed int posSI = 0;
+   signed int endSI = 0;
+   signed int lenSI = 0;
+   signed long depthSL = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun07 Sec02:
+   ^   - memory allocation and print header
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   startHeapArySI = malloc(16 * sizeof(signed int));
+   if(! startHeapArySI)
+      goto memErr_fun07_sec04;
+
+   endHeapArySI = malloc(16 * sizeof(signed int));
+   if(! endHeapArySI)
+      goto memErr_fun07_sec04;
+
+   arySizeSI = 16;
+
+
+   fprintf(
+      (FILE *) outFILE,
+      "gene\tperc_coverage\tnumber_bases\tmean_depth"
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "\tgene_length\tstart_1\tend_1\tstart_2\tend_2\t..."
+   );
+   fprintf((FILE *) outFILE, "%s", str_endLine);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun07 Sec03:
+   ^   - find gene coverage
+   ^   o fun07 sec03 sub01:
+   ^     - start loop for each gene & get gene coordinates
+   ^   o fun07 sec03 sub02:
+   ^     - find the coverage for each gene
+   ^   o fun07 sec03 sub03:
+   ^     - print out the stats
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun07 Sec03 Sub01:
+   *   - start loop for each gene and get gene coordinates
+   \*****************************************************/
+
+   for(geneSI = 0; geneSI < numGenesSI; ++geneSI)
+   { /*Loop: go though all genes to print out*/
+      posSI = geneCoordSTPtr->startAryUI[geneSI];
+      endSI = geneCoordSTPtr->endAryUI[geneSI];
+      lenSI = 1 + endSI - posSI;
+         /*+ 1 to convert to index 0*/
+      aryLenSI = 0;
+      lowDepthBl = -1;
+      startHeapArySI[0] = 0;
+      endHeapArySI[0] = 0;
+      ntSI = 0;
+
+      /**************************************************\
+      * Fun07 Sec03 Sub02:
+      *   - find the coverage for each gene
+      \**************************************************/
+
+      while(posSI <= endSI)
+      { /*Loop: get read depth*/
+         depthSL += depthArySI[posSI];
+
+         if(depthArySI[posSI] < minDepthSI)
+         { /*If: have low read depth*/
+            if(lowDepthBl < 0)
+               ; /*first position, no start found yet*/
+            else if(! lowDepthBl)
+            { /*Else If: have a true split*/
+               endHeapArySI[aryLenSI] = posSI - 1;
+               ++aryLenSI;
+
+               if(aryLenSI >= arySizeSI)
+               { /*If: need more memory*/
+                  arySizeSI += (arySizeSI >> 1);
+
+                  swapSIPtr =
+                     realloc(
+                        startHeapArySI,
+                        arySizeSI * sizeof(signed int)
+                     );
+                  if(! swapSIPtr)
+                     goto memErr_fun07_sec04;
+                  startHeapArySI = swapSIPtr;
+
+                  swapSIPtr =
+                     realloc(
+                        endHeapArySI,
+                        arySizeSI * sizeof(signed int)
+                     );
+                  if(! swapSIPtr)
+                     goto memErr_fun07_sec04;
+                  endHeapArySI = swapSIPtr;
+               } /*If: need more memory*/
+
+               lowDepthBl = 1;
+            } /*Else If: have a true split*/
+
+            /*Else: already moved to next item*/
+         } /*If: have low read depth*/
+
+         else
+         { /*Else: have enough read depth*/
+            if(lowDepthBl)
+               startHeapArySI[aryLenSI] = posSI;
+            ++ntSI;
+            lowDepthBl = 0;
+         } /*Else: have enough read depth*/
+
+         ++posSI;
+      } /*Loop: get read depth*/
+
+      /**************************************************\
+      * Fun07 Sec03 Sub03:
+      *   - print out the stats
+      \**************************************************/
+
+      if(! lowDepthBl)
+         ++aryLenSI;
+      else if(lowDepthBl < 0)
+         ++aryLenSI;
+
+      if(! ntSI)
+         fprintf(
+            (FILE *) outFILE,
+            "%s\t0\t0\t0\t%i",
+            geneCoordSTPtr->idStrAry[geneSI],
+            lenSI
+         );
+      else
+         fprintf(
+            (FILE *) outFILE,
+            "%s\t%0.2f\t%i\t%0.2f\t%i",
+            geneCoordSTPtr->idStrAry[geneSI],
+            (float) ntSI / (float) lenSI,
+            ntSI,
+            (float) ((double) depthSL / (float) lenSI),
+            lenSI
+         );
+
+      for(ntSI = 0; ntSI < aryLenSI; ++ntSI)
+      { /*Loop: print out start and ends of gaps*/
+         if(! endHeapArySI[ntSI])
+            fprintf((FILE *) outFILE, "\tNA\tNA");
+         else 
+            fprintf(
+               (FILE *) outFILE,
+               "\t%i\t%i",
+               startHeapArySI[ntSI] + 1,
+               endHeapArySI[ntSI] + 1
+            );
+      } /*Loop: print out start and ends of gaps*/
+      fprintf((FILE *) outFILE, "%s", str_endLine);
+
+      aryLenSI = 0;
+   } /*Loop: go though all genes to print out*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun07 Sec04:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   ntSI = 0;
+   goto ret_fun07_sec04;
+
+   memErr_fun07_sec04:;
+      ntSI = 1;
+      goto ret_fun07_sec04;
+
+   ret_fun07_sec04:;
+      if(startHeapArySI)
+         free(startHeapArySI);
+      startHeapArySI = 0;
+
+      if(endHeapArySI)
+         free(endHeapArySI);
+      endHeapArySI = 0;
+
+      return ntSI;
+} /*pGeneCoverage_ampDepth*/
 
 /*=======================================================\
 : License:

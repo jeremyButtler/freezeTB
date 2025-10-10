@@ -8,9 +8,15 @@
 '     - adds a read to an amp depth arrary (histogram)
 '   o fun02: phead_ampDepth
 '     - prints the header for an ampDepth tsv file
-'   o fun03: phist_ampDepth
+'   o fun03: pDepthHead_ampDepth
+'     - prints the header for the read depth output
+'   o fun04: phist_ampDepth
 '     - prints an histogram of read depths as an tsv with
 '       individual genes for ampDepth
+'   o fun05: pDepthHead_ampDepth
+'     - prints the header for the read depth output
+'   o fun06: pdepth_ampDepth
+'     - prints the read depth of each base
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -71,7 +77,7 @@ phead_ampDepth(
 );
 
 /*-------------------------------------------------------\
-| Fun03: phist_ampDepth
+| Fun04: phist_ampDepth
 |   - prints an histogram of read depths as an tsv with
 |     individual genes for ampDepth
 | Input:
@@ -107,6 +113,84 @@ phist_ampDepth(
    signed int noMapSI,
    signed char *extraColStr,
    void *outVoidFILE
+);
+
+/*-------------------------------------------------------\
+| Fun05: pDepthHead_ampDepth
+|   - prints the header for the read depth output
+| Input:
+|   - outFILE:
+|     o file to print the header to
+| Output:
+|   - Prints:
+|     o read depth header to outFILE
+\-------------------------------------------------------*/
+void
+pDepthHead_ampDepth(
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun06: pdepth_ampDepth
+|   - prints the read depth of each base
+| Input:
+|   - depthArySI:
+|     o integer array with the depthogram to print out
+|   - depthLenSI:
+|     o number of bases (length) of depthArySI (index 1)
+|   - minDepthSI:
+|     o integer with the min depth to keep an depthogram
+|       entry
+|   - refStr:
+|     o c-string with name of reference sequence
+|     o if 0/null then "reference"
+|   - flagStr:
+|     o c-string with flag to go in left column
+|     o if 0/null then "out"
+|   - outFILE:
+|     o file to print to
+| Output:
+|   - Prints:
+|     o depth for each base to outFILE
+\-------------------------------------------------------*/
+void
+pdepth_ampDepth(
+   signed int *depthArySI,  /*has read depths*/
+   signed int depthLenSI,   /*number bases in depthArySI*/
+   signed int minDepthSI,   /*minimum read depth*/
+   signed char *refStr,     /*name of reference*/
+   signed char *flagStr,    /*flag to go in left column*/
+   void *outFILE            /*output file*/
+);
+
+/*-------------------------------------------------------\
+| Fun07: pGeneCoverage_ampDepth
+|   - prints percent gene coverage and start/mid/end
+| Input
+|   - depthArySI:
+|     o signed int array with read depths
+|   - minDepthSI:
+|     o minimum read depth to count as covered
+|   - geneCoordSTPtr:
+|     o geneCoord struct with gene coordinates to print
+|   - numGenesSI:
+|     o number of genes in geneCoordSTPtr
+|   - outFILE:
+|     o FILE * pointer to print to
+| Output:
+|   - Prints:
+|     o percent coverage and starts/ends to outFILE
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+\-------------------------------------------------------*/
+signed char
+pGeneCoverage_ampDepth(
+   signed int *depthArySI, /*histogram of read depths*/
+   signed int minDepthSI,  /*min depth to print*/
+   struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
+   signed int numGenesSI,            /*number of genes*/
+   void *outFILE           /*file to print to*/
 );
 
 #endif

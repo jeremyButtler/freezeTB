@@ -41,6 +41,8 @@ struct file_inflate;
 |   - inFILE:
 |     o FILE pointer to file to add (new file)
 |     o 0 if already called get_gzSeqST for this file
+|     o must be opened in binary format
+|       * fopen(<name>, "rb");
 |     o you should set inFILE to 0/null after calling,
 |       because freeStack_file_inflate 
 |       freeHeap_file_inflate will close inFILE for you

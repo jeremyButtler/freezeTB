@@ -56,6 +56,9 @@
 '     - reverse complements a sam file sequence entry
 '   o fun20: getHead_samEntry
 '     - get header for a sam file
+'   o fun21: checkCigSize_samEntry
+'     - checks to see if I need to resize cigar and if
+'       needed resizes the cigar
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
 '        pdf
@@ -2855,12 +2858,12 @@ p_samEntry(
    fputc('\t', (FILE *) samFILE);
 
    /*PNEXT*/
-   lenSI = numToStr(buffStr, samSTPtr->pNextSI);
+   lenSI = signed_numToStr(buffStr, samSTPtr->pNextSI);
    buffStr[lenSI++] = '\t';
    fwrite(buffStr, char_fun15, lenSI, samFILE);
 
    /*TLEN*/
-   lenSI = numToStr(buffStr, samSTPtr->tLenSI);
+   lenSI = signed_numToStr(buffStr, samSTPtr->tLenSI);
    buffStr[lenSI++] = '\t';
    fwrite(buffStr, char_fun15, lenSI, samFILE);
 
@@ -3705,6 +3708,65 @@ getHead_samEntry(
    ret_fun20_sec04:;
    return retHeapStr;
 } /*getHead_samEntry*/
+
+/*-------------------------------------------------------\
+| Fun21: checkCigSize_samEntry
+|   - checks to see if I need to resize cigar and if
+|     needed resizes the cigar
+| Input:
+|   - samSTPtr:
+|     o samEntry struct pointer with cigar to check
+|   - cigPosUI:
+|     o position of next cigar entry to add
+| Output:
+|   - Modifies:
+|     o cigTypeStr in samSTPtr to be resized if needed
+|     o cigArySI in samSTPtr to be resized if needed
+|     o cigSizeUI in samSTPtr to have new cigar size
+|   - Returns:
+|     o 0 for success
+|     o 1 for memory error
+\-------------------------------------------------------*/
+signed char
+checkCigSize_samEntry(
+   struct samEntry *samSTPtr, /*has cigar*/
+   unsigned int cigPosUI      /*positon at in cigar*/
+){ /*checkCigSize_samEntry*/
+   signed char *swapStr = 0;
+   unsigned int newSizeUI = 0;
+
+   if(cigPosUI >= samSTPtr->cigSizeUI)
+   { /*If: need more memory*/
+      newSizeUI = samSTPtr->cigSizeUI;
+      newSizeUI += (newSizeUI >> 1);
+
+      swapStr =
+         realloc(
+            samSTPtr->cigTypeStr,
+            newSizeUI * sizeof(signed char)
+         );
+      if(! swapStr)
+         goto memErr_fun21;
+      samSTPtr->cigTypeStr = swapStr;
+
+      swapStr =
+         (signed char *)
+         realloc(
+            samSTPtr->cigArySI,
+            newSizeUI * sizeof(signed int)
+         );
+      if(! swapStr)
+         goto memErr_fun21;
+      samSTPtr->cigArySI = (signed int *) swapStr;
+
+      samSTPtr->cigSizeUI = newSizeUI;
+   } /*If: need more memory*/
+
+   return 0;
+
+   memErr_fun21:;
+      return 1;
+}  /*checkCigSize_samEntry*/
 
 /*=======================================================\
 : License:

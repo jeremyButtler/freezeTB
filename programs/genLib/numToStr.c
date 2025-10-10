@@ -72,6 +72,38 @@ numToStr(
 } /*numToStr*/
 
 /*-------------------------------------------------------\
+| Fun02: backNumToStr
+|   - converts a number to a c-string backwards
+| Input:
+|   - cstr:
+|     o c-string to hold the converted number
+|   - numUL:
+|     o number to convert
+| Output:
+|   - Modifies:
+|     o cstr to have the backwards number (adds a '\0' at
+|       the end)
+|   - Returns:
+|     o number of characters copied to cstr
+\-------------------------------------------------------*/
+unsigned int
+backwards_numToStr(
+   signed char *cstr,
+   unsigned long numUL
+){
+   unsigned int retUI = 0;
+
+   do{
+      cstr[retUI] = (numUL % 10) + 48;
+      ++retUI;
+      numUL /= 10;
+   } while(numUL);
+
+   cstr[retUI] = '\0';
+   return retUI;
+} /*backNumToStr*/
+
+/*-------------------------------------------------------\
 | Fun03: signed_numToStr
 |   - converts a signed number to a c-string
 | Input:
@@ -123,38 +155,6 @@ signed_numToStr(
 
    return retSI;
 } /*signed_numToStr*/
-
-/*-------------------------------------------------------\
-| Fun02: backNumToStr
-|   - converts a number to a c-string backwards
-| Input:
-|   - cstr:
-|     o c-string to hold the converted number
-|   - numUL:
-|     o number to convert
-| Output:
-|   - Modifies:
-|     o cstr to have the backwards number (adds a '\0' at
-|       the end)
-|   - Returns:
-|     o number of characters copied to cstr
-\-------------------------------------------------------*/
-unsigned int
-backwards_numToStr(
-   signed char *cstr,
-   unsigned long numUL
-){
-   unsigned int retUI = 0;
-
-   do{
-      cstr[retUI] = (numUL % 10) + 48;
-      ++retUI;
-      numUL /= 10;
-   } while(numUL);
-
-   cstr[retUI] = '\0';
-   return retUI;
-} /*backNumToStr*/
 
 /*-------------------------------------------------------\
 | Fun04: double_numToStr

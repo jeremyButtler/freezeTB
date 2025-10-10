@@ -72,6 +72,8 @@
 '        - swaps two strings until deliminator is found
 '      o fun26: swapNull_ulCp
 '        - swaps two strings until null
+'      o fun27: shift_ulCp
+'        - shifts a substring in a string up or down
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -801,6 +803,31 @@ void
 swapNull_ulCp(
    signed char *firstStr,
    signed char *secStr
+);
+
+/*-------------------------------------------------------\
+| Fun27: shift_ulCp
+|   - shifts a substring in a string up or down
+| Input:
+|   - inStr:
+|     o c-string with substring to shift
+|   - startSL:
+|     o first character to shift (index 0)
+|   - endSL:
+|     o last character to shift (index 0)
+|   - shiftSL:
+|     o index to shift string at (index 0)
+| Output:
+|   - Modifies:
+|     o inStr to have substring and startSL and endSL to
+|       be at shiftSL
+\-------------------------------------------------------*/
+void
+shift_ulCp(
+   signed char *inStr, /*string with sub-string*/
+   signed long startSL,/*first character to shift*/
+   signed long endSL,  /*last character to shift*/
+   signed long shiftSL /*were to start shift*/
 );
 
 #endif

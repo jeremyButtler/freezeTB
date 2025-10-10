@@ -54,6 +54,13 @@
 /*These have no .c files*/
 #include "../genLib/endLine.h" /*for OS line breaks*/
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+! Hidden dependencies:
+!   - .c  #include "../genLib/numToStr.h"
+!   - .c  #include "../genLib/fileFun.h"
+!   - .h  #include "ntTo5Bit.h"
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
 /*-------------------------------------------------------\
 | Fun01: blank_refs_samRef
 |   - blanks a refs_samRef struct

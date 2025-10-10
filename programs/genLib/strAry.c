@@ -18,7 +18,7 @@
 '     - compares a string to a string array
 '   o fun07: cmpIndex_strAry
 '     - compares two strings in a string array
-'   o fun08: findInsert_strAry
+'   o fun08: findClose_strAry
 '     - finds location to insert query in string array
 '       (must be sorted)
 '   o fun09: addSort_strAry
@@ -187,7 +187,6 @@ cmp_strAry(
       ); /*compare strings*/
 } /*cmp_strAry*/
 
-
 /*-------------------------------------------------------\
 | Fun07: cmpIndex_strAry
 |   - compares two strings in a string array
@@ -218,7 +217,7 @@ cmpIndex_strAry(
 } /*cmpIndex_strAry*/
 
 /*-------------------------------------------------------\
-| Fun08: findInsert_strAry
+| Fun08: findClose_strAry
 |  - finds location to insert query in string array
 |    (must be sorted)
 | Input:
@@ -311,14 +310,9 @@ addSort_strAry(
    unsigned long indexUL = 0;
    signed long diffSL = 0;
 
-
    if(! lenUL)
    { /*If: first string in array*/
-      cpStr_ulCp(
-         strAry,
-         newStr
-      );
-
+      cpStr_ulCp(strAry, newStr);
       indexUL = 0;
       goto ret_fun09;
    } /*If: first string in array*/
@@ -346,21 +340,13 @@ addSort_strAry(
 
    while(diffSL > (signed long) indexUL)
    { /*Loop: move strings up (clear position)*/
-      swap_strAry(
-         strAry,
-         diffSL,
-         diffSL - 1
-      );
-
+      swap_strAry(strAry, diffSL, diffSL - 1);
       --diffSL;
    } /*Loop: move strings up (clear position)*/
    
 
-   add_strAry(
-      newStr,
-      strAry,
-      indexUL
-   ); /*add new string in*/
+   add_strAry(newStr, strAry, indexUL);
+      /*add new string in*/
 
    ret_fun09:;
       return indexUL;

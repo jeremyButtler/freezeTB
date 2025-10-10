@@ -1,7 +1,8 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' endLine SOF: Start Of File
-'   - has line ending string for different OS's
-'   - not really needed, but I wan the flexability
+'   - has line ending string for different OS's non-binary
+'     fiels
+'   - not really needed, but I want the flexability
 '   - my code assumes there can be one or chararacters
 '     for a break (no more)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/

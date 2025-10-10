@@ -23,7 +23,7 @@
 '     - sets all variables in conNt_tbCon structure to 0
 '   o fun05: init_conNt_tbCon
 '     - initializes a conNt_tbCon structure
-'   o fun06: mk_conBase_tbCon
+'   o fun06: mk_conNt_tbCon
 '     - Makes an initialized, heap allocated conNt_tbCon
 '       structure
 '   o fun07: freeStack_conNt_tbCon
@@ -80,7 +80,6 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries
 !   o .c  #include "../genLib/base10str.h"
-!   o .c  #include "../genLib/strAry.h"
 !   o .c  #include "../genLib/fileFun.h"
 !   o .h  #include "ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -204,7 +203,7 @@ init_conNt_tbCon(
 } /*init_conNt_tbCon*/
 
 /*-------------------------------------------------------\
-| Fun06: mk_conBase_tbCon
+| Fun06: mk_conNt_tbCon
 |   - makes initialized, heap allocated conNt_tbCon struct
 | Input:
 | Output:
@@ -213,7 +212,7 @@ init_conNt_tbCon(
 |     o 0 for memory errors
 \-------------------------------------------------------*/
 struct conNt_tbCon *
-mk_conBase_tbCon(
+mk_conNt_tbCon(
    void
 ){
    struct conNt_tbCon *retST =
@@ -223,7 +222,7 @@ mk_conBase_tbCon(
       init_conNt_tbCon(retST);
    
    return retST;
-} /*mk_conBase_tbCon*/
+} /*mk_conNt_tbCon*/
 
 /*-------------------------------------------------------\
 | Fun07: freeStack_conNt_tbCon

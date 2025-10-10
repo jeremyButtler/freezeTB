@@ -357,7 +357,22 @@ readMatchFile_alnSet(
        else if(buffStr[0] == '\0')
            continue;                        /*Blank line*/
 
-       if(buffStr[4] != '1' && buffStr[4] != '0')
+       if(buffStr[4] == '1')
+          ; /*match*/
+       else if( (buffStr[4] & ~32) == 'Y' )
+          buffStr[4] = '1'; /*match*/
+       else if( (buffStr[4] & ~32) == 'T' )
+          buffStr[4] = '1'; /*match*/
+       else if(buffStr[4] == '0')
+          ; /*not match*/
+       else if( (buffStr[4] & ~32) == 'N')
+          buffStr[4] = '0'; /*mismatch*/
+       else if( (buffStr[4] & ~32) == 'F')
+          buffStr[4] = '0'; /*mismatch*/
+       else if( (buffStr[4] & ~32) == 'N')
+          buffStr[4] = def_anonymous_alnDefs;
+          /*anonymosus base*/
+       else
            return ftell((FILE *) matchFILE);
            /*This error means I do not know if match/snp*/
 
@@ -834,6 +849,10 @@ init_alnSet(
    unsigned char colUC = 0;
    unsigned char rowUC = 0;
 
+
+   alnSetST->lineWrapUI = 58; /*wrap every 58 characters*/
+   alnSetST->pFullAlnBl = 0;  /*remove masked ends*/
+   alnSetST->pBasePosBl = 1;  /*print base coordinates*/
 
    changeGap_alnSet(
       alnSetST,

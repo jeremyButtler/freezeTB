@@ -69,6 +69,9 @@
 '        - swaps two strings until deliminator is found
 '      o fun26: swapNull_ulCp
 '        - swaps two strings until null
+'      o fun27: shift_ulCp
+'        - shifts a substring in a string up or down
+'        - not tested, likely does not work
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -414,7 +417,6 @@
       return dupTmpStr - dupStr; /*number of char copied*/
    } /*cpWhite_ulCp*/
 #endif
-
 
 /*-------------------------------------------------------\
 | Fun15: lenStr_ulCp
@@ -1473,6 +1475,193 @@
          *secStr = '\0';
       } /*Else: second string ended*/
    } /*swapNull_ulCp*/
+#endif
+
+/*-------------------------------------------------------\
+| Fun27: shift_ulCp
+|   - shifts a substring in a string up or down
+| Input:
+|   - inStr:
+|     o c-string with substring to shift
+|   - startSL:
+|     o first character to shift (index 0)
+|   - endSL:
+|     o last character to shift (index 0)
+|   - shiftSL:
+|     o index to shift string at (index 0)
+| Output:
+|   - Modifies:
+|     o inStr to have substring and startSL and endSL to
+|       be at shiftSL
+\-------------------------------------------------------*/
+#ifdef NOUL
+   void
+   shift_ulCp(
+      signed char *inStr, /*string with sub-string*/
+      signed long startSL,/*first character to shift*/
+      signed long endSL,  /*last character to shift*/
+      signed long shiftSL /*were to start shift*/
+   ){
+      signed long lenSL = endSL - startSL + 1;
+      signed long posSL = 0;
+
+      if(startSL > shiftSL)
+      { /*If: moveing sub-string back in string*/
+         for( ; startSL <= endSL; ++startSL)
+         { /*Loop: shift rotate item to target positon*/
+            inStr[shiftSL] ^= inStr[startSL];
+            inStr[startSL] ^= inStr[shiftSL];
+            inStr[shiftSL] ^= inStr[startSL];
+            ++shiftSL;
+
+            for(
+               posSL = shiftSL + lenSL;
+               posSL < startSL;
+               posSL += lenSL
+            ){ /*Loop: shift old item correct position*/
+               inStr[posSL] ^= inStr[startSL];
+               inStr[startSL] ^= inStr[posSL];
+               inStr[posSL] ^= inStr[startSL];
+            }  /*Loop: shift old item correct position*/
+         } /*Loop: shift rotate item to target positon*/
+      } /*If: moveing sub-string back in string*/
+
+      else
+      { /*Else: moveing sub-string forward in string*/
+         for( ; startSL <= endSL; ++startSL)
+         { /*Loop: shift rotate item to target positon*/
+            inStr[shiftSL] ^= inStr[startSL];
+            inStr[startSL] ^= inStr[shiftSL];
+            inStr[shiftSL] ^= inStr[startSL];
+            ++shiftSL;
+
+            for(
+               posSL = startSL + lenSL;
+               posSL < shiftSL;
+               posSL += lenSL
+            ){ /*Loop: shift old item correct position*/
+               inStr[posSL] ^= inStr[startSL];
+               inStr[startSL] ^= inStr[posSL];
+               inStr[posSL] ^= inStr[startSL];
+            }  /*Loop: shift old item correct position*/
+         } /*Loop: shift rotate item to target positon*/
+      } /*Else: moveing sub-string forward in string*/
+
+      /*n * (distance / insertion_length)*/
+   } /*shift_ulCp*/
+#else
+   void
+   shift_ulCp(
+      signed char *inStr, /*string with sub-string*/
+      signed long startSL,/*first character to shift*/
+      signed long endSL,  /*last character to shift*/
+      signed long shiftSL /*were to start shift*/
+   ){
+      signed long lenSL = endSL - startSL + 1;
+      signed long posSL = 0;
+
+      unsigned long *inULPtr = 0;
+      signed long lEndSL = endSL >> def_shiftULBy_ulCp;
+
+      if(startSL > shiftSL)
+      { /*If: moveing sub-string back in string*/
+         inULPtr = (unsigned long *) &inStr[shiftSL];
+
+         startSL >>= def_shiftULBy_ulCp;
+         shiftSL >>= def_shiftULBy_ulCp;
+
+         for( ; startSL <= lEndSL; ++startSL)
+         { /*Loop: shift rotate item to target positon*/
+            inULPtr[shiftSL] ^= inULPtr[startSL];
+            inULPtr[startSL] ^= inULPtr[shiftSL];
+            inULPtr[shiftSL] ^= inULPtr[startSL];
+            ++shiftSL;
+
+            for(
+               posSL = shiftSL + lenSL;
+               posSL < startSL;
+               posSL += lenSL
+            ){ /*Loop: shift old item correct position*/
+               inULPtr[posSL] ^= inULPtr[startSL];
+               inULPtr[startSL] ^= inULPtr[posSL];
+               inULPtr[posSL] ^= inULPtr[startSL];
+            }  /*Loop: shift old item correct position*/
+         } /*Loop: shift rotate item to target positon*/
+
+         startSL <<= def_shiftULBy_ulCp;
+         shiftSL <<= def_shiftULBy_ulCp;
+
+         for( ; startSL <= endSL; ++startSL)
+         { /*Loop: shift rotate item to target positon*/
+            inStr[shiftSL] ^= inStr[startSL];
+            inStr[startSL] ^= inStr[shiftSL];
+            inStr[shiftSL] ^= inStr[startSL];
+            ++shiftSL;
+
+            for(
+               posSL = shiftSL + lenSL;
+               posSL < startSL;
+               posSL += lenSL
+            ){ /*Loop: shift old item correct position*/
+               inStr[posSL] ^= inStr[startSL];
+               inStr[startSL] ^= inStr[posSL];
+               inStr[posSL] ^= inStr[startSL];
+            }  /*Loop: shift old item correct position*/
+         } /*Loop: shift rotate item to target positon*/
+      } /*If: moveing sub-string back in string*/
+
+      else
+      { /*Else: moveing sub-string forward in string*/
+         inULPtr = (unsigned long *) &inStr[startSL];
+
+         startSL >>= def_shiftULBy_ulCp;
+         shiftSL >>= def_shiftULBy_ulCp;
+
+         for( ; startSL <= lEndSL; ++startSL)
+         { /*Loop: shift rotate item to target positon*/
+            inULPtr[shiftSL] ^= inULPtr[startSL];
+            inULPtr[startSL] ^= inULPtr[shiftSL];
+            inULPtr[shiftSL] ^= inULPtr[startSL];
+            ++shiftSL;
+
+            for(
+               posSL = startSL + lenSL;
+               posSL < shiftSL;
+               posSL += lenSL
+            ){ /*Loop: shift old item correct position*/
+               inULPtr[posSL] ^= inULPtr[startSL];
+               inULPtr[startSL] ^= inULPtr[posSL];
+               inULPtr[posSL] ^= inULPtr[startSL];
+            }  /*Loop: shift old item correct position*/
+         } /*Loop: shift rotate item to target positon*/
+
+         startSL <<= def_shiftULBy_ulCp;
+         shiftSL <<= def_shiftULBy_ulCp;
+
+         for( ; startSL <= endSL; ++startSL)
+         { /*Loop: shift rotate item to target positon*/
+            inStr[shiftSL] ^= inStr[startSL];
+            inStr[startSL] ^= inStr[shiftSL];
+            inStr[shiftSL] ^= inStr[startSL];
+            ++shiftSL;
+
+            for(
+               posSL = startSL + lenSL;
+               posSL < shiftSL;
+               posSL += lenSL
+            ){ /*Loop: shift old item correct position*/
+               inStr[posSL] ^= inStr[startSL];
+               inStr[startSL] ^= inStr[posSL];
+               inStr[posSL] ^= inStr[startSL];
+            }  /*Loop: shift old item correct position*/
+         } /*Loop: shift rotate item to target positon*/
+      } /*Else: moveing sub-string forward in string*/
+
+      /*n * (distance / insertion_length), the unsigned
+      `   long trick will reduce time by 8x for long
+      `   substrings
+      */
+   } /*shift_ulCp*/
 #endif
 
 /*=======================================================\

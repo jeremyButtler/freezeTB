@@ -262,10 +262,8 @@ water(
    ^  o fun01 sec04 sub05:
    ^    - check if keep score (score > 0)
    ^  o fun01 sec04 sub06:
-   ^    - find next deletion score
+   ^    - find deletion score and move to next index
    ^  o fun01 sec04 sub07:
-   ^    - check if have new high score
-   ^  o fun01 sec04 sub08:
    ^    - set up for scoring next row
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -381,6 +379,13 @@ water(
             scoreArySL[slRef] = 0;
          }
 
+         else if(matrixSTPtr->scoreSL < scoreArySL[slRef])
+         { /*Else If: have a new best score*/
+            matrixSTPtr->scoreSL = scoreArySL[slRef];
+            matrixSTPtr->indexSL = indexSL;
+         } /*Else If: have a new best score*/
+
+
          /*check if have negative or positive score*/
          /*no branched version is slower here
          keepSL = (signed long) -(scoreArySL[slRef] > 0);
@@ -390,7 +395,7 @@ water(
 
          /***********************************************\
          * Fun01 Sec04 Sub06:
-         *   - find next deletion score
+         *   - find deletion score and move to next index
          \***********************************************/
 
          #ifdef NOEXTEND
@@ -402,28 +407,11 @@ water(
                settings->delArySS[dirMatrixSC[indexSL]];
          #endif
 
-         /***********************************************\
-         * Fun01 Sec04 Sub07:
-         *   - check if have new high score
-         \***********************************************/
-
-         /*This is faster than the branchless option.
-         ` I am guessing to much is done in the if and 
-         ` that the if if fired rarely.
-         */
-         if(
-             matrixSTPtr->scoreSL
-           < scoreArySL[slRef]
-         ){ /*if have a new best score*/
-            matrixSTPtr->scoreSL = scoreArySL[slRef];
-            matrixSTPtr->indexSL = indexSL;
-         } /*if have a new best score*/
-
          ++indexSL;
       } /*Loop; compare one query to one reference base*/
 
       /**************************************************\
-      *  Fun01 Sec04 Sub08:
+      *  Fun01 Sec04 Sub07:
       *    - set up for scoring next row
       \**************************************************/
 

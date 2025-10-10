@@ -58,7 +58,7 @@
 ! Hidden libraries
 !   o .c  #include "../genLib/numToStr.h"
 !   o .c  #include "../genLib/ulCp.h"
-!   o .h  #include "../genLib/str_endLine.h"
+!   o .h  #include "../genLib/endLine.h"
 !   o .h  #include "ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 

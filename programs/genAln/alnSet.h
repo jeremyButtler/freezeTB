@@ -63,25 +63,15 @@
 \-------------------------------------------------------*/
 typedef struct alnSet
 { /*alnSet*/
-   /*Line wrap for printing out an alignment*/
-   unsigned int lineWrapUI;
-
-   signed char pBasePosBl; /*1 Print out base numbers*/
-   signed char pFullAlnBl;
-     /*1: Print out the full alignmnet
-     ` 0: Print out the aligned region
-     */
-
-   signed char formatFlag;
-     /*defExpandCig: is default format (S D I = X)
-     ` defEMBOSS: is EMBOSS format (| space)
-     ` defClustal: is clustal format (* space)
-     */
-
    signed long minScoreSL; /*Min score to keep alignment*/
 
+   /*for printing alignments*/
+   unsigned int lineWrapUI;/*length of line before break*/
+   signed char pFullAlnBl;/*print masked bases*/
+   signed char pBasePosBl;/*print start & end coordinate*/
+
+
    /*scoring variables*/
-   signed char noGapBl;   /*1: use gapExtendC; 0 do not*/
    signed short gapSS;    /*Penalty for starting indel*/
    signed short extendSS; /* Penalty for extending indel*/
 
@@ -123,9 +113,6 @@ typedef struct alnSet
 | Output:
 |  o Modifies:
 |    - one score in an snp/match scoring matrix
-|  - default
-|    o This assumes that the sequences are converted to
-|      indexes
 \-------------------------------------------------------*/
 #define setScore_alnSet(qryBase, refBase, score, alnSetSTPtr) ((alnSetSTPtr)->scoreMatrixSS[(unsigned char) ((qryBase) & def_ntToCode_alnSet)][(unsigned char) ((refBase) & def_ntToCode_alnSet)] = (score))
 /*setScore_alnSet, sequences will be lookup indexes*/
@@ -147,10 +134,6 @@ typedef struct alnSet
 | Output:
 |  - Modifies:
 |    o one match in the matchMatrix
-| Variations:
-|  - default
-|    o This assumes that the sequences are converted to
-|      indexes
 \-------------------------------------------------------*/
 /*The user will not be providing converted bases*/
 #define setMatch_alnSet(qryBase, refBase, match, alnSetSTPtr) ((alnSetSTPtr)->matchMatrixSC[(unsigned char) ((qryBase) & def_ntToCode_alnSet)][(unsigned char) ((refBase) & def_ntToCode_alnSet)] = (match))

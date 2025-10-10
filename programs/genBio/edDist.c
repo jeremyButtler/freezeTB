@@ -257,14 +257,12 @@ isTransNt_edDist(
 |   - minDepthUI:
 |     o minimum depth for reference base to keep
 |       difference if using a depth profile (depthAryUI)
-|   - depthAryUI:
-|     o unsigned int array with read depths for each
-|       reference base (use 0 to not use)
 |   - winSizeUI:
 |     o size of window for window error rates
 |     o windows shifts by size every time
 |   - resSTPtr:
 |     o pointer to res_edDist struct to have results
+|     o uses depthAryUI in resSTPtr to get depths
 | Output:
 |   - Modifies:
 |     o numIndelUI in resSTPtr to have number kept indels
@@ -2409,7 +2407,7 @@ phead_edDist(
 |     o FILE pointer to print header to
 | Output:
 |   - Prints:
-|     o edDist header to outFILE
+|     o stats in resSTPtr to outFILE
 \-------------------------------------------------------*/
 void
 pdist_edDist(

@@ -62,44 +62,14 @@
 /*maximum colors allowed by indexing (8bit)*/
 #define def_maxCol_mkPng 256 /*one byte*/
 
-#define def_extraBytes_mkPng 6 /*6 bytes at each row end*/
+#define def_lenZlibHeader_mkPng 6
+   /*how many bytes each zlib header adds to the total
+   `  png size
+   */
 #define def_idatEnd_mkPng 8 /*idat ends in 8 extra bytes*/
-#define def_width_mkPng 960
+/*#define def_width_mkPng 960*/
+#define def_width_mkPng 20
 #define def_height_mkPng 720
-
-#ifdef NOUL
-   typedef unsigned char ul_mkPng;
-      /*if machine requires int addresses to be even*/
-   #else
-      /*so always have maximum value for cpu*/
-      #ifdef PLAN9_64
-         typedef unsigned long long ul_mkPng;
-      #else
-         typedef unsigned long ul_mkPng;
-      #endif
-#endif
-
-/*this is a trick I use in ulCp to figure out how to
-`  convert number bytes to number longs
-*/
-#define def_shiftUL_mkPng ((sizeof(ul_mkPng) >> 1) - (sizeof(ul_mkPng) >> 3))
-
-/*Logic:
-`   - sizeof(ul_mkPng) >> 1:
-`     o This gets the number of bytes to shift to get
-`       an 32 bit or 16 bit number to one bytes. Basically
-`       it is divide by 2
-`   - (sizeof(ul_mkPng) >> 3)
-`     o This adds in 1 if I have eight bytes. It is needed
-`       as the 64 bit correction step
-`   - (sizeof(ul_mkPng) >> 1) - (sizeof(ul_mkPng) >> 3)
-`     o Gives me the number of bits I need to shift to
-`       get the number of characters in an ul_mkPng
-`   - (sizeof(ul_mkPng) >> 3) << (sizeof(ul_mkPng) >> 4)
-`     o This is not used, but would correct for a 128 bit
-`       number. Each time I increase the bit size I need
-`       to add a correction in
-*/
 
 /*-------------------------------------------------------\
 | ST01: st_mkPng

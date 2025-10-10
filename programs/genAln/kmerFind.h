@@ -68,10 +68,15 @@
 '     - finds spoligotype spacers in an sequence (from
 '       fastx file) using an faster kmer search followed
 '       by an slower waterman to finalize alignments
-'   o fun25: phit_kmerFind
+'   o fun25: fxAllFindPrims_kmerFind
+'     - finds primers in an sequence (from fastx file)
+'       using an faster kmer search followed by an slower
+'       waterman to finalize alignments
+'     - this version finds all possible primers
+'   o fun26: phit_kmerFind
 '     - prints out the primer hits for a sequence
-'   o fun26: pHeaderHit_kmerFind
-'      - prints header for phit_kmerFind (fun25)
+'   o fun27: pHeaderHit_kmerFind
+'      - prints header for phit_kmerFind (fun26)
 '   o license:
 '     - Licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -928,7 +933,99 @@ fxFindPrims_kmerFind(
 );
 
 /*-------------------------------------------------------\
-| Fun25: phit_kmerFind
+| Fun25: fxAllFindPrims_kmerFind
+|   - finds primers in an sequence (from fastx file) using
+|     an faster kmer search followed by an slower waterman
+|     to finalize alignments
+|   - this version finds all possible primers
+| Input:
+|   - tblSTPtr:
+|     o pointer to an tblST_kmerFind structure with
+|       settings and to hold the query sequence to check
+|   - refAryST
+|     o array of refST_kmerFind structures with reference
+|       (primer) sequences to search for
+|   - lenRefAryUI:
+|     o number of refST_kmerFind structures in refSTAry
+|   - seqSTPtr:
+|     o pointer to an seqST structure with the
+|       sequence to check for primers in
+|   - minPerScoreF:
+|     o float with minimum percent score to keep an
+|       alingment
+|   - dirArySCPtr:
+|     o pointer to a signed char array to hold mapped
+|       primer directions
+|   - primArySSPtr:
+|     o pointer to a signed short array to get the index of
+|       of the primer that mapped to each position
+|   - scoreArySIPtr:
+|     o array of signed ints with the best score for each
+|       matched primer
+|   - seqStartArySIPtr:
+|     o array of signed ints with the starting position
+|       one the sequence for each score in scoreArySIPtr
+|   - seqEndAySIPtr:
+|     o array of signed ints with the ending position
+|       on the sequence for each score in scoreArySIPtr
+|   - primStartArySSPtr:
+|     o array of signed shorts with the starting position
+|       on the primer for each score in scoreArySIPtr
+|   - primEndAySSPtr:
+|     o array of signed shorts with the ending position
+|       on the primer for score in scoreArySIPTr
+|   - maxPrimSI:
+|     o how many primers can have until I need to resize
+|       arrays
+|   - alnSetPtr:
+|     o pointer to an alnSet structure with the alignment
+|       settings
+| Output:
+|   - Modifies:
+|     o dirArySCPtr to have direction of each mapped
+|       position
+|       - F for foward
+|       - R for reverse
+|     o primArySSPtr to have index of each mapped primer
+|     o scoreArySIPtr score of each position a primer
+|       mapped to
+|     o seqStartArySIPtr starting sequence position of
+|       each mapped position
+|     o seqEndArySIPtr ending sequence position of
+|     o primStartArySSPtr first mapped primer base for
+|       each alignment
+|     o primEndArySSPtr last mapped primer base for each
+|       alignment
+|     o maxPrimSI to have new size of arrays if they are
+|       resized
+|     o resizes dirArySCPtr, primArySSPtr, scoreArySIPtr,
+|       seqStartArySIPtr, seqEndArySIPtr,
+|       primStartArySSPtr, and primStartArySSPtr if needed
+|   - Returns:
+|     o number of primers found
+|     o 0 if no primers were found
+|     o -1 for memory errors
+\-------------------------------------------------------*/
+signed int
+fxAllFindPrims_kmerFind(
+   struct tblST_kmerFind *tblSTPtr,
+   struct refST_kmerFind *refSTAry,
+   unsigned int lenRefAryUI,
+   struct seqST *seqSTPtr,
+   float minPercScoreF,
+   signed char **dirArySCPtr,
+   signed short **primArySSPtr,
+   signed int **scoreArySIPtr,
+   signed int **seqStartArySIPtr,
+   signed int **seqEndArySIPtr,
+   signed short **primStartArySSPtr,
+   signed short **primEndArySSPtr,
+   signed int *maxPrimSI,
+   struct alnSet *alnSetPtr
+);
+
+/*-------------------------------------------------------\
+| Fun26: phit_kmerFind
 |   - prints out the primer hits for a sequence
 | Input:
 |   - refAryST:
@@ -983,8 +1080,8 @@ phit_kmerFind(
 );
 
 /*-------------------------------------------------------\
-| Fun26: pHeaderHit_kmerFind
-|    - prints header for phit_kmerFind (fun25)
+| Fun27: pHeaderHit_kmerFind
+|    - prints header for phit_kmerFind (fun26)
 | Input:
 |   - outFILE:
 |     o file to print header to

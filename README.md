@@ -211,6 +211,7 @@ The easy way is to unzip the `freezeTB.app.zip` folder,
   The other option that might work, would bo to start
   freezeTB from the command
   line `~/Desktop/freezeTB.app/Contents/MacOS/ftbRay`.
+  The con is that this may be out of date.
   
 For a source install, the easiest way is using one of the
   Mac installer scripts. Both the raylib and TclTk install

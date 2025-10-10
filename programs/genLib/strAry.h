@@ -20,7 +20,7 @@
 '     - compares a string to a string array
 '   o fun07: cmpIndex_strAry
 '     - compares two strings in a string array
-'   o fun08: findInsert_strAry
+'   o fun08: findClose_strAry
 '     - finds location to insert query in string array
 '       (must be sorted)
 '   o fun09: addSort_strAry
@@ -191,7 +191,7 @@ cmpIndex_strAry(
 );
 
 /*-------------------------------------------------------\
-| Fun08: findInsert_strAry
+| Fun08: findClose_strAry
 |  - finds location to insert query in string array
 |    (must be sorted)
 | Input:

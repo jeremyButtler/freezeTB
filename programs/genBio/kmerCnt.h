@@ -32,7 +32,7 @@
 '     - gets number of matching kmers between a kmerCnt
 '       structure and the kmer arrays
 '   o fun13: faToKmerCnt_kmerCnt
-'     - converts a the sequences in a fasta file to a
+'     - converts the sequences in a fasta file to a
 '       kmerCnt array
 '   o license:
 '     - licensing for this code (public domain / mit)

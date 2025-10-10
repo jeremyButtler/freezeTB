@@ -61,17 +61,22 @@
 '     - does an kmer check and alings an single sequence
 '       in an refST_kmerFind structure to see if there is
 '       an match
-'   o fun24: waterFindPrims_kmerFind
+'   o fun23: waterFindPrims_kmerFind
 '     - finds primers in an sequence (from fastx file)
 '       using a slower, but more percise waterman
 '   o fun24: fxFindPrims_kmerFind
 '     - finds spoligotype spacers in an sequence (from
 '       fastx file) using an faster kmer search followed
 '       by an slower waterman to finalize alignments
-'   o fun25: phit_kmerFind
+'   o fun25: fxAllFindPrims_kmerFind
+'     - finds primers in an sequence (from fastx file)
+'       using an faster kmer search followed by an slower
+'       waterman to finalize alignments
+'     - this version finds all possible primers
+'   o fun26: phit_kmerFind
 '     - prints out the primer hits for a sequence
-'   o fun26: pHeaderHit_kmerFind
-'      - prints header for phit_kmerFind (fun25)
+'   o fun27: pHeaderHit_kmerFind
+'      - prints header for phit_kmerFind (fun26)
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -2686,7 +2691,7 @@ findRefInChunk_kmerFind(
 } /*findRefInChunk_kmerFind*/
 
 /*-------------------------------------------------------\
-| Fun24: waterFindPrims_kmerFind
+| Fun23: waterFindPrims_kmerFind
 |   - finds primers in an sequence (from fastx file) using
 |     a slower, but more percise waterman
 | Input:
@@ -2763,19 +2768,19 @@ waterFindPrims_kmerFind(
    unsigned long primEndAryUL[],
    struct alnSet *alnSetPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ^ Fun24 TOC:
-   '   o fun24 sec01:
+   ^ Fun23 TOC:
+   '   o fun23 sec01:
    '     - varaible declerations
-   '   o fun24 sec02:
+   '   o fun23 sec02:
    '     - assign sequence to table
-   '   o fun24 sec03:
+   '   o fun23 sec03:
    '     - check sequence for spacers
-   '   o fun24 sec04:
+   '   o fun23 sec04:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun24 Sec01:
+   ^ Fun23 Sec01:
    ^   - varaible declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2794,25 +2799,25 @@ waterFindPrims_kmerFind(
    unsigned long refEndUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun24 Sec02:
+   ^ Fun23 Sec02:
    ^   - convert to sequence to index
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    seqToIndex_alnSet(seqSTPtr->seqStr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun24 Sec03:
+   ^ Fun23 Sec03:
    ^   - check sequence for primers
-   ^   o fun24 sec03 sub01:
+   ^   o fun23 sec03 sub01:
    ^     - start primer loop
-   ^   o fun24 sec03 sub02:
+   ^   o fun23 sec03 sub02:
    ^     - foward alignment of primer
-   ^   o fun24 sec03 sub03:
+   ^   o fun23 sec03 sub03:
    ^     - reverse complement alignment of primer
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun24 Sec03 Sub01:
+   * Fun23 Sec03 Sub01:
    *   - start primer loop
    \*****************************************************/
 
@@ -2823,7 +2828,7 @@ waterFindPrims_kmerFind(
    ){ /*Loop: detect primers in each chunk*/
 
       /**************************************************\
-      * Fun24 Sec03 Sub02:
+      * Fun23 Sec03 Sub02:
       *   - foward alignment of primer
       \**************************************************/
 
@@ -2875,7 +2880,7 @@ waterFindPrims_kmerFind(
       } /*Else: no foward match*/
 
       /**************************************************\
-      * Fun24 Sec03 Sub03:
+      * Fun23 Sec03 Sub03:
       *   - reverse complement alignment of primer
       \**************************************************/
 
@@ -2914,7 +2919,7 @@ waterFindPrims_kmerFind(
    } /*Loop: detect primers in each chunk*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun24 Sec04:
+   ^ Fun23 Sec04:
    ^   - clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3159,7 +3164,370 @@ fxFindPrims_kmerFind(
 } /*fxFindPrims_kmerFind*/
 
 /*-------------------------------------------------------\
-| Fun25: phit_kmerFind
+| Fun25: fxAllFindPrims_kmerFind
+|   - finds primers in an sequence (from fastx file) using
+|     an faster kmer search followed by an slower waterman
+|     to finalize alignments
+|   - this version finds all possible primers
+| Input:
+|   - tblSTPtr:
+|     o pointer to an tblST_kmerFind structure with
+|       settings and to hold the query sequence to check
+|   - refAryST
+|     o array of refST_kmerFind structures with reference
+|       (primer) sequences to search for
+|   - lenRefAryUI:
+|     o number of refST_kmerFind structures in refSTAry
+|   - seqSTPtr:
+|     o pointer to an seqST structure with the
+|       sequence to check for primers in
+|   - minPerScoreF:
+|     o float with minimum percent score to keep an
+|       alingment
+|   - dirArySCPtr:
+|     o pointer to a signed char array to hold mapped
+|       primer directions
+|   - primArySSPtr:
+|     o pointer to a signed short array to get the index of
+|       of the primer that mapped to each position
+|   - scoreArySIPtr:
+|     o array of signed ints with the best score for each
+|       matched primer
+|   - seqStartArySIPtr:
+|     o array of signed ints with the starting position
+|       one the sequence for each score in scoreArySIPtr
+|   - seqEndAySIPtr:
+|     o array of signed ints with the ending position
+|       on the sequence for each score in scoreArySIPtr
+|   - primStartArySSPtr:
+|     o array of signed shorts with the starting position
+|       on the primer for each score in scoreArySIPtr
+|   - primEndAySSPtr:
+|     o array of signed shorts with the ending position
+|       on the primer for score in scoreArySIPTr
+|   - maxPrimSI:
+|     o how many primers can have until I need to resize
+|       arrays
+|   - alnSetPtr:
+|     o pointer to an alnSet structure with the alignment
+|       settings
+| Output:
+|   - Modifies:
+|     o dirArySCPtr to have direction of each mapped
+|       position
+|       - F for foward
+|       - R for reverse
+|     o primArySSPtr to have index of each mapped primer
+|     o scoreArySIPtr score of each position a primer
+|       mapped to
+|     o seqStartArySIPtr starting sequence position of
+|       each mapped position
+|     o seqEndArySIPtr ending sequence position of
+|     o primStartArySSPtr first mapped primer base for
+|       each alignment
+|     o primEndArySSPtr last mapped primer base for each
+|       alignment
+|     o maxPrimSI to have new size of arrays if they are
+|       resized
+|     o resizes dirArySCPtr, primArySSPtr, scoreArySIPtr,
+|       seqStartArySIPtr, seqEndArySIPtr,
+|       primStartArySSPtr, and primStartArySSPtr if needed
+|   - Returns:
+|     o number of primers found
+|     o 0 if no primers were found
+|     o -1 for memory errors
+\-------------------------------------------------------*/
+signed int
+fxAllFindPrims_kmerFind(
+   struct tblST_kmerFind *tblSTPtr,
+   struct refST_kmerFind *refSTAry,
+   unsigned int lenRefAryUI,
+   struct seqST *seqSTPtr,
+   float minPercScoreF,
+   signed char **dirArySCPtr,
+   signed short **primArySSPtr,
+   signed int **scoreArySIPtr,
+   signed int **seqStartArySIPtr,
+   signed int **seqEndArySIPtr,
+   signed short **primStartArySSPtr,
+   signed short **primEndArySSPtr,
+   signed int *maxPrimSI,
+   struct alnSet *alnSetPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ^ Fun25 TOC:
+   '   o fun25 sec01:
+   '     - varaible declerations
+   '   o fun25 sec02:
+   '     - assign sequence to table and memory
+   '   o fun25 sec03:
+   '     - check sequence for spacers
+   '   o fun25 sec04:
+   '     - clean up
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun25 Sec01:
+   ^   - varaible declerations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char errSC = 0; /*error messages*/
+   signed int lenSI = 0;
+   signed char *swapPtr = 0;
+
+   unsigned char matchBl = 0;
+   signed char firstTimeBl = 1;
+
+   unsigned int uiPrim = 0;
+
+   /*alignemnt variables; I keep*/
+   signed long scoreSL = 0;
+   unsigned long qryStartUL = 0;
+   unsigned long qryEndUL = 0;
+
+   /*alignemnt variables; I ingore*/
+   unsigned long refStartUL = 0;
+   unsigned long refEndUL = 0;
+
+   /*to keep the old assigned sequence*/
+   struct seqST *oldSeqST = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun25 Sec02:
+   ^   - assign sequence to table and memory
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   oldSeqST = tblSTPtr->seqSTPtr;
+   tblSTPtr->seqSTPtr = seqSTPtr;
+
+   qckBlank_tblST_kmerFind(
+      tblSTPtr,
+      0          /*I do not want to blank the sequence*/
+   ); /*using quick blank here, since all non-filled
+		` kmers will already be blanked
+		*/
+
+   /*prepare for waterman alignment*/
+   seqToIndex_alnSet(tblSTPtr->seqSTPtr->seqStr);
+
+   if(! *dirArySCPtr)
+   { /*If: need memory*/
+      *dirArySCPtr =
+         malloc((lenRefAryUI << 1) * sizeof(signed char));
+      if(! *dirArySCPtr)
+         goto memErr_fun25_sec04;
+
+      if(*primArySSPtr)
+         free(*primArySSPtr);
+      *primArySSPtr = 0;
+      *primArySSPtr =
+         malloc((lenRefAryUI <<1) * sizeof(signed short));
+      if(! *primArySSPtr)
+         goto memErr_fun25_sec04;
+
+      if(*scoreArySIPtr)
+         free(*scoreArySIPtr);
+      *scoreArySIPtr = 0;
+      *scoreArySIPtr =
+         malloc((lenRefAryUI << 1) * sizeof(signed int));
+      if(! *scoreArySIPtr)
+         goto memErr_fun25_sec04;
+
+      if(*seqStartArySIPtr)
+         free(*seqStartArySIPtr);
+      *seqStartArySIPtr = 0;
+      *seqStartArySIPtr =
+         malloc((lenRefAryUI << 1) * sizeof(signed int));
+      if(! *seqStartArySIPtr)
+         goto memErr_fun25_sec04;
+
+      if(*seqEndArySIPtr)
+         free(*seqEndArySIPtr);
+      *seqEndArySIPtr = 0;
+      *seqEndArySIPtr =
+         malloc((lenRefAryUI << 1) * sizeof(signed int));
+      if(! *seqEndArySIPtr)
+         goto memErr_fun25_sec04;
+
+      if(*primStartArySSPtr)
+         free(*primStartArySSPtr);
+      *primStartArySSPtr = 0;
+      *primStartArySSPtr =
+         malloc((lenRefAryUI <<1) * sizeof(signed short));
+      if(! *primStartArySSPtr)
+         goto memErr_fun25_sec04;
+
+      if(*primEndArySSPtr)
+         free(*primEndArySSPtr);
+      *primEndArySSPtr = 0;
+      *primEndArySSPtr =
+         malloc((lenRefAryUI <<1) * sizeof(signed short));
+      if(! *primEndArySSPtr)
+         goto memErr_fun25_sec04;
+
+      *maxPrimSI = lenRefAryUI << 1;
+   } /*If: need memory*/
+ 
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun25 Sec03:
+   ^   - check sequence for spacers
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   do{
+      errSC =
+         nextSeqChunk_tblST_kmerFind(
+            tblSTPtr,
+            &firstTimeBl
+         );
+
+      for(
+         uiPrim = 0;
+         uiPrim < lenRefAryUI;
+         ++uiPrim
+      ){ /*Loop: detect primers in each chunk*/
+
+         /***********************************************\
+         * Fun25 Sec03 Sub0x:
+         *   - resize arrays if needed
+         \***********************************************/
+
+         if(lenSI >= *maxPrimSI)
+         { /*If: need more memory*/
+            *maxPrimSI += (*maxPrimSI << 1);
+
+            swapPtr =
+               realloc(
+                  *dirArySCPtr,
+                  (*maxPrimSI << 1) * sizeof(signed char)
+               );
+            if(! *dirArySCPtr)
+               goto memErr_fun25_sec04;
+            *dirArySCPtr = swapPtr;
+
+            swapPtr =
+               (signed char *)
+               realloc(
+                  *primArySSPtr,
+                  (*maxPrimSI << 1) * sizeof(signed short)
+               );
+            if(! *primArySSPtr)
+               goto memErr_fun25_sec04;
+            *primArySSPtr = (signed short *) swapPtr;
+
+            swapPtr =
+               (signed char *)
+               realloc(
+                  *scoreArySIPtr,
+                  (*maxPrimSI << 1) * sizeof(signed int)
+               );
+            if(! *scoreArySIPtr)
+               goto memErr_fun25_sec04;
+            *scoreArySIPtr = (signed int *) swapPtr;
+
+            swapPtr =
+               (signed char *)
+               realloc(
+                  *seqStartArySIPtr,
+                  (*maxPrimSI << 1) * sizeof(signed int)
+               );
+            if(! *seqStartArySIPtr)
+               goto memErr_fun25_sec04;
+            *seqStartArySIPtr = (signed int *) swapPtr;
+
+            swapPtr =
+               (signed char *)
+               realloc(
+                  *seqEndArySIPtr,
+                  (*maxPrimSI << 1) * sizeof(signed int)
+               );
+            if(! *seqEndArySIPtr)
+               goto memErr_fun25_sec04;
+            *seqEndArySIPtr = (signed int *) swapPtr;
+
+            swapPtr =
+               (signed char *)
+               realloc(
+                  *primStartArySSPtr,
+                  (*maxPrimSI << 1) * sizeof(signed short)
+               );
+            if(! *primStartArySSPtr)
+               goto memErr_fun25_sec04;
+            *primStartArySSPtr = (signed short *) swapPtr;
+
+            swapPtr =
+               (signed char *)
+               realloc(
+                  *primEndArySSPtr,
+                  (*maxPrimSI << 1) * sizeof(signed short)
+               );
+            if(! *primEndArySSPtr)
+               goto memErr_fun25_sec04;
+            *primEndArySSPtr = (signed short *) swapPtr;
+         } /*If: need more memory*/
+
+         /***********************************************\
+         * Fun25 Sec03 Sub0y:
+         *   - see if have any matches
+         \***********************************************/
+
+         matchBl =
+            findRefInChunk_kmerFind(
+               tblSTPtr,
+               &(refSTAry[uiPrim]),
+               alnSetPtr,
+               minPercScoreF,
+               &scoreSL,
+               &qryStartUL,
+               &qryEndUL,
+               &refStartUL,
+               &refEndUL
+            );
+
+         if(matchBl)
+         { /*If: found a hit*/
+             (*primArySSPtr)[lenSI] = uiPrim;
+             (*scoreArySIPtr)[lenSI] = scoreSL;
+
+             (*seqStartArySIPtr)[lenSI] = qryStartUL;
+             (*seqEndArySIPtr)[lenSI] = qryEndUL;
+
+             (*primStartArySSPtr)[uiPrim] = refStartUL;
+             (*primEndArySSPtr)[uiPrim] = refEndUL;
+
+             if(matchBl & 2)
+                (*dirArySCPtr)[lenSI] = 'R'; /*reverse*/
+             else
+                (*dirArySCPtr)[lenSI] = 'F'; /*forward*/
+             ++lenSI;
+         } /*If: found a hit*/
+      } /*Loop: detect primers in each chunk*/
+   } while(! errSC);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun25 Sec04:
+   ^   - clean up
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   goto ret_fun25_sec04;
+
+   memErr_fun25_sec04:;
+      lenSI = -1;
+      goto ret_fun25_sec04;
+      
+   ret_fun25_sec04:;
+      qckBlank_tblST_kmerFind(tblSTPtr, 0);
+         /*using quick blank here, since all non-filled
+	   	`   kmers will already be blanked
+	   	*/
+
+      /*reset table to original sequences*/
+      indexToSeq_alnSet(tblSTPtr->seqSTPtr->seqStr);
+      tblSTPtr->seqSTPtr = oldSeqST;
+
+      return lenSI;
+} /*fxFindPrims_kmerFind*/
+
+/*-------------------------------------------------------\
+| Fun26: phit_kmerFind
 |   - prints out the primer hits for a sequence
 | Input:
 |   - refAryST:
@@ -3228,18 +3596,18 @@ phit_kmerFind(
    *oldSeqStr = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun25 Sec02:
+   ^ Fun26 Sec02:
    ^   - print out mapped primers
-   ^   o fun25 sec02 sub01:
+   ^   o fun26 sec02 sub01:
    ^     - start loop and check primers that mapped
-   ^   o fun25 sec02 sub02:
+   ^   o fun26 sec02 sub02:
    ^     - primer mate (pairing) stats printout
-   ^   o fun25 sec02 sub03:
+   ^   o fun26 sec02 sub03:
    ^     - non-primer mate (no pairing) stats printout
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun25 Sec02 Sub01:
+   * Fun26 Sec02 Sub01:
    *   - start loop and check primers that mapped
    \*****************************************************/
 
@@ -3249,13 +3617,13 @@ phit_kmerFind(
    while(siRef < numRefsSI)
    { /*Loop: print out hits*/
       if(codeAryUI[siRef] == 0)
-         goto nextRef_fun25_sec02_sub04;
+         goto nextRef_fun26_sec02_sub04;
 
       if(dirArySC[siRef] == 'N')
-         goto nextRef_fun25_sec02_sub04;
+         goto nextRef_fun26_sec02_sub04;
 
       /**************************************************\
-      * Fun25 Sec02 Sub02:
+      * Fun26 Sec02 Sub02:
       *   - primer mate (pairing) stats printout
       \**************************************************/
 
@@ -3266,19 +3634,19 @@ phit_kmerFind(
          if(codeAryUI[siMate] == 0)
          { /*If: the mate did not map*/
             ++siRef; /*move past mate*/
-            goto nextRef_fun25_sec02_sub04;
+            goto nextRef_fun26_sec02_sub04;
          } /*If: the mate did not map*/
 
          if(dirArySC[siMate] == 'N')
          { /*If: the mate did not map*/
             ++siRef; /*move past mate*/
-            goto nextRef_fun25_sec02_sub04;
+            goto nextRef_fun26_sec02_sub04;
          } /*If: the mate did not map*/
 
          if(dirArySC[siRef] == dirArySC[siMate])
          { /*If: the mate was in the same direction*/
             ++siRef; /*move past mate*/
-            goto nextRef_fun25_sec02_sub04;
+            goto nextRef_fun26_sec02_sub04;
          } /*If: the mate was in the same direction*/
 
          fprintf(
@@ -3294,7 +3662,8 @@ phit_kmerFind(
          { /*If: the mate comes last (forward read)*/
             fprintf(
                (FILE *) outFILE,
-               "\t%lu",
+               "\t%li\t%lu",
+               seqSTPtr->seqLenSL,
                seqEndAryUL[siMate] - seqStartAryUL[siRef]
             ); /*sequence length including primers*/
          } /*If: the mate comes last (foward read)*/
@@ -3376,7 +3745,7 @@ phit_kmerFind(
       } /*If: I have a mate primer*/
 
       /**************************************************\
-      * Fun25 Sec02 Sub03:
+      * Fun26 Sec02 Sub03:
       *   - non-primer mate (no pairing) stats printout
       \**************************************************/
 
@@ -3384,11 +3753,12 @@ phit_kmerFind(
       { /*Else: I have no mate primers*/
          fprintf(
              (FILE *) outFILE,
-             "%s\t%s\tNA\t%c\t%lu\t%lu",
+             "%s\t%s\tNA\t%c\t%li\t%lu\t%lu",
              seqSTPtr->idStr,
              refAryST[siRef].forSeqST->idStr
                 + skip1stCharUC,
              dirArySC[siRef],
+             seqSTPtr->seqLenSL,
              seqStartAryUL[siRef] + 1,
              seqEndAryUL[siRef] + 1
          ); /*sequence alignment stats*/
@@ -3430,11 +3800,11 @@ phit_kmerFind(
       } /*Else: I have no mate primers*/
 
       /**************************************************\
-      * Fun25 Sec02 Sub04:
+      * Fun26 Sec02 Sub04:
       *   - move to the next reference
       \**************************************************/
 
-      nextRef_fun25_sec02_sub04:;
+      nextRef_fun26_sec02_sub04:;
 
       ++siRef;
    } /*Loop: print out hits*/
@@ -3443,8 +3813,8 @@ phit_kmerFind(
 } /*phit_kmerFInd*/
 
 /*-------------------------------------------------------\
-| Fun26: pHeaderHit_kmerFind
-|    - prints header for phit_kmerFind (fun25)
+| Fun27: pHeaderHit_kmerFind
+|    - prints header for phit_kmerFind (fun26)
 | Input:
 |   - outFILE:
 |     o file to print header to
@@ -3458,17 +3828,17 @@ pHeaderHit_kmerFind(
 ){
    fprintf(
       (FILE *) outFILE,
-      "read_id\tprim_id\taln_len\tfor_dir\tfor_seq_start"
+      "read_id\tprim_id\taln_len\tfor_dir\tseq_len"
    );
 
    fprintf(
       (FILE *) outFILE,
-      "\tfor_seq_end\trev_dir\trev_start\trev_end"
+      "\tfor_seq_start\tfor_seq_end\trev_dir\trev_start"
    );
 
    fprintf(
       (FILE *) outFILE,
-      "\tfor_score\tfor_max_score"
+      "\trev_end\tfor_score\tfor_max_score"
    );
 
    fprintf(

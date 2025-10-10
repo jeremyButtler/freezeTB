@@ -42,7 +42,7 @@
 |     bit being used for anonymous bases and the 4th bit
 |     for errors
 |   - this will generate a warning if not used. Bit of
-|     a pain, but need the table to be publice
+|     a pain, but need the table to be public
 \-------------------------------------------------------*/
 static unsigned char alnNtTo_kmerBit[] =
 {
@@ -123,7 +123,7 @@ static unsigned char alnNtTo_kmerBit[] =
 `     o convert nucleotide index to bits for kmer
 `   - kmer: mkRoom | getBit:
 `     o add converted nucleotide index to kmer
-`   - kmer & mascMac:
+`   - kmer & maskMac:
 `     o clear any extra bits (not in kmer)
 */
 
@@ -147,7 +147,7 @@ static unsigned char alnNtTo_kmerBit[] =
 `     o add room for new bit
 `   - kmer: mkRoom | ntBitMac:
 `     o add converted nucleotide index to kmer
-`   - kmer & mascMac:
+`   - kmer & maskMac:
 `     o clear any extra bits (not in kmer)
 */
 

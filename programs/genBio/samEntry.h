@@ -52,6 +52,9 @@
 '      - reverse complements a sam file sequence entry
 '   o fun20: getHead_samEntry
 '     - get header for a sam file
+'   o fun21: checkCigSize_samEntry
+'     - checks to see if I need to resize cigar and if
+'     needed resizes the cigar
 '   o .h note01:
 '      - Notes about the sam file format from the sam file
 '        pdf
@@ -285,7 +288,7 @@ findQScores_samEntry(
 | Input:
 |   - samSTPtr:
 |     o Pionter to sam entry struct to copys q-scores to
-|   _ cpQStr:
+|   - cpQStr:
 |     o C-string with q-scores to copy to samSTPtr
 |   - blankQHistBl:
 |     o 1: Blank q-score vars (histogram/sum/mean/median)
@@ -555,6 +558,30 @@ signed char *
 getHead_samEntry(
    struct samEntry *samSTPtr,
    void *samFILE
+);
+
+/*-------------------------------------------------------\
+| Fun21: checkCigSize_samEntry
+|   - checks to see if I need to resize cigar and if
+|     needed resizes the cigar
+| Input:
+|   - samSTPtr:
+|     o samEntry struct pointer with cigar to check
+|   - cigPosUI:
+|     o position of next cigar entry to add
+| Output:
+|   - Modifies:
+|     o cigTypeStr in samSTPtr to be resized if needed
+|     o cigArySI in samSTPtr to be resized if needed
+|     o cigSizeUI in samSTPtr to have new cigar size
+|   - Returns:
+|     o 0 for success
+|     o 1 for memory error
+\-------------------------------------------------------*/
+signed char
+checkCigSize_samEntry(
+   struct samEntry *samSTPtr, /*has cigar*/
+   unsigned int cigPosUI      /*positon at in cigar*/
 );
 
 #endif

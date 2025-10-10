@@ -56,7 +56,7 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 ! Hidden libraries:
 !   o .c  #include "../genLib/base10str.h"
-!   o .c  #include "../genLib/fileLen.h"
+!   o .c  #include "../genLib/fileFun.h"
 !   o .h  #include "../genLib/endLine.h"
 !   o .h  #include "../genBio/ntTo5Bit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -1006,6 +1006,32 @@ getCig_dirMatrix(
    ^ Fun06 Sec03:
    ^   - add ending soft masked bases to cigar
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(! *cigTypeStr || ! *cigArySI)
+   { /*If: need memory*/
+      if(*cigTypeStr)
+         free(*cigTypeStr);
+      *cigTypeStr = 0;
+
+      *cigTypeStr =malloc((256 +8) * sizeof(signed char));
+
+      if(! *cigTypeStr)
+         goto memErr_fun06_sec07;
+
+
+      if(*cigArySI)
+         free(*cigArySI);
+      *cigArySI = 0;
+
+      *cigArySI = malloc((256 + 8) * sizeof(signed int));
+      if(! *cigArySI)
+         goto memErr_fun06_sec07;
+
+      *cigLenUI = 256;
+
+      *cigTypeStr[0] = 0;
+      *cigArySI[0] = 0;
+   } /*If: need memory*/
 
    if(
          ! revBl
