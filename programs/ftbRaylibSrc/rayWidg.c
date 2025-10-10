@@ -769,6 +769,7 @@ setup_widg_rayWidg(
    return 0;
 
    memErr_fun006:;
+      CloseWindow();
       return 1;
 } /*setup_widg_rayWidg*/
 

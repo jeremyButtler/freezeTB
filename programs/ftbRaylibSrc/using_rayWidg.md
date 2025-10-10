@@ -1,52 +1,3 @@
-# Goal
-
-Give an idea of how to use the rayWidg system to construct
-  and build a gui.
-
-The examples in here (other then the final) have not
-  been tested. There are here to give an idea of how
-  to use rayWidg.
-
-# Reason
-
-The rayWidg system is not a very good system. It was made
-  because I needed a system to build a non-game based
-  GUI using raylib. I had the option of building a GUI
-  using base raylib, which would have required a lot of
-  hard coding or I could have used guiraylib, which had
-  the widgets, but no documentation.
-
-In the end I buit a system. The design decisions reflect
-  my goal of getting a GUI up somewhat quickly, but also
-  having some organization on logic.
-
-# Use
-
-Organizes widgets, so you mostly have to focus on the
-  figuring to do when an event happened. Querying
-  functions are used to find the id of the clicked/enter
-  widget. You then have to set up the functions to handle
-  what the event does.
-
-Also, you have to set up what to draw, however, there
-  are widget functions to help you here.
-
-# Structures
-
-There are several structures used to manage the rayWidg
-  system.
-
-- widg\_rayWidg is the widget orginazation structure, it
-  holds all the details (coordiantes, width, height, and
-  state) needed for a general widget managment
-- event\_rayWidg holds the data for a single event and
-  is generally used with the more complex widgets
-- listBox\_rayWidg is a structure that is used for listbox
-  widgets and widgets that use list boxes, such as the
-  file browser
-- files\_rayWidg is a structure that is used with the file
-  browser functions (to much to pass around)
-
 ## widg\_rayWidg
 
 The primary structure is the widg\_rayWidg struct. It
@@ -103,18 +54,29 @@ Variables:
 8. lenSI is the number of widgets that have been added
 9. sizeSI is the maximum number of widgets you can add
     before reszing (calling realloc\_widg\_rayWidg)
-10. fontSizeSI is the current size of the font being
+10. xScaleF is the current scaling of the GUI
+    - there are several other variables that relate to
+      window scale and size
+11. fontSizeSI is the current size of the font being
     used
     - if you change this, then call
       `measureFont_widg_rayWidg()` to set the correct
       values for the new font size
     - `measureFont_widg_rayWidg(&widg_rayWidg_struct);`
-11. spacingF is the current font spacing (default is 1)
+12. spacingF is the current font spacing (default is 1)
     being used
     - if you change this, then call
       `measureFont_widg_rayWidg()` to set the correct
       values for the new font size
     - `measureFont_widg_rayWidg(&widg_rayWidg_struct);`
+13. guiColSI: background color of the GUI
+14. textColSI: color of text
+15. textAltColSI: color of text for the alternate color
+    scheme
+15. widgColSI: color of a widget (normal)
+16. borderColSI: color of the widget border
+17. activeColSI: color of the widget when it is in focus
+18. activeColSI: color of the widget when it is in focus
 
 ## event\_rayWidg
 
@@ -132,7 +94,8 @@ The event\_rayWidg struct is designed to get input using
      - set to 0 if no shift or caps lock and shift
      - set to 1 if left shift pressed
      - set to 2 if right shift pressed
-     - set to 4 if caps lock pressed
+     - caps lock is not checked because raylib never could
+       detect when it was turned off
   3. altBl: is set if alt key is pressed
      - set to 0 if alt key not pressed
      - set to 1 if left alt pressed
@@ -188,9 +151,10 @@ The listBox\_rayWidg structure holds the variables used
   9. onSI: item in list box the user is currently on
   10. lastSelectSI: the last item that the user selected
   11. scrollSI: first item shown in list box
-  12. maxSelectSI: maximum number of items the user can
+  12. sideScrollSI: horizontal scroll position in list box
+  13. maxSelectSI: maximum number of items the user can
                    select
-  13. numSelectSI: number of items the user has selected
+  14. numSelectSI: number of items the user has selected
 
 ## files\_rayWidg
 
@@ -273,6 +237,12 @@ Tile coordiantes are considered local and so, in widgets
 The x,y coordinate system is global and children x,y
   coordiantes are only shifted by the amount the parent
   widet was moved.
+
+One reasond to prefere tiling over x,y coordinates is that
+  tiling positions will scale with changes in screen size.
+  You can get this same effect with x,y coordinates using
+  the width and height values in the `widg_rayWidg`
+  structure, but you need to put in the work.
 
 ## States
 
@@ -364,39 +334,80 @@ These are variables that can influence the default
 
 ## Default variables
 
-- def\_widgHeightGap\_rayWidg: controlls the y-axis
-  (vertical) gap between widgts and the padding around
-  text in widgets
-  - for gap: font\_height / def\_widgHeightGap\_rayWidg
-  - for padding:
-    font\_height / def\_widgHeightGap\_rayWidg
-- def\_maxStrLen\_rayWidg: maximum length of string
-  allowed
-- def\_cursor\_rayWidg: ascii character printed for cursor
-  in entry boxes or other widgets that use the cursor
-  (no idea which)
-- def\_blinkCursor\_rayWidg: ascii chacter printed for when
-  the cursor is blinked
-- def\_border\_rayWidg: number of pixels to offset the
-  border around a shape by
-- def\_focusBorder\_rayWidg: number of pixels to offset
-  the focus border by
-- def\_<colorName>\_rayWidg: predefined hex code for a
-  color in rayWidg (colors can vary between OSs)
-  - use `Color colST GetColor(def_<colorName>_rayWidg)` to
-    get the color for raylib or for rayWidg use hex values
-  - lightGrey is a light grey color
-  - darkGrey is a dark grey color
-  - white is white
-  - black is black
-- def\_fontSize\_rayWidg: default font size to use (20)
-- def\_macRoundness\_rayWidg: controlls how round the
-  rectangles are on a Mac or when `-DMAC` is used during
-  compile time
-- def\_macSegments\_rayWidg: segments is used in drawing
-  rouned rectangles in raylib, no idea what does
-  - only appies to a Mac or when `-DMAC` is used during
-    compile time
+- window size variables:
+  - def\_scaleWidth\_rayWidg: is the default screen type
+    expected. By default, raywidg will scale up but not
+    down
+  - def\_winWidth\_rayWidg: default width of the window
+    - this is set for the smallest smartphone screen
+      possible
+  - def\_winHeight\_rayWidg: default height of the window
+    - this is set for the smallest smartphone screen
+      possible
+  - def\_FPS_rayWidg: frames per second (60)
+- tiling variables
+  - def\_widgHeightGap\_rayWidg: controlls the y-axis
+    (vertical) gap between widgts and the padding around
+    text in widgets
+    - for gap: font\_height / def\_widgHeightGap\_rayWidg
+    - for padding:
+      font\_height / def\_widgHeightGap\_rayWidg
+   - def_getPad_rayWidg: gets height padding for to top
+     or bottom of a widget (uses widgHeightGap)
+     - you input the font height
+   - def_getTotalPad_rayWidg: gets padding for both the
+     top and bottom of a widget (uses getPad)
+     - you input the font height
+- font and entry box variables
+  - def\_fontSize\_rayWidg: default font size to use (20)
+  - def\_fontSpacing\_rayWidg: default font spacing to use
+  - def\_cursor\_rayWidg: ascii character printed for
+    cursor in entry boxes
+  - def\_blinkCursor\_rayWidg: ascii chacter printed for
+    when the cursor is blinked
+  - def\_cursorBlinkInterval\_rayWidg: number of frames
+    needed to do a complete blink of the cursor
+  - def\_maxStrLen\_rayWidg: maximum length of string
+    allowed
+- file variables
+  - def\_pathSep\_rayWidg: symbol used to separate file
+    paths (chagnes for windows)
+  - def\_maxFileLen\_rayWidg: maximum length of string
+    allowed for a file name
+- widet variables
+  - def\_border\_rayWidg: number of pixels to offset the
+    border around a shape by
+  - def\_focusBorder\_rayWidg: number of pixels to offset
+    the focus border by
+- color variables
+  - raywidg is designed around a two color theme, whith
+    a slight change for when the GUI is in focus
+  - darkmode variables:
+    - def\_backFocusDarkCol\_rayWidg: is the background
+      color when the GUI is in dark mode and in focus
+    - def\_forFocusDarkCol\_rayWidg: is the forground
+      color when the GUI is in dark mode and in focus
+    - def\_backDarkCol\_rayWidg: is the background color
+      when the GUI is in dark mode and not in focus
+    - def\_forDarkCol\_rayWidg: is the forground color
+      when the GUI is in dark mode and not in focus
+  - lightmode variables:
+    - def\_backFocusLightCol\_rayWidg: is the background
+      color when the GUI is in light mode and in focus
+    - def\_forFocusLightCol\_rayWidg: is the forground
+      color when the GUI is in light mode and in focus
+    - def\_backLightCol\_rayWidg: is the background color
+      when the GUI is in light mode and not in focus
+    - def\_forLightCol\_rayWidg: is the forground color
+      when the GUI is in light mode and not in focus
+- variables unique to Mac
+  - def\_macRoundness\_rayWidg: controlls how round the
+    rectangles are on a Mac or when `-DMAC` is used during
+    compile time (not very good, but kinda works)
+  - def\_macSegments\_rayWidg: segments is used in drawing
+    rouned rectangles in raylib, no idea what does
+    - only appies to a Mac or when `-DMAC` is used during
+      compile time
 
 ## State variables
 
@@ -427,6 +438,71 @@ The state array is an unsigned short, so a total of 16
 - def\_hog\_rayWidg: is the hog state
   - widget is a high priority widget, nothing else can
     be interacted with
+
+# initial setups in a GUI
+
+## get a gui initialized
+
+Inorder to setup a GUI you first need to make a rayWidg
+  structure, initialize it, then do the set it up step
+  were memory is allocated and the GUI is started. You
+  can then run the raylib event loop to check when the
+  window should close.
+
+At the end you should always call `CloseWindow();` from
+  raylib.
+
+```
+#include <raylib.h>
+#include "raywidg.h"
+
+int
+main(
+){
+   signed int errorSI = 0;
+   struct rayWidg widgStackST;
+   
+   init_widg_rayWidg(&widgStackST);
+   if(
+      setup_widg_rayWidg(
+         &widgStackST,
+         (signed char *) "title",
+         1
+      )
+   ) goto memoryErr_main_sec0x;
+   
+   while( ! WindowShouldClose() )
+      /*do something*/
+
+   CloseWindow();
+   
+   memoryErr_main_sec0x:;
+      errorSI = 1;
+      fprintf(stderr, "memory error\n");
+      goto ret_main_sec0x;
+   
+   ret_main_sec0x:;
+      freeStack_widg_rayWidg(&widgStackST);
+      return errorSI;
+} /*main*/
+```
+
+The input for the `setup_widg_rayWidg()` function is the
+  `widg_rayWidg` structure to intialize, the tite of the
+  GUI and a number (0 to 3).
+
+- Number values:
+  - 0 means do not scale the GUI
+  - 1 means adjust the GUI font and tileing system when
+    the user is using a higher resolution screen then
+    expected
+  - 2 means scale down font and tiling for smaller screens
+    - as a rule avoid this
+  - 3 does both 1 (scale up for HDPI) and 2 (scale down
+    for smaller screens)
+    - as a rule, plan on the smallest screen possible
+
+## check events and build draw function
 
 # change fonts and raylib emmbeding fonts
 

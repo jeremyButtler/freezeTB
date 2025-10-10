@@ -4891,11 +4891,11 @@ run_freezeTB(
    *   - consensus building/mixed infection variables
    \*****************************************************/
 
-   signed char samConStr[def_lenFileName_freezeTB];
+   signed char conOutStr[def_lenFileName_freezeTB];
    signed char conTsvStr[def_lenFileName_freezeTB];
 
    struct conNt_tbCon *conNtHeapAryST = 0;
-   FILE *samConFILE = 0;
+   FILE *conOutFILE = 0;
 
    struct samEntry *samConSTAry = 0;
    signed int numFragSI = 0;
@@ -5798,12 +5798,20 @@ run_freezeTB(
    *   - set up open consensus output file name
    \*****************************************************/
 
-   errSC =
-      outputPath_freezeTBPaths(
-         ftbSetStackST.prefixStr,
-         (signed char *) "-cons.sam",
-         samConStr
-      );
+   if(ftbSetStackST.clustBl)
+      errSC =
+         outputPath_freezeTBPaths(
+            ftbSetStackST.prefixStr,
+            (signed char *) "-cons.sam",
+            conOutStr
+         );
+   else
+      errSC =
+         outputPath_freezeTBPaths(
+            ftbSetStackST.prefixStr,
+            (signed char *) "-cons.fa",
+            conOutStr
+         );
 
    if(errSC)
    { /*If: could not open file*/
@@ -5818,13 +5826,13 @@ run_freezeTB(
 
       cpStr_ulCp(
          tmpStr,
-         samConStr
+         conOutStr
       );
 
       goto err_fun09_sec11_sub02;
    } /*If: could not open file*/
 
-   samConFILE = fopen((char *) samConStr, "w");
+   conOutFILE = fopen((char *) conOutStr, "w");
 
    /*****************************************************\
    * Fun09 Sec04 Sub11:
@@ -6288,7 +6296,7 @@ run_freezeTB(
          break; /*off header*/
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          "%s%s",
          samStackST.extraStr,
          str_endLine
@@ -6441,8 +6449,8 @@ run_freezeTB(
       fprintf(samFILE, "@HD\tVN:1.6\tSO:unsorted");
       fprintf(samFILE, "\tGO:query%s", str_endLine);
 
-      fprintf(samConFILE, "@HD\tVN:1.6\tSO:unsorted");
-      fprintf(samConFILE, "\tGO:query%s", str_endLine);
+      fprintf(conOutFILE, "@HD\tVN:1.6\tSO:unsorted");
+      fprintf(conOutFILE, "\tGO:query%s", str_endLine);
 
       tmpStr = mapRefStackST.seqSTPtr->idStr;
       errSL = 0;
@@ -6463,7 +6471,7 @@ run_freezeTB(
          str_endLine
       );
       fprintf(
-         samConFILE,
+         conOutFILE,
          "@SQ\tSN:%s\tLN%li%s",
          mapRefStackST.seqSTPtr->idStr,
          mapRefStackST.seqSTPtr->seqLenSL + 1,
@@ -6502,12 +6510,12 @@ run_freezeTB(
    if(! ftbSetStackST.clustBl || fqIndexSI)
    { /*If: not doing mixed infection step*/
       fprintf(
-         samConFILE,
+         conOutFILE,
          "@PG\tID:freezeTB\tPN:freezeTB"
       );
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          "\tVN:%i-%02i-%02i\tCL:freezeTB",
          def_year_ftbVersion,
          def_month_ftbVersion,
@@ -6516,12 +6524,12 @@ run_freezeTB(
 
       /*Check if getting sam file from stdin*/
       if(! samFileStr || *samFileStr == '-')
-        fprintf(samConFILE, " -sam -");
+        fprintf(conOutFILE, " -sam -");
       else
-        fprintf(samConFILE, " -sam %s", samFileStr);
+        fprintf(conOutFILE, " -sam %s", samFileStr);
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          " -min-mapq %i -min-q %i -min-q-ins %i",
          ftbSetStackST.tbConSet.minMapqUC,
          ftbSetStackST.tbConSet.minQSI,
@@ -6529,7 +6537,7 @@ run_freezeTB(
       );
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          " -min-len %i -min-depth %i -perc-snp-sup %.2f",
          ftbSetStackST.tbConSet.minLenSI,
          ftbSetStackST.tbConSet.minDepthSI,
@@ -6537,7 +6545,7 @@ run_freezeTB(
       );
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          " -perc-ins-sup %.2f -min-del-sup %.2f",
          ftbSetStackST.tbConSet.minPercInsF,
          ftbSetStackST.tbConSet.minPercDelF
@@ -6549,7 +6557,7 @@ run_freezeTB(
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          " -min-mapq %i -min-q %i -min-q-ins %i",
          ftbSetStackST.tbConSet.minMapqUC,
          ftbSetStackST.tbConSet.minQSI,
@@ -6557,30 +6565,30 @@ run_freezeTB(
       );
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          " -p-min-depth %i -p-perc-snp-sup %.2f",
          ftbSetStackST.tbConSet.minPrintDepthSI,
          ftbSetStackST.tbConSet.printMinSupSnpF
       );
 
       fprintf(
-         samConFILE,
+         conOutFILE,
          " -p-perc-ins-sup %.2f -p-min-del-sup %.2f",
          ftbSetStackST.tbConSet.printMinSupInsF,
          ftbSetStackST.tbConSet.printMinSupDelF
       );
 
       fprintf(
-         samConFILE,
+         conOutFILE,
           " -out-tsv %s -out %s%s",
           conTsvStr,
-          samConStr,
+          conOutStr,
           str_endLine
       );
    } /*If: not doing mixed infection step*/
 
-   fclose(samConFILE);
-   samConFILE = 0;
+   fclose(conOutFILE);
+   conOutFILE = 0;
 
    /*****************************************************\
    * Fun09 Sec06 Sub03:
@@ -7444,9 +7452,9 @@ run_freezeTB(
    +   - open files + run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   samConFILE =
+   conOutFILE =
       fopen(
-         (char *) samConStr,
+         (char *) conOutStr,
           "a"
       ); /*open consensus output file*/
 
@@ -7489,7 +7497,7 @@ run_freezeTB(
       } /*If: blank structure*/
 
       /*print fragment*/
-      p_samEntry(&samConSTAry[siCon], 0, samConFILE);
+      pfa_samEntry(&samConSTAry[siCon], conOutFILE);
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
      + Fun09 Sec09 Sub04 Cat03:
@@ -7568,8 +7576,8 @@ run_freezeTB(
    free(buffHeapStr);
    buffHeapStr = 0;
 
-   fclose(samConFILE);
-   samConFILE = 0;
+   fclose(conOutFILE);
+   conOutFILE = 0;
 
    free(samConSTAry); /*all structs are freeded*/
    numFragSI = 0;
@@ -7803,18 +7811,18 @@ run_freezeTB(
    *   - print clusters for mixed infection
    \*****************************************************/
 
-   samConFILE =
+   conOutFILE =
       fopen(
-         (char *) samConStr,
+         (char *) conOutStr,
           "a"
       ); /*open consensus output file*/
 
    errSC =
-      plist_con_clustST(conListHeapST, 0, 0, samConFILE);
+      plist_con_clustST(conListHeapST, 0, 0, conOutFILE);
       /*print consensus for clusters*/
 
-   fclose(samConFILE);
-   samConFILE = 0;
+   fclose(conOutFILE);
+   conOutFILE = 0;
 
    if(errSC)
    { /*If: had error*/
@@ -8189,13 +8197,13 @@ run_freezeTB(
          fclose(outFILE);
       outFILE = 0;
 
-      if(! samConFILE) ;
-      else if(samConFILE == stdin) ;
-      else if(samConFILE == stdout) ;
-      else if(samConFILE == stderr) ;
+      if(! conOutFILE) ;
+      else if(conOutFILE == stdin) ;
+      else if(conOutFILE == stdout) ;
+      else if(conOutFILE == stderr) ;
       else
-         fclose(samConFILE);
-      samConFILE = 0;
+         fclose(conOutFILE);
+      conOutFILE = 0;
 
       if(! idFILE) ;
       else if(idFILE == stdin) ;

@@ -624,8 +624,6 @@ widg_rayWidg{
    signed int borderColSI;/*color of the border*/
 
    signed int activeColSI; /*color of widget when active*/
-   signed int activeTextColSI;
-      /*color of text when active*/
 
    /*__________________font_variables___________________*/
    struct Font *fontSTPtr;    /*font for GUI*/
