@@ -221,6 +221,13 @@ The harder way is from source (not covered here), but is
   the same as Linux, except replace `mkfile.linux`
   with `mkfile.mac`.
 
+If you get a "App may be damaged move to trash error" it
+  is Mac quantining the program. You can get around this
+  by opening a terminal and typing
+  `xattr -d com.apple.quarantine ~/Desktop/freezeTB.app`.
+
+Scaling may through the app off.
+
 ### Mac; easy way pre-steps
 
 You may get a request to install xcode. This is Mac
