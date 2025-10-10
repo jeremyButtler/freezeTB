@@ -90,6 +90,7 @@ typedef struct gui_ftbRayST
    signed int outGuiIdSI;   /*output GUI button*/
    signed int reportGuiIdSI;/*report GUI button*/
    signed int amrsGuiIdSI;  /*amr list GUI button*/
+   signed int coverGuiIdSI; /*gene % coverage GUI button*/
 
    /*_________________input GUI_________________________*/
 
@@ -184,6 +185,11 @@ typedef struct gui_ftbRayST
    signed int amrTblIdSI;
    signed int amrLabIdSI;
    struct listBox_rayWidg *amrListSTPtr;
+
+   /*_______________gene_coverage_GUI___________________*/
+   signed int geneCoverTblIdSI;
+   signed int geneCoverLabIdSI;
+   struct listBox_rayWidg *geneCoverSTPtr;
 }gui_ftbRayST;
 
 /*-------------------------------------------------------\

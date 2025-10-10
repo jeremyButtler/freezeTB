@@ -5,9 +5,9 @@
 CC=cc
 LD=cc
 MAKE=make
-coreCFLAGS=-c -static -O3 -Wall -Wextra
+coreCFLAGS=-c -static -O0 -ggdb -Wall -Wextra
 CFLAGS=-DNONE
-O=o.linux
+O=o.bug
 PREFIX=/usr/local/bin
 raylibPath=../raylib/src
 libRayLib=$(raylibPath)/libraylib.a

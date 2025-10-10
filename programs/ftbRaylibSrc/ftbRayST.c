@@ -31,6 +31,8 @@
 '     - hides the report menu
 '   o .c fun10: hideTable_ftbRayST
 '     - hides the amr table menu
+'   o .c fun11: hideGeneCover_ftbRayST
+'     - hides the gene coverage table
 '   o .c fun12: spoligoLinGet_ftbRayST
 '     - gets the spoligotype lineage and sets the spoligo
 '   o .c fun13: miruLinGet_ftbRayST
@@ -39,7 +41,7 @@
 '     - builds the drug resistance part of the ftb report
 '   o .c fun15: getDatabases_ftbRayST
 '     - get database files for freezeTB (currently Mac)
-'   o fun16: checkRunEvent_ftbRayST
+'   o fun17: checkRunEvent_ftbRayST
 '     - checks for an event, and if can runs found event
 '     - also redraws the GUI
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -314,6 +316,7 @@ init_gui_ftbRayST(
    guiSTPtr->outGuiIdSI = 0;
    guiSTPtr->reportGuiIdSI = 0;
    guiSTPtr->amrsGuiIdSI = 0;
+   guiSTPtr->coverGuiIdSI = 0;
 
    guiSTPtr->mesgBoxIdSI = 0;
    guiSTPtr->fqButIdSI = 0;
@@ -344,6 +347,10 @@ init_gui_ftbRayST(
    guiSTPtr->amrTblIdSI = 0;
    guiSTPtr->amrLabIdSI = 0;
    guiSTPtr->amrListSTPtr = 0;
+
+   guiSTPtr->geneCoverTblIdSI = 0;
+   guiSTPtr->geneCoverLabIdSI = 0;
+   guiSTPtr->geneCoverSTPtr = 0;
 
    blank_gui_ftbRayST(guiSTPtr);
 } /*init_gui_ftbRayST*/
@@ -379,6 +386,8 @@ freeStack_gui_ftbRayST(
       freeHeap_files_rayWidg(guiSTPtr->oldFtbFileSTPtr);
    if(guiSTPtr->amrListSTPtr)
       freeHeap_listBox_rayWidg(guiSTPtr->amrListSTPtr);
+   if(guiSTPtr->geneCoverSTPtr)
+      freeHeap_listBox_rayWidg(guiSTPtr->geneCoverSTPtr);
 
    init_gui_ftbRayST(guiSTPtr);
 } /*freeStack_gui_ftbRayST*/
@@ -542,6 +551,19 @@ draw_gui_ftbRayST(
       guiSTPtr->amrListSTPtr
    );
 
+   widthSet_listBox_rayWidg(
+      guiSTPtr->widgSTPtr->winWidthSI
+         - guiSTPtr->widgSTPtr->fontWidthF * 2,
+      20,
+      guiSTPtr->geneCoverSTPtr
+   );
+
+   heightSet_listBox_rayWidg(
+      guiSTPtr->widgSTPtr->winHeightSI - oneRowSI * 2,
+      20,
+      guiSTPtr->geneCoverSTPtr
+   );
+
    BeginDrawing();
       ClearBackground(guiCol);
 
@@ -611,7 +633,24 @@ draw_gui_ftbRayST(
             glob_maxWidgWidthSI,
             0,                /*minumum width = any size*/
             guiSTPtr->amrsGuiIdSI,
-            (signed char *) "table",
+            (signed char *) "AMRs",
+            0,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+      widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+      guiSTPtr->widgSTPtr->xArySI[
+         guiSTPtr->coverGuiIdSI
+      ] = widthSI;
+      guiSTPtr->widgSTPtr->yArySI[
+         guiSTPtr->coverGuiIdSI
+      ] = ySI;
+      widthSI +=
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->coverGuiIdSI,
+            (signed char *) "% gene",
             0,
             guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
@@ -969,6 +1008,25 @@ draw_gui_ftbRayST(
             guiSTPtr->widgSTPtr
          );
 
+         /*___________gene_coverage_menu________________*/
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->geneCoverLabIdSI,
+            guiSTPtr->filePrefixStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+         draw_listBox_rayWidg(
+            guiSTPtr->geneCoverTblIdSI,
+            tileBl,
+            guiSTPtr->geneCoverSTPtr,
+            guiSTPtr->widgSTPtr
+         );
+
+         /*_____________get_tile_coordinates____________*/
          if(tileBl)
          { /*If: need to apply tiling coordinates*/
             tile_widg_rayWidg(
@@ -1084,6 +1142,12 @@ mk_gui_ftbRayST(
       goto memErr_fun06_sec07;
    init_listBox_rayWidg(retHeapGUI->amrListSTPtr);
 
+   retHeapGUI->geneCoverSTPtr =
+      malloc(sizeof(struct listBox_rayWidg));
+   if(! retHeapGUI->geneCoverSTPtr)
+      goto memErr_fun06_sec07;
+   init_listBox_rayWidg(retHeapGUI->geneCoverSTPtr);
+
    retHeapGUI->widgSTPtr =
       malloc(sizeof(struct widg_rayWidg));
    if(! retHeapGUI->widgSTPtr)
@@ -1124,6 +1188,11 @@ mk_gui_ftbRayST(
    if(tmpSI < 0)
       goto memErr_fun06_sec07;
    retHeapGUI->amrsGuiIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->coverGuiIdSI = tmpSI;
 
    /*****************************************************\
    * Fun06 Sec02 Sub03:
@@ -1271,7 +1340,25 @@ mk_gui_ftbRayST(
    retHeapGUI->amrTblIdSI = tmpSI;
 
    /*****************************************************\
-   * Fun06 Sec02 Sub07:
+   * Fun06 Sec02 Sub06:
+   *   - add gene coverage table
+   \*****************************************************/
+
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->geneCoverLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->geneCoverTblIdSI = tmpSI;
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub08:
    *   - add report screen widgets (last for rectangles)
    *   - last because requires creating a large number of
    *     untracked widgets for the drugs
@@ -1679,6 +1766,36 @@ hideTable_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 } /*hideTable_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun11: hideGeneCover_ftbRayST
+|   - hides the gene coverage table
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Mofidies:
+|     o all output GUI widgets to be hidden and the output
+|       menu button to have the inactive state removed
+\-------------------------------------------------------*/
+void
+hideGeneCover_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+      inactiveClear_widg_rayWidg(
+         guiSTPtr->coverGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->geneCoverTblIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->geneCoverLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+} /*hideGeneCover_ftbRayST*/
 
 /*-------------------------------------------------------\
 | Fun12: spoligoLinGet_ftbRayST
@@ -3292,9 +3409,349 @@ getDatabases_ftbRayST(
       return 1;
 } /*getDatbases_ftbRayST*/
 
+/*-------------------------------------------------------\
+| Fun16: mkCoverageTbl_ftbRayST
+|   - makes the gene percent coverage table
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui settings and
+|       prefix of output files
+| Output:
+|   - Modifies:
+|     o gui to have the gene percent coverage table
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+\-------------------------------------------------------*/
+signed int
+mkCoverageTbl_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+   signed char lineStr[4096];
+   signed int lenSI = 0;
+   signed int posSI = 0;
+   float percF = 0;
+   FILE *inFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec02:
+   ^   - open gene coverage file and get past header
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   clear_listBox_rayWidg(guiSTPtr->geneCoverSTPtr);
+
+   lenSI = cpStr_ulCp(lineStr, guiSTPtr->filePrefixStr);
+   cpStr_ulCp(
+      &lineStr[lenSI],
+      (signed char *) "-geneCoverage.tsv"
+   );
+
+   inFILE = fopen((char *) lineStr, "r");
+   if(! inFILE)
+     return 0;
+
+
+   if( ! fgets((char *) lineStr, 4088, inFILE) )
+      return 0; /*empty file*/
+
+   if(
+      addItem_listBox_rayWidg(
+         (signed char *) "gene    %_cover  drugs...",
+         def_listSpecial_rayWidg, /*does nothing*/
+         guiSTPtr->geneCoverSTPtr,
+         guiSTPtr->widgSTPtr
+      )
+   ) return 1;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec03:
+   ^   - read in gene coverage file entries
+   ^   o fun16 sec03 sub01:
+   ^     - get gene name and percent coverage
+   ^   o fun16 sec03 sub02:
+   ^     - add drug resistance a gene mutation can cause
+   ^   o fun16 sec03 sub03:
+   ^     - add gene entry to list box
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+ 
+   /*****************************************************\
+   * Fun16 Sec03 Sub01:
+   *   - get gene name and percent coverage
+   \*****************************************************/
+
+   
+   while( fgets((char *) lineStr, 4088, inFILE) )
+   { /*Loop: get the gene coverage and gene*/
+      lenSI = 0;
+      while(lineStr[lenSI] > 32)
+         ++lenSI;
+
+      lineStr[lenSI++] = ' ';
+      posSI = lenSI;
+
+      while(lineStr[lenSI] && lineStr[lenSI] < 33)
+         ++lenSI;
+
+      lenSI += strToF_base10str(&lineStr[lenSI], &percF);
+      if(lineStr[lenSI] > 32)
+         continue; /*bad line*/
+
+      /*add in padding and column spacer*/
+      while(posSI < 8)
+         lineStr[posSI++] = ' ';
+
+      /*add the percent coverage back into the line at the
+      `   correct position
+      */
+      lenSI = posSI + 1;
+      posSI += double_numToStr(&lineStr[posSI], percF, 2);
+
+      if(lenSI == posSI)
+      { /*If: added 0*/
+         lineStr[posSI++] = '.';
+         lineStr[posSI++] = '0';
+         lineStr[posSI++] = '0';
+      } /*If: added 0*/
+
+      lineStr[posSI++] = ' ';
+      lineStr[posSI++] = ' ';
+      lineStr[posSI++] = ' ';
+      lineStr[posSI++] = ' ';
+      lineStr[posSI++] = ' ';
+
+      /**************************************************\
+      * Fun16 Sec03 Sub02:
+      *   - add drug resistance a gene mutation can cause
+      \**************************************************/
+
+      if(! eqlWhite_ulCp(lineStr, (signed char *) "atpE") )
+         posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Bdq  na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "ddn")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Bdq  Pmd  na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "eis")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Amk  Kan  na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "embA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Emb  na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "embB")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Emb  na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "ethA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Eto  na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "fabG1")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Eto  Inh  Pmd  na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Cfz  Dlm  Pmd  na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiB")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Cfz  Dlm  Pmd  na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiC")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Cfz  Dlm  Pmd  na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "fgd1")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Cfz  Dlm  na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "gidB")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Stm  na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "gyrA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Flq	 Lfx  Mfx  na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "gyrB")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Flq	 Lfx  Mfx  na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "inhA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Eto	 Inh  na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "katG")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Inh	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "pncA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Pza	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "rplC")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Lzd	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "rpoB")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Rif	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "rpsL")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Stm	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "rrl")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Cap	 Lzd  na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "rrs")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Amk	 Cap  Kan  Stm"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "Rv0678")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Bdq	 Cfz  na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "Rv2983")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Dlm	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "tlyA")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Cap	 na   na   na"
+            );
+
+      else
+         posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "na 	 na   na   na"
+            );
+
+      /**************************************************\
+      * Fun16 Sec03 Sub03:
+      *   - add gene entry to list box
+      \**************************************************/
+
+      lineStr[posSI] = 0;
+
+      if(
+         addItem_listBox_rayWidg(
+             lineStr,
+             def_listSpecial_rayWidg, /*does nothing*/
+             guiSTPtr->geneCoverSTPtr,
+             guiSTPtr->widgSTPtr
+         )
+      ) return 1;
+   } /*Loop: get the gene coverage and gene*/
+
+   return 0;
+} /*mkCoverageTbl_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun16: checkRunEvent_ftbRayST
+| Fun17: checkRunEvent_ftbRayST
 |   - checks for an event, and if can runs the found event
 |   - also redraws the GUI
 | Input:
@@ -3314,20 +3771,20 @@ signed char
 checkRunEvent_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun16 TOC:
+   ' Fun17 TOC:
    '   - checks for an event, and if can runs found event
-   '   o fun16 sec01:
+   '   o fun17 sec01:
    '     - variable declarations
-   '   o fun16 sec02:
+   '   o fun17 sec02:
    '     - get and check events
-   '   o fun16 sec06:
+   '   o fun17 sec06:
    '     - handle running button events
-   '   o fun16 sec07:
+   '   o fun17 sec07:
    '     - return results and redraw gui
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec01:
+   ^ Fun17 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3335,14 +3792,14 @@ checkRunEvent_ftbRayST(
    signed char buildReportBl = 0;
 
    /*for reading the config file*/
-   #define def_lineLen_fun16 1024
-   signed char lineStr[def_lineLen_fun16 + 8];
-   signed char logFileStr[def_lineLen_fun16 + 8];
+   #define def_lineLen_fun17 1024
+   signed char lineStr[def_lineLen_fun17 + 8];
+   signed char logFileStr[def_lineLen_fun17 + 8];
    FILE *inFILE = 0;
    signed long discardSL = 0; /*for reading files*/
 
-   signed char refStr[def_lineLen_fun16 + 8];
-   signed char minimap2Str[def_lineLen_fun16 + 8];
+   signed char refStr[def_lineLen_fun17 + 8];
+   signed char minimap2Str[def_lineLen_fun17 + 8];
 
    /*for buiding freezeTB run command*/
    signed char *argAryStr[1024];
@@ -3360,16 +3817,16 @@ checkRunEvent_ftbRayST(
       argAryStr[tmpSI] = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec02:
+   ^ Fun17 Sec02:
    ^   - get and check events
-   ^   o fun16 sec02 sub01:
+   ^   o fun17 sec02 sub01:
    ^     - get event and check entery event
-   ^   o fun16 sec02 sub02:
+   ^   o fun17 sec02 sub02:
    ^     - check which event I am running
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun16 Sec02 Sub01:
+   * Fun17 Sec02 Sub01:
    *   - get event and check entery event
    \*****************************************************/
 
@@ -3414,7 +3871,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
    } /*If: was a entry box input event*/
 
 
@@ -3436,7 +3893,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->amrSupLenSI = tmpSI;
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
    } /*If: was a entry box input event*/
 
    tmpSI =
@@ -3454,7 +3911,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->indelSupLenSI = tmpSI;
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
    } /*If: was a entry box input event*/
 
    tmpSI =
@@ -3468,81 +3925,113 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
+   } /*If: was a entry box input event*/
+
+   tmpSI =
+      listBoxEvent_rayWidg(
+         guiSTPtr->geneCoverTblIdSI,   /*id of list box*/
+         guiSTPtr->geneCoverSTPtr, /*has list box items*/
+         &eventStackST,
+         guiSTPtr->widgSTPtr
+      ); /*add any keyboard inputs to entry box*/
+
+   if(tmpSI >= 0)
+   { /*If: was a entry box input event*/
+      guiSTPtr->prefixLenSI = tmpSI;
+      goto done_fun17_sec07;
    } /*If: was a entry box input event*/
 
    /*****************************************************\
-   * Fun16 Sec02 Sub02:
+   * Fun17 Sec02 Sub02:
    *   - check which event I am running
    \*****************************************************/
 
    if(eventStackST.idSI == guiSTPtr->fqButIdSI)
-      goto getFqFiles_fun16_sec06_sub02;
+      goto getFqFiles_fun17_sec06_sub02;
 
    else if(eventStackST.idSI == guiSTPtr->outDirIdSI)
-      goto getOutDir_fun16_sec06_sub03;
+      goto getOutDir_fun17_sec06_sub03;
 
    else if(eventStackST.idSI == guiSTPtr->configIdSI)
-      goto getConfigFile_fun16_sec06_sub04;
+      goto getConfigFile_fun17_sec06_sub04;
 
    else if(eventStackST.idSI == guiSTPtr->runIdSI)
-      goto runFtb_fun16_sec06_sub06;
+      goto runFtb_fun17_sec06_sub06;
 
    else if(
       eventStackST.idSI == guiSTPtr->reportGuiIdSI
-   ) goto reportMenu_fun16_sec06_sub10;
+   ) goto reportMenu_fun17_sec06_sub10;
 
    else if(eventStackST.idSI==guiSTPtr->inputGuiIdSI)
-      goto inputMenu_fun16_sec06_sub07;
+      goto inputMenu_fun17_sec06_sub07;
 
    else if(eventStackST.idSI == guiSTPtr->outGuiIdSI)
-      goto outputMenu_fun16_sec06_sub08;
+      goto outputMenu_fun17_sec06_sub08;
 
    else if(eventStackST.idSI == guiSTPtr->amrsGuiIdSI)
-      goto amrTblMenu_fun16_sec06_sub0y;
-
-   else if(eventStackST.idSI==guiSTPtr->getPrefixButIdSI)
-       goto getFtbPrefix_fun16_sec06_sub11;
+      goto amrTblMenu_fun17_sec06_sub12;
 
    else if(eventStackST.idSI == guiSTPtr->getOutButSI)
-      goto buildOutReport_fun16_sec06_sub0x;
+      goto buildOutReport_fun17_sec06_sub0x;
+
+   else if(eventStackST.idSI == guiSTPtr->coverGuiIdSI)
+      goto geneCoverMenu_fun17_sec06_sub13;
+
+   else if(eventStackST.idSI==guiSTPtr->getPrefixButIdSI)
+       goto getFtbPrefix_fun17_sec06_sub11;
+
+   else if(eventStackST.idSI == guiSTPtr->getOutButSI)
+      goto buildOutReport_fun17_sec06_sub0x;
 
    else if(eventStackST.parIdSI == guiSTPtr->mesgBoxIdSI)
-      goto mesgBox_fun16_sec06_sub01;
+      goto mesgBox_fun17_sec06_sub01;
 
    else if(
       eventStackST.parIdSI == guiSTPtr->fileBrowserIdSI
-   ) goto fileBrowser_fun16_sec06_sub05;
+   ) goto fileBrowser_fun17_sec06_sub05;
 
-   goto done_fun16_sec07;
+   goto done_fun17_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec06:
+   ^ Fun17 Sec06:
    ^   - handle running button events
-   ^   o fun16 sec06 sub01:
+   ^   o fun17 sec06 sub01:
    ^     - message box event
-   ^   o fun16 sec06 sub02:
+   ^   o fun17 sec06 sub02:
    ^     - get fastq files event
-   ^   o fun16 sec06 sub03:
+   ^   o fun17 sec06 sub03:
    ^     - get output directory event
-   ^   o fun16 sec06 sub04:
+   ^   o fun17 sec06 sub04:
    ^     - get configuration file event
-   ^   o fun16 sec06 sub05:
+   ^   o fun17 sec06 sub05:
    ^     - file browser event actions
-   ^   o fun16 sec06 sub06:
+   ^   o fun17 sec06 sub06:
    ^     - run event actions
-   ^   o fun16 sec06 sub07:
+   ^   o fun17 sec06 sub07:
    ^     - button pressed to build the output report
+   ^   o fun17 sec06 sub08:
+   ^     - goto output menu
+   ^   o fun14 sec04 sub09:
+   ^     - build amr table entry
+   ^   o fun17 sec06 sub10:
+   ^     - got to report
+   ^   o fun17 sec06 sub11:
+   ^     - get ftb prefix
+   ^   o fun17 sec06 sub12:
+   ^     - goto to the amr table
+   ^   o fun17 sec06 sub13:
+   ^     - goto to gene coverage table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun16 Sec06 Sub01:
+   * Fun17 Sec06 Sub01:
    *   - message box event
    \*****************************************************/
 
-   mesgBox_fun16_sec06_sub01:;
+   mesgBox_fun17_sec06_sub01:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       mesgBoxEvent_rayWidg(
          2, /*rease key event*/
@@ -3550,16 +4039,16 @@ checkRunEvent_ftbRayST(
          eventStackST.idSI,
          guiSTPtr->widgSTPtr
       );
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub02:
+   * Fun17 Sec06 Sub02:
    *   - get fastq files event
    \*****************************************************/
 
-   getFqFiles_fun16_sec06_sub02:;
+   getFqFiles_fun17_sec06_sub02:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -3572,16 +4061,16 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select fastq files to run"
       );
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub03:
+   * Fun17 Sec06 Sub03:
    *   - get output directory event
    \*****************************************************/
 
-   getOutDir_fun16_sec06_sub03:;
+   getOutDir_fun17_sec06_sub03:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -3594,16 +4083,16 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select output folder"
       );
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub04:
+   * Fun17 Sec06 Sub04:
    *   - get configuration file event
    \*****************************************************/
 
-   getConfigFile_fun16_sec06_sub04:;
+   getConfigFile_fun17_sec06_sub04:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -3616,31 +4105,31 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select FTB configuration file"
       );
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub05:
+   * Fun17 Sec06 Sub05:
    *   - file browser event actions
-   *   o fun16 sec06 sub05 cat01:
+   *   o fun17 sec06 sub05 cat01:
    *     - run file brower event
-   *   o fun16 sec06 sub05 cat02:
+   *   o fun17 sec06 sub05 cat02:
    *     - cancel event
-   *   o fun16 sec06 sub05 cat03:
+   *   o fun17 sec06 sub05 cat03:
    *     - selected output directory
-   *   o fun16 sec06 sub05 cat04:
+   *   o fun17 sec06 sub05 cat04:
    *     - selected configuration file
-   *   o fun16 sec06 sub05 cat05:
+   *   o fun17 sec06 sub05 cat05:
    *     - selected fastq files
-   *   o fun16 sec06 sub05 cat05:
+   *   o fun17 sec06 sub05 cat05:
    *     - error or no event
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec06 Sub05 Cat01:
+   + Fun17 Sec06 Sub05 Cat01:
    +   - run file brower event
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fileBrowser_fun16_sec06_sub05:;
+   fileBrowser_fun17_sec06_sub05:;
       switch(guiSTPtr->browserSC)
       { /*Switch: find which browser using*/
          case 0: fileSTPtr = guiSTPtr->fqFileSTPtr;
@@ -3652,7 +4141,7 @@ checkRunEvent_ftbRayST(
          case 3: fileSTPtr = guiSTPtr->oldFtbFileSTPtr;
                  break;
 
-         default: goto done_fun16_sec07;
+         default: goto done_fun17_sec07;
            /*invalid option*/
       } /*Switch: find which browser using*/
 
@@ -3665,7 +4154,7 @@ checkRunEvent_ftbRayST(
          );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub05 Cat02:
+      + Fun17 Sec06 Sub05 Cat02:
       +   - cancel event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3676,11 +4165,11 @@ checkRunEvent_ftbRayST(
             guiSTPtr->widgSTPtr
           ); /*use hit cancel*/
 
-          goto done_fun16_sec07;
+          goto done_fun17_sec07;
       } /*If: hit cancel*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub05 Cat03:
+      + Fun17 Sec06 Sub05 Cat03:
       +   - selected output directory
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3703,16 +4192,16 @@ checkRunEvent_ftbRayST(
                      fileSTPtr
                   );
                if(! tmpHeapStr)
-                  goto err_fun16_sec07;
+                  goto err_fun17_sec07;
 
                cpStr_ulCp(guiSTPtr->outDirStr,tmpHeapStr);
                free(tmpHeapStr);
                tmpHeapStr = 0;
-               goto done_fun16_sec07;
+               goto done_fun17_sec07;
             /*Case: output directory selected*/
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun16 Sec06 Sub05 Cat04:
+            + Fun17 Sec06 Sub05 Cat04:
             +   - selected configuration file
             \+++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3726,7 +4215,7 @@ checkRunEvent_ftbRayST(
                      fileSTPtr
                   );
                if(! tmpHeapStr)
-                  goto err_fun16_sec07;
+                  goto err_fun17_sec07;
 
                cpStr_ulCp(
                   guiSTPtr->configFileStr,
@@ -3734,11 +4223,11 @@ checkRunEvent_ftbRayST(
                );
                free(tmpHeapStr);
                tmpHeapStr = 0;
-               goto done_fun16_sec07;
+               goto done_fun17_sec07;
             /*Case: configuration file selected*/
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun16 Sec06 Sub05 Cat05:
+            + Fun17 Sec06 Sub05 Cat05:
             +   - get old ftb prefix
             \+++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3752,7 +4241,7 @@ checkRunEvent_ftbRayST(
                      fileSTPtr
                   );
                if(! tmpHeapStr)
-                  goto err_fun16_sec07;
+                  goto err_fun17_sec07;
 
                cpStr_ulCp(
                   guiSTPtr->filePrefixStr,
@@ -3767,11 +4256,11 @@ checkRunEvent_ftbRayST(
                *tmpHeapStr = 0;
                tmpHeapStr = 0;
 
-               goto done_fun16_sec07;
+               goto done_fun17_sec07;
             /*Case: select old ftb prefix*/
 
             /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun16 Sec06 Sub05 Cat06:
+            + Fun17 Sec06 Sub05 Cat06:
             +   - selected fastq files
             \+++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3790,7 +4279,7 @@ checkRunEvent_ftbRayST(
                   if(tmpSI < 0)
                       break;
                   else if(! tmpHeapStr)
-                     goto err_fun16_sec07;
+                     goto err_fun17_sec07;
 
                   if(
                      add_str_ptrAry(
@@ -3798,60 +4287,60 @@ checkRunEvent_ftbRayST(
                         guiSTPtr->fqStrSTPtr,
                         guiSTPtr->fqStrSTPtr->lenSL
                      )
-                  ) goto err_fun16_sec07;
+                  ) goto err_fun17_sec07;
 
                   free(tmpHeapStr);
                   tmpHeapStr = 0;
                } /*Loop: get fastq files*/
 
-               goto done_fun16_sec07;
+               goto done_fun17_sec07;
             /*Case: fastq files selected*/
          } /*Switch: find which browser using*/
       } /*Else If: files were selected*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub05 Cat05:
+      + Fun17 Sec06 Sub05 Cat05:
       +   - error or no event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       else if(tmpSI < -2)
-         goto err_fun16_sec07;
+         goto err_fun17_sec07;
 
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub06:
+   * Fun17 Sec06 Sub06:
    *   - run event actions
-   *   o fun16 sec06 sub06 cat01:
+   *   o fun17 sec06 sub06 cat01:
    *     - check if everything was input
-   *   o fun16 sec06 sub06 cat02:
+   *   o fun17 sec06 sub06 cat02:
    *     - read in the config file
-   *   o fun16 sec06 sub06 cat03:
+   *   o fun17 sec06 sub06 cat03:
    *     - build prefix & make output directory
-   *   o fun16 sec06 sub06 cat04:
+   *   o fun17 sec06 sub06 cat04:
    *     - build the log file
-   *   o fun16 sec06 sub06 cat05:
+   *   o fun17 sec06 sub06 cat05:
    *     - check if can run minimap2
-   *   o fun16 sec06 sub06 cat06:
+   *   o fun17 sec06 sub06 cat06:
    *     - find length of minimap2 command and get memory
-   *   o fun16 sec06 sub06 cat07:
+   *   o fun17 sec06 sub06 cat07:
    *     - build minimap2 command
-   *   o fun16 sec06 sub06 cat08:
+   *   o fun17 sec06 sub06 cat08:
    *     - add the -sam <file>.sam entry to ftb
-   *   o fun16 sec06 sub06 cat09:
+   *   o fun17 sec06 sub06 cat09:
    *     - run minimap2
-   *   o fun16 sec06 sub06 cat10:
+   *   o fun17 sec06 sub06 cat10:
    *     - if cannot, copy fastq files to ftb command
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun16 Sec06 Sub06 Cat01:
+   + Fun17 Sec06 Sub06 Cat01:
    +   - check if everything was input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   runFtb_fun16_sec06_sub06:;
+   runFtb_fun17_sec06_sub06:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       if(guiSTPtr->fqStrSTPtr->lenSL <= 0)
       { /*If: no fastq files input*/
@@ -3864,7 +4353,7 @@ checkRunEvent_ftbRayST(
             (signed char *) "no fastq files input"
          );
 
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       } /*If: no fastq files input*/
 
       else if(guiSTPtr->prefixLenSI <= 0)
@@ -3883,11 +4372,11 @@ checkRunEvent_ftbRayST(
                guiSTPtr->inPrefixStr,
                (signed char *) "FTB_OUT"
             );
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       } /*Else If: no prefix input*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub06 Cat02:
+      + Fun17 Sec06 Sub06 Cat02:
       +   - read in the config file
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3902,7 +4391,7 @@ checkRunEvent_ftbRayST(
             argAryStr,
             &argLenSI
          )
-      ) goto err_fun16_sec07;
+      ) goto err_fun17_sec07;
 
       if(guiSTPtr->configFileStr[0])
       { /*If: user provided a configuration file*/
@@ -3913,7 +4402,7 @@ checkRunEvent_ftbRayST(
             getLine_fileFun(
                inFILE,
                lineStr,
-               def_lineLen_fun16,
+               def_lineLen_fun17,
                &discardSL
             )
          ){ /*Loop: read in configuration file*/
@@ -3928,7 +4417,7 @@ checkRunEvent_ftbRayST(
             argAryStr[argLenSI] =
                malloc((tmpSI + 8) * sizeof(signed char));
             if(! argAryStr[argLenSI])
-               goto err_fun16_sec07;
+               goto err_fun17_sec07;
 
             tmpHeapStr +=
                cpWhite_ulCp(
@@ -3953,7 +4442,7 @@ checkRunEvent_ftbRayST(
             if(! argAryStr[argLenSI])
             { /*If: memory error*/
                tmpHeapStr = 0;
-               goto err_fun16_sec07;
+               goto err_fun17_sec07;
             } /*If: memory error*/
 
             cpWhite_ulCp(argAryStr[argLenSI], tmpHeapStr);
@@ -3978,7 +4467,7 @@ checkRunEvent_ftbRayST(
       } /*If: user provided a configuration file*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub06 Cat03:
+      + Fun17 Sec06 Sub06 Cat03:
       +   - build prefix and make output directory
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3987,7 +4476,7 @@ checkRunEvent_ftbRayST(
          malloc((7 + 8) * sizeof(signed char));
 
       if(! argAryStr[argLenSI])
-         goto err_fun16_sec07;
+         goto err_fun17_sec07;
       cpStr_ulCp(
          argAryStr[argLenSI],
          (signed char *) "-prefix"
@@ -4001,7 +4490,7 @@ checkRunEvent_ftbRayST(
       argAryStr[argLenSI] =
          malloc((tmpSI + 8) * sizeof(signed char));
       if(! argAryStr[argLenSI])
-         goto err_fun16_sec07;
+         goto err_fun17_sec07;
       tmpSI =
          cpStr_ulCp(
             argAryStr[argLenSI],
@@ -4029,7 +4518,7 @@ checkRunEvent_ftbRayST(
             &guiSTPtr->mesgStr[tmpSI],
             argAryStr[argLenSI]
          );
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       } /*If: could not make the output directory*/
 
       argAryStr[argLenSI][tmpSI++] = def_pathSep_rayWidg;
@@ -4040,7 +4529,7 @@ checkRunEvent_ftbRayST(
          );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub06 Cat04:
+      + Fun17 Sec06 Sub06 Cat04:
       +   - build the log file
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4058,7 +4547,7 @@ checkRunEvent_ftbRayST(
       ++argLenSI;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub06 Cat05:
+      + Fun17 Sec06 Sub06 Cat05:
       +   - check if can run minimap2
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4074,7 +4563,7 @@ checkRunEvent_ftbRayST(
          system((char *) lineStr);
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun16 Sec06 Sub06 Cat06:
+         + Fun17 Sec06 Sub06 Cat06:
          +   - find length of minimap2 command
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4096,10 +4585,10 @@ checkRunEvent_ftbRayST(
          tmpHeapStr =
             malloc((tmpSI + 8) * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun16_sec07;
+            goto err_fun17_sec07;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun16 Sec06 Sub06 Cat07:
+         + Fun17 Sec06 Sub06 Cat07:
          +   - build minimap2 command
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4150,14 +4639,14 @@ checkRunEvent_ftbRayST(
          tmpHeapStr[tmpSI] = 0;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun16 Sec06 Sub06 Cat08:
+         + Fun17 Sec06 Sub06 Cat08:
          +   - add the -sam <file>.sam entry to ftb
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
          argAryStr[argLenSI] =
             malloc(11 * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun16_sec07;
+            goto err_fun17_sec07;
          argAryStr[argLenSI][0] = '-';
          argAryStr[argLenSI][1] = 's';
          argAryStr[argLenSI][2] = 'a';
@@ -4169,7 +4658,7 @@ checkRunEvent_ftbRayST(
          argAryStr[argLenSI] =
             malloc((tmpSI + 13) * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun16_sec07;
+            goto err_fun17_sec07;
          cpLen_ulCp(
             argAryStr[argLenSI],
             argAryStr[argLenSI - 2],
@@ -4183,7 +4672,7 @@ checkRunEvent_ftbRayST(
          ++argLenSI;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun16 Sec06 Sub06 Cat09:
+         + Fun17 Sec06 Sub06 Cat09:
          +   - run minimap2
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4217,7 +4706,7 @@ checkRunEvent_ftbRayST(
                &guiSTPtr->mesgStr[tmpSI],
                argAryStr[argLenSI]
             );
-            goto done_fun16_sec07;
+            goto done_fun17_sec07;
          } /*If: minimap2 errored out*/
 
          free(tmpHeapStr);
@@ -4225,7 +4714,7 @@ checkRunEvent_ftbRayST(
       } /*If: have minimap2*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub06 Cat10:
+      + Fun17 Sec06 Sub06 Cat10:
       +   - if cannot, copy fastq files to ftb command
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4244,7 +4733,7 @@ checkRunEvent_ftbRayST(
                );
 
             if(! argAryStr[argLenSI])
-               goto err_fun16_sec07;
+               goto err_fun17_sec07;
 
             cpLen_ulCp(
                argAryStr[argLenSI],
@@ -4257,7 +4746,7 @@ checkRunEvent_ftbRayST(
       } /*Else: no minimap2*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun16 Sec06 Sub06 Cat11:
+      + Fun17 Sec06 Sub06 Cat11:
       +   - run freezeTB
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4321,7 +4810,7 @@ checkRunEvent_ftbRayST(
          );
          fclose(inFILE);
          inFILE = 0;
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       } /*If: had an error*/
 
       /*remove run fastq files*/
@@ -4344,19 +4833,20 @@ checkRunEvent_ftbRayST(
          &guiSTPtr->filePrefixStr[siCnt],
          guiSTPtr->inPrefixStr
       );
-      goto buildOutReport_fun16_sec06_sub0x;
+      goto buildOutReport_fun17_sec06_sub0x;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub07:
+   * Fun17 Sec06 Sub07:
    *   - got to input menu
    \*****************************************************/
 
-   inputMenu_fun16_sec06_sub07:;
+   inputMenu_fun17_sec06_sub07:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       hideOutput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
+      hideGeneCover_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->inputGuiIdSI,
@@ -4399,19 +4889,20 @@ checkRunEvent_ftbRayST(
          guiSTPtr->runIdSI,
          guiSTPtr->widgSTPtr
       );
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub08:
+   * Fun17 Sec06 Sub08:
    *   - goto output menu
    \*****************************************************/
 
-   outputMenu_fun16_sec06_sub08:;
+   outputMenu_fun17_sec06_sub08:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       hideInput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
+      hideGeneCover_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->outGuiIdSI,
@@ -4419,7 +4910,7 @@ checkRunEvent_ftbRayST(
       );
 
       if(buildReportBl)
-         goto buildOutReport_fun16_sec06_sub0x;
+         goto buildOutReport_fun17_sec06_sub0x;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->getPrefixButIdSI,
@@ -4450,33 +4941,35 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
-   buildOutReport_fun16_sec06_sub0x:;
+   buildOutReport_fun17_sec06_sub0x:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
       if(! guiSTPtr->filePrefixStr[0])
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       /*build drug resistance report*/
       checkDrugs_ftbRayST(guiSTPtr);
       spoligoLinGet_ftbRayST(guiSTPtr);
       miruLinGet_ftbRayST(guiSTPtr);
+      mkCoverageTbl_ftbRayST(guiSTPtr);
 
-      goto reportMenu_fun16_sec06_sub10;
+      goto reportMenu_fun17_sec06_sub10;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub10:
+   * Fun17 Sec06 Sub10:
    *   - got to report
    \*****************************************************/
 
-   reportMenu_fun16_sec06_sub10:;
+   reportMenu_fun17_sec06_sub10:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       hideInput_ftbRayST(guiSTPtr);
       hideOutput_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
+      hideGeneCover_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->reportGuiIdSI,
@@ -4505,16 +4998,16 @@ checkRunEvent_ftbRayST(
             guiSTPtr->drugResRectIdSI + tmpSI,
             guiSTPtr->widgSTPtr
          );
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub11:
+   * Fun17 Sec06 Sub11:
    *   - get ftb prefix
    \*****************************************************/
 
-   getFtbPrefix_fun16_sec06_sub11:;
+   getFtbPrefix_fun17_sec06_sub11:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -4526,20 +5019,21 @@ checkRunEvent_ftbRayST(
          (signed char *) "select a FTB output file"
       );
       guiSTPtr->browserSC = 3;
-      goto fileBrowser_fun16_sec06_sub05;
+      goto fileBrowser_fun17_sec06_sub05;
 
    /*****************************************************\
-   * Fun16 Sec06 Sub0y:
+   * Fun17 Sec06 Sub12:
    *   - goto to the amr table
    \*****************************************************/
 
-   amrTblMenu_fun16_sec06_sub0y:;
+   amrTblMenu_fun17_sec06_sub12:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun16_sec07;
+         goto done_fun17_sec07;
 
       hideInput_ftbRayST(guiSTPtr);
       hideOutput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
+      hideGeneCover_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->amrsGuiIdSI,
@@ -4555,25 +5049,55 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      goto done_fun16_sec07;
+      goto done_fun17_sec07;
+
+   /*****************************************************\
+   * Fun17 Sec06 Sub13:
+   *   - goto to gene coverage table
+   \*****************************************************/
+
+   geneCoverMenu_fun17_sec06_sub13:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun17_sec07;
+
+      hideInput_ftbRayST(guiSTPtr);
+      hideOutput_ftbRayST(guiSTPtr);
+      hideReport_ftbRayST(guiSTPtr);
+      hideTable_ftbRayST(guiSTPtr);
+
+      inactiveAdd_widg_rayWidg(
+         guiSTPtr->coverGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->geneCoverTblIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->geneCoverLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      goto done_fun17_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec07:
+   ^ Fun17 Sec07:
    ^   - return results and redraw gui
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto done_fun16_sec07;
+   goto done_fun17_sec07;
 
-   err_fun16_sec07:;
+   err_fun17_sec07:;
       tmpSI = 1;
-      goto ret_fun16_sec07;
+      goto ret_fun17_sec07;
 
-   done_fun16_sec07:;
+   done_fun17_sec07:;
       draw_gui_ftbRayST(guiSTPtr);
       tmpSI = 0;
-      goto ret_fun16_sec07;
+      goto ret_fun17_sec07;
 
-   ret_fun16_sec07:;
+   ret_fun17_sec07:;
       if(inFILE)
          fclose(inFILE); /*never will be stdout/in/err*/
       inFILE = 0;

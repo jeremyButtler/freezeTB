@@ -4812,6 +4812,7 @@ run_freezeTB(
 
    signed char readStatsStr[def_lenFileName_freezeTB];
       /*output file name*/
+   signed char genePercTblStr[def_lenFileName_freezeTB];
 
    struct geneCoord *coordsHeapST = 0;
    signed int numCoordsSI = 0;
@@ -5498,6 +5499,32 @@ run_freezeTB(
         ftbSetStackST.prefixStr,
         (signed char *) "-depths.tsv",
         readStatsStr
+      );
+
+   if(errSC)
+   { /*If: could not open file*/
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *)
+               "unable to open depths ouput file: "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         readStatsStr
+      );
+
+      goto err_fun09_sec11_sub02;
+   } /*If: could not open file*/
+
+   errSC =
+      outputPath_freezeTBPaths(
+        ftbSetStackST.prefixStr,
+        (signed char *) "-geneCoverage.tsv",
+        genePercTblStr
       );
 
    if(errSC)
@@ -7212,6 +7239,18 @@ run_freezeTB(
       ftbSetStackST.depthFlagStr,
       outFILE
     ); /*print filterd read stats*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   outFILE = fopen((char *) genePercTblStr, "w");
+   pGeneCoverage_ampDepth(
+      readMapArySI,                    /*read depths*/
+      ftbSetStackST.tbConSet.minDepthSI,
+      coordsHeapST,
+      numCoordsSI,
+      outFILE
+   );
 
    fclose(outFILE);
    outFILE = 0;
