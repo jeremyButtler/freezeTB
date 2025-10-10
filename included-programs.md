@@ -121,27 +121,29 @@ These are so out of date it is not worth using. Still,
 
 Chapter six: the GUI fiend
 
-In programs/guiFreezeTB there is a script called gui.tcl.
-  This is the GUI script used in guiFreezeTB. However,
-  you need to use rmBlocks from my `build` repository to
-  get it to run with wish
-  (`rmBlocks -file gui.tcl | wish`). You will also need
-  the command line freezeTB (installed by default if
-  did default install). However, it does run on its own
-  with wish.
+There are two GUI version of freezeTB. For ftbRay, you
+  can not edit the GUI (everything is in C). For ftbTclTk
+  you can, because it uses a Tcl script for the GUI. This
+  script is `gui.tcl` and is located
+  in `programs/ftbTclTkSrc`. In order to use `gui.tcl` 
+  you will have to convert it from its current form to a
+  true Tcl script with rmBlocks from my `build`. After
+  the conversion you can run it
+  with (`rmBlocks -file gui.tcl | wish`). You will also
+  need the command line freezeTB (installed by default if
+  did default install).
 
-The main reason for gui.tcl is that it allows you to edit
-  the gui for guiFreezeTB and view it in reall time. You
-  can then convert it to the freezeTB gui script using
-  `rmBlocks -no-script -file gui.tcl > gui-FTB.tcl`. You
-  can then copy `gui-FTB.tcl` to your freezeTBFiles
+The main reason for gui.tcl is that it it is needed for
+  TclTk. You can then convert it to the primary freezeTB
+  gui script
+  using `rmBlocks -no-script -file gui.tcl > gui-FTB.tcl`.
+  You can then copy `gui-FTB.tcl` to your freezeTBFiles
   location to get the new gui.
 
 On the surface it sounds good, until you dig in. Then
   comes the nightmare of my documentation (adds a lot of
-  lines) and just how many lines this GUI takes (1k with
-  everything merged and comments removed). You will also
-  need to understand my syntax for rmBlocks.
+  lines) and just how many lines this GUI takes. You will
+  also need to understand my syntax for rmBlocks.
 
 I also need to release rmBlocks. It is currently part of a
   larger, side project I am working on. So, I do not plan
