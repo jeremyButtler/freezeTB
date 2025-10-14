@@ -13,6 +13,11 @@ mv \
     freezeTB.app/Contents/MacOS;
 mv freezeTB.app "${HOME}/Desktop";
 
+xattr \
+    -d com.apple.quarantine \
+    ${HOME}/Desktop/freezeTB.app;
+    # make sure Mac will not quantine this
+
 # make install location
 #if [ ! -d "${HOME}/local/bin" ];
 #then
