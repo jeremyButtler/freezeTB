@@ -14,7 +14,7 @@ mv \
 mv freezeTB.app "${HOME}/Desktop";
 
 xattr \
-    -d com.apple.quarantine \
+    -rd com.apple.quarantine \
     ${HOME}/Desktop/freezeTB.app;
     # make sure Mac will not quantine this
 

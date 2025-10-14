@@ -207,7 +207,7 @@ sudo make -f mkfile.unix install
 The easy way is to unzip the `freezeTB.app.zip` folder,
   copy it to your Desktop (or other desired location),
   then you need to get around Mac's gatekeeper system
-  with `sudo xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
+  with `xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
   The other option that might work, would bo to start
   freezeTB from the command
   line `~/Desktop/freezeTB.app/Contents/MacOS/ftbRay`.
@@ -220,13 +220,6 @@ For a source install, the easiest way is using one of the
 The harder way is from source (not covered here), but is
   the same as Linux, except replace `mkfile.linux`
   with `mkfile.mac`.
-
-If you get a "App may be damaged move to trash error" it
-  is Mac quantining the program. You can get around this
-  by opening a terminal and typing
-  `xattr -d com.apple.quarantine ~/Desktop/freezeTB.app`.
-
-Scaling may through the app off.
 
 ### Mac; easy way pre-steps
 
@@ -262,6 +255,11 @@ This should install freezeTB as an app `freezeTB.app` to
   your desktop.
 
 ### Mac TclTk:
+
+This may fail due to Mac not trying to use TclTk 8.5. I have
+  given up on trying to get this version to work. If you can
+  get TclTk setup correctly, it will work. The problem is
+  TclTk.
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.

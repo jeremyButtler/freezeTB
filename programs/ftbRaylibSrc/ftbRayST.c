@@ -101,6 +101,26 @@
 /*main window settings*/
 signed int glob_maxWidgWidthSI = 240;
 
+/*cases when to scale*/
+
+#ifdef NORESIZE
+   #define def_resizeState_ftbRayST 0
+   /*do not resize based on scale/resolution*/
+#else
+   #ifdef ALLRESIZE
+         #define def_resizeState_ftbRayST 3
+         /*downsize and upsize for all resolutions*/
+   #else
+      #ifdef NOUPSIZE
+         #define def_resizeState_ftbRayST 2
+         /*do only downsize for low resolution*/
+      #else
+         #define def_resizeState_ftbRayST 1
+         /*only upsize for HDPI screens*/
+     #endif
+   #endif
+#endif
+
 /*entry box dimensions*/
 #define def_entryWidth_ftbRayST 200
 signed int glob_widthPrefixEntrySI =
@@ -1156,8 +1176,13 @@ mk_gui_ftbRayST(
    widgSTPtr = retHeapGUI->widgSTPtr;
 
 
-   if( setup_widg_rayWidg(widgSTPtr,guiTitleStr,1) )
-      goto memErr_fun06_sec07;
+   if(
+     setup_widg_rayWidg(
+        widgSTPtr,
+        guiTitleStr,
+        def_resizeState_ftbRayST
+      )
+   ) goto memErr_fun06_sec07;
       /*1 is for scaling for HDPI screens*/
 
    /*SetWindowIcon(ftbIconImg)*/
@@ -3837,7 +3862,7 @@ checkRunEvent_ftbRayST(
          1,                 /*handel focus changes*/
          draw_gui_ftbRayST, /*redraw GUI for presses*/
          guiSTPtr,          /*has GUI to redraw*/
-         1,                 /*only scale for HDPI screen*/
+         def_resizeState_ftbRayST, /*when to resize*/
          &eventStackST,     /*has events*/
          guiSTPtr->widgSTPtr/*has widgets*/
       );

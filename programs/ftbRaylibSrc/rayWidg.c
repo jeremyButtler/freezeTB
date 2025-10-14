@@ -602,10 +602,24 @@ setWinDim_rayWidg(
    return;
 
    noScale_fun004:;
+      /*this is needed to avoid odd downsizing effects
+      `  when the non-default screen resolution is used.
+      `  I have no idea what this forces, but it works on
+      `  Mac
+      */
       widgSTPtr->winWidthSI =
            widgSTPtr->winOriginalWidthSI;
+      widgSTPtr->winWidthSI +=
+        (   widgSTPtr->xTargetWidthSI
+          / widgSTPtr->xWidthSI
+        );
       widgSTPtr->winHeightSI =
            widgSTPtr->winOriginalHeightSI;
+      widgSTPtr->winHeightSI +=
+        (
+           widgSTPtr->xTargetWidthSI
+         / widgSTPtr->xWidthSI
+        );
 } /*setWinDim_rayWidg*/
 
 /*-------------------------------------------------------\
@@ -658,20 +672,16 @@ getScale_widg_rayWidg(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    tmpSI = GetCurrentMonitor();
-
-   if(tmpSI == widgSTPtr->monitorNumSI)
-      return; /*already resized for this monitor*/
-
    widgSTPtr->monitorNumSI = tmpSI;
    tmpSI = GetMonitorWidth(tmpSI);
    tmpVect2ST = GetWindowScaleDPI();
 
    if(tmpSI != widgSTPtr->xWidthSI)
       widgSTPtr->xWidthSI = tmpSI;
-   else if(
+   /*else if(
          (signed int) (100 * tmpVect2ST.x)
       == (signed int) (100 * widgSTPtr->xUsrScaleF)
-   ) return; /*same scale factor*/
+   ) return;*/ /*same scale factor*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun005 Sec03:
@@ -687,18 +697,18 @@ getScale_widg_rayWidg(
       widgSTPtr->xScaleF /= widgSTPtr->xUsrScaleF;
       /*account for scaling factor the user used*/
 
-   setFontSize_widg_rayWidg(
-      widgSTPtr,
-      widgSTPtr->originalFontSizeSI,
-      scaleSC
-   ); /*set the font size*/
-
    setWinDim_rayWidg(
       widgSTPtr->winOriginalWidthSI,
       widgSTPtr->winOriginalHeightSI,
       scaleSC,
       widgSTPtr
    ); /*set the window width and height by monitor*/
+
+   setFontSize_widg_rayWidg(
+      widgSTPtr,
+      widgSTPtr->originalFontSizeSI,
+      scaleSC
+   ); /*set the font size*/
 } /*getScale_widg_rayWidg*/
 
 /*-------------------------------------------------------\
@@ -11817,10 +11827,36 @@ fileBrowserEvent_rayWidg(
       );
       widgSTPtr->focusSI = fileSTPtr->lastWidgSI;
       fileSTPtr->lastWidgSI = -1;
+
+      focusClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 2,
+         widgSTPtr
+      );
+      pressClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 2,
+         widgSTPtr
+      );
+      activeClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 2,
+         widgSTPtr
+      );
       goto ret_fun130_sec04;
 
    cancle_fun130_sec04:;
       tmpSI = 3;
+      focusClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 3,
+         widgSTPtr
+      );
+      pressClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 3,
+         widgSTPtr
+      );
+      activeClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 3,
+         widgSTPtr
+      );
+
       clearSelect_listBox_rayWidg(&fileSTPtr->fileListST);
       hidenAdd_widg_rayWidg(
          eventSTPtr->parIdSI,
