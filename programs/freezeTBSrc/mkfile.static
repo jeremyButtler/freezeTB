@@ -447,6 +447,7 @@ $(genLib)/endin.$O: \
 			$(CFLAGS) $(coreCFLAGS) $(genLib)/endin.c
 
 install:
+	if [ ! -d "$(PREFIX)" ]; then mkdir "$(PREFIX)"; fi;
 	mv $(NAME) $(PREFIX)
 	chmod a+x $(PREFIX)/$(NAME)
 
