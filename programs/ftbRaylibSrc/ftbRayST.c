@@ -41,6 +41,8 @@
 '     - builds the drug resistance part of the ftb report
 '   o .c fun15: getDatabases_ftbRayST
 '     - get database files for freezeTB (currently Mac)
+'   o .c fun16: mkCoverageTbl_ftbRayST
+'     - makes the gene percent coverage table
 '   o fun17: checkRunEvent_ftbRayST
 '     - checks for an event, and if can runs found event
 '     - also redraws the GUI
@@ -3549,11 +3551,19 @@ mkCoverageTbl_ftbRayST(
       *   - add drug resistance a gene mutation can cause
       \**************************************************/
 
-      if(! eqlWhite_ulCp(lineStr, (signed char *) "atpE") )
+      if(! eqlWhite_ulCp(lineStr, (signed char *) "atpE"))
          posSI +=
             cpStr_ulCp(
                &lineStr[posSI],
                (signed char *) "Bdq  na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "ahpc")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Inh  Pmd  na   na"
             );
 
       else if(
@@ -3629,6 +3639,14 @@ mkCoverageTbl_ftbRayST(
             );
 
       else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiD")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Dlm	 na   na   na"
+            );
+
+      else if(
          ! eqlWhite_ulCp(lineStr, (signed char *) "fgd1")
       ) posSI +=
             cpStr_ulCp(
@@ -3674,6 +3692,14 @@ mkCoverageTbl_ftbRayST(
             cpStr_ulCp(
                &lineStr[posSI],
                (signed char *) "Inh	 na   na   na"
+            );
+
+      else if(
+         ! eqlWhite_ulCp(lineStr, (signed char *) "pepQ")
+      ) posSI +=
+            cpStr_ulCp(
+               &lineStr[posSI],
+               (signed char *) "Bdq	 Cfz  na   na"
             );
 
       else if(
@@ -3725,19 +3751,11 @@ mkCoverageTbl_ftbRayST(
             );
 
       else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "Rv0678")
+         ! eqlWhite_ulCp(lineStr,(signed char *) "Rv0678")
       ) posSI +=
             cpStr_ulCp(
                &lineStr[posSI],
                (signed char *) "Bdq	 Cfz  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "Rv2983")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Dlm	 na   na   na"
             );
 
       else if(

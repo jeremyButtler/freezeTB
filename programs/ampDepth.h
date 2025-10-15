@@ -45,7 +45,7 @@ struct geneCoord;
 |     o geneCoord struct pointer with gene/target
 |       coordinates want to extract
 |   - numGenesSI:
-|     o number of genes in coordsSTPtr (index 1)
+|     o number of genes in coordsSTPtr (index 0)
 |   - numOffTargSI:
 |     o number of reads not mapping to a gene coordiante,
 |       but are mapped to the genome

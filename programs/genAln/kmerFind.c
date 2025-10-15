@@ -3672,7 +3672,8 @@ phit_kmerFind(
          { /*Else: the mate comes first (reverse read)*/
             fprintf(
                (FILE *) outFILE,
-               "\t%lu",
+               "\t%li\t%lu",
+               seqSTPtr->seqLenSL,
                seqEndAryUL[siRef] - seqStartAryUL[siMate]
             ); /*sequence length including primers*/
          } /*Else: the mate comes first (reverse read)*/
@@ -3753,12 +3754,12 @@ phit_kmerFind(
       { /*Else: I have no mate primers*/
          fprintf(
              (FILE *) outFILE,
-             "%s\t%s\tNA\t%c\t%li\t%lu\t%lu",
+             "%s\t%s\t%li\tNA\t%c\t%li\t%lu",
              seqSTPtr->idStr,
              refAryST[siRef].forSeqST->idStr
                 + skip1stCharUC,
-             dirArySC[siRef],
              seqSTPtr->seqLenSL,
+             dirArySC[siRef],
              seqStartAryUL[siRef] + 1,
              seqEndAryUL[siRef] + 1
          ); /*sequence alignment stats*/
@@ -3828,7 +3829,7 @@ pHeaderHit_kmerFind(
 ){
    fprintf(
       (FILE *) outFILE,
-      "read_id\tprim_id\taln_len\tfor_dir\tseq_len"
+      "ref\tprim_id\tref_len\taln_len\tfor_dir"
    );
 
    fprintf(

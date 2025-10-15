@@ -39,7 +39,9 @@
 '     - builds the drug resistance part of the ftb report
 '   o .c fun15: getDatabases_ftbRayST
 '     - get database files for freezeTB (currently Mac)
-'   o fun16: checkRunEvent_ftbRayST
+'   o .c fun16: mkCoverageTbl_ftbRayST
+'     - makes the gene percent coverage table
+'   o fun17: checkRunEvent_ftbRayST
 '     - checks for an event, and if can runs found event
 '     - also redraws the GUI
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -287,7 +289,7 @@ mk_gui_ftbRayST(
 );
 
 /*-------------------------------------------------------\
-| Fun16: checkRunEvent_ftbRayST
+| Fun17: checkRunEvent_ftbRayST
 |   - checks for an event, and if can runs the found event
 |   - also redraws the GUI
 | Input:
