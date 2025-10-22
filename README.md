@@ -14,7 +14,7 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
 
 - For installation instructions:
   - [Linux install steps](#Linux); do raylib install
-  - [Mac install steps](#Mac);
+  - [Mac install steps](#Mac)
   - [Windows install steps](#Windows)
 
 # License:
@@ -216,9 +216,6 @@ The easy way is to unzip the `freezeTB.app.zip` folder,
   then you need to get around Mac's gatekeeper system
   by opening a terminal and
   typing `xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
-  The other option that might work, would bo to start
-  freezeTB from the command
-  line `~/Desktop/freezeTB.app/Contents/MacOS/ftbRay`.
   
 For a source install, the easiest way is using one of the
   Mac installer scripts. Both the raylib and TclTk install
