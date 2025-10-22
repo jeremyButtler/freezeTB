@@ -3135,6 +3135,18 @@ getDatabases_ftbRayST(
    signed int lenSI = 0;
    signed char pathStr[1024];
 
+   #ifdef WINDOWS
+      signed char *mapVersionCmdStr =
+         (signed char *) "minimap2.exe --version";
+      signed char *mapCallCmdStr =
+         (signed char *) "minimap2.exe";
+   #else
+      signed char *mapVersionCmdStr =
+         (signed char *) "minimap2 --version";
+      signed char *mapCallCmdStr =
+         (signed char *) "minimap2";
+   #endif
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec02:
    ^   - get path to databases
@@ -3398,29 +3410,22 @@ getDatabases_ftbRayST(
    ^   - find path to minimap2
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   cpStr_ulCp(
-      minimap2Str,
-      (signed char *) "minimap2 --version"
-   );
+   cpStr_ulCp(minimap2Str, mapVersionCmdStr);
 
    if( ! system((char *) minimap2Str) )
-      cpStr_ulCp(
-         minimap2Str,
-         (signed char *) "minimap2"
-      );
+      cpStr_ulCp(minimap2Str, mapCallCmdStr);
    else
    { /*Else: minimap2 is not in the path*/
       lenSI = cpStr_ulCp(minimap2Str, pathStr);
-      cpStr_ulCp(
-         &minimap2Str[lenSI],
-         (signed char *) "minimap2 --version"
-      );
+      cpStr_ulCp(&minimap2Str[lenSI], mapVersionCmdStr);
 
       if( system((char *) minimap2Str) )
          minimap2Str[0] = 0;
       else
       { /*Else: found minimap2*/
-         lenSI = endWhite_ulCp(minimap2Str);
+         /*find space between minimap2 & --version*/
+         while(minimap2Str[lenSI] > 32)
+            ++lenSI;
          minimap2Str[lenSI] = 0;
       } /*Else: found minimap2*/
    } /*Else: minimap2 is not in the path*/

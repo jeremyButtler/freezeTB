@@ -696,16 +696,25 @@ getScale_widg_rayWidg(
       `  scaling
       */
       widgSTPtr->xUsrScaleF = 1; /*assume no scale*/
+
+      widgSTPtr->xScaleF = (float) widgSTPtr->xWidthSI;
+      widgSTPtr->xScaleF /=
+         (float) widgSTPtr->xTargetWidthSI;
+
+      if(tmpVect2ST.x > widgSTPtr->xScaleF)
+         widgSTPtr->xScaleF = tmpVect2ST.x;
+         /*OS has scaling, respect that it is greater*/
    #else
       widgSTPtr->xUsrScaleF = tmpVect2ST.x;
+
+      widgSTPtr->xScaleF = (float) widgSTPtr->xWidthSI;
+      widgSTPtr->xScaleF /=
+         (float) widgSTPtr->xTargetWidthSI;
+   
+      if(widgSTPtr->xUsrScaleF > 0)
+         widgSTPtr->xScaleF /= widgSTPtr->xUsrScaleF;
+         /*account for scaling factor the user used*/
    #endif
-
-   widgSTPtr->xScaleF = (float) widgSTPtr->xWidthSI;
-   widgSTPtr->xScaleF /=(float) widgSTPtr->xTargetWidthSI;
-
-   if(widgSTPtr->xUsrScaleF > 0)
-      widgSTPtr->xScaleF /= widgSTPtr->xUsrScaleF;
-      /*account for scaling factor the user used*/
 
    setWinDim_rayWidg(
       widgSTPtr->winOriginalWidthSI,
