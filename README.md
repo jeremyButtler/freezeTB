@@ -320,62 +320,9 @@ The other option is copy the `ftbReasources` folder in
 
 ## GUI
 
-Doulbe click the installed freezeTB/ftbRay/ftbTclTk icon
+Double click the installed freezeTB/ftbRay/ftbTclTk icon
   to launch. Provide the fastq files by hitting
   the `fastq` button and then hit the run button.
-
-## Command line:
-
-I have setup freezeTB to auto detect database files. It
-  looks for the freezeTBFiles databases in the working
-  directory and in a few other locations. So, you should 
-  need to provide any databases unless you want different
-  settings.
-
-For Linux freezeTB will also search for the freezeTBFiles
-  directory (has databases) in `~/Documents` frist and
-  then in `/usr/local/share`.
-
-For Windows freezeTB will also search for the
-  freezeTBFiles directory (has databases)
-  in `%app%\Documents` (user Documents) first and
-  then in `%PUBLIC%\Documents` (Public Documents).
-
-### Mac/Linux:
-
-Get the help message with `freezeTB -h`. It is long so
-  I would recomend doing `freezeTB -h | less` on Linux.
-
-Map reads to the reference using
-  minimap2: `minimap2 -a /usr/local/share/freezeTBFiles/NC000962.fa reads.fastq > reads.sam`.
-
-Then run
-  freezeTB: `freezeTB -sam reads.sam -prefix goodName`.
-
-You can also have freezeTB do the read mapping with
-  `freezeTB -prefix goodName /path/to/fastq_pass/*.fastq*`.
-
-To get graphs
-  do: `graphAmpDepth.r -stats goodName-depths.tsv -amrs goodName-read-amrs.tsv -who /usr/local/share/freezeTBFiles/amrDb.tsv -prefix goodName`
-
-### Windows:
-
-Windows command line is painful, but yes you can use it.
-  This should work, so long as carriage returns do not
-  become an issue. If have errors or infinite loops, let
-  me know.
-
-You can get the help message
-  with: `%ProgramFiles%\freezeTB\freezeTB.exe -h`
-
-Map reads to the reference using
-  minimap2: `/path/to/minimap2.exe -a %PUBLIC%\Documents\freezeTBFiles\NC000962.fa reads.fastq > reads.sam`.
-
-Map reads to the reference using
-  freezeTB: `%ProgramFiles%\freezeTB\freezeTB.exe -sam reads.sam -prefix goodName`
-
-Build graphs (if wanted)
-  do: `%ProgramFiles%\R\<R version>\bin\Rscript %ProgramFiles%\freezeTB\graphAmdDepth.r -stats goodName-depths.tsv -who %PUBLIC%\Documents\freezeTBFiles\amrDb.tsv -prefix goodName`
 
 ### R9.4 flow cells
 
