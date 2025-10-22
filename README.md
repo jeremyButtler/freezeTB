@@ -12,6 +12,11 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
   [https://github.com/GTB-tbsequencing/mutation-catalogue-2023](
    https://github.com/GTB-tbsequencing/mutation-catalogue-2023).
 
+- For installation instructions:
+  - [Linux install steps](#Linux); do raylib install
+  - [Mac install steps](#Mac);
+  - [Windows install steps](#Windows)
+
 # License:
 
 freezeTB includes databases from other repositories and
@@ -79,7 +84,8 @@ Here are the order of Merlin winners:
         Apr;35(4):907-14.
         doi: 10.1128/jcm.35.4.907-914.1997.
         PMID: 9157152; PMCID: PMC229700.
-  - minimap2: recommend; auto installed for Mac scripts
+  - minimap2: recommend; auto installed for Mac scripts or
+    is included with the binaries
     - Under the MIT license
     - [https://github.com/lh3/minimap2](
        https://github.com/lh3/minimap2)
@@ -94,7 +100,8 @@ Here are the order of Merlin winners:
     - [https://www.fontspace.com/search?q=IBM%20Plex%20Mono](
        https://www.fontspace.com/search?q=IBM%20Plex%20Mono)
   - tcltk was used to make the ftbTcltk GUI (graphical
-    user interface [the window])
+    user interface [the window]), still an option, but no
+    longer default
     - Tcltk is under the MIT license
     - [https://github.com/tcltk/tk](
        https://github.com/tcltk/tk)
@@ -207,19 +214,18 @@ sudo make -f mkfile.unix install
 The easy way is to unzip the `freezeTB.app.zip` folder,
   copy it to your Desktop (or other desired location),
   then you need to get around Mac's gatekeeper system
-  with `xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
+  by opening a terminal and
+  typing `xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
   The other option that might work, would bo to start
   freezeTB from the command
   line `~/Desktop/freezeTB.app/Contents/MacOS/ftbRay`.
-  The con is that this may be out of date.
   
 For a source install, the easiest way is using one of the
   Mac installer scripts. Both the raylib and TclTk install
   scripts install freezeTB and minimap2 locally.
 
-The harder way is from source (not covered here), but is
-  the same as Linux, except replace `mkfile.linux`
-  with `mkfile.mac`.
+The source install is not covered here, but is the same as
+  Linux, except replace `mkfile.linux` with `mkfile.mac`.
 
 ### Mac; easy way pre-steps
 
@@ -256,10 +262,11 @@ This should install freezeTB as an app `freezeTB.app` to
 
 ### Mac TclTk:
 
-This may fail due to Mac not trying to use TclTk 8.5. I have
-  given up on trying to get this version to work. If you can
-  get TclTk setup correctly, it will work. The problem is
-  TclTk.
+This may fail due to Mac trying to use TclTk 8.5, instead
+  of a later version of TclTk. I have given up on trying
+  to get this version to work. If you can get TclTk setup
+  correctly, it will work. The problem is dual versions of
+  TclTk on the system.
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.
@@ -279,24 +286,19 @@ If you want graphs, install R with PNG support.
 
 I would reccomend using the windows raylib exe (binary) in
   the `bin` folder. Unzip the `windowsFtb` folder in `bin`
-  and then copy the contents to your desktop. It should have
-  the `ftbRay.exe` file and the `ftbResources` folder. This
-  should include minimap2.
+  and then copy the contents to your desktop. It should
+  have the `ftbRay.exe` file and the `ftbResources`
+  folder. This does include minimap2.
 
 There is a TclTk version, but it requires installing Magic
   splat and visual studio build tools. The raylib version
-  is the binary.
+  has a binary, and so can skipt the build tools.
 
 Harder way, install the visual studio build tools then you
   might be able to double click `winRayInstall.bat` script
-  in the `windows` directory (works for visual studio 2022).
-  You will either have to install minimap2 or use the default
-  read mapper. For compiling minimap2 on windows see
-  [https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows](
-   https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows).
-   You should add the minimap2 support files to the ftbReasources
-   folder (needs to be in same location as ftbRay.exe).
-   
+  in the `windows` directory (works for visual studio
+  2022).
+
 If that fails, in the x64 developer terminal, try:
 
 ```
@@ -305,10 +307,17 @@ cd programs/ftbRaylibSrc;
 nmake /F mkfile.win
 ```
 
-Put the ftbRay.exe file
-  in `/path/to/freezeTB/programs/ftbRaylibSrc` on your
-  desktop. Also, copy the `freezeTBFiles` to your desktop.
-  At this point ftbRay should run.
+After compling ftbRay.exe, you should install minimap2.
+  For compiling minimap2 on windows see
+  [https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows](
+   https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows).
+  You should add the minimap2.exe and the needed `.dll`
+  files to the `ftbReasources` folder, which needs to be
+  in same location as ftbRay.exe.
+
+The other option is copy the `ftbReasources` folder in
+  the zip compressed `windowsFtb.zip` folder. This has
+  minimap2.
 
 # Run
 
