@@ -278,22 +278,21 @@ If you want graphs, install R with PNG support.
 ## Windows
 
 I would reccomend using the windows raylib exe (binary) in
-  the `bin` folder. Copy `ftbRay.exe` (may be `ftbRay`) to
-  your desktop. Then copy the `freezeTBFiles` to your
-  desktop.
+  the `bin` folder. Unzip the `windowsFtb` folder in `bin`
+  and then copy the contents to your desktop. It should have
+  the `ftbRay.exe` file and the `ftbResources` folder. If you
+  want minimap2 support you will need to compile minimap2 and
+  add it to the `ftbResources` folder.
 
 There is a TclTk version, but it requires installing Magic
   splat and visual studio build tools. The raylib version
   is the binary.
 
-**TODO: add the binary**
+Harder way, install the visual studio build tools then you
+  might be able to double click `winRayInstall.bat` script
+  in the `windows` directory (works for visual studio 2022).
 
-Harder way, install the visual studio build tools, then
-  open a developer terminal, then you might be able to
-  double click `winRayInstall.bat` script in the `windows`
-  directory.
-
-If that fails, in a developer terminal, try:
+If that fails, in the x64 developer terminal, try:
 
 ```
 cd /path/to/freezeTB;
