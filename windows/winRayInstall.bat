@@ -38,19 +38,16 @@ cd %guiDir%
 if exist ..\..\windows\freezeTB\ftbRay.exe (
    del ..\..\windows\freezeTB\ftbRay.exe
 ) 
-if exist ..\..\windows\freezeTB\graphAmpDepth.r (
-   del ..\..\windows\freezeTB\graphAmpDepth.r
-) 
 if exist ..\..\windows\freezeTB\FTB-icon.ico (
    del ..\..\windows\freezeTB\FTB-icon.ico
 ) 
 
 nmake /F mkfile.win
 nmake /F mkfile.win clean
-
-move ftbRay.exe ..\..\windows\freezeTB\
 cd ..\..\windows
-copy ..\FTB-icon.ico freezeTB
+
+move %guiDir%\ftbRay.exe .
+copy ..\FTB-icon.ico FTB-icon.ico
 
 :: The if statment is to detect if I can to install
 ::   globally or if I need to install localy
@@ -59,7 +56,11 @@ copy /y nul "%programFiles%\2025-02-11--test-file.txt"
 if exist "%programFiles%\2025-02-11--test-file.txt" (
    del "%programFiles%\2025-02-11--test-file.txt"
 
-   xcopy freezeTB "%programFiles%\freezeTB" /E /I
+   if not exist "%programFiles%\freezeTB" (
+      mkdir "%programFiles%\freezeTB"
+   )
+
+   move ftbRay.exe "%programFiles%\freezeTB"
    xcopy ..\freezeTBFiles "%programFiles%\freezeTB\freezeTBFiles" /E /I
 
    echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
@@ -74,11 +75,11 @@ if exist "%programFiles%\2025-02-11--test-file.txt" (
 ) else (
    ::: del "%localAppData%\2025-02-11--test-file.txt" ::: did not make it
 
-   if exist "%localAppData%\freezeTB" (
-      echo "found freezeTB directory"
-   ) else ( mkdir "%localAppData%\freezeTB")
+   if not exist "%localAppData%\freezeTB" (
+      mkdir "%localAppData%\freezeTB"
+   )
 
-   xcopy freezeTB "%localAppData%\freezeTB" /E /I
+   move ftbRay.exe "%localAppData%\freezeTB"
    xcopy ..\freezeTBFiles "%localAppData%\freezeTB\freezeTBFiles" /E /I
 
    echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
