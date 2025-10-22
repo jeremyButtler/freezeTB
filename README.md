@@ -280,9 +280,8 @@ If you want graphs, install R with PNG support.
 I would reccomend using the windows raylib exe (binary) in
   the `bin` folder. Unzip the `windowsFtb` folder in `bin`
   and then copy the contents to your desktop. It should have
-  the `ftbRay.exe` file and the `ftbResources` folder. If you
-  want minimap2 support you will need to compile minimap2 and
-  add it to the `ftbResources` folder.
+  the `ftbRay.exe` file and the `ftbResources` folder. This
+  should include minimap2.
 
 There is a TclTk version, but it requires installing Magic
   splat and visual studio build tools. The raylib version
@@ -291,7 +290,13 @@ There is a TclTk version, but it requires installing Magic
 Harder way, install the visual studio build tools then you
   might be able to double click `winRayInstall.bat` script
   in the `windows` directory (works for visual studio 2022).
-
+  You will either have to install minimap2 or use the default
+  read mapper. For compiling minimap2 on windows see
+  [https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows](
+   https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows).
+   You should add the minimap2 support files to the ftbReasources
+   folder (needs to be in same location as ftbRay.exe).
+   
 If that fails, in the x64 developer terminal, try:
 
 ```
@@ -358,7 +363,7 @@ You can get the help message
   with: `%ProgramFiles%\freezeTB\freezeTB.exe -h`
 
 Map reads to the reference using
-  minimap2: `%ProgramFiles%/freezeTB/minimap2.exe -a %PUBLIC%\Documents\freezeTBFiles\NC000962.fa reads.fastq > reads.sam`.
+  minimap2: `/path/to/minimap2.exe -a %PUBLIC%\Documents\freezeTBFiles\NC000962.fa reads.fastq > reads.sam`.
 
 Map reads to the reference using
   freezeTB: `%ProgramFiles%\freezeTB\freezeTB.exe -sam reads.sam -prefix goodName`
