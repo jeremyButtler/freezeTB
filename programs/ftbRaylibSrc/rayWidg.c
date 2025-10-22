@@ -33,7 +33,8 @@
 '       - structure with files listed in a file browser
 '   * Sof02: widg_rayWidg struct functions
 '       + sof02 sec01:
-'         - widg_rayWidg struct managment functions
+'         - widg_rayWidg struct managment functions and
+'           window scaling/dimension functions
 '       + sof02 sec02:
 '         - change font or font variables in widg_rayWidg
 '       + sof02 sec03:
@@ -45,7 +46,8 @@
 '       + sof02 sec06:
 '         - widg_rayWidg struct clear state of widgets
 '     + Sof02 Sec01:
-'       - widg_rayWidg struct managment functions
+'       - widg_rayWidg struct managment functions and
+'         window scaling/dimension functions
 '       o fun001: idBlank_widg_rayWidg
 '         - blanks a widget id in a widg_rayWidg struct
 '       o fun002: blank_widg_rayWidg
@@ -688,7 +690,15 @@ getScale_widg_rayWidg(
    ^   - find scale factor and scale
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   widgSTPtr->xUsrScaleF = tmpVect2ST.x;
+   #ifdef WINDOWS
+      /*windows has a weird issue were it will report a
+      `  scale, but not apply it, so I need to assume no
+      `  scaling
+      */
+      widgSTPtr->xUsrScaleF = 1; /*assume no scale*/
+   #else
+      widgSTPtr->xUsrScaleF = tmpVect2ST.x;
+   #endif
 
    widgSTPtr->xScaleF = (float) widgSTPtr->xWidthSI;
    widgSTPtr->xScaleF /=(float) widgSTPtr->xTargetWidthSI;
