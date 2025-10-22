@@ -60,10 +60,10 @@ Do not, unless you want to deal with Windows command line
 - Cd into the `programs/freezeTBSrc` in the freezeTB
   github
   - the most likely path is `cd "%HOMEPATH%\Downloads\freezeTB-main\freezeTB-main\programs\freezeTBStr`
-- Do `nmake /F mkfile.win`, then put the `freezeTB.exe`
-  file in a good location.
+- Do `nmake /F mkfile.win`
+- Put the `freezeTB.exe` file in a good location.
 - Copy the `freezeTBFiles` to you Documents, or in the
-  same directory (folder) as `freezeTB.exe`.
+  same directory (folder/location) as `freezeTB.exe`.
 
 The internal read mapper for freezeTB is usable, but slow,
   and not as sensitive (it will miss stuff) as minimap2. I
@@ -74,7 +74,7 @@ The internal read mapper for freezeTB is usable, but slow,
   Once complited copy the minimap2.exe and the two
   needed `.dll` files to a good location.
 
-# Using:
+# Using_Linux:
 
 You can get the help message with `freezeTB -h`.
 
