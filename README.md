@@ -13,9 +13,10 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
    https://github.com/GTB-tbsequencing/mutation-catalogue-2023).
 
 - For installation instructions:
-  - [Linux install steps](#Linux); do raylib install
-  - [Mac install steps](#Mac)
-  - [Windows install steps](#Windows)
+  - [Pre-compiled installation](#pre_compiled_install)
+  - [Linux source install steps](#Linux); do raylib
+  - [Mac source install steps](#Mac)
+  - [Windows source install steps](#Windows)
 
 # License:
 
@@ -120,21 +121,49 @@ For the graphical user interface (GUI), you have two
   choices. One GUI which uses TclTk or another GUI that
   uses raylib.
 
-For Windows and Mac you also have binaries (in bin) you 
-  can install. For Linux, things are not as reliable, so
-  it is better to build from source.
+For all GUI freezeTB source install methods, make sure to
+  copy the freezeTBFiles or the ftbResources (included in
+  binary installs) directory (folder) to you `Documents`
+  directory (folder).
 
-For the command line programs, installation is not
-  covered here. You can do `cd programs/<program>Src` and
-  then build the program using the make file.
-  Use `mkfile.unix` for Linux/BSD/Mac. Use `mkfile.win`
-  with `nmake` for windows.
+The installation steps for the command line programs, are
+  not covered here. If you wish to install a command line
+  program, open a terminal (for windows a developer
+  terminal). Then do `cd programs/<program>Src` and
+  `make -f mkfile.unix` for Linux/BSD/Mac
+  or `nmake /F mkfile.win` for windows. Put the compiled
+  binary in the desired location.
+
+## pre_compiled_install
+
+This is the easiest method and can mostly be done without
+  a terminal. You will need to clone the repository from
+  git hub or at least your OS's binary files (in the `bin`
+  directory (folder)).
+
+For amd64 Linux (likely your Linux computer), Mac, and
+  Windows there are pre-compiled binaries and resources in
+  the `bin` directory (folder). A pre-compiled minimap2
+  binary is included in the resources. If you are unsure
+  what you are doing, then use these.
+
+1. Copy zip file to your desktop
+   - For Linux copy `linuxFtb.zip`
+   - For Mac copy `freezeTB.app.zip`
+   - For Windows copy `windowsFtb.zip`
+2. Unzip the zip file
+3. Remove the zip file
+4. OS specific steps
+   - For Mac open a terminal (apps->terminal) and run
+     `xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`
+     - This gets you around Mac's gatekeeper
+   - For Linux Ubuntu, you can try right clicking the
+     ftbRay file and select `Allow Launching`
+     - No idea if works, but hope it does
 
 ## Linux:
 
-Bit of a pain, but it works. Would like to do binraries,
-  but I suspect I might have issues on different Linux
-  distros.
+Bit of a pain, but it works.
 
 I recommend installing minimap2, it is more sensitive and
   faster then freezeTB's internal read mapper. For a
@@ -211,12 +240,6 @@ sudo make -f mkfile.unix install
 
 ## Mac
 
-The easy way is to unzip the `freezeTB.app.zip` folder,
-  copy it to your Desktop (or other desired location),
-  then you need to get around Mac's gatekeeper system
-  by opening a terminal and
-  typing `xattr -rd com.apple.quarantine ~/Desktop/freezeTB.app`.
-  
 For a source install, the easiest way is using one of the
   Mac installer scripts. Both the raylib and TclTk install
   scripts install freezeTB and minimap2 locally.
@@ -259,11 +282,10 @@ This should install freezeTB as an app `freezeTB.app` to
 
 ### Mac TclTk:
 
-This may fail due to Mac trying to use TclTk 8.5, instead
-  of a later version of TclTk. I have given up on trying
-  to get this version to work. If you can get TclTk setup
-  correctly, it will work. The problem is dual versions of
-  TclTk on the system.
+This will attempt to install homebrew and then use
+  homebrew to install the dependencies. You will need sudo
+  privileges to run this. This should work, but may not.
+
 
 Open a terminal (apps->terminal). Then copy the code
   beneath into the terminal and hit enter/return.
@@ -281,20 +303,9 @@ If you want graphs, install R with PNG support.
 
 ## Windows
 
-I would reccomend using the windows raylib exe (binary) in
-  the `bin` folder. Unzip the `windowsFtb` folder in `bin`
-  and then copy the contents to your desktop. It should
-  have the `ftbRay.exe` file and the `ftbResources`
-  folder. This does include minimap2.
-
-There is a TclTk version, but it requires installing Magic
-  splat and visual studio build tools. The raylib version
-  has a binary, and so can skipt the build tools.
-
-Harder way, install the visual studio build tools then you
-  might be able to double click `winRayInstall.bat` script
-  in the `windows` directory (works for visual studio
-  2022).
+Install the visual studio build tools then you can double
+  click the `winRayInstall.bat` script in the `windows`
+  directory (works for visual studio 2022).
 
 If that fails, in the x64 developer terminal, try:
 
@@ -304,6 +315,10 @@ cd programs/ftbRaylibSrc;
 nmake /F mkfile.win
 ```
 
+The TclTk GUI is similar to raylib, except you also need
+  to install Magic splat (TclTk for windows) and then run
+  (double click) the `winInstall.bat` script.
+
 After compling ftbRay.exe, you should install minimap2.
   For compiling minimap2 on windows see
   [https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows](
@@ -312,7 +327,7 @@ After compling ftbRay.exe, you should install minimap2.
   files to the `ftbReasources` folder, which needs to be
   in same location as ftbRay.exe.
 
-The other option is copy the `ftbReasources` folder in
+The other option is copy the `ftbResources` folder in
   the zip compressed `windowsFtb.zip` folder. This has
   minimap2.
 

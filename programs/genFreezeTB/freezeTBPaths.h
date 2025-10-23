@@ -6,7 +6,7 @@
 '     - guards
 '   o .c fun01: checkPaths_freezeTBPaths
 '     - checks/finds if input file exits in freezeTB paths
-'   o fun03: amrPath_freezeTBPaths
+'   o fun02: amrPath_freezeTBPaths
 '     - finds default AMR path for freezeTB
 '   o fun03: miruPath_freezeTBPaths
 '     - finds default MIRU table path for freezeTB
@@ -37,7 +37,26 @@
 #define FREEZETB_DEFAULT_FILE_PATHS_H
 
 /*-------------------------------------------------------\
-| Fun03: amrPath_freezeTBPaths
+| Fun01: checkPaths_freezeTBPaths
+|   - checks/finds if input file exits in freezeTB paths
+| Input:
+|   - pathStr:
+|     o c-string to hold final path
+|   - fileStr:
+|     o c-string with file name
+| Output:
+|   - Modifies:
+|     o pathStr to have detected path/file name
+|     o pathStr to be '\0' if no path detected
+\-------------------------------------------------------*/
+void
+checkPaths_freezeTBPaths(
+   signed char *pathStr, /*holds final path*/
+   signed char *fileStr  /*file to search for*/
+);
+
+/*-------------------------------------------------------\
+| Fun02: amrPath_freezeTBPaths
 |   - finds default AMR path for freezeTB
 | Input:
 |   - amrPathStr:

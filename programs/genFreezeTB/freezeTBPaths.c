@@ -4,7 +4,7 @@
 '     freezeTB
 '   o header:
 '     - included libraries and defined variables
-'   o .c fun01: checkPaths_freezeTBPaths
+'   o fun01: checkPaths_freezeTBPaths
 '     - checks/finds if input file exits in freezeTB paths
 '   o fun02: amrPath_freezeTBPaths
 '     - finds default AMR path for freezeTB
@@ -117,6 +117,8 @@ checkPaths_freezeTBPaths(
    #ifdef WINDOWS
       signed char *dbDirStr =
          (signed char *) "\\freezeTBFiles\\";
+      signed char *altDbDirStr =
+         (signed char *) "\\ftbResources\\";
       signed char *installDirStr =
          (signed char *) "\\freezeTB\\";
 
@@ -136,6 +138,8 @@ checkPaths_freezeTBPaths(
    #else
       signed char *dbDirStr =
          (signed char *) "/freezeTBFiles/";
+      signed char *altDbDirStr =
+         (signed char *) "/ftbResources/";
 
       signed char *homePathStr =
          (signed char *) getenv("HOME");
@@ -159,56 +163,26 @@ checkPaths_freezeTBPaths(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    tmpStr = pathStr;
-
-   cpStr_ulCp(
-      tmpStr,
-      fileStr
-   );
-
-   testFILE =
-      fopen(
-         (char *) tmpStr,
-         "r"
-      );
+   cpStr_ulCp(tmpStr, fileStr);
+   testFILE = fopen((char *) tmpStr, "r");
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec03:
    ^   - if not, check local documents folder
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   checkDatabaseDir_fun01_sec03:;
+
    if(! testFILE)
    { /*If: database not in current directory*/
       tmpStr = pathStr;
 
-      tmpStr +=
-         cpStr_ulCp(
-           tmpStr,
-           homePathStr
-         );
+      tmpStr += cpStr_ulCp(tmpStr, homePathStr);
+      tmpStr += cpStr_ulCp(tmpStr, docStr);
+      tmpStr += cpStr_ulCp(tmpStr, dbDirStr);
+      tmpStr += cpStr_ulCp(tmpStr, fileStr);
 
-      tmpStr +=
-         cpStr_ulCp(
-            tmpStr,
-            docStr
-         );
-
-      tmpStr +=
-         cpStr_ulCp(
-            tmpStr,
-            dbDirStr
-         );
-
-      tmpStr +=
-         cpStr_ulCp(
-            tmpStr,
-            fileStr
-         );
-
-      testFILE =
-         fopen(
-            (char *) pathStr,
-            "r"
-         );
+      testFILE = fopen((char *) pathStr, "r");
 
       /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
       ^ Fun01 Sec04:
@@ -219,35 +193,12 @@ checkPaths_freezeTBPaths(
       { /*If: database not in $HOME/documents*/
          tmpStr = pathStr;
 
-         tmpStr +=
-            cpStr_ulCp(
-              tmpStr,
-              sharePathStr
-            );
+         tmpStr += cpStr_ulCp(tmpStr, sharePathStr);
+         tmpStr += cpStr_ulCp(tmpStr, altPathStr);
+         tmpStr += cpStr_ulCp(tmpStr, dbDirStr);
+         tmpStr += cpStr_ulCp(tmpStr, fileStr);
 
-         tmpStr +=
-            cpStr_ulCp(
-               tmpStr,
-               altPathStr
-            );
-
-         tmpStr +=
-            cpStr_ulCp(
-               tmpStr,
-               dbDirStr
-            );
-
-         tmpStr +=
-            cpStr_ulCp(
-               tmpStr,
-               fileStr
-            );
-
-         testFILE =
-            fopen(
-               (char *) pathStr,
-               "r"
-            );
+         testFILE = fopen((char *) pathStr, "r");
 
          #ifndef WINDOWS
             if(! testFILE)
@@ -255,38 +206,25 @@ checkPaths_freezeTBPaths(
                /*the local install hidden path*/
                tmpStr = pathStr;
 
+               tmpStr += cpStr_ulCp(tmpStr, homePathStr);
                tmpStr +=
-                  cpStr_ulCp(
-                    tmpStr,
-                    homePathStr
-                  );
+                  cpStr_ulCp(tmpStr, localInstallStr);
+               tmpStr += cpStr_ulCp(tmpStr, dbDirStr);
+               tmpStr += cpStr_ulCp(tmpStr, fileStr);
 
-               tmpStr +=
-                  cpStr_ulCp(
-                     tmpStr,
-                     localInstallStr
-                  );
-
-               tmpStr +=
-                  cpStr_ulCp(
-                     tmpStr,
-                     dbDirStr
-                  );
-
-               tmpStr +=
-                  cpStr_ulCp(
-                     tmpStr,
-                     fileStr
-                  );
-
-               testFILE =
-                  fopen(
-                     (char *) pathStr,
-                     "r"
-                  );
+               testFILE = fopen((char *) pathStr, "r");
 
                 if(! testFILE)
-                  pathStr[0] = '\0'; /*no idea were at*/ 
+                { /*If: could not find the file*/
+                   if(dbDirStr == altDbDirStr)
+                      pathStr[0] = '\0';
+                      /*no idea were at*/ 
+                   else
+                   { /*Else: can check alternate paths*/
+                      dbDirStr = altDbDirStr;
+                      goto checkDatabaseDir_fun01_sec03;
+                   } /*Else: can check alternate paths*/
+                } /*If: could not find the file*/
             } /*If: not in global path*/
 
             /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -297,36 +235,12 @@ checkPaths_freezeTBPaths(
             if(! testFILE)
             { /*If: database not in global path*/
                tmpStr = pathStr;
+               tmpStr += cpStr_ulCp(tmpStr, appDataStr);
+               tmpStr += cpStr_ulCp(tmpStr,installDirStr);
+               tmpStr += cpStr_ulCp(tmpStr, dbDirStr);
+               tmpStr += cpStr_ulCp(tmpStr, fileStr);
 
-               tmpStr +=
-                  cpStr_ulCp(
-                    tmpStr,
-                    appDataStr
-                  );
-
-               tmpStr +=
-                  cpStr_ulCp(
-                    tmpStr,
-                    installDirStr
-                  );
-
-               tmpStr +=
-                  cpStr_ulCp(
-                     tmpStr,
-                     dbDirStr
-                  );
-
-               tmpStr +=
-                  cpStr_ulCp(
-                     tmpStr,
-                     fileStr
-                  );
-
-               testFILE =
-                  fopen(
-                     (char *) pathStr,
-                     "r"
-                  );
+               testFILE = fopen((char *) pathStr, "r");
 
                /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
                ^ Fun01 Sec06:
@@ -337,38 +251,25 @@ checkPaths_freezeTBPaths(
                { /*If: database not in local install*/
                   tmpStr = pathStr;
 
+                  tmpStr += cpStr_ulCp(tmpStr,programStr);
                   tmpStr +=
-                     cpStr_ulCp(
-                       tmpStr,
-                       programStr
-                     );
+                     cpStr_ulCp(tmpStr, installDirStr);
+                  tmpStr += cpStr_ulCp(tmpStr, dbDirStr);
+                  tmpStr += cpStr_ulCp(tmpStr, fileStr);
 
-                  tmpStr +=
-                     cpStr_ulCp(
-                       tmpStr,
-                       installDirStr
-                     );
-
-                  tmpStr +=
-                     cpStr_ulCp(
-                        tmpStr,
-                        dbDirStr
-                     );
-
-                  tmpStr +=
-                     cpStr_ulCp(
-                        tmpStr,
-                        fileStr
-                     );
-
-                  testFILE =
-                     fopen(
-                        (char *) pathStr,
-                        "r"
-                     );
+                  testFILE = fopen((char *) pathStr, "r");
 
                   if(! testFILE)
-                     pathStr[0] = '\0';/*no idea were at*/ 
+                  { /*If: could not find the databse*/
+                     if(dbDirStr == altDbDirStr)
+                        pathStr[0] = '\0';
+                        /*no idea were at*/ 
+                     else
+                     { /*Else: can check alternate paths*/
+                        dbDirStr = altDbDirStr;
+                        goto checkDatabaseDir_fun01_sec03;
+                     } /*Else: can check alternate paths*/
+                  } /*If: could not find the databse*/
                } /*If: database not in local install*/
             } /*If: database not in global path*/
          #endif
