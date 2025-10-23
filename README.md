@@ -160,6 +160,10 @@ For amd64 Linux (likely your Linux computer), Mac, and
    - For Linux Ubuntu, you can try right clicking the
      ftbRay file and select `Allow Launching`
      - No idea if works, but hope it does
+   - For Linux, I am hoping it works out of the box, but
+     if you get dependencies errors see the [installing
+     raylib Linux](#raylib_Linux) section for a list of
+     dependencies.
 
 ## Linux:
 
@@ -170,7 +174,7 @@ I recommend installing minimap2, it is more sensitive and
   Debain based system (ex Ubuntu)
   do `sudo apt-get install minimap2;`.
 
-### raylib Linux
+### raylib_Linux
 
 For the acutual installtion steps, you have two options.
   The global install (all users) and local installs (only
