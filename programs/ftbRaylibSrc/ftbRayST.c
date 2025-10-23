@@ -3134,6 +3134,7 @@ getDatabases_ftbRayST(
 
    signed int lenSI = 0;
    signed char pathStr[1024];
+   signed char *tmpStr = 0;
 
    #ifdef WINDOWS
       signed char *mapVersionCmdStr =
@@ -3420,7 +3421,31 @@ getDatabases_ftbRayST(
       cpStr_ulCp(&minimap2Str[lenSI], mapVersionCmdStr);
 
       if( system((char *) minimap2Str) )
-         minimap2Str[0] = 0;
+      { /*If: failed to find minimap2*/
+         checkPaths_freezeTBPaths(
+            minimap2Str,
+            mapCallCmdStr
+         );
+
+         if(! minimap2Str[0])
+            minimap2Str[0] = 0;
+         else
+         { /*Else: found minimap2 file; check if runs*/
+            tmpStr = minimap2Str;
+            while(*tmpStr)
+               ++tmpStr;
+            cpStr_ulCp(
+               tmpStr,
+               (signed char *) "--version"
+            );
+
+            if( system((char *) minimap2Str) )
+               minimap2Str[0] = 0;/*minimap2 did not run*/
+            else
+               *tmpStr = 0; /*remove --version flag*/
+         } /*Else: found minimap2 file; check if runs*/
+      } /*If: failed to find minimap2*/
+
       else
       { /*Else: found minimap2*/
          /*find space between minimap2 & --version*/
