@@ -18,6 +18,11 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
   - [Mac source install steps](#Mac)
   - [Windows source install steps](#Windows)
 
+# Protocols
+
+The wet lab protocol can be found at
+  [https://www.protocols.io/view/freezetb-m-tuberculosis-drug-resistance-screening-6qpvrq652lmk/v1](https://www.protocols.io/view/freezetb-m-tuberculosis-drug-resistance-screening-6qpvrq652lmk/v1).
+
 # License:
 
 freezeTB includes databases from other repositories and
