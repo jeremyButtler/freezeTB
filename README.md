@@ -60,8 +60,8 @@ To get the version number of minimap2 and freezeTB for the
   the command line version of freezeTB do `freezeTB -v`.
 
 I also included the citations in bibtext format in
-  `freezeTB-citations.bib` and the command line program
-  will also print out both citation formats with `-cite`
+  `freezeTB-citations.bib`. The command line program
+  will also print out citation with `-cite`
   for freezeTB and `-cite-minimap2` for minimap2. The
   graphical freezeTB will put citations (freezeTB and if
   used minimap2) in the log file.
