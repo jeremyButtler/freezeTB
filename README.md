@@ -1,6 +1,6 @@
 ![freezeTB icon](FTB-icon.svg)
 
-# Use
+# Use:
 
 freezeTB is a program that detects gene mutations
   associated with drug resistance from nanopore sequenced
@@ -22,6 +22,49 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
 
 The wet lab protocol can be found at
   [https://www.protocols.io/view/freezetb-m-tuberculosis-drug-resistance-screening-6qpvrq652lmk/v1](https://www.protocols.io/view/freezetb-m-tuberculosis-drug-resistance-screening-6qpvrq652lmk/v1).
+
+# Citing:
+
+For citing freezeTB:
+
+```
+Inman B, Butler J, George-Nichol S, Kovalenko G,
+  Savidge T, Vergnetti Y, Pongratz C, Bee E, DiNardo AR,
+  Kay A, Mandalakas A, Bortz E, Ness TE. Application of
+  FreezeTB, a targeted nanopore sequencing assay, for
+  identification of drug resistance and lineages among
+  pulmonary tuberculosis cases in Alaska.
+  Microbiol Spectr. 2025 Nov 17:e0233525.
+  doi: 10.1128/spectrum.02335-25. Epub ahead of print.
+  PMID: 41247050.
+```
+
+If you are using the GUI ("graphical user interface" or
+  "window") version of freezeTB, then you should also
+  cite minimap2.
+
+```
+Li H. Minimap2: pairwise alignment for nucleotide
+  sequences. Bioinformatics. 2018 Sep 15;34(18):3094-3100.
+  doi: 10.1093/bioinformatics/bty191. PMID: 29750242;
+  PMCID: PMC6137996.
+
+Li H. New strategies to improve minimap2 alignment
+  accuracy. Bioinformatics. 2021 Dec 7;37(23):4572-4574.
+  doi: 10.1093/bioinformatics/btab705. PMID: 34623391;
+  PMCID: PMC8652018.
+```
+
+To get the version number of minimap2 and freezeTB for the
+  graphical user interface check the output log file. For
+  the command line version of freezeTB do `freezeTB -v`.
+
+I also included the citations in bibtext format in
+  `freezeTB-citations.bib` and the command line program
+  will also print out both citation formats with `-cite`
+  for freezeTB and `-cite-minimap2` for minimap2. The
+  graphical freezeTB will put citations (freezeTB and if
+  used minimap2) in the log file.
 
 # License:
 

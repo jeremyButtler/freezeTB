@@ -1,0 +1,211 @@
+/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+' freezeTB-citations SOF: Start Of File
+'   - citations used for freezeTB in bibtex format
+'   o sec01: freezeTB reference
+'     - the citations for freezeTB
+'   o sec02: minimap2 references
+'     - for GUI freezeTB, you cite this since you used
+'       minimap2
+'     - for command freezeTB, cite the read mapper you
+'       used
+\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/
+
+/>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+^ Sec01: freezeTB reference
+^   - the citations for freezeTB
+\>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>/
+
+@Article{freezeTB-2025,
+  Title={
+    Application of FreezeTB, a targeted nanopore
+    sequencing assay, for identification of drug
+    resistance and lineages among pulmonary tuberculosis
+    cases in Alaska.
+  },
+  Author={
+    Inman, Bryce and Butler, Jeremy and
+    George-Nichol, Soren and Kovalenko, Ganna and
+    Savidge, Theresa and Vergnetti, Yvette and
+    Pongratz, Catherine and Bee, Elizabeth and
+    DiNardo, Andrew R and Kay, Alexander and
+    Mandalakas, Anna and Bortz, Eric and Ness, Tara E
+  },
+  Journal={Microbiology spectrum},
+  JournalId={101634614},
+  Year={2025},
+  Month={Nov},
+  Day={17},
+  Volume={},
+  Number={},
+  Pages={e0233525},
+  doi={10.1128/spectrum.02335-25},
+  url={https://dx.doi.org/10.1128/spectrum.02335-25},
+  ISSN={2165-0497},
+  PMID={41247050},
+  File={2025-pmid-41247050.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={
+    AMR, Alaska, DR-TB, MDR-TB,
+    Mycobacterium tuberculosis, TB, nanopore, sequencing,
+    spoligotyping, tNGS, targeted, tuberculosis
+  },
+  NotesP={
+  },
+  Abstract={
+    Alaska has the highest incidence of tuberculosis (TB)
+    in the United States, with 8% mortality while
+    undergoing TB treatment. With a quarter of TB cases
+    lacking sputum culture to enable drug resistance
+    testing, FreezeTB aimed to develop tools tailored to
+    meet the challenges in Alaska while being
+    translatable to other settings. We designed a rapid
+    and cost-effective laboratory workflow and software
+    to identify drug-resistant mutations in Mycobacterium
+    tuberculosis using targeted next-generation
+    sequencing (tNGS). FreezeTB, a Fast, Reliable,
+    Economical Evaluation tool to Zap Endemic
+    Tuberculosis, amplifies 22 gene loci associated with
+    resistance to 16 anti-tuberculosis drugs. M.
+    tuberculosis isolates from Alaska (2011-2024) were
+    blinded and underwent analysis with FreezeTB, then
+    compared with phenotypic drug susceptibility testing
+    (pDST) and whole genome sequencing (WGS). Compared
+    with WGS (n = 79), FreezeTB provided the same
+    mutations in 96% (n = 76/79) of samples with 100%
+    lineage agreement (n = 79/79). Compared with pDST
+    using Cohen's kappa, FreezeTB had almost perfect
+    agreement for rifampin (RIF, 0.90; n = 97/98) and
+    ethambutol (EMB, 1.00; n = 98/98), strong agreement
+    for isoniazid (INH, 0.80; n = 88/98), moderate
+    agreement for ethionamide (ETO, 0.78; n = 95/98),
+    weak agreement for streptomycin (STR, 0.56; n =
+    95/98), and no agreement for pyrazinamide (PZA, 0.20;
+    n = 91/98). Using a portable nanopore sequencer, each
+    sample cost under $30 for sequencing, which included
+    a flow cell, a barcoding kit, a flow cell wash kit, a
+    polymerase, and primers. FreezeTB provides a
+    portable, 1-day laboratory and bioinformatic workflow
+    for sequencing M. tuberculosis. Freeze TB can
+    accurately determine mycobacterial lineage and
+    resistance for RIF, INH, ETH, and ETO at a low
+    cost.IMPORTANCEGlobally, tuberculosis is the leading
+    infectious cause of mortality with 10.8 million new
+    cases and 1.25 million deaths occurring in 2024.
+    Targeted next-generation sequencing (tNGS) is a
+    rapid, cost-effective method for identifying
+    mutations in the Mycobacterium tuberculosis genome
+    associated with drug resistance. FreezeTB was created
+    to provide low-cost, portable sequencing and tNGS
+    analysis for drug resistance. FreezeTB selectively
+    amplifies and sequences 24 targets of the M.
+    tuberculosis genome that cover regions the WHO has
+    designated as containing mutations conferring drug
+    resistance, as well as provides species confirmation
+    and rapid lineage determination. Freeze TB is a
+    laboratory workflow and free, open-source (OS) low
+    dependency bioinformatic software that can be
+    downloaded onto a computer with no further need for
+    internet access. Using M. tuberculosis isolates from
+    Alaska, FreezeTB provided the same mutations in 96%
+    (n = 76/79) of samples with 100% lineage agreement (n
+    = 79/79) compared with whole genome sequencing.
+  },
+}
+
+/>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+^ Sec02: minimap2 references
+^   - for GUI freezeTB, you cite this since you used
+^     minimap2
+^   - for command freezeTB, cite the read mapper you
+^     used
+\>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>/
+
+@Article{minimap2-2018,
+  Title={
+    Minimap2: pairwise alignment for nucleotide sequences.
+  },
+  Author={Li, Heng},
+  Journal={Bioinformatics (Oxford, England)},
+  JournalId={9808944},
+  Year={2018},
+  Month={Sep},
+  Day={15},
+  Volume={34},
+  Number={18},
+  Pages={3094-3100},
+  doi={10.1093/bioinformatics/bty191},
+  url={https://dx.doi.org/10.1093/bioinformatics/bty191},
+  ISSN={1367-4803},
+  PMID={29750242},
+  PMC={PMC6137996},
+  File={2018-pmid-29750242.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={},
+  NotesP={
+  },
+  Abstract={
+    MOTIVATION: Recent advances in sequencing
+    technologies promise ultra-long reads of âˆ¼100 kb in
+    average, full-length mRNA or cDNA reads in high
+    throughput and genomic contigs over 100 Mb in length.
+    Existing alignment programs are unable or inefficient
+    to process such data at scale, which presses for the
+    development of new alignment algorithms. RESULTS:
+    Minimap2 is a general-purpose alignment program to
+    map DNA or long mRNA sequences against a large
+    reference database. It works with accurate short
+    reads of â‰¥100â€‰bp in length, â‰¥1â€‰kb genomic
+    reads at error rate âˆ¼15%, full-length noisy Direct
+    RNA or cDNA reads and assembly contigs or closely
+    related full chromosomes of hundreds of megabases in
+    length. Minimap2 does split-read alignment, employs
+    concave gap cost for long insertions and deletions
+    and introduces new heuristics to reduce spurious
+    alignments. It is 3-4 times as fast as mainstream
+    short-read mappers at comparable accuracy, and is â‰
+    30 times faster than long-read genomic or cDNA
+    mappers at higher accuracy, surpassing most aligners
+    specialized in one type of alignment. AVAILABILITY
+    AND IMPLEMENTATION: https://github.com/lh3/minimap2.
+    SUPPLEMENTARY INFORMATION: Supplementary data are
+    available at Bioinformatics online.
+  },
+}
+
+@Article{minimap2-2021,
+  Title={
+    New strategies to improve minimap2 alignment accuracy.
+  },
+  Author={Li, Heng},
+  Journal={Bioinformatics (Oxford, England)},
+  JournalId={9808944},
+  Year={2021},
+  Month={Dec},
+  Day={75},
+  Volume={37},
+  Number={23},
+  Pages={4572-4574},
+  doi={10.1093/bioinformatics/btab705},
+  url={https://dx.doi.org/10.1093/bioinformatics/btab705},
+  ISSN={1367-4803},
+  PMID={34623391},
+  PMC={PMC8652018},
+  File={2021-pmid-34623391.pdf},
+  Supplement={},
+  Tags={},
+  Keywords={},
+  NotesP={
+  },
+  Abstract={
+    SUMMARY: We present several recent improvements to
+    minimap2, a versatile pairwise aligner for nucleotide
+    sequences. Now minimap2 v2.22 can more accurately map
+    long reads to highly repetitive regions and align
+    through insertions or deletions up to 100â€‰kb by
+    default, addressing major weakness in minimap2 v2.18
+    or earlier. AVAILABILITY AND IMPLEMENTATION:
+    https://github.com/lh3/minimap2.
+  },
+}

@@ -16,16 +16,20 @@
 '     - frees a set_freezeTB stack struct
 '   o fun06: pversion_freezeTB
 '     - prints version number for freezeTB and |submodules
-'   o .c fun07: phelp_freezeTB
+'   o fun07: pcitation_freezeTB
+'     - prints citation for freezeTB
+'   o fun08: pminimap2Citation_freezeTB
+'     - prints the citation for minimap2
+'   o .c fun09: phelp_freezeTB
 '     - prints help message for freezeTB
-'   o .c fun08: input_freezeTB
+'   o .c fun10: input_freezeTB
 '     - gets user input
-'   o fun09: run_freezeTB:
-'     - drives everything, but not fun09 (for tcltk)
+'   o fun11: run_freezeTB:
+'     - drives everything, but not fun11 (for tcltk)
 '   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public dofun09 / mit)
+'     - licensing for this code (public dofun11 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -37,7 +41,7 @@
 #define FREEZE_TB_H
 
 /*-------------------------------------------------------\
-| Fun06: pversion_freezeTB
+| Fun07: pversion_freezeTB
 |   - prints version number for freezeTB and |submodules
 | Input:
 |   - outFILE:
@@ -52,7 +56,37 @@ pversion_freezeTB(
 );
 
 /*-------------------------------------------------------\
-| Fun04: run_freezeTB
+| Fun07: pcitation_freezeTB
+|   - prints citation for freezeTB
+| Input:
+|   - outFILE:
+|     o file to print citation to
+| Ouput:
+|   - Prints:
+|     o the citation to outFILE
+\-------------------------------------------------------*/
+void
+pcitation_freezeTB(
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun08: pminimap2Citation_freezeTB
+|   - prints the citation for minimap2
+| Input:
+|   - outFILE:
+|     o file to print minimap2 citation to
+| Ouput:
+|   - Prints:
+|     o minimap2 citation to outFILE
+\-------------------------------------------------------*/
+void
+pMinimap2Citation_freezeTB(
+   void *outFILE
+);
+
+/*-------------------------------------------------------\
+| Fun11: run_freezeTB
 |    - Analyze ONT sequenced TB reads
 | Input:
 |    - numArgsSI:
