@@ -16,16 +16,18 @@
 '     - frees a set_freezeTB stack struct
 '   o fun06: pversion_freezeTB
 '     - prints version number for freezeTB and |submodules
-'   o .c fun07: phelp_freezeTB
+'   o fun07: pcitation_freezeTB
+'     - prints citation for freezeTB
+'   o .c fun09: phelp_freezeTB
 '     - prints help message for freezeTB
-'   o .c fun08: input_freezeTB
+'   o .c fun10: input_freezeTB
 '     - gets user input
-'   o fun09: run_freezeTB:
-'     - drives everything, but not fun09 (for tcltk)
+'   o fun11: run_freezeTB:
+'     - drives everything, but not fun11 (for tcltk)
 '   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public dofun09 / mit)
+'     - licensing for this code (public dofun11 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -442,7 +444,472 @@ pversion_freezeTB(
 } /*pversion_freezeTB*/
 
 /*-------------------------------------------------------\
-| Fun07: phelp_freezeTB
+| Fun07: pcitation_freezeTB
+|   - prints citation for freezeTB
+| Input:
+|   - outFILE:
+|     o file to print citation to
+| Ouput:
+|   - Prints:
+|     o the citation to outFILE
+\-------------------------------------------------------*/
+void
+pcitation_freezeTB(
+   void *outFILE
+){
+
+  fprintf(
+     (FILE *) outFILE,
+     "Inman B, Butler J, George-Nichol S, Kovalenko G,%s",
+     str_endLine
+  );
+  fprintf(
+    (FILE *) outFILE,
+    "  Savidge T, Vergnetti Y, Pongratz C, Bee E, "
+  );
+  fprintf((FILE *) outFILE, "DiNardo AR,%s", str_endLine);
+  fprintf(
+    (FILE *) outFILE,
+    "  Kay A, Mandalakas A, Bortz E, Ness TE."
+  );
+  fprintf(
+    (FILE *) outFILE,
+    " Application of%s",
+    str_endLine
+  );
+  fprintf(
+    (FILE *) outFILE,
+     "  FreezeTB, a targeted nanopore sequencing assay,"
+  );
+  fprintf((FILE *) outFILE, " for%s", str_endLine);
+
+  fprintf(
+    (FILE *) outFILE,
+    "  identification of drug resistance and lineages"
+  );
+  fprintf(
+    (FILE *) outFILE,
+    "among%s  pulmonary tuberculosis cases in Alaska.%s",
+    str_endLine,
+    str_endLine
+  );
+  fprintf(
+    (FILE *) outFILE,
+    "  Microbiol Spectr. 2025 Nov 17:e0233525.%s",
+    str_endLine
+  );
+  fprintf(
+    (FILE *) outFILE,
+    "  doi: 10.1128/spectrum.02335-25."
+  );
+  fprintf(
+    (FILE *) outFILE,
+    "  Epub ahead of print.%s  PMID: 41247050.%s%s",
+    str_endLine,
+    str_endLine,
+    str_endLine
+  );
+
+  fprintf(
+     (FILE *) outFILE,
+     "@Article{freezeTB-2025%s",
+     str_endLine
+  );
+
+  fprintf(
+     (FILE *) outFILE,
+     "  Title={%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    Application of FreezeTB, a targeted nanopore%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    sequencing assay, for identification of drug%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    resistance and lineages among pulmonary"
+  );
+  fprintf((FILE *) outFILE," tuberculosis%s",str_endLine);
+  fprintf(
+      (FILE *) outFILE,
+      "    cases in Alaska%s",
+     str_endLine
+  );
+  fprintf((FILE *) outFILE, "  },%s", str_endLine);
+
+  fprintf((FILE *) outFILE, "  Author={%s", str_endLine);
+  fprintf(
+     (FILE *) outFILE,
+     "    Inman, Bryce and Butler, Jeremy and%s",
+     str_endLine
+  );
+  fprintf(
+    (FILE *) outFILE,
+    "    George-Nichol, Soren and Kovalenko, Ganna and%s",
+    str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    Savidge, Theresa and Vergnetti, Yvette and%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    Pongratz, Catherine and Bee, Elizabeth and%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    DiNardo, Andrew R and Kay, Alexander and%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "    Mandalakas, Anna and Bortz, Eric "
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "and Ness, Tara E%s",
+     str_endLine
+  );
+  fprintf((FILE *) outFILE, "  },%s", str_endLine);
+
+  fprintf(
+     (FILE *) outFILE,
+     "  Journal={Microbiology spectrum},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  JournalId={101634614},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  Year={2025},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  Month={Nov},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  Day={17},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  Volume={},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  Number={},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  Pages={e0233525},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  doi={10.1128/spectrum.02335-25},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  url={https://dx.doi.org/10.1128/spectrum.02335-25"
+  );
+  fprintf((FILE *) outFILE, "},%s", str_endLine);
+  fprintf(
+     (FILE *) outFILE,
+     "  ISSN={2165-0497},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "  PMID={41247050},%s",
+     str_endLine
+  );
+  fprintf(
+     (FILE *) outFILE,
+     "}%s",
+     str_endLine
+  );
+} /*pcitation_freezeTB*/
+
+/*-------------------------------------------------------\
+| Fun08: pminimap2Citation_freezeTB
+|   - prints the citation for minimap2
+| Input:
+|   - outFILE:
+|     o file to print minimap2 citation to
+| Ouput:
+|   - Prints:
+|     o minimap2 citation to outFILE
+\-------------------------------------------------------*/
+void
+pMinimap2Citation_freezeTB(
+   void *outFILE
+){
+
+   fprintf(
+      (FILE *) outFILE,
+      "Li H. Minimap2: pairwise alignment for nucleotide"
+   );
+   fprintf( (FILE *) outFILE, "%s", str_endLine);
+   fprintf(
+      (FILE *) outFILE,
+      "  sequences. Bioinformatics. 2018 Sep 15;34(18):"
+   );
+   fprintf((FILE *) outFILE, "3094-3100.%s", str_endLine);
+   fprintf(
+      (FILE *) outFILE,
+      "  doi: 10.1093/bioinformatics/bty191."
+   );
+   fprintf(
+      (FILE *) outFILE,
+      " PMID: 29750242;%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  PMCID: PMC6137996.%s%s",
+      str_endLine,
+      str_endLine
+   );
+
+
+   fprintf(
+      (FILE *) outFILE,
+      "Li H. New strategies to improve minimap2 alignment"
+   );
+   fprintf( (FILE *) outFILE, "%s", str_endLine);
+   fprintf(
+      (FILE *) outFILE,
+      "  accuracy. Bioinformatics. 2021 Dec 7;37(23):"
+   );
+   fprintf((FILE *) outFILE, "4572-4574.%s", str_endLine);
+   fprintf(
+      (FILE *) outFILE,
+      "  doi: 10.1093/bioinformatics/btab705. PMID:"
+   );
+   fprintf((FILE *) outFILE, "34623391;%s", str_endLine);
+   fprintf(
+      (FILE *) outFILE,
+      "  PMCID: PMC8652018.%s%s",
+      str_endLine,
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "@Article{minimap2-2018,%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Title={%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "    Minimap2: pairwise alignment for nucleotide"
+   );
+   fprintf(
+      (FILE *) outFILE,
+      " sequences.%s",
+      str_endLine
+   );
+  fprintf((FILE *) outFILE, "  },%s", str_endLine);
+
+   fprintf(
+      (FILE *) outFILE,
+      "  Author={Li, Heng},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Journal={Bioinformatics (Oxford, England)},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  JournalId={9808944},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Year={2018},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Month={Sep},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Day={15},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Volume={34},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Number={18},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Pages={3094-3100},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  doi={10.1093/bioinformatics/bty191},%s",
+      str_endLine
+   );
+   fprintf((FILE *) outFILE, "  url={https:");
+   fprintf(
+      (FILE *) outFILE,
+      "//dx.doi.org/10.1093/bioinformatics/bty191},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  ISSN={1367-4803},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  PMID={29750242},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  PMC={PMC6137996},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "}%s%s",
+      str_endLine,
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "@Article{minimap2-2021,%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Title={%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "    New strategies to improve minimap2 alignment"
+   );
+   fprintf(
+      (FILE *) outFILE,
+      " accuracy.%s",
+     str_endLine
+   );
+   fprintf( (FILE *) outFILE, "  },%s", str_endLine);
+   fprintf(
+      (FILE *) outFILE,
+      "  Author={Li, Heng},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Journal={Bioinformatics (Oxford, England)},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  JournalId={9808944},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Year={2021},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Month={Dec},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Day={75},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Volume={37},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Number={23},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  Pages={4572-4574},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  doi={10.1093/bioinformatics/btab705},%s",
+      str_endLine
+   );
+   fprintf((FILE *) outFILE, "  url={https:");
+   fprintf(
+      (FILE *) outFILE,
+      "//dx.doi.org/10.1093/bioinformatics/btab705},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  ISSN={1367-4803},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  PMID={34623391},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "  PMC={PMC8652018},%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "}%s",
+      str_endLine
+   );
+} /*pminimap2Citation_freezeTB*/
+
+/*-------------------------------------------------------\
+| Fun09: phelp_freezeTB
 |   - prints help message for freezeTB
 | Input:
 |   - pFiltBl:
@@ -479,22 +946,22 @@ phelp_freezeTB(
    signed char pOtherBl,  /*print cluster settings*/
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun07 TOC:
+   ' Fun09 TOC:
    '   - print help message
-   '   o fun07 sec01:
+   '   o fun09 sec01:
    '     - variable declerations
-   '   o fun07 sec02:
+   '   o fun09 sec02:
    '     - find default file paths
-   '   o fun07 sec03:
+   '   o fun09 sec03:
    '     - usage
-   '   o fun07 sec04:
+   '   o fun09 sec04:
    '     - input
-   '   o fun07 sec05:
+   '   o fun09 sec05:
    '     - output
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec01:
+   ^ Fun09 Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -510,7 +977,7 @@ phelp_freezeTB(
    signed char refFileStr[def_lenFileName_freezeTB];
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec02:
+   ^ Fun09 Sec02:
    ^   - find default file paths
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -523,7 +990,7 @@ phelp_freezeTB(
    refPath_freezeTBPaths(refFileStr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec03:
+   ^ Fun09 Sec03:
    ^   - usage entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
  
@@ -568,53 +1035,53 @@ phelp_freezeTB(
    );
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec04:
+   ^ Fun09 Sec04:
    ^   - input entry
-   ^   o fun07 sec04 sub01:
+   ^   o fun09 sec04 sub01:
    ^     - input header/File IO input
-   ^   o fun07 sec04 sub02:
+   ^   o fun09 sec04 sub02:
    ^     - fitering settings
-   ^   o fun07 sec04 sub03:
+   ^   o fun09 sec04 sub03:
    ^     - indel clean up (rmHomo) settings
-   ^   o fun07 sec04 sub04:
+   ^   o fun09 sec04 sub04:
    ^     - consensus settings
-   ^   o fun07 sec04 sub05:
+   ^   o fun09 sec04 sub05:
    ^     - clustering settings
-   ^   o fun07 sec04 sub06:
+   ^   o fun09 sec04 sub06:
    ^     - variant/read AMR printing settings
-   ^   o fun07 sec04 sub07:
+   ^   o fun09 sec04 sub07:
    ^     - AMR settings
-   ^   o fun07 sec04 sub08:
+   ^   o fun09 sec04 sub08:
    ^     - lineage (non-database) settings
-   ^   o fun07 sec04 sub09:
+   ^   o fun09 sec04 sub09:
    ^     - other settings and help message/version number
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun07 Sec04 Sub01:
+   * Fun09 Sec04 Sub01:
    *   - input header/File IO input
-   *   o fun07 sec04 sub01 cat01:
+   *   o fun09 sec04 sub01 cat01:
    *     - input header
-   *   o fun07 sec04 sub01 cat02:
+   *   o fun09 sec04 sub01 cat02:
    *     - sam file input
-   *   o fun07 sec04 sub01 cat03:
+   *   o fun09 sec04 sub01 cat03:
    *     - prefix to name output files
-   *   o fun07 sec04 sub01 cat04:
+   *   o fun09 sec04 sub01 cat04:
    *     - AMR table input
-   *   o fun07 sec04 sub01 cat05:
+   *   o fun09 sec04 sub01 cat05:
    *     - gene coordinates
-   *   o fun07 sec04 sub01 cat06:
+   *   o fun09 sec04 sub01 cat06:
    *     - MIRU table input
-   *   o fun07 sec04 sub01 cat07:
+   *   o fun09 sec04 sub01 cat07:
    *     - spoligotype spacer sequence input
-   *   o fun07 sec04 sub01 cat08:
+   *   o fun09 sec04 sub01 cat08:
    *     - spoligotype linage database
-   *   o fun07 sec04 sub01 cat09:
+   *   o fun09 sec04 sub01 cat09:
    *     - primer masking database
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat01:
+   + Fun09 Sec04 Sub01 Cat01:
    +   - input header and FILE IO header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -623,7 +1090,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE,"  File IO: %s",str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat02:
+   + Fun09 Sec04 Sub01 Cat02:
    +   - sam file
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -640,7 +1107,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat03:
+   + Fun09 Sec04 Sub01 Cat03:
    +   - prefix to name output files
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -659,7 +1126,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat04:
+   + Fun09 Sec04 Sub01 Cat04:
    +   - AMR table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -685,7 +1152,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat05:
+   + Fun09 Sec04 Sub01 Cat05:
    +   - gene coordinates
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -710,7 +1177,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat06:
+   + Fun09 Sec04 Sub01 Cat06:
    +   - MIRU table input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -735,7 +1202,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, " with%s", str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat07:
+   + Fun09 Sec04 Sub01 Cat07:
    +   - spoligotype spacer sequence input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -766,7 +1233,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat08:
+   + Fun09 Sec04 Sub01 Cat08:
    +   - spoligotype linage database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -804,7 +1271,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat09:
+   + Fun09 Sec04 Sub01 Cat09:
    +   - primer masking database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -851,7 +1318,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub01 Cat10:
+   + Fun09 Sec04 Sub01 Cat10:
    +   - reference for indel clean up
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -882,27 +1349,27 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec04 Sub02:
+   * Fun09 Sec04 Sub02:
    *   - fitering settings
-   *   o fun07 sec04 sub02 cat01:
+   *   o fun09 sec04 sub02 cat01:
    *     - filter header
-   *   o fun07 sec04 sub02 cat02:
+   *   o fun09 sec04 sub02 cat02:
    *     - mapping quality filter
-   *   o fun07 sec04 sub02 cat03:
+   *   o fun09 sec04 sub02 cat03:
    *     - min length filter
-   *   o fun07 sec04 sub02 cat04:
+   *   o fun09 sec04 sub02 cat04:
    *     - mean Q-score filter
-   *   o fun07 sec04 sub02 cat05:
+   *   o fun09 sec04 sub02 cat05:
    *     - median Q-score filter
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub02 Cat01:
+   + Fun09 Sec04 Sub02 Cat01:
    +   - fitering header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(! pFiltBl)
-      goto skipReadFilt_fun07_sec04_sub04;
+      goto skipReadFilt_fun09_sec04_sub04;
 
    fprintf(
       (FILE *) outFILE,
@@ -911,7 +1378,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub02 Cat02:
+   + Fun09 Sec04 Sub02 Cat02:
    +   - mapping quality filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -930,7 +1397,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub02 Cat03:
+   + Fun09 Sec04 Sub02 Cat03:
    +   - min length filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -949,7 +1416,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub02 Cat04:
+   + Fun09 Sec04 Sub02 Cat04:
    +   - mean q-score filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -968,7 +1435,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub02 Cat05:
+   + Fun09 Sec04 Sub02 Cat05:
    +   - median Q-score filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -987,19 +1454,19 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec04 Sub03:
+   * Fun09 Sec04 Sub03:
    *   - indel clean up (rmHomo) settings
-   *   o fun07 sec04 sub03 cat01:
+   *   o fun09 sec04 sub03 cat01:
    *     - rmHomo header
-   *   o fun07 sec04 sub03 cat02:
+   *   o fun09 sec04 sub03 cat02:
    *     - indel clean up boolean
-   *   o fun07 sec04 sub03 cat03:
+   *   o fun09 sec04 sub03 cat03:
    *     - indel clean up minimum homopolymer size
-   *   o fun07 sec04 sub03 cat04:
+   *   o fun09 sec04 sub03 cat04:
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub03 Cat01:
+   + Fun09 Sec04 Sub03 Cat01:
    +   - rmHomo header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1010,7 +1477,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub03 Cat02:
+   + Fun09 Sec04 Sub03 Cat02:
    +   - indel clean up boolean
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1040,7 +1507,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub03 Cat03:
+   + Fun09 Sec04 Sub03 Cat03:
    +   - indel clean up minimum homopolymer size
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1059,7 +1526,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub03 Cat04:
+   + Fun09 Sec04 Sub03 Cat04:
    +   - indel clean up maximum indel size
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1078,35 +1545,35 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec04 Sub04:
+   * Fun09 Sec04 Sub04:
    *   - consensus settings
-   *   o fun07 sec04 sub04 cat01:
+   *   o fun09 sec04 sub04 cat01:
    *     - consensus setting header
-   *   o fun07 sec04 sub04 cat02:
+   *   o fun09 sec04 sub04 cat02:
    *     - min depth filter
-   *   o fun07 sec04 sub04 cat03:
+   *   o fun09 sec04 sub04 cat03:
    *     - min length to keep a fragment
-   *   o fun07 sec04 sub04 cat04:
+   *   o fun09 sec04 sub04 cat04:
    *     - min snp/match Q-score
-   *   o fun07 sec04 sub04 cat05:
+   *   o fun09 sec04 sub04 cat05:
    *     - min insertion Q-score
-   *   o fun07 sec04 sub04 cat06:
+   *   o fun09 sec04 sub04 cat06:
    *     - min percdent snp/match support
-   *   o fun07 sec04 sub04 cat07:
+   *   o fun09 sec04 sub04 cat07:
    *     - min percdent insertion support
-   *   o fun07 sec04 sub04 cat08:
+   *   o fun09 sec04 sub04 cat08:
    *     - min percent deletion support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat01:
+   + Fun09 Sec04 Sub04 Cat01:
    +   - consensus setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   skipReadFilt_fun07_sec04_sub04:;
+   skipReadFilt_fun09_sec04_sub04:;
 
    if(! pConBl)
-       goto skipConSet_fun07_sec04_sub05_cat01;
+       goto skipConSet_fun09_sec04_sub05_cat01;
 
    fprintf(
       (FILE *) outFILE,
@@ -1115,7 +1582,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat02:
+   + Fun09 Sec04 Sub04 Cat02:
    +   - min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1134,7 +1601,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat03:
+   + Fun09 Sec04 Sub04 Cat03:
    +   - min length to keep a fragment
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1159,7 +1626,7 @@ phelp_freezeTB(
 
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat04:
+   + Fun09 Sec04 Sub04 Cat04:
    +   - min snp/match Q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1178,7 +1645,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat05:
+   + Fun09 Sec04 Sub04 Cat05:
    +   - min insertion Q-score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1197,7 +1664,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat06:
+   + Fun09 Sec04 Sub04 Cat06:
    +   - min percdent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1216,7 +1683,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat07:
+   + Fun09 Sec04 Sub04 Cat07:
    +   - min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1235,7 +1702,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub04 Cat08:
+   + Fun09 Sec04 Sub04 Cat08:
    +   - min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1254,53 +1721,53 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec04 Sub05:
+   * Fun09 Sec04 Sub05:
    *   - clustering settings
-   *   o fun07 sec04 sub05 cat01:
+   *   o fun09 sec04 sub05 cat01:
    *     - print clustering setting header
-   *   o fun07 sec04 sub05 cat02:
+   *   o fun09 sec04 sub05 cat02:
    *     - read scoring settings
-   *   o fun07 sec04 sub05 cat03:
+   *   o fun09 sec04 sub05 cat03:
    *     - minimum cluster depth
-   *   o fun07 sec04 sub05 cat04:
+   *   o fun09 sec04 sub05 cat04:
    *     - minimum cluster percent depth
-   *   o fun07 sec04 sub05 cat05:
+   *   o fun09 sec04 sub05 cat05:
    *     - minimum percent difference between reads
-   *   o fun07 sec04 sub05 cat06:
+   *   o fun09 sec04 sub05 cat06:
    *     - minimum consensus to read percent difference
-   *   o fun07 sec04 sub05 cat07:
+   *   o fun09 sec04 sub05 cat07:
    *     - maximum percent similarity between consensuses
-   *   o fun07 sec04 sub05 cat08:
+   *   o fun09 sec04 sub05 cat08:
    *     - minimum percent overlap between consensuses
-   *   o fun07 sec04 sub05 cat09:
+   *   o fun09 sec04 sub05 cat09:
    *     - maximum percent maksing in consensus
-   *   o fun07 sec04 sub05 cat10:
+   *   o fun09 sec04 sub05 cat10:
    *     - number of consensus rebuilds
-   *   o fun07 sec04 sub05 cat11:
+   *   o fun09 sec04 sub05 cat11:
    *     - depth profiling (edit distance setting start)
-   *   o fun07 sec04 sub05 cat12:
+   *   o fun09 sec04 sub05 cat12:
    *     - minimum depth profile depth (edDist)
-   *   o fun07 sec04 sub05 cat13:
+   *   o fun09 sec04 sub05 cat13:
    *     - minimum error:variant ratio to be different
-   *   o fun07 sec04 sub05 cat14:
+   *   o fun09 sec04 sub05 cat14:
    *     - length of window (edDist)
-   *   o fun07 sec04 sub05 cat15:
+   *   o fun09 sec04 sub05 cat15:
    *     - window variant:error ratio (for difference)
-   *   o fun07 sec04 sub05 cat16:
+   *   o fun09 sec04 sub05 cat16:
    *     - minimum indel length to keep indel in edDist
-   *   o fun07 sec04 sub05 cat17:
+   *   o fun09 sec04 sub05 cat17:
    *     - minimum q-score to count snp as different
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat01:
+   + Fun09 Sec04 Sub05 Cat01:
    +   - print clustering setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   skipConSet_fun07_sec04_sub05_cat01:;
+   skipConSet_fun09_sec04_sub05_cat01:;
 
    if(! pClustBl)
-      goto skipClustSet_fun07_sec04_sub06_cat01;
+      goto skipClustSet_fun09_sec04_sub06_cat01;
 
    fprintf(
       (FILE *) outFILE,
@@ -1334,7 +1801,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat02:
+   + Fun09 Sec04 Sub05 Cat02:
    +   - read scoring settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1386,7 +1853,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat03:
+   + Fun09 Sec04 Sub05 Cat03:
    +   - minimum cluster depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1411,7 +1878,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat04:
+   + Fun09 Sec04 Sub05 Cat04:
    +   - minimum cluster percent depth
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1436,7 +1903,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat05:
+   + Fun09 Sec04 Sub05 Cat05:
    +   - minimum percent difference between reads
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1455,7 +1922,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat06:
+   + Fun09 Sec04 Sub05 Cat06:
    +   - minimum consensus to read percent difference
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1474,7 +1941,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat07:
+   + Fun09 Sec04 Sub05 Cat07:
    +   - maximum percent similarity between consensuses
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1499,7 +1966,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat08:
+   + Fun09 Sec04 Sub05 Cat08:
    +   - minimum percent overlap between consensuses
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1530,7 +1997,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat09:
+   + Fun09 Sec04 Sub05 Cat09:
    +   - maximum percent maksing in consensus
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1549,7 +2016,7 @@ phelp_freezeTB(
    ); /*both consensus and edit distance*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat10:
+   + Fun09 Sec04 Sub05 Cat10:
    +   - number of consensus rebuilds
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1568,7 +2035,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat11:
+   + Fun09 Sec04 Sub05 Cat11:
    +   - depth profiling (edit distance setting start)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1592,7 +2059,7 @@ phelp_freezeTB(
       );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat12:
+   + Fun09 Sec04 Sub05 Cat12:
    +   - minimum depth profile depth (edDist)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1615,7 +2082,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat13:
+   + Fun09 Sec04 Sub05 Cat13:
    +   - minimum error:variant ratio to be different
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1647,7 +2114,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat14:
+   + Fun09 Sec04 Sub05 Cat14:
    +   - length of window (edDist)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1678,7 +2145,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat15:
+   + Fun09 Sec04 Sub05 Cat15:
    +   - window variant:error ratio (for difference)
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1697,7 +2164,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat16:
+   + Fun09 Sec04 Sub05 Cat16:
    +   - minimum indel length to keep indel in edDist
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1716,7 +2183,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub05 Cat17:
+   + Fun09 Sec04 Sub05 Cat17:
    +   - minimum q-score to count snp as different
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1735,31 +2202,31 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*****************************************************\
-   * Fun07 Sec04 Sub06:
+   * Fun09 Sec04 Sub06:
    *   - variant printing settings (depth is AMR)
-   *   o fun07 sec04 sub06 cat01:
+   *   o fun09 sec04 sub06 cat01:
    *     - variant/readAMR print setting header
-   *   o fun07 sec04 sub06 cat02:
+   *   o fun09 sec04 sub06 cat02:
    *     - min depth filter
-   *   o fun07 sec04 sub06 cat03:
+   *   o fun09 sec04 sub06 cat03:
    +     - min percent of reads to keep read AMR
-   *   o fun07 sec04 sub06 cat04:
+   *   o fun09 sec04 sub06 cat04:
    *     - min perccent snp/match support
-   *   o fun07 sec04 sub06 cat05:
+   *   o fun09 sec04 sub06 cat05:
    *     - min percent insertion support
-   *   o fun07 sec04 sub06 cat06:
+   *   o fun09 sec04 sub06 cat06:
    *     - min percent deletion support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub06 Cat01:
+   + Fun09 Sec04 Sub06 Cat01:
    +   - variant/readAMR print setting header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   skipClustSet_fun07_sec04_sub06_cat01:;
+   skipClustSet_fun09_sec04_sub06_cat01:;
 
    if(! pPrintBl)
-      goto skipPrintSet_fun07_sec04_sub07_cat01;
+      goto skipPrintSet_fun09_sec04_sub07_cat01;
 
    fprintf(
       (FILE *) outFILE,
@@ -1768,7 +2235,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub06 Cat02:
+   + Fun09 Sec04 Sub06 Cat02:
    +   - print min depth filter
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1793,7 +2260,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub06 Cat04:
+   + Fun09 Sec04 Sub06 Cat04:
    +   - min percent snp/match support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1818,7 +2285,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub06 Cat05:
+   + Fun09 Sec04 Sub06 Cat05:
    +   - min percent insertion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1838,7 +2305,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub06 Cat06:
+   + Fun09 Sec04 Sub06 Cat06:
    +   - min percent deletion support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1857,20 +2324,20 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*****************************************************\
-   * Fun07 Sec04 Sub07:
+   * Fun09 Sec04 Sub07:
    *   - AMR settings
-   *   o fun07 sec04 sub07 cat01:
+   *   o fun09 sec04 sub07 cat01:
    *     - min percent of reads to keep read AMR
-   *   o fun07 sec04 sub07 cat02:
+   *   o fun09 sec04 sub07 cat02:
    *     - min percent of reads to keep indel
-   *   o fun07 sec04 sub07 cat03:
+   *   o fun09 sec04 sub07 cat03:
    *     - checking frameshifts
-   *   o fun07 sec04 sub07 cat04:
+   *   o fun09 sec04 sub07 cat04:
    *     - frameshift support
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub07 Cat01:
+   + Fun09 Sec04 Sub07 Cat01:
    +   - min percent of reads to keep read AMR
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1895,7 +2362,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub07 Cat02:
+   + Fun09 Sec04 Sub07 Cat02:
    +   - min percent of reads to keep indel
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1914,7 +2381,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub07 Cat03:
+   + Fun09 Sec04 Sub07 Cat03:
    +   - checking frameshifts
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1944,7 +2411,7 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub07 Cat04:
+   + Fun09 Sec04 Sub07 Cat04:
    +   - frameshift support
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1963,29 +2430,29 @@ phelp_freezeTB(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 
    /*****************************************************\
-   * Fun07 Sec04 Sub08:
+   * Fun09 Sec04 Sub08:
    *   - lineage settings
-   *   o fun07 sec04 sub08 cat01:
+   *   o fun09 sec04 sub08 cat01:
    *     - lineage setting block
-   *   o fun07 sec04 sub08 cat02:
+   *   o fun09 sec04 sub08 cat02:
    *     - MIRU fudge setting
-   *   o fun07 sec04 sub08 cat03:
+   *   o fun09 sec04 sub08 cat03:
    *     - spoligtyping min perc score
-   *   o fun07 sec04 sub08 cat04:
+   *   o fun09 sec04 sub08 cat04:
    *     - spoligtyping dr-start
-   *   o fun07 sec04 sub08 cat05:
+   *   o fun09 sec04 sub08 cat05:
    *     - spoligtyping dr-end
    \*****************************************************/
 
-   skipPrintSet_fun07_sec04_sub07_cat01:;
+   skipPrintSet_fun09_sec04_sub07_cat01:;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub08 Cat01:
+   + Fun09 Sec04 Sub08 Cat01:
    +   - lineage setting block
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(! pLinBl)
-      goto skipLineageSet_fun07_sec04_sub09;
+      goto skipLineageSet_fun09_sec04_sub09;
 
    fprintf(
       (FILE *) outFILE,
@@ -1994,7 +2461,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub08 Cat02:
+   + Fun09 Sec04 Sub08 Cat02:
    +   - MIRU fudge setting
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2019,7 +2486,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub08 Cat03:
+   + Fun09 Sec04 Sub08 Cat03:
    +   - spoligtyping min perc score
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2044,7 +2511,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub08 Cat04:
+   + Fun09 Sec04 Sub08 Cat04:
    +   - spoligtyping dr-start
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2063,7 +2530,7 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub08 Cat05:
+   + Fun09 Sec04 Sub08 Cat05:
    +   - spoligtyping dr-end
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2082,26 +2549,26 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec04 Sub09:
+   * Fun09 Sec04 Sub09:
    *   - other settings and help message/version number
-   *   o fun07 sec04 sub09 cat01:
+   *   o fun09 sec04 sub09 cat01:
    *     - other settings header
-   *   o fun07 sec04 sub09 cat02:
+   *   o fun09 sec04 sub09 cat02:
    *     - flag for graph
-   *   o fun07 sec04 sub09 cat03:
+   *   o fun09 sec04 sub09 cat03:
    *     - default help message
-   *   o fun07 sec04 sub09 cat04:
+   *   o fun09 sec04 sub09 cat04:
    *     - addons for help message
-   *   o fun07 sec04 sub09 cat05:
-   *     - version number
+   *   o fun09 sec04 sub09 cat05:
+   *     - version number and citation
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub09 Cat01:
+   + Fun09 Sec04 Sub09 Cat01:
    +   - Other settings header
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   skipLineageSet_fun07_sec04_sub09:;
+   skipLineageSet_fun09_sec04_sub09:;
 
    fprintf(
       (FILE *) outFILE,
@@ -2110,12 +2577,12 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub09 Cat02:
+   + Fun09 Sec04 Sub09 Cat02:
    +   - flag for graph
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(! pOtherBl)
-      goto skipOtherSet_fun07_sec04_sub09_cat04;
+      goto skipOtherSet_fun09_sec04_sub09_cat04;
    
    fprintf(
       (FILE *) outFILE,
@@ -2139,11 +2606,11 @@ phelp_freezeTB(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub09 Cat03:
+   + Fun09 Sec04 Sub09 Cat03:
    +   - default help message
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   skipOtherSet_fun07_sec04_sub09_cat04:;
+   skipOtherSet_fun09_sec04_sub09_cat04:;
 
    if(
          pFiltBl
@@ -2170,7 +2637,7 @@ phelp_freezeTB(
    } /*Else: not default help message*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub09 Cat04:
+   + Fun09 Sec04 Sub09 Cat04:
    +   - addons for help message
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2254,8 +2721,8 @@ phelp_freezeTB(
      );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun07 Sec04 Sub09 Cat07:
-   +   - version number
+   + Fun09 Sec04 Sub09 Cat07:
+   +   - version number and citation
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    fprintf(
@@ -2264,37 +2731,49 @@ phelp_freezeTB(
     str_endLine
    );
 
+   fprintf(
+    (FILE *) outFILE,
+    "    -cite: print citation for freezeTB and exit%s",
+    str_endLine
+   );
+
+   fprintf(
+    (FILE *) outFILE,
+    "    -cite-minimap2: citation for minimap2 + exit%s",
+    str_endLine
+   );
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun07 Sec05:
+   ^ Fun09 Sec05:
    ^   - output
-   ^   o fun07 sec05 sub01:
+   ^   o fun09 sec05 sub01:
    ^     - output header
-   ^   o fun07 sec05 sub02:
+   ^   o fun09 sec05 sub02:
    ^     - consensus amrs file
-   ^   o fun07 sec05 sub04:
+   ^   o fun09 sec05 sub04:
    ^     - consensus mirufile
-   ^   o fun07 sec05 sub05:
+   ^   o fun09 sec05 sub05:
    ^     - consensus file
-   ^   o fun07 sec05 sub06:
+   ^   o fun09 sec05 sub06:
    ^     - variants file
-   ^   o fun07 sec05 sub07:
+   ^   o fun09 sec05 sub07:
    ^     - reads amr table
-   ^   o fun07 sec05 sub08:
+   ^   o fun09 sec05 sub08:
    ^     - reads ids of AMR reads
-   ^   o fun07 sec05 sub09:
+   ^   o fun09 sec05 sub09:
    ^     - reads MIRU table
-   ^   o fun07 sec05 sub09:
+   ^   o fun09 sec05 sub09:
    ^     - filtered histogram file
-   ^   o fun07 sec05 sub10:
+   ^   o fun09 sec05 sub10:
    ^     - unfiltered histogram file
-   ^   o fun07 sec05 sub11:
+   ^   o fun09 sec05 sub11:
    ^     - clusters with reads
-   ^   o fun07 sec05 sub12:
+   ^   o fun09 sec05 sub12:
    ^     - log (for mixed infect)
    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun07 Sec05 Sub01:
+   * Fun09 Sec05 Sub01:
    *   - output header
    \*****************************************************/
 
@@ -2305,7 +2784,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub02:
+   * Fun09 Sec05 Sub02:
    *   - consensus amrs file
    \*****************************************************/
 
@@ -2322,7 +2801,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub04:
+   * Fun09 Sec05 Sub04:
    *   - consensus mirufile
    \*****************************************************/
 
@@ -2339,7 +2818,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub05:
+   * Fun09 Sec05 Sub05:
    *   - consensus file
    \*****************************************************/
 
@@ -2356,7 +2835,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub06:
+   * Fun09 Sec05 Sub06:
    *   - variants file
    \*****************************************************/
 
@@ -2373,7 +2852,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub07:
+   * Fun09 Sec05 Sub07:
    *   - reads amr table
    \*****************************************************/
 
@@ -2390,7 +2869,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub08:
+   * Fun09 Sec05 Sub08:
    *   - reads ids of AMR reads
    \*****************************************************/
 
@@ -2407,7 +2886,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub09:
+   * Fun09 Sec05 Sub09:
    *   - reads MIRU table
    \*****************************************************/
 
@@ -2425,7 +2904,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub09:
+   * Fun09 Sec05 Sub09:
    *   - filtered histogram file
    \*****************************************************/
 
@@ -2448,7 +2927,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub10:
+   * Fun09 Sec05 Sub10:
    *   - unfiltered histogram file
    \*****************************************************/
 
@@ -2471,7 +2950,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub11:
+   * Fun09 Sec05 Sub11:
    *   - clusters with reads
    \*****************************************************/
 
@@ -2488,7 +2967,7 @@ phelp_freezeTB(
    );
 
    /*****************************************************\
-   * Fun07 Sec05 Sub12:
+   * Fun09 Sec05 Sub12:
    *   - log (for mixed infect)
    \*****************************************************/
 
@@ -2506,7 +2985,7 @@ phelp_freezeTB(
 } /*phelp_freezeTB*/
 
 /*-------------------------------------------------------\
-| Fun08: input_freezeTB
+| Fun10: input_freezeTB
 |   - gets user input
 | Input:
 |   User Input:
@@ -2542,20 +3021,20 @@ input_freezeTB(
    signed int *fqIndexSIPtr,
    struct set_freezeTB *ftbSetSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun08 TOC: input_freezeTB
+   ' Fun10 TOC: input_freezeTB
    '   - gets user input
-   '   o fun08 sec01:
+   '   o fun10 sec01:
    '     - variable declerations
-   '   o fun08 sec02:
+   '   o fun10 sec02:
    '     - check if have user input
-   '   o fun08 sec03:
+   '   o fun10 sec03:
    '     - get user input
-   '   o fun08 sec04:
+   '   o fun10 sec04:
    '     - return error type
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec01:
+   ^ Fun10 Sec01:
    ^   - variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2574,7 +3053,7 @@ input_freezeTB(
    signed char pOtherHelpBl = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec02:
+   ^ Fun10 Sec02:
    ^   - check if have user input
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2582,7 +3061,7 @@ input_freezeTB(
 
    if(numArgsSI <= 1)
    { /*If: nothing was input*/
-      phelp_fun08_sec02:;
+      phelp_fun10_sec02:;
 
       phelp_freezeTB(
          pFiltHelpBl,
@@ -2594,44 +3073,46 @@ input_freezeTB(
          stdout
       );
 
-      goto help_fun08_sec04;
+      goto help_fun10_sec04;
    } /*If: nothing was input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec03:
+   ^ Fun10 Sec03:
    ^   - get user input
-   ^   o fun08 sec03 sub01:
+   ^   o fun10 sec03 sub01:
    ^     - file input + start loop
-   ^   o fun08 sec03 sub02:
+   ^   o fun10 sec03 sub02:
    ^     - consensus options
-   ^   o fun08 sec03 sub03:
+   ^   o fun10 sec03 sub03:
    ^     - printing settings (for consensus tsv)
-   ^   o fun08 sec03 sub04:
+   ^   o fun10 sec03 sub04:
    ^     - indel clean up settings
-   ^   o fun08 sec03 sub05:
+   ^   o fun10 sec03 sub05:
    ^     - tbAmr settings
-   ^   o fun08 sec03 sub06:
+   ^   o fun10 sec03 sub06:
    ^     - read filtering
-   ^   o fun08 sec03 sub07:
+   ^   o fun10 sec03 sub07:
    ^     - lineages and graph output
-   ^   o fun08 sec03 sub08:
+   ^   o fun10 sec03 sub08:
    ^     - cluster settings
-   ^   o fun08 sec03 sub09:
+   ^   o fun10 sec03 sub09:
    ^     - check for help message requests (normal)
-   ^   o fun08 sec03 sub10:
+   ^   o fun10 sec03 sub10:
    ^     - check for add on help message requests
-   ^   o fun08 sec03 sub11:
+   ^   o fun10 sec03 sub11:
    ^     - check for version number requests
-   ^   o fun08 sec03 sub12:
+   ^   o fun10 sec03 sub12:
+   ^     - check if citation was requested
+   ^   o fun10 sec03 sub13:
    ^     - set fastq file index
-   ^   o fun08 sec03 sub13:
+   ^   o fun10 sec03 sub14:
    ^     - invalid input
-   ^   o fun08 sec03 sub14:
+   ^   o fun10 sec03 sub15:
    ^     - move to next argument
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun08 Sec03 Sub01:
+   * Fun10 Sec03 Sub01:
    *   - file input + start loop
    \*****************************************************/
 
@@ -2651,7 +3132,7 @@ input_freezeTB(
                 "can not read both sam and fastq files%s",
                 str_endLine
             );
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: using both sam file and fastq file*/
 
          ++siArg;
@@ -2764,18 +3245,18 @@ input_freezeTB(
       } /*Else If: prefix input*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub02:
+      * Fun10 Sec03 Sub02:
       *   - consensus options
-      *   o fun08 sec03 sub02 cat01:
+      *   o fun10 sec03 sub02 cat01:
       *     - consensus q-score settinngs
-      *   o fun08 sec03 sub02 cat02:
+      *   o fun10 sec03 sub02 cat02:
       *     - consensus min depth/length settings
-      *   o fun08 sec03 sub02 cat03:
+      *   o fun10 sec03 sub02 cat03:
       *     - consensus min base percent support settings
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub02 Cat01:
+      + Fun10 Sec03 Sub02 Cat01:
       +    - consensus q-score settinngs
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2798,7 +3279,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: had an error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2807,7 +3288,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: had an error*/
 
          if(
@@ -2815,7 +3296,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.minQSI < 0
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2824,7 +3305,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum q-score input*/
 
@@ -2848,7 +3329,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2857,7 +3338,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(
@@ -2865,7 +3346,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.minInsQSI < 0
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2874,12 +3355,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum insertion q-score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub02 Cat02:
+      + Fun10 Sec03 Sub02 Cat02:
       +    - consensus min depth/length settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2902,7 +3383,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2911,13 +3392,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(ftbSetSTPtr->tbConSet.minDepthSI < 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2925,7 +3406,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum depth*/
 
@@ -2949,7 +3430,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2958,13 +3439,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(ftbSetSTPtr->tbConSet.minLenSI < 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -2972,12 +3453,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum fragment length*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub02 Cat03:
+      + Fun10 Sec03 Sub02 Cat03:
       +    - consensus min base percent support settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2999,7 +3480,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.minPercSnpF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3008,7 +3489,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*If: minimum % snp support*/
 
@@ -3028,7 +3509,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.minPercInsF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3037,7 +3518,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum % ins support*/
 
@@ -3057,7 +3538,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.minPercDelF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3066,12 +3547,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum % del support*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub03:
+      * Fun10 Sec03 Sub03:
       *   - printing settings (for consensus tsv)
       \**************************************************/
 
@@ -3095,7 +3576,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3104,13 +3585,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(ftbSetSTPtr->tbConSet.minPrintDepthSI < 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3119,7 +3600,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: print minimum depth*/
 
@@ -3141,7 +3622,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.printMinSupSnpF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
               stderr,
@@ -3150,7 +3631,7 @@ input_freezeTB(
               str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: print minimum % snp support*/
 
@@ -3171,7 +3652,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.printMinSupInsF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
               stderr,
@@ -3180,7 +3661,7 @@ input_freezeTB(
               str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: print minimum % ins support*/
 
@@ -3201,7 +3682,7 @@ input_freezeTB(
             || ftbSetSTPtr->tbConSet.printMinSupDelF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
               stderr,
@@ -3210,25 +3691,25 @@ input_freezeTB(
               str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: print minimum % snp support*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub04:
+      * Fun10 Sec03 Sub04:
       *   - indel clean up
-      *   o fun08 sec03 sub04 cat01:
+      *   o fun10 sec03 sub04 cat01:
       *     - do indel clean up
-      *   o fun08 sec03 sub04 cat02:
+      *   o fun10 sec03 sub04 cat02:
       *     - indel clean up min hompolymer length
-      *   o fun08 sec03 sub04 cat03:
+      *   o fun10 sec03 sub04 cat03:
       *     - indel clean up maximum indel length
-      *   o fun08 sec03 sub04 cat04:
+      *   o fun10 sec03 sub04 cat04:
       *     - indel clean up reference
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub04 Cat02:
+      + Fun10 Sec03 Sub04 Cat02:
       +   - do indel clean up
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3249,7 +3730,7 @@ input_freezeTB(
       ) ftbSetSTPtr->indelCleanBl = 0;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub04 Cat02:
+      + Fun10 Sec03 Sub04 Cat02:
       +   - indel clean up min hompolymer length
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3279,14 +3760,14 @@ input_freezeTB(
                argAryStr[siArg],
                str_endLine
             );
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: non-numeric*/
 
          else if(
             ftbSetSTPtr->minHomoLenSI <= 0
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3295,12 +3776,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       }  /*Else If: minimum homopolymer length*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub04 Cat03:
+      + Fun10 Sec03 Sub04 Cat03:
       +   - indel clean up maximum indel length
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3330,14 +3811,14 @@ input_freezeTB(
                argAryStr[siArg],
                str_endLine
             );
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: non-numeric*/
 
          else if(
             ftbSetSTPtr->maxIndelLenSI <= 0
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3346,12 +3827,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       }  /*Else If: maximum indel length*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub04 Cat04:
+      + Fun10 Sec03 Sub04 Cat04:
       +   - indel clean up reference
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3370,18 +3851,18 @@ input_freezeTB(
       }  /*Else If: reference for clean up*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub05:
+      * Fun10 Sec03 Sub05:
       *   - AMR settings
-      *   o fun08 sec03 sub05 cat01:
+      *   o fun10 sec03 sub05 cat01:
       *     - minimum AMR mapping percent
-      *   o fun08 sec03 sub05 cat02:
+      *   o fun10 sec03 sub05 cat02:
       *     - minimum indel percent support
-      *   o fun08 sec03 sub05 cat03:
+      *   o fun10 sec03 sub05 cat03:
       *     - frameshift setting/filtering
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub05 Cat01:
+      + Fun10 Sec03 Sub05 Cat01:
       +   - minimum AMR mapping percent
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3401,7 +3882,7 @@ input_freezeTB(
             || ftbSetSTPtr->minPercMapF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
              stderr,
@@ -3410,12 +3891,12 @@ input_freezeTB(
              str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: AMR min percent mapped reads*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub05 Cat02:
+      + Fun10 Sec03 Sub05 Cat02:
       +   - minimum indel percent support
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3435,7 +3916,7 @@ input_freezeTB(
             || ftbSetSTPtr->amrIndelSupF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3444,12 +3925,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       }  /*Else If: min indel % support*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub05 Cat03:
+      + Fun10 Sec03 Sub05 Cat03:
       +   - frameshift setting/filtering
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3486,7 +3967,7 @@ input_freezeTB(
             || ftbSetSTPtr->amrFrameshiftSupF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
               stderr,
@@ -3495,13 +3976,13 @@ input_freezeTB(
               str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       }  /*Else If: min % frameshift support*/
 
 
       /**************************************************\
-      * Fun08 Sec03 Sub06:
+      * Fun10 Sec03 Sub06:
       *   - read filterting
       \**************************************************/
 
@@ -3525,7 +4006,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3534,13 +4015,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(ftbSetSTPtr->tbConSet.minMapqUC > 93)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3549,7 +4030,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum mapping quality*/
 
@@ -3569,7 +4050,7 @@ input_freezeTB(
             || ftbSetSTPtr->minMedianQF > 93
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3578,7 +4059,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: min median q-score*/
 
@@ -3597,7 +4078,7 @@ input_freezeTB(
             || ftbSetSTPtr->minMeanQF > 93
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3606,12 +4087,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: min mean q-score*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub07:
+      * Fun10 Sec03 Sub07:
       *   - lineages and graph output
       \**************************************************/
 
@@ -3649,7 +4130,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3658,7 +4139,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(
@@ -3666,7 +4147,7 @@ input_freezeTB(
             || ftbSetSTPtr->fudgeSI > 100
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3675,7 +4156,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: fudge length (MIRU VNTR)*/
 
@@ -3695,7 +4176,7 @@ input_freezeTB(
             || ftbSetSTPtr->spolPercScoreF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
             stderr,
@@ -3704,7 +4185,7 @@ input_freezeTB(
             str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: min % score for spacer to map*/
 
@@ -3727,7 +4208,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3736,13 +4217,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(ftbSetSTPtr->drStartSI < 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3751,7 +4232,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: Start of direct repeat region*/
 
@@ -3774,7 +4255,7 @@ input_freezeTB(
          if(tmpStr[0] != '\0')
          { /*If: error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3783,13 +4264,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: error*/
 
          if(ftbSetSTPtr->drEndSI <= 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3798,49 +4279,49 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: end of direct repeat region*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub08:
+      * Fun10 Sec03 Sub08:
       *   - clustering settings
-      *   o fun08 sec03 sub08 cat01:
+      *   o fun10 sec03 sub08 cat01:
       *     - user requested clustering?
-      *   o fun08 sec03 sub08 cat02:
+      *   o fun10 sec03 sub08 cat02:
       *     - minimum length weight for read scoring
-      *   o fun08 sec03 sub08 cat03:
+      *   o fun10 sec03 sub08 cat03:
       *     - depth profiling
-      *   o fun08 sec03 sub08 cat04:
+      *   o fun10 sec03 sub08 cat04:
       *     - minium cluster depth
-      *   o fun08 sec03 sub08 cat05:
+      *   o fun10 sec03 sub08 cat05:
       *     - minium cluster percent depth
-      *   o fun08 sec03 sub08 cat06:
+      *   o fun10 sec03 sub08 cat06:
       *     - minium read:read percent distance
-      *   o fun08 sec03 sub08 cat07:
+      *   o fun10 sec03 sub08 cat07:
       *     - minium consensus:read percent distance
-      *   o fun08 sec03 sub08 cat08:
+      *   o fun10 sec03 sub08 cat08:
       *     - maximum consensus similarity (before merge)
-      *   o fun08 sec03 sub08 cat09:
+      *   o fun10 sec03 sub08 cat09:
       *     - maximum error to variant percent (edDist)
-      *   o fun08 sec03 sub08 cat10:
+      *   o fun10 sec03 sub08 cat10:
       *     - minimum overlap between consensuses
-      *   o fun08 sec03 sub08 cat11:
+      *   o fun10 sec03 sub08 cat11:
       *     - window size for window scan
-      *   o fun08 sec03 sub08 cat12:
+      *   o fun10 sec03 sub08 cat12:
       *     - window variant:error ratio
-      *   o fun08 sec03 sub08 cat13:
+      *   o fun10 sec03 sub08 cat13:
       *     - mimimum indel length to count as difference
-      *   o fun08 sec03 sub08 cat14:
+      *   o fun10 sec03 sub08 cat14:
       *     - mimimum q-score to keep snp
-      *   o fun08 sec03 sub08 cat15:
+      *   o fun10 sec03 sub08 cat15:
       *     - maximum percent of consensus maksed
-      *   o fun08 sec03 sub08 cat16:
+      *   o fun10 sec03 sub08 cat16:
       *     - number of times to rebuild consensus
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat01:
+      + Fun10 Sec03 Sub08 Cat01:
       +   - user requested clustering
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3861,7 +4342,7 @@ input_freezeTB(
       ) ftbSetSTPtr->clustBl = 0;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat02:
+      + Fun10 Sec03 Sub08 Cat02:
       +   - minimum length weight for read scoring
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3879,7 +4360,7 @@ input_freezeTB(
          if(ftbSetSTPtr->clustSetST.lenWeightF < 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3888,12 +4369,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: how much length influces score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat03:
+      + Fun10 Sec03 Sub08 Cat03:
       +   - depth profiling
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3914,7 +4395,7 @@ input_freezeTB(
       ) ftbSetSTPtr->clustSetST.depthProfBl = 0;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat04:
+      + Fun10 Sec03 Sub08 Cat04:
       +   - minium cluster depth
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3943,13 +4424,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: invalid input*/
 
          if(ftbSetSTPtr->clustSetST.minDepthUI <= 0)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -3958,12 +4439,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: min cluster read depth*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat05:
+      + Fun10 Sec03 Sub08 Cat05:
       +   - minium cluster percent depth
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3984,7 +4465,7 @@ input_freezeTB(
             || ftbSetSTPtr->clustSetST.minPercDepthF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
              stderr,
@@ -3993,12 +4474,12 @@ input_freezeTB(
              str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: cluster min percent read depth*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat06:
+      + Fun10 Sec03 Sub08 Cat06:
       +   - minium read:read percent distance
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4019,7 +4500,7 @@ input_freezeTB(
             || ftbSetSTPtr->clustSetST.readErrRateF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4028,12 +4509,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: error rate for read to read map*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat07:
+      + Fun10 Sec03 Sub08 Cat07:
       +   - minium consensus:read percent distance
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4053,7 +4534,7 @@ input_freezeTB(
             || ftbSetSTPtr->clustSetST.conErrRateF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4062,12 +4543,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
      } /*Else If: error rate for con to read map*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat08:
+      + Fun10 Sec03 Sub08 Cat08:
       +   - maximum consensus similarity (before merge)
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4088,7 +4569,7 @@ input_freezeTB(
             || ftbSetSTPtr->clustSetST.maxConSimF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4097,12 +4578,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: maximum similarity between cons*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat09:
+      + Fun10 Sec03 Sub08 Cat09:
       +   - maximum error to variant percent (edDist)
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4131,12 +4612,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: invalid input*/
       } /*Else If: maximum error to variant ratio*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat10:
+      + Fun10 Sec03 Sub08 Cat10:
       +   - minimum overlap between consensuses
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4161,7 +4642,7 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: invalid input*/
 
          if(
@@ -4169,7 +4650,7 @@ input_freezeTB(
             || ftbSetSTPtr->clustSetST.percOverlapF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4178,12 +4659,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: minimum overlap*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat11:
+      + Fun10 Sec03 Sub08 Cat11:
       +   - window size for window scan
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4212,12 +4693,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: invalid input*/
       } /*Else If: window length for window scanning*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat12:
+      + Fun10 Sec03 Sub08 Cat12:
       +   - window variant:error ratio
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4246,12 +4727,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: invalid input*/
       } /*Else If: window error to varaint ratio*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat13:
+      + Fun10 Sec03 Sub08 Cat13:
       +   - mimimum indel length to count as difference
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4280,12 +4761,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: invalid input*/
       } /*Else If: min indel length*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat14:
+      + Fun10 Sec03 Sub08 Cat14:
       +   - mimimum q-score to keep snp
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4314,13 +4795,13 @@ input_freezeTB(
              str_endLine
             );
 
-           goto err_fun08_sec04;
+           goto err_fun10_sec04;
          } /*If: invalid input*/
 
          if(ftbSetSTPtr->clustSetST.minSnpQUC > 93)
          { /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4329,12 +4810,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: min snp q-score*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat15:
+      + Fun10 Sec03 Sub08 Cat15:
       +   - maximum percent of consensus maksed
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4354,7 +4835,7 @@ input_freezeTB(
             || ftbSetSTPtr->clustSetST.maxNPercF > 1
          ){ /*If: value out of range*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4363,12 +4844,12 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: maximum % masking*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun08 Sec03 Sub08 Cat16:
+      + Fun10 Sec03 Sub08 Cat16:
       +   - number times to rebuild consensus
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4391,7 +4872,7 @@ input_freezeTB(
          if(*tmpStr != '\0')
          { /*If: had error*/
             if(helpBl)
-               goto phelp_fun08_sec02;
+               goto phelp_fun10_sec02;
 
             fprintf(
                stderr,
@@ -4400,13 +4881,13 @@ input_freezeTB(
                str_endLine
             );
 
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: had error*/
       } /*Else If: number of cosensus rebuilds*/
 
 
       /**************************************************\
-      * Fun08 Sec03 Sub09:
+      * Fun10 Sec03 Sub09:
       *   - check for help message requests (normal)
       \**************************************************/
 
@@ -4451,7 +4932,7 @@ input_freezeTB(
       ) helpBl = 1;
 
       /**************************************************\
-      * Fun08 Sec03 Sub10:
+      * Fun10 Sec03 Sub10:
       *   - check for extra entry help messages
       \**************************************************/
 
@@ -4522,7 +5003,7 @@ input_freezeTB(
       } /*Else If: add other settings to help*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub11:
+      * Fun10 Sec03 Sub11:
       *   - check for version number requests
       \**************************************************/
 
@@ -4534,7 +5015,7 @@ input_freezeTB(
          )
       ){ /*Else If: wanted version number*/
          pversion_freezeTB(stdout);
-         goto pversion_fun08_sec04;
+         goto pversion_fun10_sec04;
       } /*Else If: wanted version number*/
 
       else if(
@@ -4545,7 +5026,7 @@ input_freezeTB(
          )
       ){ /*Else If: wanted version number*/
          pversion_freezeTB(stdout);
-         goto pversion_fun08_sec04;
+         goto pversion_fun10_sec04;
       } /*Else If: wanted version number*/
 
       else if(
@@ -4556,7 +5037,7 @@ input_freezeTB(
          )
       ){ /*Else If: wanted version number*/
          pversion_freezeTB(stdout);
-         goto pversion_fun08_sec04;
+         goto pversion_fun10_sec04;
       } /*Else If: wanted version number*/
 
       else if(
@@ -4567,7 +5048,7 @@ input_freezeTB(
          )
       ){ /*Else If: wanted version number*/
          pversion_freezeTB(stdout);
-         goto pversion_fun08_sec04;
+         goto pversion_fun10_sec04;
       } /*Else If: wanted version number*/
 
       else if(
@@ -4578,11 +5059,153 @@ input_freezeTB(
          )
       ){ /*Else If: wanted version number*/
          pversion_freezeTB(stdout);
-         goto pversion_fun08_sec04;
+         goto pversion_fun10_sec04;
       } /*Else If: wanted version number*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub12:
+      * Fun10 Sec03 Sub12:
+      *   - check for freezeTB citations request
+      \**************************************************/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "cite",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pcitation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-cite",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pcitation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "--cite",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pcitation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "citation",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pcitation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-citation",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pcitation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "--citation",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pcitation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      /**************************************************\
+      * Fun10 Sec03 Sub13:
+      *   - check for minimap2 citations request
+      \**************************************************/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "cite-minimap2",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pMinimap2Citation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-cite-minimap2",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pMinimap2Citation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "--cite-minimap2",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pMinimap2Citation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "citation-minimap2",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pMinimap2Citation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-citation-minimap2",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pMinimap2Citation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "--citation-minimap2",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: user wanted citation for freezeTB*/
+         pMinimap2Citation_freezeTB(stdout);
+         goto pcitation_fun10_sec04;
+      }  /*Else If: user wanted citation for freezeTB*/
+
+      /**************************************************\
+      * Fun10 Sec03 Sub14:
       *   - set fastq file index
       \**************************************************/
 
@@ -4592,7 +5215,7 @@ input_freezeTB(
             *fqIndexSIPtr = siArg;
 
          if(argAryStr[siArg][0] == '>')
-            goto done_fun08_sec04;
+            goto done_fun10_sec04;
             /*at stdout redirect to file*/
 
          testFILE = fopen(argAryStr[siArg], "r");
@@ -4605,7 +5228,7 @@ input_freezeTB(
                argAryStr[siArg],
                str_endLine
             );
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: could not open file*/
 
          fclose(testFILE);
@@ -4618,7 +5241,7 @@ input_freezeTB(
                 "can not read both sam and fastq files%s",
                 str_endLine
             );
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: using both sam file and fastq file*/
       } /*Else If: likely query fastx files*/
 
@@ -4631,7 +5254,7 @@ input_freezeTB(
                 "can not read both sam and fastq files%s",
                 str_endLine
             );
-            goto err_fun08_sec04;
+            goto err_fun10_sec04;
          } /*If: using both sam file and fastq file*/
 
          if(! *fqIndexSIPtr)
@@ -4639,14 +5262,14 @@ input_freezeTB(
       } /*Else If: standard input*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub13:
+      * Fun10 Sec03 Sub15:
       *   - invalid input
       \**************************************************/
 
       else
       { /*Else: invalid input*/
          if(helpBl)
-            goto phelp_fun08_sec02;
+            goto phelp_fun10_sec02;
 
          fprintf(
             stderr,
@@ -4655,11 +5278,11 @@ input_freezeTB(
             str_endLine
          );
 
-         goto err_fun08_sec04;
+         goto err_fun10_sec04;
       } /*Else: invalid input*/
 
       /**************************************************\
-      * Fun08 Sec03 Sub14:
+      * Fun10 Sec03 Sub16:
       *   - move to next argument
       \**************************************************/
 
@@ -4667,33 +5290,34 @@ input_freezeTB(
    } /*Loop: read in user input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun08 Sec04:
+   ^ Fun10 Sec04:
    ^   - return errors
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   done_fun08_sec04:;
+   done_fun10_sec04:;
       errSC = 0;
       if(helpBl)
-         goto phelp_fun08_sec02;
+         goto phelp_fun10_sec02;
          /*user wanted help message*/
          /*this allows for full help message printing*/
-      goto ret_fun09_sec04;
+      goto ret_fun11_sec04;
    
-   help_fun08_sec04:;
-   pversion_fun08_sec04:;
+   help_fun10_sec04:;
+   pversion_fun10_sec04:;
+   pcitation_fun10_sec04:;
       errSC = 1;
-      goto ret_fun09_sec04;
+      goto ret_fun11_sec04;
 
-   err_fun08_sec04:;
+   err_fun10_sec04:;
       errSC = 2;
-      goto ret_fun09_sec04;
+      goto ret_fun11_sec04;
 
-   ret_fun09_sec04:;
+   ret_fun11_sec04:;
       return errSC;
 } /*input_freezeTB*/
 
 /*-------------------------------------------------------\
-| Fun09: run_freezeTB
+| Fun11: run_freezeTB
 |    - Analyze ONT sequenced TB reads
 | Input:
 |    - numArgsSI:
@@ -4714,61 +5338,61 @@ run_freezeTB(
    int numArgsSI,
    char *argAryStr[]
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun09 TOC:
+   ' Fun11 TOC:
    '   - Run freezeTB on user input
-   '   o fun09 sec01:
+   '   o fun11 sec01:
    '     - Variable declerations
-   '   o fun09 sec02:
+   '   o fun11 sec02:
    '     - initialize, get input, and set up memory
-   '   o fun09 sec03:
+   '   o fun11 sec03:
    '     - check user input database (if can open)
-   '   o fun09 sec04:
+   '   o fun11 sec04:
    '     - check output files (can I open?)
-   '   o fun09 sec05:
+   '   o fun11 sec05:
    '     - read in databases
-   '   o fun09 sec06:
+   '   o fun11 sec06:
    '     - get reference stats and print consensus header
-   '   o fun09 sec07:
+   '   o fun11 sec07:
    '     - Do read analysis
-   '   o fun09 sec08:
+   '   o fun11 sec08:
    '     - print read data
-   '   o fun09 sec09:
+   '   o fun11 sec09:
    '     - collapse consensus and consensus analysis
-   '   o fun09 sec10:
+   '   o fun11 sec10:
    '     - run mixed infection detection (if requested)
-   '   o fun09 sec11:
+   '   o fun11 sec11:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec01:
+   ^ Fun11 Sec01:
    ^   - Variable declerations
-   ^   o fun09 sec01 sub01:
+   ^   o fun11 sec01 sub01:
    ^     - general IO variables (applies to multple subs)
-   ^   o fun09 sec01 sub02:
+   ^   o fun11 sec01 sub02:
    ^     - temporay and error reporting variables
-   ^   o fun09 sec01 sub03:
+   ^   o fun11 sec01 sub03:
    ^     - filtering and sam file variables (adjust coord)
-   ^   o fun09 sec01 sub04:
+   ^   o fun11 sec01 sub04:
    ^     - read depth and coverage stats variables
-   ^   o fun09 sec01 sub05:
+   ^   o fun11 sec01 sub05:
    ^     - AMR detection variables
-   ^   o fun09 sec01 sub06:
+   ^   o fun11 sec01 sub06:
    ^     - miru lineage unique variables
-   ^   o fun09 sec01 sub07:
+   ^   o fun11 sec01 sub07:
    ^     - spoligotyping unique variables
-   ^   o fun09 sec01 sub08:
+   ^   o fun11 sec01 sub08:
    ^     - consensus building/mixed infection variables
-   ^   o fun09 sec01 sub09:
+   ^   o fun11 sec01 sub09:
    ^     - masking unique variables
-   ^   o fun09 sec01 sub10:
+   ^   o fun11 sec01 sub10:
    ^     - indel clean up (rmHomo)
-   ^   o fun09 sec01 sub11:
+   ^   o fun11 sec01 sub11:
    ^     - read mapping (mapRead)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec01 Sub01:
+   * Fun11 Sec01 Sub01:
    *   - general IO variables (applies to multple subs)
    \*****************************************************/
 
@@ -4776,7 +5400,7 @@ run_freezeTB(
    struct set_freezeTB ftbSetStackST; /*has settings*/
 
    /*****************************************************\
-   * Fun09 Sec01 Sub02:
+   * Fun11 Sec01 Sub02:
    *   - Temporay and error reporting variables
    \*****************************************************/
 
@@ -4788,7 +5412,7 @@ run_freezeTB(
    signed char *errHeapStr = 0;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub03:
+   * Fun11 Sec01 Sub03:
    *   - filtering and sam file variables (adjust coord)
    \*****************************************************/
 
@@ -4806,7 +5430,7 @@ run_freezeTB(
    signed char refIdStr[def_lenFileName_freezeTB];
 
    /*****************************************************\
-   * Fun09 Sec01 Sub04:
+   * Fun11 Sec01 Sub04:
    *   - read depth and coverage stats variables
    \*****************************************************/
 
@@ -4823,7 +5447,7 @@ run_freezeTB(
    signed int noMapReadSI = 0;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub05:
+   * Fun11 Sec01 Sub05:
    *   - AMR detection variables
    \*****************************************************/
 
@@ -4848,7 +5472,7 @@ run_freezeTB(
    unsigned int totalReadsUI = 0;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub06:
+   * Fun11 Sec01 Sub06:
    *   - miru lineage unique variables
    \*****************************************************/
 
@@ -4860,15 +5484,15 @@ run_freezeTB(
       /*consensus results output*/
 
    /*****************************************************\
-   * Fun09 Sec01 Sub07:
+   * Fun11 Sec01 Sub07:
    *   - Spoligotyping unique variables
    \*****************************************************/
 
    signed char checkSpoligoLinBl = 1;
       /*set to 0 if failed to load linage database*/
 
-   #define def_lenSpolAry_fun09 128
-   unsigned int spoligoAryUI[def_lenSpolAry_fun09 + 1];
+   #define def_lenSpolAry_fun11 128
+   unsigned int spoligoAryUI[def_lenSpolAry_fun11 + 1];
    signed char
       outSpoligoFileStr[def_lenFileName_freezeTB];
    signed char
@@ -4888,7 +5512,7 @@ run_freezeTB(
    signed int numSpoligosSI = 0;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub08:
+   * Fun11 Sec01 Sub08:
    *   - consensus building/mixed infection variables
    \*****************************************************/
 
@@ -4907,7 +5531,7 @@ run_freezeTB(
    struct con_clustST *conNodeST = 0;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub09:
+   * Fun11 Sec01 Sub09:
    *   - masking unique variables
    \*****************************************************/
 
@@ -4917,7 +5541,7 @@ run_freezeTB(
    unsigned int maskNumPrimUI = 0;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub10:
+   * Fun11 Sec01 Sub10:
    *   - indel clean up variables
    \*****************************************************/
 
@@ -4928,7 +5552,7 @@ run_freezeTB(
    struct seqST refStackST;
 
    /*****************************************************\
-   * Fun09 Sec01 Sub11:
+   * Fun11 Sec01 Sub11:
    *   - read mapping
    \*****************************************************/
 
@@ -4955,18 +5579,18 @@ run_freezeTB(
    FILE *fqFILE = 0; 
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec02:
+   ^ Fun11 Sec02:
    ^   - initialize, get input, and set up memory
-   ^   o fun09 sec02 sub01:
+   ^   o fun11 sec02 sub01:
    ^     - initialize variables
-   ^   o fun09 sec02 sub02:
+   ^   o fun11 sec02 sub02:
    ^     - get input
-   ^   o fun09 sec02 sub03:
+   ^   o fun11 sec02 sub03:
    ^     - set up memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec02 Sub01:
+   * Fun11 Sec02 Sub01:
    *   - initialize variables
    \*****************************************************/
 
@@ -4991,7 +5615,7 @@ run_freezeTB(
    /*initialize spoligotyping array*/
    for(
       numLineagesSI = 0;
-      numLineagesSI < def_lenSpolAry_fun09;
+      numLineagesSI < def_lenSpolAry_fun11;
       ++numLineagesSI
    ) spoligoAryUI[numLineagesSI] = 0;
 
@@ -5006,7 +5630,7 @@ run_freezeTB(
       */
 
    /*****************************************************\
-   * Fun09 Sec02 Sub02:
+   * Fun11 Sec02 Sub02:
    *   - get input
    \*****************************************************/
 
@@ -5040,24 +5664,24 @@ run_freezeTB(
          *tmpStr++ = 'r';
          *tmpStr++ = '\0';
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: had input error*/
 
       else
-         goto ret_fun09_sec11;
+         goto ret_fun11_sec11;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec02 Sub03:
+   * Fun11 Sec02 Sub03:
    *   - set up memory
-   *   o fun09 sec02 sub03 cat01:
+   *   o fun11 sec02 sub03 cat01:
    *     - general setup
-   *   o fun09 sec02 sub03 cat02:
+   *   o fun11 sec02 sub03 cat02:
    *     - mapRead setup
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec02 Sub03 Cat01:
+   + Fun11 Sec02 Sub03 Cat01:
    +   - general setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5069,7 +5693,7 @@ run_freezeTB(
          str_endLine
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: hadd memory error*/
 
 
@@ -5081,7 +5705,7 @@ run_freezeTB(
              "memory error freezeTB setting struct setup"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: memory error*/
 
    if( setup_samEntry(&samStackST) )
@@ -5092,7 +5716,7 @@ run_freezeTB(
              "memory error samEntry struct setup"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: memory error*/
 
 
@@ -5114,11 +5738,11 @@ run_freezeTB(
             "memory error tblST_kmerFind struct setup"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: memory error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec02 Sub03 Cat02:
+   + Fun11 Sec02 Sub03 Cat02:
    +   - mapRead setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5135,7 +5759,7 @@ run_freezeTB(
                "memroy error setting map read structs"
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: memory error*/
 
       if( setup_samEntry(&revSamStackST) )
@@ -5146,32 +5770,32 @@ run_freezeTB(
                "memroy error setting map read structs"
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: memory error*/
    } /*If: mapping reads*/
 
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec03:
+   ^ Fun11 Sec03:
    ^   - check user input database (if can open)
-   ^   o fun09 sec03 sub01:
+   ^   o fun11 sec03 sub01:
    ^     - check if MIRU table exists
-   ^   o fun09 sec03 sub02:
+   ^   o fun11 sec03 sub02:
    ^     - check if spoligotyping spacer sequences exists
-   ^   o fun09 sec03 sub03:
+   ^   o fun11 sec03 sub03:
    ^     - check if spoligotyping lineage database
-   ^   o fun09 sec03 sub04:
+   ^   o fun11 sec03 sub04:
    ^     - check if amr table exists
-   ^   o fun09 sec03 sub05:
+   ^   o fun11 sec03 sub05:
    ^     - open the sam file
-   ^   o fun09 sec03 sub06:
+   ^   o fun11 sec03 sub06:
    ^     - check if gene coordinates file exits
-   ^   o fun09 sec03 sub07:
+   ^   o fun11 sec03 sub07:
    ^     - read in reference sequence
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec03 Sub01:
+   * Fun11 Sec03 Sub01:
    *   - check if MIRU table exists
    \*****************************************************/
 
@@ -5193,14 +5817,14 @@ run_freezeTB(
          ftbSetStackST.miruDbFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: I could not open the MIRU table*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec03 Sub02:
+   * Fun11 Sec03 Sub02:
    *   - check if spoligotyping spacer sequences exists
    \*****************************************************/
 
@@ -5222,14 +5846,14 @@ run_freezeTB(
          ftbSetStackST.spolRefFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open spoligo spacer sequences*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec03 Sub03:
+   * Fun11 Sec03 Sub03:
    *   - check if spoligotyping lineage database
    \*****************************************************/
 
@@ -5260,7 +5884,7 @@ run_freezeTB(
    outFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec03 Sub04:
+   * Fun11 Sec03 Sub04:
    *   - check if amr table exists
    \*****************************************************/
 
@@ -5283,14 +5907,14 @@ run_freezeTB(
          ftbSetStackST.amrDbFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open the filtered read stats file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec03 Sub05:
+   * Fun11 Sec03 Sub05:
    *   - open sam file
    \*****************************************************/
    
@@ -5319,12 +5943,12 @@ run_freezeTB(
             samFileStr
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: could not open the sam file*/
    } /*Else: need to open sam file*/
 
    /*****************************************************\
-   * Fun09 Sec03 Sub06:
+   * Fun11 Sec03 Sub06:
    *   - open gene coordinates file
    \*****************************************************/
    
@@ -5346,25 +5970,25 @@ run_freezeTB(
          ftbSetStackST.coordFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open gene coordinates file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec03 Sub07
+   * Fun11 Sec03 Sub07
    *   - read in reference sequence
-   *   o fun09 sec03 sub07 cat01:
+   *   o fun11 sec03 sub07 cat01:
    *     - open reference file
-   *   o fun09 sec03 sub07 cat02:
+   *   o fun11 sec03 sub07 cat02:
    *     - get reference sequence for rmHomo only
-   *   o fun09 sec03 sub07 cat03:
+   *   o fun11 sec03 sub07 cat03:
    *     - get reference sequence for mapRead and rmHomo
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec03 Sub07 Cat01:
+   + Fun11 Sec03 Sub07 Cat01:
    +   - open reference file
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5389,11 +6013,11 @@ run_freezeTB(
             ftbSetStackST.refFileStr
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: unable to open reference file*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun09 Sec03 Sub07 Cat02:
+      + Fun11 Sec03 Sub07 Cat02:
       +   - get reference sequence for rmHomo only
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5422,12 +6046,12 @@ run_freezeTB(
                );
 
             cpStr_ulCp(tmpStr, ftbSetStackST.refFileStr);
-            goto err_fun09_sec11_sub02;
+            goto err_fun11_sec11_sub02;
          } /*Else: error reading reference*/
       } /*If: not using mapRead*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun09 Sec03 Sub07 Cat03:
+      + Fun11 Sec03 Sub07 Cat03:
       +   - get reference sequence for rmHomo and mapRead
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5457,40 +6081,40 @@ run_freezeTB(
                 );
 
              cpStr_ulCp(tmpStr, ftbSetStackST.refFileStr);
-             goto err_fun09_sec11_sub02;
+             goto err_fun11_sec11_sub02;
           } /*Else: error reading reference*/
       } /*Else: mapping reads, could be using rmHomo to*/
    } /*Else: need reference (rmHomo or mapRead)*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec04:
+   ^ Fun11 Sec04:
    ^   - check output files (can I open?)
-   ^   o fun09 sec04 sub01:
+   ^   o fun11 sec04 sub01:
    ^     - output file for read stats
-   ^   o fun09 sec04 sub02:
+   ^   o fun11 sec04 sub02:
    ^     - set up cosensus fragments output file
-   ^   o fun09 sec04 sub03:
+   ^   o fun11 sec04 sub03:
    ^     - set up read AMRs table outp file name
-   ^   o fun09 sec04 sub04:
+   ^   o fun11 sec04 sub04:
    ^     - set up read id AMR hit table
-   ^   o fun09 sec04 sub05:
+   ^   o fun11 sec04 sub05:
    ^     - output file for the AMRs found in consensus
-   ^   o fun09 sec04 sub06:
+   ^   o fun11 sec04 sub06:
    ^     - set up MIRU reads table output name
-   ^   o fun09 sec04 sub07:
+   ^   o fun11 sec04 sub07:
    ^     - set up MIRU consensus table output name
-   ^   o fun09 sec04 sub08:
+   ^   o fun11 sec04 sub08:
    ^     - set up consensus spoligotyping output file
-   ^   o fun09 sec04 sub09:
+   ^   o fun11 sec04 sub09:
    ^     - set up read spoligotyping output file name
-   ^   o fun09 sec04 sub10:
+   ^   o fun11 sec04 sub10:
    ^     - set up open consensus output file name
-   ^   o fun09 sec04 sub12:
+   ^   o fun11 sec04 sub12:
    ^     - set up sam file name (if mapping reads)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub01:
+   * Fun11 Sec04 Sub01:
    *   - set up read stats file name
    \*****************************************************/
 
@@ -5517,7 +6141,7 @@ run_freezeTB(
          readStatsStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    errSC =
@@ -5543,11 +6167,11 @@ run_freezeTB(
          readStatsStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
  
    /*****************************************************\
-   * Fun09 Sec04 Sub02:
+   * Fun11 Sec04 Sub02:
    *   - set up cosensus fragments output file
    \*****************************************************/
 
@@ -5574,11 +6198,11 @@ run_freezeTB(
          conTsvStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub03:
+   * Fun11 Sec04 Sub03:
    *   - set up read AMRs table outp file name
    \*****************************************************/
 
@@ -5605,11 +6229,11 @@ run_freezeTB(
          readAmrStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub04:
+   * Fun11 Sec04 Sub04:
    *   - set up read id AMR hit table
    \*****************************************************/
 
@@ -5636,11 +6260,11 @@ run_freezeTB(
          idFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub05:
+   * Fun11 Sec04 Sub05:
    *   - Set up the name for the consensus AMRs table
    \*****************************************************/
 
@@ -5667,11 +6291,11 @@ run_freezeTB(
          conAmrStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub06:
+   * Fun11 Sec04 Sub06:
    *   - set up MIRU reads table output name
    \*****************************************************/
 
@@ -5698,11 +6322,11 @@ run_freezeTB(
          readMiruStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub07:
+   * Fun11 Sec04 Sub07:
    *   - set up MIRU consensus table output name
    \*****************************************************/
 
@@ -5729,7 +6353,7 @@ run_freezeTB(
          conMiruStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    errSC =
@@ -5755,11 +6379,11 @@ run_freezeTB(
          conMiruStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub08:
+   * Fun11 Sec04 Sub08:
    *   - set up consensus spoligotyping output file
    \*****************************************************/
 
@@ -5786,11 +6410,11 @@ run_freezeTB(
          outSpoligoFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub09:
+   * Fun11 Sec04 Sub09:
    *   - set up read spoligotyping output file name
    \*****************************************************/
 
@@ -5817,11 +6441,11 @@ run_freezeTB(
          outReadSpoligoFileStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun09 Sec04 Sub10:
+   * Fun11 Sec04 Sub10:
    *   - set up open consensus output file name
    \*****************************************************/
 
@@ -5856,13 +6480,13 @@ run_freezeTB(
          conOutStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open file*/
 
    conOutFILE = fopen((char *) conOutStr, "w");
 
    /*****************************************************\
-   * Fun09 Sec04 Sub11:
+   * Fun11 Sec04 Sub11:
    *   - set up sam file name (if mapping reads)
    \*****************************************************/
 
@@ -5891,7 +6515,7 @@ run_freezeTB(
             mapSamStr
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: could not open file*/
 
       samFILE = fopen((char *) mapSamStr, "w");
@@ -5899,24 +6523,24 @@ run_freezeTB(
 
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec05:
+   ^ Fun11 Sec05:
    ^   - read in databases
-   ^   o fun09 sec05 sub01:
+   ^   o fun11 sec05 sub01:
    ^     - get gene mapping coodiantes
-   ^   o fun09 sec05 sub02:
+   ^   o fun11 sec05 sub02:
    ^     - get amr table
-   ^   o fun09 sec05 sub03:
+   ^   o fun11 sec05 sub03:
    ^     - get MIRU lineage table
-   ^   o fun09 sec05 sub04:
+   ^   o fun11 sec05 sub04:
    ^     - get spoligotyping spacer sequences
-   ^   o fun09 sec05 sub05:
+   ^   o fun11 sec05 sub05:
    ^     - get spoligotyping lineages
-   ^   o fun09 sec05 sub06:
+   ^   o fun11 sec05 sub06:
    ^     - get masking primer coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec05 Sub01:
+   * Fun11 Sec05 Sub01:
    *   - get gene mapping coodiantes
    \*****************************************************/
 
@@ -5975,14 +6599,14 @@ run_freezeTB(
          );
       } /*Else: wrong coordinates*/
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    lenBuffUL = 0;
    lastBaseUI = coordsHeapST->endAryUI[numCoordsSI];
 
    /*****************************************************\
-   * Fun09 Sec05 Sub02:
+   * Fun11 Sec05 Sub02:
    *   - get amr table
    \*****************************************************/
 
@@ -6024,11 +6648,11 @@ run_freezeTB(
          );
       } /*If: memory error*/
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec05 Sub03:
+   * Fun11 Sec05 Sub03:
    *   - get MIRU lineage table
    \*****************************************************/
  
@@ -6073,11 +6697,11 @@ run_freezeTB(
          );
       } /*Else: memory error*/
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec05 Sub04:
+   * Fun11 Sec05 Sub04:
    *   - get spoligotyping spacer sequences
    \*****************************************************/
 
@@ -6111,7 +6735,7 @@ run_freezeTB(
             ftbSetStackST.spolRefFileStr
          );
  
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: file error*/
  
       else
@@ -6122,12 +6746,12 @@ run_freezeTB(
                "memory error getting spoligo seqs"
          );
  
-          goto err_fun09_sec11_sub02;
+          goto err_fun11_sec11_sub02;
       } /*Else: memory error*/
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec05 Sub05:
+   * Fun11 Sec05 Sub05:
    *   - get spoligotyping lineage database
    \*****************************************************/
 
@@ -6174,13 +6798,13 @@ run_freezeTB(
                ftbSetStackST.spolDBFileStr
             );
 
-            goto err_fun09_sec11_sub02;
+            goto err_fun11_sec11_sub02;
          } /*Else: memory error*/
       } /*If: error*/
    } /*If: have lineage database*/
 
    /*****************************************************\
-   * Fun09 Sec05 Sub06:
+   * Fun11 Sec05 Sub06:
    *   - get masking primer coordinates
    \*****************************************************/
 
@@ -6271,43 +6895,43 @@ run_freezeTB(
             );
          } /*Else: memory error*/
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: error*/
    } /*If: primer masking file was input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec06:
+   ^ Fun11 Sec06:
    ^   - get reference stats and print consensus header
-   ^   o fun09 sec06 sub01:
+   ^   o fun11 sec06 sub01:
    ^     - get reference name/length from header
-   ^   o fun09 sec06 sub02:
+   ^   o fun11 sec06 sub02:
    ^     - print tbCon header for sam file
-   ^   o fun09 sec06 sub03:
+   ^   o fun11 sec06 sub03:
    ^     - check if have reference name/length
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec06 Sub01:
+   * Fun11 Sec06 Sub01:
    *   - get reference length from header
-   *   o fun09 sec06 sub01 cat01:
+   *   o fun11 sec06 sub01 cat01:
    *     - get first sam file entry + start loop
-   *   o fun09 sec06 sub01 cat02:
+   *   o fun11 sec06 sub01 cat02:
    *     - print comment entry (end loop if not comment)
-   *   o fun09 sec06 sub01 cat03:
+   *   o fun11 sec06 sub01 cat03:
    *     - if sequence entry; get id and length
-   *   o fun09 sec06 sub01 cat04:
+   *   o fun11 sec06 sub01 cat04:
    *     - move to next entry
-   *   o fun09 sec06 sub01 cat05:
+   *   o fun11 sec06 sub01 cat05:
    *     - check for errors
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec06 Sub01 Cat01:
+   + Fun11 Sec06 Sub01 Cat01:
    +   - get first sam file entry + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(fqIndexSI)
-      goto pFTBHeader_fun09_sec06_sub02_cat01;
+      goto pFTBHeader_fun11_sec06_sub02_cat01;
 
    errSC = get_samEntry(&samStackST, samFILE);
 
@@ -6315,7 +6939,7 @@ run_freezeTB(
    { /*Loop: read in header*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun09 Sec06 Sub01 Cat02:
+      + Fun11 Sec06 Sub01 Cat02:
       +   - print comment entry (end loop if not comment)
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6330,7 +6954,7 @@ run_freezeTB(
       );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun09 Sec06 Sub01 Cat03:
+      + Fun11 Sec06 Sub01 Cat03:
       +   - if sequence entry; get id and length
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6357,7 +6981,7 @@ run_freezeTB(
                samFileStr
             );
 
-            goto err_fun09_sec11_sub02;
+            goto err_fun11_sec11_sub02;
          } /*If: sam file has multiple references*/
 
          multiRefBl = 1;
@@ -6370,7 +6994,7 @@ run_freezeTB(
                break;
 
          if(*(tmpStr - 1) != ':')
-            goto nextHeader_fun09_sec06_sub01_cat04;
+            goto nextHeader_fun11_sec06_sub01_cat04;
 
          tmpStr +=
             cpDelim_ulCp(
@@ -6383,7 +7007,7 @@ run_freezeTB(
          ++tmpStr;
         
          if(*tmpStr < 31 )
-            goto nextHeader_fun09_sec06_sub01_cat04;
+            goto nextHeader_fun11_sec06_sub01_cat04;
 
          /*move past LN: flag*/
          while(*tmpStr++ != ':')
@@ -6391,7 +7015,7 @@ run_freezeTB(
                break;
 
          if(*(tmpStr - 1) != ':')
-            goto nextHeader_fun09_sec06_sub01_cat04;
+            goto nextHeader_fun11_sec06_sub01_cat04;
 
          /*get reference length*/
          tmpStr += strToSI_base10str(tmpStr, &lenRefSI);
@@ -6402,16 +7026,16 @@ run_freezeTB(
       } /*If: sequence entry*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun09 Sec06 Sub01 Cat04:
+      + Fun11 Sec06 Sub01 Cat04:
       +   - move to next entry
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      nextHeader_fun09_sec06_sub01_cat04:;
+      nextHeader_fun11_sec06_sub01_cat04:;
          errSC = get_samEntry(&samStackST, samFILE);
    } /*Loop: read in header*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec06 Sub01 Cat05:
+   + Fun11 Sec06 Sub01 Cat05:
    +   - check for errors
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6450,26 +7074,26 @@ run_freezeTB(
          );
       } /*Else: memory error*/
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error reading sam file header*/
 
    /*****************************************************\
-   * Fun09 Sec06 Sub02:
+   * Fun11 Sec06 Sub02:
    *   - print tbCon header for sam file
-   *   o fun09 sec06 sub02 cat01:
+   *   o fun11 sec06 sub02 cat01:
    *     - mapRead sam file header settings
-   *   o fun09 sec06 sub02 cat02:
+   *   o fun11 sec06 sub02 cat02:
    *     - tbCon cosensus settings
-   *   o fun09 sec06 sub02 cat03:
+   *   o fun11 sec06 sub02 cat03:
    *     - tbCon variant print (tsv file) settings
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec06 Sub02 Cat01:
+   + Fun11 Sec06 Sub02 Cat01:
    +   - mapRead sam file header settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   pFTBHeader_fun09_sec06_sub02_cat01:;
+   pFTBHeader_fun11_sec06_sub02_cat01:;
 
    if(fqIndexSI)
    { /*If: need a full header*/
@@ -6530,7 +7154,7 @@ run_freezeTB(
    } /*If: need a full header*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec06 Sub02 Cat02:
+   + Fun11 Sec06 Sub02 Cat02:
    +   - tbCon cosensus settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6579,7 +7203,7 @@ run_freezeTB(
       );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun09 Sec06 Sub02 Cat03:
+      + Fun11 Sec06 Sub02 Cat03:
       +   - tbCon variant print (tsv file) settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6618,7 +7242,7 @@ run_freezeTB(
    conOutFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec06 Sub03:
+   * Fun11 Sec06 Sub03:
    *   - check if have reference name/length
    \*****************************************************/
 
@@ -6637,36 +7261,36 @@ run_freezeTB(
    } /*If: reference name is missing*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec07:
+   ^ Fun11 Sec07:
    ^   - read analysis
-   ^   o fun09 sec06 sub01:
+   ^   o fun11 sec06 sub01:
    ^     - allocate memory for the read stats arrays
-   ^   o fun09 sec06 sub02:
+   ^   o fun11 sec06 sub02:
    ^     - map reads (if needed) + start loop
-   ^   o fun09 sec06 sub03:
+   ^   o fun11 sec06 sub03:
    ^     - filter reads (sam entries)
-   ^   o fun09 sec06 sub04:
+   ^   o fun11 sec06 sub04:
    ^     - mask primers in reads
-   ^   o fun09 sec06 sub05:
+   ^   o fun11 sec06 sub05:
    ^     - build filtered histogram
-   ^   o fun09 sec06 sub06:
+   ^   o fun11 sec06 sub06:
    ^     - indel clean up
-   ^   o fun09 sec06 sub07:
+   ^   o fun11 sec06 sub07:
    ^     - build consensus
-   ^   o fun09 sec06 sub08:
+   ^   o fun11 sec06 sub08:
    ^     - check for AMRs
-   ^   o fun09 sec06 sub09:
+   ^   o fun11 sec06 sub09:
    ^     - check for MIRU lineages
-   ^   o fun09 sec06 sub10:
+   ^   o fun11 sec06 sub10:
    ^     - check for spoligotypes
-   ^   o fun09 sec06 sub11:
+   ^   o fun11 sec06 sub11:
    ^     - move to next read
-   ^   o fun09 sec06 sub12:
+   ^   o fun11 sec06 sub12:
    ^     - minor clean up (variables unique to sec07)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec07 Sub01:
+   * Fun11 Sec07 Sub01:
    *   - allocate memory for the read stats arrays
    \*****************************************************/
 
@@ -6685,20 +7309,20 @@ run_freezeTB(
             "memory error (read histogram malloc)"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: memory error*/
 
    /*****************************************************\
-   * Fun09 Sec07 Sub02:
+   * Fun11 Sec07 Sub02:
    *   - map reads (if needed) + start loop
-   *   o fun09 sec07 sub02 cat01:
+   *   o fun11 sec07 sub02 cat01:
    *     - open fastq(s) file for mapping + start loop
-   *   o fun09 sec07 sub02 cat02:
+   *   o fun11 sec07 sub02 cat02:
    *     - map reads
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec07 Sub02 Cat01:
+   + Fun11 Sec07 Sub02 Cat01:
    +   - open fastq(s) file for mapping + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6749,7 +7373,7 @@ run_freezeTB(
                             argAryStr[fqIndexSI]
                      );
 
-                  goto err_fun09_sec11_sub02;
+                  goto err_fun11_sec11_sub02;
                } /*If: could not open fastq file*/
             } /*Else: fastq file input*/
 
@@ -6757,7 +7381,7 @@ run_freezeTB(
          } /*If: finished last file*/
 
         /*+++++++++++++++++++++++++++++++++++++++++++++++\
-        + Fun09 Sec07 Sub02 Cat02:
+        + Fun11 Sec07 Sub02 Cat02:
         +   - map reads
         \+++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6790,7 +7414,7 @@ run_freezeTB(
                      (signed char *) argAryStr[fqIndexSI]
                   );
 
-               goto err_fun09_sec11_sub02;
+               goto err_fun11_sec11_sub02;
          } /*Else If: error (likely file)*/
 
          forScoreSL =
@@ -6806,7 +7430,7 @@ run_freezeTB(
 
          if(forErrSC == def_memErr_mapRead)
          { /*If: mapRead had memory error*/
-            mapMemErr_fun09_sec07_sub02_cat02:;
+            mapMemErr_fun11_sec07_sub02_cat02:;
                tmpStr = errHeapStr;
 
                tmpStr +=
@@ -6822,7 +7446,7 @@ run_freezeTB(
                      (signed char *) argAryStr[fqIndexSI]
                   );
 
-               goto err_fun09_sec11_sub02;
+               goto err_fun11_sec11_sub02;
          } /*If: mapRead had memory error*/
 
          revCmpIndex_alnSet(
@@ -6843,7 +7467,7 @@ run_freezeTB(
             ); /*get forward alignment*/
 
          if(revErrSC == def_memErr_mapRead)
-            goto mapMemErr_fun09_sec07_sub02_cat02;
+            goto mapMemErr_fun11_sec07_sub02_cat02;
          revSamStackST.flagUS = 16;
 
          if(revScoreSL > forScoreSL)
@@ -6869,7 +7493,7 @@ run_freezeTB(
       } /*If: need to map reads*/ 
 
       /**************************************************\
-      * Fun09 Sec07 Sub03:
+      * Fun11 Sec07 Sub03:
       *   - filter reads (sam entries)
       \**************************************************/
 
@@ -6880,7 +7504,7 @@ run_freezeTB(
          if(samStackST.flagUS & 4)
             ++noMapReadSI;
 
-         goto nextRead_fun09_sec07_sub09;
+         goto nextRead_fun11_sec07_sub09;
       } /*If:umapped 4, secondary 256, or suplemtal 2048*/
 
       /*remove soft masked bases*/
@@ -6888,26 +7512,26 @@ run_freezeTB(
          /*already removed reads that could cause errors*/
 
       if(samStackST.medianQF < ftbSetStackST.minMedianQF)
-         goto nextRead_fun09_sec07_sub09;
+         goto nextRead_fun11_sec07_sub09;
          /*low mean q-score*/
 
       if(samStackST.medianQF < ftbSetStackST.minMedianQF)
-         goto nextRead_fun09_sec07_sub09;
+         goto nextRead_fun11_sec07_sub09;
          /*low median q-score*/
 
       if(
            samStackST.mapqUC
          < ftbSetStackST.tbConSet.minMapqUC
-      ) goto nextRead_fun09_sec07_sub09;
+      ) goto nextRead_fun11_sec07_sub09;
          /*low mapping quality*/
 
       if(
            samStackST.alnReadLenUI
          < (unsigned int) ftbSetStackST.tbConSet.minLenSI
-      ) goto nextRead_fun09_sec07_sub09; /*short read*/
+      ) goto nextRead_fun11_sec07_sub09; /*short read*/
 
       /**************************************************\
-      * Fun09 Sec07 Sub04:
+      * Fun11 Sec07 Sub04:
       *   - mask primers in reads
       \**************************************************/
 
@@ -6926,7 +7550,7 @@ run_freezeTB(
       } /*If: masking primers*/
 
       /**************************************************\
-      * Fun09 Sec07 Sub05:
+      * Fun11 Sec07 Sub05:
       *   - build filtered histogram
       \**************************************************/
 
@@ -6941,7 +7565,7 @@ run_freezeTB(
       );
 
       /**************************************************\
-      * Fun09 Sec07 Sub06:
+      * Fun11 Sec07 Sub06:
       *   - indel clean up
       \**************************************************/
 
@@ -6976,7 +7600,7 @@ run_freezeTB(
                   *tmpStr++ = str_endLine[1];
                *tmpStr = 0;
 
-               goto err_fun09_sec11_sub02;
+               goto err_fun11_sec11_sub02;
             } /*If: had memory error*/
 
          } /*If: need larger buffer*/
@@ -7019,7 +7643,7 @@ run_freezeTB(
       } /*If: cleaning up indels in reads*/
 
       /**************************************************\
-      * Fun09 Sec07 Sub07:
+      * Fun11 Sec07 Sub07:
       *   - build consensus
       \**************************************************/
 
@@ -7050,12 +7674,12 @@ run_freezeTB(
                totalReadsUI
             );
 
-            goto err_fun09_sec11_sub02;
+            goto err_fun11_sec11_sub02;
          } /*If: memory error*/
       } /*If: not doing mixed infection detection*/
 
       /**************************************************\
-      * Fun09 Sec07 Sub08:
+      * Fun11 Sec07 Sub08:
       *   - check for AMRs
       \**************************************************/
 
@@ -7087,7 +7711,7 @@ run_freezeTB(
             totalReadsUI
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: memory error*/
 
       if(amrHitHeapSTList)
@@ -7103,7 +7727,7 @@ run_freezeTB(
       } /*If: read had AMR(s)*/
 
       /**************************************************\
-      * Fun09 Sec07 Sub09:
+      * Fun11 Sec07 Sub09:
       *   - check for MIRU lineages 
       \**************************************************/
 
@@ -7114,7 +7738,7 @@ run_freezeTB(
       );
 
       /**************************************************\
-      * Fun09 Sec07 Sub10:
+      * Fun11 Sec07 Sub10:
       *   - Check for spoligotypes
       \**************************************************/
 
@@ -7150,21 +7774,21 @@ run_freezeTB(
             totalReadsUI
          );
 
-         goto err_fun09_sec11_sub02;
+         goto err_fun11_sec11_sub02;
       } /*If: memory error*/
       
       /**************************************************\
-      * Fun09 Sec07 Sub11:
+      * Fun11 Sec07 Sub11:
       *   - move to next read
       \**************************************************/
 
-      nextRead_fun09_sec07_sub09:;
+      nextRead_fun11_sec07_sub09:;
          if(! fqIndexSI)
             errSC = get_samEntry(&samStackST, samFILE);
    } /*Loop: read anaylsis*/
 
    /*****************************************************\
-   * Fun09 Sec07 Sub12:
+   * Fun11 Sec07 Sub12:
    *   - minor clean up (variables unique to sec07)
    \*****************************************************/
 
@@ -7201,22 +7825,22 @@ run_freezeTB(
    maskFlagHeapAryUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec08:
+   ^ Fun11 Sec08:
    ^   - print read data
-   ^   o fun09 sec08 sub01:
+   ^   o fun11 sec08 sub01:
    ^     - print filtered read stats
-   ^   o fun09 sec08 sub02:
+   ^   o fun11 sec08 sub02:
    ^     - print AMR hits for reads
-   ^   o fun09 sec08 sub03:
+   ^   o fun11 sec08 sub03:
    ^     - print read MIRU table
-   ^   o fun09 sec08 sub04:
+   ^   o fun11 sec08 sub04:
    ^     - print read spoligotype entry
-   ^   o fun09 sec08 sub05:
+   ^   o fun11 sec08 sub05:
    ^     - print tsv file of variants
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec08 Sub01:
+   * Fun11 Sec08 Sub01:
    *   - print filtered read stats
    \*****************************************************/
 
@@ -7262,7 +7886,7 @@ run_freezeTB(
    coordsHeapST = 0;
 
    /*****************************************************\
-   * Fun09 Sec08 Sub02:
+   * Fun11 Sec08 Sub02:
    *   - print AMR hits for reads
    \*****************************************************/
 
@@ -7302,7 +7926,7 @@ run_freezeTB(
    outFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec08 Sub03:
+   * Fun11 Sec08 Sub03:
    *   - print read MIRU table
    \*****************************************************/
 
@@ -7354,7 +7978,7 @@ run_freezeTB(
       );
 
    /*****************************************************\
-   * Fun09 Sec08 Sub04:
+   * Fun11 Sec08 Sub04:
    *   - print read spoligotype entry
    \*****************************************************/
 
@@ -7388,7 +8012,7 @@ run_freezeTB(
 
    for(
       errSL = 0;
-      errSL < def_lenSpolAry_fun09;
+      errSL < def_lenSpolAry_fun11;
       ++errSL
    ) spoligoAryUI[errSL] = 0;
 
@@ -7396,13 +8020,13 @@ run_freezeTB(
    errSL = 0;
    
    /*****************************************************\
-   * Fun09 Sec08 Sub05:
+   * Fun11 Sec08 Sub05:
    *   - print tsv file of variants
    \*****************************************************/
 
    /*Build the tsv of variants table*/
    if(ftbSetStackST.clustBl)
-      goto mixedInfect_fun09_sec11;
+      goto mixedInfect_fun11_sec11;
 
    errSC =
       pvar_tbCon(
@@ -7420,26 +8044,26 @@ run_freezeTB(
           (signed char *) "unable to build consensus"
        );
 
-       goto err_fun09_sec11_sub02;
+       goto err_fun11_sec11_sub02;
     } /*If: nothing mapped*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec09:
+   ^ Fun11 Sec09:
    ^   - collapse consensus and consensus analysis
-   ^   o fun09 sec09 sub01:
+   ^   o fun11 sec09 sub01:
    ^     - collapse consensus
-   ^   o fun09 sec09 sub02:
+   ^   o fun11 sec09 sub02:
    ^     - print consensus and do ananlysis
-   ^   o fun09 sec09 sub03:
+   ^   o fun11 sec09 sub03:
    ^     - close output files and free uneeded variables
-   ^   o fun09 sec09 sub04:
+   ^   o fun11 sec09 sub04:
    ^     - print consensus MIRU lineages
-   ^   o fun09 sec09 sub05:
+   ^   o fun11 sec09 sub05:
    ^     - print detected spoligotype (consensus)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec09 Sub01:
+   * Fun11 Sec09 Sub01:
    *   - collapse consensus
    \*****************************************************/
 
@@ -7468,26 +8092,26 @@ run_freezeTB(
          (signed char *) "could not collapse consensus"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec09 Sub02:
+   * Fun11 Sec09 Sub02:
    *   - print consensus and do ananlysis
-   *   o fun09 sec09 sub04 cat01:
+   *   o fun11 sec09 sub04 cat01:
    *     - open files + run consensus fragment loop
-   *   o fun09 sec09 sub04 cat02:
+   *   o fun11 sec09 sub04 cat02:
    *     - print consensus fragments
-   *   o fun09 sec09 sub04 cat03:
+   *   o fun11 sec09 sub04 cat03:
    *     - AMR detection and printing
-   *   o fun09 sec09 sub04 cat04:
+   *   o fun11 sec09 sub04 cat04:
    *     - MIRU-VNTR lineage detection and printing
-   *   o fun09 sec09 sub04 cat05:
+   *   o fun11 sec09 sub04 cat05:
    *     - detect spoligotypes
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec09 Sub04 Cat01:
+   + Fun11 Sec09 Sub04 Cat01:
    +   - open files + run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7519,7 +8143,7 @@ run_freezeTB(
    ){ /*Loop: print and analyize consensuses*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec09 Sub04 Cat02:
+     + Fun11 Sec09 Sub04 Cat02:
      +   - print consensus fragments
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7539,7 +8163,7 @@ run_freezeTB(
       pfa_samEntry(&samConSTAry[siCon], conOutFILE);
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec09 Sub04 Cat03:
+     + Fun11 Sec09 Sub04 Cat03:
      +   - AMR detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7571,7 +8195,7 @@ run_freezeTB(
       } /*If: have AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec09 Sub04 Cat04:
+     + Fun11 Sec09 Sub04 Cat04:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7582,7 +8206,7 @@ run_freezeTB(
       ); /*find MIRU lineages in consensus fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec09 Sub04 Cat05:
+     + Fun11 Sec09 Sub04 Cat05:
      +   - spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7604,7 +8228,7 @@ run_freezeTB(
    } /*Loop: print and analyize consensuse*/
 
    /*****************************************************\
-   * Fun09 Sec09 Sub03:
+   * Fun11 Sec09 Sub03:
    *   - close output files and free uneeded variables
    \*****************************************************/
 
@@ -7640,11 +8264,11 @@ run_freezeTB(
             "error during consensus analyisis step"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec09 Sub04:
+   * Fun11 Sec09 Sub04:
    *   - print consensus MIRU lineages
    \*****************************************************/
 
@@ -7673,11 +8297,11 @@ run_freezeTB(
          conMiruStr
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec09 Sub05:
+   * Fun11 Sec09 Sub05:
    *   - print detected spoligotype
    \*****************************************************/
 
@@ -7724,31 +8348,31 @@ run_freezeTB(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
-   goto ret_fun09_sec11;
+   goto ret_fun11_sec11;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec10:
+   ^ Fun11 Sec10:
    ^   - run mixed infection detection (if requested)
-   ^   o fun09 sec10 sub01:
+   ^   o fun11 sec10 sub01:
    ^     - check if can open log files
-   ^   o fun09 sec10 sub02:
+   ^   o fun11 sec10 sub02:
    ^     - run mixed infection detection
-   ^   o fun09 sec10 sub03:
+   ^   o fun11 sec10 sub03:
    ^     - print clusters for mixed infection
-   ^   o fun09 sec10 sub04:
+   ^   o fun11 sec10 sub04:
    ^     - amr/miru/spoligotype detection on clusters
-   ^   o fun09 sec10 sub05:
+   ^   o fun11 sec10 sub05:
    ^     - print consensus MIRU lineages
-   ^   o fun09 sec10 sub06:
+   ^   o fun11 sec10 sub06:
    ^     - print detected spoligotype
    \*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec10 Sub01:
+   * Fun11 Sec10 Sub01:
    *   - check if can open log files
    \*****************************************************/
 
-   mixedInfect_fun09_sec11:;
+   mixedInfect_fun11_sec11:;
 
    if(samFILE == stdin)
    { /*If: piping file to mixed infection detect*/
@@ -7761,7 +8385,7 @@ run_freezeTB(
              "do not use -sam stdin for clustering"
          );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: piping file to mixed infection detect*/
 
    errSC =
@@ -7785,11 +8409,11 @@ run_freezeTB(
          str_endLine
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: could not open log flie*/
 
    /*****************************************************\
-   * Fun09 Sec10 Sub02:
+   * Fun11 Sec10 Sub02:
    *   - run mixed infection detection
    \*****************************************************/
 
@@ -7838,7 +8462,7 @@ run_freezeTB(
          *tmpStr++ = str_endLine[1];
       *tmpStr = '\0';
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    if(logFILE != stderr)
@@ -7846,7 +8470,7 @@ run_freezeTB(
    logFILE = 0;
 
    /*****************************************************\
-   * Fun09 Sec10 Sub03:
+   * Fun11 Sec10 Sub03:
    *   - print clusters for mixed infection
    \*****************************************************/
 
@@ -7871,7 +8495,7 @@ run_freezeTB(
             "cluster memory error consensus print"
       );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: had error*/
 
    errSC =
@@ -7901,7 +8525,7 @@ run_freezeTB(
                "cluster file error cluster print"
          );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: had error*/
 
    fclose(samFILE);
@@ -7912,18 +8536,18 @@ run_freezeTB(
    indexHeapST = 0;
 
    /*****************************************************\
-   * Fun09 Sec10 Sub04:
+   * Fun11 Sec10 Sub04:
    *   - amr/miru/spoligotype detection on clusters
-   *   o fun09 sec10 sub04 cat01:
+   *   o fun11 sec10 sub04 cat01:
    *     - amr detection + start loop
-   *   o fun09 sec10 sub04 cat02:
+   *   o fun11 sec10 sub04 cat02:
    *     - MIRU-VNTR lineage detection and printing
-   *   o fun09 sec10 sub04 cat03:
+   *   o fun11 sec10 sub04 cat03:
    *     - spoligotype detection and printing
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun09 Sec10 Sub04 Cat01:
+   + Fun11 Sec10 Sub04 Cat01:
    +   - amr detection + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7974,7 +8598,7 @@ run_freezeTB(
       } /*If: have AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec10 Sub04 Cat02:
+     + Fun11 Sec10 Sub04 Cat02:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7985,7 +8609,7 @@ run_freezeTB(
       ); /*find MIRU lineages in consensus fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec10 Sub04 Cat03:
+     + Fun11 Sec10 Sub04 Cat03:
      +   - spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8004,7 +8628,7 @@ run_freezeTB(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun09 Sec10 Sub04 Cat04:
+     + Fun11 Sec10 Sub04 Cat04:
      +   - move to next cluster
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8017,7 +8641,7 @@ run_freezeTB(
    conNodeST = 0;
          
    /*****************************************************\
-   * Fun09 Se109 Sub05:
+   * Fun11 Se109 Sub05:
    *   - print consensus MIRU lineages
    \*****************************************************/
 
@@ -8047,11 +8671,11 @@ run_freezeTB(
             conMiruStr
          );
 
-      goto err_fun09_sec11_sub02;
+      goto err_fun11_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun09 Sec10 Sub06:
+   * Fun11 Sec10 Sub06:
    *   - print detected spoligotype
    \*****************************************************/
 
@@ -8082,45 +8706,45 @@ run_freezeTB(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
-   goto ret_fun09_sec11;
+   goto ret_fun11_sec11;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun09 Sec11:
+   ^ Fun11 Sec11:
    ^   - clean up
-   ^   o fun09 sec11 sub01:
+   ^   o fun11 sec11 sub01:
    ^     - no error clean up
-   ^   o fun09 sec11 sub02:
+   ^   o fun11 sec11 sub02:
    ^     - error clean up
-   ^   o fun09 sec11 sub03:
+   ^   o fun11 sec11 sub03:
    ^     - general clean up (everything calls)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun09 Sec11 Sub01:
+   * Fun11 Sec11 Sub01:
    *   - no error clean up
    \*****************************************************/
 
-   ret_fun09_sec11:;
+   ret_fun11_sec11:;
       errSC = 0;
       free(errHeapStr);
       errHeapStr = 0;
-      goto cleanUp_fun09_sec11_sub03;
+      goto cleanUp_fun11_sec11_sub03;
 
    /*****************************************************\
-   * Fun09 Sec11 Sub02:
+   * Fun11 Sec11 Sub02:
    *   - error clean up
    \*****************************************************/
 
-   err_fun09_sec11_sub02:;
+   err_fun11_sec11_sub02:;
       errSC = 1;
-      goto cleanUp_fun09_sec11_sub03;
+      goto cleanUp_fun11_sec11_sub03;
 
    /*****************************************************\
-   * Fun09 Sec11 Sub03:
+   * Fun11 Sec11 Sub03:
    *   - general clean up (everything calls)
    \*****************************************************/
 
-   cleanUp_fun09_sec11_sub03:;
+   cleanUp_fun11_sec11_sub03:;
       freeStack_seqST(&refStackST);
       freeStack_set_freezeTB(&ftbSetStackST);
       freeStack_samEntry(&samStackST);

@@ -3884,6 +3884,7 @@ checkRunEvent_ftbRayST(
    signed int tmpSI = 0;
    signed int siCnt = 0;
 
+   FILE *tmpFILE = 0;
    struct files_rayWidg *fileSTPtr = 0;
 
    for(tmpSI = 0; tmpSI < 1024; ++tmpSI)
@@ -4617,6 +4618,13 @@ checkRunEvent_ftbRayST(
       logFileStr[tmpSI++] = 't';
       logFileStr[tmpSI] = 0;
 
+      tmpFILE = fopen((char *) logFileStr, "w");
+      if(! tmpFILE)
+         goto err_fun17_sec07;
+      pcitation_freezeTB(tmpFILE);
+      fclose(tmpFILE);
+      tmpFILE = 0;
+
       ++argLenSI;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -4626,11 +4634,16 @@ checkRunEvent_ftbRayST(
 
       if(minimap2Str[0])
       { /*If: have minimap2*/
+         tmpFILE = fopen((char *) logFileStr, "a");
+         pMinimap2Citation_freezeTB(tmpFILE);
+         fclose(tmpFILE);
+         tmpFILE = 0;
+
          tmpSI = cpStr_ulCp(lineStr, minimap2Str);
          tmpSI +=
             cpStr_ulCp(
                &lineStr[tmpSI],
-               (signed char *) " --version > "
+               (signed char *) " --version >> "
             );
          tmpSI += cpStr_ulCp(&lineStr[tmpSI], logFileStr);
          system((char *) lineStr);
@@ -5174,6 +5187,10 @@ checkRunEvent_ftbRayST(
       if(inFILE)
          fclose(inFILE); /*never will be stdout/in/err*/
       inFILE = 0;
+
+      if(tmpFILE)
+         fclose(tmpFILE); /*never will be stdout/in/err*/
+      tmpFILE = 0;
 
       freeStack_event_rayWidg(&eventStackST);
 
