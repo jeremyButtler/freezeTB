@@ -15,6 +15,10 @@
 '     - demux a read
 '   o fun04: read_demux
 '     - convert barcode coordinates to demuxed reads
+'   o fun05: primer_demux
+'     - get primer target regins from the input sequence
+'   o license:
+'     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -134,4 +138,160 @@ read_demux(
    signed char *barFileStrAry[] /*output file names*/
 );
 
+/*-------------------------------------------------------\
+| Fun05: primer_demux
+|   - get primer target regins from the input sequence
+| Input:
+|   - seqSTPtr:
+|     o seqSTPtr struct pointer with read to demux
+|   - minDistSI:
+|     o minimum distance between primers
+|   - maxDistSI:
+|     o maximum distance between primers
+|   - coordsArySI:
+|     o signed int array retured from barcodeCoords_demux
+|       * index (n % 4 = 0) is barcode index
+|       * index (n % 4 = 1) is the barcode start
+|       * index (n % 4 = 2) is the barcode end
+|       * index (n % 4 = 3) is the score
+|         + a negative score means a reverse mapping
+|   - coordLenSI:
+|     o length of coordsArySI (number barcodes << 2)
+|   - barSTPtr:
+|     o refs_kmerFind struct pionter with the primer
+|       ids and the index of their mates (if paired)
+|   - outFILE:
+|     o FILE pionter to print reads to
+| Output:
+|   - Prints:
+|     o amplicons to outFILE
+|   - Returns:
+|     o number of amplicons found
+|     o 0 if no amplicons
+\-------------------------------------------------------*/
+signed int
+primer_demux(
+   struct seqST *seqSTPtr,/*read to split into amplicons*/
+   signed int minDistSI,  /*min distance between primers*/
+   signed int maxDistSI,  /*max distance between primers*/
+   signed int coordArySI[],/*has barcode mappings*/
+   signed int coordLenSI, /*length of coordLenSI*/
+   struct refST_kmerFind *barSTPtr,/*primer ids & mates*/
+   void *outFILE          /*print sequences to*/
+);
+
+/*-------------------------------------------------------\
+| Fun06: pGeneCoord_demux
+|   - get coordinates of all genes found in target
+| Input:
+|   - seqSTPtr:
+|     o seqSTPtr struct pointer with read to find genes
+|       in
+|   - coordsArySI:
+|     o signed int array retured from barcodeCoords_demux
+|       * index (n % 4 = 0) is barcode index
+|       * index (n % 4 = 1) is the barcode start
+|       * index (n % 4 = 2) is the barcode end
+|       * index (n % 4 = 3) is the score
+|         + a negative score means a reverse mapping
+|   - coordLenSI:
+|     o length of coordsArySI (number barcodes << 2)
+|   - geneSTPtr:
+|     o refST_kmerFind struct pionter with the genes
+|   - headBlPtr:
+|     o 1: print header and then set to 0
+|     o 0: do not print the header
+|   - geneSTPtr
+|     o refST_kmerFind struct pionter with the genes
+|       to find
+|   - outFILE:
+|     o FILE pionter to print gene coordinates
+| Output:
+|   - Prints:
+|     o gene coordinates to outFILE
+|   - Returns:
+|     o number of amplicons found
+|     o 0 if no genes
+\-------------------------------------------------------*/
+signed int
+pGeneCoord_demux(
+   struct seqST *seqSTPtr,/*read to split into amplicons*/
+   signed int coordArySI[],/*has barcode mappings*/
+   signed int coordLenSI, /*length of coordLenSI*/
+   signed char *headBlPtr,/*1: print header + set to 0*/
+   struct refST_kmerFind *geneSTPtr,/*genes searched*/
+   void *outFILE          /*print sequences to*/
+);
+
 #endif
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2025 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

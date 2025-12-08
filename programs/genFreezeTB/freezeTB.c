@@ -101,6 +101,10 @@
 #include "../genAln/alnSet.h"
 #include "../genAln/kmerFind.h"
 
+/*general genotyping*/
+#include "../genGeneoType/linST.h"
+#include "../genGeneoType/getLin.h"
+
 /********************************************************\
 * Header Sec01 Sub03:
 *   - libraries unique to tb analysis
@@ -246,6 +250,12 @@ typedef struct set_freezeTB
    signed char prefixStr[64];     /*what to name output*/
    signed char depthFlagStr[64];  /*graph prefix*/
 
+   /*hsp65 species and custom user lineages*/
+   signed char
+      hsp65SimpleFileStr[def_lenFileName_freezeTB];
+   signed char
+      hsp65ComplexFileStr[def_lenFileName_freezeTB];
+   float hsp65MixSupF; /*max support for mixed infection*/
 }set_freezeTB;
 
 /*-------------------------------------------------------\
@@ -321,6 +331,7 @@ init_set_freezeTB(
 
    setFTBST->clustBl = def_mixedInfect_freezeTBDefs;
 
+   setFTBST->hsp65MixSupF = 0.4;
 
    /*copy database paths*/
    amrPath_freezeTBPaths(setFTBST->amrDbFileStr);
@@ -330,6 +341,12 @@ init_set_freezeTB(
    refPath_freezeTBPaths(setFTBST->refFileStr);
    spolLineagePath_freezeTBPaths(setFTBST->spolDBFileStr);
    spolSpacerPath_freezeTBPaths(setFTBST->spolRefFileStr);
+   hsp65SimpleDbPath_freezeTBPaths(
+      setFTBST->hsp65SimpleFileStr
+   );
+   hsp65ComplexDbPath_freezeTBPaths(
+      setFTBST->hsp65ComplexFileStr
+   );
 
    cpStr_ulCp(
       setFTBST->depthFlagStr,
@@ -976,6 +993,9 @@ phelp_freezeTB(
 
    signed char refFileStr[def_lenFileName_freezeTB];
 
+   signed char hsp65SimpleStr[def_lenFileName_freezeTB];
+   signed char hsp65ComplexStr[def_lenFileName_freezeTB];
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun09 Sec02:
    ^   - find default file paths
@@ -988,6 +1008,8 @@ phelp_freezeTB(
    spolLineagePath_freezeTBPaths(spolDBFileStr);
    maskPath_freezeTBPaths(maskPrimFileStr);
    refPath_freezeTBPaths(refFileStr);
+   hsp65SimpleDbPath_freezeTBPaths(hsp65SimpleStr);
+   hsp65ComplexDbPath_freezeTBPaths(hsp65ComplexStr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun09 Sec03:
@@ -1078,6 +1100,12 @@ phelp_freezeTB(
    *     - spoligotype linage database
    *   o fun09 sec04 sub01 cat09:
    *     - primer masking database
+   *   o fun09 sec04 sub01 cat10:
+   *     - hsp65 simple database input
+   *   o fun09 sec04 sub01 cat11:
+   *     - hsp65 complex database input
+   *   o fun09 sec04 sub01 cat12:
+   *     - reference for indel clean up
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1319,6 +1347,56 @@ phelp_freezeTB(
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun09 Sec04 Sub01 Cat10:
+   +   - hsp65 simple database input
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(maskPrimFileStr[0] == '\0')
+      fprintf(
+        (FILE *) outFILE,
+        "    -hsp65-simple getLin-simple-database.tsv:%s",
+        str_endLine
+      );
+   else
+      fprintf(
+        (FILE *) outFILE,
+        "    -hsp65-simple database.tsv: [Using %s]%s",
+        hsp65SimpleStr,
+        str_endLine
+      );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o simple database for getLin lineages%s",
+      str_endLine
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun09 Sec04 Sub01 Cat11:
+   +   - hsp65 complex database input
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(maskPrimFileStr[0] == '\0')
+     fprintf(
+      (FILE *) outFILE,
+      "    -hsp65-complex getLin-complex-database.tsv:%s",
+      str_endLine
+     );
+   else
+      fprintf(
+         (FILE *) outFILE,
+         "    -hsp65-complex database.tsv: [Using %s]%s",
+         hsp65ComplexStr,
+         str_endLine
+      );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o complex database for getLin lineages%s",
+      str_endLine
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun09 Sec04 Sub01 Cat12:
    +   - reference for indel clean up
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -3213,6 +3291,36 @@ input_freezeTB(
             (signed char *) argAryStr[siArg]
          );
       } /*Else If: spoligo lineage database input*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-hsp65-simple",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: getLin simple database*/
+         ++siArg;
+
+         cpStr_ulCp(
+            ftbSetSTPtr->hsp65SimpleFileStr,
+            (signed char *) argAryStr[siArg]
+         );
+      } /*Else If: getLin simple database*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-hsp65-complex",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: getLin complex database*/
+         ++siArg;
+
+         cpStr_ulCp(
+            ftbSetSTPtr->hsp65ComplexFileStr,
+            (signed char *) argAryStr[siArg]
+         );
+      } /*Else If: getLin complex database*/
 
       else if(
          ! eql_charCp(
@@ -5388,6 +5496,8 @@ run_freezeTB(
    ^   o fun11 sec01 sub10:
    ^     - indel clean up (rmHomo)
    ^   o fun11 sec01 sub11:
+   ^     - genotyping
+   ^   o fun11 sec01 sub12:
    ^     - read mapping (mapRead)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5553,6 +5663,31 @@ run_freezeTB(
 
    /*****************************************************\
    * Fun11 Sec01 Sub11:
+   *   - genotyping variables
+   \*****************************************************/
+
+   FILE *hsp65OutFILE = 0;
+
+   signed char
+      hsp65ReadOutStr[def_lenFileName_freezeTB];
+   signed char
+      hsp65ConOutStr[def_lenFileName_freezeTB];
+   signed char hsp65HeadBl = 1; /*1: print header*/
+
+   signed int *hsp65SimpleLinHeapArySI = 0;
+   signed int *hsp65TrsHeapArySI = 0;
+   signed int hsp65SimpleLenSI = 0;
+
+   signed int *hsp65ComplexLinHeapArySI = 0;
+   signed int hsp65ComplexLenSI = 0;
+
+   struct tblST_kmerFind hsp65TblStackST;
+   struct simple_linST *hsp65SimpleHeapST = 0;
+   struct complex_linST *hsp65ComplexHeapST = 0;
+   struct cnt_getLin hsp65CntStackST;
+
+   /*****************************************************\
+   * Fun11 Sec01 Sub12:
    *   - read mapping
    \*****************************************************/
 
@@ -5612,6 +5747,10 @@ run_freezeTB(
    init_seqST(&readSeqStackST);
    init_samEntry(&revSamStackST);
 
+   /*for hsp65 species (and other user lineage systems)*/
+   init_tblST_kmerFind(&hsp65TblStackST);
+   init_cnt_getLin(&hsp65CntStackST);
+   
    /*initialize spoligotyping array*/
    for(
       numLineagesSI = 0;
@@ -5741,6 +5880,28 @@ run_freezeTB(
       goto err_fun11_sec11_sub02;
    } /*If: memory error*/
 
+
+   errSC =
+      setup_tblST_kmerFind(
+         &hsp65TblStackST,
+         ftbSetStackST.lenKmerUC
+      );
+
+   if(
+      setup_tblST_kmerFind(
+         &hsp65TblStackST,
+         ftbSetStackST.lenKmerUC
+      )
+   ){ /*If: memory error*/
+      cpStr_ulCp(
+         errHeapStr,
+         (signed char *)
+            "memory error tblST_kmerFind struct setup"
+      );
+
+      goto err_fun11_sec11_sub02;
+   } /*If: memory error*/
+
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun11 Sec02 Sub03 Cat02:
    +   - mapRead setup
@@ -5791,6 +5952,8 @@ run_freezeTB(
    ^   o fun11 sec03 sub06:
    ^     - check if gene coordinates file exits
    ^   o fun11 sec03 sub07:
+   ^   o fun11 sec03 sub08:
+   ^   o fun11 sec03 sub09:
    ^     - read in reference sequence
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5977,18 +6140,174 @@ run_freezeTB(
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub07
-   *   - read in reference sequence
+   * Fun11 Sec03 Sub07:
+   *   - get the hsp65 simple database
    *   o fun11 sec03 sub07 cat01:
-   *     - open reference file
+   *     - open the hsp65 simple database
    *   o fun11 sec03 sub07 cat02:
-   *     - get reference sequence for rmHomo only
-   *   o fun11 sec03 sub07 cat03:
-   *     - get reference sequence for mapRead and rmHomo
+   *     - get the hsp65 simple database
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun11 Sec03 Sub07 Cat01:
+   +   - open the hsp65 simple database
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   outFILE =
+     fopen((char *) ftbSetStackST.hsp65SimpleFileStr,"r");
+
+   if(! outFILE)
+   { /*If: could not open the hsp65 simple database*/
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+           errHeapStr,
+           (signed char *) "could not open -hsp65-simple "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         ftbSetStackST.hsp65SimpleFileStr
+      );
+
+      goto err_fun11_sec11_sub02;
+   } /*If: could not open the hsp65 simple database*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun11 Sec03 Sub07 Cat02:
+   +   - get the hsp65 simple database
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   hsp65SimpleHeapST =
+      getSimpleLineages_linST(
+         0, /*want fast lineage support*/
+         &hsp65TblStackST,
+         &errSL, /*line errored out on or last line*/
+         outFILE
+      );
+
+   if(! hsp65SimpleHeapST)
+   { /*If: errored out reading the lineage database*/
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *) "error reading line "
+         );
+
+      numToStr(tmpStr, errSL);
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *) " in -hsp65-simple "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         ftbSetStackST.hsp65SimpleFileStr
+      );
+
+      goto err_fun11_sec11_sub02;
+   } /*If: errored out reading the lineage database*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Fun11 Sec03 Sub08:
+   *   - get the hsp65 complex database
+   *   o fun11 sec03 sub08 cat01:
+   *     - open the hsp65 complex database
+   *   o fun11 sec03 sub08 cat02:
+   *     - get the hsp65 complex database
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun11 Sec03 Sub08 Cat01:
+   +   - open the hsp65 complex database
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   outFILE =
+      fopen(
+         (char *) ftbSetStackST.hsp65ComplexFileStr,
+         "r"
+      );
+
+   if(! outFILE)
+   { /*If: could not open the hsp65 complex database*/
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+           errHeapStr,
+           (signed char *) "could not open -hsp65-complex "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         ftbSetStackST.hsp65ComplexFileStr
+      );
+
+      goto err_fun11_sec11_sub02;
+   } /*If: could not open the hsp65 complex database*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun11 Sec03 Sub08 Cat02:
+   +   - get the hsp65 complex database
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   hsp65ComplexHeapST =
+      getComplexLineages_linST(
+         hsp65SimpleHeapST,
+         &errSL, /*line errored out on or last line*/
+         outFILE
+      );
+
+   if(! hsp65ComplexHeapST)
+   { /*If: errored out reading the lineage database*/
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *) "error reading line "
+         );
+
+      numToStr(tmpStr, errSL);
+
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *) " in -hsp65-complex "
+         );
+
+      cpStr_ulCp(
+         tmpStr,
+         ftbSetStackST.hsp65ComplexFileStr
+      );
+
+      goto err_fun11_sec11_sub02;
+   } /*If: errored out reading the lineage database*/
+
+   fclose(outFILE);
+   outFILE = 0;
+
+   /*****************************************************\
+   * Fun11 Sec03 Sub09
+   *   - read in reference sequence
+   *   o fun11 sec03 sub09 cat01:
+   *     - open reference file
+   *   o fun11 sec03 sub09 cat02:
+   *     - get reference sequence for rmHomo only
+   *   o fun11 sec03 sub09 cat03:
+   *     - get reference sequence for mapRead and rmHomo
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun11 Sec03 Sub09 Cat01:
    +   - open reference file
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6017,7 +6336,7 @@ run_freezeTB(
       } /*If: unable to open reference file*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec03 Sub07 Cat02:
+      + Fun11 Sec03 Sub09 Cat02:
       +   - get reference sequence for rmHomo only
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6051,7 +6370,7 @@ run_freezeTB(
       } /*If: not using mapRead*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec03 Sub07 Cat03:
+      + Fun11 Sec03 Sub09 Cat03:
       +   - get reference sequence for rmHomo and mapRead
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6109,8 +6428,12 @@ run_freezeTB(
    ^     - set up read spoligotyping output file name
    ^   o fun11 sec04 sub10:
    ^     - set up open consensus output file name
-   ^   o fun11 sec04 sub12:
+   ^   o fun11 sec04 sub11:
    ^     - set up sam file name (if mapping reads)
+   ^   o fun11 sec04 sub12:
+   ^     - set up hsp65 read species output name
+   ^   o fun11 sec04 sub13:
+   ^     - set up hsp65 consensus species output name
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -6521,6 +6844,57 @@ run_freezeTB(
       samFILE = fopen((char *) mapSamStr, "w");
    } /*If: mapping reads*/
 
+   /*****************************************************\
+   * Fun11 Sec04 Sub12:
+   *   - set up hsp65 read species output name
+   \*****************************************************/
+
+   errSC =
+      outputPath_freezeTBPaths(
+         ftbSetStackST.prefixStr,
+         (signed char *) "-read-hsp65.tsv",
+         hsp65ReadOutStr
+      );
+
+   if(errSC)
+   { /*If: could not open file*/
+      tmpStr = errHeapStr;
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *)
+               "unable to open hsp65 file output: "
+         );
+      cpStr_ulCp(tmpStr, hsp65ReadOutStr);
+
+      goto err_fun11_sec11_sub02;
+   } /*If: could not open file*/
+
+   /*****************************************************\
+   * Fun11 Sec04 Sub13:
+   *   - set up hsp65 read consensus output name
+   \*****************************************************/
+
+   errSC =
+      outputPath_freezeTBPaths(
+         ftbSetStackST.prefixStr,
+         (signed char *) "-con-hsp65.tsv",
+         hsp65ConOutStr
+      );
+
+   if(errSC)
+   { /*If: could not open file*/
+      tmpStr = errHeapStr;
+      tmpStr +=
+         cpStr_ulCp(
+            errHeapStr,
+            (signed char *)
+               "unable to open hsp65 file output: "
+         );
+      cpStr_ulCp(tmpStr, hsp65ConOutStr);
+
+      goto err_fun11_sec11_sub02;
+   } /*If: could not open file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec05:
@@ -7284,8 +7658,10 @@ run_freezeTB(
    ^   o fun11 sec06 sub10:
    ^     - check for spoligotypes
    ^   o fun11 sec06 sub11:
-   ^     - move to next read
+   ^     - get hsp65 species and any user lineages
    ^   o fun11 sec06 sub12:
+   ^     - move to next read
+   ^   o fun11 sec06 sub13:
    ^     - minor clean up (variables unique to sec07)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7417,11 +7793,13 @@ run_freezeTB(
                goto err_fun11_sec11_sub02;
          } /*Else If: error (likely file)*/
 
+         seqToIndex_alnSet(readSeqStackST.seqStr);
          forScoreSL =
             align_mapRead(
                &readSeqStackST,
                &mapRefStackST,
                &ignoreSI,
+               1, /*read is in index format*/
                &samStackST,
                &mapAlnStackST,
                &ftbSetStackST.mapSetST,
@@ -7460,6 +7838,7 @@ run_freezeTB(
                &readSeqStackST,
                &mapRefStackST,
                &ignoreSI,
+               1, /*is already indexed*/
                &revSamStackST,
                &mapAlnStackST,
                &ftbSetStackST.mapSetST,
@@ -7482,7 +7861,6 @@ run_freezeTB(
             continue; /*read did not map*/
 
          /*left align homopolymer indels*/
-         seqToIndex_alnSet(samStackST.seqStr);
          leftAlnIndel_rmHomo(
             &samStackST,
             mapRefStackST.seqSTPtr->seqStr
@@ -7779,6 +8157,78 @@ run_freezeTB(
       
       /**************************************************\
       * Fun11 Sec07 Sub11:
+      *   - get hsp65 species and any user lineages
+      \**************************************************/
+
+      hsp65SimpleLinHeapArySI =
+         simpleLineage_getLin(
+            &samStackST,
+            hsp65SimpleHeapST,
+            &hsp65TblStackST,
+            &hsp65TrsHeapArySI,
+            &hsp65SimpleLenSI
+         );
+
+      if(hsp65SimpleLenSI < 0)
+         goto readHsp65Err_fun11_sec07_sub11;
+
+      else if(hsp65SimpleLenSI)
+      { /*Else If: have simple lineages*/
+         hsp65ComplexLinHeapArySI =
+            complexLineage_getLin(
+               hsp65ComplexHeapST,
+               hsp65SimpleHeapST,
+               hsp65SimpleLinHeapArySI,
+               hsp65TrsHeapArySI,
+               &hsp65SimpleLenSI,
+               &hsp65ComplexLenSI
+            );
+
+         if(hsp65ComplexLenSI == -2)
+            goto readHsp65Err_fun11_sec07_sub11;
+
+         if(
+            addReadLineages_cnt_getLin(
+               &hsp65CntStackST,
+               hsp65SimpleLinHeapArySI,
+               hsp65TrsHeapArySI,
+               hsp65SimpleLenSI,
+               hsp65ComplexLinHeapArySI,
+               hsp65ComplexLenSI,
+               0, /*only print marked variants*/
+               hsp65SimpleHeapST,
+               hsp65ComplexHeapST
+            )
+         ){ /*If: memory error*/
+            readHsp65Err_fun11_sec07_sub11:;
+            tmpStr = errHeapStr;
+
+            tmpStr +=
+               cpStr_ulCp(
+                 errHeapStr,
+                 (signed char *)
+                   "memory error for hsp65 on line "
+               );
+            numToStr(tmpStr, totalReadsUI);
+
+            goto err_fun11_sec11_sub02;
+         }  /*If: memory error*/
+      } /*Else If: have simple lineages*/
+
+      if(hsp65SimpleLinHeapArySI)
+         free(hsp65SimpleLinHeapArySI);
+      hsp65SimpleLinHeapArySI = 0;
+
+      if(hsp65TrsHeapArySI)
+         free(hsp65TrsHeapArySI);
+      hsp65TrsHeapArySI = 0;
+
+      if(hsp65ComplexLinHeapArySI)
+         free(hsp65ComplexLinHeapArySI);
+      hsp65ComplexLinHeapArySI = 0;
+
+      /**************************************************\
+      * Fun11 Sec07 Sub12:
       *   - move to next read
       \**************************************************/
 
@@ -7788,7 +8238,7 @@ run_freezeTB(
    } /*Loop: read anaylsis*/
 
    /*****************************************************\
-   * Fun11 Sec07 Sub12:
+   * Fun11 Sec07 Sub13:
    *   - minor clean up (variables unique to sec07)
    \*****************************************************/
 
@@ -7837,6 +8287,8 @@ run_freezeTB(
    ^     - print read spoligotype entry
    ^   o fun11 sec08 sub05:
    ^     - print tsv file of variants
+   ^   o fun11 sec08 sub06:
+   ^     - print hsp65 species and custom user lineages
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
@@ -8047,6 +8499,25 @@ run_freezeTB(
        goto err_fun11_sec11_sub02;
     } /*If: nothing mapped*/
    
+   /*****************************************************\
+   * Fun11 Sec08 Sub06:
+   *   - print hsp65 species and custom user lineages
+   \*****************************************************/
+
+   outFILE = fopen((char *) hsp65ReadOutStr, "w");
+
+   pReadLineages_getLin(
+      ftbSetStackST.prefixStr,
+      &hsp65CntStackST,
+      ftbSetStackST.tbConSet.minDepthSI,
+      ftbSetStackST.hsp65MixSupF,
+      outFILE
+   );
+
+   fclose(outFILE);
+   outFILE = 0;
+   freeStack_cnt_getLin(&hsp65CntStackST);
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec09:
    ^   - collapse consensus and consensus analysis
@@ -8108,6 +8579,10 @@ run_freezeTB(
    *     - MIRU-VNTR lineage detection and printing
    *   o fun11 sec09 sub04 cat05:
    *     - detect spoligotypes
+   *   o fun11 sec09 sub04 cat06:
+   *     - hsp65 species checking + user defined lineages
+   *   o fun11 sec09 sub04 cat07:
+   *     - free the consensus fragment
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -8115,17 +8590,14 @@ run_freezeTB(
    +   - open files + run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   conOutFILE =
-      fopen(
-         (char *) conOutStr,
-          "a"
-      ); /*open consensus output file*/
+   /*open consensus output file*/
+   conOutFILE = fopen((char *) conOutStr, "a");
 
-   outFILE =
-      fopen(
-         (char *) conAmrStr,
-         "w"
-      );
+   /*open the AMR output file*/
+   outFILE = fopen((char *) conAmrStr, "w");
+
+   /*open the hsp65 species and custom lineages file*/
+   hsp65OutFILE = fopen((char *) hsp65ConOutStr, "w");
 
    errSC = 0;
 
@@ -8224,6 +8696,85 @@ run_freezeTB(
             &ftbSetStackST.alnSetST
          ); /*find spoligotype with kmer search*/
 
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Fun11 Sec09 Sub04 Cat06:
+     +   - hsp65 species checking + user defined lineages
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      hsp65SimpleLinHeapArySI =
+         simpleLineage_getLin(
+            &samConSTAry[siCon],
+            hsp65SimpleHeapST,
+            &hsp65TblStackST,
+            &hsp65TrsHeapArySI,
+            &hsp65SimpleLenSI
+         );
+
+      if(hsp65SimpleLenSI < 0)
+         goto conHsp65Err_fun11_sec09_sub04_cat06;
+
+      else if(hsp65SimpleLenSI)
+      { /*Else If: have simple lineages*/
+         hsp65ComplexLinHeapArySI =
+            complexLineage_getLin(
+               hsp65ComplexHeapST,
+               hsp65SimpleHeapST,
+               hsp65SimpleLinHeapArySI,
+               hsp65TrsHeapArySI,
+               &hsp65SimpleLenSI,
+               &hsp65ComplexLenSI
+            );
+
+         if(hsp65ComplexLenSI == -2)
+            goto conHsp65Err_fun11_sec09_sub04_cat06;
+
+         if(
+            plineages_getLin(
+               samConSTAry[siCon].qryIdStr,
+               hsp65SimpleLinHeapArySI,
+               hsp65TrsHeapArySI,
+               hsp65SimpleLenSI,
+               hsp65ComplexLinHeapArySI,
+               hsp65ComplexLenSI,
+               hsp65SimpleHeapST,
+               hsp65ComplexHeapST,
+               0, /*only print marked variants*/
+               &hsp65HeadBl, /*tells if printing header*/
+               hsp65OutFILE
+            )
+         ){ /*If: memory error*/
+            conHsp65Err_fun11_sec09_sub04_cat06:;
+               tmpStr = errHeapStr;
+
+               tmpStr +=
+                  cpStr_ulCp(
+                    errHeapStr,
+                    (signed char *)
+                      "memory error for hsp65 on line "
+                  );
+               numToStr(tmpStr, totalReadsUI);
+
+               goto err_fun11_sec11_sub02;
+         }  /*If: memory error*/
+      } /*Else If: have simple lineages*/
+
+      if(hsp65SimpleLinHeapArySI)
+         free(hsp65SimpleLinHeapArySI);
+      hsp65SimpleLinHeapArySI = 0;
+
+      if(hsp65TrsHeapArySI)
+         free(hsp65TrsHeapArySI);
+      hsp65TrsHeapArySI = 0;
+
+      if(hsp65ComplexLinHeapArySI)
+         free(hsp65ComplexLinHeapArySI);
+      hsp65ComplexLinHeapArySI = 0;
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Fun11 Sec09 Sub04 Cat07:
+     +   - free the consensus fragment
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
       freeStack_samEntry(&samConSTAry[siCon]);
    } /*Loop: print and analyize consensuse*/
 
@@ -8231,6 +8782,9 @@ run_freezeTB(
    * Fun11 Sec09 Sub03:
    *   - close output files and free uneeded variables
    \*****************************************************/
+
+   fclose(hsp65OutFILE);
+   hsp65OutFILE = 0;
 
    fclose(outFILE);
    outFILE = 0;
@@ -8246,11 +8800,7 @@ run_freezeTB(
    numFragSI = 0;
 
    /*AMR memory*/
-   freeHeapAry_amrST(
-      amrHeapAryST,
-      numAmrSI
-   );
-
+   freeHeapAry_amrST(amrHeapAryST, numAmrSI);
    amrHeapAryST = 0 ;
 
    free(drugHeapAryStr);
@@ -8544,6 +9094,10 @@ run_freezeTB(
    *     - MIRU-VNTR lineage detection and printing
    *   o fun11 sec10 sub04 cat03:
    *     - spoligotype detection and printing
+   *   o fun11 sec10 sub04 cat04:
+   *     - hsp65 species checking + user defined lineages
+   *   o fun11 sec10 sub04 cat05:
+   *     - move to next cluster
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -8553,11 +9107,9 @@ run_freezeTB(
 
    conNodeST = conListHeapST;
 
-   outFILE =
-      fopen(
-         (char *) conAmrStr,
-         "w"
-      ); /*file to print AMR results to*/
+   outFILE = fopen((char *) conAmrStr, "w");
+      /*file to print AMR results to*/
+   hsp65OutFILE = fopen((char *) hsp65ConOutStr, "w");
 
    pConHead_checkAmr(outFILE);
 
@@ -8628,7 +9180,81 @@ run_freezeTB(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec10 Sub04 Cat04:
+     + Fun11 Sec09 Sub04 Cat04:
+     +   - hsp65 species checking + user defined lineages
+     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      hsp65SimpleLinHeapArySI =
+         simpleLineage_getLin(
+            &samConSTAry[siCon],
+            hsp65SimpleHeapST,
+            &hsp65TblStackST,
+            &hsp65TrsHeapArySI,
+            &hsp65SimpleLenSI
+         );
+
+      if(hsp65SimpleLenSI < 0)
+         goto clustHsp65Err_fun11_sec09_sub04_cat04;
+
+      else if(hsp65SimpleLenSI)
+      { /*Else If: have simple lineages*/
+         hsp65ComplexLinHeapArySI =
+            complexLineage_getLin(
+               hsp65ComplexHeapST,
+               hsp65SimpleHeapST,
+               hsp65SimpleLinHeapArySI,
+               hsp65TrsHeapArySI,
+               &hsp65SimpleLenSI,
+               &hsp65ComplexLenSI
+            );
+
+         if(hsp65ComplexLenSI == -2)
+            goto clustHsp65Err_fun11_sec09_sub04_cat04;
+
+         if(
+            plineages_getLin(
+               samConSTAry[siCon].qryIdStr,
+               hsp65SimpleLinHeapArySI,
+               hsp65TrsHeapArySI,
+               hsp65SimpleLenSI,
+               hsp65ComplexLinHeapArySI,
+               hsp65ComplexLenSI,
+               hsp65SimpleHeapST,
+               hsp65ComplexHeapST,
+               0, /*only print marked variants*/
+               &hsp65HeadBl, /*tells if printing header*/
+               hsp65OutFILE
+            )
+         ){ /*If: memory error*/
+            clustHsp65Err_fun11_sec09_sub04_cat04:;
+               tmpStr = errHeapStr;
+
+               tmpStr +=
+                  cpStr_ulCp(
+                    errHeapStr,
+                    (signed char *)
+                      "memory error for hsp65 on line "
+                  );
+               numToStr(tmpStr, totalReadsUI);
+
+               goto err_fun11_sec11_sub02;
+         }  /*If: memory error*/
+      } /*Else If: have simple lineages*/
+
+      if(hsp65SimpleLinHeapArySI)
+         free(hsp65SimpleLinHeapArySI);
+      hsp65SimpleLinHeapArySI = 0;
+
+      if(hsp65TrsHeapArySI)
+         free(hsp65TrsHeapArySI);
+      hsp65TrsHeapArySI = 0;
+
+      if(hsp65ComplexLinHeapArySI)
+         free(hsp65ComplexLinHeapArySI);
+      hsp65ComplexLinHeapArySI = 0;
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
+     + Fun11 Sec10 Sub04 Cat05:
      +   - move to next cluster
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8639,7 +9265,10 @@ run_freezeTB(
       freeHeapList_con_clustST(conListHeapST);
    conListHeapST = 0;
    conNodeST = 0;
-         
+
+   fclose(hsp65OutFILE);
+   hsp65OutFILE = 0;
+
    /*****************************************************\
    * Fun11 Se109 Sub05:
    *   - print consensus MIRU lineages
@@ -8755,6 +9384,31 @@ run_freezeTB(
       freeStack_samEntry(&revSamStackST);
       freeStack_seqST(&readSeqStackST);
 
+
+      freeStack_tblST_kmerFind(&hsp65TblStackST);
+      freeStack_cnt_getLin(&hsp65CntStackST);
+
+      if(hsp65SimpleHeapST)
+         freeHeap_simple_linST(hsp65SimpleHeapST);
+      hsp65SimpleHeapST = 0;
+
+      if(hsp65ComplexHeapST)
+         freeHeap_complex_linST(hsp65ComplexHeapST);
+      hsp65ComplexHeapST = 0;
+
+      if(hsp65SimpleLinHeapArySI)
+         free(hsp65SimpleLinHeapArySI);
+      hsp65SimpleLinHeapArySI = 0;
+
+      if(hsp65TrsHeapArySI)
+         free(hsp65TrsHeapArySI);
+      hsp65TrsHeapArySI = 0;
+
+      if(hsp65ComplexLinHeapArySI)
+         free(hsp65ComplexLinHeapArySI);
+      hsp65ComplexLinHeapArySI = 0;
+
+
       for(
          siCon = 0;
          siCon < numFragSI;
@@ -8840,57 +9494,57 @@ run_freezeTB(
       else if(samFILE == stdin) ;
       else if(samFILE == stdout) ;
       else if(samFILE == stderr) ;
-      else
-         fclose(samFILE);
+      else fclose(samFILE);
       samFILE = 0;
 
       if(! fqFILE) ;
       else if(fqFILE == stdin) ;
       else if(fqFILE == stdout) ;
       else if(fqFILE == stderr) ;
-      else
-         fclose(fqFILE);
+      else fclose(fqFILE);
       fqFILE = 0;
 
       if(! outFILE) ;
       else if(outFILE == stdin) ;
       else if(outFILE == stdout) ;
       else if(outFILE == stderr) ;
-      else
-         fclose(outFILE);
+      else fclose(outFILE);
       outFILE = 0;
 
       if(! conOutFILE) ;
       else if(conOutFILE == stdin) ;
       else if(conOutFILE == stdout) ;
       else if(conOutFILE == stderr) ;
-      else
-         fclose(conOutFILE);
+      else fclose(conOutFILE);
       conOutFILE = 0;
 
       if(! idFILE) ;
       else if(idFILE == stdin) ;
       else if(idFILE == stdout) ;
       else if(idFILE == stderr) ;
-      else
-         fclose(idFILE);
+      else fclose(idFILE);
       idFILE = 0;
 
       if(! spoligoOutFILE) ;
       else if(spoligoOutFILE == stdin) ;
       else if(spoligoOutFILE == stdout) ;
       else if(spoligoOutFILE == stderr) ;
-      else
-         fclose(spoligoOutFILE);
+      else fclose(spoligoOutFILE);
       spoligoOutFILE = 0;
 
       if(! logFILE) ;
       else if(logFILE == stdin) ;
       else if(logFILE == stdout) ;
       else if(logFILE == stderr) ;
-      else
-         fclose(logFILE);
+      else fclose(logFILE);
       logFILE = 0;
+
+      if(! hsp65OutFILE) ;
+      else if(hsp65OutFILE == stdin) ;
+      else if(hsp65OutFILE == stdout) ;
+      else if(hsp65OutFILE == stderr) ;
+      else fclose(hsp65OutFILE);
+      hsp65OutFILE = 0;
 
       return errHeapStr;
 } /*run_freezeTB*/

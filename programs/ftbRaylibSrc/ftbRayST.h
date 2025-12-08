@@ -31,17 +31,23 @@
 '     - hides the report menu
 '   o .c fun10: hideTable_ftbRayST
 '     - hides the amr table menu
-'   o .c fun12: spoligoLinGet_ftbRayST
+'   o .c fun11: hideHsp65_ftbRayST
+'     - hides the hsp65 and user lineage table menu
+'   o .c fun12: hideGeneCover_ftbRayST
+'     - hides the gene coverage table
+'   o .c fun13: spoligoLinGet_ftbRayST
 '     - gets the spoligotype lineage and sets the spoligo
-'   o .c fun13: miruLinGet_ftbRayST
+'   o .c fun14: miruLinGet_ftbRayST
 '     - gets the MIRU-VNTR lineage & sets miru text output
-'   o .c fun14: checkDrugs_ftbRayST
+'   o .c fun15: checkDrugs_ftbRayST
 '     - builds the drug resistance part of the ftb report
-'   o .c fun15: getDatabases_ftbRayST
+'   o .c fun16: getDatabases_ftbRayST
 '     - get database files for freezeTB (currently Mac)
-'   o .c fun16: mkCoverageTbl_ftbRayST
+'   o .c fun17: mkCoverageTbl_ftbRayST
 '     - makes the gene percent coverage table
-'   o fun17: checkRunEvent_ftbRayST
+'   o .c fun18: getHsp65Lin_ftbRayST
+'     - get the getLin hsp65 lineages (an others)
+'   o fun19: checkRunEvent_ftbRayST
 '     - checks for an event, and if can runs found event
 '     - also redraws the GUI
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -92,6 +98,7 @@ typedef struct gui_ftbRayST
    signed int outGuiIdSI;   /*output GUI button*/
    signed int reportGuiIdSI;/*report GUI button*/
    signed int amrsGuiIdSI;  /*amr list GUI button*/
+   signed int hsp65GuiIdSI; /*hsp65 species GUI button*/
    signed int coverGuiIdSI; /*gene % coverage GUI button*/
 
    /*_________________input GUI_________________________*/
@@ -187,6 +194,11 @@ typedef struct gui_ftbRayST
    signed int amrTblIdSI;
    signed int amrLabIdSI;
    struct listBox_rayWidg *amrListSTPtr;
+
+   /*_______________hsp65_species_GUI___________________*/
+   signed int hsp65TblIdSI;
+   signed int hsp65LabIdSI;
+   struct listBox_rayWidg *hsp65ListSTPtr;
 
    /*_______________gene_coverage_GUI___________________*/
    signed int geneCoverTblIdSI;
@@ -289,7 +301,7 @@ mk_gui_ftbRayST(
 );
 
 /*-------------------------------------------------------\
-| Fun17: checkRunEvent_ftbRayST
+| Fun19: checkRunEvent_ftbRayST
 |   - checks for an event, and if can runs the found event
 |   - also redraws the GUI
 | Input:

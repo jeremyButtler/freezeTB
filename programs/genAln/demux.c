@@ -3,9 +3,6 @@
 '   - has functions to demultiplexes reads by barcode
 '   o header:
 '     - included libraries
-'   o fun01: sortBarcodes_demux
-'     - sorts a the mapped barcodes by their barcode and
-'       then start coordiante
 '   o .c fun01: sortBarcodes_demux
 '     - sorts the mapped barcodes by their barcode and
 '       then by start coordiante
@@ -15,6 +12,10 @@
 '     - demux a read
 '   o fun04: read_demux
 '     - convert barcode coordinates to demuxed reads
+'   o fun05: primer_demux
+'     - get primer target regins from the input sequence
+'   o license:
+'     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -349,7 +350,6 @@ sortStart_demux(
    } /*Loop: all rounds*/
 } /*sortStart_demux*/
 
-
 /*-------------------------------------------------------\
 | Fun03: barcodeCoords_demux
 |   - find the coordinates of barcodes in a read
@@ -389,6 +389,7 @@ sortStart_demux(
 |       * index (n % 4 = 1) is the barcode start
 |       * index (n % 4 = 2) is the barcode end
 |       * index (n % 4 = 3) is the score
+|         + is negative if reverse, positive if forward
 |       * ex: [index_1, start_1, end_1, score_1,
 |              index_2, start_2 end_2, score_2,
 |              index_3, start_3, end_3, score_3,
@@ -437,6 +438,8 @@ barcodeCoords_demux(
    signed int lenSI = 0;
    signed int endSI = 0;
    signed int siMap = 0;
+   signed int scoreSI = 0;
+   signed int lastScoreSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -466,6 +469,11 @@ barcodeCoords_demux(
       goto noPrim_fun03_sec05;
    else if(lenSI < 0)
       goto memErr_fun03_sec05;
+
+   for(endSI = 0; endSI < lenSI; ++endSI)
+      if( (dirArySC[endSI] & ~32) == 'R' )
+         scoreArySI[endSI] *= -1; /*so have direction*/
+   endSI = 0;
 
    free(dirArySC);
    dirArySC = 0;
@@ -500,12 +508,20 @@ barcodeCoords_demux(
    { /*If: have a min score to filter by*/
       for(siMap = 0; siMap < endSI; ++siMap)
       { /*Loop: remove low scores (non-percent check)*/
-         if(scoreArySI[siMap] < minScoreSL)
+         if(scoreArySI[siMap] < 0)
+            scoreSI = scoreArySI[siMap] * -1;
+         else
+            scoreSI = scoreArySI[siMap];
+
+         if(scoreSI < minScoreSL)
             primArySS[siMap] = -1;
          else
             ++lenSI;
       } /*Loop: remove low scores (non-percent check)*/
    } /*If: have a min score to filter by*/
+
+   else
+      lenSI = endSI;
 
    sortBarcodes_demux(
       (unsigned short *) primArySS,
@@ -520,31 +536,43 @@ barcodeCoords_demux(
    *   - flag duplicate mappings
    \*****************************************************/
 
-   endSI = lenSI;
-   lenSI = 0;
-   for(siMap = 1; siMap < endSI; ++siMap)
+   endSI = 0;
+   lastScoreSI = 0;
+   scoreSI = 0;
+   for(siMap = 1; siMap < lenSI; ++siMap)
    { /*Loop: remove duplicate mappings*/
       if(seqStartArySI[siMap] < seqEndArySI[siMap-1])
       { /*If: barcode overlap or double map*/
          if(primArySS[siMap] != primArySS[siMap - 1])
             goto barcodeOverlap_fun03_sec05;
 
+         if(scoreArySI[siMap] < 0)
+            scoreSI = scoreArySI[siMap] * -1;
+         else
+            scoreSI = scoreArySI[siMap];
+
+         if(scoreArySI[siMap - 1] < 0)
+            lastScoreSI = scoreArySI[siMap - 1] * -1;
+         else
+            lastScoreSI = scoreArySI[siMap - 1];
+
          /*mapped the same position twice*/
-         if(scoreArySI[siMap] >= scoreArySI[siMap - 1])
+         if(scoreSI >= lastScoreSI)
             primArySS[siMap - 1] = -1;
          else
             primArySS[siMap] = -1;
 
          if(siMap < 2)
-            ++lenSI; /*first comparison*/
+            ++endSI; /*first comparision*/
       } /*If: barcode overlap or double map*/
 
       else
-         ++lenSI;
-         /*different barcodes or unique positions*/
+         ++endSI; /*make sure have at least one hit*/
    } /*Loop: remove duplicate mappings*/
 
-   if(lenSI <= 0)
+   if(lenSI == 1)
+      endSI = 1; /*no duplicate mappings*/
+   else if(endSI <= 0)
       goto noPrim_fun03_sec05;
 
    /*****************************************************\
@@ -706,6 +734,7 @@ barcodeCoords_demux(
 |       * index (n % 4 = 1) is the barcode start
 |       * index (n % 4 = 2) is the barcode end
 |       * index (n % 4 = 3) is the score
+|         + a negative score means a reverse mapping
 |   - coordLenSI:
 |     o length of coordsArySI (number barcodes << 2)
 |   - barFileStrAry:
@@ -759,6 +788,7 @@ read_demux(
    signed char tmpIdStr[4096];
    signed int headSI = 0;
 
+   signed int scoreSI = 0;
    FILE *outFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -793,13 +823,18 @@ read_demux(
             posSI = coordArySI[2] + 1; /*at start*/
       } /*If: trimming barcodes*/
 
+      if(coordArySI[3] < 0)
+         scoreSI = coordArySI[3] * -1;
+      else
+         scoreSI = coordArySI[3];
+
       fprintf(
          outFILE,
          "@%s\tscore=%i\tstart=%i\tend=%i%s%s%s+%s%s%s",
          seqSTPtr->idStr,
-         coordArySI[3],
-         coordArySI[1],
-         coordArySI[2],
+         scoreSI,
+         coordArySI[1] + 1,
+         coordArySI[2] + 1,
          str_endLine,
          &seqSTPtr->seqStr[posSI],
          str_endLine,
@@ -931,8 +966,8 @@ read_demux(
             "%s\tscore=%i\tstart=%i\tend=%i\t%s%s%s",
             &seqSTPtr->idStr[headSI],
             coordArySI[maxSplitSI],
-            coordArySI[maxSplitSI - 2],
-            coordArySI[maxSplitSI - 3],
+            coordArySI[maxSplitSI - 2] + 1,
+            coordArySI[maxSplitSI - 3] + 1,
             str_endLine,
             &seqSTPtr->seqStr[posSI],
             str_endLine
@@ -1021,8 +1056,8 @@ read_demux(
             "%s\tscore=%i\tstart=%i\tend=%i%s%s%s",
             &seqSTPtr->idStr[headSI],
             coordArySI[maxSplitSI + 3],
-            coordArySI[maxSplitSI + 1],
-            coordArySI[maxSplitSI + 2],
+            coordArySI[maxSplitSI + 1] + 1,
+            coordArySI[maxSplitSI + 2] + 1,
             str_endLine,
             &seqSTPtr->seqStr[posSI],
             str_endLine
@@ -1086,3 +1121,744 @@ read_demux(
 
       return posSI;
 } /*read_demux*/
+
+/*-------------------------------------------------------\
+| Fun05: primer_demux
+|   - get primer target regins from the input sequence
+| Input:
+|   - seqSTPtr:
+|     o seqSTPtr struct pointer with read to demux
+|   - minDistSI:
+|     o minimum distance between primers
+|   - maxDistSI:
+|     o maximum distance between primers
+|   - coordsArySI:
+|     o signed int array retured from barcodeCoords_demux
+|       * index (n % 4 = 0) is barcode index
+|       * index (n % 4 = 1) is the barcode start
+|       * index (n % 4 = 2) is the barcode end
+|       * index (n % 4 = 3) is the score
+|         + a negative score means a reverse mapping
+|   - coordLenSI:
+|     o length of coordsArySI (number barcodes << 2)
+|   - barSTPtr:
+|     o refST_kmerFind struct pionter with the primer
+|       ids and the index of their mates (if paired)
+|   - outFILE:
+|     o FILE pionter to print reads to
+| Output:
+|   - Prints:
+|     o amplicons to outFILE
+|   - Returns:
+|     o number of amplicons found
+|     o 0 if no amplicons
+\-------------------------------------------------------*/
+signed int
+primer_demux(
+   struct seqST *seqSTPtr,/*read to split into amplicons*/
+   signed int minDistSI,  /*min distance between primers*/
+   signed int maxDistSI,  /*max distance between primers*/
+   signed int coordArySI[],/*has barcode mappings*/
+   signed int coordLenSI, /*length of coordLenSI*/
+   struct refST_kmerFind *barSTPtr,/*primer ids & mates*/
+   void *outFILE          /*print sequences to*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun05 TOC:
+   '   - get primer target regins from the input sequence
+   '   o fun05 sec01:
+   '     - variable declarations
+   '   o fun05 sec02:
+   '     - check if to many splits and print no split case
+   '   o fun05 sec03:
+   '     - check if splits are to close and ending barcode
+   '   o fun05 sec04:
+   '     - print split sequences
+   '   o fun05 sec05:
+   '     - return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun05 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char tmpSeqSC = 0; /*seting sequence end to 0*/
+   signed char tmpQSC = 0;/*for setting q-score end to 0*/
+
+   signed int startSI = 0; /*first base in amplicon*/
+   signed int endSI = 0;   /*last base in amplicon*/
+   signed int lenSI = 0;   /*amplicon length*/
+   signed int cntSI = 0;   /*number primers found*/
+   signed int siCoord = 0; /*primer on*/
+
+   signed int barSI = 0;  /*id of primer on*/
+   signed int mateSI = 0; /*id of the mate primer*/
+   signed int siNext = 0;/*finding next primer in a pair*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun05 Sec02:
+   ^   - check if to many splits and print no split case
+   ^   o fun05 sec02 sub01:
+   ^     - check if have primers and start primer loop
+   ^   o fun05 sec02 sub02:
+   ^     - deal with primer pairs
+   ^   o fun05 sec02 sub03:
+   ^     - non-paired primers
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun05 Sec02 Sub01:
+   *   - check if have primers and start primer loop
+   \*****************************************************/
+
+   if(coordLenSI < 4)
+      goto noBarcodes_fun05_sec05;
+
+   for(siCoord = 0; siCoord < coordLenSI; siCoord += 4)
+   { /*Loop: print primers*/
+      barSI = coordArySI[siCoord];
+      mateSI = barSTPtr[barSI].mateSI;
+
+      /**************************************************\
+      * Fun05 Sec02 Sub02:
+      *   - deal with primer pairs
+      *   o fun05 sec02 sub02 cat01:
+      *     - find the mate for the current primer
+      *   o fun05 sec02 sub02 cat02:
+      *     - print the sequence from primer start to
+      *       the mates primer end
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun05 Sec02 Sub02 Cat01:
+      +   - find the mate for the current primer
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(mateSI >= 0)
+      { /*If: have a reverse barcode*/
+         if(coordArySI[siCoord + 3] < 0)
+            continue;
+            /*should have already found the mate, since
+            `   this requires searching backwards
+            */
+         for(
+            siNext = siCoord + 4;
+            siNext < coordLenSI;
+            siNext += 4
+         ){ /*Loop: find the mate primer*/
+            if(coordArySI[siNext] != mateSI)
+               ; /*not the mate of the primer pair*/
+            else if(coordArySI[siNext + 3] > 0)
+               ; /*wrong direction to amplify*/
+            else if(coordArySI[siNext + 3] < 0)
+               break;
+         }  /*Loop: find the mate primer*/
+
+         if(siNext >= coordLenSI)
+            continue;
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun05 Sec02 Sub02 Cat02:
+         +   - print the sequence from primer start to
+         +     the mates primer end
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         lenSI =
+           coordArySI[siNext +2] - coordArySI[siCoord +1];
+         ++lenSI;
+         startSI = coordArySI[siCoord + 1];
+         endSI = coordArySI[siNext + 2];
+
+         if(lenSI < minDistSI)
+            continue;
+         else if(lenSI > maxDistSI && maxDistSI)
+            continue;
+         else
+         { /*Else: have match with a good length*/
+            tmpSeqSC =
+               seqSTPtr->seqStr[coordArySI[siNext +2] +1];
+            seqSTPtr->seqStr[coordArySI[siNext +2]+1] = 0;
+
+            if(seqSTPtr->qStr && seqSTPtr->qStr[0])
+            { /*If: have quality score entry*/
+               tmpQSC =
+                  seqSTPtr->qStr[coordArySI[siNext +2]+1];
+               seqSTPtr->qStr[coordArySI[siNext +2] +1] =
+                  0;
+               fprintf(
+                  (FILE *) outFILE,
+                  "@%s-%03i",
+                  seqSTPtr->idStr,
+                  cntSI++
+               );
+            } /*If: have quality score entry*/
+
+            else
+               fprintf(
+                  (FILE *) outFILE,
+                  ">%s-%03i",
+                  seqSTPtr->idStr,
+                  cntSI++
+               );
+
+            if(mateSI < barSI)
+            { /*If: reverse complemet*/
+               fprintf(
+                  (FILE *) outFILE,
+                  "\tdir=rev\tlen=%i\tstart=%i\tend=%i",
+                  lenSI,
+                  startSI + 1,
+                  endSI + 1
+               );
+               fprintf(
+                  (FILE *) outFILE,
+                  "\tforPrim=%s\trevPrim=%s",
+                  barSTPtr[mateSI].forSeqST->idStr,
+                  barSTPtr[barSI].forSeqST->idStr
+               );
+               fprintf(
+                  (FILE *) outFILE,
+                  "\tforStart=%i\tforEnd=%i\tforScore=%i",
+                  coordArySI[siNext + 1] - startSI + 1,
+                  coordArySI[siNext + 2] - startSI + 1,
+                  coordArySI[siNext + 3] * -1
+               );
+               fprintf(
+                  (FILE *) outFILE,
+                  "\trevStart=%i\trevEnd=%i\trevScore=%i",
+                  coordArySI[siCoord + 1] - startSI + 1,
+                  coordArySI[siCoord + 2] - startSI + 1,
+                  coordArySI[siCoord + 3]
+               );
+            } /*If: reverse complemet*/
+               
+            else
+            { /*Else: forward*/
+               fprintf(
+                  (FILE *) outFILE,
+                  "\tdir=for\tlen=%i\tstart=%i\tend=%i",
+                  lenSI,
+                  startSI + 1,
+                  endSI + 1
+               );
+               fprintf(
+                  (FILE *) outFILE,
+                  "\tforPrim=%s\trevPrim=%s",
+                  barSTPtr[barSI].forSeqST->idStr,
+                  barSTPtr[mateSI].forSeqST->idStr
+               );
+               fprintf(
+                  (FILE *) outFILE,
+                  "\tforStart=%i\tforEnd=%i\tforScore=%i",
+                  coordArySI[siCoord + 1] - startSI + 1,
+                  coordArySI[siCoord + 2] - startSI + 1,
+                  coordArySI[siCoord + 3]
+               );
+               fprintf(
+                  (FILE *) outFILE,
+                  "\trevStart=%i\trevEnd=%i\trevScore=%i",
+                  coordArySI[siNext + 1] - startSI + 1,
+                  coordArySI[siNext + 2] - startSI + 1,
+                  coordArySI[siNext + 3] * -1
+               );
+            } /*Else: forward*/
+
+            if(! seqSTPtr->qStr || ! seqSTPtr->qStr[0])
+               fprintf(
+                 (FILE *) outFILE,
+                 "%s%s%s",
+                 str_endLine, /*for end of header*/
+                 &seqSTPtr->seqStr[coordArySI[siCoord+1]],
+                 str_endLine
+               );
+            else
+               fprintf(
+                 (FILE *) outFILE,
+                 "%s%s%s+%s%s%s",
+                 str_endLine, /*for end of header*/
+                 &seqSTPtr->seqStr[coordArySI[siCoord+1]],
+                 str_endLine, /*end of sequence*/
+                 str_endLine, /*for +*/
+                 &seqSTPtr->qStr[coordArySI[siCoord + 1]],
+                 str_endLine  /*for q-score entry*/
+               );
+               
+            seqSTPtr->seqStr[coordArySI[siNext + 2] + 1] =
+               tmpSeqSC;
+
+            if(seqSTPtr->qStr && seqSTPtr->qStr[0])
+               seqSTPtr->qStr[coordArySI[siNext + 2] + 1]=
+                  tmpQSC;
+         } /*Else: have match with a good length*/
+      } /*If: have a reverse barcode*/
+
+      /**************************************************\
+      * Fun05 Sec02 Sub03:
+      *   - non-paired primers
+      *   o fun05 sec02 sub03 cat01:
+      *     - non-paired else + deal with reverse primers
+      *   o fun05 sec02 sub03 cat02:
+      *     - deal with single forward primers
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun05 Sec02 Sub03 Cat01:
+      +   - non-paired else + deal with reverse primers
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else
+      { /*Else: solo barcode*/
+         if(coordArySI[siCoord + 3] < 0)
+         { /*If: need to go backwards*/
+            lenSI = coordArySI[siCoord + 2];
+            endSI = lenSI;
+
+            if(siCoord)
+            { /*If: have a pervious primer*/
+               lenSI -= coordArySI[siCoord - 2];
+               ++lenSI;
+               startSI = coordArySI[siCoord - 2];
+
+               if(coordArySI[siCoord - 1] >= 0)
+                  continue; /*the last and current
+                            `  primers are in oposite
+                            `  directions and so overlap,
+                            `  so I can not make a call
+                            */
+            } /*If: have a pervious primer*/
+
+            else
+               startSI = 0;
+
+            if(lenSI < minDistSI)
+               continue; /*to short*/
+            else if(lenSI > maxDistSI && maxDistSI)
+               continue; /*to long*/
+
+            tmpSeqSC =
+               seqSTPtr->seqStr[coordArySI[siCoord +2]+1];
+            seqSTPtr->seqStr[coordArySI[siCoord + 2]+1]=0;
+
+            if(seqSTPtr->qStr && seqSTPtr->qStr[0])
+            { /*If: have quality score entry*/
+               tmpQSC =
+                  seqSTPtr->qStr[coordArySI[siCoord+2]+1];
+               seqSTPtr->qStr[coordArySI[siCoord+2]+1]=0;
+
+               fprintf(
+                  (FILE *) outFILE,
+                  "@%s-%03i\tdir=rev\tlen=%i\t",
+                  seqSTPtr->idStr,
+                  cntSI++,
+                  lenSI
+               );
+            } /*If: have quality score entry*/
+
+            else
+               fprintf(
+                  (FILE *) outFILE,
+                  ">%s-%03i\tdir=rev\tlen=%i\t",
+                  seqSTPtr->idStr,
+                  cntSI++,
+                  lenSI
+               );
+
+            fprintf(
+               (FILE *) outFILE,
+               "start=%i\tend=%i\tforPrim=NA\trevPrim=%s",
+               startSI + 1,
+               endSI + 1,
+               barSTPtr[barSI].forSeqST->idStr
+            );
+            fprintf(
+               (FILE *) outFILE,
+               "\tforStart=NA\tforEnd=NA\tforScore=NA"
+            );
+            fprintf(
+               (FILE *) outFILE,
+               "\trevStart=%i\trevEnd=%i\trevScore=%i",
+               coordArySI[siCoord + 1] - startSI + 1,
+               coordArySI[siCoord + 2] - startSI + 1,
+               coordArySI[siCoord + 3] * -1
+            );
+
+            if(! seqSTPtr->qStr || ! seqSTPtr->qStr[0])
+               fprintf(
+                 (FILE *) outFILE,
+                 "%s%s%s",
+                 str_endLine, /*for end of header*/
+                 &seqSTPtr->seqStr[
+                    coordArySI[siCoord - 2] + 1
+                 ],
+                 str_endLine
+               );
+            else
+               fprintf(
+                 (FILE *) outFILE,
+                 "%s%s%s+%s%s%s",
+                 str_endLine, /*for end of header*/
+                 &seqSTPtr->seqStr[
+                    coordArySI[siCoord - 2] + 1
+                 ],
+                 str_endLine, /*end of sequence*/
+                 str_endLine, /*for +*/
+                 &seqSTPtr->qStr[coordArySI[barSI + 1]],
+                 str_endLine  /*for q-score entry*/
+               );
+
+            seqSTPtr->seqStr[coordArySI[siCoord + 2]+1] =
+               tmpSeqSC;
+            if(seqSTPtr->qStr && seqSTPtr->qStr[0])
+               seqSTPtr->qStr[coordArySI[siCoord + 2]+1] =
+                  tmpQSC;
+         } /*If: need to go backwards*/
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun05 Sec02 Sub03 Cat02:
+         +   - deal with single forward primers
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         else
+         { /*Else: forward*/
+            lenSI = coordArySI[siCoord + 1];
+
+            if(siCoord < coordLenSI - 4)
+            { /*If: have a next primer*/
+               lenSI = coordArySI[siCoord + 6] - lenSI +1;
+
+               if(coordArySI[siCoord + 7] >= 0)
+                  continue; /*the next primer and this
+                            `  primers are in oposite
+                            `  directions and so you can
+                            `  not make a call
+                            */
+            } /*If: have a next primer*/
+
+            else
+               lenSI = seqSTPtr->seqLenSL - lenSI;
+
+            if(lenSI < minDistSI)
+               continue; /*to short*/
+            else if(lenSI > maxDistSI && maxDistSI)
+               continue; /*to long*/
+
+            tmpSeqSC =
+               seqSTPtr->seqStr[coordArySI[siCoord +6]+1];
+            seqSTPtr->seqStr[coordArySI[siCoord + 6]+1]=0;
+               /*6 = 4 + 2; 4 moves to next primer and
+               `  2 is end of the primer
+               */
+
+            if(seqSTPtr->qStr && seqSTPtr->qStr[0])
+            { /*If: have a quality score entry*/
+               tmpQSC =
+                  seqSTPtr->qStr[coordArySI[siCoord+6]+1];
+               seqSTPtr->qStr[coordArySI[siCoord + 6]+1] =
+                  0;
+
+               fprintf(
+                  (FILE *) outFILE,
+                  ">%s-%03i\tdir=for\tlen=%i\t",
+                  seqSTPtr->idStr,
+                  cntSI++,
+                  lenSI
+               );
+            } /*If: have a quality score entry*/
+
+            else
+            { /*Else: is a fastq file*/
+               fprintf(
+                  (FILE *) outFILE,
+                  "@%s-%03i\tdir=for\tlen=%i\t",
+                  seqSTPtr->idStr,
+                  cntSI++,
+                  lenSI
+               );
+            } /*Else: is a fastq file*/
+
+            fprintf(
+               (FILE *) outFILE,
+               "start=%i\tend=%i\tforPrim=%s\trevPrim=NA",
+               startSI + 1,
+               endSI + 1,
+               barSTPtr[siNext].forSeqST->idStr
+            );
+            fprintf(
+               (FILE *) outFILE,
+               "\tforStart=%i\tforEnd=%i\tforScore=%i",
+               coordArySI[siCoord + 1] - startSI + 1,
+               coordArySI[siCoord + 2] - startSI + 1,
+               coordArySI[siCoord + 3]
+            );
+            fprintf(
+               (FILE *) outFILE,
+               "\trevStart=NA\trevEnd=NA\trevScore=NA"
+            );
+
+            if(! seqSTPtr->qStr || ! seqSTPtr->qStr[0])
+               fprintf(
+                 (FILE *) outFILE,
+                 "%s%s%s",
+                 str_endLine, /*for end of header*/
+                 &seqSTPtr->seqStr[coordArySI[siCoord+1]],
+                 str_endLine
+               );
+            else
+               fprintf(
+                 (FILE *) outFILE,
+                 "%s%s%s+%s%s%s",
+                 str_endLine, /*for end of header*/
+                 &seqSTPtr->seqStr[coordArySI[siCoord+1]],
+                 str_endLine, /*end of sequence*/
+                 str_endLine, /*for +*/
+                 &seqSTPtr->qStr[coordArySI[barSI + 1]],
+                 str_endLine  /*for q-score entry*/
+               );
+
+            seqSTPtr->seqStr[coordArySI[siCoord + 6]+1] =
+               tmpSeqSC;
+
+            if(seqSTPtr->qStr && seqSTPtr->qStr[0])
+               seqSTPtr->qStr[coordArySI[siCoord + 6]+1] =
+                  tmpQSC;
+         } /*Else: forward*/
+      } /*Else: solo barcode*/
+   } /*Loop: print primers*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun05 Sec05:
+   ^   - return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   goto ret_fun05_sec05;
+
+   noBarcodes_fun05_sec05:;
+      cntSI = 0;
+      goto ret_fun05_sec05;
+
+   ret_fun05_sec05:;
+      return cntSI;
+} /*primer_demux*/
+
+/*-------------------------------------------------------\
+| Fun06: pGeneCoord_demux
+|   - get coordinates of all genes found in target
+| Input:
+|   - seqSTPtr:
+|     o seqSTPtr struct pointer with read to find genes
+|       in
+|   - coordsArySI:
+|     o signed int array retured from barcodeCoords_demux
+|       * index (n % 4 = 0) is barcode index
+|       * index (n % 4 = 1) is the barcode start
+|       * index (n % 4 = 2) is the barcode end
+|       * index (n % 4 = 3) is the score
+|         + a negative score means a reverse mapping
+|   - coordLenSI:
+|     o length of coordsArySI (number barcodes << 2)
+|   - geneSTPtr:
+|     o refST_kmerFind struct pionter with the genes
+|   - headBlPtr:
+|     o 1: print header and then set to 0
+|     o 0: do not print the header
+|   - geneSTPtr
+|     o refST_kmerFind struct pionter with the genes
+|       to find
+|   - outFILE:
+|     o FILE pionter to print gene coordinates
+| Output:
+|   - Prints:
+|     o gene coordinates to outFILE
+|   - Returns:
+|     o number of amplicons found
+|     o 0 if no genes
+\-------------------------------------------------------*/
+signed int
+pGeneCoord_demux(
+   struct seqST *seqSTPtr,/*read to split into amplicons*/
+   signed int coordArySI[],/*has barcode mappings*/
+   signed int coordLenSI, /*length of coordLenSI*/
+   signed char *headBlPtr,/*1: print header + set to 0*/
+   struct refST_kmerFind *geneSTPtr,/*genes searched*/
+   void *outFILE          /*print sequences to*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun06 TOC:
+   '   - get coordinates of all genes found in target
+   '   o fun06 sec01:
+   '     - variable declarations
+   '   o fun06 sec02:
+   '     - print header if needed
+   '   o fun06 sec03:
+   '     - print gene coordinates
+   '   o fun06 sec04:
+   '     - print split sequences
+   '   o fun06 sec04:
+   '     - return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int lenSI = 0;   /*amplicon length*/
+   signed int cntSI = 0;   /*number primers found*/
+   signed int siCoord = 0; /*primer on*/
+
+   signed int geneSI = 0; /*index of gene on*/
+
+   signed int *coordHeapArySI = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec02:
+   ^   - print header if needed
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(coordLenSI < 4)
+      goto noGenes_fun06_sec04;
+
+   if(*headBlPtr)
+   { /*If: printing the header*/
+      fprintf(
+         (FILE *) outFILE,
+         "id-count\tgene\tdir\tscore\tmaxScore\tlength"
+      );
+      fprintf(
+         (FILE *) outFILE,
+         "\tmaxLength\tstart\tend%s",
+         str_endLine
+      );
+      *headBlPtr = 0;
+   } /*If: printing the header*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec03:
+   ^   - print gene coordinates
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   for(siCoord = 0; siCoord < coordLenSI; siCoord += 4)
+   { /*Loop: print gene coordinates*/
+      geneSI = coordArySI[siCoord];
+      lenSI =
+          coordArySI[siCoord+2] - coordArySI[siCoord+1]+1;
+      if(coordArySI[siCoord + 3] < 0)
+         fprintf(
+           (FILE *) outFILE,
+           "%s-%03i\t%s\tR\t%i\t%0.2f\t%i\t%li\t%i\t%i%s",
+           seqSTPtr->idStr,
+           cntSI++,                 /*number of genes*/
+           geneSTPtr[geneSI].forSeqST->idStr,
+           coordArySI[siCoord + 3], /*score*/
+           geneSTPtr[geneSI].maxRevScoreF,
+           lenSI,
+           geneSTPtr[geneSI].forSeqST->seqLenSL,
+           coordArySI[siCoord + 1] + 1,     /*start*/
+           coordArySI[siCoord + 2] + 1,     /*end*/
+           str_endLine
+         );
+      else
+         fprintf(
+           (FILE *) outFILE,
+           "%s-%03i\t%s\tF\t%i\t%0.2f\t%i\t%li\t%i\t%i%s",
+           seqSTPtr->idStr,
+           cntSI++,                       /*number genes*/
+           geneSTPtr[geneSI].forSeqST->idStr,
+           coordArySI[siCoord + 3],   /*score*/
+           geneSTPtr[geneSI].maxForScoreF,
+           lenSI,
+           geneSTPtr[geneSI].forSeqST->seqLenSL,
+           coordArySI[siCoord +1] +1, /*start*/
+           coordArySI[siCoord +2] +1, /*end*/
+           str_endLine
+         );
+   } /*Loop: print gene coordinates*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun06 Sec04:
+   ^   - return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   goto ret_fun06_sec04;
+
+   noGenes_fun06_sec04:;
+      cntSI = 0;
+      goto ret_fun06_sec04;
+
+   ret_fun06_sec04:;
+      if(coordHeapArySI)
+         free(coordHeapArySI);
+      coordHeapArySI = 0;
+
+      return cntSI;
+} /*pGeneCoord_demux*/
+
+/*=======================================================\
+: License:
+: 
+: This code is under the unlicense (public domain).
+:   However, for cases were the public domain is not
+:   suitable, such as countries that do not respect the
+:   public domain or were working with the public domain
+:   is inconveint / not possible, this code is under the
+:   MIT license
+: 
+: Public domain:
+: 
+: This is free and unencumbered software released into the
+:   public domain.
+: 
+: Anyone is free to copy, modify, publish, use, compile,
+:   sell, or distribute this software, either in source
+:   code form or as a compiled binary, for any purpose,
+:   commercial or non-commercial, and by any means.
+: 
+: In jurisdictions that recognize copyright laws, the
+:   author or authors of this software dedicate any and
+:   all copyright interest in the software to the public
+:   domain. We make this dedication for the benefit of the
+:   public at large and to the detriment of our heirs and
+:   successors. We intend this dedication to be an overt
+:   act of relinquishment in perpetuity of all present and
+:   future rights to this software under copyright law.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
+:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
+:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+:   DEALINGS IN THE SOFTWARE.
+: 
+: For more information, please refer to
+:   <https://unlicense.org>
+: 
+: MIT License:
+: 
+: Copyright (c) 2025 jeremyButtler
+: 
+: Permission is hereby granted, free of charge, to any
+:   person obtaining a copy of this software and
+:   associated documentation files (the "Software"), to
+:   deal in the Software without restriction, including
+:   without limitation the rights to use, copy, modify,
+:   merge, publish, distribute, sublicense, and/or sell
+:   copies of the Software, and to permit persons to whom
+:   the Software is furnished to do so, subject to the
+:   following conditions:
+: 
+: The above copyright notice and this permission notice
+:   shall be included in all copies or substantial
+:   portions of the Software.
+: 
+: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+\=======================================================*/

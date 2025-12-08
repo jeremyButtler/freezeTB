@@ -1100,14 +1100,12 @@ trimReads_trimSam(
     goto cleanUp_fun04;
 
     memErr_fun04:;
-    errSC = def_memErr_trimSam;
-    goto cleanUp_fun04;
+       errSC = def_memErr_trimSam;
+       goto cleanUp_fun04;
 
     cleanUp_fun04:;
-
-    freeStack_samEntry(&samStackST);
-
-    return errSC;
+       freeStack_samEntry(&samStackST);
+       return errSC;
 } /*trimReads_trimSam*/
 
 /*=======================================================\

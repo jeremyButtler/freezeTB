@@ -86,8 +86,15 @@
 '   o fun35: scoreSubAln_mapRead
 '     - scores the aligment in samEntry and finds best
 '       sub-aligment
+'   o fun36: chainToAln_mapRead
+'     - converts chain in chains_mapRead struct to
+'       alignment
 '   o fun37: align_mapRead
 '     - maps read to reference
+'   o fun38: kmerscan_mapRead
+'     - map an amplicon (short sequence) to a reference
+'       using kmerFind for the locations and mapRead for
+'       the final alignment
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -127,6 +134,7 @@
 !   - .c  #include "../genLib/strAry.h"
 !   - .c  #include "../genLib/fileFun.h"
 !   - .c  #include "../genAln/indexToCoord.h"
+!   - .c  #include "memwater.h"
 !   - .h  #include "../genBio/ntTo5Bit.h"
 !   - .h  #include "../genLib/endLine.h"
 !   - .h  #include "../genBio/kmerBit.h"
@@ -984,6 +992,16 @@ addRef_ref_mapRead(
    ^ Fun17 Sec02:
    ^   - find reference alignment settings
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   if(! refSTPtr->seqSTPtr)
+   { /*If: need a sequence structure*/
+      refSTPtr->seqSTPtr = malloc( sizeof(struct seqST) );
+
+      if(! refSTPtr->seqSTPtr)
+         goto memErr_fun17_sec06;
+      init_seqST(refSTPtr->seqSTPtr);
+   } /*If: need a sequence structure*/
+
 
    for(
       siKmer = 0;
@@ -3517,6 +3535,12 @@ mergeToSam_mapRead(
    chainLenSI += lenKmerUC; /*get bases in one chain*/
    chainLenSI += (chainLenSI >> 1); /*softmasks at end*/
 
+   if(! samSTPtr->seqStr)
+   { /*If: need to add initial memory*/
+      if( setup_samEntry(samSTPtr) )
+         goto memErr_fun34_sec06;
+   } /*If: need to add initial memory*/
+
    cigHeapArySI =
       malloc(
          ((chainLenSI << 1) + 8) * sizeof(signed int)
@@ -5606,13 +5630,18 @@ chainToAln_mapRead(
 |   - mapIndexSIPtr:
 |     o signed int pointer to hold index of best chain
 |       (used to make mapping)
+|   - alreadyIndexedBl:
+|     o 1: the sequence in qrySTPtr has already been
+|          converted to index's
+|     o 0: this function will convert to index's and flip
+|          back
+|   - samSTPtr:
+|     o pointer to samEntry struct to hold best alignment
 |   - alnSTPtr:
 |     o aln_mapRead struct pionter with allocated memory to
 |       use/allocate/resize in mapping steps
 |   - setSTPtr:
 |     o set_mapRead structure with non-reference specific
-|   - samSTPtr:
-|     o pointer to samEntry struct to hold best alignment
 |   - errSCPtr:
 |     o signed char pointer to hold any errors
 | Output:
@@ -5643,6 +5672,7 @@ align_mapRead(
    struct seqST *qrySTPtr,      /*has query sequence*/
    struct ref_mapRead *refSTPtr,/*ref kmers/settings*/
    signed int *mapIndexSIPtr,   /*index of best chain*/
+   signed char alreadyIndexedBl,/*1: qrySTPtr is index*/
    struct samEntry *samSTPtr,   /*gets alignments*/
    struct aln_mapRead *alnSTPtr,/*memory for query*/
    struct set_mapRead *setSTPtr,/*alignment settings*/
@@ -5692,7 +5722,8 @@ align_mapRead(
    if( setup_samEntry(&samStackST) )
       goto memErr_fun37_sec06;
 
-   seqToIndex_alnSet(qrySTPtr->seqStr);
+   if(! alreadyIndexedBl)
+      seqToIndex_alnSet(qrySTPtr->seqStr);
 
    if(qrySTPtr->seqLenSL < (refSTPtr->lenKmerUC << 1))
    { /*If: mapping a read that has less then two chains*/
@@ -5896,10 +5927,14 @@ align_mapRead(
             if(! iterSTPtr)
             { /*If: new index goes to end*/
                swapSTPtr = hitHeapST->nextST;
-               tailSTPtr->nextST = hitHeapST;
                hitHeapST->nextST = 0;
+               tailSTPtr->nextST = hitHeapST;
+               tailSTPtr = hitHeapST;
                hitHeapST = swapSTPtr;
             } /*If: new index goes to end*/
+
+            else if(iterSTPtr == hitHeapST)
+               ; /*already positioned*/
 
             else
             { /*Else: index is inserted*/
@@ -5907,6 +5942,9 @@ align_mapRead(
               hitHeapST = hitHeapST->nextST;
               swapSTPtr->nextST = iterSTPtr->nextST;
               iterSTPtr->nextST = swapSTPtr;
+
+              if(tailSTPtr == iterSTPtr)
+                 tailSTPtr = iterSTPtr->nextST;
             } /*Else: index is inserted*/
          } /*Else: need to position new index*/
 
@@ -6005,11 +6043,7 @@ align_mapRead(
       if(scoreSL > bestScoreSL)
       { /*If: new best alignment*/
          bestScoreSL = scoreSL;
-
-         swap_samEntry(
-            &samStackST,
-            samSTPtr
-         );
+         swap_samEntry(&samStackST, samSTPtr);
       } /*If: new best alignment*/
    } /*Loop: find best alignment*/
 

@@ -68,7 +68,7 @@
 |       coordinates want to extract
 |     o input 0/null to not filter by genes
 |   - numGenesSI:
-|     o number of genes in coordsSTPtr (index 1)
+|     o number of genes in coordsSTPtr (index 0)
 |   - depthArySI:
 |     o histogram (int array) to add each base to
 |   - numOffTargSI:
@@ -98,7 +98,7 @@ addRead_ampDepth(
             coordsSTPtr,
             samSTPtr->refStartUI,
             samSTPtr->refEndUI,
-            numGenesSI
+            numGenesSI + 1
          );
 
       if(siIndex < 0)
@@ -289,7 +289,7 @@ phist_ampDepth(
          findStart_geneCoord(
             geneCoordSTPtr,
             mapStartSI,
-            numGenesSI
+            numGenesSI + 1
          ); /*Find the index of the gene at the position*/
 
       if(geneIndexSI < 0)

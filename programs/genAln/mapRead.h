@@ -87,8 +87,15 @@
 '   o fun35: scoreSubAln_mapRead
 '     - scores the aligment in samEntry and finds best
 '       sub-aligment
+'   o fun36: chainToAln_mapRead
+'     - converts chain in chains_mapRead struct to
+'       alignment
 '   o fun37: align_mapRead
 '     - maps read to reference
+'   o fun38: kmerscan_mapRead
+'     - map an amplicon (short sequence) to a reference
+'       using kmerFind for the locations and mapRead for
+'       the final alignment
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -159,7 +166,7 @@ typedef struct chains_mapRead
 \-------------------------------------------------------*/
 typedef struct set_mapRead
 {
-   /*determined by reference length*/
+   /*________determined by reference length_____________*/
    signed int lenArySI[16];  /*length to swith kmer size*/
    unsigned char kmerAryUC[16]; /*kmer size per length*/
    signed int chainLenArySI[16]; /*minimum chain length
@@ -167,7 +174,7 @@ typedef struct set_mapRead
                                  */
    unsigned char lenKmersUC;    /*number kmer lengths*/
 
-   /*chain merging*/
+   /*_____________chain merging________________________*/
    signed int gapSI;   /*gap score for chain merging*/
    signed int matchSI; /*match score for chain merging*/
 
@@ -175,12 +182,12 @@ typedef struct set_mapRead
    struct alnSet *alnSetST;
    signed char alnEndsBl; /*align softmasked ends*/
 
-   /*for scoreSub_mapRead*/
+   /*______________for scoreSub_mapRead_________________*/
    signed char subBl;     /*1: do sub-aligment score*/
    float minScoreF;       /*min % score to keep*/
    float minMatchF;       /*min % matches to keep read*/
    float minPercLenF;     /*min % score to keep*/
-   float chainMinNtF;    /*min % bases in chainto keep*/
+   float chainMinNtF;     /*min % bases in chainto keep*/
    float maxLenPercF;     /*max % length between chains*/
 }set_mapRead;
 
@@ -1094,13 +1101,18 @@ chainToAln_mapRead(
 |   - mapIndexSIPtr:
 |     o signed int pointer to hold index of best chain
 |       (used to make mapping)
+|   - alreadyIndexedBl:
+|     o 1: the sequence in qrySTPtr has already been
+|          converted to index's
+|     o 0: this function will convert to index's and flip
+|          back
+|   - samSTPtr:
+|     o pointer to samEntry struct to hold best alignment
 |   - alnSTPtr:
 |     o aln_mapRead struct pionter with allocated memory to
 |       use/allocate/resize in mapping steps
 |   - setSTPtr:
 |     o set_mapRead structure with non-reference specific
-|   - samSTPtr:
-|     o pointer to samEntry struct to hold best alignment
 |   - errSCPtr:
 |     o signed char pointer to hold any errors
 | Output:
@@ -1131,6 +1143,7 @@ align_mapRead(
    struct seqST *qrySTPtr,      /*has query sequence*/
    struct ref_mapRead *refSTPtr,/*ref kmers/settings*/
    signed int *mapIndexSIPtr,   /*index of best chain*/
+   signed char alreadyIndexedBl,/*1: qrySTPtr is index*/
    struct samEntry *samSTPtr,   /*gets alignments*/
    struct aln_mapRead *alnSTPtr,/*memory for query*/
    struct set_mapRead *setSTPtr,/*alignment settings*/

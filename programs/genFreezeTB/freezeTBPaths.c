@@ -24,6 +24,10 @@
 '     - sets up an ouput file name & opens "w", the closes
 '   o fun10: guiTclPath_freezeTBPaths
 '     - path to tcl script for GUI
+'   o fun11: hsp65SimpleDbPath_freezeTBPaths
+'     - finds default hsp65 simple database file path
+'   o fun12: hsp65ComplexDbPath_freezeTBPaths
+'     - finds default hsp65 complex database file path
 '   o license:
 '     - licensing for this code (public dofun03 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -73,6 +77,14 @@ signed char
 signed char
    *def_ref_freezeTBPaths =
       (signed char *) "NC000962.fa";
+
+signed char
+   *def_hsp65SimpleDb_freezeTBPaths =
+      (signed char *) "hsp65-db-simple.tsv";
+
+signed char
+   *def_hsp65ComplexDb_freezeTBPaths =
+      (signed char *) "hsp65-db-complex.tsv";
 
 signed char
    *def_tclGui_freezeTBPaths =
@@ -518,6 +530,50 @@ outputPath_freezeTBPaths(
    fclose(testFILE);
    return 0;
 } /*outputPath_freezeTBPaths*/
+
+/*-------------------------------------------------------\
+| Fun11: hsp65SimpleDbPath_freezeTBPaths
+|   - finds default hsp65 simple database file path
+| Input:
+|   - pathStr:
+|     o c-string to copy default hsp65 simple database
+|       path to
+| Output:
+|   - Modifies:
+|     o pathStr to have the default path or '\0' if
+|       could not find file
+\-------------------------------------------------------*/
+void
+hsp65SimpleDbPath_freezeTBPaths(
+   signed char *pathStr
+){
+   checkPaths_freezeTBPaths(
+      pathStr,
+      def_hsp65SimpleDb_freezeTBPaths
+   );
+} /*hsp65SimpleDbPath_freezeTBPaths*/
+
+/*-------------------------------------------------------\
+| Fun12: hsp65ComplexDbPath_freezeTBPaths
+|   - finds default hsp65 complex database file path
+| Input:
+|   - pathStr:
+|     o c-string to copy default hsp65 complex database
+|       path to
+| Output:
+|   - Modifies:
+|     o pathStr to have the default path or '\0' if
+|       could not find file
+\-------------------------------------------------------*/
+void
+hsp65ComplexDbPath_freezeTBPaths(
+   signed char *pathStr
+){
+   checkPaths_freezeTBPaths(
+      pathStr,
+      def_hsp65ComplexDb_freezeTBPaths
+   );
+} /*hsp65ComplexDbPath_freezeTBPaths*/
 
 /*=======================================================\
 : License:

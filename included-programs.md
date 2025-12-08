@@ -207,19 +207,23 @@ End of comment block ---#
 
 Chapter seven: make your own monster
 
-A better picture of how freezeTB works might be gotten by
-  showing how it would look if I used a bash script. This
+To give a a better picture of how freezeTB works I made
+  a shell script that should do the same task. This
   is for default settings only, since it is an example and
-  I want to keep the script more simple. This has not been
-  tested.
+  I want to keep the script more simple. Also, this has
+  not been tested.
+
+Finally, the shell script will be slower, since these
+  programs are built into freezeTB.
 
 You will need some programs from my bioTools repo(
   [https://github.com/jeremybuttler/bioTools](
    https://github.com/jeremybuttler/bioTools)). These
-  include ampDepth, filtsam, maskPrim, edClust, tbCon,
-  rmHomo, and mapRead.
+  include ampDepth, filtsam, getLin, maskPrim, edClust,
+  tbCon, rmHomo, and mapRead.
 
 ```
+#!/usr/bin/sh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SOF: Start Of File
 #   o sec01:
@@ -250,7 +254,6 @@ prefixStr="out";
 graphExtStr="tiff";
 
 graphBl="FALSE";
-adjBl="FALSE";
 maskBl="FALSE";
 rmHomoBl="FALSE";
 
@@ -269,10 +272,6 @@ Input:
     o fastq file with tuberculosis reads to check
   -prefix good-name: [$prefixStr]
     o what to name output files
-  -coord-adj: [$adjBl]
-    o makes freezeTB.sh adjust mapping coordinates. This
-      means you mapped to an set of genes instead of an
-      reference.
   -prim-mask: [$maskBl]
     o mask any primer coordinates in an gene
   -graph: [$graphBl]
@@ -291,19 +290,31 @@ Output:
 #   - get user input
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-while [[ #$ -gt 0 ]]; do
+while [ #$ -gt 0 ]; do
 # Loop: get user input
-   case $1 in
-      -fq) readsStr="$2"; shift;;
-      -prefix) prefixStr="$2"; shift;;
-      -graph) graphBl="TRUE";;
-      -coord-adj) adjBl="TRUE";;
-      -prim-mask) maskBl="TRUE";;
-      -ext) graphExtStr="$2"; graphBl="TRUE";;
-      -rmHomo) rmHomoeBl="TRUE";;
-      -h) printf "%s\n" "$helpStr"; exit;;
-      *) printf "%s not recognized\n" "$1"; exit;;
-   esac
+   if [ "$1" = "-fq" ]; then
+      shift;
+      readsStr="$1";
+   elif [ "$1" = "-prefix" ]; then
+      shift;
+      prefixStr="$1";
+   elif [ "$1" = "-graph" ]; then
+      graphBl="TRUE";
+   elif [ "$1" = "-prim-mask" ]; then
+      maskBl="TRUE";
+   elif [ "$1" = "-ext" ]; then
+      shift;
+      graphExtStr="$1";
+      graphBl="TRUE";
+   elif [ "$1" = "-rmHomo" ]; then
+      rmHomoeBl="TRUE";
+   elif [ "$1" = "-h" ]; then
+      printf "%s\n" "$helpStr";
+      exit;
+   else
+      printf "%s not recognized\n" "$1";
+      exit;
+   fi;
 
    shift;
 done # Loop: get user input
@@ -407,6 +418,15 @@ tbSpol \
     -sam "$samStr" \
     -out "$prefixStr-read-spoligo.tsv";
 
+# find species using the hsp65 gene
+getLin \
+    -simple "$dbDirStr/hsp65-db-simple.tsv" \
+    -complex "$dbDirStr/hsp65-db-complex.tsv" \
+    -sam "$samStr" \
+    -id "$prefixStr" \
+    -pmode-read \
+    -out "$prefixStr-read-hsp65.tsv";
+
 # build the consensuses
 if [ "$mixedInfectBl" -lt 1 ]; then
    tbCon \
@@ -447,12 +467,27 @@ tbSpol \
     -sam "$prefixStr-cons.sam" \
     -out "$prefixStr-con-spoligo.tsv";
 
+# find species using the hsp65 gene
+getLin \
+    -simple "$dbDirStr/hsp65-db-simple.tsv" \
+    -complex "$dbDirStr/hsp65-db-complex.tsv" \
+    -sam "$prefixStr-cons.sam" \
+    -id "$prefixStr" \
+    -pmode-genome \
+    -out "$prefixStr-con-hsp65.tsv";
+
+# output the fasta file
+filtsam \
+    -out-fasta \
+    -sam "$prefixStr-cons.sam" \
+    -out "$prefixStr-cons.fa";
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec06:
 #   - build the read depth and coverage graphs
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-if [ "$graphBl" == "TRUE" ]; then
+if [ "$graphBl" = "TRUE" ]; then
 # If: graphs were wanted
    # For graphing (wait till ampDepth finishes)
    Rscript graphAmpDepth.r \

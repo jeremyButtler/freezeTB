@@ -27,10 +27,19 @@
 '   o fun08: filter_memwaterScan
 '     - removes low scoring alignments and alignments that
 '       are nested alignments
-'   o fun09 memwaterScan:
+'   o fun09: merge_aln_memwaterScan
+'     - merges one aln_memwaterScan struct into another
+'       aln_memwaterScan struct
+'   o fun10 memwaterScan:
 '     - performs a memory efficent Smith Waterman scan
 '       (keep best alignment for each query/reference base)
 '       alignment on a pair of sequences
+'   o fun11: simple_memwaterScan
+'     - performs a memory efficent Smith Waterman scan
+'       (keep best alignment for each query/reference
+'       base) alignment on a pair of sequences
+'     - simple means no settings or seqST structure used
+'       and no match matrix
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -267,7 +276,35 @@ filter_memwaterScan(
 );
 
 /*-------------------------------------------------------\
-| Fun09: memwaterScan
+| Fun09: merge_aln_memwaterScan
+|   - merges one aln_memwaterScan struct into another
+|     aln_memwaterScan struct
+| Input:
+|   - mergeSTPtr:
+|     o aln_memwaterScan struct to merge into the final
+|       structure
+|   - outSTPtr:
+|     o aln_memwaterScan struct to merge mergeSTPtr into
+|   - minScoreSL:
+|     o minumum score to keep score in mergeSTPtr
+| Output:
+|   - Modifies:
+|     o variables in outSTPtr to include variables in
+|       mergeSTPtr and outSTPtr
+|   - Returns:
+|     o 0 for success
+|     o -1 if reference lengths differ (no way to merge)
+|     o -2 for memory errors
+\-------------------------------------------------------*/
+signed char
+merge_aln_memwaterScan(
+   struct aln_memwaterScan *mergeSTPtr,
+   struct aln_memwaterScan *outSTPtr,
+   signed long minScoreSL
+);
+
+/*-------------------------------------------------------\
+| Fun10: memwaterScan
 |   - performs a memory efficent Smith Waterman scan
 |     (keep best alignment for each query/reference base)
 |     alignment on a pair of sequences
@@ -299,6 +336,41 @@ memwaterScan(
    struct seqST *refSTPtr, /*ref sequence and data*/
    struct aln_memwaterScan *alnSTPtr,/*gets alignment*/
    struct alnSet *settings
+);
+
+/*-------------------------------------------------------\
+| Fun11: simple_memwaterScan
+|   - performs a memory efficent Smith Waterman scan
+|     (keep best alignment for each query/reference base)
+|     alignment on a pair of sequences
+|   - simple means no settings or seqST structure used and
+|     no match matrix
+| Input;
+|   - qrySeqStr:
+|     o c-string with query sequence
+|   - qryLenSI:
+|     o length of qrySeqStr (index 1)
+|   - refSeqStr:
+|     o c-string with reference sequence
+|   - refLenSI:
+|     o length of refSeqStr (index 1)
+|   - alnSTPtr:
+|     o pointer to aln_memwaterScan structure to hold the
+|       results of the alignment
+| Output:
+|  - Modifies:
+|    o variables in alnSTPtr to have the new alignment
+|  - Returns:
+|    o score for aligment
+|    o negative number for memory errors
+\-------------------------------------------------------*/
+signed long
+simple_memwaterScan(
+   signed char *qrySeqStr,   /*query sequence*/
+   signed int lenQrySI,      /*length of query sequence*/
+   signed char *refSeqStr,   /*reference sequence*/
+   signed int lenRefSI,      /*reference sequence length*/
+   struct aln_memwaterScan *alnSTPtr /*gets alignment*/
 );
 
 #endif

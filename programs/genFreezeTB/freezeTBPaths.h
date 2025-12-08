@@ -24,6 +24,10 @@
 '     - path to tcl script for GUI
 '   o fun10: outputPath_freezeTBPaths
 '     - sets up an ouput file name & opens "w", the closes
+'   o fun11: hsp65SimpleDbPath_freezeTBPaths
+'     - finds default hsp65 simple database file path
+'   o fun12: hsp65ComplexDbPath_freezeTBPaths
+'     - finds default hsp65 complex database file path
 '   o license:
 '     - licensing for this code (public dofun03 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -209,6 +213,40 @@ outputPath_freezeTBPaths(
    signed char *prefixStr,
    signed char *nameStr,
    signed char *outStr
+);
+
+/*-------------------------------------------------------\
+| Fun11: hsp65SimpleDbPath_freezeTBPaths
+|   - finds default hsp65 simple database file path
+| Input:
+|   - pathStr:
+|     o c-string to copy default hsp65 simple database
+|       path to
+| Output:
+|   - Modifies:
+|     o pathStr to have the default path or '\0' if
+|       could not find file
+\-------------------------------------------------------*/
+void
+hsp65SimpleDbPath_freezeTBPaths(
+   signed char *pathStr
+);
+
+/*-------------------------------------------------------\
+| Fun12: hsp65ComplexDbPath_freezeTBPaths
+|   - finds default hsp65 complex database file path
+| Input:
+|   - pathStr:
+|     o c-string to copy default hsp65 complex database
+|       path to
+| Output:
+|   - Modifies:
+|     o pathStr to have the default path or '\0' if
+|       could not find file
+\-------------------------------------------------------*/
+void
+hsp65ComplexDbPath_freezeTBPaths(
+   signed char *pathStr
 );
 
 #endif

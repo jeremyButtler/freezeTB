@@ -12,11 +12,33 @@ Currently freezeTb uses the WHO 2023 mutation catalog from
   [https://github.com/GTB-tbsequencing/mutation-catalogue-2023](
    https://github.com/GTB-tbsequencing/mutation-catalogue-2023).
 
+As of 2025-12-08 freezeTB uses getLin and the hsp65 gene
+  to identify different *Mycobacterium* species. If you
+  are willing to learn the getLin database system you
+  can modify the `hsp65-db-simple.tsv` and
+  the `hsp65-db-complex.tsv` files for lineage checks.
+  The one thing to be aware of is that the GUI will only
+  show the results for reads.
+
+- Species searched for with the hsp65 gene:
+  - *M. tuberculosis*
+  - *M. Abcessus*
+  - *M. brumae*
+  - *M. chelonae*
+  - *M. chitae*
+  - *M. confluentis*
+  - *M. fortuitum*
+  - *M. mucogenicum*
+  - *M. peregrinum*
+  - *M. senegalense*
+  - *M. smegamtis*
+  
+
 - For installation instructions:
   - [Pre-compiled installation](#pre_compiled_install)
   - [Linux source install steps](#Linux); do raylib
-  - [Mac source install steps](#Mac)
-  - [Windows source install steps](#Windows)
+  - [Mac source install steps](#Mac); do raylib
+  - [Windows source install steps](#Windows); do raylib
 
 # Protocols
 
