@@ -3253,8 +3253,12 @@ getDatabases_ftbRayST(
    '   o fun16 sec07:
    '     - get spoligotype lineage database
    '   o fun16 sec08:
+   '     - get hsp65 simple speices database
+   '   o fun16 sec08:
+   '     - get hsp65 complex speices database
+   '   o fun16 sec10:
    '     - find path to minimap2
-   '   o fun16 sec09:
+   '   o fun16 sec11:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -3324,7 +3328,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(8 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'r';
    argAryStr[*argLenSIPtr][2] = 'e';
@@ -3335,7 +3339,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    refPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
 
    if(! argAryStr[*argLenSIPtr][0])
@@ -3353,7 +3357,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'a';
    argAryStr[*argLenSIPtr][2] = 'm';
@@ -3368,7 +3372,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
 
    amrPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3390,7 +3394,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'g';
    argAryStr[*argLenSIPtr][2] = 'e';
@@ -3409,7 +3413,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
 
    coordPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3431,7 +3435,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'm';
    argAryStr[*argLenSIPtr][2] = 'i';
@@ -3447,7 +3451,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-     goto err_fun16_sec09;
+     goto err_fun16_sec11;
 
    miruPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3468,7 +3472,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 's';
    argAryStr[*argLenSIPtr][2] = 'p';
@@ -3483,7 +3487,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
 
    spolSpacerPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3505,7 +3509,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec09;
+      goto err_fun16_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'd';
    argAryStr[*argLenSIPtr][2] = 'b';
@@ -3523,7 +3527,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
      malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-     goto err_fun16_sec09;
+     goto err_fun16_sec11;
 
    spolLineagePath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3539,6 +3543,91 @@ getDatabases_ftbRayST(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun16 Sec08:
+   ^   - get hsp65 simple speices database
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   argAryStr[*argLenSIPtr] =
+      malloc(16 * sizeof(signed char));
+   if(! argAryStr[*argLenSIPtr])
+      goto err_fun16_sec11;
+   argAryStr[*argLenSIPtr][0] = '-';
+   argAryStr[*argLenSIPtr][1] = 'h';
+   argAryStr[*argLenSIPtr][2] = 's';
+   argAryStr[*argLenSIPtr][3] = 'p';
+   argAryStr[*argLenSIPtr][4] = '6';
+   argAryStr[*argLenSIPtr][5] = '5';
+   argAryStr[*argLenSIPtr][6] = '-';
+   argAryStr[*argLenSIPtr][7] = 's';
+   argAryStr[*argLenSIPtr][8] = 'i';
+   argAryStr[*argLenSIPtr][9] = 'm';
+   argAryStr[*argLenSIPtr][10] = 'p';
+   argAryStr[*argLenSIPtr][11] = 'l';
+   argAryStr[*argLenSIPtr][12] = 'e';
+   argAryStr[*argLenSIPtr][13] = 0;
+   ++(*argLenSIPtr);
+
+   argAryStr[*argLenSIPtr] =
+     malloc(256 * sizeof(signed char));
+   if(! argAryStr[*argLenSIPtr])
+     goto err_fun16_sec11;
+
+   hsp65SimpleDbPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
+   if(! argAryStr[*argLenSIPtr][0])
+   { /*If: need to find hsp65 simple lineage database*/
+      lenSI = cpStr_ulCp(argAryStr[*argLenSIPtr],pathStr);
+      cpStr_ulCp(
+         &argAryStr[*argLenSIPtr][lenSI],
+         (signed char *) "hsp65-db-simple.tsv"
+      );
+   } /*If: need to find hsp65 simple lineage database*/
+
+   ++(*argLenSIPtr);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec09:
+   ^   - get hsp65 complex speices database
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   argAryStr[*argLenSIPtr] =
+      malloc(16 * sizeof(signed char));
+   if(! argAryStr[*argLenSIPtr])
+      goto err_fun16_sec11;
+   argAryStr[*argLenSIPtr][0] = '-';
+   argAryStr[*argLenSIPtr][1] = 'h';
+   argAryStr[*argLenSIPtr][2] = 's';
+   argAryStr[*argLenSIPtr][3] = 'p';
+   argAryStr[*argLenSIPtr][4] = '6';
+   argAryStr[*argLenSIPtr][5] = '5';
+   argAryStr[*argLenSIPtr][6] = '-';
+   argAryStr[*argLenSIPtr][7] = 'c';
+   argAryStr[*argLenSIPtr][8] = 'o';
+   argAryStr[*argLenSIPtr][9] = 'm';
+   argAryStr[*argLenSIPtr][10] = 'p';
+   argAryStr[*argLenSIPtr][11] = 'l';
+   argAryStr[*argLenSIPtr][12] = 'e';
+   argAryStr[*argLenSIPtr][13] = 'x';
+   argAryStr[*argLenSIPtr][14] = 0;
+   ++(*argLenSIPtr);
+
+   argAryStr[*argLenSIPtr] =
+     malloc(256 * sizeof(signed char));
+   if(! argAryStr[*argLenSIPtr])
+     goto err_fun16_sec11;
+
+   hsp65ComplexDbPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
+   if(! argAryStr[*argLenSIPtr][0])
+   { /*If: need to find hsp65 complex lineage database*/
+      lenSI = cpStr_ulCp(argAryStr[*argLenSIPtr],pathStr);
+      cpStr_ulCp(
+         &argAryStr[*argLenSIPtr][lenSI],
+         (signed char *) "hsp65-db-complex.tsv"
+      );
+   } /*If: need to find hsp65 complex lineage database*/
+
+   ++(*argLenSIPtr);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun16 Sec10:
    ^   - find path to minimap2
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3587,13 +3676,13 @@ getDatabases_ftbRayST(
    } /*Else: minimap2 is not in the path*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec09:
+   ^ Fun16 Sec11:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    return 0;
 
-   err_fun16_sec09:;
+   err_fun16_sec11:;
       return 1;
 } /*getDatbases_ftbRayST*/
 
