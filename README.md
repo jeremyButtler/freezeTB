@@ -230,10 +230,7 @@ For amd64 Linux (likely your Linux computer), Mac, and
    - For Linux Ubuntu, you can try right clicking the
      ftbRay file and select `Allow Launching`
      - No idea if works, but hope it does
-   - For Linux, I am hoping it works out of the box, but
-     if you get dependencies errors see the [installing
-     raylib Linux](#raylib_Linux) section for a list of
-     dependencies.
+   - For Linux, it looks like it works
 
 ## Linux:
 
