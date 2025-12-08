@@ -178,7 +178,7 @@ $(genGeneoType)/getLin.$O: \
 	$(genBio)/samEntry.$O \
 	$(genBio)/codonFun.$O \
 	$(genAln)/alnDefs.h
-		$(CC) -o $(genGeneoType)/getLin.$O \
+		$(CC) /Fo:$(genGeneoType)/getLin.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genGeneoType)/getLin.c
 
@@ -189,7 +189,7 @@ $(genGeneoType)/linST.$O: \
 	$(genLib)/fileFun.$O \
 	$(genAln)/kmerFind.$O \
 	$(genAln)/alnDefs.h
-		$(CC) -o $(genGeneoType)/linST.$O \
+		$(CC) /Fo:$(genGeneoType)/linST.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genGeneoType)/linST.c
 
@@ -344,7 +344,7 @@ $(genAln)/memwaterScan.$O: \
 	$(genAln)/indexToCoord.$O \
 	$(genBio)/seqST.$O \
 	$(genLib)/genMath.h
-		$(CC) -o $(genAln)/memwaterScan.$O \
+		$(CC) /Fo:$(genAln)/memwaterScan.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genAln)/memwaterScan.c
 
