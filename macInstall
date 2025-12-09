@@ -133,6 +133,7 @@ fi # If: need to install minimap2
 #   - install freezeTB
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+cd programs/ftbTclTkSrc;
 make -f mkfile.unix;
 sudo make -f mkfile.unix install;
 
