@@ -191,10 +191,10 @@ For the graphical user interface (GUI), you have two
   choices. One GUI which uses TclTk or another GUI that
   uses raylib.
 
-For all GUI freezeTB source install methods, make sure to
-  copy the freezeTBFiles or the ftbResources (included in
-  binary installs) directory (folder) to you `Documents`
-  directory (folder).
+For all GUI freezeTB source (not pre-compiled) install
+  methods, make sure to copy the freezeTBFiles or the
+  ftbResources (included in binary installs) directory
+  (folder) to you `Documents` directory (folder).
 
 The installation steps for the command line programs, are
   not covered here. If you wish to install a command line
@@ -204,12 +204,15 @@ The installation steps for the command line programs, are
   or `nmake /F mkfile.win` for windows. Put the compiled
   binary in the desired location.
 
-## pre_compiled_install
+## pre-compiled install
+
+This is a less slick, but is easier to install. If you
+  want the more slick GUI, go with TclTk.
 
 This is the easiest method and can mostly be done without
-  a terminal. You will need to clone the repository from
-  git hub or at least your OS's binary files (in the `bin`
-  directory (folder)).
+  a terminal (Mac needs one command). You will need to
+  clone the repository from git hub or at least your OS's
+  binary files (in the `bin` directory (folder)).
 
 For amd64 Linux (likely your Linux computer), Mac, and
   Windows there are pre-compiled binaries and resources in
