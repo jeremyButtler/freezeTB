@@ -39,7 +39,7 @@ libStr=""; # library paths
 
 libStr="$(brew --version)";
 
-if [[ "$libStr" == "" ]];
+if [ "$libStr" == "" ];
 then # If: need to install homebrew
    printf "installing homebrew\n";
    printf "enter your user password when prompted\n";
@@ -63,7 +63,7 @@ then # If: need to install homebrew
 
    eval "$(/opt/homebrew/bin/brew shellenv)";
    source ~/.bash_profile;
-fi # If: need to install homebrew
+fi; # If: need to install homebrew
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec03:
@@ -72,11 +72,11 @@ fi # If: need to install homebrew
 
 libStr="$(sh programs/ftbTclTKSrc/libDetect/x11GetLib.sh)";
 
-if [[ ! -f "$libStr" ]];
+if [ ! -f "$libStr" ];
 then # If: need to install X11/Xquartz
    printf "Installing X11 (xquatz)\n";
    brew install xquartz;
-fi # If: need to install X11/Xquartz
+fi; # If: need to install X11/Xquartz
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec04:
@@ -85,7 +85,7 @@ fi # If: need to install X11/Xquartz
 
 libStr="$(bash programs/ftbTclTKSrc/libDetect/tkGetLib.sh)";
 
-if [[ ! -f "$libStr" ]];
+if [ ! -f "$libStr" ];
 then # If: need to install tcltk
    printf "Installing tcltk\n";
    brew install tcl-tk;
@@ -94,13 +94,13 @@ else
 # Else: make sure tcl is not missing
    libStr="$(bash programs/ftbTclTKSrc/libDetect/tclGetLib.sh)";
 
-   if [[ ! -f "$libStr" ]];
+   if [ ! -f "$libStr" ];
    then # If: need to install tcltk
       printf "Installing tcltk\n";
       brew install tcl-tk;
    fi # If: need to install tcltk
 # Else: make sure tcl is not missing
-fi # check if need to install tcltk
+fi; # check if need to install tcltk
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec05:
@@ -109,11 +109,11 @@ fi # check if need to install tcltk
 
 libStr="$(R --version)";
 
-if [[ "$libStr" == "" ]];
+if [ "$libStr" = "" ];
 then # If: need to install R
    printf "Installing R\n";
    brew install R;
-fi # If: need to install R
+fi; # If: need to install R
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec06:
@@ -122,11 +122,11 @@ fi # If: need to install R
 
 libStr="$(minimap2 --version)";
 
-if [[ "$libStr" == "" ]];
+if [ "$libStr" == "" ];
 then # If: need to install minimap2
    printf "Installing minimap2\n";
    brew install minimap2;
-fi # If: need to install minimap2
+fi; # If: need to install minimap2
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec07:
@@ -145,16 +145,16 @@ ln /usr/local/bin/ftbTclTk ~/Desktop/freezeTB;
 # set up fileicon
 libStr="$(fileicon --version)";
 
-if [[ "$libStr" == "" ]];
+if [ "$libStr" == "" ];
 then # If: need to install fileicon
    brew install fileicon
 
    libStr="$(fileicon --version)";
 
-   if [[ "$libStr" != "" ]];
+   if [ "$libStr" != "" ];
    then # If: can set icon
        fileicon set ~/Desktop/freezeTB FTB-icon.png;
-   fi # If: can set icon
+   fi; # If: can set icon
 else
    fileicon set ~/Desktop/freezeTB FTB-icon.png;
-fi # If: need to install fileicon
+fi; # If: need to install fileicon
