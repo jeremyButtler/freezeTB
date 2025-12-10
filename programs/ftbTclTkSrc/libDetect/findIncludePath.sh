@@ -1,37 +1,37 @@
 if [ -d "/opt/X11/include" ];
 then
    hPath="$hPath -I/opt/X11/include";
-fi
+fi;
 
-if [ -d "/opt/homebrew/include" ]];
+if [ -d "/opt/homebrew/include" ];
 then
    hPath="$hPath -I/opt/homebrew/include";
-fi
+fi;
 
 if [ -d "/usr/include/tcl-tk" ] ;
 then
    hPath="$hPath -I/usr/include/tcl-tk";
-fi
+fi;
 
 if [ -d "/usr/include" ];
 then
    hPath="$hPath -I/usr/include";
-fi
+fi;
 
 if [ -d "/usr/X11/include" ];
 then
    hPath="$hPath -I/usr/include";
-fi
+fi;
 
 if [ -d "/usr/local/include/tcl-tk" ];
 then
    hPath="$hPath -I/usr/local/include/tcl-tk";
-fi
+fi;
 
 if [ -d "/usr/local/include" ];
 then
    hPath="$hPath -I/usr/local/include";
-fi
+fi;
 
 hPath="$(find /usr -name tcl.h 2>/dev/null)";
 hPath="$hPath $(find /opt -name tcl.h 2>/dev/null)";
