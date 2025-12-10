@@ -136,6 +136,8 @@ fi # If: need to install minimap2
 cd programs/ftbTclTkSrc;
 make -f mkfile.unix;
 sudo make -f mkfile.unix install;
+sudo cp freezeTBFiles/graphAmpDepth.r /usr/local/bin;
+sudo chmod a+x /usr/local/bin/graphAmpDepth.r;
 
 # set up shortcut by sim link
 ln /usr/local/bin/ftbTclTk ~/Desktop/freezeTB;
