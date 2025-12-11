@@ -113,7 +113,7 @@ These settings change how sensitive freezeTB is for
   setting applies to the consensus and all other minimum
   depth settings as well.
 
-`-min-amr-amp-perc 0.1`: minimum percentage of mapped
+`-min-amr-map-perc 0.1`: minimum percentage of mapped
   reads to keep an AMR caused by an SNP . Valid input is
   0 to 1.
 
