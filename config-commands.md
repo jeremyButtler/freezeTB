@@ -3,14 +3,14 @@
 List the configuration file options for the raylib
   freezeTB GUI.
 
-- (Databases)[#databases]
-- (AMR settings for freezeTB)[#amr]
-- (Read filtering)[#filtering]
-- (Lineage settings)[#lineage]
-- (Consensus settings)[#consensus]
-- (Variant file for consensus)[#variants]
-- (Clustering settings)[#clustering]
-- (Other settings that are not very useful)[#other]
+- [Databases](#databases)
+- [AMR settings for freezeTB](#amr)
+- [Read filtering](#filtering)
+- [Lineage settings](#lineage)
+- [Consensus settings](#consensus)
+- [Variant file for consensus](#variants)
+- [Clustering settings](#clustering)
+- [Other settings that are not very useful](#other)
 
 # Databases
 
