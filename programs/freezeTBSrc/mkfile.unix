@@ -12,6 +12,7 @@ genLib=../genLib
 genBio=../genBio
 genAln=../genAln
 genClust=../genClust
+genGeneoType=../genGeneoType
 
 objFiles= \
    $(genFreezeTB)/freezeTB.$O \
@@ -31,9 +32,12 @@ objFiles= \
    $(genFreezeTB)/miruTbl.$O \
    $(genFreezeTB)/spolFind.$O \
    $(genFreezeTB)/spolST.$O \
+   $(genGeneoType)/linST.$O \
+   $(genGeneoType)/getLin.$O \
    $(genBio)/seqST.$O \
    $(genAln)/kmerFind.$O \
    $(genAln)/memwater.$O \
+   $(genAln)/memwaterScan.$O \
    $(genAln)/alnSet.$O \
    $(genAln)/indexToCoord.$O \
    $(genLib)/shellSort.$O \
@@ -74,6 +78,8 @@ $(genFreezeTB)/freezeTB.$O: \
 	$(genFreezeTB)/miruTbl.$O \
 	$(genFreezeTB)/spolFind.$O \
 	$(genFreezeTB)/freezeTBPaths.$O \
+   $(genGeneoType)/linST.$O \
+   $(genGeneoType)/getLin.$O \
 	$(genAln)/mapRead.$O \
 	$(genBio)/gzSeqST.$O \
 	$(genBio)/trimSam.$O \
@@ -95,6 +101,29 @@ $(genFreezeTB)/freezeTB.$O: \
 		$(CC) -o $(genFreezeTB)/freezeTB.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/freezeTB.c
+
+$(genGeneoType)/getLin.$O: \
+	$(genGeneoType)/getLin.c \
+	$(genGeneoType)/getLin.h \
+	$(genGeneoType)/linST.$O \
+	$(genAln)/memwaterScan.$O \
+	$(genBio)/samEntry.$O \
+	$(genBio)/codonFun.$O \
+	$(genAln)/alnDefs.h
+		$(CC) -o $(genGeneoType)/getLin.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genGeneoType)/getLin.c
+
+
+$(genGeneoType)/linST.$O: \
+	$(genGeneoType)/linST.c \
+	$(genGeneoType)/linST.h \
+	$(genLib)/fileFun.$O \
+	$(genAln)/kmerFind.$O \
+	$(genAln)/alnDefs.h
+		$(CC) -o $(genGeneoType)/linST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genGeneoType)/linST.c
 
 $(genFreezeTB)/freezeTBPaths.$O: \
 	$(genFreezeTB)/freezeTBPaths.c \
@@ -257,6 +286,17 @@ $(genAln)/memwater.$O: \
 	$(genLib)/genMath.h
 		$(CC) -o $(genAln)/memwater.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genAln)/memwater.c
+
+$(genAln)/memwaterScan.$O: \
+	$(genAln)/memwaterScan.c \
+	$(genAln)/memwaterScan.h \
+	$(genAln)/alnSet.$O \
+	$(genAln)/indexToCoord.$O \
+	$(genBio)/seqST.$O \
+	$(genLib)/genMath.h
+		$(CC) -o $(genAln)/memwaterScan.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAln)/memwaterScan.c
 
 $(genAln)/alnSet.$O: \
 	$(genAln)/alnSet.c \
@@ -447,7 +487,7 @@ $(genLib)/endin.$O: \
 			$(CFLAGS) $(coreCFLAGS) $(genLib)/endin.c
 
 install:
-	if [ ! -d "$(PREFIX)" ]; then  mkdir "$(PREFIX)"; fi;
+	if [ ! -d "$(PREFIX)" ]; then mkdir "$(PREFIX)"; fi;
 	mv $(NAME) $(PREFIX)
 	chmod a+x $(PREFIX)/$(NAME)
 
