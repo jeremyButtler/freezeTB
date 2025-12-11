@@ -133,11 +133,22 @@ fi; # If: need to install minimap2
 #   - install freezeTB
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+if [ ! -d /usr/local/bin ]; then
+   sudo mkdir -p /usr/local/bin;
+fi;
+
+if [ ! -d /usr/local/share ]; then
+   sudo mkdir /usr/local/share;
+fi;
+
 cd programs/ftbTclTkSrc;
 make -f mkfile.unix;
 sudo make -f mkfile.unix install;
+cd ../..;
 sudo cp freezeTBFiles/graphAmpDepth.r /usr/local/bin;
 sudo chmod a+x /usr/local/bin/graphAmpDepth.r;
+sudo cp -r freezeTBFiles /usr/local/share;
+sudo chmod a+rx /usr/local/share/freezeTBFiles/*;
 
 # set up shortcut by sim link
 ln /usr/local/bin/ftbTclTk ~/Desktop/freezeTB;
