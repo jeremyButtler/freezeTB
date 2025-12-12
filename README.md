@@ -337,7 +337,7 @@ export MACOSX_DEPLOYMENT_TARGET=10.9 && \
 xcodeHere="$(xcode-select -p 1/dev/null;echo $?)"; \
 if [ "$xcodeHere" -ne 0 ]; then\
    xcode-select --install; \
-fi; \
+fi;
 ```
 
 ### Mac raylib Easy way:
