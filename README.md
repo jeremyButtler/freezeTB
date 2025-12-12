@@ -222,7 +222,7 @@ For amd64 Linux (likely your Linux computer), Mac, and
 
 1. Copy zip file to your desktop
    - For Linux copy `linuxFtb.zip`
-   - For Mac copy `freezeTB.app.zip`
+   - For Mac copy `macFtb.zip`
    - For Windows copy `windowsFtb.zip`
 2. Unzip the zip file
 3. Remove the zip file
