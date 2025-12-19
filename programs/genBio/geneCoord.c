@@ -31,10 +31,14 @@
 '   o fun10: sortName_geneCoord
 '     - Sorts the arrays in a genesCoord structure by
 '       gene name
-'   o fun11: findName_geneCoord
+'   o fun11: nameSortFloat3IndexSync_geneCoord
+'    - sorts the arrays in a genesCoord structure by
+'      gene name and keep an array of floats (index 3) in
+'      sync
+'   o fun12: findName_geneCoord
 '     - Does a binary search to find an gene name in an
 '       gene geneCoord structer (must be sorted by name)
-'   o fun12: getCoords_geneCoord
+'   o fun13: getCoords_geneCoord
 '     - Gets the gene coordinates from an gene coordinates
 '       table
 '   o license:
@@ -696,7 +700,168 @@ sortName_geneCoord(
 } /*sortName_geneCoord*/
 
 /*-------------------------------------------------------\
-| Fun11: findName_geneCoord
+| Fun11: nameSortFloat3IndexSync_geneCoord
+|  - sorts the arrays in a genesCoord structure by
+|    gene name and keep an array of floats (index 3) in
+|    sync
+| Input:
+|  - geneCoordST:
+|    o Pointer to geneCoord structure with gene
+|      coordinates to sort
+|  - numGenesSI:
+|    o number of genes
+|  - floatAry:
+|    o float array to keep in sync
+|    o float array has 3 entries per gene, so is moved in
+|      groups of threee
+| Output:
+|  - Modifies:
+|    o arrays in geneCoordST to be sorted by the gene
+|      starting coordinate (lowest first)
+|    o floatAry to be in sync with geneCoordST
+\-------------------------------------------------------*/
+void
+nameSortFloat3IndexSync_geneCoord(
+   struct geneCoord *geneCoordST,
+   signed int numGenesSI,
+   float *floatAryF
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ' Fun11 TOC:
+   '  - Sorts the arrays in a genesCoord structure by
+   '    gene name and keep an array of floats (index 3) in
+   '    sync
+   '  - Shell sort taken from:
+   '    - Adam Drozdek. 2013. Data Structures and
+   '      Algorithims in c++. Cengage Leraning. fourth
+   '      edition. pages 505-508
+   '    - I made some minor changes, but is mostly the
+   '      same
+   '  o fun11 sec01:
+   '    - Variable declerations
+   '  o fun11 sec02:
+   '    - Find the number of rounds to sort for
+   '  o fun11 sec03:
+   '    - Sort the arrays in geneCoordST
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun11 Sec01:
+  ^  - Variable declerations
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  /*Number of elements to sort*/
+  signed int endSI = numGenesSI - 1;
+  
+  /*Number of sorting rounds*/
+  signed int subSI = 0;
+  signed int nextSI = 0;
+  signed int lastSI = 0;
+  signed int onSI = 0;
+
+  /*these variables are for keeping the float array in
+  `  sync
+  */
+  float swapF = 0;
+  signed int firstSwapUL = 0;
+  signed int secSwapUL = 0;
+
+  /*Variables to incurment loops*/
+  signed int siIndex = 0;
+  signed int curSI = 0;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+  ^ Fun11 Sec02:
+  ^  - Find the max search value (number rounds to sort)
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  if(endSI <= 0)
+     return;
+
+  /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
+  subSI = 1; /*Initialzie first array*/
+  while(subSI < endSI)
+     subSI = (3 * subSI) + 1;
+  
+  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ^ Fun11 Sec03:
+  ^  - Sort the arrays in geneCoordST
+  \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+  
+  while(subSI > 0)
+  { /*loop trhough all sub arrays sort the subarrays*/
+    for(siIndex = 0; siIndex <= subSI; ++siIndex)
+    { /*For each element in the subarray*/
+      for(curSI = siIndex;
+          curSI + subSI <= endSI;
+          curSI += subSI
+      ){ /*Loop; swap each nth element of the subarray*/
+        nextSI = curSI + subSI;
+        
+        if(
+            eqlNull_ulCp(
+               geneCoordST->idStrAry[curSI],
+               geneCoordST->idStrAry[nextSI]
+            ) > 0
+        ){ /*If I need to swap an element*/
+          swap_geneCoord((geneCoordST),curSI,nextSI);
+          firstSwapUL = curSI * 3;
+          secSwapUL = nextSI * 3;
+          
+          swapF = floatAryF[firstSwapUL];
+          floatAryF[firstSwapUL++] = floatAryF[secSwapUL];
+          floatAryF[secSwapUL++] = swapF;
+
+          swapF = floatAryF[firstSwapUL];
+          floatAryF[firstSwapUL++] = floatAryF[secSwapUL];
+          floatAryF[secSwapUL++] = swapF;
+
+          swapF = floatAryF[firstSwapUL];
+          floatAryF[firstSwapUL++] = floatAryF[secSwapUL];
+          floatAryF[secSwapUL++] = swapF;
+
+          lastSI = curSI;
+          onSI = curSI;
+          
+          while(lastSI >= subSI)
+          { /*loop; move swapped element back*/
+            lastSI -= subSI;
+            
+            if(
+                eqlNull_ulCp(
+                   geneCoordST->idStrAry[onSI],
+                   geneCoordST->idStrAry[lastSI]
+                ) > 0
+            ) break; /*Positioned the element*/
+            
+            swap_geneCoord(geneCoordST, onSI, lastSI);
+
+            firstSwapUL = onSI * 3;
+            secSwapUL = lastSI * 3;
+             
+            swapF = floatAryF[firstSwapUL];
+            floatAryF[firstSwapUL++] =floatAryF[secSwapUL];
+            floatAryF[secSwapUL++] = swapF;
+
+             swapF = floatAryF[firstSwapUL];
+             floatAryF[firstSwapUL++] =floatAryF[secSwapUL];
+             floatAryF[secSwapUL++] = swapF;
+
+             swapF = floatAryF[firstSwapUL];
+             floatAryF[firstSwapUL++] =floatAryF[secSwapUL];
+             floatAryF[secSwapUL++] = swapF;
+            
+            onSI = lastSI;
+          } /*loop; move swapped element back*/
+        } /*If I need to swap elements*/
+      } /*Loop; swap each nth element of the subarray*/
+    } /*For each element in the subarray*/
+    
+    subSI = (subSI - 1) / 3; /*Move to the next round*/
+  } /*loop through all sub arrays to sort the subarrays*/
+} /*nameSortFloat3IndexSync_geneCoord*/
+
+/*-------------------------------------------------------\
+| Fun12: findName_geneCoord
 |  - Does a binary search to find an gene name in an gene
 |    geneCoord structer (must be sorted by name)
 | Input:
@@ -748,7 +913,7 @@ findName_geneCoord(
 } /*geneCoord_findCloseGene*/
 
 /*-------------------------------------------------------\
-| Fun12: getCoords_geneCoord
+| Fun13: getCoords_geneCoord
 |  - Gets the gene coordinates from a gene table (tsv)
 | Input:
 |  - geneTblFileStr:
@@ -780,24 +945,24 @@ getCoords_geneCoord(
    signed int *numGenesSI, /*Number of genes extracted*/
    unsigned long *errULPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun12 TOC: getCoords_geneCoord
+   ' Fun13 TOC: getCoords_geneCoord
    '   - Gets the gene coordinates from a gene table (tsv)
-   '   o fun12 Sec01:
+   '   o fun13 Sec01:
    '     - Variable declerations
-   '   o fun12 Sec02:
+   '   o fun13 Sec02:
    '     - Check input and allocate memory for buffer
-   '   o fun12 Sec03:
+   '   o fun13 Sec03:
    '     - Find number lines/max line length in table file
-   '   o fun12 Sec04:
+   '   o fun13 Sec04:
    '     - Allocate memory and go back to start of file
-   '   o fun12 Sec05:
+   '   o fun13 Sec05:
    '     - Read in the gene coordinates from the file
-   '   o fun12 Sec06:
+   '   o fun13 Sec06:
    '     - Clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec01:
+   ^ Fun13 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -812,12 +977,12 @@ getCoords_geneCoord(
    FILE *tblFILE  = 0;
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec02:
+   ^ Fun13 Sec02:
    ^   - Check input and allocate memory for buffer
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec03:
+   ^ Fun13 Sec03:
    ^   - Find number lines/max line length in table file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -826,38 +991,38 @@ getCoords_geneCoord(
 
    tblFILE  = fopen( (char *) geneTblFileStr, "r");
    if(! tblFILE)
-      goto fileErr_fun12_sec06_sub03;
+      goto fileErr_fun13_sec06_sub03;
    numLinesSL = lineCnt_fileFun(tblFILE, &maxLineSL);
    maxLineSL += 3; /*account for line endings*/
 
    buffHeapStr =
       calloc((maxLineSL + 8), sizeof(signed char));
    if(! buffHeapStr)
-       goto memErr_fun12_sec06_sub02;
+       goto memErr_fun13_sec06_sub02;
 
    genesHeapST = mk_geneCoord(numLinesSL);
    if(! genesHeapST)
-      goto memErr_fun12_sec06_sub02;
+      goto memErr_fun13_sec06_sub02;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec05:
+   ^ Fun13 Sec05:
    ^   - Read in the gene coordinates from the file
-   ^   o fun12 sec05 sub01:
+   ^   o fun13 sec05 sub01:
    ^     - Start loop and copy gene name
-   ^   o fun12 sec05 sub02:
+   ^   o fun13 sec05 sub02:
    ^     - Move past the refernce id
-   ^   o fun12 sec05 sub03:
+   ^   o fun13 sec05 sub03:
    ^     - Move past the gene direction
-   ^   o fun12 sec05 sub04:
+   ^   o fun13 sec05 sub04:
    ^     - Get coordiante of frist reference base in gene
-   ^   o fun12 sec05 sub05:
+   ^   o fun13 sec05 sub05:
    ^     - Get coordiante of last reference base in gene
-   ^   o fun12 sec05 sub06:
+   ^   o fun13 sec05 sub06:
    ^     - Move to the next gene
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun12 Sec05 Sub01:
+   * Fun13 Sec05 Sub01:
    *   - Start loop and copy gene name
    \*****************************************************/
 
@@ -891,13 +1056,13 @@ getCoords_geneCoord(
       if(*cpStr == '\t') ;      /*Expected*/
       else if(*cpStr == ' ') ;  /*Odd, but works*/
       else                      /*new line or null*/
-         goto invalidEntry_fun12_sec06_sub04;
+         goto invalidEntry_fun13_sec06_sub04;
 
       while(*cpStr == '\t' || *cpStr == ' ')
          ++cpStr; /*get off white space*/
 
       /**************************************************\
-      * Fun12 Sec05 Sub02:
+      * Fun13 Sec05 Sub02:
       *   - get refernce id
       \**************************************************/
 
@@ -912,13 +1077,13 @@ getCoords_geneCoord(
       if(*cpStr == '\t') ;      /*Expected*/
       else if(*cpStr == ' ') ;  /*Odd, but works*/
       else                            /*new line or null*/
-         goto invalidEntry_fun12_sec06_sub04;
+         goto invalidEntry_fun13_sec06_sub04;
 
       while(*cpStr == '\t' || *cpStr == ' ')
          ++cpStr; /*get off white space*/
 
       /**************************************************\
-      * Fun12 Sec05 Sub03:
+      * Fun13 Sec05 Sub03:
       *   - get the gene direction
       \**************************************************/
 
@@ -930,13 +1095,13 @@ getCoords_geneCoord(
       if(*(cpStr - 1) == '\t') ;      /*Expected*/
       else if(*(cpStr - 1) == ' ') ;  /*Odd, but works*/
       else                            /*new line or null*/
-         goto invalidEntry_fun12_sec06_sub04;
+         goto invalidEntry_fun13_sec06_sub04;
 
       while(*cpStr == '\t' || *cpStr == ' ')
          ++cpStr; /*get off white space*/
 
       /**************************************************\
-      * Fun12 Sec05 Sub04:
+      * Fun13 Sec05 Sub04:
       *   - Get coordiante of frist reference base in gene
       \**************************************************/
 
@@ -951,13 +1116,13 @@ getCoords_geneCoord(
       if(*cpStr == '\t') ;      /*Expected*/
       else if(*cpStr == ' ') ;  /*Odd, but works*/
       else                      /*new line or null*/
-         goto invalidEntry_fun12_sec06_sub04;
+         goto invalidEntry_fun13_sec06_sub04;
 
       while(*cpStr == '\t' || *cpStr == ' ')
          ++cpStr; /*get off white space*/
 
       /**************************************************\
-      * Fun12 Sec05 Sub05:
+      * Fun13 Sec05 Sub05:
       *   - Get coordiante of last reference base in gene
       \**************************************************/
 
@@ -970,7 +1135,7 @@ getCoords_geneCoord(
       --genesHeapST->endAryUI[*numGenesSI];
 
       if(*cpStr > 32)
-         goto invalidEntry_fun12_sec06_sub04; /*Not an tsv*/
+         goto invalidEntry_fun13_sec06_sub04; /*Not an tsv*/
 
       if(
            genesHeapST->endAryUI[*numGenesSI]
@@ -987,7 +1152,7 @@ getCoords_geneCoord(
       } /*If: I need to swap coordinates*/
 
       /**************************************************\
-      * Fun12 Sec05 Sub06:
+      * Fun13 Sec05 Sub06:
       *   - Move to the next gene
       \**************************************************/
 
@@ -995,34 +1160,34 @@ getCoords_geneCoord(
    } /*Loop: Get entries from coordinates file*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec06:
+   ^ Fun13 Sec06:
    ^   - Clean up and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    --(*numGenesSI); /*Convert to index 0*/
    sort_geneCoord(genesHeapST, 0, *(numGenesSI));
 
-   goto cleanUp_fun12_sec06_sub05;
+   goto cleanUp_fun13_sec06_sub05;
 
-   memErr_fun12_sec06_sub02:;
+   memErr_fun13_sec06_sub02:;
       *errULPtr = def_memErr_geneCoord;
-      goto errCleanUp_fun12_sec06_sub05;
+      goto errCleanUp_fun13_sec06_sub05;
 
-   fileErr_fun12_sec06_sub03:;
+   fileErr_fun13_sec06_sub03:;
       *errULPtr = def_fileErr_geneCoord;
-      goto errCleanUp_fun12_sec06_sub05;
+      goto errCleanUp_fun13_sec06_sub05;
 
-   invalidEntry_fun12_sec06_sub04:;
+   invalidEntry_fun13_sec06_sub04:;
       *errULPtr = def_invalidEntry_geneCoord;
       *errULPtr |= (*numGenesSI << 8);
-      goto errCleanUp_fun12_sec06_sub05;
+      goto errCleanUp_fun13_sec06_sub05;
 
-   errCleanUp_fun12_sec06_sub05:;
+   errCleanUp_fun13_sec06_sub05:;
       freeHeap_geneCoord(genesHeapST);
       genesHeapST = 0;
-      goto cleanUp_fun12_sec06_sub05;
+      goto cleanUp_fun13_sec06_sub05;
 
-   cleanUp_fun12_sec06_sub05:;
+   cleanUp_fun13_sec06_sub05:;
       free(buffHeapStr);
       buffHeapStr = 0;
 

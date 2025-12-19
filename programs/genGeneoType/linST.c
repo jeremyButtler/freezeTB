@@ -149,6 +149,7 @@
    #include <stdlib.h>
 #endif
 
+#include <stdio.h> /*DELETE*/
 #include "linST.h"
 #include "../genLib/ulCp.h"
 #include "../genLib/base10str.h"
@@ -3783,7 +3784,7 @@ getComplexLineages_linST(
 
    if( addMem_complex_linST(complexHeapST, 16) )
       goto memErr_fun41_sec05;
-   complexIndexHeapArySI=malloc(16 * sizeof(signed int));
+   complexIndexHeapArySI = calloc(16, sizeof(signed int));
    if(! complexIndexHeapArySI)
       goto memErr_fun41_sec05;
 
@@ -3855,6 +3856,7 @@ getComplexLineages_linST(
    { /*Loop: read in each lineage*/
       if(complexHeapST->lenSI >= complexHeapST->sizeSI)
       { /*If: need more memory*/
+         posSI = complexHeapST->sizeSI;
          tmpSI = complexHeapST->sizeSI;
          tmpSI += (tmpSI >> 1);
 
@@ -3868,6 +3870,11 @@ getComplexLineages_linST(
          if(! swapSIPtr)
             goto memErr_fun41_sec05;
          complexIndexHeapArySI = swapSIPtr;
+
+         while(posSI < complexHeapST->sizeSI)
+            complexIndexHeapArySI[posSI++] = 0;
+            /*initializes to avoid access errors*/
+         posSI = 0;
       } /*If: need more memory*/
 
       /**************************************************\
@@ -4580,8 +4587,7 @@ getComplexLineages_linST(
    ); /*I used to unsort this, because sorting will mess
       `  up future checks since some multi-lineages can
       `  included other multi-lineages, which complicates
-      `  things. `  Best leave in order so the simplest
-      `  multi-lineages are first
+      `  things.
       `This position sort works because it sorts by the
       `  ending coordinate (complex lineages always have
       `  max range) and also puts the complex lineages

@@ -33,10 +33,14 @@
 '   o fun10: sortName_geneCoord
 '     - Sorts the arrays in a genesCoord structure by
 '       gene name
-'   o fun11: findName_geneCoord
+'   o fun11: nameSortFloat3IndexSync_geneCoord
+'    - sorts the arrays in a genesCoord structure by
+'      gene name and keep an array of floats (index 3) in
+'      sync
+'   o fun12: findName_geneCoord
 '     - Does a binary search to find an gene name in an
 '       gene geneCoord structer (must be sorted by name)
-'   o fun12: getCoords_geneCoord
+'   o fun13: getCoords_geneCoord
 '     - Gets the gene coordinates from an gene coordinates
 '       table
 '   o license:
@@ -267,7 +271,35 @@ sortName_geneCoord(
 );
 
 /*-------------------------------------------------------\
-| Fun11: findName_geneCoord
+| Fun11: nameSortFloat3IndexSync_geneCoord
+|  - sorts the arrays in a genesCoord structure by
+|    gene name and keep an array of floats (index 3) in
+|    sync
+| Input:
+|  - geneCoordST:
+|    o Pointer to geneCoord structure with gene
+|      coordinates to sort
+|  - numGenesSI:
+|    o number of genes
+|  - floatAry:
+|    o float array to keep in sync
+|    o float array has 3 entries per gene, so is moved in
+|      groups of threee
+| Output:
+|  - Modifies:
+|    o arrays in geneCoordST to be sorted by the gene
+|      starting coordinate (lowest first)
+|    o floatAry to be in sync with geneCoordST
+\-------------------------------------------------------*/
+void
+nameSortFloat3IndexSync_geneCoord(
+   struct geneCoord *geneCoordST,
+   signed int numGenesSI,
+   float *floatAryF
+);
+
+/*-------------------------------------------------------\
+| Fun12: findName_geneCoord
 |  - Does a binary search to find an gene name in an gene
 |    geneCoord structer (must be sorted by name)
 | Input:
@@ -291,7 +323,7 @@ findName_geneCoord(
 );
 
 /*-------------------------------------------------------\
-| Fun12: getCoords_geneCoord
+| Fun13: getCoords_geneCoord
 |  - Gets the gene coordinates from a gene table (tsv)
 | Input:
 |  - geneTblFileStr:

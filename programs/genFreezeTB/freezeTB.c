@@ -22,12 +22,15 @@
 '     - prints help message for freezeTB
 '   o .c fun10: input_freezeTB
 '     - gets user input
-'   o fun11: run_freezeTB:
-'     - drives everything, but not fun11 (for tcltk)
+'   o .c fun11: mkAmrCoverageTbl_freezeTB
+'     - makes the gene percent coverage table with drug
+'       resisitance
+'   o fun12: run_freezeTB:
+'     - drives everything, but not fun12 (for tcltk)
 '   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public dofun11 / mit)
+'     - licensing for this code (public dofun12 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -5408,24 +5411,361 @@ input_freezeTB(
          goto phelp_fun10_sec02;
          /*user wanted help message*/
          /*this allows for full help message printing*/
-      goto ret_fun11_sec04;
+      goto ret_fun12_sec04;
    
    help_fun10_sec04:;
    pversion_fun10_sec04:;
    pcitation_fun10_sec04:;
       errSC = 1;
-      goto ret_fun11_sec04;
+      goto ret_fun12_sec04;
 
    err_fun10_sec04:;
       errSC = 2;
-      goto ret_fun11_sec04;
+      goto ret_fun12_sec04;
 
-   ret_fun11_sec04:;
+   ret_fun12_sec04:;
       return errSC;
 } /*input_freezeTB*/
 
 /*-------------------------------------------------------\
-| Fun11: run_freezeTB
+| Fun11: mkAmrCoverageTbl_freezeTB
+|   - makes the gene percent coverage table with drug
+|     resisitance
+| Input:
+|   - prefixStr:
+|     o c-string with prefix to name the output file
+|   - minDepthSI:
+|     o minimum read depth to coun11for coverage
+|   - depthArySI:
+|     o signed int array with read depths
+|   - geneCoordSTPtr:
+|     o geneCoord structure pointer with gene names
+|     o NEEDS to be sorted by position
+|   - numGenesSI:
+|     o index of the last gene in a geneCoordSTPtr struct
+|       * index 0
+|   - coordsStr:
+|     o c-string with coordinates and drug resistance for
+|       amplicons/genes (has drug resitance columns)
+|     o format is freezeTB coordinates file, but also has
+|       drug resistances at end. The resitances can end
+|       with a new line or a '*' if you need a notes
+|       column or other columns
+| Output:
+|   - Prints:
+|     o coverage table with AMRs per gene
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+|     o 2 if could not open the coordinates file
+\-------------------------------------------------------*/
+signed int
+mkAmrCoverageTbl_freezeTB(
+   signed char *prefixStr,    /*name of output file*/
+   signed int minDepthSI,  /*min read depth for coverage*/
+   signed int *depthArySI,    /*array of read depths*/
+   struct geneCoord *geneCoordSTPtr, /*has gene coords*/
+   signed int numGenesSI,     /*number of genes*/
+   signed char *coordsStr     /*has amrs for each gene*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun11 TOC:
+   '   - makes the gene percent coverage table
+   '   o fun11 sec01:
+   '     - variable declarations
+   '   o fun11 sec02:
+   '     - get gene coverage, open files, and print header
+   '   o fun11 sec03:
+   '     - get AMR information and coverage and print rows
+   '   o fun11 sec04:
+   '     - clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun11 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char lineStr[4096];
+   signed char drugStr[4000];
+
+   signed int lenSI = 0; /*length of entry*/
+   signed int posSI = 0; /*current position in entry*/
+   signed int endSI = 0; /*end of info columns in entry*/
+
+   float *coverHeapAryF = 0;
+
+   signed int geneSI = 0;
+   FILE *inFILE = 0;
+   FILE *outFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun11 Sec02:
+   ^   - get gene coverage, open files, and print headers
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*________________get_gene_coverage__________________*/
+   coverHeapAryF =
+      getGeneCoverage_ampDepth(
+         depthArySI,
+         minDepthSI,
+         geneCoordSTPtr,
+         numGenesSI + 1
+      ); /*gives percent coverage and mean depth*/
+   if(! coverHeapAryF)
+      goto memErr_fun11_sec04;
+   nameSortFloat3IndexSync_geneCoord(
+      geneCoordSTPtr,
+      numGenesSI + 1,
+      coverHeapAryF
+   ); /*this allows me to easily get genes by name*/
+
+   /*________________open_coordinates_file______________*/
+   inFILE = fopen((char *) coordsStr, "r");
+   if(! inFILE)
+      goto fileErr_fun11_sec04;
+
+   /*________________open_the_output_file_______________*/
+   lenSI = cpStr_ulCp(lineStr, prefixStr);
+   cpStr_ulCp(
+      &lineStr[lenSI],
+      (signed char *) "-coverage-amrs.tsv"
+   );
+   outFILE = fopen((char *) lineStr, "w");
+   if(! outFILE)
+      goto fileErr_fun11_sec04;
+
+   /*________________print_the_table_header_____________*/
+   fprintf(
+      outFILE,
+      "gene\t%%coverage\tmean_coverage_depth\t"
+   );
+   fprintf(
+      outFILE,
+      "\tmean_target_depth\tdrugs%s",
+      str_endLine
+   );
+
+   if(! fgets((char *) lineStr, 4088, inFILE) )
+      goto fileErr_fun11_sec04; /*blank file*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun11 Sec03:
+   ^   - get AMR information and coverage
+   ^   o fun11 sec03 sub01:
+   ^     - start loop and position the gene id
+   ^   o fun11 sec03 sub02:
+   ^     - move past the reference and coordinate info
+   ^   o fun11 sec03 sub03:
+   ^     - copy resistance and add coverage/depths
+   ^   o fun11 sec03 sub04:
+   ^     - print the new table row
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun11 Sec03 Sub01:
+   *   - start loop and position the gene id
+   \*****************************************************/
+
+   while( fgets((char *) lineStr, 4088, inFILE) )
+   { /*Loop: read in the gene/amplicons*/
+      posSI = 0;
+      lenSI = 0;
+
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         continue; /*blank line*/
+
+      /*copy the primer name*/
+      if(posSI > 0)
+      { /*If: gene id is not at the start*/
+         lenSI = 0; 
+         while(lineStr[posSI] > 32)
+            lineStr[lenSI++] = lineStr[posSI++];
+      } /*If: gene id is not at the start*/
+
+      else
+      { /*Else: gene id is at start, move to drugs*/
+         while(lineStr[posSI] > 32)
+             ++posSI;
+         lenSI = posSI;
+      } /*Else: gene id is at start, move to drugs*/
+
+      /*move past white space*/
+      lineStr[lenSI] = 0;
+      ++posSI;
+
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      geneSI =
+         findName_geneCoord(
+            geneCoordSTPtr,
+            lineStr,
+            numGenesSI + 1
+         );
+      if(geneSI < 0)
+      { /*If: gene was not found*/
+         fprintf(
+            outFILE,
+            "%s\t0\t0\t0\t*%s",
+            lineStr,
+            str_endLine
+         );
+         continue;
+      } /*If: gene was not found*/
+
+      lineStr[lenSI++] = '\t';
+
+      geneSI *= 3; /*move to index in coverage array*/
+
+      /**************************************************\
+      * Fun11 Sec03 Sub02:
+      *   - move past the reference and coordinate info
+      \**************************************************/
+
+      /*reference*/
+      while(lineStr[posSI] > 32)
+         ++posSI;
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*direction*/
+      while(lineStr[posSI] > 32)
+         ++posSI;
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*start of gene*/
+      while(lineStr[posSI] > 32)
+         ++posSI;
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*end of gene*/
+      while(lineStr[posSI] > 32)
+         ++posSI;
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+
+      /**************************************************\
+      * Fun11 Sec03 Sub03:
+      *   - copy resistance and add coverage/depths
+      \**************************************************/
+
+      endSI = 0;
+
+      /*______________check_if_have_drugs_______________*/
+      if(lineStr[posSI] == '*' || ! lineStr[posSI])
+         goto addCoverage_fun11_sec03_sub03;
+      else
+      { /*Else: have drug resistance entries to copy*/
+         while(lineStr[posSI] && lineStr[posSI] != '*')
+         { /*Loop: copy drugs to separate array*/
+            if(lineStr[posSI] < 32)
+            { /*If: white space*/
+               if(drugStr[endSI - 1] != '\t')
+                  drugStr[endSI++] = '\t';
+               ++posSI;
+            } /*If: white space*/
+
+            else
+               drugStr[endSI++] = lineStr[posSI++];
+         } /*Loop: copy drugs to separate array*/
+
+      } /*Else: have drug resistance entries to copy*/
+
+      drugStr[endSI] = 0;
+
+
+      /*_____________add_coverage_information___________*/
+      addCoverage_fun11_sec03_sub03:;
+         lenSI +=
+            double_numToStr(
+               &lineStr[lenSI],
+               coverHeapAryF[geneSI] * 100, /*% coverage*/
+               1 /*1 digit of percision*/
+            );
+         lineStr[lenSI++] = '\t';
+         lenSI +=
+            double_numToStr(
+               &lineStr[lenSI],
+               coverHeapAryF[geneSI + 1],/*cover depth*/
+               1 /*1 digit of percision*/
+            );
+         lineStr[lenSI++] = '\t';
+         lenSI +=
+            double_numToStr(
+               &lineStr[lenSI],
+               coverHeapAryF[geneSI + 2],/*gene depth*/
+               1 /*1 digit of percision*/
+            );
+         lineStr[lenSI++] = '\t';
+
+      /**************************************************\
+      * Fun11 Sec03 Sub04:
+      *   - print the new table row
+      \**************************************************/
+
+      drugStr[endSI++] = '\t';
+      drugStr[endSI++] = '*';
+      drugStr[endSI] = 0;
+      lineStr[lenSI] = 0;
+
+      fprintf(
+         outFILE,
+         "%s%s%s",
+         lineStr,
+         drugStr,
+         str_endLine
+      );
+   } /*Loop: read in the gene/amplicons*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun11 Sec04:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   lenSI = 0;
+   goto ret_fun11_sec04;
+
+   memErr_fun11_sec04:;
+      lenSI = 1;
+      goto ret_fun11_sec04;
+
+   fileErr_fun11_sec04:;
+      lenSI = 2;
+      goto ret_fun11_sec04;
+
+   ret_fun11_sec04:;
+      if(coverHeapAryF)
+         free(coverHeapAryF);
+      coverHeapAryF = 0;
+
+      if(inFILE)
+         fclose(inFILE);
+      inFILE = 0;
+
+      if(outFILE)
+         fclose(outFILE);
+      outFILE = 0;
+
+      sort_geneCoord(geneCoordSTPtr, 0, numGenesSI);
+         /*make sure genes are resorted by position*/
+
+      return (signed char) lenSI;
+} /*mkAmrCoverageTbl_freezeTB*/
+
+/*-------------------------------------------------------\
+| Fun12: run_freezeTB
 |    - Analyze ONT sequenced TB reads
 | Input:
 |    - numArgsSI:
@@ -5446,63 +5786,63 @@ run_freezeTB(
    int numArgsSI,
    char *argAryStr[]
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun11 TOC:
+   ' Fun12 TOC:
    '   - Run freezeTB on user input
-   '   o fun11 sec01:
+   '   o fun12 sec01:
    '     - Variable declerations
-   '   o fun11 sec02:
+   '   o fun12 sec02:
    '     - initialize, get input, and set up memory
-   '   o fun11 sec03:
+   '   o fun12 sec03:
    '     - check user input database (if can open)
-   '   o fun11 sec04:
+   '   o fun12 sec04:
    '     - check output files (can I open?)
-   '   o fun11 sec05:
+   '   o fun12 sec05:
    '     - read in databases
-   '   o fun11 sec06:
+   '   o fun12 sec06:
    '     - get reference stats and print consensus header
-   '   o fun11 sec07:
-   '     - Do read analysis
-   '   o fun11 sec08:
+   '   o fun12 sec07:
+   '     - do read analysis
+   '   o fun12 sec08:
    '     - print read data
-   '   o fun11 sec09:
+   '   o fun12 sec09:
    '     - collapse consensus and consensus analysis
-   '   o fun11 sec10:
+   '   o fun12 sec10:
    '     - run mixed infection detection (if requested)
-   '   o fun11 sec11:
+   '   o fun12 sec11:
    '     - clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec01:
+   ^ Fun12 Sec01:
    ^   - Variable declerations
-   ^   o fun11 sec01 sub01:
+   ^   o fun12 sec01 sub01:
    ^     - general IO variables (applies to multple subs)
-   ^   o fun11 sec01 sub02:
+   ^   o fun12 sec01 sub02:
    ^     - temporay and error reporting variables
-   ^   o fun11 sec01 sub03:
+   ^   o fun12 sec01 sub03:
    ^     - filtering and sam file variables (adjust coord)
-   ^   o fun11 sec01 sub04:
+   ^   o fun12 sec01 sub04:
    ^     - read depth and coverage stats variables
-   ^   o fun11 sec01 sub05:
+   ^   o fun12 sec01 sub05:
    ^     - AMR detection variables
-   ^   o fun11 sec01 sub06:
+   ^   o fun12 sec01 sub06:
    ^     - miru lineage unique variables
-   ^   o fun11 sec01 sub07:
+   ^   o fun12 sec01 sub07:
    ^     - spoligotyping unique variables
-   ^   o fun11 sec01 sub08:
+   ^   o fun12 sec01 sub08:
    ^     - consensus building/mixed infection variables
-   ^   o fun11 sec01 sub09:
+   ^   o fun12 sec01 sub09:
    ^     - masking unique variables
-   ^   o fun11 sec01 sub10:
+   ^   o fun12 sec01 sub10:
    ^     - indel clean up (rmHomo)
-   ^   o fun11 sec01 sub11:
+   ^   o fun12 sec01 sub11:
    ^     - genotyping
-   ^   o fun11 sec01 sub12:
+   ^   o fun12 sec01 sub12:
    ^     - read mapping (mapRead)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec01 Sub01:
+   * Fun12 Sec01 Sub01:
    *   - general IO variables (applies to multple subs)
    \*****************************************************/
 
@@ -5510,7 +5850,7 @@ run_freezeTB(
    struct set_freezeTB ftbSetStackST; /*has settings*/
 
    /*****************************************************\
-   * Fun11 Sec01 Sub02:
+   * Fun12 Sec01 Sub02:
    *   - Temporay and error reporting variables
    \*****************************************************/
 
@@ -5522,7 +5862,7 @@ run_freezeTB(
    signed char *errHeapStr = 0;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub03:
+   * Fun12 Sec01 Sub03:
    *   - filtering and sam file variables (adjust coord)
    \*****************************************************/
 
@@ -5540,7 +5880,7 @@ run_freezeTB(
    signed char refIdStr[def_lenFileName_freezeTB];
 
    /*****************************************************\
-   * Fun11 Sec01 Sub04:
+   * Fun12 Sec01 Sub04:
    *   - read depth and coverage stats variables
    \*****************************************************/
 
@@ -5557,7 +5897,7 @@ run_freezeTB(
    signed int noMapReadSI = 0;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub05:
+   * Fun12 Sec01 Sub05:
    *   - AMR detection variables
    \*****************************************************/
 
@@ -5582,7 +5922,7 @@ run_freezeTB(
    unsigned int totalReadsUI = 0;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub06:
+   * Fun12 Sec01 Sub06:
    *   - miru lineage unique variables
    \*****************************************************/
 
@@ -5594,15 +5934,15 @@ run_freezeTB(
       /*consensus results output*/
 
    /*****************************************************\
-   * Fun11 Sec01 Sub07:
+   * Fun12 Sec01 Sub07:
    *   - Spoligotyping unique variables
    \*****************************************************/
 
    signed char checkSpoligoLinBl = 1;
       /*set to 0 if failed to load linage database*/
 
-   #define def_lenSpolAry_fun11 128
-   unsigned int spoligoAryUI[def_lenSpolAry_fun11 + 1];
+   #define def_lenSpolAry_fun12 128
+   unsigned int spoligoAryUI[def_lenSpolAry_fun12 + 1];
    signed char
       outSpoligoFileStr[def_lenFileName_freezeTB];
    signed char
@@ -5622,7 +5962,7 @@ run_freezeTB(
    signed int numSpoligosSI = 0;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub08:
+   * Fun12 Sec01 Sub08:
    *   - consensus building/mixed infection variables
    \*****************************************************/
 
@@ -5641,7 +5981,7 @@ run_freezeTB(
    struct con_clustST *conNodeST = 0;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub09:
+   * Fun12 Sec01 Sub09:
    *   - masking unique variables
    \*****************************************************/
 
@@ -5651,7 +5991,7 @@ run_freezeTB(
    unsigned int maskNumPrimUI = 0;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub10:
+   * Fun12 Sec01 Sub10:
    *   - indel clean up variables
    \*****************************************************/
 
@@ -5662,7 +6002,7 @@ run_freezeTB(
    struct seqST refStackST;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub11:
+   * Fun12 Sec01 Sub11:
    *   - genotyping variables
    \*****************************************************/
 
@@ -5687,7 +6027,7 @@ run_freezeTB(
    struct cnt_getLin hsp65CntStackST;
 
    /*****************************************************\
-   * Fun11 Sec01 Sub12:
+   * Fun12 Sec01 Sub12:
    *   - read mapping
    \*****************************************************/
 
@@ -5714,18 +6054,18 @@ run_freezeTB(
    FILE *fqFILE = 0; 
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec02:
+   ^ Fun12 Sec02:
    ^   - initialize, get input, and set up memory
-   ^   o fun11 sec02 sub01:
+   ^   o fun12 sec02 sub01:
    ^     - initialize variables
-   ^   o fun11 sec02 sub02:
+   ^   o fun12 sec02 sub02:
    ^     - get input
-   ^   o fun11 sec02 sub03:
+   ^   o fun12 sec02 sub03:
    ^     - set up memory
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec02 Sub01:
+   * Fun12 Sec02 Sub01:
    *   - initialize variables
    \*****************************************************/
 
@@ -5754,7 +6094,7 @@ run_freezeTB(
    /*initialize spoligotyping array*/
    for(
       numLineagesSI = 0;
-      numLineagesSI < def_lenSpolAry_fun11;
+      numLineagesSI < def_lenSpolAry_fun12;
       ++numLineagesSI
    ) spoligoAryUI[numLineagesSI] = 0;
 
@@ -5769,7 +6109,7 @@ run_freezeTB(
       */
 
    /*****************************************************\
-   * Fun11 Sec02 Sub02:
+   * Fun12 Sec02 Sub02:
    *   - get input
    \*****************************************************/
 
@@ -5803,24 +6143,24 @@ run_freezeTB(
          *tmpStr++ = 'r';
          *tmpStr++ = '\0';
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: had input error*/
 
       else
-         goto ret_fun11_sec11;
+         goto ret_fun12_sec11;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec02 Sub03:
+   * Fun12 Sec02 Sub03:
    *   - set up memory
-   *   o fun11 sec02 sub03 cat01:
+   *   o fun12 sec02 sub03 cat01:
    *     - general setup
-   *   o fun11 sec02 sub03 cat02:
+   *   o fun12 sec02 sub03 cat02:
    *     - mapRead setup
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec02 Sub03 Cat01:
+   + Fun12 Sec02 Sub03 Cat01:
    +   - general setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5832,7 +6172,7 @@ run_freezeTB(
          str_endLine
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: hadd memory error*/
 
 
@@ -5844,7 +6184,7 @@ run_freezeTB(
              "memory error freezeTB setting struct setup"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: memory error*/
 
    if( setup_samEntry(&samStackST) )
@@ -5855,7 +6195,7 @@ run_freezeTB(
              "memory error samEntry struct setup"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: memory error*/
 
 
@@ -5877,7 +6217,7 @@ run_freezeTB(
             "memory error tblST_kmerFind struct setup"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: memory error*/
 
 
@@ -5899,11 +6239,11 @@ run_freezeTB(
             "memory error tblST_kmerFind struct setup"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: memory error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec02 Sub03 Cat02:
+   + Fun12 Sec02 Sub03 Cat02:
    +   - mapRead setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5920,7 +6260,7 @@ run_freezeTB(
                "memroy error setting map read structs"
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: memory error*/
 
       if( setup_samEntry(&revSamStackST) )
@@ -5931,34 +6271,34 @@ run_freezeTB(
                "memroy error setting map read structs"
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: memory error*/
    } /*If: mapping reads*/
 
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec03:
+   ^ Fun12 Sec03:
    ^   - check user input database (if can open)
-   ^   o fun11 sec03 sub01:
+   ^   o fun12 sec03 sub01:
    ^     - check if MIRU table exists
-   ^   o fun11 sec03 sub02:
+   ^   o fun12 sec03 sub02:
    ^     - check if spoligotyping spacer sequences exists
-   ^   o fun11 sec03 sub03:
+   ^   o fun12 sec03 sub03:
    ^     - check if spoligotyping lineage database
-   ^   o fun11 sec03 sub04:
+   ^   o fun12 sec03 sub04:
    ^     - check if amr table exists
-   ^   o fun11 sec03 sub05:
+   ^   o fun12 sec03 sub05:
    ^     - open the sam file
-   ^   o fun11 sec03 sub06:
+   ^   o fun12 sec03 sub06:
    ^     - check if gene coordinates file exits
-   ^   o fun11 sec03 sub07:
-   ^   o fun11 sec03 sub08:
-   ^   o fun11 sec03 sub09:
+   ^   o fun12 sec03 sub07:
+   ^   o fun12 sec03 sub08:
+   ^   o fun12 sec03 sub09:
    ^     - read in reference sequence
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec03 Sub01:
+   * Fun12 Sec03 Sub01:
    *   - check if MIRU table exists
    \*****************************************************/
 
@@ -5980,14 +6320,14 @@ run_freezeTB(
          ftbSetStackST.miruDbFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: I could not open the MIRU table*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub02:
+   * Fun12 Sec03 Sub02:
    *   - check if spoligotyping spacer sequences exists
    \*****************************************************/
 
@@ -6009,14 +6349,14 @@ run_freezeTB(
          ftbSetStackST.spolRefFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open spoligo spacer sequences*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub03:
+   * Fun12 Sec03 Sub03:
    *   - check if spoligotyping lineage database
    \*****************************************************/
 
@@ -6047,7 +6387,7 @@ run_freezeTB(
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub04:
+   * Fun12 Sec03 Sub04:
    *   - check if amr table exists
    \*****************************************************/
 
@@ -6070,14 +6410,14 @@ run_freezeTB(
          ftbSetStackST.amrDbFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open the filtered read stats file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub05:
+   * Fun12 Sec03 Sub05:
    *   - open sam file
    \*****************************************************/
    
@@ -6106,12 +6446,12 @@ run_freezeTB(
             samFileStr
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: could not open the sam file*/
    } /*Else: need to open sam file*/
 
    /*****************************************************\
-   * Fun11 Sec03 Sub06:
+   * Fun12 Sec03 Sub06:
    *   - open gene coordinates file
    \*****************************************************/
    
@@ -6133,23 +6473,23 @@ run_freezeTB(
          ftbSetStackST.coordFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open gene coordinates file*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub07:
+   * Fun12 Sec03 Sub07:
    *   - get the hsp65 simple database
-   *   o fun11 sec03 sub07 cat01:
+   *   o fun12 sec03 sub07 cat01:
    *     - open the hsp65 simple database
-   *   o fun11 sec03 sub07 cat02:
+   *   o fun12 sec03 sub07 cat02:
    *     - get the hsp65 simple database
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec03 Sub07 Cat01:
+   + Fun12 Sec03 Sub07 Cat01:
    +   - open the hsp65 simple database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6171,11 +6511,11 @@ run_freezeTB(
          ftbSetStackST.hsp65SimpleFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open the hsp65 simple database*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec03 Sub07 Cat02:
+   + Fun12 Sec03 Sub07 Cat02:
    +   - get the hsp65 simple database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6210,23 +6550,23 @@ run_freezeTB(
          ftbSetStackST.hsp65SimpleFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: errored out reading the lineage database*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub08:
+   * Fun12 Sec03 Sub08:
    *   - get the hsp65 complex database
-   *   o fun11 sec03 sub08 cat01:
+   *   o fun12 sec03 sub08 cat01:
    *     - open the hsp65 complex database
-   *   o fun11 sec03 sub08 cat02:
+   *   o fun12 sec03 sub08 cat02:
    *     - get the hsp65 complex database
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec03 Sub08 Cat01:
+   + Fun12 Sec03 Sub08 Cat01:
    +   - open the hsp65 complex database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6251,11 +6591,11 @@ run_freezeTB(
          ftbSetStackST.hsp65ComplexFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open the hsp65 complex database*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec03 Sub08 Cat02:
+   + Fun12 Sec03 Sub08 Cat02:
    +   - get the hsp65 complex database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6289,25 +6629,25 @@ run_freezeTB(
          ftbSetStackST.hsp65ComplexFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: errored out reading the lineage database*/
 
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec03 Sub09
+   * Fun12 Sec03 Sub09
    *   - read in reference sequence
-   *   o fun11 sec03 sub09 cat01:
+   *   o fun12 sec03 sub09 cat01:
    *     - open reference file
-   *   o fun11 sec03 sub09 cat02:
+   *   o fun12 sec03 sub09 cat02:
    *     - get reference sequence for rmHomo only
-   *   o fun11 sec03 sub09 cat03:
+   *   o fun12 sec03 sub09 cat03:
    *     - get reference sequence for mapRead and rmHomo
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec03 Sub09 Cat01:
+   + Fun12 Sec03 Sub09 Cat01:
    +   - open reference file
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6332,11 +6672,11 @@ run_freezeTB(
             ftbSetStackST.refFileStr
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: unable to open reference file*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec03 Sub09 Cat02:
+      + Fun12 Sec03 Sub09 Cat02:
       +   - get reference sequence for rmHomo only
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6365,12 +6705,12 @@ run_freezeTB(
                );
 
             cpStr_ulCp(tmpStr, ftbSetStackST.refFileStr);
-            goto err_fun11_sec11_sub02;
+            goto err_fun12_sec11_sub02;
          } /*Else: error reading reference*/
       } /*If: not using mapRead*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec03 Sub09 Cat03:
+      + Fun12 Sec03 Sub09 Cat03:
       +   - get reference sequence for rmHomo and mapRead
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -6400,44 +6740,44 @@ run_freezeTB(
                 );
 
              cpStr_ulCp(tmpStr, ftbSetStackST.refFileStr);
-             goto err_fun11_sec11_sub02;
+             goto err_fun12_sec11_sub02;
           } /*Else: error reading reference*/
       } /*Else: mapping reads, could be using rmHomo to*/
    } /*Else: need reference (rmHomo or mapRead)*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec04:
+   ^ Fun12 Sec04:
    ^   - check output files (can I open?)
-   ^   o fun11 sec04 sub01:
+   ^   o fun12 sec04 sub01:
    ^     - output file for read stats
-   ^   o fun11 sec04 sub02:
+   ^   o fun12 sec04 sub02:
    ^     - set up cosensus fragments output file
-   ^   o fun11 sec04 sub03:
+   ^   o fun12 sec04 sub03:
    ^     - set up read AMRs table outp file name
-   ^   o fun11 sec04 sub04:
+   ^   o fun12 sec04 sub04:
    ^     - set up read id AMR hit table
-   ^   o fun11 sec04 sub05:
+   ^   o fun12 sec04 sub05:
    ^     - output file for the AMRs found in consensus
-   ^   o fun11 sec04 sub06:
+   ^   o fun12 sec04 sub06:
    ^     - set up MIRU reads table output name
-   ^   o fun11 sec04 sub07:
+   ^   o fun12 sec04 sub07:
    ^     - set up MIRU consensus table output name
-   ^   o fun11 sec04 sub08:
+   ^   o fun12 sec04 sub08:
    ^     - set up consensus spoligotyping output file
-   ^   o fun11 sec04 sub09:
+   ^   o fun12 sec04 sub09:
    ^     - set up read spoligotyping output file name
-   ^   o fun11 sec04 sub10:
+   ^   o fun12 sec04 sub10:
    ^     - set up open consensus output file name
-   ^   o fun11 sec04 sub11:
+   ^   o fun12 sec04 sub11:
    ^     - set up sam file name (if mapping reads)
-   ^   o fun11 sec04 sub12:
+   ^   o fun12 sec04 sub12:
    ^     - set up hsp65 read species output name
-   ^   o fun11 sec04 sub13:
+   ^   o fun12 sec04 sub13:
    ^     - set up hsp65 consensus species output name
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub01:
+   * Fun12 Sec04 Sub01:
    *   - set up read stats file name
    \*****************************************************/
 
@@ -6464,7 +6804,7 @@ run_freezeTB(
          readStatsStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    errSC =
@@ -6490,11 +6830,11 @@ run_freezeTB(
          readStatsStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
  
    /*****************************************************\
-   * Fun11 Sec04 Sub02:
+   * Fun12 Sec04 Sub02:
    *   - set up cosensus fragments output file
    \*****************************************************/
 
@@ -6521,11 +6861,11 @@ run_freezeTB(
          conTsvStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub03:
+   * Fun12 Sec04 Sub03:
    *   - set up read AMRs table outp file name
    \*****************************************************/
 
@@ -6552,11 +6892,11 @@ run_freezeTB(
          readAmrStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub04:
+   * Fun12 Sec04 Sub04:
    *   - set up read id AMR hit table
    \*****************************************************/
 
@@ -6583,11 +6923,11 @@ run_freezeTB(
          idFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub05:
+   * Fun12 Sec04 Sub05:
    *   - Set up the name for the consensus AMRs table
    \*****************************************************/
 
@@ -6614,11 +6954,11 @@ run_freezeTB(
          conAmrStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub06:
+   * Fun12 Sec04 Sub06:
    *   - set up MIRU reads table output name
    \*****************************************************/
 
@@ -6645,11 +6985,11 @@ run_freezeTB(
          readMiruStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub07:
+   * Fun12 Sec04 Sub07:
    *   - set up MIRU consensus table output name
    \*****************************************************/
 
@@ -6676,7 +7016,7 @@ run_freezeTB(
          conMiruStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    errSC =
@@ -6702,11 +7042,11 @@ run_freezeTB(
          conMiruStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub08:
+   * Fun12 Sec04 Sub08:
    *   - set up consensus spoligotyping output file
    \*****************************************************/
 
@@ -6733,11 +7073,11 @@ run_freezeTB(
          outSpoligoFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub09:
+   * Fun12 Sec04 Sub09:
    *   - set up read spoligotyping output file name
    \*****************************************************/
 
@@ -6764,11 +7104,11 @@ run_freezeTB(
          outReadSpoligoFileStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub10:
+   * Fun12 Sec04 Sub10:
    *   - set up open consensus output file name
    \*****************************************************/
 
@@ -6803,13 +7143,13 @@ run_freezeTB(
          conOutStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    conOutFILE = fopen((char *) conOutStr, "w");
 
    /*****************************************************\
-   * Fun11 Sec04 Sub11:
+   * Fun12 Sec04 Sub11:
    *   - set up sam file name (if mapping reads)
    \*****************************************************/
 
@@ -6838,14 +7178,14 @@ run_freezeTB(
             mapSamStr
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: could not open file*/
 
       samFILE = fopen((char *) mapSamStr, "w");
    } /*If: mapping reads*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub12:
+   * Fun12 Sec04 Sub12:
    *   - set up hsp65 read species output name
    \*****************************************************/
 
@@ -6867,11 +7207,11 @@ run_freezeTB(
          );
       cpStr_ulCp(tmpStr, hsp65ReadOutStr);
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun11 Sec04 Sub13:
+   * Fun12 Sec04 Sub13:
    *   - set up hsp65 read consensus output name
    \*****************************************************/
 
@@ -6893,28 +7233,28 @@ run_freezeTB(
          );
       cpStr_ulCp(tmpStr, hsp65ConOutStr);
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec05:
+   ^ Fun12 Sec05:
    ^   - read in databases
-   ^   o fun11 sec05 sub01:
+   ^   o fun12 sec05 sub01:
    ^     - get gene mapping coodiantes
-   ^   o fun11 sec05 sub02:
+   ^   o fun12 sec05 sub02:
    ^     - get amr table
-   ^   o fun11 sec05 sub03:
+   ^   o fun12 sec05 sub03:
    ^     - get MIRU lineage table
-   ^   o fun11 sec05 sub04:
+   ^   o fun12 sec05 sub04:
    ^     - get spoligotyping spacer sequences
-   ^   o fun11 sec05 sub05:
+   ^   o fun12 sec05 sub05:
    ^     - get spoligotyping lineages
-   ^   o fun11 sec05 sub06:
+   ^   o fun12 sec05 sub06:
    ^     - get masking primer coordinates
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec05 Sub01:
+   * Fun12 Sec05 Sub01:
    *   - get gene mapping coodiantes
    \*****************************************************/
 
@@ -6973,14 +7313,14 @@ run_freezeTB(
          );
       } /*Else: wrong coordinates*/
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    lenBuffUL = 0;
    lastBaseUI = coordsHeapST->endAryUI[numCoordsSI];
 
    /*****************************************************\
-   * Fun11 Sec05 Sub02:
+   * Fun12 Sec05 Sub02:
    *   - get amr table
    \*****************************************************/
 
@@ -7022,11 +7362,11 @@ run_freezeTB(
          );
       } /*If: memory error*/
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec05 Sub03:
+   * Fun12 Sec05 Sub03:
    *   - get MIRU lineage table
    \*****************************************************/
  
@@ -7071,11 +7411,11 @@ run_freezeTB(
          );
       } /*Else: memory error*/
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec05 Sub04:
+   * Fun12 Sec05 Sub04:
    *   - get spoligotyping spacer sequences
    \*****************************************************/
 
@@ -7109,7 +7449,7 @@ run_freezeTB(
             ftbSetStackST.spolRefFileStr
          );
  
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: file error*/
  
       else
@@ -7120,12 +7460,12 @@ run_freezeTB(
                "memory error getting spoligo seqs"
          );
  
-          goto err_fun11_sec11_sub02;
+          goto err_fun12_sec11_sub02;
       } /*Else: memory error*/
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec05 Sub05:
+   * Fun12 Sec05 Sub05:
    *   - get spoligotyping lineage database
    \*****************************************************/
 
@@ -7172,13 +7512,13 @@ run_freezeTB(
                ftbSetStackST.spolDBFileStr
             );
 
-            goto err_fun11_sec11_sub02;
+            goto err_fun12_sec11_sub02;
          } /*Else: memory error*/
       } /*If: error*/
    } /*If: have lineage database*/
 
    /*****************************************************\
-   * Fun11 Sec05 Sub06:
+   * Fun12 Sec05 Sub06:
    *   - get masking primer coordinates
    \*****************************************************/
 
@@ -7269,43 +7609,43 @@ run_freezeTB(
             );
          } /*Else: memory error*/
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: error*/
    } /*If: primer masking file was input*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec06:
+   ^ Fun12 Sec06:
    ^   - get reference stats and print consensus header
-   ^   o fun11 sec06 sub01:
+   ^   o fun12 sec06 sub01:
    ^     - get reference name/length from header
-   ^   o fun11 sec06 sub02:
+   ^   o fun12 sec06 sub02:
    ^     - print tbCon header for sam file
-   ^   o fun11 sec06 sub03:
+   ^   o fun12 sec06 sub03:
    ^     - check if have reference name/length
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec06 Sub01:
+   * Fun12 Sec06 Sub01:
    *   - get reference length from header
-   *   o fun11 sec06 sub01 cat01:
+   *   o fun12 sec06 sub01 cat01:
    *     - get first sam file entry + start loop
-   *   o fun11 sec06 sub01 cat02:
+   *   o fun12 sec06 sub01 cat02:
    *     - print comment entry (end loop if not comment)
-   *   o fun11 sec06 sub01 cat03:
+   *   o fun12 sec06 sub01 cat03:
    *     - if sequence entry; get id and length
-   *   o fun11 sec06 sub01 cat04:
+   *   o fun12 sec06 sub01 cat04:
    *     - move to next entry
-   *   o fun11 sec06 sub01 cat05:
+   *   o fun12 sec06 sub01 cat05:
    *     - check for errors
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec06 Sub01 Cat01:
+   + Fun12 Sec06 Sub01 Cat01:
    +   - get first sam file entry + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    if(fqIndexSI)
-      goto pFTBHeader_fun11_sec06_sub02_cat01;
+      goto pFTBHeader_fun12_sec06_sub02_cat01;
 
    errSC = get_samEntry(&samStackST, samFILE);
 
@@ -7313,13 +7653,20 @@ run_freezeTB(
    { /*Loop: read in header*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec06 Sub01 Cat02:
+      + Fun12 Sec06 Sub01 Cat02:
       +   - print comment entry (end loop if not comment)
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       if(samStackST.extraStr[0] != '@')
          break; /*off header*/
 
+      else
+         goto nextHeader_fun12_sec06_sub01_cat04;
+         /*currently not printing the consensus in a
+         `  a sam file format. Instead using fasta, so
+         `  I need to skip the header
+         */
+ 
       fprintf(
          conOutFILE,
          "%s%s",
@@ -7328,7 +7675,7 @@ run_freezeTB(
       );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec06 Sub01 Cat03:
+      + Fun12 Sec06 Sub01 Cat03:
       +   - if sequence entry; get id and length
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7355,7 +7702,7 @@ run_freezeTB(
                samFileStr
             );
 
-            goto err_fun11_sec11_sub02;
+            goto err_fun12_sec11_sub02;
          } /*If: sam file has multiple references*/
 
          multiRefBl = 1;
@@ -7368,7 +7715,7 @@ run_freezeTB(
                break;
 
          if(*(tmpStr - 1) != ':')
-            goto nextHeader_fun11_sec06_sub01_cat04;
+            goto nextHeader_fun12_sec06_sub01_cat04;
 
          tmpStr +=
             cpDelim_ulCp(
@@ -7381,7 +7728,7 @@ run_freezeTB(
          ++tmpStr;
         
          if(*tmpStr < 31 )
-            goto nextHeader_fun11_sec06_sub01_cat04;
+            goto nextHeader_fun12_sec06_sub01_cat04;
 
          /*move past LN: flag*/
          while(*tmpStr++ != ':')
@@ -7389,7 +7736,7 @@ run_freezeTB(
                break;
 
          if(*(tmpStr - 1) != ':')
-            goto nextHeader_fun11_sec06_sub01_cat04;
+            goto nextHeader_fun12_sec06_sub01_cat04;
 
          /*get reference length*/
          tmpStr += strToSI_base10str(tmpStr, &lenRefSI);
@@ -7400,16 +7747,16 @@ run_freezeTB(
       } /*If: sequence entry*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec06 Sub01 Cat04:
+      + Fun12 Sec06 Sub01 Cat04:
       +   - move to next entry
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      nextHeader_fun11_sec06_sub01_cat04:;
+      nextHeader_fun12_sec06_sub01_cat04:;
          errSC = get_samEntry(&samStackST, samFILE);
    } /*Loop: read in header*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec06 Sub01 Cat05:
+   + Fun12 Sec06 Sub01 Cat05:
    +   - check for errors
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7448,26 +7795,30 @@ run_freezeTB(
          );
       } /*Else: memory error*/
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error reading sam file header*/
 
    /*****************************************************\
-   * Fun11 Sec06 Sub02:
+   * Fun12 Sec06 Sub02:
    *   - print tbCon header for sam file
-   *   o fun11 sec06 sub02 cat01:
+   *   o fun12 sec06 sub02 cat01:
    *     - mapRead sam file header settings
-   *   o fun11 sec06 sub02 cat02:
+   *   o fun12 sec06 sub02 cat02:
    *     - tbCon cosensus settings
-   *   o fun11 sec06 sub02 cat03:
+   *   o fun12 sec06 sub02 cat03:
    *     - tbCon variant print (tsv file) settings
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec06 Sub02 Cat01:
+   + Fun12 Sec06 Sub02 Cat01:
    +   - mapRead sam file header settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   pFTBHeader_fun11_sec06_sub02_cat01:;
+   pFTBHeader_fun12_sec06_sub02_cat01:;
+   goto skipHeader_fun12_sec06_sub03;
+      /*currently not printing in sam format, so I need
+      `  to skip the header
+      */
 
    if(fqIndexSI)
    { /*If: need a full header*/
@@ -7528,7 +7879,7 @@ run_freezeTB(
    } /*If: need a full header*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec06 Sub02 Cat02:
+   + Fun12 Sec06 Sub02 Cat02:
    +   - tbCon cosensus settings
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7577,7 +7928,7 @@ run_freezeTB(
       );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun11 Sec06 Sub02 Cat03:
+      + Fun12 Sec06 Sub02 Cat03:
       +   - tbCon variant print (tsv file) settings
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7616,57 +7967,63 @@ run_freezeTB(
    conOutFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec06 Sub03:
+   * Fun12 Sec06 Sub03:
    *   - check if have reference name/length
    \*****************************************************/
 
-   if(! lenRefSI)
-      lenRefSI = def_refLen_tbConDefs;
+   skipHeader_fun12_sec06_sub03:;
+      if(conOutFILE)
+         fclose(conOutFILE);
+      conOutFILE = 0;
 
-   if(refIdStr[0] == '\0')
-   { /*If: reference name is missing*/
-      refIdStr[0] = 'u';
-      refIdStr[1] = 'n';
-      refIdStr[2] = 'k';
-      refIdStr[3] = 'o';
-      refIdStr[4] = 'w';
-      refIdStr[5] = 'n';
-      refIdStr[6] = '\0';
-   } /*If: reference name is missing*/
+      if(! lenRefSI)
+         lenRefSI = def_refLen_tbConDefs;
+
+
+      if(refIdStr[0] == '\0')
+      { /*If: reference name is missing*/
+         refIdStr[0] = 'u';
+         refIdStr[1] = 'n';
+         refIdStr[2] = 'k';
+         refIdStr[3] = 'o';
+         refIdStr[4] = 'w';
+         refIdStr[5] = 'n';
+         refIdStr[6] = '\0';
+      } /*If: reference name is missing*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec07:
+   ^ Fun12 Sec07:
    ^   - read analysis
-   ^   o fun11 sec06 sub01:
+   ^   o fun12 sec06 sub01:
    ^     - allocate memory for the read stats arrays
-   ^   o fun11 sec06 sub02:
+   ^   o fun12 sec06 sub02:
    ^     - map reads (if needed) + start loop
-   ^   o fun11 sec06 sub03:
+   ^   o fun12 sec06 sub03:
    ^     - filter reads (sam entries)
-   ^   o fun11 sec06 sub04:
+   ^   o fun12 sec06 sub04:
    ^     - mask primers in reads
-   ^   o fun11 sec06 sub05:
+   ^   o fun12 sec06 sub05:
    ^     - build filtered histogram
-   ^   o fun11 sec06 sub06:
+   ^   o fun12 sec06 sub06:
    ^     - indel clean up
-   ^   o fun11 sec06 sub07:
+   ^   o fun12 sec06 sub07:
    ^     - build consensus
-   ^   o fun11 sec06 sub08:
+   ^   o fun12 sec06 sub08:
    ^     - check for AMRs
-   ^   o fun11 sec06 sub09:
+   ^   o fun12 sec06 sub09:
    ^     - check for MIRU lineages
-   ^   o fun11 sec06 sub10:
+   ^   o fun12 sec06 sub10:
    ^     - check for spoligotypes
-   ^   o fun11 sec06 sub11:
+   ^   o fun12 sec06 sub11:
    ^     - get hsp65 species and any user lineages
-   ^   o fun11 sec06 sub12:
+   ^   o fun12 sec06 sub12:
    ^     - move to next read
-   ^   o fun11 sec06 sub13:
+   ^   o fun12 sec06 sub13:
    ^     - minor clean up (variables unique to sec07)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec07 Sub01:
+   * Fun12 Sec07 Sub01:
    *   - allocate memory for the read stats arrays
    \*****************************************************/
 
@@ -7685,20 +8042,20 @@ run_freezeTB(
             "memory error (read histogram malloc)"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: memory error*/
 
    /*****************************************************\
-   * Fun11 Sec07 Sub02:
+   * Fun12 Sec07 Sub02:
    *   - map reads (if needed) + start loop
-   *   o fun11 sec07 sub02 cat01:
+   *   o fun12 sec07 sub02 cat01:
    *     - open fastq(s) file for mapping + start loop
-   *   o fun11 sec07 sub02 cat02:
+   *   o fun12 sec07 sub02 cat02:
    *     - map reads
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec07 Sub02 Cat01:
+   + Fun12 Sec07 Sub02 Cat01:
    +   - open fastq(s) file for mapping + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7749,7 +8106,7 @@ run_freezeTB(
                             argAryStr[fqIndexSI]
                      );
 
-                  goto err_fun11_sec11_sub02;
+                  goto err_fun12_sec11_sub02;
                } /*If: could not open fastq file*/
             } /*Else: fastq file input*/
 
@@ -7757,7 +8114,7 @@ run_freezeTB(
          } /*If: finished last file*/
 
         /*+++++++++++++++++++++++++++++++++++++++++++++++\
-        + Fun11 Sec07 Sub02 Cat02:
+        + Fun12 Sec07 Sub02 Cat02:
         +   - map reads
         \+++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -7790,7 +8147,7 @@ run_freezeTB(
                      (signed char *) argAryStr[fqIndexSI]
                   );
 
-               goto err_fun11_sec11_sub02;
+               goto err_fun12_sec11_sub02;
          } /*Else If: error (likely file)*/
 
          seqToIndex_alnSet(readSeqStackST.seqStr);
@@ -7808,7 +8165,7 @@ run_freezeTB(
 
          if(forErrSC == def_memErr_mapRead)
          { /*If: mapRead had memory error*/
-            mapMemErr_fun11_sec07_sub02_cat02:;
+            mapMemErr_fun12_sec07_sub02_cat02:;
                tmpStr = errHeapStr;
 
                tmpStr +=
@@ -7824,7 +8181,7 @@ run_freezeTB(
                      (signed char *) argAryStr[fqIndexSI]
                   );
 
-               goto err_fun11_sec11_sub02;
+               goto err_fun12_sec11_sub02;
          } /*If: mapRead had memory error*/
 
          revCmpIndex_alnSet(
@@ -7846,7 +8203,7 @@ run_freezeTB(
             ); /*get forward alignment*/
 
          if(revErrSC == def_memErr_mapRead)
-            goto mapMemErr_fun11_sec07_sub02_cat02;
+            goto mapMemErr_fun12_sec07_sub02_cat02;
          revSamStackST.flagUS = 16;
 
          if(revScoreSL > forScoreSL)
@@ -7871,7 +8228,7 @@ run_freezeTB(
       } /*If: need to map reads*/ 
 
       /**************************************************\
-      * Fun11 Sec07 Sub03:
+      * Fun12 Sec07 Sub03:
       *   - filter reads (sam entries)
       \**************************************************/
 
@@ -7882,7 +8239,7 @@ run_freezeTB(
          if(samStackST.flagUS & 4)
             ++noMapReadSI;
 
-         goto nextRead_fun11_sec07_sub09;
+         goto nextRead_fun12_sec07_sub09;
       } /*If:umapped 4, secondary 256, or suplemtal 2048*/
 
       /*remove soft masked bases*/
@@ -7890,26 +8247,26 @@ run_freezeTB(
          /*already removed reads that could cause errors*/
 
       if(samStackST.medianQF < ftbSetStackST.minMedianQF)
-         goto nextRead_fun11_sec07_sub09;
+         goto nextRead_fun12_sec07_sub09;
          /*low mean q-score*/
 
       if(samStackST.medianQF < ftbSetStackST.minMedianQF)
-         goto nextRead_fun11_sec07_sub09;
+         goto nextRead_fun12_sec07_sub09;
          /*low median q-score*/
 
       if(
            samStackST.mapqUC
          < ftbSetStackST.tbConSet.minMapqUC
-      ) goto nextRead_fun11_sec07_sub09;
+      ) goto nextRead_fun12_sec07_sub09;
          /*low mapping quality*/
 
       if(
            samStackST.alnReadLenUI
          < (unsigned int) ftbSetStackST.tbConSet.minLenSI
-      ) goto nextRead_fun11_sec07_sub09; /*short read*/
+      ) goto nextRead_fun12_sec07_sub09; /*short read*/
 
       /**************************************************\
-      * Fun11 Sec07 Sub04:
+      * Fun12 Sec07 Sub04:
       *   - mask primers in reads
       \**************************************************/
 
@@ -7928,7 +8285,7 @@ run_freezeTB(
       } /*If: masking primers*/
 
       /**************************************************\
-      * Fun11 Sec07 Sub05:
+      * Fun12 Sec07 Sub05:
       *   - build filtered histogram
       \**************************************************/
 
@@ -7943,7 +8300,7 @@ run_freezeTB(
       );
 
       /**************************************************\
-      * Fun11 Sec07 Sub06:
+      * Fun12 Sec07 Sub06:
       *   - indel clean up
       \**************************************************/
 
@@ -7978,7 +8335,7 @@ run_freezeTB(
                   *tmpStr++ = str_endLine[1];
                *tmpStr = 0;
 
-               goto err_fun11_sec11_sub02;
+               goto err_fun12_sec11_sub02;
             } /*If: had memory error*/
 
          } /*If: need larger buffer*/
@@ -8021,7 +8378,7 @@ run_freezeTB(
       } /*If: cleaning up indels in reads*/
 
       /**************************************************\
-      * Fun11 Sec07 Sub07:
+      * Fun12 Sec07 Sub07:
       *   - build consensus
       \**************************************************/
 
@@ -8052,12 +8409,12 @@ run_freezeTB(
                totalReadsUI
             );
 
-            goto err_fun11_sec11_sub02;
+            goto err_fun12_sec11_sub02;
          } /*If: memory error*/
       } /*If: not doing mixed infection detection*/
 
       /**************************************************\
-      * Fun11 Sec07 Sub08:
+      * Fun12 Sec07 Sub08:
       *   - check for AMRs
       \**************************************************/
 
@@ -8089,7 +8446,7 @@ run_freezeTB(
             totalReadsUI
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: memory error*/
 
       if(amrHitHeapSTList)
@@ -8105,7 +8462,7 @@ run_freezeTB(
       } /*If: read had AMR(s)*/
 
       /**************************************************\
-      * Fun11 Sec07 Sub09:
+      * Fun12 Sec07 Sub09:
       *   - check for MIRU lineages 
       \**************************************************/
 
@@ -8116,7 +8473,7 @@ run_freezeTB(
       );
 
       /**************************************************\
-      * Fun11 Sec07 Sub10:
+      * Fun12 Sec07 Sub10:
       *   - Check for spoligotypes
       \**************************************************/
 
@@ -8152,11 +8509,11 @@ run_freezeTB(
             totalReadsUI
          );
 
-         goto err_fun11_sec11_sub02;
+         goto err_fun12_sec11_sub02;
       } /*If: memory error*/
       
       /**************************************************\
-      * Fun11 Sec07 Sub11:
+      * Fun12 Sec07 Sub11:
       *   - get hsp65 species and any user lineages
       \**************************************************/
 
@@ -8170,7 +8527,7 @@ run_freezeTB(
          );
 
       if(hsp65SimpleLenSI < 0)
-         goto readHsp65Err_fun11_sec07_sub11;
+         goto readHsp65Err_fun12_sec07_sub11;
 
       else if(hsp65SimpleLenSI)
       { /*Else If: have simple lineages*/
@@ -8185,7 +8542,7 @@ run_freezeTB(
             );
 
          if(hsp65ComplexLenSI == -2)
-            goto readHsp65Err_fun11_sec07_sub11;
+            goto readHsp65Err_fun12_sec07_sub11;
 
          if(
             addReadLineages_cnt_getLin(
@@ -8200,7 +8557,7 @@ run_freezeTB(
                hsp65ComplexHeapST
             )
          ){ /*If: memory error*/
-            readHsp65Err_fun11_sec07_sub11:;
+            readHsp65Err_fun12_sec07_sub11:;
             tmpStr = errHeapStr;
 
             tmpStr +=
@@ -8211,7 +8568,7 @@ run_freezeTB(
                );
             numToStr(tmpStr, totalReadsUI);
 
-            goto err_fun11_sec11_sub02;
+            goto err_fun12_sec11_sub02;
          }  /*If: memory error*/
       } /*Else If: have simple lineages*/
 
@@ -8228,17 +8585,17 @@ run_freezeTB(
       hsp65ComplexLinHeapArySI = 0;
 
       /**************************************************\
-      * Fun11 Sec07 Sub12:
+      * Fun12 Sec07 Sub12:
       *   - move to next read
       \**************************************************/
 
-      nextRead_fun11_sec07_sub09:;
+      nextRead_fun12_sec07_sub09:;
          if(! fqIndexSI)
             errSC = get_samEntry(&samStackST, samFILE);
    } /*Loop: read anaylsis*/
 
    /*****************************************************\
-   * Fun11 Sec07 Sub13:
+   * Fun12 Sec07 Sub13:
    *   - minor clean up (variables unique to sec07)
    \*****************************************************/
 
@@ -8275,25 +8632,25 @@ run_freezeTB(
    maskFlagHeapAryUI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec08:
+   ^ Fun12 Sec08:
    ^   - print read data
-   ^   o fun11 sec08 sub01:
-   ^     - print filtered read stats
-   ^   o fun11 sec08 sub02:
+   ^   o fun12 sec08 sub01:
+   ^     - print read stats
+   ^   o fun12 sec08 sub02:
    ^     - print AMR hits for reads
-   ^   o fun11 sec08 sub03:
+   ^   o fun12 sec08 sub03:
    ^     - print read MIRU table
-   ^   o fun11 sec08 sub04:
+   ^   o fun12 sec08 sub04:
    ^     - print read spoligotype entry
-   ^   o fun11 sec08 sub05:
+   ^   o fun12 sec08 sub05:
    ^     - print tsv file of variants
-   ^   o fun11 sec08 sub06:
+   ^   o fun12 sec08 sub06:
    ^     - print hsp65 species and custom user lineages
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec08 Sub01:
-   *   - print filtered read stats
+   * Fun12 Sec08 Sub01:
+   *   - print read stats
    \*****************************************************/
 
    sort_geneCoord(
@@ -8328,6 +8685,15 @@ run_freezeTB(
       outFILE
    );
 
+   mkAmrCoverageTbl_freezeTB(
+      ftbSetStackST.prefixStr,
+      ftbSetStackST.tbConSet.minDepthSI,
+      readMapArySI,                    /*read depths*/
+      coordsHeapST,
+      numCoordsSI,
+      ftbSetStackST.coordFileStr
+   );
+
    fclose(outFILE);
    outFILE = 0;
 
@@ -8338,7 +8704,7 @@ run_freezeTB(
    coordsHeapST = 0;
 
    /*****************************************************\
-   * Fun11 Sec08 Sub02:
+   * Fun12 Sec08 Sub02:
    *   - print AMR hits for reads
    \*****************************************************/
 
@@ -8370,15 +8736,14 @@ run_freezeTB(
          /*number AMRs in amrHeapAryST*/
       drugHeapAryStr,
          /*has drug names*/
-      outFILE
-         /*file to print to*/
+      outFILE /*file to print to*/
    ); /*print AMRs detected in reads*/
-      
+
    fclose(outFILE);
    outFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec08 Sub03:
+   * Fun12 Sec08 Sub03:
    *   - print read MIRU table
    \*****************************************************/
 
@@ -8430,7 +8795,7 @@ run_freezeTB(
       );
 
    /*****************************************************\
-   * Fun11 Sec08 Sub04:
+   * Fun12 Sec08 Sub04:
    *   - print read spoligotype entry
    \*****************************************************/
 
@@ -8464,7 +8829,7 @@ run_freezeTB(
 
    for(
       errSL = 0;
-      errSL < def_lenSpolAry_fun11;
+      errSL < def_lenSpolAry_fun12;
       ++errSL
    ) spoligoAryUI[errSL] = 0;
 
@@ -8472,13 +8837,13 @@ run_freezeTB(
    errSL = 0;
    
    /*****************************************************\
-   * Fun11 Sec08 Sub05:
+   * Fun12 Sec08 Sub05:
    *   - print tsv file of variants
    \*****************************************************/
 
    /*Build the tsv of variants table*/
    if(ftbSetStackST.clustBl)
-      goto mixedInfect_fun11_sec11;
+      goto mixedInfect_fun12_sec11;
 
    errSC =
       pvar_tbCon(
@@ -8496,11 +8861,11 @@ run_freezeTB(
           (signed char *) "unable to build consensus"
        );
 
-       goto err_fun11_sec11_sub02;
+       goto err_fun12_sec11_sub02;
     } /*If: nothing mapped*/
    
    /*****************************************************\
-   * Fun11 Sec08 Sub06:
+   * Fun12 Sec08 Sub06:
    *   - print hsp65 species and custom user lineages
    \*****************************************************/
 
@@ -8519,22 +8884,22 @@ run_freezeTB(
    freeStack_cnt_getLin(&hsp65CntStackST);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec09:
+   ^ Fun12 Sec09:
    ^   - collapse consensus and consensus analysis
-   ^   o fun11 sec09 sub01:
+   ^   o fun12 sec09 sub01:
    ^     - collapse consensus
-   ^   o fun11 sec09 sub02:
+   ^   o fun12 sec09 sub02:
    ^     - print consensus and do ananlysis
-   ^   o fun11 sec09 sub03:
+   ^   o fun12 sec09 sub03:
    ^     - close output files and free uneeded variables
-   ^   o fun11 sec09 sub04:
+   ^   o fun12 sec09 sub04:
    ^     - print consensus MIRU lineages
-   ^   o fun11 sec09 sub05:
+   ^   o fun12 sec09 sub05:
    ^     - print detected spoligotype (consensus)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec09 Sub01:
+   * Fun12 Sec09 Sub01:
    *   - collapse consensus
    \*****************************************************/
 
@@ -8563,30 +8928,30 @@ run_freezeTB(
          (signed char *) "could not collapse consensus"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec09 Sub02:
+   * Fun12 Sec09 Sub02:
    *   - print consensus and do ananlysis
-   *   o fun11 sec09 sub04 cat01:
+   *   o fun12 sec09 sub04 cat01:
    *     - open files + run consensus fragment loop
-   *   o fun11 sec09 sub04 cat02:
+   *   o fun12 sec09 sub04 cat02:
    *     - print consensus fragments
-   *   o fun11 sec09 sub04 cat03:
+   *   o fun12 sec09 sub04 cat03:
    *     - AMR detection and printing
-   *   o fun11 sec09 sub04 cat04:
+   *   o fun12 sec09 sub04 cat04:
    *     - MIRU-VNTR lineage detection and printing
-   *   o fun11 sec09 sub04 cat05:
+   *   o fun12 sec09 sub04 cat05:
    *     - detect spoligotypes
-   *   o fun11 sec09 sub04 cat06:
+   *   o fun12 sec09 sub04 cat06:
    *     - hsp65 species checking + user defined lineages
-   *   o fun11 sec09 sub04 cat07:
+   *   o fun12 sec09 sub04 cat07:
    *     - free the consensus fragment
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec09 Sub04 Cat01:
+   + Fun12 Sec09 Sub04 Cat01:
    +   - open files + run consensus fragment loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8615,7 +8980,7 @@ run_freezeTB(
    ){ /*Loop: print and analyize consensuses*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat02:
+     + Fun12 Sec09 Sub04 Cat02:
      +   - print consensus fragments
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8635,7 +9000,7 @@ run_freezeTB(
       pfa_samEntry(&samConSTAry[siCon], conOutFILE);
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat03:
+     + Fun12 Sec09 Sub04 Cat03:
      +   - AMR detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8667,7 +9032,7 @@ run_freezeTB(
       } /*If: have AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat04:
+     + Fun12 Sec09 Sub04 Cat04:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8678,7 +9043,7 @@ run_freezeTB(
       ); /*find MIRU lineages in consensus fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat05:
+     + Fun12 Sec09 Sub04 Cat05:
      +   - spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8697,7 +9062,7 @@ run_freezeTB(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat06:
+     + Fun12 Sec09 Sub04 Cat06:
      +   - hsp65 species checking + user defined lineages
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8711,7 +9076,7 @@ run_freezeTB(
          );
 
       if(hsp65SimpleLenSI < 0)
-         goto conHsp65Err_fun11_sec09_sub04_cat06;
+         goto conHsp65Err_fun12_sec09_sub04_cat06;
 
       else if(hsp65SimpleLenSI)
       { /*Else If: have simple lineages*/
@@ -8726,7 +9091,7 @@ run_freezeTB(
             );
 
          if(hsp65ComplexLenSI == -2)
-            goto conHsp65Err_fun11_sec09_sub04_cat06;
+            goto conHsp65Err_fun12_sec09_sub04_cat06;
 
          if(
             plineages_getLin(
@@ -8743,7 +9108,7 @@ run_freezeTB(
                hsp65OutFILE
             )
          ){ /*If: memory error*/
-            conHsp65Err_fun11_sec09_sub04_cat06:;
+            conHsp65Err_fun12_sec09_sub04_cat06:;
                tmpStr = errHeapStr;
 
                tmpStr +=
@@ -8754,7 +9119,7 @@ run_freezeTB(
                   );
                numToStr(tmpStr, totalReadsUI);
 
-               goto err_fun11_sec11_sub02;
+               goto err_fun12_sec11_sub02;
          }  /*If: memory error*/
       } /*Else If: have simple lineages*/
 
@@ -8771,7 +9136,7 @@ run_freezeTB(
       hsp65ComplexLinHeapArySI = 0;
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat07:
+     + Fun12 Sec09 Sub04 Cat07:
      +   - free the consensus fragment
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -8779,7 +9144,7 @@ run_freezeTB(
    } /*Loop: print and analyize consensuse*/
 
    /*****************************************************\
-   * Fun11 Sec09 Sub03:
+   * Fun12 Sec09 Sub03:
    *   - close output files and free uneeded variables
    \*****************************************************/
 
@@ -8814,11 +9179,11 @@ run_freezeTB(
             "error during consensus analyisis step"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec09 Sub04:
+   * Fun12 Sec09 Sub04:
    *   - print consensus MIRU lineages
    \*****************************************************/
 
@@ -8847,11 +9212,11 @@ run_freezeTB(
          conMiruStr
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec09 Sub05:
+   * Fun12 Sec09 Sub05:
    *   - print detected spoligotype
    \*****************************************************/
 
@@ -8898,31 +9263,31 @@ run_freezeTB(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
-   goto ret_fun11_sec11;
+   goto ret_fun12_sec11;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec10:
+   ^ Fun12 Sec10:
    ^   - run mixed infection detection (if requested)
-   ^   o fun11 sec10 sub01:
+   ^   o fun12 sec10 sub01:
    ^     - check if can open log files
-   ^   o fun11 sec10 sub02:
+   ^   o fun12 sec10 sub02:
    ^     - run mixed infection detection
-   ^   o fun11 sec10 sub03:
+   ^   o fun12 sec10 sub03:
    ^     - print clusters for mixed infection
-   ^   o fun11 sec10 sub04:
+   ^   o fun12 sec10 sub04:
    ^     - amr/miru/spoligotype detection on clusters
-   ^   o fun11 sec10 sub05:
+   ^   o fun12 sec10 sub05:
    ^     - print consensus MIRU lineages
-   ^   o fun11 sec10 sub06:
+   ^   o fun12 sec10 sub06:
    ^     - print detected spoligotype
    \*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec10 Sub01:
+   * Fun12 Sec10 Sub01:
    *   - check if can open log files
    \*****************************************************/
 
-   mixedInfect_fun11_sec11:;
+   mixedInfect_fun12_sec11:;
 
    if(samFILE == stdin)
    { /*If: piping file to mixed infection detect*/
@@ -8935,7 +9300,7 @@ run_freezeTB(
              "do not use -sam stdin for clustering"
          );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: piping file to mixed infection detect*/
 
    errSC =
@@ -8959,11 +9324,11 @@ run_freezeTB(
          str_endLine
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: could not open log flie*/
 
    /*****************************************************\
-   * Fun11 Sec10 Sub02:
+   * Fun12 Sec10 Sub02:
    *   - run mixed infection detection
    \*****************************************************/
 
@@ -9012,7 +9377,7 @@ run_freezeTB(
          *tmpStr++ = str_endLine[1];
       *tmpStr = '\0';
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    if(logFILE != stderr)
@@ -9020,7 +9385,7 @@ run_freezeTB(
    logFILE = 0;
 
    /*****************************************************\
-   * Fun11 Sec10 Sub03:
+   * Fun12 Sec10 Sub03:
    *   - print clusters for mixed infection
    \*****************************************************/
 
@@ -9045,7 +9410,7 @@ run_freezeTB(
             "cluster memory error consensus print"
       );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: had error*/
 
    errSC =
@@ -9075,7 +9440,7 @@ run_freezeTB(
                "cluster file error cluster print"
          );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: had error*/
 
    fclose(samFILE);
@@ -9086,22 +9451,22 @@ run_freezeTB(
    indexHeapST = 0;
 
    /*****************************************************\
-   * Fun11 Sec10 Sub04:
+   * Fun12 Sec10 Sub04:
    *   - amr/miru/spoligotype detection on clusters
-   *   o fun11 sec10 sub04 cat01:
+   *   o fun12 sec10 sub04 cat01:
    *     - amr detection + start loop
-   *   o fun11 sec10 sub04 cat02:
+   *   o fun12 sec10 sub04 cat02:
    *     - MIRU-VNTR lineage detection and printing
-   *   o fun11 sec10 sub04 cat03:
+   *   o fun12 sec10 sub04 cat03:
    *     - spoligotype detection and printing
-   *   o fun11 sec10 sub04 cat04:
+   *   o fun12 sec10 sub04 cat04:
    *     - hsp65 species checking + user defined lineages
-   *   o fun11 sec10 sub04 cat05:
+   *   o fun12 sec10 sub04 cat05:
    *     - move to next cluster
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun11 Sec10 Sub04 Cat01:
+   + Fun12 Sec10 Sub04 Cat01:
    +   - amr detection + start loop
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9150,7 +9515,7 @@ run_freezeTB(
       } /*If: have AMRs*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec10 Sub04 Cat02:
+     + Fun12 Sec10 Sub04 Cat02:
      +   - MIRU-VNTR lineage detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9161,7 +9526,7 @@ run_freezeTB(
       ); /*find MIRU lineages in consensus fragment*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec10 Sub04 Cat03:
+     + Fun12 Sec10 Sub04 Cat03:
      +   - spoligotype detection and printing
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9180,7 +9545,7 @@ run_freezeTB(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec09 Sub04 Cat04:
+     + Fun12 Sec09 Sub04 Cat04:
      +   - hsp65 species checking + user defined lineages
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9194,7 +9559,7 @@ run_freezeTB(
          );
 
       if(hsp65SimpleLenSI < 0)
-         goto clustHsp65Err_fun11_sec09_sub04_cat04;
+         goto clustHsp65Err_fun12_sec09_sub04_cat04;
 
       else if(hsp65SimpleLenSI)
       { /*Else If: have simple lineages*/
@@ -9209,7 +9574,7 @@ run_freezeTB(
             );
 
          if(hsp65ComplexLenSI == -2)
-            goto clustHsp65Err_fun11_sec09_sub04_cat04;
+            goto clustHsp65Err_fun12_sec09_sub04_cat04;
 
          if(
             plineages_getLin(
@@ -9226,7 +9591,7 @@ run_freezeTB(
                hsp65OutFILE
             )
          ){ /*If: memory error*/
-            clustHsp65Err_fun11_sec09_sub04_cat04:;
+            clustHsp65Err_fun12_sec09_sub04_cat04:;
                tmpStr = errHeapStr;
 
                tmpStr +=
@@ -9237,7 +9602,7 @@ run_freezeTB(
                   );
                numToStr(tmpStr, totalReadsUI);
 
-               goto err_fun11_sec11_sub02;
+               goto err_fun12_sec11_sub02;
          }  /*If: memory error*/
       } /*Else If: have simple lineages*/
 
@@ -9254,7 +9619,7 @@ run_freezeTB(
       hsp65ComplexLinHeapArySI = 0;
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun11 Sec10 Sub04 Cat05:
+     + Fun12 Sec10 Sub04 Cat05:
      +   - move to next cluster
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -9270,7 +9635,7 @@ run_freezeTB(
    hsp65OutFILE = 0;
 
    /*****************************************************\
-   * Fun11 Se109 Sub05:
+   * Fun12 Se109 Sub05:
    *   - print consensus MIRU lineages
    \*****************************************************/
 
@@ -9300,11 +9665,11 @@ run_freezeTB(
             conMiruStr
          );
 
-      goto err_fun11_sec11_sub02;
+      goto err_fun12_sec11_sub02;
    } /*If: error*/
 
    /*****************************************************\
-   * Fun11 Sec10 Sub06:
+   * Fun12 Sec10 Sub06:
    *   - print detected spoligotype
    \*****************************************************/
 
@@ -9335,45 +9700,45 @@ run_freezeTB(
    fclose(spoligoOutFILE);
    spoligoOutFILE = 0;
 
-   goto ret_fun11_sec11;
+   goto ret_fun12_sec11;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec11:
+   ^ Fun12 Sec11:
    ^   - clean up
-   ^   o fun11 sec11 sub01:
+   ^   o fun12 sec11 sub01:
    ^     - no error clean up
-   ^   o fun11 sec11 sub02:
+   ^   o fun12 sec11 sub02:
    ^     - error clean up
-   ^   o fun11 sec11 sub03:
+   ^   o fun12 sec11 sub03:
    ^     - general clean up (everything calls)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun11 Sec11 Sub01:
+   * Fun12 Sec11 Sub01:
    *   - no error clean up
    \*****************************************************/
 
-   ret_fun11_sec11:;
+   ret_fun12_sec11:;
       errSC = 0;
       free(errHeapStr);
       errHeapStr = 0;
-      goto cleanUp_fun11_sec11_sub03;
+      goto cleanUp_fun12_sec11_sub03;
 
    /*****************************************************\
-   * Fun11 Sec11 Sub02:
+   * Fun12 Sec11 Sub02:
    *   - error clean up
    \*****************************************************/
 
-   err_fun11_sec11_sub02:;
+   err_fun12_sec11_sub02:;
       errSC = 1;
-      goto cleanUp_fun11_sec11_sub03;
+      goto cleanUp_fun12_sec11_sub03;
 
    /*****************************************************\
-   * Fun11 Sec11 Sub03:
+   * Fun12 Sec11 Sub03:
    *   - general clean up (everything calls)
    \*****************************************************/
 
-   cleanUp_fun11_sec11_sub03:;
+   cleanUp_fun12_sec11_sub03:;
       freeStack_seqST(&refStackST);
       freeStack_set_freezeTB(&ftbSetStackST);
       freeStack_samEntry(&samStackST);

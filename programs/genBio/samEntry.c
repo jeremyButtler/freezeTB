@@ -2130,9 +2130,30 @@ get_samEntry(
    { /*Else: need to get past white space*/
       while(buffStr[posSI] && buffStr[posSI] < 33)
          ++posSI;
+
       if(! buffStr[posSI])
-         goto fileErr_fun12_sec14;
-      else if(buffStr[posSI - 1] == '\t')
+      { /*If: end of buffer*/
+         if(posSI <= 0)
+            goto fileErr_fun12_sec14;
+         else if(buffStr[posSI - 1] == '\n' )
+            goto fileErr_fun12_sec14;
+         else if(buffStr[posSI - 1] == '\r')
+            goto fileErr_fun12_sec14;
+         else
+         { /*Else: need to get more in buffer*/
+            buffStr[1] = buffStr[posSI - 1];
+            lenSL =
+               getLine_fileFun(
+                  samFILE,
+                  &buffStr[1],
+                  size_fun12 - 1,
+                  &ignoreSL
+               );
+            posSI = 1;
+         } /*Else: need to get more in buffer*/
+      } /*If: end of buffer*/
+
+      if(buffStr[posSI - 1] == '\t')
          ;
       else if(buffStr[posSI - 1] == ' ')
          ;

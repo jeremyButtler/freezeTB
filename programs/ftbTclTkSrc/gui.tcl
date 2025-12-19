@@ -675,6 +675,14 @@ variable glob_amrDb [getPath "amrDb.tsv"] ;
 #variable glob_maskCoords [getPath "mask.tsv"] ;
 variable glob_maskCoords "" ;
 variable glob_miruDb [getPath "miruTbl.tsv"] ;
+
+---variable
+   glob_hsp65SimpleDb [getPath "hsp65-db-simple.tsv"] ;
+---
+---variable
+   glob_hsp65ComplexDb [getPath "hsp65-db-complex.tsv"] ;
+---
+
 variable glob_spacer [getPath "spoligo-spacers.fa"] ;
 variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
 
@@ -1468,6 +1476,12 @@ proc setFreezeTBStatus {} {
       lappend tbCmd "-gene-coords" ;
       lappend tbCmd $::glob_coordsTsv ;
       lappend tbCmd "-miru-tbl" $::glob_miruDb ;
+      ---lappend
+         tbCmd "-hsp65-simple" $::glob_hsp65SimpleDb ;
+      ---
+      ---lappend
+         tbCmd "-hsp65-complex" $::glob_hsp65ComplexDb ;
+      ---
       lappend tbCmd "-spoligo" $::glob_spacer ;
 
       if { $::glob_spolDb ne ""} {
@@ -2578,8 +2592,12 @@ tk::frame .main.lin ;
 #   o gui06 sec02 sub02:
 #     - set up miru database button
 #   o gui06 sec02 sub03:
-#     - set up spoligotype sequences button
+#     - set up simple hsp65 database button
 #   o gui06 sec02 sub04:
+#     - set up complex hsp65 database button
+#   o gui06 sec02 sub05:
+#     - set up spoligotype sequences button
+#   o gui06 sec02 sub06:
 #     - set up spoligotype database button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2632,6 +2650,90 @@ tk::label .main.lin.db.miru.lab -text $glob_miruDb ;
 
 #***************************************************
 # Gui06 Sec02 Sub03:
+#   - set up hsp65 simple database button
+#***************************************************
+
+tk::frame .main.lin.db.hsp65Simple ;
+pack .main.lin.db.hsp65Simple -anchor w -side top ;
+
+---tk::label
+   .main.lin.db.hsp65Simple.lab
+   -text $glob_hsp65SimpleDb
+--- ;
+
+---tk::button
+   .main.lin.db.hsp65Simple.but
+   -text "hsp65 simple database"
+   -command {
+---
+      set tsvFile [
+         ---tk_getOpenFile
+            -title "select hsp65 simple database"
+            -filetypes $::tsv_types
+         --- ] ; # get hsp65 simple databse
+
+      if { $tsvFile eq "" } {
+
+      } else {
+         ---.main.lin.db.hsp65Simple.lab
+            configure
+            -text $tsvFile
+          ---;
+          set ::glob_hsp65SimpleDb $tsvFile ;
+      } ; # Else: miru database selected
+} ; # -command get MIRU database
+
+---pack
+   .main.lin.db.hsp65Simple.but
+   .main.lin.db.hsp65Simple.lab
+   -anchor w
+   -side left
+---
+
+#***************************************************
+# Gui06 Sec02 Sub03:
+#   - set up hsp65 complex database button
+#***************************************************
+
+tk::frame .main.lin.db.hsp65Complex ;
+pack .main.lin.db.hsp65Complex -anchor w -side top ;
+
+---tk::label
+   .main.lin.db.hsp65Complex.lab
+   -text $glob_hsp65ComplexDb
+--- ;
+
+---tk::button
+   .main.lin.db.hsp65Complex.but
+   -text "hsp65 complex database"
+   -command {
+---
+      set tsvFile [
+         ---tk_getOpenFile
+            -title "select hsp65 complex database"
+            -filetypes $::tsv_types
+         --- ] ; # get hsp65 complex databse
+
+      if { $tsvFile eq "" } {
+
+      } else {
+         ---.main.lin.db.hsp65Complex.lab
+            configure
+            -text $tsvFile
+          ---;
+          set ::glob_hsp65ComplexDb $tsvFile ;
+      } ; # Else: miru database selected
+} ; # -command get MIRU database
+
+---pack
+   .main.lin.db.hsp65Complex.but
+   .main.lin.db.hsp65Complex.lab
+   -anchor w
+   -side left
+---
+
+#***************************************************
+# Gui06 Sec02 Sub05:
 #   - set up spoligotype sequences button
 #***************************************************
 
@@ -2676,7 +2778,7 @@ pack .main.lin.db.spacer -anchor w -side top ;
 --- ;   
 
 #***************************************************
-# Gui06 Sec02 Sub04:
+# Gui06 Sec02 Sub06:
 #   - set up spoligotype database button
 #***************************************************
 
@@ -4051,66 +4153,6 @@ proc setAmrLab {prefixStr pathStr} {
 } ; # set AMR report labels by gene depth
  
 #**************************************************
-# Gui08 Sec02 Sub02:
-#   - function; consensus AMR report
-#**************************************************
-
-#---
-# removing because might be confusing
-proc conAmrRep {prefixStr} {
-   set fileStr $prefixStr ;
-   append fileStr "-con-amrs.tsv" ;
-
-   set openFILE [open $fileStr] ;
-   gets $openFILE line ; # get header line
-   set amrList "" ;
-
-   # set amr labels to low depth colorings (or no depth)
-   setAmrLab $prefixStr .main.out.report.conAmr ;
-
-   while {[gets $openFILE line] > -1} {
-      set line [split $line "\t"] ;
-      set tmpStr [lindex $line 2] ;
-      set amrList [concat $amrList $tmpStr] ;
-
-      if { [lindex $line 3] ne "NA" } {
-         set tmpStr [split [lindex $line 3] "_"] ;
-         set amrList [concat $amrList $tmpStr] ;
-      } ; # If: have cross resistance
-
-      # remove duplicates
-      set amrList [lsort -unique $amrList] ;
-   } ; # Loop: read file by line
-
-   # make sure always lower case
-   close $openFILE ;
-   set amrList [string tolower $amrList] ;
-
-   ---for
-      { set siAmr 0 }
-      { $siAmr < [llength $::glob_amrList] }
-      { incr siAmr }
-   --- {
-      set tmpStr [lindex $::glob_amrList $siAmr] ;
-      set tmpStr [string tolower $tmpStr] ;
-
-      set labStr [lindex $::glob_amrGenes $siAmr 0] ;
-      set labStr [string tolower $labStr] ;
-      append labStr "lab" ;
-
-      if { [lsearch $amrList $tmpStr] ne -1 } {
-         ---.main.out.report.conAmr.$labStr
-            configure
-            -background $::glob_amrCol
-            -fg $::glob_amrTextCol
-         ---;
-      } ; # If: found AMR
-      # else no AMR detected, color already set; setAmrLab
-   } ; # Loop: build amr labels
-} ; # conAmrRep
----#
-
-#**************************************************
 # Gui08 Sec02 Sub03:
 #   - function read AMR report
 #**************************************************
@@ -4184,71 +4226,6 @@ proc readAmrRep {prefixStr} {
 } ; # readAmrRep
 
 #**************************************************
-# Gui08 Sec02 Sub04:
-#   - function; consensus spoligotype
-#**************************************************
-
-#--- removing due to noise
-proc conSpol {prefixStr} {
-   set fileStr $prefixStr ;
-   append fileStr "-con-spoligo.tsv" ;
-   set openFILE [open $fileStr] ;
-
-   gets $openFILE lineStr ; # get header line
-   set statusBl [gets $openFILE lineStr ] ;
-   close $openFILE ;
-
-   if {$statusBl < 0} {
-      ---.main.out.report.conspol.octal.reslab
-         configure
-         -text "NA"
-      ---;
-
-      ---.main.out.report.conspol.sit.reslab
-         configure
-         -text "NA"
-      ---;
-
-      ---.main.out.report.conspol.strain.reslab
-         configure
-         -text "NA"
-      ---;
-
-      ---.main.out.report.conspol.orig.reslab
-         configure
-         -text "NA"
-      ---;
-
-      return false ;
-   } ; # If: no spoligotype entry
-
-   set lineStr [split $lineStr "\t"] ;
-
-   # each value is either NA or has actual value
-
-   ---.main.out.report.conspol.octal.reslab
-      configure
-      -text [lindex $lineStr 3]
-   ---;
-
-   ---.main.out.report.conspol.sit.reslab
-      configure
-      -text [lindex $lineStr 5]
-   ---;
-
-   ---.main.out.report.conspol.strain.reslab
-      configure
-      -text [lindex $lineStr 1]
-   ---;
-
-   ---.main.out.report.conspol.orig.reslab
-      configure
-      -text [lindex $lineStr 6]
-   ---;
-} ; # conSpol
----#
-
-#**************************************************
 # Gui08 Sec02 Sub05:
 #   - function; read spoligotype
 #**************************************************
@@ -4268,17 +4245,12 @@ proc readSpol {prefixStr} {
          -text "NA"
       ---;
 
-      ---.main.out.report.readspol.sit.reslab
-         configure
-         -text "NA"
-      ---;
-
       ---.main.out.report.readspol.strain.reslab
          configure
          -text "NA"
       ---;
 
-      ---.main.out.report.readspol.orig.reslab
+      ---.main.out.report.readspol.lin.reslab
          configure
          -text "NA"
       ---;
@@ -4295,38 +4267,35 @@ proc readSpol {prefixStr} {
       -text [lindex $lineStr 3]
    ---;
 
-   ---.main.out.report.readspol.sit.reslab
-      configure
-      -text [lindex $lineStr 5]
-   ---;
-
    ---.main.out.report.readspol.strain.reslab
       configure
       -text [lindex $lineStr 1]
    ---;
 
-   ---.main.out.report.readspol.orig.reslab
+   ---.main.out.report.readspol.lin.reslab
       configure
-      -text [lindex $lineStr 6]
+      -text [lindex $lineStr 4]
    ---;
 } ; # readSpol
 
 #**************************************************
 # Gui08 Sec02 Sub06:
-#   - function read MIRU-VNTR
+#   - function read hsp65 results
 #**************************************************
 
-proc readMiru {prefixStr} {
+proc readHsp65 {prefixStr} {
    set fileStr $prefixStr ;
-   append fileStr "-read-mirulin.tsv" ;
+   append fileStr "-read-hsp65.tsv" ;
    set openFILE [open $fileStr] ;
    
    gets $openFILE lineStr ; # get header
-   set status [gets $openFILE lineStr] ;
+   set status [gets $openFILE depthsStr] ;
+      # this would be read depths, for know I am leaving
+      #   this out
    close $openFILE ;
 
    if {$status < 0} {
-      ---.main.out.report.miru.reslab
+      ---.main.out.report.hsp65.reslab
          configure
          -text "NA"
       ---;
@@ -4335,28 +4304,33 @@ proc readMiru {prefixStr} {
 
    set lineStr [split $lineStr "\t"] ;
 
+   if {[llength $lineStr] < 4} {
+      ---.main.out.report.hsp65.reslab
+         configure
+         -text "NA"
+      ---;
+      return false ;
+   } ; # If: no species detected
+
    # need to remove lineage index
-   set lineStr [lreplace $lineStr 0 0];
+   set endSI [ expr [llength $lineStr] - 1 ] ;
+      # get number items
+   set outStr [lindex $lineStr 2] ; # get first species
 
-   set tmpStr [lsort -unique $lineStr ] ;
+   ---for
+      { set siDrug 3 }
+      { $siDrug < $endSI }
+      { incr siDrug }
+   --- { append outStr [ lindex $lineStr $siDrug ] ; } ;
+       # get hsp65 species detected
 
-   if {[llength $tmpStr] < 2} {
-      if {[lindex $tmpStr 0] eq "NA"} {
-         ---.main.out.report.miru.reslab
-            configure
-            -text "NA"
-         ---;
-         return false ;
-      } ; # If: no lineage detected
-   } ; # If: have many duplicates
-
-   ---.main.out.report.miru.reslab
+   ---.main.out.report.hsp65.reslab
       configure
-      -text $lineStr
+      -text $outStr
    ---;
 
    return true ;
-} ; # readMiru
+} ; # readHsp65
 
 #**************************************************
 # Gui08 Sec02 Sub07:
@@ -5444,7 +5418,7 @@ pack .main.out.set.run -anchor w -side top ;
       #conSpol $::glob_outCur ;
 
       readSpol $::glob_outCur ;
-      readMiru $::glob_outCur ;
+      readHsp65 $::glob_outCur ;
       conAmrTbl $::glob_outCur "   " ;
       readAmrTbl $::glob_outCur "   " ;
 
@@ -5843,8 +5817,6 @@ pack .main.out.menu.inBut -anchor w -side left ;
 #     - build consensus AMR labels
 #   o gui08 sec05 sub02:
 #     - build read AMR labels
-#   o gui08 sec05 sub03:
-#     - consensus spoligotype
 #   o gui08 sec05 sub04:
 #     - read spoligotype
 #   o gui08 sec05 sub05:
@@ -6022,191 +5994,6 @@ tk::label .main.out.report.amrLegend.spaceTwo ;
 ---;
    
 #**************************************************
-# Gui08 Sec05 Sub04:
-#   - consensus spoligotype
-#   o gui08 sec05 sub04 cat01:
-#     - consensus spoligotype label
-#   o gui08 sec05 sub04 cat02:
-#     - octal for consensus spoligotype
-#   o gui08 sec05 sub04 cat03:
-#     - SIT for consensus spoligotype
-#   o gui08 sec05 sub04 cat03:
-#     - strain for consensus spoligotype
-#   o gui08 sec05 sub04 cat0::
-#     - countries dectected in (use orig for short)
-#**************************************************
-
-#--- removing because adds to much noise
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub04 Cat01:
-#   - consensus spoligotype label
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# add space so does not overlap with amr labels
-tk::frame .main.out.report.space2 ;
-pack .main.out.report.space2 -anchor w -side top ;
-
-tk::frame .main.out.report.conspol ;
-pack .main.out.report.conspol -anchor w -side top ;
-
-tk::frame .main.out.report.conspol.head ;
-pack .main.out.report.conspol.head -anchor w -side top ;
-
----tk::label 
-   .main.out.report.conspol.head.lab
-   -text "Consensus spoligotype:"
----;
-
----pack
-   .main.out.report.conspol.head.lab
-   -anchor w
-   -side top
----;
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub04 Cat02:
-#   - octal for consensus spoligotype
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tk::frame .main.out.report.conspol.octal ;
----pack
-  .main.out.report.conspol.octal
-  -anchor w
-  -side top
----;
-
----pack
-   .main.out.report.conspol.octal
-   -anchor w
-   -side top
----;
-
----tk::label 
-   .main.out.report.conspol.octal.headlab
-   -text "     Octal: "
----;
-
----tk::label 
-   .main.out.report.conspol.octal.reslab
-   -text "NA"
----;
-
----pack
-   .main.out.report.conspol.octal.headlab
-   .main.out.report.conspol.octal.reslab
-   -anchor w
-   -side left
----;
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub04 Cat03:
-#   - SIT for consensus spoligotype
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tk::frame .main.out.report.conspol.sit ;
----pack
-   .main.out.report.conspol.sit
-   -anchor w
-   -side top
----;
-
----pack
-   .main.out.report.conspol.sit
-   -anchor w
-   -side top
----;
-
----tk::label 
-   .main.out.report.conspol.sit.headlab
-   -text "     SIT: "
----;
-
----tk::label 
-   .main.out.report.conspol.sit.reslab
-   -text "NA"
----;
-
----pack
-   .main.out.report.conspol.sit.headlab
-   .main.out.report.conspol.sit.reslab
-   -anchor w
-   -side left
----;
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub04 Cat03:
-#   - strain for consensus spoligotype
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tk::frame .main.out.report.conspol.strain ;
----pack
-   .main.out.report.conspol.strain
-   -anchor w
-   -side top
----;
-
----pack
-   .main.out.report.conspol.strain
-   -anchor w
-   -side top
----;
-
----tk::label 
-   .main.out.report.conspol.strain.headlab
-   -text "     Strain: "
----;
-
----tk::label 
-   .main.out.report.conspol.strain.reslab
-   -text "NA"
----;
-
----pack
-   .main.out.report.conspol.strain.headlab
-   .main.out.report.conspol.strain.reslab
-   -anchor w
-   -side left
----;
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub04 Cat04:
-#   - countries dectected in (use orig for short)
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tk::frame .main.out.report.conspol.orig ;
----pack
-  .main.out.report.conspol.orig
-  -anchor w
-  -side top
----;
-
----pack
-   .main.out.report.conspol.orig
-   -anchor w
-   -side top
----;
-
----tk::label 
-   .main.out.report.conspol.orig.headlab
-   -text "     Countries: "
----;
-
----tk::label 
-   .main.out.report.conspol.orig.reslab
-   -text "NA"
----;
-
----pack
-   .main.out.report.conspol.orig.headlab
-   .main.out.report.conspol.orig.reslab
-   -anchor w
-   -side left
----;
-
----#
-
-#**************************************************
 # Gui08 Sec05 Sub05:
 #   - read spoligotype
 #   o gui08 sec05 sub05 cat01:
@@ -6214,11 +6001,9 @@ tk::frame .main.out.report.conspol.orig ;
 #   o gui08 sec05 sub05 cat02:
 #     - octal for read spoligotype
 #   o gui08 sec05 sub05 cat03:
-#     - SIT for read spoligotype
-#   o gui08 sec05 sub05 cat03:
 #     - strain for read spoligotype
-#   o gui08 sec05 sub05 cat0::
-#     - countries dectected in (use orig for short)
+#   o gui08 sec05 sub05 cat04:
+#     - lineage for read spoligotype
 #**************************************************
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -6288,41 +6073,6 @@ tk::frame .main.out.report.readspol.octal ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub05 Cat03:
-#   - SIT for read spoligotype
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-tk::frame .main.out.report.readspol.sit ;
----pack
-   .main.out.report.readspol.sit
-   -anchor w
-   -side top
----;
-
----pack
-   .main.out.report.readspol.sit
-   -anchor w
-   -side top
----;
-
----tk::label 
-   .main.out.report.readspol.sit.headlab
-   -text "     SIT: "
----;
-
----tk::label 
-   .main.out.report.readspol.sit.reslab
-   -text "NA"
----;
-
----pack
-   .main.out.report.readspol.sit.headlab
-   .main.out.report.readspol.sit.reslab
-   -anchor w
-   -side left
----;
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub05 Cat03:
 #   - strain for read spoligotype
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -6358,38 +6108,39 @@ tk::frame .main.out.report.readspol.strain ;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 # Gui08 Sec05 Sub05 Cat04:
-#   - countries dectected in (use orig for short)
+#   - lineage for read spoligotype
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
-tk::frame .main.out.report.readspol.orig ;
+tk::frame .main.out.report.readspol.lin ;
 ---pack
-  .main.out.report.readspol.orig
-  -anchor w
-  -side top
+   .main.out.report.readspol.lin
+   -anchor w
+   -side top
 ---;
 
 ---pack
-   .main.out.report.readspol.orig
+   .main.out.report.readspol.lin
    -anchor w
    -side top
 ---;
 
 ---tk::label 
-   .main.out.report.readspol.orig.headlab
-   -text "     Countries: "
+   .main.out.report.readspol.lin.headlab
+   -text "     Lineage: "
 ---;
 
 ---tk::label 
-   .main.out.report.readspol.orig.reslab
+   .main.out.report.readspol.lin.reslab
    -text "NA"
 ---;
 
 ---pack
-   .main.out.report.readspol.orig.headlab
-   .main.out.report.readspol.orig.reslab
+   .main.out.report.readspol.lin.headlab
+   .main.out.report.readspol.lin.reslab
    -anchor w
    -side left
 ---;
+
 
 #**************************************************
 # Gui08 Sec05 Sub06:
@@ -6400,22 +6151,22 @@ tk::frame .main.out.report.readspol.orig ;
 tk::frame .main.out.report.space4 ;
 pack .main.out.report.space4 -anchor w -side top ;
 
-tk::frame .main.out.report.miru ;
-pack .main.out.report.miru -anchor w -side top ;
+tk::frame .main.out.report.hsp65 ;
+pack .main.out.report.hsp65 -anchor w -side top ;
 
 ---tk::label
-   .main.out.report.miru.headlab
-   -text "MIRU-VNTR: "
+   .main.out.report.hsp65.headlab
+   -text "hsp65:"
 ---;
 
 ---tk::label
-   .main.out.report.miru.reslab
+   .main.out.report.hsp65.reslab
    -text "NA"
 ---;
 
 ---pack
-   .main.out.report.miru.headlab
-   .main.out.report.miru.reslab
+   .main.out.report.hsp65.headlab
+   .main.out.report.hsp65.reslab
    -anchor w
    -side left
 ---;

@@ -433,3 +433,11 @@ The extra files are saved as `.md` files. You can view
   come with freezeTB. Some are installed by default,
   others are side programs. The side programs often do
   a single step (ex AMR analysis) in the freezeTB program.
+
+# Updates:
+
+- 2025-12-19:
+  - added "coverage-amr" table to include coverage and
+    potential AMRs missed
+  - replaced the MIRU-VNTR output in the TclTk GUI with
+    the hsp65 species report

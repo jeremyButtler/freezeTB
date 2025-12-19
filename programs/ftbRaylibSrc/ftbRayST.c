@@ -3212,6 +3212,10 @@ checkDrugs_ftbRayST(
 |     o c-string with path to ftbRay binarary
 |   - refStr:
 |     o c-string to get path to the reference sequence
+|   - coordsStr:
+|     o c-string to get path to the coordinates file,
+|       which also might have the drug resistance for
+|       each gene/amplicon
 |   - minimap2Str:
 |     o c-string to get path for minimap2
 |   - argAryStr:
@@ -3232,6 +3236,7 @@ signed char
 getDatabases_ftbRayST(
    signed char *appPathStr, /*path to ftbRay binary*/
    signed char *refStr,     /*gets reference sequence*/
+   signed char *coordsStr,  /*gets coordinates file*/
    signed char *minimap2Str,/*gets minimap2 location*/
    signed char **argAryStr, /*gets database paths*/
    signed int *argLenSIPtr  /*number of arguments*/
@@ -3244,21 +3249,23 @@ getDatabases_ftbRayST(
    '     - get path to databases
    '   o fun16 sec03:
    '     - get reference file
-   '   o fun16 sec04:
-   '     - get gene coordinates file
+   '   o fun16 sec02:
+   '     - get amrs table (amrs database)
    '   o fun16 sec05:
-   '     - get MIRU-VNTR lineage table
+   '     - get gene coordinates file
    '   o fun16 sec06:
-   '     - get spoligotype spacer sequences
+   '     - get MIRU-VNTR lineage table
    '   o fun16 sec07:
+   '     - get spoligotype spacer sequences
+   '   o fun16 sec08:
    '     - get spoligotype lineage database
-   '   o fun16 sec08:
+   '   o fun16 sec09:
    '     - get hsp65 simple speices database
-   '   o fun16 sec08:
-   '     - get hsp65 complex speices database
    '   o fun16 sec10:
-   '     - find path to minimap2
+   '     - get hsp65 complex speices database
    '   o fun16 sec11:
+   '     - find path to minimap2
+   '   o fun16 sec12:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -3288,7 +3295,6 @@ getDatabases_ftbRayST(
    ^   - get path to databases
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*TODO this needs to be defined for every OS*/
    #ifdef MAC
       lenSI = cpStr_ulCp(pathStr, appPathStr);
       pathStr[lenSI++] = def_pathSep_rayWidg;
@@ -3350,8 +3356,8 @@ getDatabases_ftbRayST(
    ++*argLenSIPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec03:
-   ^   - get reference file
+   ^ Fun16 Sec04:
+   ^   - get amr table (amrs database)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
@@ -3387,7 +3393,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec04:
+   ^ Fun16 Sec05:
    ^   - get gene coordinates file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3425,10 +3431,11 @@ getDatabases_ftbRayST(
       );
    } /*If: need to find coordinates file path*/
 
+   cpStr_ulCp(coordsStr, argAryStr[*argLenSIPtr]);
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec05:
+   ^ Fun16 Sec06:
    ^   - get MIRU-VNTR lineage table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3465,7 +3472,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec06:
+   ^ Fun16 Sec07:
    ^   - get spoligotype spacer sequences
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3502,7 +3509,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec07:
+   ^ Fun16 Sec08:
    ^   - get spoligotype lineage database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3542,7 +3549,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec08:
+   ^ Fun16 Sec09:
    ^   - get hsp65 simple speices database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3584,7 +3591,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec09:
+   ^ Fun16 Sec10:
    ^   - get hsp65 complex speices database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3614,7 +3621,10 @@ getDatabases_ftbRayST(
    if(! argAryStr[*argLenSIPtr])
      goto err_fun16_sec11;
 
-   hsp65ComplexDbPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
+   hsp65ComplexDbPath_freezeTBPaths(
+      argAryStr[*argLenSIPtr]
+   );
+
    if(! argAryStr[*argLenSIPtr][0])
    { /*If: need to find hsp65 complex lineage database*/
       lenSI = cpStr_ulCp(argAryStr[*argLenSIPtr],pathStr);
@@ -3627,7 +3637,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec10:
+   ^ Fun16 Sec11:
    ^   - find path to minimap2
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3676,7 +3686,7 @@ getDatabases_ftbRayST(
    } /*Else: minimap2 is not in the path*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec11:
+   ^ Fun16 Sec12:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3699,348 +3709,431 @@ getDatabases_ftbRayST(
 |   - Returns:
 |     o 0 for no errors
 |     o 1 for memory errors
+|     o 2 if could not open the coordinates file
 \-------------------------------------------------------*/
 signed int
 mkCoverageTbl_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
-){
-   signed char lineStr[4096];
-   signed int lenSI = 0;
-   signed int posSI = 0;
-   float percF = 0;
-   FILE *inFILE = 0;
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun17 TOC:
+   '   - makes the gene percent coverage table
+   '   o fun17 sec01:
+   '     - variable declarations
+   '   o fun17 sec02:
+   '     - get gene targets and the drug resistance
+   '   o fun17 sec03:
+   '     - sort amplicon/gene names for quick look up
+   '   o fun17 sec04:
+   '     - get the genes coverage and mean depth
+   '   o fun17 sec04:
+   '     - clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec02:
-   ^   - open gene coverage file and get past header
+   ^ Fun17 Sec01:
+   ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed char lineStr[4096];
+   signed int linePosSI = 0;
+
+   signed char outStr[4096];
+   signed int outPosSI = 0;
+   signed int tmpSI = 0;
+
+   signed int colArySI[256]; /*main column sizes*/
+   signed int colPosSI = 0;
+   signed int lastColSI = 0;
+
+   FILE *inFILE = 0;
+
+   signed int lineSI = 0;
 
    clear_listBox_rayWidg(guiSTPtr->geneCoverSTPtr);
 
-   lenSI = cpStr_ulCp(lineStr, guiSTPtr->filePrefixStr);
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun17 Sec02:
+   ^   - get maximum column sizes
+   ^   o fun17 sec02 sub01:
+   ^     - open the amr coverage file
+   ^   o fun17 sec02 sub02:
+   ^     - find column sizes
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun17 Sec02 Sub01:
+   *   - open the amr coverage file
+   \*****************************************************/
+
+   for(tmpSI = 0; tmpSI < 256; ++tmpSI)
+      colArySI[tmpSI] = 0;
+   tmpSI = 0;
+
+   linePosSI =
+      cpStr_ulCp(lineStr, guiSTPtr->filePrefixStr);
    cpStr_ulCp(
-      &lineStr[lenSI],
-      (signed char *) "-geneCoverage.tsv"
+      &lineStr[linePosSI],
+      (signed char *) "-coverage-amrs.tsv"
    );
 
    inFILE = fopen((char *) lineStr, "r");
    if(! inFILE)
-     return 0;
+      goto fileErr_fun17_sec04;
+   if(! fgets((char *) lineStr, 4088, inFILE) )
+      goto fileErr_fun17_sec04;
 
+   /*****************************************************\
+   * Fun17 Sec02 Sub02:
+   *   - find column sizes
+   \*****************************************************/
 
-   if( ! fgets((char *) lineStr, 4088, inFILE) )
-      return 0; /*empty file*/
+   lineSI = 0;
+   do { /*Loop: find column sizes*/
+      linePosSI = 0;
+      colPosSI = 0;
 
-   if(
-      addItem_listBox_rayWidg(
-         (signed char *) "gene    %_cover  drugs...",
-         def_listSpecial_rayWidg, /*does nothing*/
-         guiSTPtr->geneCoverSTPtr,
-         guiSTPtr->widgSTPtr
-      )
-   ) return 1;
+      /*____________get_gene_id_size____________________*/
+      outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
+      if(outPosSI > colArySI[colPosSI])
+         colArySI[colPosSI] = outPosSI;
+      ++colPosSI;
+
+      linePosSI += outPosSI;
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      if(! linePosSI)
+         continue; /*end of line*/
+
+      /*____________get_gene_percent_coverage___________*/
+      outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
+      if(outPosSI > colArySI[colPosSI])
+         colArySI[colPosSI] = outPosSI;
+      ++colPosSI;
+
+      linePosSI += outPosSI;
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      if(! linePosSI)
+         goto fileErr_fun17_sec04;
+
+      /*____________get_gene_mean_coverage_depth________*/
+      outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
+
+      if(! lineSI)
+         colArySI[colPosSI] = 9;
+      else
+      { /*Else: not header*/
+         if(outPosSI > colArySI[2])
+            colArySI[colPosSI] = outPosSI;
+      } /*Else: not header*/
+
+      ++colPosSI;
+
+      linePosSI += outPosSI;
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      if(! linePosSI)
+         goto fileErr_fun17_sec04;
+
+      /*____________skip_gene_mean_target_depth_________*/
+      linePosSI += endWhite_ulCp(&lineStr[linePosSI]);
+
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      if(! linePosSI)
+         goto fileErr_fun17_sec04;
+
+      /*____________get_drug_names______________________*/
+      while(
+         lineStr[linePosSI] && lineStr[linePosSI] != '*'
+      ){ /*Loop: find drug column lengths*/
+         outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
+         if(outPosSI > colArySI[colPosSI])
+            colArySI[colPosSI] = outPosSI;
+         if(colArySI[colPosSI] < 8)
+            colArySI[colPosSI] = 8;
+         ++colPosSI;
+
+         linePosSI += outPosSI;
+         while(
+            lineStr[linePosSI] && lineStr[linePosSI] < 33
+         ) ++linePosSI;
+      }  /*Loop: find drug column lengths*/
+
+      if(colPosSI > lastColSI - 1)
+         lastColSI = colPosSI - 1;
+      ++lineSI;
+   } while( fgets((char *) lineStr, 4088, inFILE) );
+        /*Loop: find column sizes*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun17 Sec03:
-   ^   - read in gene coverage file entries
+   ^   - build the table
    ^   o fun17 sec03 sub01:
-   ^     - get gene name and percent coverage
+   ^     - move to the start of coverage table and start
+   ^       read loop
    ^   o fun17 sec03 sub02:
-   ^     - add drug resistance a gene mutation can cause
+   ^     - get the gene name
    ^   o fun17 sec03 sub03:
-   ^     - add gene entry to list box
+   ^     - get percent coverage of the gene
+   ^   o fun17 sec03 sub04:
+   ^     - get mean covered region read depth
+   ^   o fun17 sec03 sub05:
+   ^     - skip gene mean read depth column
+   ^     - this is the mean read depth for the entire
+   ^       gene/target instead of the region that had
+   ^       good read depth
+   ^   o fun17 sec03 sub06:
+   ^     - get the name for each drug
+   ^   o fun17 sec03 sub07:
+   ^     - add row to table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
- 
+
    /*****************************************************\
    * Fun17 Sec03 Sub01:
-   *   - get gene name and percent coverage
+   *   - move to the start of coverage table and start
+   *     read loop
    \*****************************************************/
 
-   
+   fseek(inFILE, 0, SEEK_SET);
+   lineSI = 0;
+
    while( fgets((char *) lineStr, 4088, inFILE) )
-   { /*Loop: get the gene coverage and gene*/
-      lenSI = 0;
-      while(lineStr[lenSI] > 32)
-         ++lenSI;
-
-      lineStr[lenSI++] = ' ';
-      posSI = lenSI;
-
-      while(lineStr[lenSI] && lineStr[lenSI] < 33)
-         ++lenSI;
-
-      lenSI += strToF_base10str(&lineStr[lenSI], &percF);
-      if(lineStr[lenSI] > 32)
-         continue; /*bad line*/
-
-      /*add in padding and column spacer*/
-      while(posSI < 8)
-         lineStr[posSI++] = ' ';
-
-      /*add the percent coverage back into the line at the
-      `   correct position
-      */
-      lenSI = posSI + 1;
-      posSI += double_numToStr(&lineStr[posSI], percF, 2);
-
-      if(lenSI == posSI)
-      { /*If: added 0*/
-         lineStr[posSI++] = '.';
-         lineStr[posSI++] = '0';
-         lineStr[posSI++] = '0';
-      } /*If: added 0*/
-
-      lineStr[posSI++] = ' ';
-      lineStr[posSI++] = ' ';
-      lineStr[posSI++] = ' ';
-      lineStr[posSI++] = ' ';
-      lineStr[posSI++] = ' ';
+   { /*Loop: read in the gene/amplicons*/
+      linePosSI = 0;
+      outPosSI = 0;
+      colPosSI = 0;
 
       /**************************************************\
       * Fun17 Sec03 Sub02:
-      *   - add drug resistance a gene mutation can cause
+      *   - get the gene name
       \**************************************************/
 
-      if(! eqlWhite_ulCp(lineStr, (signed char *) "atpE"))
-         posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Bdq  na   na   na"
-            );
+      tmpSI =
+         cpWhite_ulCp(
+            &outStr[outPosSI],
+            &lineStr[linePosSI]
+         );
+      outPosSI += tmpSI;
+      linePosSI += tmpSI;
 
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "ahpc")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Inh  Pmd  na   na"
-            );
+      while(tmpSI <= colArySI[colPosSI] + 2)
+      { /*Loop: pad column if is to short*/
+         outStr[outPosSI++] = ' ';
+         ++tmpSI;
+      } /*Loop: pad column if is to short*/
 
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "ddn")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Bdq  Pmd  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "eis")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Amk  Kan  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "embA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Emb  na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "embB")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Emb  na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "ethA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Eto  na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "fabG1")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Eto  Inh  Pmd  na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Cfz  Dlm  Pmd  na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiB")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Cfz  Dlm  Pmd  na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiC")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Cfz  Dlm  Pmd  na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "fbiD")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Dlm	 na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "fgd1")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Cfz  Dlm  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "gidB")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Stm  na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "gyrA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Flq	 Lfx  Mfx  na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "gyrB")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Flq	 Lfx  Mfx  na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "inhA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Eto	 Inh  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "katG")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Inh	 na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "pepQ")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Bdq	 Cfz  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "pncA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Pza	 na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "rplC")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Lzd	 na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "rpoB")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Rif	 na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "rpsL")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Stm	 na   na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "rrl")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Cap	 Lzd  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "rrs")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Amk	 Cap  Kan  Stm"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr,(signed char *) "Rv0678")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Bdq	 Cfz  na   na"
-            );
-
-      else if(
-         ! eqlWhite_ulCp(lineStr, (signed char *) "tlyA")
-      ) posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "Cap	 na   na   na"
-            );
-
-      else
-         posSI +=
-            cpStr_ulCp(
-               &lineStr[posSI],
-               (signed char *) "na 	 na   na   na"
-            );
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      ++colPosSI;
 
       /**************************************************\
       * Fun17 Sec03 Sub03:
-      *   - add gene entry to list box
+      *   - get percent coverage of the gene
       \**************************************************/
 
-      lineStr[posSI] = 0;
+      tmpSI =
+         cpWhite_ulCp(
+            &outStr[outPosSI],
+            &lineStr[linePosSI]
+         );
+      outPosSI += tmpSI;
+      linePosSI += tmpSI;
+
+      while(tmpSI <= colArySI[colPosSI] + 2)
+      { /*Loop: pad column if is to short*/
+         outStr[outPosSI++] = ' ';
+         ++tmpSI;
+      } /*Loop: pad column if is to short*/
+
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      ++colPosSI;
+
+      /**************************************************\
+      * Fun17 Sec03 Sub04:
+      *   - get mean covered region read depth
+      \**************************************************/
+
+      if(! lineSI)
+      { /*If: on the header*/
+         linePosSI += endWhite_ulCp(&lineStr[linePosSI]);
+         tmpSI =
+            cpStr_ulCp(
+               &outStr[outPosSI],
+               (signed char *) "mean_depth"
+            );
+      } /*If: on the header*/
+
+      else
+      { /*Else: on a gene/target row*/
+         tmpSI =
+            cpWhite_ulCp(
+               &outStr[outPosSI],
+               &lineStr[linePosSI]
+            );
+         linePosSI += tmpSI;
+      } /*Else: on a gene/target row*/
+
+
+      outPosSI += tmpSI;
+
+      while(tmpSI <= colArySI[colPosSI] + 2)
+      { /*Loop: pad column if is to short*/
+         outStr[outPosSI++] = ' ';
+         ++tmpSI;
+      } /*Loop: pad column if is to short*/
+
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+      ++colPosSI;
+
+      /**************************************************\
+      * Fun17 Sec03 Sub05:
+      *   - skip gene mean read depth column
+      *   - this is the mean read depth for the entire
+      *     gene/target instead of the region that had
+      *     good read depth
+      \**************************************************/
+
+      linePosSI += endWhite_ulCp(&lineStr[linePosSI]);
+      while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
+         ++linePosSI;
+
+      /**************************************************\
+      * Fun17 Sec03 Sub06:
+      *   - get the name for each drug
+      *   o fun17 sec03 sub06 cat01:
+      *     - if header line; print header columns
+      *   o fun17 sec03 sub06 cat02:
+      *     - if gene/target line; print drugs
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun17 Sec03 Sub06 Cat01:
+      +   - if header line; print header columns
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(! lineSI)
+      { /*If: on the header*/
+         lineSI = 1;
+
+         while(colPosSI <= lastColSI)
+         { /*Loop: print 'na' for no drug columns*/
+            tmpSI = 0;
+
+            outStr[outPosSI++] = 'd';
+            outStr[outPosSI++] = 'r';
+            outStr[outPosSI++] = 'u';
+            outStr[outPosSI++] = 'g';
+            outStr[outPosSI++] = '_';
+            tmpSI += numToStr(&outStr[outPosSI], lineSI);
+            outPosSI += tmpSI;
+            tmpSI += 5; /*account for "drug_"*/
+
+            while(tmpSI <= colArySI[colPosSI] + 2)
+            { /*Loop: pad column if is to short*/
+               outStr[outPosSI++] = ' ';
+               ++tmpSI;
+            } /*Loop: pad column if is to short*/
+
+            ++colPosSI;
+            ++lineSI;
+         } /*Loop: print 'na' for no drug columns*/
+
+         lineSI = 0;
+      } /*If: on the header*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun17 Sec03 Sub06 Cat02:
+      +   - if gene/target line; print drugs
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else
+      { /*Else: on gene/target entry*/
+         while(
+           lineStr[linePosSI] && lineStr[linePosSI] != '*'
+         ){ /*Loop: find drug column lengths*/
+            tmpSI =
+               cpWhite_ulCp(
+                  &outStr[outPosSI],
+                  &lineStr[linePosSI]
+               );
+            outPosSI += tmpSI;
+            linePosSI += tmpSI;
+
+            while(tmpSI <= colArySI[colPosSI] + 2)
+            { /*Loop: pad column if is to short*/
+               outStr[outPosSI++] = ' ';
+               ++tmpSI;
+            } /*Loop: pad column if is to short*/
+
+            while(
+                  lineStr[linePosSI]
+               && lineStr[linePosSI] < 33
+            ) ++linePosSI;
+
+            ++colPosSI;
+         }  /*Loop: find drug column lengths*/
+
+         /*__________add_na's_for_empty_columns_________*/
+         while(colPosSI <= lastColSI)
+         { /*Loop: print 'na' for no drug columns*/
+            ++colPosSI;
+            outStr[outPosSI++] = 'n';
+            outStr[outPosSI++] = 'a';
+
+            tmpSI = 2;
+
+            while(tmpSI <= colArySI[colPosSI] + 2)
+            { /*Loop: pad column if is to short*/
+               outStr[outPosSI++] = ' ';
+               ++tmpSI;
+            } /*Loop: pad column if is to short*/
+         } /*Loop: print 'na' for no drug columns*/
+      } /*Else: on gene/target entry*/
+
+      /**************************************************\
+      * Fun17 Sec03 Sub07:
+      *   - add row to table
+      \**************************************************/
+
+      outStr[outPosSI] = 0;
 
       if(
          addItem_listBox_rayWidg(
-             lineStr,
-             def_listSpecial_rayWidg, /*does nothing*/
-             guiSTPtr->geneCoverSTPtr,
-             guiSTPtr->widgSTPtr
+            outStr,
+            def_listSpecial_rayWidg, /*so does nothing*/
+            guiSTPtr->geneCoverSTPtr,
+            guiSTPtr->widgSTPtr
          )
-      ) return 1;
-   } /*Loop: get the gene coverage and gene*/
+      ) goto memErr_fun17_sec04;
+ 
+      ++lineSI;
+   } /*Loop: read in the gene/amplicons*/
 
-   return 0;
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun17 Sec04:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   lineSI = 0;
+   goto ret_fun17_sec04;
+
+   memErr_fun17_sec04:;
+      lineSI = 1;
+      goto ret_fun17_sec04;
+
+   fileErr_fun17_sec04:;
+      lineSI = 2;
+      goto ret_fun17_sec04;
+
+   ret_fun17_sec04:;
+      if(inFILE)
+         fclose(inFILE);
+      inFILE = 0;
+
+      return (signed char) lineSI;
 } /*mkCoverageTbl_ftbRayST*/
 
 /*-------------------------------------------------------\
@@ -4478,6 +4571,7 @@ checkRunEvent_ftbRayST(
    signed long discardSL = 0; /*for reading files*/
 
    signed char refStr[def_lineLen_fun19 + 8];
+   signed char coordsStr[def_lineLen_fun19 + 8];
    signed char minimap2Str[def_lineLen_fun19 + 8];
 
    /*for buiding freezeTB run command*/
@@ -5086,6 +5180,7 @@ checkRunEvent_ftbRayST(
          getDatabases_ftbRayST(
             (signed char *) GetApplicationDirectory(),
             refStr,
+            coordsStr,
             minimap2Str,
             argAryStr,
             &argLenSI
@@ -5154,6 +5249,25 @@ checkRunEvent_ftbRayST(
             else
                cpStr_ulCp(refStr, argAryStr[argLenSI]);
                /*user input reference sequence*/
+
+            /*make sure user is not changing reference*/
+            if(argAryStr[argLenSI - 1][0] != '-') ;
+            else if(argAryStr[argLenSI - 1][1] != 'r') ;
+            else if(argAryStr[argLenSI - 1][2] != 'e') ;
+            else if(argAryStr[argLenSI - 1][3] != 'f') ;
+            else
+               cpStr_ulCp(refStr, argAryStr[argLenSI]);
+               /*user input reference sequence*/
+
+            if(
+               ! eqlWhite_ulCp(
+                  (signed char *) "-gene-coords",
+                  argAryStr[argLenSI - 1]
+               )
+            ) cpStr_ulCp(coordsStr, argAryStr[argLenSI]);
+               /*user input a coordinates database; these
+               `  likely means a change in drug targets
+               */
 
             ++argLenSI;
             tmpHeapStr = 0;

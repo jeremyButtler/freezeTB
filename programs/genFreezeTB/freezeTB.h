@@ -24,12 +24,15 @@
 '     - prints help message for freezeTB
 '   o .c fun10: input_freezeTB
 '     - gets user input
-'   o fun11: run_freezeTB:
-'     - drives everything, but not fun11 (for tcltk)
+'   o .c fun11: mkAmrCoverageTbl_freezeTB
+'     - makes the gene percent coverage table with drug
+'       resisitance
+'   o fun12: run_freezeTB:
+'     - drives everything, but not fun12 (for tcltk)
 '   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public dofun11 / mit)
+'     - licensing for this code (public dofun12 / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -86,7 +89,7 @@ pMinimap2Citation_freezeTB(
 );
 
 /*-------------------------------------------------------\
-| Fun11: run_freezeTB
+| Fun12: run_freezeTB
 |    - Analyze ONT sequenced TB reads
 | Input:
 |    - numArgsSI:

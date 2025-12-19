@@ -19,6 +19,8 @@
 '     - prints the read depth of each base
 '   o fun07: pGeneCoverage_ampDepth
 '     - prints percent gene coverage and start/mid/end
+'   o fun08: getGeneCoverage_ampDepth
+'     - puts the gene coverage and depth into an array
 '   o license:
 '     - licensing for this code (public domain / mit)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -193,6 +195,38 @@ pGeneCoverage_ampDepth(
    struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
    signed int numGenesSI,            /*number of genes*/
    void *outFILE           /*file to print to*/
+);
+
+/*-------------------------------------------------------\
+| Fun08: getGeneCoverage_ampDepth
+|   - puts the gene coverage and depth into an array
+| Input
+|   - depthArySI:
+|     o signed int array with read depths
+|   - minDepthSI:
+|     o minimum read depth to count as covered
+|   - geneCoordSTPtr:
+|     o geneCoord struct with gene coordinates to print
+|   - numGenesSI:
+|     o number of genes in geneCoordSTPtr (index 0)
+| Output:
+|   - Returns:
+|     o float array (size = numGenesSI * 3) with percent
+|       coverage, coverage mean read depth, and gene mean
+|       read depth
+|       * has two items per index
+|       * index 0: gene percent coverage (as decimal)
+|       * index 1: mean read depth in covered region
+|       * index 2: gene mean read depth (as decimal)
+|       * you can get the gene index with (index / 3)
+|     o 0 if had a memory error
+\-------------------------------------------------------*/
+float *
+getGeneCoverage_ampDepth(
+   signed int *depthArySI, /*histogram of read depths*/
+   signed int minDepthSI,  /*min depth to print*/
+   struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
+   signed int numGenesSI             /*number of genes*/
 );
 
 #endif

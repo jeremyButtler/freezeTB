@@ -24,7 +24,7 @@ set glob_amrCol "#F1605D" ;
 set glob_amrTextCol "#000004" ;
 set glob_lowDepthCol "#FDE725" ;
 set glob_lowDepthTextCol "#000004" ;
-set glob_amrList [list "amikacin" "bedaquiline" "capreomycin" "clofazimine" "delamanid" "ethambutol" "ethionamide" "fluoroquine" "isoniazid" "kanamycin" "levofloxacin" "linezolid" "moxifloxacin" "penicillin-myceial-dreg" "pyrazinamide" "rifampicin" "streptomycin" ] ;
+set glob_amrList [list "amikacin" "bedaquiline" "capreomycin" "clofazimine" "delamanid" "ethambutol" "ethionamide" "fluoroquine" "isoniazid" "kanamycin" "levofloxacin" "linezolid" "moxifloxacin" "protonimid" "pyrazinamide" "rifampicin" "streptomycin" ] ;
 
 set glob_amrGenes {
 {"Amk" "eis" "rrs"}
@@ -367,6 +367,8 @@ lappend tbCmd "-amr-tbl" $::glob_amrDb ;
 lappend tbCmd "-gene-coords" ;
 lappend tbCmd $::glob_coordsTsv ;
 lappend tbCmd "-miru-tbl" $::glob_miruDb ;
+lappend tbCmd "-hsp65-simple" $::glob_hsp65SimpleDb ;
+lappend tbCmd "-hsp65-complex" $::glob_hsp65ComplexDb ;
 lappend tbCmd "-spoligo" $::glob_spacer ;
 if { $::glob_spolDb ne ""} {
 lappend tbCmd "-db-spoligo" ;
@@ -783,6 +785,32 @@ set ::glob_miruDb $tsvFile ;
 } ;
 } ;
 pack .main.lin.db.miru.but .main.lin.db.miru.lab -anchor w -side left 
+tk::frame .main.lin.db.hsp65Simple ;
+pack .main.lin.db.hsp65Simple -anchor w -side top ;
+tk::label .main.lin.db.hsp65Simple.lab -text $glob_hsp65SimpleDb  ;
+tk::button .main.lin.db.hsp65Simple.but -text "hsp65 simple database" -command { 
+set tsvFile [
+tk_getOpenFile -title "select hsp65 simple database" -filetypes $::tsv_types  ] ;
+if { $tsvFile eq "" } {
+} else {
+.main.lin.db.hsp65Simple.lab configure -text $tsvFile ;
+set ::glob_hsp65SimpleDb $tsvFile ;
+} ;
+} ;
+pack .main.lin.db.hsp65Simple.but .main.lin.db.hsp65Simple.lab -anchor w -side left 
+tk::frame .main.lin.db.hsp65Complex ;
+pack .main.lin.db.hsp65Complex -anchor w -side top ;
+tk::label .main.lin.db.hsp65Complex.lab -text $glob_hsp65ComplexDb  ;
+tk::button .main.lin.db.hsp65Complex.but -text "hsp65 complex database" -command { 
+set tsvFile [
+tk_getOpenFile -title "select hsp65 complex database" -filetypes $::tsv_types  ] ;
+if { $tsvFile eq "" } {
+} else {
+.main.lin.db.hsp65Complex.lab configure -text $tsvFile ;
+set ::glob_hsp65ComplexDb $tsvFile ;
+} ;
+} ;
+pack .main.lin.db.hsp65Complex.but .main.lin.db.hsp65Complex.lab -anchor w -side left 
 tk::frame .main.lin.db.spacer ;
 pack .main.lin.db.spacer -anchor w -side top ;
 tk::label .main.lin.db.spacer.lab -text $glob_spacer  ; 
@@ -1064,7 +1092,6 @@ $labStr configure -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol ;
 } ; 
 close $openFILE ;
 } ;
-
 proc readAmrRep {prefixStr} {
 set fileStr $prefixStr ;
 append fileStr "-read-amrs.tsv" ;
@@ -1107,7 +1134,6 @@ if { [lsearch $amrList $tmpStr] ne -1 } {
 } ;
 } ; 
 } ;
-
 proc readSpol {prefixStr} {
 set fileStr $prefixStr ;
 append fileStr "-read-spoligo.tsv" ;
@@ -1117,38 +1143,35 @@ set statusBl [gets $openFILE lineStr ] ;
 close $openFILE ;
 if {$statusBl < 0} {
 .main.out.report.readspol.octal.reslab configure -text "NA" ;
-.main.out.report.readspol.sit.reslab configure -text "NA" ;
 .main.out.report.readspol.strain.reslab configure -text "NA" ;
-.main.out.report.readspol.orig.reslab configure -text "NA" ;
+.main.out.report.readspol.lin.reslab configure -text "NA" ;
 return false ;
 } ; 
 set lineStr [split $lineStr "\t"] ;
 .main.out.report.readspol.octal.reslab configure -text [lindex $lineStr 3] ;
-.main.out.report.readspol.sit.reslab configure -text [lindex $lineStr 5] ;
 .main.out.report.readspol.strain.reslab configure -text [lindex $lineStr 1] ;
-.main.out.report.readspol.orig.reslab configure -text [lindex $lineStr 6] ;
+.main.out.report.readspol.lin.reslab configure -text [lindex $lineStr 4] ;
 } ;
-proc readMiru {prefixStr} {
+proc readHsp65 {prefixStr} {
 set fileStr $prefixStr ;
-append fileStr "-read-mirulin.tsv" ;
+append fileStr "-read-hsp65.tsv" ;
 set openFILE [open $fileStr] ;
 gets $openFILE lineStr ; 
-set status [gets $openFILE lineStr] ;
+set status [gets $openFILE depthsStr] ;
 close $openFILE ;
 if {$status < 0} {
-.main.out.report.miru.reslab configure -text "NA" ;
+.main.out.report.hsp65.reslab configure -text "NA" ;
 return false ;
 } ; 
 set lineStr [split $lineStr "\t"] ;
-set lineStr [lreplace $lineStr 0 0];
-set tmpStr [lsort -unique $lineStr ] ;
-if {[llength $tmpStr] < 2} {
-if {[lindex $tmpStr 0] eq "NA"} {
-.main.out.report.miru.reslab configure -text "NA" ;
+if {[llength $lineStr] < 4} {
+.main.out.report.hsp65.reslab configure -text "NA" ;
 return false ;
-} ;
 } ; 
-.main.out.report.miru.reslab configure -text $lineStr ;
+set endSI [ expr [llength $lineStr] - 1 ] ;
+set outStr [lindex $lineStr 2] ; 
+for { set siDrug 3 } { $siDrug < $endSI } { incr siDrug }  { append outStr [ lindex $lineStr $siDrug ] ; } ;
+.main.out.report.hsp65.reslab configure -text $outStr ;
 return true ;
 } ;
 proc depthGraph {prefixStr} {
@@ -1538,7 +1561,7 @@ set ::glob_outCur $::glob_outPref ;
 readAmrRep $::glob_outCur ;
 coverageGraph $::glob_outCur ;
 readSpol $::glob_outCur ;
-readMiru $::glob_outCur ;
+readHsp65 $::glob_outCur ;
 conAmrTbl $::glob_outCur "   " ;
 readAmrTbl $::glob_outCur "   " ;
 .main.out.menu.reportBut invoke ;
@@ -1676,7 +1699,6 @@ tk::label .main.out.report.amrLegend.noAmrLab -background $::glob_noAmrCol -fg $
 tk::label .main.out.report.amrLegend.lowDepthLab -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol -text "No resistance, but missing genes" ;
 tk::label .main.out.report.amrLegend.amrLab -background $::glob_amrCol -fg $::glob_amrTextCol -text "Drug resistance" ;
 pack .main.out.report.amrLegend.legLab .main.out.report.amrLegend.noAmrLab .main.out.report.amrLegend.spaceOne .main.out.report.amrLegend.lowDepthLab .main.out.report.amrLegend.spaceTwo .main.out.report.amrLegend.amrLab -anchor w -side left ;
-
 tk::frame .main.out.report.space3 ;
 pack .main.out.report.space3 -anchor w -side top ;
 tk::frame .main.out.report.readspol ;
@@ -1691,31 +1713,25 @@ pack .main.out.report.readspol.octal -anchor w -side top ;
 tk::label .main.out.report.readspol.octal.headlab -text "     Octal: " ;
 tk::label .main.out.report.readspol.octal.reslab -text "NA" ;
 pack .main.out.report.readspol.octal.headlab .main.out.report.readspol.octal.reslab -anchor w -side left ;
-tk::frame .main.out.report.readspol.sit ;
-pack .main.out.report.readspol.sit -anchor w -side top ;
-pack .main.out.report.readspol.sit -anchor w -side top ;
-tk::label .main.out.report.readspol.sit.headlab -text "     SIT: " ;
-tk::label .main.out.report.readspol.sit.reslab -text "NA" ;
-pack .main.out.report.readspol.sit.headlab .main.out.report.readspol.sit.reslab -anchor w -side left ;
 tk::frame .main.out.report.readspol.strain ;
 pack .main.out.report.readspol.strain -anchor w -side top ;
 pack .main.out.report.readspol.strain -anchor w -side top ;
 tk::label .main.out.report.readspol.strain.headlab -text "     Strain: " ;
 tk::label .main.out.report.readspol.strain.reslab -text "NA" ;
 pack .main.out.report.readspol.strain.headlab .main.out.report.readspol.strain.reslab -anchor w -side left ;
-tk::frame .main.out.report.readspol.orig ;
-pack .main.out.report.readspol.orig -anchor w -side top ;
-pack .main.out.report.readspol.orig -anchor w -side top ;
-tk::label .main.out.report.readspol.orig.headlab -text "     Countries: " ;
-tk::label .main.out.report.readspol.orig.reslab -text "NA" ;
-pack .main.out.report.readspol.orig.headlab .main.out.report.readspol.orig.reslab -anchor w -side left ;
+tk::frame .main.out.report.readspol.lin ;
+pack .main.out.report.readspol.lin -anchor w -side top ;
+pack .main.out.report.readspol.lin -anchor w -side top ;
+tk::label .main.out.report.readspol.lin.headlab -text "     Lineage: " ;
+tk::label .main.out.report.readspol.lin.reslab -text "NA" ;
+pack .main.out.report.readspol.lin.headlab .main.out.report.readspol.lin.reslab -anchor w -side left ;
 tk::frame .main.out.report.space4 ;
 pack .main.out.report.space4 -anchor w -side top ;
-tk::frame .main.out.report.miru ;
-pack .main.out.report.miru -anchor w -side top ;
-tk::label .main.out.report.miru.headlab -text "MIRU-VNTR: " ;
-tk::label .main.out.report.miru.reslab -text "NA" ;
-pack .main.out.report.miru.headlab .main.out.report.miru.reslab -anchor w -side left ;
+tk::frame .main.out.report.hsp65 ;
+pack .main.out.report.hsp65 -anchor w -side top ;
+tk::label .main.out.report.hsp65.headlab -text "hsp65:" ;
+tk::label .main.out.report.hsp65.reslab -text "NA" ;
+pack .main.out.report.hsp65.headlab .main.out.report.hsp65.reslab -anchor w -side left ;
 tk::label .main.out.depth.graph ;
 pack .main.out.depth.graph -anchor w -side left ;
 tk::label .main.out.cover.graph ;
