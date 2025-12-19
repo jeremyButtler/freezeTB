@@ -400,6 +400,10 @@ initTK_ftbTclTk(
    *   o fun03 sec03 sub02 cat05:
    *     - miru table database variable setup
    *   o fun03 sec03 sub02 cat06:
+   *     - hsp65 simple database setup
+   *   o fun03 sec03 sub02 cat07:
+   *     - hsp65 complex database setup
+   *   o fun03 sec03 sub02 cat08:
    *     - spoligo spacer database setup
    \*****************************************************/
 
@@ -688,6 +692,120 @@ initTK_ftbTclTk(
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat06:
+   +   - hsp65 simple database setup
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_hsp65SimpleDb "
+      );
+      
+   hsp65SimpleDbPath_freezeTBPaths(tmpStr);
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) fileStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s%shsp65 simple database path setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub02 Cat07:
+   +   - hsp65 complex database setup
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_hsp65ComplexDb "
+      );
+      
+   hsp65ComplexDbPath_freezeTBPaths(tmpStr);
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+
+   errSI =
+      Tcl_Eval(
+         tclInterpSTPtr,
+         (char *) fileStr
+      );
+
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+         stderr,
+         "%s%shsp65 complex database path setup error%s",
+         Tcl_GetStringResult(tclInterpSTPtr),
+         str_endLine,
+         str_endLine
+      );
+
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub02 Cat08:
    +   - spoligo spacer database setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
