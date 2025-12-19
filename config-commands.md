@@ -152,7 +152,7 @@ These settings change what reads to remove. FreezeTB will
   does not convert the score to the percent error and then
   back. It is often to optimistic.
 
-`-min-meanian-q 7`: minimum median read quality score to
+`-min-median-q 7`: minimum median read quality score to
   keep a read. This median has the same issue as the
   `-min-mean-q`.
 
