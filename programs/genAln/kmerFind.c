@@ -2855,8 +2855,10 @@ nextSeqChunk_tblST_kmerFind(
 
    firstKmers_fun19_sec04:; /*first time for sequence*/
 
-   if(endWindowUI > tblSTPtr->seqSTPtr->seqLenSL)
-   { /*If: this is the last window*/
+   if(
+        (signed long) endWindowUI
+      > tblSTPtr->seqSTPtr->seqLenSL
+   ){ /*If: this is the last window*/
       endWindowUI = tblSTPtr->seqSTPtr->seqLenSL;
       lastWinBl = 1;
    } /*If: this is the last window*/
@@ -3087,8 +3089,10 @@ nextNoIndexSeqChunk_tblST_kmerFind(
 
    firstKmers_fun20_sec04:; /*first time for sequence*/
 
-   if(endWindowUI > tblSTPtr->seqSTPtr->seqLenSL)
-   { /*If: this is the last window*/
+   if(
+        (signed long) endWindowUI
+      > tblSTPtr->seqSTPtr->seqLenSL
+   ){ /*If: this is the last window*/
       endWindowUI = tblSTPtr->seqSTPtr->seqLenSL;
       lastWinBl = 1;
    } /*If: this is the last window*/

@@ -692,7 +692,7 @@ findNumMap_edClust(
             errRateF
          ); /*find variant:error ratio*/
 
-      if(distSL > clustSetSTPtr->varToErrUI)
+      if(distSL > (signed long) clustSetSTPtr->varToErrUI)
       { /*If: reads are to distant*/
          indexSTPtr->clustArySI[lineSL] = 0;
          continue;
@@ -1138,8 +1138,9 @@ cluster_edClust(
 
    clustSetSTPtr->clustSI = 1; /*on first cluster*/
 
-   while(numReadsSL >= clustSetSTPtr->minDepthUI)
-   { /*Loop: cluster reads*/
+   while(
+     numReadsSL >= (signed long) clustSetSTPtr->minDepthUI
+   ){ /*Loop: cluster reads*/
 
       if(clustSetSTPtr->repIntervalSL > 0)
       { /*If: reporting status*/

@@ -1,7 +1,7 @@
 
 CC=cc
 LD=cc
-coreCFLAGS= -c -O0 -std=c99 -g -Werror -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
+coreCFLAGS= -c -O0 -std=c99 -g -Wno-incompatible-pointer-types -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
 CFLAGS=-DNONE
 NAME=ftbTclTk
 PREFIX=/usr/local/bin
@@ -142,7 +142,7 @@ $(NAME): ftbTclTk.$O
 		elif [ -f /usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so ]; then tkObj=/usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so; \
 		else echo "could not find libtk"; exit; \
 		fi; \
-			$(LD) $$x11Obj $$tkObj $$tclObj  -o $(NAME) $(objFiles)
+			$(LD) $(objFiles) $$x11Obj $$tkObj $$tclObj  -o $(NAME)
 
 ftbTclTk.$O: \
 	ftbTclTk.c \
@@ -159,7 +159,6 @@ ftbTclTk.$O: \
 		if [ -d /usr/local/include/tcl-tk ]; then hPath="$$hPath -I/usr/local/include/tcl-tk"; fi; \
 		if [ -d /usr/local/include/tcltk ]; then hPath="$$hPath -I/usr/local/include/tcltk"; fi; \
 		if [ -d /usr/local/include ]; then hPath="$$hPath -I/usr/local/include"; fi; \
-      \
 		$(CC) $$hPath -o ftbTclTk.$O \
 			$(CFLAGS) $(coreCFLAGS) ftbTclTk.c
 $(genFreezeTB)/freezeTB.$O: \

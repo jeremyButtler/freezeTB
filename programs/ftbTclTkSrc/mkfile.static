@@ -143,7 +143,7 @@ $(NAME): ftbTclTk.$O
 		elif [ -f /usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so ]; then tkObj=/usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so; \
 		else echo "could not find libtk"; exit; \
 		fi; \
-			$(LD) $$x11Obj $$tkObj $$tclObj  -o $(NAME) $(objFiles)
+			$(LD) $(objFiles) $$x11Obj $$tkObj $$tclObj  -o $(NAME)
 
 ftbTclTk.$O: \
 	ftbTclTk.c \

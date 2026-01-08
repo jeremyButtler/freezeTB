@@ -400,11 +400,13 @@ initTK_ftbTclTk(
    *   o fun03 sec03 sub02 cat05:
    *     - miru table database variable setup
    *   o fun03 sec03 sub02 cat06:
-   *     - hsp65 simple database setup
+   *     - hsp65 simple database
    *   o fun03 sec03 sub02 cat07:
-   *     - hsp65 complex database setup
+   *     - hsp65 complex database
    *   o fun03 sec03 sub02 cat08:
    *     - spoligo spacer database setup
+   *   o fun03 sec03 sub02 cat09:
+   *     - spoligo lineage database setup
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -692,7 +694,7 @@ initTK_ftbTclTk(
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat06:
-   +   - hsp65 simple database setup
+   +   - hsp65 simple database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    tmpStr = defStr;
@@ -749,7 +751,7 @@ initTK_ftbTclTk(
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
    + Fun03 Sec03 Sub02 Cat07:
-   +   - hsp65 complex database setup
+   +   - hsp65 complex database
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    tmpStr = defStr;
@@ -862,7 +864,7 @@ initTK_ftbTclTk(
    } /*If: error*/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun03 Sec03 Sub02 Cat07:
+   + Fun03 Sec03 Sub02 Cat09:
    +   - spoligo lineage database setup
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

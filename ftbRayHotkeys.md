@@ -15,6 +15,7 @@ For entry boxes:
 - end: move to end of entry box
 - scroll wheel: move cursor up one character
 - shift + scroll wheel: move cursor one block
+- shift + backspace to delete all text
 
 For list boxes and file browsers:
 

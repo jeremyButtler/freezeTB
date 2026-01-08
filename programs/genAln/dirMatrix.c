@@ -300,7 +300,7 @@ getAln_dirMatrix(
 
    blank_samEntry(samSTPtr);
 
-   if(qryPosUI + 1 < qrySTPtr->seqLenSL)
+   if((signed long) qryPosUI + 1 < qrySTPtr->seqLenSL)
    { /*If: need to add ending softmasked bases*/
       samSTPtr->cigTypeStr[0] = 'S';
 
@@ -370,8 +370,10 @@ getAln_dirMatrix(
    *   - copy query sequence
    \*****************************************************/
 
-   if(samSTPtr->seqSizeUI < qrySTPtr->seqLenSL)
-   { /*If: I need more memory for the sequence*/
+   if(
+        (signed long) samSTPtr->seqSizeUI
+      < qrySTPtr->seqLenSL
+   ){ /*If: I need more memory for the sequence*/
       free(samSTPtr->seqStr);
       samSTPtr->seqStr = 0;
 
@@ -407,8 +409,9 @@ getAln_dirMatrix(
 
    if(qrySTPtr->qLenSL)
    { /*If: have q-score entry*/
-      if(samSTPtr->qSizeUI < qrySTPtr->qLenSL)
-      { /*If: I need more memory for the sequence*/
+      if(
+        (signed long) samSTPtr->qSizeUI < qrySTPtr->qLenSL
+      ){ /*If: I need more memory for the sequence*/
          free(samSTPtr->qStr);
          samSTPtr->qStr = 0;
 
@@ -975,7 +978,7 @@ getCig_dirMatrix(
    ^   - find sequence start and ending positions
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(*refStartUI < matrixSTPtr->refOffsetSL)
+   if((signed long)*refStartUI < matrixSTPtr->refOffsetSL)
       *refStartUI += matrixSTPtr->refOffsetSL;
       /*likely user did not account for offset*/
 
@@ -1042,7 +1045,7 @@ getCig_dirMatrix(
        /*forward sequence mean backwards cigars*/
    } /*If: cigar entry already here*/
 
-   if( refPosUI < (matrixSTPtr->refLenSL - 1) )
+   if((signed long) refPosUI < (matrixSTPtr->refLenSL -1))
    { /*If: missing bases at end*/
       if(revBl)
       { /*If: reverse complement sequence*/
@@ -1065,7 +1068,7 @@ getCig_dirMatrix(
       } /*Else: foward sequence (deletions at end)*/
    } /*If: missing bases at end*/
 
-   if(qryPosUI + 1 < matrixSTPtr->qryLenSL)
+   if((signed long) qryPosUI + 1 < matrixSTPtr->qryLenSL)
    { /*If: need to add ending softmasked bases*/
       if((*cigTypeStr)[cigPosUI] > 32)
          ++cigPosUI;
@@ -1251,8 +1254,8 @@ getCig_dirMatrix(
    if(
          revBl
       &&
-           (refPosUI + matrixSTPtr->refOffsetSL)
-         < matrixSTPtr->refEndSL
+          ((signed long)refPosUI+matrixSTPtr->refOffsetSL)
+        < matrixSTPtr->refEndSL
       && delAtEndBl
    ){ /*If: deletions at end*/
       

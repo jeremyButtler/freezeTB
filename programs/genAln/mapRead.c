@@ -416,7 +416,7 @@ setup_chains_mapRead(
    } /*Loop: blank kmer starting coords arrays*/
 
    slElm = 0;
-   while(slElm < lenRefUI)
+   while(slElm < (signed long) lenRefUI)
       chainsSTPtr->indexArySI[slElm++] = -1;
 
 
@@ -624,7 +624,7 @@ realloc_chains_mapRead(
       chainsSTPtr->indexArySI = (signed int *) scPtr;
 
       slElm = chainsSTPtr->sizeIndexSI;
-      while(slElm < lenRefUI)
+      while(slElm < (signed long) lenRefUI)
          chainsSTPtr->indexArySI[slElm++] = 0;
 
       chainsSTPtr->sizeIndexSI = lenRefUI;
@@ -1605,11 +1605,8 @@ getRefBin_ref_mapRead(
 
    if(! refSTPtr->seqSTPtr->seqLenSL)
       goto badEntry_fun20_sec07;
-   if(
-        refSTPtr->seqSTPtr->seqLenSL
-      < (unsigned int) refSTPtr->lenSI
-   ) goto badEntry_fun20_sec07;
-     /*hit EOF early*/
+   if(refSTPtr->seqSTPtr->seqLenSL < refSTPtr->lenSI)
+      goto badEntry_fun20_sec07; /*hit EOF early*/
 
    refSTPtr->seqSTPtr->seqStr[
       refSTPtr->seqSTPtr->seqLenSL
@@ -4614,8 +4611,9 @@ mergeToSam_mapRead(
    *   - copy sequence
    \*****************************************************/
 
-   if(samSTPtr->seqSizeUI < qrySTPtr->seqLenSL)
-   { /*If: need more memory for sequence*/
+   if(
+     (signed long)samSTPtr->seqSizeUI < qrySTPtr->seqLenSL
+   ){ /*If: need more memory for sequence*/
       free(samSTPtr->seqStr);
       samSTPtr->seqStr = 0;
 
@@ -4653,8 +4651,10 @@ mergeToSam_mapRead(
       && qrySTPtr->qStr[0] != '\0'
    ){ /*If: have q-score entry*/
 
-      if(samSTPtr->qSizeUI < qrySTPtr->seqLenSL)
-      { /*If: need more memory*/
+      if(
+           (signed long) samSTPtr->qSizeUI
+         < qrySTPtr->seqLenSL
+      ){ /*If: need more memory*/
          free(samSTPtr->qStr);
          samSTPtr->qStr = 0;
 

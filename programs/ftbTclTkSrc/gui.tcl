@@ -4033,22 +4033,16 @@ tk::frame .main.out.amr ;
 #   o gui08 sec02 sub01:
 #     - function; set AMR colors by depth
 #   o gui08 sec02 sub02:
-#     - function consensus AMR report
-#   o gui08 sec02 sub03:
 #     - function read AMR report
-#   o gui08 sec02 sub04:
-#     - function; consensus spoligotype
-#   o gui08 sec02 sub05:
+#   o gui08 sec02 sub03:
 #     - function; read spoligotype
-#   o gui08 sec02 sub06:
+#   o gui08 sec02 sub04:
 #     - function read MIRU-VNTR
-#   o gui08 sec02 sub07:
+#   o gui08 sec02 sub05:
 #     - function; read depth graph
-#   o gui08 sec02 sub08:
+#   o gui08 sec02 sub06:
 #     - function; coverage graph
-#   o gui08 sec02 sub09:
-#     - function; consnesus AMR table
-#   o gui08 sec02 sub10:
+#   o gui08 sec02 sub07:
 #     - function; read AMR table
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -4153,7 +4147,7 @@ proc setAmrLab {prefixStr pathStr} {
 } ; # set AMR report labels by gene depth
  
 #**************************************************
-# Gui08 Sec02 Sub03:
+# Gui08 Sec02 Sub02:
 #   - function read AMR report
 #**************************************************
 
@@ -4226,7 +4220,7 @@ proc readAmrRep {prefixStr} {
 } ; # readAmrRep
 
 #**************************************************
-# Gui08 Sec02 Sub05:
+# Gui08 Sec02 Sub03:
 #   - function; read spoligotype
 #**************************************************
 
@@ -4279,7 +4273,7 @@ proc readSpol {prefixStr} {
 } ; # readSpol
 
 #**************************************************
-# Gui08 Sec02 Sub06:
+# Gui08 Sec02 Sub04:
 #   - function read hsp65 results
 #**************************************************
 
@@ -4333,7 +4327,7 @@ proc readHsp65 {prefixStr} {
 } ; # readHsp65
 
 #**************************************************
-# Gui08 Sec02 Sub07:
+# Gui08 Sec02 Sub05:
 #   - function; read depth graph display
 #**************************************************
 
@@ -4418,7 +4412,7 @@ proc depthGraph {prefixStr} {
 } ; # depthGraph
 
 #**************************************************
-# Gui08 Sec02 Sub08:
+# Gui08 Sec02 Sub06:
 #   - function; coverage graph dispaly
 #**************************************************
 
@@ -4526,366 +4520,40 @@ proc coverageGraph {prefixStr} {
 } ; # coverageGraph
 
 #**************************************************
-# Gui08 Sec02 Sub09:
-#   - function; consnesus AMR table
-#   o gui08 sec02 sub09 cat01:
-#     - open file and get header lenghts
-#   o gui08 sec02 sub09 cat02:
-#     - get gene name length + start length loop
-#   o gui08 sec02 sub09 cat03:
-#     - get AMR (short name) length
-#   o gui08 sec02 sub09 cat04:
-#     - get AMR cross resistance column length
-#   o gui08 sec02 sub09 cat05:
-#     - mutation, variant, level, additive, needs gene
-#   o gui08 sec02 sub09 cat06:
-#     - print no AMR case
-#   o gui08 sec02 sub09 cat07:
-#     - print header
-#   o gui08 sec02 sub09 cat08:
-#     - get gene ids + start print loop
-#   o gui08 sec02 sub09 cat09:
-#     - get primrary resistant drug (3 letter)
-#   o gui08 sec02 sub09 cat10:
-#     - get cross resistant drugs (3 letter)
-#   o gui08 sec02 sub09 cat11:
-#     - get mutation, var id, level, additvee, needs
-#   o gui08 sec02 sub09 cat12:
-#     - add text to consensus AMR table + return
-#**************************************************
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec02 Sub09 Cat01:
-#   - open file and get header lengths
-#++++++++++++++++++++++++++++++++++++++++++++++++++
-
-proc conAmrTbl {prefixStr indentStr} {
-   set fileStr $prefixStr ;
-   append fileStr "-con-amrs.tsv" ;
-   set openFILE [open $fileStr] ;
-
-   set pad1 [string length "gene"] ;
-   set pad2 [string length "drug"] ;
-   set pad3 [string length "cross-res"] ;
-   set pad4 [string length "var_id"] ;
-   set pad5 [string length "mutant"] ;
-   set pad9 [string length "level"] ;
-   set pad10 [string length "additive"] ;
-   set pad11 [string length "needs"] ;
-
-   if {[gets $openFILE lineStr] < 0} {
-      ---.main.out.amr.read.tbl.lab
-          configure
-          -text "NA"
-      ---;
-
-      return false ;
-   } ; # If; nothing in file
-
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub09 Cat02:
-   #   - get gene name length + start length loop
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-
-   while {[gets $openFILE lineStr] > -1} {
-      set lineStr [split $lineStr "\t"] ;
-
-      # gene name length
-      set tmpStr [lindex $lineStr 1] ;
-      set lenUI [string length $tmpStr] ;
-      if {$pad1 < $lenUI} { set pad1 $lenUI ; } ;
-
-      #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub09 Cat03:
-      #   - get AMR (short name) length
-      #++++++++++++++++++++++++++++++++++++++++++++
-
-      set tmpStr [lindex $lineStr 2] ;
-      set tmpStr [string tolower $tmpStr] ;
-
-      # loop converts drug name to short hand
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
-      } ; # Loop: convert AMR ids to short hand
-
-      set lenUI [string length $tmpStr] ;
-      if {$pad2 < $lenUI} { set pad2 $lenUI ; } ;
-
-      #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub09 Cat04:
-      #   - get AMR cross resistance column length
-      #++++++++++++++++++++++++++++++++++++++++++++
-
-      # cross resistance length
-      set tmpStr [lindex $lineStr 3] ;
-      set tmpStr [string tolower $tmpStr] ;
-
-      # loop converts drug names to three letters
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
-      } ; # Loop: convert AMR ids to short hand
-
-      set lenUI [string length $tmpStr] ;
-      if {$pad3 < $lenUI} { set pad3 $lenUI ; } ;
-
-      #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub09 Cat05:
-      #   - mutation, variant, level, additive, +
-      #++++++++++++++++++++++++++++++++++++++++++++
-
-      # variant id
-      set tmpStr [lindex $lineStr 4] ;
-      set lenUI [string length $tmpStr] ;
-      if {$pad4 < $lenUI} { set pad4 $lenUI ; } ;
-
-      # mutation
-      set tmpStr [lindex $lineStr 5] ;
-      set lenUI [string length $tmpStr] ;
-      if {$pad5 < $lenUI} { set pad5 $lenUI ; } ;
-
-      # resistance level
-      set tmpStr [lindex $lineStr 9] ;
-      set lenUI [string length $tmpStr] ;
-      if {$pad9 < $lenUI} { set pad9 $lenUI ; } ;
-
-      # is resistance additive
-      set tmpStr [lindex $lineStr 10] ;
-      set lenUI [string length $tmpStr] ;
-      if {$pad10 < $lenUI} { set pad10 $lenUI ; } ;
-
-      # does resistance need a gene
-      set tmpStr [lindex $lineStr 11] ;
-      set lenUI [string length $tmpStr] ;
-      if {$pad11 < $lenUI} { set pad11 $lenUI ; } ;
-   } ; # Loop: find longest entries per column
-
-   close $openFILE ;
-
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub09 Cat06:
-   #   - print no AMR case
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-
-   if {$pad1 eq 0} {
-      ---.main.out.amr.con.tbl.lab
-          configure
-          -text "NA"
-      ---;
-
-      return false ;
-   } ; # If; nothing in file
-
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub09 Cat07:
-   #   - print header
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-
-   set tmpStr [format "%-*s" $pad1 "gene"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad2 "drug"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad3 "cross-res"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad4 "var_id"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad5 "mutant"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad9 "level"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad10 "additive"] ;
-   append tblStr $tmpStr $indentStr;
-
-   set tmpStr [format "%-*s" $pad11 "needs"] ;
-   append tblStr $tmpStr $indentStr;
-
-   append tblStr "\n";
-
-   set openFILE [open $fileStr] ;
-   gets $openFILE lineStr ;
-
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub09 Cat08:
-   #   - get gene ids + start print loop
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-
-   while {[gets $openFILE lineStr] > -1} {
-      set lineStr [split $lineStr "\t"] ;
-
-      set tmpStr [lindex $lineStr 1] ; # gene id
-      set tmpStr [format "%-*s" $pad1 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub09 Cat09:
-      #   - get primrary resistant drug (3 letter)
-      #++++++++++++++++++++++++++++++++++++++++++++
-
-      set tmpStr [lindex $lineStr 2] ;
-      set tmpStr [string tolower $tmpStr] ;
-
-      # loop converts to three letter code
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
-      } ; # Loop: convert AMR ids to short hand
-      set tmpStr [format "%-*s" $pad2 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub09 Cat10:
-      #   - get cross resistant drugs (3 letter)
-      #++++++++++++++++++++++++++++++++++++++++++++
-
-      # cross resistance AMRs
-      set tmpStr [lindex $lineStr 3] ;
-      set tmpStr [string tolower $tmpStr] ;
-
-      # loop converts drug to three letter codes
-      ---for
-        { set siAmr 0 }
-        { $siAmr < [llength $::glob_amrList] }
-        { incr siAmr }
-      ---{
-         ---set
-            tmpStr
-            [regsub
-               [lindex $::glob_amrList $siAmr]
-               $tmpStr
-               [lindex $::glob_amrGenes $siAmr 0]
-            ]
-         ---;
-      } ; # Loop: convert AMR ids to short hand
-
-      set tmpStr [format "%-*s" $pad3 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub09 Cat11:
-      #   - get mutation, var id, level, additvee, needs
-      #++++++++++++++++++++++++++++++++++++++++++++
-
-      # variant id
-      set tmpStr [lindex $lineStr 4] ; # mut type
-      set tmpStr [format "%-*s" $pad4 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      # mutation type
-      set tmpStr [lindex $lineStr 5] ; # mut type
-      set tmpStr [format "%-*s" $pad5 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      # resitance level
-      set tmpStr [lindex $lineStr 9] ; # mut type
-      set tmpStr [format "%-*s" $pad9 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      # additive resistance
-      set tmpStr [lindex $lineStr 10] ; # mut type
-      set tmpStr [format "%-*s" $pad10 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      # needs gene
-      set tmpStr [lindex $lineStr 11] ; # mut type
-      set tmpStr [format "%-*s" $pad11 $tmpStr] ;
-      append tblStr $tmpStr $indentStr;
-
-      append tblStr "\n" ; # next row
-   } ; # Loop: get AMRs
-
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub09 Cat12:
-   #   - add text to consensus AMR table + return
-   #+++++++++++++++++++++++++++++++++++++++++++++++
-
-   # allow editing
-   .main.out.amr.con.tbl.txt configure -state normal ;
-
-   # delete old text; then insert new
-   .main.out.amr.con.tbl.txt delete 0.0 end ;
-   .main.out.amr.con.tbl.txt insert end $tblStr ;
-
-   ---.main.out.amr.con.tbl.txt
-       configure
-       -state disabled
-   ---; # disable editing
-
-   close $openFILE ;
-   return true ;
-} ; # conAmrTbl
-
-#**************************************************
-# Gui08 Sec02 Sub10:
+# Gui08 Sec02 Sub07:
 #   - function; read AMR table
-#   o gui08 sec02 sub10 cat01:
+#   o gui08 sec02 sub07 cat01:
 #     - open file and get header lengths
-#   o gui08 sec02 sub10 cat02:
+#   o gui08 sec02 sub07 cat02:
 #     - find gene id length + start length loop
-#   o gui08 sec02 sub10 cat03:
+#   o gui08 sec02 sub07 cat03:
 #     - find primrary drug length
-#   o gui08 sec02 sub10 cat04:
+#   o gui08 sec02 sub07 cat04:
 #     - find cross resitance drugs length
-#   o gui08 sec02 sub10 cat05:
+#   o gui08 sec02 sub07 cat05:
 #     - find mutation and % support lengths
-#   o gui08 sec02 sub10 cat06:
+#   o gui08 sec02 sub07 cat06:
 #     - find gene depth length + others
-#   o gui08 sec02 sub10 cat07:
+#   o gui08 sec02 sub07 cat07:
 #     - print NA for nothing in file case
-#   o gui08 sec02 sub10 cat08:
+#   o gui08 sec02 sub07 cat08:
 #     - build header for table
-#   o gui08 sec02 sub10 cat09:
+#   o gui08 sec02 sub07 cat09:
 #     - add gene id to header + start table loop
-#   o gui08 sec02 sub10 cat10:
+#   o gui08 sec02 sub07 cat10:
 #     - add primrary drug to header
-#   o gui08 sec02 sub10 cat11:
+#   o gui08 sec02 sub07 cat11:
 #     - add cross-resistance drugs to header
-#   o gui08 sec02 sub10 cat12:
+#   o gui08 sec02 sub07 cat12:
 #     - add mutation + % support + variant id
-#   o gui08 sec02 sub10 cat13:
+#   o gui08 sec02 sub07 cat13:
 #     - add gene depth + resistance data
-#   o gui08 sec02 sub10 cat14:
+#   o gui08 sec02 sub07 cat14:
 #     - put table into AMR read table label
 #**************************************************
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec02 Sub10 Cat01:
+# Gui08 Sec02 Sub07 Cat01:
 #   - open file and get header lengths
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4915,7 +4583,7 @@ proc readAmrTbl {prefixStr indentStr} {
    } ; # If; nothing in file
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub10 Cat02:
+   # Gui08 Sec02 Sub07 Cat02:
    #   - find gene id length + start length loop
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4928,7 +4596,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad0 < $lenUI} { set pad0 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat03:
+      # Gui08 Sec02 Sub07 Cat03:
       #   - find primrary drug length
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4955,7 +4623,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad1 < $lenUI} { set pad1 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat04:
+      # Gui08 Sec02 Sub07 Cat04:
       #   - find cross resitance drugs length
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4983,7 +4651,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad2 < $lenUI} { set pad2 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat05:
+      # Gui08 Sec02 Sub07 Cat05:
       #   - find mutation and % support lengths
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4998,7 +4666,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad8 < $lenUI} { set pad8 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat06:
+      # Gui08 Sec02 Sub07 Cat06:
       #   - find gene depth length + others
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5031,7 +4699,7 @@ proc readAmrTbl {prefixStr indentStr} {
    close $openFILE ;
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub10 Cat07:
+   # Gui08 Sec02 Sub07 Cat07:
    #   - print NA for nothing in file case
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5044,9 +4712,8 @@ proc readAmrTbl {prefixStr indentStr} {
       return false ;
    } ; # If; nothing in file
 
-
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub10 Cat07:
+   # Gui08 Sec02 Sub07 Cat07:
    #   - build header for table
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5083,7 +4750,7 @@ proc readAmrTbl {prefixStr indentStr} {
    append tblStr "\n";
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub10 Cat08:
+   # Gui08 Sec02 Sub07 Cat08:
    #   - add gene id to table + start table loop
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5099,7 +4766,7 @@ proc readAmrTbl {prefixStr indentStr} {
       set tmpF [expr $tmpF / 100] ;
 
       # make sure keeping entry
-      if {[lindex $tmpStr 4] eq "snp"} {
+      if {[lindex $lineStr 4] eq "snp"} {
          if { $tmpF < $::glob_outSnpSup} {
              continue ;
          } ; # If: support is to low
@@ -5115,7 +4782,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat09:
+      # Gui08 Sec02 Sub07 Cat09:
       #   - add primrary drug to table
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5141,7 +4808,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat10:
+      # Gui08 Sec02 Sub07 Cat10:
       #   - add cross-resistance drugs to table
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5168,7 +4835,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat11:
+      # Gui08 Sec02 Sub07 Cat11:
       #   - add mutation + % support + variant id
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5188,7 +4855,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub10 Cat12:
+      # Gui08 Sec02 Sub07 Cat12:
       #   - add gene depth + resistance data
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5216,7 +4883,7 @@ proc readAmrTbl {prefixStr indentStr} {
    } ; # Loop: get AMRs
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub10 Cat13:
+   # Gui08 Sec02 Sub07 Cat13:
    #   - put table into AMR read table label
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5235,7 +4902,6 @@ proc readAmrTbl {prefixStr indentStr} {
    close $openFILE ;
    return true ;
 } ; # readAmrTbl
-
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec03:
@@ -5285,12 +4951,12 @@ tk::label .main.out.set.prefix.lab -text "" ;
          # remove all possible extension types
 
          set prefStr [regsub con.* $prefStr ""] ;
-         set prefStr [regsub map.* $prefStr ""] ;
+         set prefStr [regsub map.sam $prefStr ""] ;
          set prefStr [regsub read.* $prefStr ""] ;
          set prefStr [regsub tsv.* $prefStr ""] ;
          set prefStr [regsub id.* $prefStr ""] ;
-         set prefStr [regsub dept.* $prefStr ""] ;
-         set prefStr [regsub grap.* $prefStr ""] ;
+         set prefStr [regsub depth.* $prefStr ""] ;
+         set prefStr [regsub graph.* $prefStr ""] ;
          set prefStr [regsub coverage.* $prefStr ""] ;
 
          ---set
@@ -5419,7 +5085,6 @@ pack .main.out.set.run -anchor w -side top ;
 
       readSpol $::glob_outCur ;
       readHsp65 $::glob_outCur ;
-      conAmrTbl $::glob_outCur "   " ;
       readAmrTbl $::glob_outCur "   " ;
 
       .main.out.menu.reportBut invoke ;
@@ -6187,60 +5852,7 @@ pack .main.out.cover.graph -anchor w -side left ;
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec07:
 #   - set up amr table
-#   o gui08 sec07 sub01:
-#     - set up consensus AMR table
-#   o gui08 sec07 sub02:
-#     - set up read AMR table
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#**************************************************
-# Gui08 Sec07 Sub01:
-#   - set up consensus AMR table
-#**************************************************
-
-tk::frame .main.out.amr.con ;
-pack .main.out.amr.con -anchor nw -side left ;
-
-tk::frame .main.out.amr.con.head ;
-pack .main.out.amr.con.head -anchor w -side top ;
-
-tk::frame .main.out.amr.con.tbl ;
-pack .main.out.amr.con.tbl -anchor w -side top ;
-
----tk::label
-   .main.out.amr.con.head.lab
-   -font "Courier"
-   -text "Consensus ARMs:"
----;
-
----text
-   .main.out.amr.con.tbl.txt
-   -height 20
-   -width 81
-   -yscrollcommand ".main.out.amr.con.tbl.scroll set"
----; # set up text box
-
-# so user can not edit
-.main.out.amr.con.tbl.txt configure -state disabled ;
-
----scrollbar
-   .main.out.amr.con.tbl.scroll
-   -command ".main.out.amr.con.tbl.txt yview"
-   -orient v
----; # setup scroll bar for text box
-
----pack
-   .main.out.amr.con.head.lab
-   .main.out.amr.con.tbl.txt
-   .main.out.amr.con.tbl.scroll
-   -anchor nw
-   -side left
----;
-
-#**************************************************
-# Gui08 Sec07 Sub02:
-#   - set up read AMR table
-#**************************************************
 
 tk::frame .main.out.amr.read ;
 pack .main.out.amr.read -anchor nw -side right ;

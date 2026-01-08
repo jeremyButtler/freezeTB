@@ -5,7 +5,7 @@
 CC=cc
 LD=cc
 MAKE=make
-coreCFLAGS=-c -static -O0 -ggdb -Wall -Wextra
+coreCFLAGS=-c -O0 -ggdb -Wall -Wextra
 CFLAGS=-DNONE
 O=o.bug
 PREFIX=/usr/local/bin
@@ -125,6 +125,7 @@ $(libRayLib): \
 		#  shared library on linux
 	#sudo $(MAKE) \
 	#	PLATFORM=PLATFORM_DESKTOP \
+	#	RAYLIB_LIBTYPE=SHARED \
 	#	-C ../raylib/src \
 	#	install;
 

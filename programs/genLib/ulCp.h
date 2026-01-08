@@ -107,34 +107,63 @@
    #ifdef PLAN9_64
       typedef unsigned long long ulong_ulCp;   
    #else
-      typedef unsigned long ulong_ulCp;   
+      #ifdef BIT_32
+         typedef unsigned int ulong_ulCp;   
+      #else
+         typedef unsigned long ulong_ulCp;   
+      #endif
    #endif
 #endif
 
 /*ulong_ulCp shortcuts*/
 /*the compiler should truncate these as needed*/
 #define def_null_ulCp 0
-#define def_newline_ulCp (ulong_ulCp)0x0a0a0a0a0a0a0a0a
-#define def_carriage_ulCp (ulong_ulCp) 0x0d0d0d0d0d0d0d0d
-#define def_tab_ulCp (ulong_ulCp) 0x0909090909090909
-#define def_space_ulCp (ulong_ulCp) 0x2020202020202020
-#define def_comma_ulCp (ulong_ulCp) 0x2c2c2c2c2c2c2c2c
 
-#define def_one_ulCp (ulong_ulCp) 0x0101010101010101
-#define def_highBit_ulCp (ulong_ulCp) 0x8080808080808080
-
-#define def_four_ulCp (ulong_ulCp) 0x0404040404040404
-#define def_eight_ulCp (ulong_ulCp) 0x0808080808080808
-
-#define def_hi3Bits_ulCp (ulong_ulCp) 0xe0e0e0e0e0e0e0e0
-   /*gets the high three bits in a char*/
-
-/*for white space checks*/
-#define def_31_ulCp (ulong_ulCp) 0x0f0f0f0f0f0f0f0f
-#define def_gt63_ulCp (ulong_ulCp) 0xc0c0c0c0c0c0c0c0
-   /*0xc0 is 12*/
-#define def_32Or64_ulCp (ulong_ulCp) 0x6060606060606060
-   /*32 | 64 = (0x20 | 0x40) = (0010 0000 | 0100 0000)*/
+#ifdef BIT_32
+   #define def_newline_ulCp (ulong_ulCp)0x0a0a0a0a
+   #define def_carriage_ulCp (ulong_ulCp) 0x0d0d0d0d
+   #define def_tab_ulCp (ulong_ulCp) 0x09090909
+   #define def_space_ulCp (ulong_ulCp) 0x20202020
+   #define def_comma_ulCp (ulong_ulCp) 0x2c2c2c2c
+   
+   #define def_one_ulCp (ulong_ulCp) 0x01010101
+   #define def_highBit_ulCp (ulong_ulCp) 0x80808080
+   
+   #define def_four_ulCp (ulong_ulCp) 0x04040404
+   #define def_eight_ulCp (ulong_ulCp) 0x08080808
+   
+   #define def_hi3Bits_ulCp (ulong_ulCp) 0xe0e0e0e0
+      /*gets the high three bits in a char*/
+   
+   /*for white space checks*/
+   #define def_31_ulCp (ulong_ulCp) 0x0f0f0f0f
+   #define def_gt63_ulCp (ulong_ulCp) 0xc0c0c0c0
+      /*0xc0 is 12*/
+   #define def_32Or64_ulCp (ulong_ulCp) 0x60606060
+      /*32 | 64 = (0x20 | 0x40) = (0010 0000 | 0100 0000)*/
+#else
+  #define def_newline_ulCp (ulong_ulCp)0x0a0a0a0a0a0a0a0a
+  #define def_carriage_ulCp (ulong_ulCp) 0x0d0d0d0d0d0d0d0d
+  #define def_tab_ulCp (ulong_ulCp) 0x0909090909090909
+  #define def_space_ulCp (ulong_ulCp) 0x2020202020202020
+  #define def_comma_ulCp (ulong_ulCp) 0x2c2c2c2c2c2c2c2c
+   
+  #define def_one_ulCp (ulong_ulCp) 0x0101010101010101
+  #define def_highBit_ulCp (ulong_ulCp) 0x8080808080808080
+   
+  #define def_four_ulCp (ulong_ulCp) 0x0404040404040404
+  #define def_eight_ulCp (ulong_ulCp) 0x0808080808080808
+   
+  #define def_hi3Bits_ulCp (ulong_ulCp) 0xe0e0e0e0e0e0e0e0
+    /*gets the high three bits in a char*/
+   
+  /*for white space checks*/
+  #define def_31_ulCp (ulong_ulCp) 0x0f0f0f0f0f0f0f0f
+  #define def_gt63_ulCp (ulong_ulCp) 0xc0c0c0c0c0c0c0c0
+     /*0xc0 is 12*/
+  #define def_32Or64_ulCp (ulong_ulCp) 0x6060606060606060
+     /*32 | 64 = (0x20 | 0x40) = (0010 0000 | 0100 0000)*/
+#endif
 
 
 #define def_bitsPerChar_ulCp 8
@@ -220,7 +249,11 @@
 |   - Returns:
 |     o ulong_ulCp as new deliminator
 \-------------------------------------------------------*/
-#define mkDelim_ulCp(delim) ( rshiftByte_ulCp((delim), 7) | rshiftByte_ulCp((delim), 6) | rshiftByte_ulCp((delim), 5) | rshiftByte_ulCp((delim), 4) | rshiftByte_ulCp((delim), 3) | rshiftByte_ulCp((delim), 2) | rshiftByte_ulCp((delim), 1) | rshiftByte_ulCp((delim), 0) )
+#ifdef BIT_32
+   #define mkDelim_ulCp(delim) (rshiftByte_ulCp((delim), 3) | rshiftByte_ulCp((delim), 2) | rshiftByte_ulCp((delim), 1) | rshiftByte_ulCp((delim), 0) )
+#else
+   #define mkDelim_ulCp(delim) ( rshiftByte_ulCp((delim), 7) | rshiftByte_ulCp((delim), 6) | rshiftByte_ulCp((delim), 5) | rshiftByte_ulCp((delim), 4) | rshiftByte_ulCp((delim), 3) | rshiftByte_ulCp((delim), 2) | rshiftByte_ulCp((delim), 1) | rshiftByte_ulCp((delim), 0) )
+#endif
 /*Logic:
 `  - make a ulong_ulCp delminator
 `  - addDelim: rshiftByte_ulCp(delim, 7):

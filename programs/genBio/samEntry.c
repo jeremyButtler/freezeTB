@@ -1937,7 +1937,7 @@ get_samEntry(
             (FILE *) samFILE
          );
 
-      if(tmpSL < samSTPtr->readLenUI)
+      if(tmpSL < (signed long) samSTPtr->readLenUI)
          goto fileErr_fun12_sec14;
          /*missing a good chunk of the sequence*/
       lenSL = 0;
@@ -2065,7 +2065,7 @@ get_samEntry(
                (FILE *) samFILE
             );
 
-         if(tmpSL < samSTPtr->readLenUI)
+         if(tmpSL < (signed long) samSTPtr->readLenUI)
             goto fileErr_fun12_sec14;
          samSTPtr->qStr[samSTPtr->readLenUI] = 0;
          posSI = 0;
@@ -2173,7 +2173,7 @@ get_samEntry(
    { /*Else If: need to copy buffer*/
       tmpSL = lenSL - posSI;
 
-      if(tmpSL >= samSTPtr->extraSizeUI)
+      if(tmpSL >= (signed long) samSTPtr->extraSizeUI)
       { /*If: need more buffer*/ 
          free(samSTPtr->extraStr);
          samSTPtr->extraStr = 0;

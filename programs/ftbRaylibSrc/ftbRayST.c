@@ -2180,10 +2180,13 @@ checkDrugs_ftbRayST(
    signed int numSupReadsSI = 0;
    signed int numMapReadsSI = 0;
    float percSupReadsF = 0;
-   signed char drugAryStr[def_numDrugs_ftbRayST * 4];
-   signed int drugLenSI = 0;
 
    FILE *inFILE = 0;
+
+   /*for building the drug resistance part of the report*/
+   signed char drugAryStr[def_numDrugs_ftbRayST * 4];
+   signed int drugLenSI = 0;
+   signed int crossStartSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec02:
@@ -2922,6 +2925,10 @@ checkDrugs_ftbRayST(
    { /*If: have header*/
       while( fgets((char *) lineStr, 1000, inFILE) )
       { /*Loop: get drug resistance*/
+         crossStartSI = 0;
+         drugLenSI = 0;
+         drugAryStr[0] = 0;
+
          tmpStr = lineStr;
 
          tmpStr += cpWhite_ulCp(geneStr, tmpStr);
@@ -2929,9 +2936,11 @@ checkDrugs_ftbRayST(
             continue;
          ++tmpStr;
 
-         tmpStr += cpWhite_ulCp(colStr, tmpStr);
+         lenSI = 0;
+         while(*tmpStr > 32)
+            colStr[lenSI++] = ((*tmpStr++) | 32);
+         colStr[lenSI] = 0;
          ++tmpStr;
-         drugLenSI = 0;
 
          /***********************************************\
          * Fun15 Sec04 Sub03:
@@ -2939,26 +2948,21 @@ checkDrugs_ftbRayST(
          \***********************************************/
 
          if(
-               colStr[0] == 'N'
-            && colStr[1] == 'A'
+               colStr[0] == 'n'
+            && colStr[1] == 'a'
             && ! colStr[2]
          ) tmpStr += 2; /*no drug to check*/
 
          else
          { /*Else: check what drug am resistant to*/
-            checkDrug_fun15_sec04:;
-               drugLenSI = 0;
-               while(colStr[drugLenSI])
-                  colStr[drugLenSI++] |= 32;/*lower case*/
-               drugLenSI = 0;
-
+            checkDrug_fun15_sec04_sub03:;
                for(
                   lenSI = 0;
                   lenSI < def_numDrugs_ftbRayST;
                   ++lenSI
                ){ /*Loop: check all drugs*/
                   resAryBl[lenSI] = 0;
-                  drugAryStr[lenSI] = 0;
+                  drugAryStr[drugLenSI] = 0;
 
                   if(
                         ! eqlNull_ulCp(
@@ -2972,14 +2976,13 @@ checkDrugs_ftbRayST(
                   ){ /*If: found resistance*/
                      resAryBl[lenSI] = 1;
 
-                     drugAryStr[drugLenSI * 4] =
+                     drugAryStr[drugLenSI++] =
                         glob_drugStrAry[lenSI][0];
-                     drugAryStr[drugLenSI * 4 + 1] =
+                     drugAryStr[drugLenSI++] =
                         glob_drugStrAry[lenSI][1];
-                     drugAryStr[drugLenSI * 4 + 2] =
+                     drugAryStr[drugLenSI++] =
                         glob_drugStrAry[lenSI][2];
-                     drugAryStr[drugLenSI * 4 + 3] = '_';
-                     ++drugLenSI;
+                     drugAryStr[drugLenSI++] = '_';
                   }  /*If: found resistance*/
                }  /*Loop: check all drugs*/
          } /*Else: check what drug am resistant to*/
@@ -2989,6 +2992,20 @@ checkDrugs_ftbRayST(
          *   - check for cross resistance (loops to sub03)
          \***********************************************/
 
+         drugAryStr[drugLenSI] = 0;
+         if(! crossStartSI)
+         { /*If: need to mark end of primary drug*/
+            drugAryStr[drugLenSI - 1] = 0;
+            crossStartSI = drugLenSI;
+
+            /*assume no cross resistance, this will be
+            `  overwritten if there is cross resitstance
+            */
+            drugAryStr[drugLenSI] = 'N';
+            drugAryStr[drugLenSI + 1] = 'A';
+            drugAryStr[drugLenSI + 2] = 0;
+         } /*If: need to mark end of primary drug*/
+
          if(
                tmpStr[0] == 'N'
             && tmpStr[1] == 'A'
@@ -2997,35 +3014,19 @@ checkDrugs_ftbRayST(
 
          else if(*tmpStr > 32)
          { /*Else If: have cross resistance*/
+
             if(*tmpStr == '_')
                ++tmpStr;
 
             lenSI = 0;
             while(*tmpStr > 32 && *tmpStr != '_')
-               colStr[lenSI++] = *tmpStr++;
-            goto checkDrug_fun15_sec04;
+               colStr[lenSI++] = ((*tmpStr++) | 32);
+            goto checkDrug_fun15_sec04_sub03;
          } /*Else If: have cross resistance*/
 
          if(! *tmpStr)
             continue;
          ++tmpStr;
-
-         if(drugLenSI > 0)
-         { /*If: resistance, break into two c-strings*/
-            if(drugLenSI <= 3)
-            { /*If: not cross resistance*/
-               drugAryStr[3] = 0;
-               drugAryStr[4] = 'N';
-               drugAryStr[5] = 'A';
-               drugAryStr[6] = 0;
-            } /*If: not cross resistance*/
-
-            else
-            { /*Else: had cross resistance*/
-               drugAryStr[(drugLenSI - 1) * 4 + 3] = 0;
-               drugAryStr[3] = 0; /*store two c-strings*/
-            } /*Else: had cross resistance*/
-         } /*If: resistance, break into two c-strings*/
 
          /***********************************************\
          * Fun15 Sec04 Sub05:
@@ -3075,18 +3076,18 @@ checkDrugs_ftbRayST(
 
          /*check if keeping AMR*/
          if(
-               (typeStr[0] & ~32) == 's'
-            && (typeStr[1] & ~32) == 'n'
-            && (typeStr[2] & ~32) == 'p'
+               (typeStr[0] | 32) == 's'
+            && (typeStr[1] | 32) == 'n'
+            && (typeStr[2] | 32) == 'p'
             && typeStr[3] < 33
          ){ /*If: snp variant*/
-            if(percSupReadsF < minPerSupF)
+            if(percSupReadsF < minPerSupF * 100)
                continue;
          }  /*If: snp variant*/
 
          else
          { /*Else: frameshift or indel*/
-            if(percSupReadsF < minIndelPerSupF)
+            if(percSupReadsF < minIndelPerSupF * 100)
                continue;
          } /*Else: frameshift or indel*/
 
@@ -3151,6 +3152,7 @@ checkDrugs_ftbRayST(
          lineStr[lenSI++] = ' '; /*set lenSI to 4*/
          lineStr[lenSI++] = ' '; /*set lenSI to 5*/
 
+         /*copy variant id*/
          lenSI +=
             cpStr_ulCp(&lineStr[lenSI], varIdStr);
 
@@ -3158,12 +3160,21 @@ checkDrugs_ftbRayST(
             lineStr[lenSI++] = ' ';
          lineStr[lenSI++] = ' '; /*make 26*/
 
+         /*copy cross resistance*/
+         if(drugAryStr[drugLenSI - 1] == '_')
+            drugAryStr[drugLenSI - 1] = 0;
+            /*cross resitistance will add a _ to the end*/
+
          lenSI +=
-            cpStr_ulCp(&lineStr[lenSI], &drugAryStr[4]);
+            cpStr_ulCp(
+               &lineStr[lenSI],
+               &drugAryStr[crossStartSI]
+            );
          while(lenSI < 37)
             lineStr[lenSI++] = ' ';
          lineStr[lenSI++] = ' '; /*sets to 38*/
 
+         /*copy read support*/
          lenSI += numToStr(&lineStr[lenSI],numSupReadsSI);
          while(lenSI < 48)
             lineStr[lenSI++] = ' ';
@@ -3182,6 +3193,7 @@ checkDrugs_ftbRayST(
          lenSI +=
             cpStr_ulCp(&lineStr[lenSI], needsGeneStr);
 
+         /*add entry to the list box and move on*/
          if(
             addItem_listBox_rayWidg(
                lineStr,
@@ -3823,7 +3835,7 @@ mkCoverageTbl_ftbRayST(
          colArySI[colPosSI] = 9;
       else
       { /*Else: not header*/
-         if(outPosSI > colArySI[2])
+         if(outPosSI > colArySI[colPosSI])
             colArySI[colPosSI] = outPosSI;
       } /*Else: not header*/
 
@@ -3850,8 +3862,8 @@ mkCoverageTbl_ftbRayST(
          outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
          if(outPosSI > colArySI[colPosSI])
             colArySI[colPosSI] = outPosSI;
-         if(colArySI[colPosSI] < 8)
-            colArySI[colPosSI] = 8;
+         if(colArySI[colPosSI] < 6)
+            colArySI[colPosSI] = 6;
          ++colPosSI;
 
          linePosSI += outPosSI;
@@ -4031,7 +4043,7 @@ mkCoverageTbl_ftbRayST(
             outPosSI += tmpSI;
             tmpSI += 5; /*account for "drug_"*/
 
-            while(tmpSI <= colArySI[colPosSI] + 2)
+            while(tmpSI <= colArySI[colPosSI])
             { /*Loop: pad column if is to short*/
                outStr[outPosSI++] = ' ';
                ++tmpSI;
@@ -4062,7 +4074,7 @@ mkCoverageTbl_ftbRayST(
             outPosSI += tmpSI;
             linePosSI += tmpSI;
 
-            while(tmpSI <= colArySI[colPosSI] + 2)
+            while(tmpSI <= colArySI[colPosSI])
             { /*Loop: pad column if is to short*/
                outStr[outPosSI++] = ' ';
                ++tmpSI;
@@ -4085,7 +4097,7 @@ mkCoverageTbl_ftbRayST(
 
             tmpSI = 2;
 
-            while(tmpSI <= colArySI[colPosSI] + 2)
+            while(tmpSI <= colArySI[colPosSI])
             { /*Loop: pad column if is to short*/
                outStr[outPosSI++] = ' ';
                ++tmpSI;
@@ -4190,15 +4202,12 @@ getHsp65Lin_ftbRayST(
  
    signed char thirdLineStr[def_lenLine_fun18];
    signed char *thirdStr = 0;
-   signed int thirdMaxLenSI = 0;
 
    /*variables for printing to table*/
-   signed char idStr[64];
    signed char outLineStr[256];
    signed char *outStr = 0;
 
    /*temporary or general variables*/
-   signed int idLenSI = 0;
    signed int lenSI = 0;
    signed long ignoreSL = 0;
 
@@ -4262,21 +4271,14 @@ getHsp65Lin_ftbRayST(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun18 Sec03:
-   ^   - get id and move past id and type column
+   ^   - move past id and type column
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    outStr = outLineStr;
 
-   /*get of id column*/
-   idLenSI = cpWhite_ulCp(outStr, firstStr);
-   outStr += idLenSI;
-   firstStr += idLenSI;
-
-   idLenSI += cpWhite_ulCp(idStr, secStr);
-   secStr += idLenSI;
-   outStr[idLenSI++] = ' ';
-   outStr[idLenSI++] = ' ';
-
+   /*get past id column*/
+   firstStr += endWhite_ulCp(firstStr);
+   secStr += endWhite_ulCp(secStr);
    thirdStr += endWhite_ulCp(thirdStr);
    if(! *firstStr || ! *secStr || ! *thirdStr)
       goto done_fun18_sec05;
@@ -4354,14 +4356,6 @@ getHsp65Lin_ftbRayST(
    outStr = outLineStr;
 
    /*___________build_the_header________________________*/
-   if(idLenSI < 4)
-      idLenSI = 4;
-   lenSI = cpStr_ulCp(outStr,(signed char *) "id");
-   outStr += lenSI;
-   for( ; lenSI <= idLenSI; ++lenSI)
-      *outStr++ = ' ';
-   *outStr = 0;
-
    if(firstMaxLenSI < 9)
       firstMaxLenSI = 9;
    else
@@ -4382,12 +4376,8 @@ getHsp65Lin_ftbRayST(
       *outStr++ = ' ';
    *outStr = 0;
 
-   thirdMaxLenSI = 13; /*max 3rd column item is 15 chars*/
    lenSI = cpStr_ulCp(outStr, (signed char *) "call");
    outStr += lenSI;
-   for( ; lenSI <= thirdMaxLenSI; ++lenSI)
-      *outStr++ = ' ';
-   *outStr = 0;
 
    /*___________add_header_to_the_table_________________*/
    if(
@@ -4408,16 +4398,6 @@ getHsp65Lin_ftbRayST(
    while(secStr != secEndStr)
    { /*Loop: build the table*/
       outStr = outLineStr;
-
-      /*______________add_id_to_entry___________________*/
-      lenSI = cpWhite_ulCp(outStr, idStr);
-      outStr += lenSI;
-      while(lenSI <= idLenSI)
-      { /*Loop: add padding for the lineage*/
-         *outStr++ = ' ';
-         ++lenSI;
-      } /*Loop: add padding for the lineage*/
-      *outStr = 0;
 
       /*______________add_lineage_to_entry______________*/
       lenSI = cpWhite_ulCp(outStr, firstStr);
@@ -4452,13 +4432,13 @@ getHsp65Lin_ftbRayST(
       if(thirdStr[0] == 'L')
          cpStr_ulCp(
             outStr,
-            (signed char *) "low_depth    "
+            (signed char *) "low_depth"
          );
 
       else if(thirdStr[0] == 'N')
          cpStr_ulCp(
             outStr,
-            (signed char *) "alternate    "
+            (signed char *) "alternate"
          );
 
       else if(thirdStr[0] == 'M')
@@ -4470,7 +4450,7 @@ getHsp65Lin_ftbRayST(
       else
          cpStr_ulCp(
             outStr,
-            (signed char *) "supported    "
+            (signed char *) "supported"
          );
 
       /**************************************************\
@@ -4560,6 +4540,7 @@ checkRunEvent_ftbRayST(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
+   signed char *tmpStr = 0;
    signed char *tmpHeapStr = 0;
    signed char buildReportBl = 0;
 
@@ -4908,12 +4889,14 @@ checkRunEvent_ftbRayST(
    *   o fun19 sec06 sub05 cat02:
    *     - cancel event
    *   o fun19 sec06 sub05 cat03:
-   *     - selected output directory
+   *     - selected or cleared files
    *   o fun19 sec06 sub05 cat04:
-   *     - selected configuration file
-   *   o fun19 sec06 sub05 cat05:
    *     - selected fastq files
    *   o fun19 sec06 sub05 cat05:
+   *     - get file and find browser used
+   *   o fun19 sec06 sub05 cat06:
+   *     - add file to the browswer (or clear)
+   *   o fun19 sec06 sub05 cat07:
    *     - error or no event
    \*****************************************************/
 
@@ -4963,102 +4946,29 @@ checkRunEvent_ftbRayST(
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
       + Fun19 Sec06 Sub05 Cat03:
-      +   - selected output directory
+      +   - selected or clear files
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-      else if(tmpSI == 1)
-      { /*Else If: files were selected*/
+      else if(tmpSI > 0)
+      { /*Else If: files were selected or cleared*/
          hidenAdd_widg_rayWidg(
             guiSTPtr->fileBrowserIdSI,
             guiSTPtr->widgSTPtr
          ); /*user hit select*/
 
-         switch(guiSTPtr->browserSC)
-         { /*Switch: find which browser using*/
-            case 1:
-            /*Case: output directory selected*/
-               tmpSI = 0;
-               tmpHeapStr =
-                  getFile_files_rayWidg(
-                     &tmpSI,
-                     0, /*only selected items*/
-                     fileSTPtr
-                  );
-               if(! tmpHeapStr)
-                  goto err_fun19_sec07;
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun19 Sec06 Sub05 Cat04:
+         +   - selected fastq files
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
 
-               cpStr_ulCp(guiSTPtr->outDirStr,tmpHeapStr);
-               free(tmpHeapStr);
-               tmpHeapStr = 0;
-               goto done_fun19_sec07;
-            /*Case: output directory selected*/
+         if(! guiSTPtr->browserSC)
+         { /*If: fastq files input*/
+            if(tmpSI == 3)
+               blank_str_ptrAry(guiSTPtr->fqStrSTPtr);
+               /*clearning all fastq files*/
 
-            /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun19 Sec06 Sub05 Cat04:
-            +   - selected configuration file
-            \+++++++++++++++++++++++++++++++++++++++++++*/
-
-            case 2:
-            /*Case: configuration file selected*/
-               tmpSI = 0;
-               tmpHeapStr =
-                  getFile_files_rayWidg(
-                     &tmpSI,
-                     0, /*only selected items*/
-                     fileSTPtr
-                  );
-               if(! tmpHeapStr)
-                  goto err_fun19_sec07;
-
-               cpStr_ulCp(
-                  guiSTPtr->configFileStr,
-                  tmpHeapStr
-               );
-               free(tmpHeapStr);
-               tmpHeapStr = 0;
-               goto done_fun19_sec07;
-            /*Case: configuration file selected*/
-
-            /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun19 Sec06 Sub05 Cat05:
-            +   - get old ftb prefix
-            \+++++++++++++++++++++++++++++++++++++++++++*/
-
-            case 3:
-            /*Case: select old ftb prefix*/
-               tmpSI = 0;
-               tmpHeapStr =
-                  getFile_files_rayWidg(
-                     &tmpSI,
-                     0, /*only selected items*/
-                     fileSTPtr
-                  );
-               if(! tmpHeapStr)
-                  goto err_fun19_sec07;
-
-               cpStr_ulCp(
-                  guiSTPtr->filePrefixStr,
-                  tmpHeapStr
-               );
-               free(tmpHeapStr);
-               tmpHeapStr = 0;
-
-               /*remove suffix ("-depths.tsv") ftb adds*/
-               tmpHeapStr = guiSTPtr->filePrefixStr;
-               tmpHeapStr += endStr_ulCp(tmpHeapStr) - 11;
-               *tmpHeapStr = 0;
-               tmpHeapStr = 0;
-
-               goto done_fun19_sec07;
-            /*Case: select old ftb prefix*/
-
-            /*+++++++++++++++++++++++++++++++++++++++++++\
-            + Fun19 Sec06 Sub05 Cat06:
-            +   - selected fastq files
-            \+++++++++++++++++++++++++++++++++++++++++++*/
-
-            case 0:
-            /*Case: fastq files selected*/
+            else
+            { /*Else: getting fastq files*/
                tmpSI = 0;
 
                while(tmpSI >= 0)
@@ -5085,14 +4995,70 @@ checkRunEvent_ftbRayST(
                   free(tmpHeapStr);
                   tmpHeapStr = 0;
                } /*Loop: get fastq files*/
+            } /*Else: getting fastq files*/
 
-               goto done_fun19_sec07;
-            /*Case: fastq files selected*/
+            goto done_fun19_sec07;
+         } /*If: fastq files input*/
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun19 Sec06 Sub05 Cat05:
+         +   - get file and find browser used
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         if(tmpSI == 1)
+         { /*If: files were selected*/
+            tmpHeapStr =
+               getFile_files_rayWidg(
+                  &tmpSI,
+                  0, /*only selected items*/
+                  fileSTPtr
+               );
+            if(! tmpHeapStr)
+               goto err_fun19_sec07;
+         } /*If: files were selected*/
+
+         switch(guiSTPtr->browserSC)
+         { /*Switch: find which browser using*/
+            case 1: /*Case: output directory selected*/
+               tmpStr = guiSTPtr->outDirStr;
+               break;
+
+            case 2: /*Case: configuration file selected*/
+               tmpStr = guiSTPtr->configFileStr;
+               break;
+
+            case 3: /*Case: select old ftb prefix*/
+               tmpStr = guiSTPtr->filePrefixStr;
+               break;
          } /*Switch: find which browser using*/
-      } /*Else If: files were selected*/
+
+         /*++++++++++++++++++++++++++++++++++++++++++++++\
+         + Fun19 Sec06 Sub05 Cat06:
+         +   - add file to browser or clear
+         \++++++++++++++++++++++++++++++++++++++++++++++*/
+
+         if(tmpSI == 3)
+            tmpStr[0] = 0;
+         else
+            cpStr_ulCp(tmpStr, tmpHeapStr);
+
+         if(tmpHeapStr)
+            free(tmpHeapStr);
+         tmpHeapStr = 0;
+
+         if(guiSTPtr->browserSC == 3)
+         { /*If: need to remove the suffix*/
+            tmpHeapStr = guiSTPtr->filePrefixStr;
+            tmpHeapStr += endStr_ulCp(tmpHeapStr) - 11;
+            *tmpHeapStr = 0;
+            tmpHeapStr = 0;
+         } /*If: need to remove the suffix*/
+
+         goto done_fun19_sec07;
+      } /*Else If: files were selected or cleared*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub05 Cat05:
+      + Fun19 Sec06 Sub05 Cat07:
       +   - error or no event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5658,6 +5624,7 @@ checkRunEvent_ftbRayST(
          &guiSTPtr->filePrefixStr[siCnt],
          guiSTPtr->inPrefixStr
       );
+      guiSTPtr->inPrefixStr[0] = 0;
       goto buildOutReport_fun19_sec06_sub0x;
 
    /*****************************************************\

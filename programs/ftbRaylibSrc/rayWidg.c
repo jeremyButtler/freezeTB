@@ -5104,6 +5104,14 @@ addCharToEntry_rayWidg(
 
    else if(keySI == KEY_DELETE)
    { /*Else If: deleting the next character*/
+      if(shiftBl)
+      { /*If: deleting everything*/
+         textStr[posArySI[1]] = 0;
+         textStr[0] = 0;
+         *lenSIPtr = 0;
+         goto delete_fun078_sec06;
+      } /*If: deleting everything*/
+
       if(*lenSIPtr <= 0)
          goto cursorMove_fun078_sec06;
          /*delete, but nothing to delete*/
@@ -5143,6 +5151,14 @@ addCharToEntry_rayWidg(
 
    else if(keySI == KEY_BACKSPACE)
    { /*Else If: backspace to delete last character*/
+      if(shiftBl)
+      { /*If: deleting everything*/
+         textStr[posArySI[1]] = 0;
+         textStr[0] = 0;
+         *lenSIPtr = 0;
+         goto delete_fun078_sec06;
+      } /*If: deleting everything*/
+
       if(posArySI[1] <= 0)
          goto cursorMove_fun078_sec06;
          /*at start of string; nothing to delete*/
@@ -5298,7 +5314,9 @@ addCharToEntry_rayWidg(
 
    else if(keySI >= 32 && keySI <= 96)
    { /*Else If: normal key pressed*/
-      if(keySI < KEY_A)
+      if(keySI == KEY_MINUS && shiftBl)
+         keySI = '_';
+      else if(keySI < KEY_A)
          ;
       else if(keySI <= KEY_Z)
       { /*Else If: alphabet key input*/
@@ -9163,7 +9181,7 @@ draw_listBox_rayWidg(
    /*find the width of the list box*/
    itemSI =
         listSTPtr->lineWidthSI
-      + widgSTPtr->fontWidthF * 3; /**3 for # and >*/
+      + widgSTPtr->fontWidthF * 4; /*4 for #/> and space*/
 
    if(listSTPtr->maxWidthSI <= 0)
       widgSTPtr->widthArySI[idSI] = itemSI;
@@ -10115,11 +10133,14 @@ listBoxEvent_rayWidg(
                listSTPtr->numSelectSI < maxSelectSI
             ){ /*Else If: selecting the item*/
                ++listSTPtr->numSelectSI;
-               listSTPtr->lastSelectSI = lastSelectSI;
+               listSTPtr->lastSelectSI = listSTPtr->onSI;
 
                listSTPtr->stateArySC[listSTPtr->onSI] ^=
                    def_listSelect_rayWidg;
             }  /*Else If: selecting the item*/
+
+            else
+               listSTPtr->lastSelectSI = listSTPtr->onSI;
          }  /*If: can select the item*/
 
          goto selectEvent_fun116_sec06;
@@ -10145,6 +10166,8 @@ listBoxEvent_rayWidg(
             cntSI = listSTPtr->lastSelectSI;
             tmpSI = listSTPtr->onSI;
          } /*Else: going backwards*/
+
+         listSTPtr->lastSelectSI = listSTPtr->onSI;
 
          while(tmpSI <= cntSI)
          { /*Loop: add files to selection*/
@@ -10200,7 +10223,8 @@ listBoxEvent_rayWidg(
             if(listSTPtr->numSelectSI < maxSelectSI)
             { /*Else If: selecting the item*/
                ++listSTPtr->numSelectSI;
-               listSTPtr->lastSelectSI = lastSelectSI;
+               /*listSTPtr->lastSelectSI = lastSelectSI;*/
+               listSTPtr->lastSelectSI = listSTPtr->onSI;
 
                listSTPtr->stateArySC[listSTPtr->onSI] ^=
                    def_listSelect_rayWidg;
@@ -10736,7 +10760,7 @@ scanForFiles_files_rayWidg(
    clear_listBox_rayWidg(&fileSTPtr->fileListST);
    if(
       addItem_listBox_rayWidg(
-         (signed char *) "[d] <--- (..)", /*back one dir*/
+         (signed char *) "[d] <---back", /*back one dir*/
          def_listSpecial_rayWidg,
          &fileSTPtr->fileListST,
          widgSTPtr
@@ -11049,10 +11073,22 @@ mkFileBrowser_rayWidg(
    childAdd_widg_rayWidg(idSI + 3, widgSTPtr);
    hogAdd_widg_rayWidg(idSI + 3, widgSTPtr);
 
-   /*file extension list box*/
-   mk_listBox_rayWidg(0, 0, 0, widgSTPtr);
+   /*clear button*/
+   addWidget_widg_rayWidg(
+      2, /*colomn*/
+      0, /*row*/
+      0, /*use x,y*/
+      20, /*width*/
+      widgSTPtr->fontHeightF, /*height*/
+      widgSTPtr
+   );
    childAdd_widg_rayWidg(idSI + 4, widgSTPtr);
    hogAdd_widg_rayWidg(idSI + 4, widgSTPtr);
+
+   /*file extension list box*/
+   mk_listBox_rayWidg(0, 0, 0, widgSTPtr);
+   childAdd_widg_rayWidg(idSI + 5, widgSTPtr);
+   hogAdd_widg_rayWidg(idSI + 5, widgSTPtr);
 
    hidenAdd_widg_rayWidg(idSI, widgSTPtr);
       /*hide the file browser*/
@@ -11160,7 +11196,7 @@ fileBrowserDraw_rayWidg(
       focusAdd_widg_rayWidg(idSI + 1, widgSTPtr);
    } /*If: file browser is not in focus*/
 
-   else if(widgSTPtr->focusSI > idSI + 4)
+   else if(widgSTPtr->focusSI > idSI + 5)
    { /*Else If: file browser is not in focus*/
       fileSTPtr->lastWidgSI = widgSTPtr->focusSI;
       widgSTPtr->focusSI = idSI + 1;
@@ -11311,11 +11347,11 @@ fileBrowserDraw_rayWidg(
    fileSTPtr->extListST.maxWidthSI =
      fileSTPtr->extListST.minWidthSI;
 
-   widgSTPtr->xArySI[idSI + 4] =
+   widgSTPtr->xArySI[idSI + 5] =
         widgSTPtr->widthArySI[idSI]
       - fileSTPtr->extListST.minWidthSI;
 
-   widgSTPtr->yArySI[idSI + 4] =
+   widgSTPtr->yArySI[idSI + 5] =
         widgSTPtr->yArySI[idSI + 1]
       + widgSTPtr->heightArySI[idSI + 1]
       + widgGapSI;
@@ -11323,7 +11359,7 @@ fileBrowserDraw_rayWidg(
    fileSTPtr->extListST.minHeightSI =
         widgSTPtr->heightArySI[idSI]
       + widgSTPtr->yArySI[idSI]
-      - widgSTPtr->yArySI[idSI + 4]
+      - widgSTPtr->yArySI[idSI + 5]
       - widgGapSI;
 
    fileSTPtr->extListST.maxHeightSI =
@@ -11368,11 +11404,24 @@ fileBrowserDraw_rayWidg(
          1, /*do not draw the button yet*/
          widgSTPtr
       );
-
    widgSTPtr->xArySI[idSI + 2] = widgPadSI;
 
    widgSTPtr->xArySI[idSI + 3] = 
         widgSTPtr->xArySI[idSI + 2]
+      + tmpSI
+      + widgPadSI;
+
+   tmpSI =
+      butDraw_rayWidg(
+         200, /*maximum width*/
+         20,  /*minimum width*/
+         idSI + 3,
+         (signed char *) "Cancel",
+         1, /*do not draw the button yet*/
+         widgSTPtr
+      );
+   widgSTPtr->xArySI[idSI + 4] = 
+        widgSTPtr->xArySI[idSI + 3]
       + tmpSI
       + widgPadSI;
 
@@ -11382,6 +11431,7 @@ fileBrowserDraw_rayWidg(
       + mesgHeightSI
       + widgGapSI;
    widgSTPtr->yArySI[idSI +3] = widgSTPtr->yArySI[idSI+2];
+   widgSTPtr->yArySI[idSI +4] = widgSTPtr->yArySI[idSI+2];
       
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun129 Sec04:
@@ -11430,7 +11480,7 @@ fileBrowserDraw_rayWidg(
    );
 
    draw_listBox_rayWidg(
-      idSI + 4,
+      idSI + 5,
       0, /*drawing*/
       &fileSTPtr->extListST,
       widgSTPtr
@@ -11455,6 +11505,15 @@ fileBrowserDraw_rayWidg(
       20,  /*minimum width*/
       idSI + 3,
       (signed char *) "Cancel",
+      0,
+      widgSTPtr
+   );
+
+   butDraw_rayWidg(
+      200 * tmpF, /*maximum width*/
+      20,  /*minimum width*/
+      idSI + 4,
+      (signed char *) "Clear",
       0,
       widgSTPtr
    );
@@ -11491,7 +11550,7 @@ fileBrowserDraw_rayWidg(
    retNoDraw_fun129_sec05:;
      if(widgSTPtr->focusSI < idSI)
         ;
-     else if(widgSTPtr->focusSI > idSI + 4)
+     else if(widgSTPtr->focusSI > idSI + 5)
         ;
      else
         widgSTPtr->focusSI = 0;
@@ -11522,6 +11581,7 @@ fileBrowserDraw_rayWidg(
 |       files selection (fileListST), and extenon changes
 |       (extListST)
 |   - Returns:
+|     o 3 for clear event
 |     o 2 for cancel event
 |     o 1 for ok event
 |       - get files with the `getFile_files_rayWidg()`
@@ -11539,7 +11599,7 @@ fileBrowserEvent_rayWidg(
    struct files_rayWidg *fileSTPtr, /*has files/extions*/
    struct widg_rayWidg *widgSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun130:
+   ' Fun130 TOC:
    '   - process and event for the file browser
    '   o fun130 sec01:
    '     - variable declarations
@@ -11661,6 +11721,17 @@ fileBrowserEvent_rayWidg(
       else
          goto noEvent_fun130_sec04;
    } /*Else If: cancel files button hit*/
+
+   else if(eventSTPtr->idSI == eventSTPtr->parIdSI + 4)
+   { /*Else If: clear button hit*/
+      if(
+            eventSTPtr->leftReleaseBl
+         || eventSTPtr->keySI == KEY_ENTER
+      ) goto clear_fun130_sec04;
+
+      else
+         goto noEvent_fun130_sec04;
+   } /*Else If: clear button hit*/
 
    /*****************************************************\
    * Fun130 Sec03 Sub02:
@@ -11807,13 +11878,13 @@ fileBrowserEvent_rayWidg(
    *   - check for extension list box events
    \*****************************************************/
 
-   else if(eventSTPtr->idSI == eventSTPtr->parIdSI + 4)
+   else if(eventSTPtr->idSI == eventSTPtr->parIdSI + 5)
    { /*Else If: is the file extension box*/
       fileSTPtr->fileListST.clickSI = -1;
 
       tmpSI =
          listBoxEvent_rayWidg(
-            idSI + 4,
+            idSI + 5,
             &fileSTPtr->extListST,
             eventSTPtr,
             widgSTPtr
@@ -11862,6 +11933,30 @@ fileBrowserEvent_rayWidg(
       goto ret_fun130_sec04;
 
    cancle_fun130_sec04:;
+      tmpSI = 2;
+      focusClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 3,
+         widgSTPtr
+      );
+      pressClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 3,
+         widgSTPtr
+      );
+      activeClear_widg_rayWidg(
+         eventSTPtr->parIdSI + 3,
+         widgSTPtr
+      );
+
+      clearSelect_listBox_rayWidg(&fileSTPtr->fileListST);
+      hidenAdd_widg_rayWidg(
+         eventSTPtr->parIdSI,
+         widgSTPtr
+      );
+      widgSTPtr->focusSI = fileSTPtr->lastWidgSI;
+      fileSTPtr->lastWidgSI = -1;
+      goto ret_fun130_sec04;
+
+   clear_fun130_sec04:;
       tmpSI = 3;
       focusClear_widg_rayWidg(
          eventSTPtr->parIdSI + 3,

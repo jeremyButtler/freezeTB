@@ -436,6 +436,9 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2025-01-08:
+  - fixed some minor bugs in the GUIs. No major changes,
+    and binary recompile will not be done on the 9th.
 - 2025-12-19:
   - added "coverage-amr" table to include coverage and
     potential AMRs missed

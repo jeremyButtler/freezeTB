@@ -6,7 +6,7 @@
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2018-2025 Ahmad Fatoum & Ramon Santamaria (@raysan5)
+*   Copyright (c) 2018-2026 Ahmad Fatoum and Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -49,19 +49,18 @@
 #define SUPPORT_RPRAND_GENERATOR        1
 // Mouse gestures are directly mapped like touches and processed by gestures system
 #define SUPPORT_MOUSE_GESTURES          1
-// Reconfigure standard input to receive key inputs, works with SSH connection.
+// Reconfigure standard input to receive key inputs, works with SSH connection
 #define SUPPORT_SSH_KEYBOARD_RPI        1
-// Setting a higher resolution can improve the accuracy of time-out intervals in wait functions.
-// However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
+// Setting a higher resolution can improve the accuracy of time-out intervals in wait functions
+// However, it can also reduce overall system performance, because the thread scheduler switches tasks more often
 #define SUPPORT_WINMM_HIGHRES_TIMER     1
 // Use busy wait loop for timing sync, if not defined, a high-resolution timer is set up and used
 //#define SUPPORT_BUSY_WAIT_LOOP          1
 // Use a partial-busy wait loop, in this case frame sleeps for most of the time, but then runs a busy loop at the end for accuracy
 #define SUPPORT_PARTIALBUSY_WAIT_LOOP    1
 // Allow automatic screen capture of current screen pressing F12, defined in KeyCallback()
+// WARNING: It also requires SUPPORT_IMAGE_EXPORT and SUPPORT_FILEFORMAT_PNG flags
 #define SUPPORT_SCREEN_CAPTURE          1
-// Allow automatic gif recording of current screen pressing CTRL+F12, defined in KeyCallback()
-#define SUPPORT_GIF_RECORDING           1
 // Support CompressData() and DecompressData() functions
 #define SUPPORT_COMPRESSION_API         1
 // Support automatic generated events, loading and recording of those events when required
@@ -76,7 +75,7 @@
 #define SUPPORT_CLIPBOARD_IMAGE    1
 
 // NOTE: Clipboard image loading requires support for some image file formats
-// TODO: Those defines should probably be removed from here, I prefer to let the user manage them
+// TODO: Those defines should probably be removed from here, letting the user manage them
 #if defined(SUPPORT_CLIPBOARD_IMAGE)
     #ifndef SUPPORT_MODULE_RTEXTURES
         #define SUPPORT_MODULE_RTEXTURES 1
@@ -95,7 +94,6 @@
     #endif
 #endif
 
-
 // rcore: Configuration values
 //------------------------------------------------------------------------------------
 #define MAX_FILEPATH_CAPACITY        8192       // Maximum file paths capacity
@@ -107,7 +105,7 @@
 #define MAX_GAMEPAD_AXES                8       // Maximum number of axes supported (per gamepad)
 #define MAX_GAMEPAD_BUTTONS            32       // Maximum number of buttons supported (per gamepad)
 #define MAX_GAMEPAD_VIBRATION_TIME      2.0f    // Maximum vibration time in seconds
-#define MAX_TOUCH_POINTS                8       // Maximum number of touch points supported
+#define MAX_TOUCH_POINTS               10       // Maximum number of touch points supported
 #define MAX_KEY_PRESSED_QUEUE          16       // Maximum number of keys in the key input queue
 #define MAX_CHAR_PRESSED_QUEUE         16       // Maximum number of characters in the char input queue
 
@@ -136,8 +134,8 @@
 
 #define RL_MAX_SHADER_LOCATIONS               32      // Maximum number of shader locations supported
 
-#define RL_CULL_DISTANCE_NEAR              0.001      // Default projection matrix near cull distance
-#define RL_CULL_DISTANCE_FAR             10000.0      // Default projection matrix far cull distance
+#define RL_CULL_DISTANCE_NEAR              0.05       // Default projection matrix near cull distance
+#define RL_CULL_DISTANCE_FAR             4000.0       // Default projection matrix far cull distance
 
 // Default shader vertex attribute locations
 #define RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION    0
@@ -152,7 +150,6 @@
     #define RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS 8
 #endif
 #define RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCE_TX 9
-
 
 // Default shader vertex attribute names to set location points
 // NOTE: When a new shader is loaded, the following locations are tried to be set for convenience
@@ -173,7 +170,6 @@
 #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1  "texture1"          // texture1 (texture slot active 1)
 #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
 
-
 //------------------------------------------------------------------------------------
 // Module: rshapes - Configuration Flags
 //------------------------------------------------------------------------------------
@@ -185,11 +181,10 @@
 //------------------------------------------------------------------------------------
 #define SPLINE_SEGMENT_DIVISIONS       24       // Spline segments subdivisions
 
-
 //------------------------------------------------------------------------------------
 // Module: rtextures - Configuration Flags
 //------------------------------------------------------------------------------------
-// Selecte desired fileformats to be supported for image data loading
+// Selected desired fileformats to be supported for image data loading
 #define SUPPORT_FILEFORMAT_PNG      1
 //#define SUPPORT_FILEFORMAT_BMP      1
 //#define SUPPORT_FILEFORMAT_TGA      1
@@ -213,7 +208,6 @@
 // If not defined, still some functions are supported: ImageFormat(), ImageCrop(), ImageToPOT()
 #define SUPPORT_IMAGE_MANIPULATION      1
 
-
 //------------------------------------------------------------------------------------
 // Module: rtext - Configuration Flags
 //------------------------------------------------------------------------------------
@@ -231,15 +225,17 @@
 
 // On font atlas image generation [GenImageFontAtlas()], add a 3x3 pixels white rectangle
 // at the bottom-right corner of the atlas. It can be useful to for shapes drawing, to allow
-// drawing text and shapes with a single draw call [SetShapesTexture()].
+// drawing text and shapes with a single draw call [SetShapesTexture()]
 #define SUPPORT_FONT_ATLAS_WHITE_REC    1
+
+// Support conservative font atlas size estimation
+//#define SUPPORT_FONT_ATLAS_SIZE_CONSERVATIVE    1
 
 // rtext: Configuration values
 //------------------------------------------------------------------------------------
 #define MAX_TEXT_BUFFER_LENGTH       1024       // Size of internal static buffers used on some functions:
                                                 // TextFormat(), TextSubtext(), TextToUpper(), TextToLower(), TextToPascal(), TextSplit()
 #define MAX_TEXTSPLIT_COUNT           128       // Maximum number of substrings to split: TextSplit()
-
 
 //------------------------------------------------------------------------------------
 // Module: rmodels - Configuration Flags
@@ -291,9 +287,7 @@
 // Standard file io library (stdio.h) included
 #define SUPPORT_STANDARD_FILEIO         1
 // Show TRACELOG() output messages
-// NOTE: By default LOG_DEBUG traces not shown
 #define SUPPORT_TRACELOG                1
-//#define SUPPORT_TRACELOG_DEBUG          1
 
 // utils: Configuration values
 //------------------------------------------------------------------------------------

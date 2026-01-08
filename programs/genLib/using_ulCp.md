@@ -667,8 +667,12 @@ Table: of macros that check a long for certain charaters.
 - Flags:
   - `-DNOUL`: do byte by byte coping, slower, but always
     works byte copying
-  - `-DPLAN9_64` for plan9 longs are 32bit, so you need ot
-    use `long long` on 64 bit plan9 OS's
+  - `-DBIT_32`: this avoids warnings on 32 bit systems.
+    - This is not needed, because the 32 bit system will
+      truncate 8 bytes to 4 bytes. In this case all values
+      are repeating patterns. Still warnings are anoying.
+  - `-DPLAN9_64`: for plan9 longs are 32bit, so you need
+     ot use `long long` on 64 bit plan9 OS's
 
 Finally, this has a slew of functions, check the header
   of the .c or .h file for a list.

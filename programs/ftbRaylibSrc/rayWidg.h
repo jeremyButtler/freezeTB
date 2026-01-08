@@ -3999,6 +3999,7 @@ fileBrowserDraw_rayWidg(
 |       files selection (fileListST), and extenon changes
 |       (extListST)
 |   - Returns:
+|     o 3 for clear event
 |     o 2 for cancel event
 |     o 1 for ok event
 |       - get files with the `getFile_files_rayWidg()`
