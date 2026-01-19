@@ -31,118 +31,13 @@ if defined FOUND (
    )
 )
 
-:: the CALL command has called bat script operate in the
-:: current bat scripts terminal, otherwise the other
-:: script fires a separate terminal
+if exist freezeTB (rmdir /S /Q freezeTB)
+mkdir freezeTB
 
-:: Find tcltk path
-
-::call set tcltkPath="%programFiles%\Tcl90\tk90t.lib"
-::if exist "!tcltkPath!" (
-::   goto :tk90_program
-::)
-::call set tcltkPath="%programFiles%\Tcl90\tcl9tk90t.lib" (
-::if exist "!tcltkPath!" (
-::   goto :tcl9tk90_program
-::)
-::call set tcltkPath="%programFiles%\Tcl86\tk86t.lib"
-::if exist "!tcltkPath!" (
-::   echo "found"
-::   goto :tk86_program
-::)
-::call set tcltkPath="%programFiles%\Tcl86\tcl8tk86t.lib"
-::if exist "!tcltkPath!" (
-::   goto :tcl8tk86_program
-::)
-::call set tcltkPath="%localAppData%\Apps\Tcl90\tk90t.lib" 
-::if exist "!tcltkPath!" (
-::   goto :tk90_apps
-::)
-::call set tcltkPath="%localAppData%\Apps\Tcl90\tcl9tk90t.lib"
-::if exist "!tcltkPath!" (
-::   goto :tcl9tk90_apps
-::)
-::call set tcltkPath="%localAppData%\Apps\Tcl86\tk86t.lib"
-::if exist "!tcltkPath!" (
-::   goto :tk86_apps
-::)
-::call set tcltkPath="%localAppData%\Apps\Tcl86\tcl8tk86t.lib"
-::if exist "!tcltkPath!" (
-::   goto :tcl8tk86_apps
-::)
-::
-:::: could not find tcltk case
-::if %foundBl%==0 (
-::  echo "could not find tcltk"
-::  goto :error
-::)
-::
-:::tk90_program
-::   set foundBl=1
-::   set tclPath="%programFiles%\Tcl90\lib\tcl90t.lib"
-::   set tkPath="%programFiles%\Tcl90\lib\tk90t.lib"
-::   set tcltkInclude="/I %programFiles%\Tcl90\include"
-::   echo "found tcltk at %programFiles%\Tcl90"
-::   goto :build
-:::tcl9tk90_program
-::   set foundBl=1
-::   set tclPath="%programFiles%\Tcl90\lib\tcl90t.lib"
-::   set tkPath="%programFiles%\Tcl90\lib\tcl9tk90t.lib"
-::   set tcltkInclude="/I %programFiles%\Tcl90\include"
-::   echo "found tcltk at %programFiles%\Tcl90"
-::   goto :build
-:::tk86_program
-::   set foundBl=1
-::   set tclPath="%programFiles%\Tcl86\lib\tcl86t.lib"
-::   set tkPath="%programFiles%\Tcl86\lib\tk86t.lib"
-::   set tcltkInclude="/I %programFiles%\Tcl86\include"
-::   echo "found tcltk at %programFiles%\Tcl86"
-::   goto :build
-:::tcl8tk86_program
-::   set foundBl=1
-::   set tclPath="%programFiles%\Tcl86\lib\tcl86t.lib"
-::   set tkPath="%programFiles%\Tcl86\lib\tcl8tk86t.lib"
-::   set tcltkInclude="/I %programFiles%\Tcl86\include"
-::   echo "found tcltk at %programFiles%\Tcl86"
-::   goto :build
-:::tk90_apps
-::   set foundBl=1
-::   set tclPath="%localAppData%\Apps\Tcl90\lib\tcl90t.lib"
-::   set tkPath="%localAppData%\Apps\Tcl90\lib\tk90t.lib"
-::   set tcltkInclude="/I %localAppData%\Apps\Tcl90\include"
-::   echo "found tcltk at %localAppData%\Apps\Tcl90"
-::   goto :build
-:::tcl9tk90_apps
-::   set foundBl=1
-::   set tclPath="%localAppData%\Apps\Tcl90\lib\tcl90t.lib"
-::   set tkPath="%localAppData%\Apps\Tcl90\lib\tcl9tk90t.lib"
-::   set tcltkInclude="/I %localAppData%\Apps\Tcl90\include"
-::   echo "found tcltk at %localAppData%\Apps\Tcl90"
-::   goto :build
-:::tk86_apps
-::   set foundBl=1
-::   set tclPath="%localAppData%\Apps\Tcl86\lib\tcl86t.lib"
-::   set tkPath="%localAppData%\Apps\Tcl86\lib\tk86t.lib"
-::   set tcltkInclude="/I %localAppData%\Apps\Tcl86\include"
-::   echo "found tcltk at %localAppData%\Apps\Tcl86"
-::   goto :build
-:::tcl8tk86_apps
-::   set foundBl=1
-::   set tclPath="%localAppData%\Apps\Tcl86\lib\tcl86t.lib"
-::   set tkPath="%localAppData%\Apps\Tcl86\lib\tcl8tk86t.lib"
-::   set tcltkInclude="/I %localAppData%\Apps\Tcl86\include"
-::   echo "found tcltk at %localAppData%\Apps\Tcl86"
-::   goto :build
-::
-::goto :error
-:::: compile freezeTB
-:::build
-::
-:::: DELETE THIS PAUSE
-::echo "tcltk is at %tcltkInclude%"
-::echo "tcltk is at %tclPath%"
-::echo "tcltk is at %tkPath%"
-::pause
+:: add minimap2 to the install and its needed dll's
+copy minimap2.exe freezeTB
+copy msys-z.dll freezeTB
+copy msys-2.0.dll freezeTB
 
 cd %guiDir%
 
