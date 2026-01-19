@@ -6,9 +6,6 @@ pushd %~dp0
 
 set guiDir="..\programs\ftbRaylibSrc"
 set foundBl=0
-::set tclPath="blank"
-::set tkPath="blank"
-::set tcltkInclude="blank"
 
 :: check if in a development shell (have cl.exe) or
 :: try to actiavate the development shell settings
@@ -23,6 +20,8 @@ if defined FOUND (
 ) else (
    if exist "%programFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
       CALL "%programFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+   ) else if exist "%programFiles(x86)%\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
+      CALL "%programFiles(x86)%\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
    ) else (
       echo could not find cl.exe
       goto :error
