@@ -16,15 +16,12 @@
 '     - Initializes a geneCoord structure
 '   o fun04: mk_geneCoord
 '     - Makes a heap allocated geneCoord structure
-'   o fun05: getPaf_geneCoord
-'     - Get the id and coordinates for a gene from a paf
-'       file
 '   o .c fun06: swap_geneCoord
 '     - Swaps two array items in a geneCoord structure
 '       around
 '   o fun07: sort_geneCoord
-'     - Sorts the arrays in a genesCoord structure by
-'       starting position with shell short.
+'     - sorts the arrays in a genesCoord structure by
+'       gene name and then reference
 '   o fun08: findStart_geneCoord
 '     - Does a binary search by starting coordinate for a
 '       potentail gene in a geneCoord structure
@@ -64,7 +61,6 @@
 #include "../genLib/fileFun.h"
 #include "../genLib/base10str.h"
 #include "../genLib/ulCp.h"
-#include "../genLib/charCp.h"
 
 /*.h files only*/
 #include "../genLib/genMath.h" /*only max macro (in .h)*/
@@ -90,6 +86,7 @@ init_geneCoord(
    geneCoordST->endAryUI = 0;
 
    geneCoordST->dirAryUC = 0;
+   geneCoordST->lenSI = 0;
 } /*init_geneCoord*/
 
 /*-------------------------------------------------------\
@@ -169,124 +166,42 @@ mk_geneCoord(
    struct geneCoord *retST = 0;
 
    retST = malloc(sizeof(struct geneCoord));
-   
    if(! retST)
       goto memErr_fun04;
-
    init_geneCoord(retST);
    
    retST->idStrAry =
       calloc((numGenesUI), sizeof(*retST->idStrAry));
-   
    if(! retST->idStrAry)
       goto memErr_fun04;
 
    retST->refAryStr =
       calloc((numGenesUI), sizeof(*retST->refAryStr));
-   
    if(! retST->refAryStr)
       goto memErr_fun04;
 
    retST->startAryUI=
        malloc((numGenesUI) * sizeof(unsigned int));
-   
    if(! retST->startAryUI)
       goto memErr_fun04;
    
    retST->endAryUI =
        malloc((numGenesUI) * sizeof(unsigned int));
-   
    if(! retST->endAryUI)
       goto memErr_fun04;
 
    retST->dirAryUC =
        malloc((numGenesUI) * sizeof(unsigned char));
-   
    if(! retST->dirAryUC)
       goto memErr_fun04;
 
    return retST;
 
    memErr_fun04:;
-
-   freeHeap_geneCoord(retST);
-   retST = 0;
-   return 0;
+      freeHeap_geneCoord(retST);
+      retST = 0;
+      return 0;
 } /*mk_geneCoord*/
-
-/*-------------------------------------------------------\
-| Fun05: getPaf_geneCoord
-|    - Get the id and coordinates for a gene from a paf
-|      file
-| Input:
-|   - geneCoordST:
-|     o Pointer to a geneCoordST structure to hold the
-|       new gene
-|   - posUI:
-|     o Position in the arrays in the geneCoord structure
-|       to add the new gene at
-|   - typeC:
-|     o Alignment type for the extracted gene
-|   - pafLineStr:
-|     o Line from the paf file with the gene to add
-| Output:
-|   - Modifies:
-|     o All arrays in geneCoordST to hold the new gene
-\-------------------------------------------------------*/
-void
-getPaf_geneCoord(
-   struct geneCoord *geneCoordST,
-   unsigned int posUI,
-   signed char *typeC,
-   signed char *pafLineStr
-){ /*getPagGene*/
-   unsigned char ucEntry = 0;
-   unsigned int uiChar = 0;
-   signed char *tmpStr = 0;
-   
-   for(uiChar = 0; (pafLineStr)[uiChar] > 32; ++uiChar)
-   { /*Loop: copy id*/
-      geneCoordST->idStrAry[posUI][uiChar] =
-         pafLineStr[uiChar];
-   } /*Loop: copy id*/
-   
-   geneCoordST->idStrAry[(posUI)][uiChar] = '\0';
-
-   ++uiChar;
-   
-   for(ucEntry = 1; ucEntry < 7; ++ucEntry)
-   { /*Loop: Move to the reference start position*/
-      /*Move off the tab*/
-      while((pafLineStr)[uiChar++] > 32) ;
-   } /*Loop: Move to the reference start position*/
-   
-   tmpStr +=
-      strToUI_base10str(
-         &(pafLineStr)[uiChar],
-         &geneCoordST->startAryUI[posUI]
-      ); /*Get the starting position*/
-   
-   ++tmpStr; /*Move off the tab*/
-   ++ucEntry;
-   
-   tmpStr +=
-      strToUI_base10str(
-         tmpStr,
-         &geneCoordST->endAryUI[posUI]
-      ); /*Get the ending position*/
-   
-   ++tmpStr; /*Move off the tab*/
-   ++ucEntry;
-   
-   /*Get the alignment type (P for primary)*/
-   uiChar = 0;
-   while(tmpStr[uiChar] != 't'
-      && tmpStr[uiChar + 1] != 'p'
-      && tmpStr[uiChar + 2] != ':'
-   ) ++uiChar;
-
-   *(typeC) = tmpStr[uiChar + 5];
-} /*getPaf_geneCoord*/
 
 /*-------------------------------------------------------\
 | Fun06: swap_geneCoord
@@ -371,10 +286,6 @@ swap_geneCoord(
 |  - geneCoordST:
 |    o Pointer to geneCoord structure with gene
 |      coordinates to sort
-|  - startUI:
-|    o First element to start sorting at
-|  - endUI:
-|    o Last element to sort
 | Output:
 |  - Modifies:
 |    o Arrays in geneCoordST to be sorted by the gene
@@ -382,9 +293,7 @@ swap_geneCoord(
 \-------------------------------------------------------*/
 void
 sort_geneCoord(
-   struct geneCoord *geneCoordST,
-   unsigned int startUI,
-   unsigned int endUI
+   struct geneCoord *geneCoordST
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    ' Fun07 TOC: sort_geneCoord
    '  - Sorts the arrays in a geneCoord struct by
@@ -409,19 +318,19 @@ sort_geneCoord(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Number of elements to sort*/
-  unsigned long numElmUL = (endUI) - (startUI);
+  signed long numElmSL = geneCoordST->lenSI - 1;
   
   /*Number of sorting rounds*/
-  unsigned long subUL = 0;
-  unsigned long nextElmUL = 0;
-  unsigned long lastElmUL = 0;
-  unsigned long elmOnUL = 0;
+  signed long subSL = 0;
+  signed long nextElmSL = 0;
+  signed long lastElmSL = 0;
+  signed long elmOnSL = 0;
   
   /*Get arrays to sort from the matrix (for sanity)*/
   
   /*Variables to incurment loops*/
-  unsigned long ulIndex = 0;
-  unsigned long ulElm = 0;
+  signed long slIndex = 0;
+  signed long slElm = 0;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun07 Sec02:
@@ -429,49 +338,77 @@ sort_geneCoord(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
-  subUL = 1; /*Initialzie first array*/
-  while(subUL < numElmUL - 1) subUL = (3 * subUL) + 1;
+  subSL = 1; /*Initialzie first array*/
+  while(subSL < numElmSL - 1)
+     subSL = (3 * subSL) + 1;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ^ Fun07 Sec03:
   ^  - Sort the arrays in geneCoordST
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
-  while(subUL > 0)
+  while(subSL > 0)
   { /*loop trhough all sub arrays sort the subarrays*/
-    for(ulIndex = 0; ulIndex <= subUL; ++ulIndex)
+    for(slIndex = 0; slIndex <= subSL; ++slIndex)
     { /*For each element in the subarray*/
-      for(ulElm = ulIndex;
-          ulElm + subUL <= endUI;
-          ulElm += subUL
+      for(slElm = slIndex;
+          slElm + subSL <= numElmSL;
+          slElm += subSL
       ){ /*Loop; swap each nth element of the subarray*/
-        nextElmUL = ulElm + subUL;
+        nextElmSL = slElm + subSL;
         
-        if(   (geneCoordST)->startAryUI[ulElm]
-            > (geneCoordST)->startAryUI[nextElmUL]
+        if(
+             geneCoordST->startAryUI[slElm]
+           > geneCoordST->startAryUI[nextElmSL]
+        ) goto swapNext_fun07_sec03;
+
+        else if(
+             geneCoordST->startAryUI[slElm]
+           < geneCoordST->startAryUI[nextElmSL]
+        ) ;
+
+        else if(
+            eqlNull_ulCp(
+               geneCoordST->refAryStr[slElm],
+               geneCoordST->refAryStr[nextElmSL]
+            ) > 0
         ){ /*If I need to swap an element*/
-          swap_geneCoord((geneCoordST),ulElm,nextElmUL);
+          swapNext_fun07_sec03:;
+          swap_geneCoord((geneCoordST),slElm,nextElmSL);
           
-          lastElmUL = ulElm;
-          elmOnUL = ulElm;
+          lastElmSL = slElm;
+          elmOnSL = slElm;
           
-          while(lastElmUL >= subUL)
+          while(lastElmSL >= subSL)
           { /*loop; move swapped element back*/
-            lastElmUL -= subUL;
+            lastElmSL -= subSL;
             
-            if(   (geneCoordST)->startAryUI[elmOnUL]
-                > (geneCoordST)->startAryUI[lastElmUL]
-            ) break; /*Positioned the element*/
+            if(
+                  geneCoordST->startAryUI[elmOnSL]
+                > geneCoordST->startAryUI[lastElmSL]
+            ) break; /*positioned the element*/
+
+            else if(
+                  geneCoordST->startAryUI[elmOnSL]
+                < geneCoordST->startAryUI[lastElmSL]
+            ) break; /*positioned the element*/
+
+            else if(
+               eqlNull_ulCp(
+                  geneCoordST->refAryStr[elmOnSL],
+                  geneCoordST->refAryStr[lastElmSL]
+               ) > 0
+            ) break;
             
-            swap_geneCoord(geneCoordST,elmOnUL,lastElmUL);
+            swap_geneCoord(geneCoordST,elmOnSL,lastElmSL);
             
-            elmOnUL = lastElmUL;
+            elmOnSL = lastElmSL;
           } /*loop; move swapped element back*/
         } /*If I need to swap elements*/
       } /*Loop; swap each nth element of the subarray*/
     } /*For each element in the subarray*/
     
-    subUL = (subUL - 1) / 3; /*Move to the next round*/
+    subSL = (subSL - 1) / 3; /*Move to the next round*/
   } /*loop through all sub arrays to sort the subarrays*/
 } /*sort_geneCoord*/
 
@@ -486,8 +423,9 @@ sort_geneCoord(
 |  - qryUI:
 |    o Starting coordinate (query) to search for in
 |      geneCoordST
-|  - numGenesUI:
-|    o Number of genes in geneCoordST (index 1)
+|  - refStr:
+|    o c-string with reference to find the gene for
+|    o 0/null for ignore reference
 | Output:
 |  - Returns:
 |    o The index of the starting position
@@ -497,29 +435,42 @@ signed int
 findStart_geneCoord(
    struct geneCoord *geneST,
    unsigned int qryUI,
-   signed int numGenesSI
+   signed char *refStr
 ){
    signed int midSI = 0;
-   signed int rightHalfSI = numGenesSI - 1;
+   signed int rightSI = geneST->lenSI - 1;
    signed int leftSI = 0;
 
-   while(leftSI <= rightHalfSI)
+   signed long matchSL = 0;
+
+   while(leftSI <= rightSI)
    { /*Loop: Search for the starting coordinate*/
-      midSI = (leftSI + rightHalfSI) >> 1;
+      midSI = (leftSI + rightSI) >> 1;
 
       if(qryUI < geneST->startAryUI[midSI])
-         rightHalfSI = midSI - 1;
+         rightSI = midSI - 1;
 
       else if(qryUI > geneST->endAryUI[midSI])
          leftSI = midSI + 1;
 
      else
-        return midSI;
+     { /*Else: if may have a match*/
+        if(! refStr || ! refStr[0])
+           return midSI; /*no reference sequence*/
+        
+         matchSL =
+            eqlNull_ulCp(refStr,geneST->refAryStr[midSI]);
+         if(! matchSL)
+            return midSI; /*have matching reference*/
+         else if(matchSL < 0)
+            rightSI = midSI - 1;
+         else
+            leftSI = midSI - 1;
+     } /*Else: if may have a match*/
    } /*Loop: Search for the starting coordinate*/
 
    if(qryUI < geneST->startAryUI[midSI])
       return -1;
-
    if(qryUI > geneST->endAryUI[midSI])
       return -1;
 
@@ -537,8 +488,9 @@ findStart_geneCoord(
 |    o starting coordinate (query) to search for
 |  - endUI:
 |    o ending coordinate (query) to search for
-|  - numGenesUI:
-|    o Number of genes in geneCoordST (index 1)
+|  - refStr:
+|    o c-string with reference to find the gene for
+|    o 0/null for ignore reference
 | Output:
 |  - Returns:
 |    o index of gene that overlaps with startUI and endUI
@@ -549,30 +501,46 @@ findRange_geneCoord(
    struct geneCoord *geneST,
    unsigned int startUI,
    unsigned int endUI,
-   signed int numGenesSI
+   signed char *refStr
 ){
    signed int midSI = 0;
-   signed int rightHalfSI = numGenesSI - 1;
+   signed int rightSI = geneST->lenSI - 1;
    signed int leftSI = 0;
 
-   while(leftSI <= rightHalfSI)
+   signed long matchSL = 0;
+
+   while(leftSI <= rightSI)
    { /*Loop: Search for the starting coordinate*/
-      midSI = (leftSI + rightHalfSI) >> 1;
+      midSI = (leftSI + rightSI) >> 1;
 
       if(endUI < geneST->startAryUI[midSI])
-         rightHalfSI = midSI - 1;
+         rightSI = midSI - 1;
 
       else if(startUI > geneST->endAryUI[midSI])
          leftSI = midSI + 1;
 
      else if(! midSI)
-        return midSI; /*at start of array*/
+        goto possibleMatch_fun10; /*at start of array*/
 
      else if(startUI > geneST->endAryUI[midSI - 1])
-        return midSI; /*nothing in range further back*/
+     { /*Else: may have foud a match*/
+        possibleMatch_fun10:;
+
+        if(! refStr || ! refStr[0])
+           return midSI; /*no reference sequence*/
+        
+         matchSL =
+            eqlNull_ulCp(refStr,geneST->refAryStr[midSI]);
+         if(! matchSL)
+            return midSI; /*have matching reference*/
+         else if(matchSL < 0)
+            rightSI = midSI - 1;
+         else
+            leftSI = midSI - 1;
+     } /*Else: may have foud a match*/
 
      else
-         rightHalfSI = midSI - 1;
+         rightSI = midSI - 1;
          /*at least one more item in range*/
    } /*Loop: Search for the starting coordinate*/
 
@@ -581,8 +549,8 @@ findRange_geneCoord(
 
 /*-------------------------------------------------------\
 | Fun10: sortName_geneCoord
-|  - Sorts the arrays in a genesCoord structure by
-|    gene name
+|  - sorts the arrays in a genesCoord structure by
+|    gene name and then reference
 | Input:
 |  - geneCoordST:
 |    o Pointer to geneCoord structure with gene
@@ -598,9 +566,7 @@ findRange_geneCoord(
 \-------------------------------------------------------*/
 void
 sortName_geneCoord(
-   struct geneCoord *geneCoordST,
-   unsigned int startUI,
-   unsigned int endUI
+   struct geneCoord *geneCoordST
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    ' Fun10 TOC:
    '  - Sorts the arrays in a genesCoord structure by
@@ -625,19 +591,20 @@ sortName_geneCoord(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Number of elements to sort*/
-  unsigned long numElmUL = (endUI) - (startUI);
+  signed long numElmSL = geneCoordST->lenSI - 1;
   
   /*Number of sorting rounds*/
-  unsigned long subUL = 0;
-  unsigned long nextElmUL = 0;
-  unsigned long lastElmUL = 0;
-  unsigned long elmOnUL = 0;
+  signed long subSL = 0;
+  signed long nextElmSL = 0;
+  signed long lastElmSL = 0;
+  signed long elmOnSL = 0;
   
   /*Get arrays to sort from the matrix (for sanity)*/
   
   /*Variables to incurment loops*/
-  unsigned long ulIndex = 0;
-  unsigned long ulElm = 0;
+  signed long slIndex = 0;
+  signed long slElm = 0;
+  signed long compareSL = 0;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun10 Sec02:
@@ -645,57 +612,75 @@ sortName_geneCoord(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Recursion formula: h[0] = 1, h[n] = 3 * h[n - 1] +1*/
-  subUL = 1; /*Initialzie first array*/
-  while(subUL < numElmUL - 1) subUL = (3 * subUL) + 1;
+  subSL = 1; /*Initialzie first array*/
+  while(subSL < numElmSL - 1)
+     subSL = (3 * subSL) + 1;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ^ Fun10 Sec03:
   ^  - Sort the arrays in geneCoordST
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
-  while(subUL > 0)
+  while(subSL > 0)
   { /*loop trhough all sub arrays sort the subarrays*/
-    for(ulIndex = 0; ulIndex <= subUL; ++ulIndex)
+    for(slIndex = 0; slIndex <= subSL; ++slIndex)
     { /*For each element in the subarray*/
-      for(ulElm = ulIndex;
-          ulElm + subUL <= endUI;
-          ulElm += subUL
+      for(slElm = slIndex;
+          slElm + subSL <= numElmSL;
+          slElm += subSL
       ){ /*Loop; swap each nth element of the subarray*/
-        nextElmUL = ulElm + subUL;
+        nextElmSL = slElm + subSL;
         
-        if(
-            eql_charCp(
-               geneCoordST->idStrAry[ulElm],
-               geneCoordST->idStrAry[nextElmUL],
-               0
+        compareSL =
+           eqlNull_ulCp(
+              geneCoordST->idStrAry[slElm],
+              geneCoordST->idStrAry[nextElmSL]
+           );
+
+        if(compareSL > 0)
+           goto swapNext_fun10_sec03;
+        else if(compareSL < 0)
+           ;
+        else if(
+            eqlNull_ulCp(
+               geneCoordST->refAryStr[slElm],
+               geneCoordST->refAryStr[nextElmSL]
             ) > 0
         ){ /*If I need to swap an element*/
-          swap_geneCoord((geneCoordST),ulElm,nextElmUL);
+          swapNext_fun10_sec03:;
+          swap_geneCoord((geneCoordST),slElm,nextElmSL);
           
-          lastElmUL = ulElm;
-          elmOnUL = ulElm;
+          lastElmSL = slElm;
+          elmOnSL = slElm;
           
-          while(lastElmUL >= subUL)
+          while(lastElmSL >= subSL)
           { /*loop; move swapped element back*/
-            lastElmUL -= subUL;
+            lastElmSL -= subSL;
             
-            if(
-                eql_charCp(
-                   geneCoordST->idStrAry[elmOnUL],
-                   geneCoordST->idStrAry[lastElmUL],
-                   0
+            compareSL =
+               eqlNull_ulCp(
+                  geneCoordST->idStrAry[elmOnSL],
+                  geneCoordST->idStrAry[lastElmSL]
+               );
+            if(compareSL > 0)
+               break; /*positioned the gene*/
+            else if(compareSL < 0)
+               ; /*need to position the element*/
+            else if(
+                eqlNull_ulCp(
+                   geneCoordST->refAryStr[elmOnSL],
+                   geneCoordST->refAryStr[lastElmSL]
                 ) > 0
             ) break; /*Positioned the element*/
             
-            swap_geneCoord(geneCoordST,elmOnUL,lastElmUL);
-            
-            elmOnUL = lastElmUL;
+            swap_geneCoord(geneCoordST,elmOnSL,lastElmSL);
+            elmOnSL = lastElmSL;
           } /*loop; move swapped element back*/
         } /*If I need to swap elements*/
       } /*Loop; swap each nth element of the subarray*/
     } /*For each element in the subarray*/
     
-    subUL = (subUL - 1) / 3; /*Move to the next round*/
+    subSL = (subSL - 1) / 3; /*Move to the next round*/
   } /*loop through all sub arrays to sort the subarrays*/
 } /*sortName_geneCoord*/
 
@@ -723,7 +708,6 @@ sortName_geneCoord(
 void
 nameSortFloat3IndexSync_geneCoord(
    struct geneCoord *geneCoordST,
-   signed int numGenesSI,
    float *floatAryF
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    ' Fun11 TOC:
@@ -750,7 +734,7 @@ nameSortFloat3IndexSync_geneCoord(
   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
   
   /*Number of elements to sort*/
-  signed int endSI = numGenesSI - 1;
+  signed long endSI = geneCoordST->lenSI - 1;
   
   /*Number of sorting rounds*/
   signed int subSI = 0;
@@ -768,6 +752,8 @@ nameSortFloat3IndexSync_geneCoord(
   /*Variables to incurment loops*/
   signed int siIndex = 0;
   signed int curSI = 0;
+
+  signed long compareSL = 0;
   
   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
   ^ Fun11 Sec02:
@@ -797,12 +783,24 @@ nameSortFloat3IndexSync_geneCoord(
       ){ /*Loop; swap each nth element of the subarray*/
         nextSI = curSI + subSI;
         
-        if(
+        compareSL =
+           eqlNull_ulCp(
+              geneCoordST->idStrAry[curSI],
+              geneCoordST->idStrAry[nextSI]
+           );
+
+        if(compareSL > 0)
+           goto swapNext_fun11_sec03;
+        else if(compareSL < 0)
+           ;
+        else if(
             eqlNull_ulCp(
-               geneCoordST->idStrAry[curSI],
-               geneCoordST->idStrAry[nextSI]
+               geneCoordST->refAryStr[curSI],
+               geneCoordST->refAryStr[nextSI]
             ) > 0
         ){ /*If I need to swap an element*/
+          swapNext_fun11_sec03:;
+
           swap_geneCoord((geneCoordST),curSI,nextSI);
           firstSwapUL = curSI * 3;
           secSwapUL = nextSI * 3;
@@ -826,10 +824,19 @@ nameSortFloat3IndexSync_geneCoord(
           { /*loop; move swapped element back*/
             lastSI -= subSI;
             
-            if(
+            compareSL =
+               eqlNull_ulCp(
+                  geneCoordST->idStrAry[onSI],
+                  geneCoordST->idStrAry[lastSI]
+               );
+            if(compareSL > 0)
+               break; /*positioned the gene*/
+            else if(compareSL < 0)
+               ; /*need to position the element*/
+            else if(
                 eqlNull_ulCp(
-                   geneCoordST->idStrAry[onSI],
-                   geneCoordST->idStrAry[lastSI]
+                   geneCoordST->refAryStr[onSI],
+                   geneCoordST->refAryStr[lastSI]
                 ) > 0
             ) break; /*Positioned the element*/
             
@@ -839,15 +846,17 @@ nameSortFloat3IndexSync_geneCoord(
             secSwapUL = lastSI * 3;
              
             swapF = floatAryF[firstSwapUL];
-            floatAryF[firstSwapUL++] =floatAryF[secSwapUL];
+            floatAryF[firstSwapUL++]=floatAryF[secSwapUL];
             floatAryF[secSwapUL++] = swapF;
 
              swapF = floatAryF[firstSwapUL];
-             floatAryF[firstSwapUL++] =floatAryF[secSwapUL];
+             floatAryF[firstSwapUL++] =
+                floatAryF[secSwapUL];
              floatAryF[secSwapUL++] = swapF;
 
              swapF = floatAryF[firstSwapUL];
-             floatAryF[firstSwapUL++] =floatAryF[secSwapUL];
+             floatAryF[firstSwapUL++] =
+                floatAryF[secSwapUL];
              floatAryF[secSwapUL++] = swapF;
             
             onSI = lastSI;
@@ -870,8 +879,9 @@ nameSortFloat3IndexSync_geneCoord(
 |      coordinates to search
 |  - nameStr:
 |    o c-string with name to search for
-|  - numGenesSI:
-|    o Number of genes in geneCoordST (index 1)
+|  - refStr:
+|    o c-string with reference sequence
+|    o use 0 for search for gene only
 | Output:
 |  - Returns:
 |    o The index of gene with the same name
@@ -881,36 +891,46 @@ signed int
 findName_geneCoord(
    struct geneCoord *geneST,
    signed char *nameStr,
-   signed int numGenesSI
+   signed char *refStr
 ){ 
-   signed int matchSI = 0;
    signed int midSI = 0;
-   signed int rightHalfSI = numGenesSI - 1;
+   signed int rightHalfSI = geneST->lenSI - 1;
    signed int leftHalfSI = 0;
+
+   signed long matchSL = 0;
 
    while(leftHalfSI <= rightHalfSI)
    { /*Loop: Search for the starting coordinate*/
       midSI = (leftHalfSI + rightHalfSI) >> 1;
 
-      matchSI =
-         eql_charCp(
-            nameStr,
-            geneST->idStrAry[midSI],
-            '\0'
-         ); /*see if I have an match*/
+      matchSL =
+         eqlNull_ulCp(nameStr, geneST->idStrAry[midSI]);
+            /*see if I have an match*/
 
-      if(matchSI < 0)
+      if(matchSL < 0)
          rightHalfSI = midSI - 1;
 
-      else if(matchSI > 0)
+      else if(matchSL > 0)
          leftHalfSI = midSI + 1;
 
      else
-        return midSI;
+     { /*Else: may have foud a match*/
+        if(! refStr || ! refStr[0])
+           return midSI; /*no reference sequence*/
+        
+         matchSL =
+            eqlNull_ulCp(refStr,geneST->refAryStr[midSI]);
+         if(! matchSL)
+            return midSI; /*have matching reference*/
+         else if(matchSL < 0)
+            rightHalfSI = midSI - 1;
+         else
+            leftHalfSI = midSI - 1;
+     } /*Else: may have foud a match*/
    } /*Loop: Search for the starting coordinate*/
 
    return -1; /*No match found*/
-} /*geneCoord_findCloseGene*/
+} /*findName_geneCoord*/
 
 /*-------------------------------------------------------\
 | Fun13: getCoords_geneCoord
@@ -919,8 +939,6 @@ findName_geneCoord(
 |  - geneTblFileStr:
 |    o C-string with name of the gene table file to
 |      extract the gene coordinates and names from
-|  - numGenesSI:
-|    o Will hold the Number of genes extracted
 |  - errULPtr:
 |    o Will hold the error return value
 | Output:
@@ -929,8 +947,6 @@ findName_geneCoord(
 |      gene coordinates
 |    o 0 for errors
 |  - Modifies:
-|    o numGenesI to have the number of genes (index 0)
-|      extracted
 |    o errULPtr to hold the error
 |      - 0 for no errors
 |      - def_fileErr_geneCoord for an file opening error
@@ -942,7 +958,6 @@ findName_geneCoord(
 struct geneCoord *
 getCoords_geneCoord(
    signed char *geneTblFileStr,
-   signed int *numGenesSI, /*Number of genes extracted*/
    unsigned long *errULPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun13 TOC: getCoords_geneCoord
@@ -986,7 +1001,6 @@ getCoords_geneCoord(
    ^   - Find number lines/max line length in table file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   *numGenesSI = 0;
    *errULPtr = 0;
 
    tblFILE  = fopen( (char *) geneTblFileStr, "r");
@@ -1045,7 +1059,7 @@ getCoords_geneCoord(
    ){ /*Loop: Get entries from coordinates file*/
 
       cpStr = buffHeapStr;
-      dupStr = genesHeapST->idStrAry[*numGenesSI];
+      dupStr = genesHeapST->idStrAry[genesHeapST->lenSI];
 
       /*Copy the gene name*/
       while(*cpStr > 32)
@@ -1066,7 +1080,7 @@ getCoords_geneCoord(
       *   - get refernce id
       \**************************************************/
 
-      dupStr = genesHeapST->refAryStr[*numGenesSI];
+      dupStr = genesHeapST->refAryStr[genesHeapST->lenSI];
 
       /*Copy the gene name*/
       while(*cpStr > 32)
@@ -1087,8 +1101,10 @@ getCoords_geneCoord(
       *   - get the gene direction
       \**************************************************/
 
-      genesHeapST->dirAryUC[*numGenesSI] = (*cpStr =='-');
-      genesHeapST->dirAryUC[*numGenesSI] |= (*cpStr=='R');
+      genesHeapST->dirAryUC[genesHeapST->lenSI] =
+         (*cpStr =='-');
+      genesHeapST->dirAryUC[genesHeapST->lenSI] |=
+         (*cpStr=='R');
 
       while(*cpStr++ > 32) ;
 
@@ -1108,10 +1124,10 @@ getCoords_geneCoord(
       cpStr +=
          strToUI_base10str(
             cpStr,
-            &genesHeapST->startAryUI[*numGenesSI]
+            &genesHeapST->startAryUI[genesHeapST->lenSI]
          ); /*Get the genes frist reference base*/
 
-      --genesHeapST->startAryUI[*numGenesSI];
+      --genesHeapST->startAryUI[genesHeapST->lenSI];
 
       if(*cpStr == '\t') ;      /*Expected*/
       else if(*cpStr == ' ') ;  /*Odd, but works*/
@@ -1129,26 +1145,26 @@ getCoords_geneCoord(
       cpStr +=
          strToUI_base10str(
             cpStr,
-            &genesHeapST->endAryUI[*numGenesSI]
+            &genesHeapST->endAryUI[genesHeapST->lenSI]
          ); /*Get the genes last reference base*/
 
-      --genesHeapST->endAryUI[*numGenesSI];
+      --genesHeapST->endAryUI[genesHeapST->lenSI];
 
       if(*cpStr > 32)
-         goto invalidEntry_fun13_sec06_sub04; /*Not an tsv*/
+         goto invalidEntry_fun13_sec06_sub04; /*not tsv*/
 
       if(
-           genesHeapST->endAryUI[*numGenesSI]
-         < genesHeapST->startAryUI[*numGenesSI]
+           genesHeapST->endAryUI[genesHeapST->lenSI]
+         < genesHeapST->startAryUI[genesHeapST->lenSI]
       ){ /*If: I need to coordinates*/
-         genesHeapST->endAryUI[*numGenesSI] ^=
-            genesHeapST->startAryUI[*numGenesSI];
+         genesHeapST->endAryUI[genesHeapST->lenSI] ^=
+            genesHeapST->startAryUI[genesHeapST->lenSI];
 
-         genesHeapST->startAryUI[*numGenesSI] ^=
-            genesHeapST->endAryUI[*numGenesSI];
+         genesHeapST->startAryUI[genesHeapST->lenSI] ^=
+            genesHeapST->endAryUI[genesHeapST->lenSI];
 
-         genesHeapST->endAryUI[*numGenesSI] ^=
-            genesHeapST->startAryUI[*numGenesSI];
+         genesHeapST->endAryUI[genesHeapST->lenSI] ^=
+            genesHeapST->startAryUI[genesHeapST->lenSI];
       } /*If: I need to swap coordinates*/
 
       /**************************************************\
@@ -1156,7 +1172,7 @@ getCoords_geneCoord(
       *   - Move to the next gene
       \**************************************************/
 
-      ++(*numGenesSI);
+      ++genesHeapST->lenSI;
    } /*Loop: Get entries from coordinates file*/
    
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1164,8 +1180,7 @@ getCoords_geneCoord(
    ^   - Clean up and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   --(*numGenesSI); /*Convert to index 0*/
-   sort_geneCoord(genesHeapST, 0, *(numGenesSI));
+   sort_geneCoord(genesHeapST);
 
    goto cleanUp_fun13_sec06_sub05;
 
@@ -1179,7 +1194,7 @@ getCoords_geneCoord(
 
    invalidEntry_fun13_sec06_sub04:;
       *errULPtr = def_invalidEntry_geneCoord;
-      *errULPtr |= (*numGenesSI << 8);
+      *errULPtr |= (genesHeapST->lenSI << 8);
       goto errCleanUp_fun13_sec06_sub05;
 
    errCleanUp_fun13_sec06_sub05:;

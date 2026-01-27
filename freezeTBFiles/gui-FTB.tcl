@@ -16,7 +16,6 @@ variable mapPath "" ;
 variable glob_minimapFoundBl 0 ;
 variable glob_useMinimapBl 0 ;
 variable rPath "" ;
-variable graphScript "" ;
 
 set glob_noAmrCol "#000004" ;
 set glob_noAmrTextCol "#FDE725" ;
@@ -25,6 +24,7 @@ set glob_amrTextCol "#000004" ;
 set glob_lowDepthCol "#FDE725" ;
 set glob_lowDepthTextCol "#000004" ;
 set glob_amrList [list "amikacin" "bedaquiline" "capreomycin" "clofazimine" "delamanid" "ethambutol" "ethionamide" "fluoroquine" "isoniazid" "kanamycin" "levofloxacin" "linezolid" "moxifloxacin" "protonimid" "pyrazinamide" "rifampicin" "streptomycin" ] ;
+set glob_amrShort [list "Amk" "Bdq" "Cap" "Cfz" "Dlm" "Emb" "Eto" "Flq" "Inh" "Kan" "Lfx" "Lzd" "Mfx" "Pmd" "Pza" "Rif" "Stm" ] ;
 
 set glob_amrGenes {
 {"Amk" "eis" "rrs"}
@@ -90,20 +90,6 @@ set ::rPath "" ;
 tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
 } ;
 } ; 
-if { $::rPath ne "" } {
-set ::graphScript "graphAmpDepth.r" ;
-if { [file exists $::graphScript] eq 0 } {
-set ::graphScript [file join $appData "freezeTB" "graphAmpDepth.r" ] ;
-if { [file exists $::graphScript] eq 0 } {
-set ::graphScript [file join $programFiles "freezeTB" "graphAmpDepth.r" ] ;
-if { [file exists $::graphScript] eq 0 } {
-set ::glob_mkGraphBl 0 ;
-tk_messageBox -message "graphAmpDepth.r not found" -title "no graphing script" ;
-set ::graphScript "" ;
-} ;
-} ;
-} ;
-} ; 
 } else {
 set glob_minimapFoundBl 1 ;
 set ::mapPath "minimap2" ;
@@ -134,22 +120,6 @@ set ::glob_mkGraphBl 0 ;
 set ::rPath "" ;
 tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
 }
-if { $::rPath ne "" } {
-set ::graphScript "graphAmpDepth.r" ;
-if { [file exists $::graphScript] eq 0 } {
-set ::graphScript [file join "/usr/local/bin" "graphAmpDepth.r"] ;
-if { [file exists $::graphScript] eq 0 } {
-set ::graphScript $::env(HOME);
-set ::graphScript [file join $::graphScript "bin" "graphAmpDepth.r" ]
-if { [file exists $::graphScript] eq 0 } {
-set ::glob_mkGraphBl 0 ;
-set ::graphScript "" ;
-tk_messageBox -message "graphAmpDepth.r not found" -title "no graphing script" ;
-} ;
-} ;
-} ;
-} else {
-} ; 
 } ;
 
 set fq_types {
@@ -1054,37 +1024,40 @@ tk::frame .main.out.cover ;
 tk::frame .main.out.amr ;
 proc setAmrLab {prefixStr pathStr} {
 set fileStr $prefixStr ;
-append fileStr "-depths.tsv" ; 
+append fileStr "-coverage.tsv" ; 
 set openFILE [open $fileStr] ;
 gets $openFILE lineStr ;
 set geneList "" ;
+set amrList [string tolower $::glob_amrShort] ;
+set depthAry 0 ;
+for {set siAmr 0} {$siAmr < [llength $amrList]} {incr siAmr} { lappend depthAry 0 ; } ;
 while {[gets $openFILE lineStr] > 1} {
+set lineStr [string tolower $lineStr] ;
 set lineStr [split $lineStr "\t"] ; 
-set depthUI [lindex $lineStr 6] ;
-if {$depthUI >= $::glob_depth} {
-set geneStr [lindex $lineStr 9] ; 
-set geneStr [string tolower $geneStr] ;
-set geneList [concat $geneList $geneStr] ;
+for {set siDrug 4} {$siDrug < [llength $lineStr]} {incr siDrug}  {
+set tmpStr [lindex $lineStr $siDrug] ;
+if {$tmpStr eq "*"} {
+break ;
+} ;
+set indexSI [lsearch $amrList $tmpStr] ;
+if { $indexSI >= 0 } {
+scan [lindex $lineStr 1] %d coverF ;
+if { $coverF >= 0.95 } {
+scan [lindex $depthAry $indexSI] %d val ;
+if { $val == 0 } {
+lset depthAry $indexSI 1 ;
+} ;
+} else {
+lset depthAry $indexSI 2 ;
+} ;
+} ;
 } ;
 } ; 
-set geneList [lsort -unique $geneList] ;
-foreach drugList $::glob_amrGenes {
-set lowDepthBl 0 ;
-for {set siGene 1} {$siGene  < [llength $drugList]} {incr siGene}  {
-set geneStr [lindex $drugList $siGene] ;
-set geneStr [string tolower $geneStr] ;
-if {$geneStr eq "na"} {
-break ;
-} elseif {[lsearch $geneList $geneStr] eq -1 } {
-set lowDepthBl 1 ;
-break ;
-} ;
-} ;
-set tmpStr [lindex $drugList 0] ; 
-set tmpStr [string tolower $tmpStr] ;
+for {set siAmr 0} {$siAmr < [llength $amrList]} {incr siAmr}  {
+set drugStr [lindex $amrList $siAmr] ; 
 set labStr $pathStr ;
-append labStr "." $tmpStr "lab" ; 
-if {$lowDepthBl eq 0} {
+append labStr "." $drugStr "lab" ; 
+if { [lindex $depthAry $siAmr] == 1 } {
 $labStr configure -background $::glob_noAmrCol -fg $::glob_noAmrTextCol ;
 } else {
 $labStr configure -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol ;
@@ -1175,18 +1148,14 @@ for { set siDrug 3 } { $siDrug < $endSI } { incr siDrug }  { append outStr [ lin
 return true ;
 } ;
 proc depthGraph {prefixStr} {
-set dbStr "\"" ;
-append dbStr $::glob_amrDb "\"" ;
 set graphStr "\"" ;
-append graphStr $::graphScript "\"" ;
+append graphStr $::glob_depthGraph "\"" ;
+set tmpPathStr $prefixStr ;
+append tmpPathStr "-mean-depth.png" ;
 if {! [image inuse $::glob_depthImg] } {
 image delete $::glob_depthImg ;
 } ; 
 if {$::glob_mkGraphBl ne 0 } {
-set tmpStr "\"" ;
-append tmpStr $prefixStr "-depths.tsv\"" ;
-set tmpPathStr $prefixStr ;
-append tmpPathStr "-readDepth.png" ;
 if { [file exists $tmpPathStr] eq 1 } {
 set ::glob_depthImg [image create photo -file $tmpPathStr] ;
 .main.out.depth.graph configure -image $::glob_depthImg ;
@@ -1194,7 +1163,7 @@ set ::glob_depthImg [image create photo -file $tmpPathStr] ;
 set quoteStr "\"" ;
 append quoteStr $prefixStr "\"" ;
 set prefixStr $quoteStr ;
-set status [catch {eval exec \$::rPath " " $graphStr " -stats " $tmpStr " -who " $dbStr " -prefix " $prefixStr } ] ;
+set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr } ] ;
 if { $status ne 0 } {
 tk_messageBox -message "failed to build depth graph" -title "ERROR" ;
 .main.out.set.graph.check toggle ;
@@ -1209,42 +1178,29 @@ proc coverageGraph {prefixStr} {
 set dbStr "\"" ;
 append dbStr $::glob_amrDb "\"" ;
 set graphStr "\"" ;
-append graphStr $::graphScript "\"" ;
+append graphStr $::glob_coverGraph "\"" ;
+set coordsTsv "\"" ;
+append coordsTsv $::glob_coordsTsv "\"" ;
+set coverPathStr $prefixStr ;
+append coverPathStr "-coverage.png" ;
 if {! [image inuse $::glob_coverImg] } {
 image delete $::glob_coverImg ;
 } ; 
-if {! [image inuse $::glob_depthImg] } {
-image delete $::glob_depthImg ;
-} ; 
 if {$::glob_mkGraphBl ne 0 } {
-set statsTsv "\"" ;
-append statsTsv $prefixStr "-depths.tsv\"" ;
-set amrTblStr "\"" ;
-append amrTblStr $prefixStr "-read-amrs.tsv\"" ;
-set coverPathStr $prefixStr ;
-append coverPathStr "-coverage.png" ;
-set depthPathStr $prefixStr ;
-append depthPathStr "-readDepth.png" ;
-if { ([file exists $coverPathStr] eq 1) && ([file exists $depthPathStr] eq 1) } {
+if { ([file exists $coverPathStr] eq 1) } {
 set ::glob_coverImg [image create photo -file $coverPathStr] ;
 .main.out.cover.graph configure -image $::glob_coverImg ;
-set ::glob_depthImg [image create photo -file $depthPathStr] ;
-.main.out.depth.graph configure -image $::glob_depthImg ;
 } else {
 set quoteStr "\"" ;
 append quoteStr $prefixStr "\"" ;
 set prefixStr $quoteStr ;
-set status [catch {eval exec $::rPath " " $::graphScript " -stats " $statsTsv " -amrs " $amrTblStr " -who " $::glob_amrDb " -prefix " $prefixStr } ] ;
+set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr " " $coordsTsv " " $dbStr } ] ;
 if { $status ne 0 } {
 tk_messageBox -message "failed to build cover graph" -title "ERROR" ;
 .main.out.set.graph.check toggle ;
 } else {
 set ::glob_coverImg [ image create photo -file $coverPathStr ] ;
 .main.out.cover.graph configure -image $::glob_coverImg ;
-if { [file exists $coverPathStr] eq 1 } {
-set ::glob_depthImg [image create photo -file $depthPathStr] ;
-.main.out.depth.graph configure -image $::glob_depthImg ;
-} ;
 } ;
 } ;
 } ;
@@ -1441,6 +1397,7 @@ pack .main.out.set.run -anchor w -side top ;
 tk::button .main.out.set.run.but -text "get report" -command { 
 set ::glob_outCur $::glob_outPref ;
 readAmrRep $::glob_outCur ;
+depthGraph $::glob_outCur ;
 coverageGraph $::glob_outCur ;
 readSpol $::glob_outCur ;
 readHsp65 $::glob_outCur ;
@@ -1552,7 +1509,6 @@ pack forget .main.out.menu ;
 .main.out.menu.amrBut configure -relief raised -state normal ;
 } ;
 pack .main.out.menu.inBut -anchor w -side left ;
-
 tk::frame .main.out.report.space ;
 tk::frame .main.out.report.readAmr ;
 pack .main.out.report.space .main.out.report.readAmr -anchor w -side top ;

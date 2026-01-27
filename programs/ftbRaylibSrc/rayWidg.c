@@ -392,7 +392,7 @@
 '         o fun126: changeExt_files_rayWidg
 '           - updates files for the change extension type
 '       # Sof08 Sec04 Sub02:
-'         - manipulate file browswer functions
+'         - manipulate file browser functions
 '         o fun125: addExt_files_rayWidg
 '           - add an file extension to a files_rayWidg
 '         o fun128: mkFileBrowser_rayWidg
@@ -1231,14 +1231,38 @@ backCheckTextWidth_rayWidg(
    signed char *outStr,  /*gets modified text*/
    signed int widthSI,   /*width of text*/
    struct widg_rayWidg *widgSTPtr
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun013 TOC:
+   '   - check if text meets widgets length, if not
+   '     shortens start of string until is proper length
+   '   o fun013 sec01:
+   '     - variable declarations
+   '   o fun013 sec02:
+   '     - find the rough length of the string
+   '   o fun013 sec03:
+   '     - find the actual length of the string
+   '   o fun013 sec04:
+   '     - return the width of the string
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun013 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    signed int textWidthSI = 0;
    signed int ignoreSI = 0;
    signed int indexSI = endStr_ulCp(textStr);
    signed char tmpArySC[2] = {0, 0};
 
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun013 Sec02:
+   ^   - find the rough length of the string
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    outStr[indexSI--] = 0;
 
+   /*find the rough length of the string*/
    while(indexSI >= 0)
    { /*Loop: copy text to outStr*/
       tmpArySC[0] = textStr[indexSI];
@@ -1273,8 +1297,61 @@ backCheckTextWidth_rayWidg(
 
    if(indexSI > 0)
       cpStr_ulCp(outStr, &outStr[indexSI]);
-   return
-     textMeasure_widg_rayWidg(outStr,&ignoreSI,widgSTPtr);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun013 Sec03:
+   ^   - find the actual length of the string
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*this is needed to finalize the measurment, otherwise
+   `  the width is always off
+   */
+   textWidthSI =
+      textMeasure_widg_rayWidg(
+         outStr,
+         &ignoreSI,
+         widgSTPtr
+      );
+   indexSI = 0;
+
+   while(textWidthSI > widthSI && outStr[indexSI])
+   { /*Loop: finish finding the width*/
+      if(textWidthSI > widthSI)
+         ++indexSI;
+      textWidthSI =
+        textMeasure_widg_rayWidg(
+           &outStr[indexSI],
+           &ignoreSI,
+           widgSTPtr
+        );
+   } /*Loop: finish finding the width*/
+
+   if(indexSI)
+   { /*If: need to shorten the string*/
+      if(indexSI <= 2)
+         indexSI = 2;
+
+      ignoreSI = 0;
+      while(outStr[indexSI])
+         outStr[ignoreSI++] = outStr[indexSI++];
+      outStr[0] = '.';
+      outStr[1] = '.';
+      outStr[2] = '.';
+
+      textWidthSI =
+        textMeasure_widg_rayWidg(
+           &outStr[indexSI],
+           &ignoreSI,
+           widgSTPtr
+        );
+   } /*If: need to shorten the string*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun013 Sec04:
+   ^   - return the width of the string
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   return textWidthSI;
      /*for some odd reason the text width is off without
      `  measuring the full string
      */
@@ -11959,15 +12036,15 @@ fileBrowserEvent_rayWidg(
    clear_fun130_sec04:;
       tmpSI = 3;
       focusClear_widg_rayWidg(
-         eventSTPtr->parIdSI + 3,
+         eventSTPtr->parIdSI + 4,
          widgSTPtr
       );
       pressClear_widg_rayWidg(
-         eventSTPtr->parIdSI + 3,
+         eventSTPtr->parIdSI + 4,
          widgSTPtr
       );
       activeClear_widg_rayWidg(
-         eventSTPtr->parIdSI + 3,
+         eventSTPtr->parIdSI + 4,
          widgSTPtr
       );
 

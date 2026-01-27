@@ -82,7 +82,6 @@ variable mapPath "" ; # path to minimap2
 variable glob_minimapFoundBl 0 ; # if found minimap2
 variable glob_useMinimapBl 0 ;   # if using minimap2
 variable rPath "" ; # path to Rscript
-variable graphScript "" ; # graphAmpDepth.r path
 
 #***************************************************
 # Header Sec01 Sub02:
@@ -136,7 +135,6 @@ set glob_lowDepthTextCol "#000004" ; # magma dark purple
    ]
 ---;
 
-#--- no longer using, but here for ids
 ---set
    glob_amrShort
    [list
@@ -159,6 +157,7 @@ set glob_lowDepthTextCol "#000004" ; # magma dark purple
       "Stm" # streptomycin (Str, Stp, Stm)
    ]
 ---;
+#--- no longer using, but here for ids
 ---#
 
 #---
@@ -261,9 +260,7 @@ set glob_amrGenes {
 #   o header sec02 sub01 cat02:
 #     - windows detect minimap2
 #   o header sec02 sub01 cat03:
-#     - windows detect Rscript
-#   o header sec02 sub01 cat04:
-#     - windows detect graphing script
+#     - windows find Rscript
 #***************************************************
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -339,7 +336,7 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 
    #++++++++++++++++++++++++++++++++++++++++++++++++
    # Header Sec02 Sub01 Cat03:
-   #   - windows detect Rscript
+   #   - windows find Rscript
    #++++++++++++++++++++++++++++++++++++++++++++++++
 
    # Not best method, but works for default installs
@@ -386,55 +383,13 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
       } ; # If: no R-script
    } ; # If: unable to find Rscript
 
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-   # Header Sec02 Sub01 Cat04:
-   #   - windows detect graphing script
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-   
-   if { $::rPath ne "" } {
-      set ::graphScript "graphAmpDepth.r" ;
-
-      if { [file exists $::graphScript] eq 0 } {
-         ---set
-            ::graphScript
-            [file join
-             $appData
-             "freezeTB"
-             "graphAmpDepth.r"
-            ]
-         ---;
-
-         if { [file exists $::graphScript] eq 0 } {
-            ---set
-               ::graphScript
-               [file join
-                $programFiles
-                "freezeTB"
-                "graphAmpDepth.r"
-               ]
-            ---;
-
-            if { [file exists $::graphScript] eq 0 } {
-               set ::glob_mkGraphBl 0 ;
-
-               ---tk_messageBox
-                  -message "graphAmpDepth.r not found"
-                  -title "no graphing script"
-               ---;
-
-               set ::graphScript "" ;
-            } ; # If: could not find graphing script
-         } ; # If: need to check global install
-      } ; # If: did not find local graphing script
-   } ; # If: have Rscript; find graph script
-
 #***************************************************
 # Header Sec02 Sub02:
 #   - unix program detection
 #   o header sec02 sub02 cat01:
 #     - unix; find minimap2 version (check if have)
 #   o header sec02 sub02 cat02:
-#     - unix find graphing script
+#     - unix find Rscript
 #***************************************************
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -529,45 +484,6 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
          -title "ERROR"
       ---;
    }
-   
-   
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-   # Header Sec02 Sub02 Cat03:
-   #   - unix find graphing script
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-   
-	if { $::rPath ne "" } {
-      set ::graphScript "graphAmpDepth.r" ;
-
-      if { [file exists $::graphScript] eq 0 } {
-         ---set
-            ::graphScript
-            [file join "/usr/local/bin" "graphAmpDepth.r"]
-         ---;
-
-         if { [file exists $::graphScript] eq 0 } {
-            set ::graphScript $::env(HOME);
-            ---set ::graphScript
-               [file join
-                $::graphScript
-                "bin"
-                "graphAmpDepth.r"
-            ]---
-
-            if { [file exists $::graphScript] eq 0 } {
-               set ::glob_mkGraphBl 0 ;
-               set ::graphScript "" ;
-
-               ---tk_messageBox
-                  -message "graphAmpDepth.r not found"
-                  -title "no graphing script"
-               ---;
-            } ; # If: could not find graphing script location
-         } ; # If: could not find graphing script
-      } ; # If: did not find graphing script
-   } else {
-      # path is already set
-   } ; # check if have Rscript for graphAmpDepth.r
 } ;    # check if windows or linux
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -685,6 +601,9 @@ variable glob_miruDb [getPath "miruTbl.tsv"] ;
 
 variable glob_spacer [getPath "spoligo-spacers.fa"] ;
 variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
+
+variable glob_depthGraph [getPath "meanDepthGraph.r"] ;
+variable glob_coverGraph [getPath "coverGraph.r"] ;
 
 #***************************************************
 # Header Sec03 Sub03:
@@ -1317,7 +1236,7 @@ proc setFreezeTBStatus {} {
             -title "ERROR"
          ---;
          return false;
-      } ; #  no coordiantes file for ampDepth
+      } ; # no coordiantes file for coverage/depth output
 
       if { $::glob_amrDb eq "" } {
          .main.menu.amrBut invoke ;
@@ -4049,14 +3968,13 @@ tk::frame .main.out.amr ;
 #**************************************************
 # Gui08 Sec02 Sub01:
 #   - function; set AMR colors by depth
+#   - this does not detect any resistance
 #   o gui08 sec02 sub01 cat01:
 #     - open file + declare function
 #   o gui08 sec02 sub01 cat02:
-#     - get genes with at least minimum read depth
+#     - detect which amrs were missing
 #   o gui08 sec02 sub01 cat03:
-#     - detect missing genes for AMRs
-#   o gui08 sec02 sub01 cat04:
-#     - build label path and select color pattern
+#     - assign low depth or no amr to labels
 #**************************************************
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -4065,70 +3983,77 @@ tk::frame .main.out.amr ;
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc setAmrLab {prefixStr pathStr} {
-  
    set fileStr $prefixStr ;       # set up file prefix
-   append fileStr "-depths.tsv" ; # add read depth file id
+   append fileStr "-coverage.tsv" ; # has coverage
 
-   set openFILE [open $fileStr] ;# open read depth file
+   set openFILE [open $fileStr] ;# open gene coverage file
    gets $openFILE lineStr ;      # get header; allows skip
+
    set geneList "" ;             # genes at min depth
+   set amrList [string tolower $::glob_amrShort] ;
+   set depthAry 0 ;
+
+   # initialize the array to 0's
+   ---for
+      {set siAmr 0}
+      {$siAmr < [llength $amrList]}
+      {incr siAmr}
+   ---{ lappend depthAry 0 ; } ;
 
    #++++++++++++++++++++++++++++++++++++++++++++++++++
    # Gui08 Sec02 Sub01 Cat02:
-   #   - get genes with at least minimum read depth
+   #   - detect which amrs were missing
    #++++++++++++++++++++++++++++++++++++++++++++++++++
 
    while {[gets $openFILE lineStr] > 1} {
-      set lineStr [split $lineStr "\t"] ; # make columns
-      set depthUI [lindex $lineStr 6] ;   # get mean depth
-
-      if {$depthUI >= $::glob_depth} {
-         set geneStr [lindex $lineStr 9] ; # get gene id
-         set geneStr [string tolower $geneStr] ;
-         set geneList [concat $geneList $geneStr] ;
-      } ; # If: have enough depth to keep
-   } ; # Loop: get genes at min depth
-
-   # remove any duplicate gene entries
-   set geneList [lsort -unique $geneList] ;
-
-   #++++++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub01 Cat03:
-   #   - detect missing genes for AMRs
-   #++++++++++++++++++++++++++++++++++++++++++++++++++
-
-   foreach drugList $::glob_amrGenes {
-      set lowDepthBl 0 ; # marks if set low depth color
+      set lineStr [string tolower $lineStr] ;
+      set lineStr [split $lineStr "\t"] ; # make an array
 
       ---for
-         {set siGene 1}
-         {$siGene  < [llength $drugList]}
-         {incr siGene}
+         {set siDrug 4}
+         {$siDrug < [llength $lineStr]}
+         {incr siDrug}
       --- {
-         # get first gene and convert to lower case
-         set geneStr [lindex $drugList $siGene] ;
-         set geneStr [string tolower $geneStr] ;
+         set tmpStr [lindex $lineStr $siDrug] ;
 
-         if {$geneStr eq "na"} {
-            break ; # no more genes in list
-         } elseif {[lsearch $geneList $geneStr] eq -1 } {
-            set lowDepthBl 1 ;
-            break ; # found a low depth gene, coloring
-         } ; # If: AMR gene had enough depth
-      } ; # Loop: detect if have missing genes
+         if {$tmpStr eq "*"} {
+            break ;
+         } ; # found end of drugs for this gene/target
 
-      #++++++++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub01 Cat04:
-      #   - build label path and select color pattern
-      #++++++++++++++++++++++++++++++++++++++++++++++++++
+         set indexSI [lsearch $amrList $tmpStr] ;
 
-      # set up drug label path
-      set tmpStr [lindex $drugList 0] ; # get drug id
-      set tmpStr [string tolower $tmpStr] ;
+         if { $indexSI >= 0 } {
+            scan [lindex $lineStr 1] %d coverF ;
+
+            if { $coverF >= 0.95 } {
+               scan [lindex $depthAry $indexSI] %d val ;
+               if { $val == 0 } {
+                  lset depthAry $indexSI 1 ;
+               } ;
+            } else {
+               lset depthAry $indexSI 2 ;
+            } ; # check if have good gene coverage
+         } ; # drug is in the report list
+      } ; # Loop: detect if genes have enough depth
+   } ; # Loop: detect low depth genes
+
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub01 Cat03:
+   #   - assign low depth or no amr to labels
+   #++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   ---for
+      {set siAmr 0}
+      {$siAmr < [llength $amrList]}
+      {incr siAmr}
+   --- {
+      #______________set_up drug_label_path_______________
+      set drugStr [lindex $amrList $siAmr] ; # get drug id
       set labStr $pathStr ;
-      append labStr "." $tmpStr "lab" ; # add id ending
+      append labStr "." $drugStr "lab" ; # add id ending
 
-      if {$lowDepthBl eq 0} {
+      #______________assign_color_by_depth________________
+      if { [lindex $depthAry $siAmr] == 1 } {
          ---$labStr
             configure
             -background $::glob_noAmrCol
@@ -4140,7 +4065,7 @@ proc setAmrLab {prefixStr pathStr} {
             -background $::glob_lowDepthCol
             -fg $::glob_lowDepthTextCol
          ---; # set color for gene has read depth
-      } ; # color label based on if found all genes
+      } ; # check if have low read depth
    } ; # Loop: color labels by low depth
 
    close $openFILE ;
@@ -4332,27 +4257,19 @@ proc readHsp65 {prefixStr} {
 #**************************************************
 
 proc depthGraph {prefixStr} {
-   # deal with spaces
-   set dbStr "\"" ;
-   append dbStr $::glob_amrDb "\"" ;
-
    set graphStr "\"" ;
-   append graphStr $::graphScript "\"" ;
+   append graphStr $::glob_depthGraph "\"" ;
+
+   set tmpPathStr $prefixStr ;
+   append tmpPathStr "-mean-depth.png" ;
 
    # delete old graphs
    if {! [image inuse $::glob_depthImg] } {
          image delete $::glob_depthImg ;
    } ; # If: image exists
 
-
+   # check if can make graphs and if need to make one
    if {$::glob_mkGraphBl ne 0 } {
-      
-      set tmpStr "\"" ;
-      append tmpStr $prefixStr "-depths.tsv\"" ;
-
-      set tmpPathStr $prefixStr ;
-      append tmpPathStr "-readDepth.png" ;
-
       if { [file exists $tmpPathStr] eq 1 } {
          ---set
            ::glob_depthImg
@@ -4360,8 +4277,7 @@ proc depthGraph {prefixStr} {
          ---;
 
          ---.main.out.depth.graph
-            configure
-            -image $::glob_depthImg
+            configure -image $::glob_depthImg
          ---;
 
       } else {
@@ -4376,10 +4292,7 @@ proc depthGraph {prefixStr} {
          ---set status
             [catch
                {eval exec
-                  \$::rPath " " $graphStr
-                  " -stats " $tmpStr
-                  " -who " $dbStr
-                  " -prefix " $prefixStr
+                  $::rPath " " $graphStr " " $prefixStr
                }
             ]
          ---; # run R to build graphs
@@ -4395,16 +4308,11 @@ proc depthGraph {prefixStr} {
          } else {
             ---set
               ::glob_depthImg
-              [image
-                 create
-                 photo
-                 -file $tmpPathStr
-              ]
+              [image create photo -file $tmpPathStr ]
             ---;
 
             ---.main.out.depth.graph
-               configure
-               -image $::glob_depthImg
+               configure -image $::glob_depthImg
             ---;
          } ; # Else: add image
       } ; # check if need to build graphs
@@ -4422,35 +4330,22 @@ proc coverageGraph {prefixStr} {
    append dbStr $::glob_amrDb "\"" ;
 
    set graphStr "\"" ;
-   append graphStr $::graphScript "\"" ;
+   append graphStr $::glob_coverGraph "\"" ;
+
+   set coordsTsv "\"" ;
+   append coordsTsv $::glob_coordsTsv "\"" ;
+
+   set coverPathStr $prefixStr ;
+   append coverPathStr "-coverage.png" ;
 
    # delete old graphs
    if {! [image inuse $::glob_coverImg] } {
          image delete $::glob_coverImg ;
    } ; # If: image exists
 
-   # delete old graphs
-   if {! [image inuse $::glob_depthImg] } {
-         image delete $::glob_depthImg ;
-   } ; # If: image exists
 
    if {$::glob_mkGraphBl ne 0 } {
-      set statsTsv "\"" ;
-      append statsTsv $prefixStr "-depths.tsv\"" ;
-
-      set amrTblStr "\"" ;
-      append amrTblStr $prefixStr "-read-amrs.tsv\"" ;
-
-      set coverPathStr $prefixStr ;
-      append coverPathStr "-coverage.png" ;
-
-      set depthPathStr $prefixStr ;
-      append depthPathStr "-readDepth.png" ;
-
-      ---if {
-            ([file exists $coverPathStr] eq 1)
-         && ([file exists $depthPathStr] eq 1)
-      ---} {
+      if { ([file exists $coverPathStr] eq 1) } {
          ---set
            ::glob_coverImg
            [image create photo -file $coverPathStr]
@@ -4458,15 +4353,6 @@ proc coverageGraph {prefixStr} {
 
          ---.main.out.cover.graph
             configure -image $::glob_coverImg
-         ---;
-
-         ---set
-           ::glob_depthImg
-           [image create photo -file $depthPathStr]
-         ---;
-
-         ---.main.out.depth.graph
-            configure -image $::glob_depthImg
          ---;
       } else {
          # using quotes incase of spaces
@@ -4477,11 +4363,10 @@ proc coverageGraph {prefixStr} {
          ---set status
             [catch
                {eval exec
-                  $::rPath " " $::graphScript
-                  " -stats " $statsTsv
-                  " -amrs " $amrTblStr
-                  " -who " $::glob_amrDb
-                  " -prefix " $prefixStr
+                  $::rPath " " $graphStr
+                  " " $prefixStr
+                  " " $coordsTsv
+                  " " $dbStr
                }
             ]
          ---; # run R to build graphs
@@ -4503,17 +4388,6 @@ proc coverageGraph {prefixStr} {
             ---.main.out.cover.graph
                configure -image $::glob_coverImg
             ---;
-
-            if { [file exists $coverPathStr] eq 1 } {
-               ---set
-                 ::glob_depthImg
-                 [image create photo -file $depthPathStr]
-               ---;
-
-               ---.main.out.depth.graph
-                  configure -image $::glob_depthImg
-               ---;
-            } ; # if read depth graph was made
          } ; # Else: add image
       } ; # check if need to build graphs
     } ; # check if users wants graphs displayed
@@ -5078,7 +4952,7 @@ pack .main.out.set.run -anchor w -side top ;
       #conAmrRep $::glob_outCur ;
 
       readAmrRep $::glob_outCur ;
-      #depthGraph $::glob_outCur ;
+      depthGraph $::glob_outCur ;
       coverageGraph $::glob_outCur ;
 
       #conSpol $::glob_outCur ;
@@ -5479,72 +5353,17 @@ pack .main.out.menu.inBut -anchor w -side left ;
 # Gui08 Sec05:
 #   - set up report gui
 #   o gui08 sec05 sub01:
-#     - build consensus AMR labels
-#   o gui08 sec05 sub02:
 #     - build read AMR labels
-#   o gui08 sec05 sub04:
+#   o gui08 sec05 sub02:
+#     - build AMR legened
+#   o gui08 sec05 sub03:
 #     - read spoligotype
-#   o gui08 sec05 sub05:
+#   o gui08 sec05 sub04:
 #     - MIRU lineage
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #**************************************************
 # Gui08 Sec05 Sub01:
-#   - build consensus AMR labels
-#**************************************************
-
-#---
-tk::frame .main.out.report.conAmr ;
-pack .main.out.report.conAmr -anchor w -side top ;
-
----tk::label
-   .main.out.report.conAmr.lab
-   -text "con  AMRs:" 
----;
-
----pack
-   .main.out.report.conAmr.lab
-   -anchor w
-   -side left
----;
-
-foreach amr $::glob_amrGenes {
-   set tmpStr [lindex $amr 0] ; # get drug name
-   set tmpStr [string tolower $tmpStr] ;
-   append tmpStr "lab" ;
-
-   ---tk::label
-      .main.out.report.conAmr.$tmpStr
-      -text [lindex $amr 0]
-      -background $glob_noAmrCol
-      -fg $glob_amrTextCol
-   ---;
-
-   ---pack
-      .main.out.report.conAmr.$tmpStr
-      -anchor w
-      -side left
-   ---;
-
-   # add a space between the labels
-   set tmpStr [string tolower $amr] ;
-   append tmpStr "space" ;
-
-   ---tk::label
-      .main.out.report.conAmr.$tmpStr
-      -text ""
-   ---;
-
-   ---pack
-      .main.out.report.conAmr.$tmpStr
-      -anchor w
-      -side left
-   ---;
-} ; # Loop: build amr labels
----#
-
-#**************************************************
-# Gui08 Sec05 Sub02:
 #   - build read AMR labels
 #**************************************************
 
@@ -5605,7 +5424,7 @@ foreach amr $::glob_amrGenes {
 } ; # Loop: build amr labels
 
 #**************************************************
-# Gui08 Sec05 Sub03:
+# Gui08 Sec05 Sub02:
 #   - build AMR legened
 #**************************************************
 
@@ -5659,20 +5478,20 @@ tk::label .main.out.report.amrLegend.spaceTwo ;
 ---;
    
 #**************************************************
-# Gui08 Sec05 Sub05:
+# Gui08 Sec05 Sub04:
 #   - read spoligotype
-#   o gui08 sec05 sub05 cat01:
+#   o gui08 sec05 sub04 cat01:
 #     - read spoligotype label
-#   o gui08 sec05 sub05 cat02:
+#   o gui08 sec05 sub04 cat02:
 #     - octal for read spoligotype
-#   o gui08 sec05 sub05 cat03:
+#   o gui08 sec05 sub04 cat03:
 #     - strain for read spoligotype
-#   o gui08 sec05 sub05 cat04:
+#   o gui08 sec05 sub04 cat04:
 #     - lineage for read spoligotype
 #**************************************************
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub05 Cat01:
+# Gui08 Sec05 Sub04 Cat01:
 #   - read spoligotype label
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5702,7 +5521,7 @@ tk::frame .main.out.report.readspol.head ;
 ---;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub05 Cat02:
+# Gui08 Sec05 Sub04 Cat02:
 #   - octal for read spoligotype
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5737,7 +5556,7 @@ tk::frame .main.out.report.readspol.octal ;
 ---;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub05 Cat03:
+# Gui08 Sec05 Sub04 Cat03:
 #   - strain for read spoligotype
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5772,7 +5591,7 @@ tk::frame .main.out.report.readspol.strain ;
 ---;
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec05 Sub05 Cat04:
+# Gui08 Sec05 Sub04 Cat04:
 #   - lineage for read spoligotype
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5808,7 +5627,7 @@ tk::frame .main.out.report.readspol.lin ;
 
 
 #**************************************************
-# Gui08 Sec05 Sub06:
+# Gui08 Sec05 Sub05:
 #   - MIRU lineage
 #**************************************************
 

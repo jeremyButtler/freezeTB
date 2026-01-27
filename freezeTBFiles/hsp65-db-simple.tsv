@@ -1,4 +1,9 @@
 gene	group	id	start	end	molecule	type	direction	base	lineage	print_lineage	fudge	min_score	max_trs_gap
+embB	BCG	BCG_embB	4247173	4247173	nt	snp	Forward	A	bovis_embB_G->A	False	0	0	0
+gyrA	BCG	BCG_gyrA	8624	8624	nt	snp	Forward	T	BCG_gryA_G->T	False	0	0	0
+ndh	BCG	BCG_ndh	2102106	2102106	nt	snp	Reverse	G	BCG_ndh_C->G	False	0	0	0
+rpsL	BCG	BCG_rpsL	781568	781568	nt	snp	Forward	T	BCG_rpsL_C->T	False	0	0	0
+gyrA	bovis	bovis_gyrA	9217	9217	nt	snp	Forward	C	bovis_gyrA_A->C	False	0	0	0
 hsp65	hsp65	431_C	528787	528787	nt	snp	Forward	C	431_C	False	0	0	0
 hsp65	hsp65	431_G	528787	528787	nt	snp	Forward	G	431_G	False	0	0	0
 hsp65	hsp65	434_C	528790	528790	nt	snp	Forward	C	434_C	False	0	0	0

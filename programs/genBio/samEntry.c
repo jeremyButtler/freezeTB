@@ -534,8 +534,7 @@ findQScores_samEntry(
        unsigned long qScoresUL = 0;
        ulong_ulCp qAdjustUL =
           mkDelim_ulCp((signed char) def_adjQ_samEntry);
-       unsigned long *qPtrUL =
-          (unsigned long *) samSTPtr->qStr;
+       ulong_ulCp *qPtrUL = (ulong_ulCp *) samSTPtr->qStr;
     #endif
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -580,8 +579,8 @@ findQScores_samEntry(
           } /*Loop: Get the q-score entries*/
        } /*Loop: Update the q-score historgram and sum*/
     
-          uiQScore = (samSTPtr)->readLenUI;
-          scoreAryUC = (unsigned char *) samSTPtr->qStr;
+       uiQScore = (samSTPtr)->readLenUI;
+       scoreAryUC = (unsigned char *) samSTPtr->qStr;
     #endif
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\

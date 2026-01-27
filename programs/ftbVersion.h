@@ -3,9 +3,9 @@
 '   - defines version for freezeTB programs
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-#define def_year_ftbVersion 2025
-#define def_month_ftbVersion 12
-#define def_day_ftbVersion 8
+#define def_year_ftbVersion 2026
+#define def_month_ftbVersion 1
+#define def_day_ftbVersion 27
 
 /*=======================================================\
 : License:

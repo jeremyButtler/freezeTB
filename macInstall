@@ -4,6 +4,11 @@
 
 # VVV old install method VVV
 
+if [ -f "${HOME}/Desktop/freezeTB" ];
+then
+   rm "${HOME}/Desktop/freezeTB";
+fi; # remove the old freezeTB shortcut
+
 cd "$(dirname "$0")"; # move to freezeTB directory
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

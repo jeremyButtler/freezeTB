@@ -436,6 +436,16 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2025-01-26:
+  - chagned coverage graphs in TclTk GUI and added missing
+    genes to the mean read depth graph
+  - changed raylib GUI width to be longer
+  - changed ftb output to no longer output the read depth
+    table (only coverage depths)
+  - coverage output tables know have headers that cover
+    all columns
+  - addAmr know adds a reference column. To use with
+    freezeTB remove the reference column.
 - 2025-01-08:
   - fixed some minor bugs in the GUIs. No major changes,
     and binary recompile will not be done on the 9th.

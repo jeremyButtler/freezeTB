@@ -407,6 +407,10 @@ initTK_ftbTclTk(
    *     - spoligo spacer database setup
    *   o fun03 sec03 sub02 cat09:
    *     - spoligo lineage database setup
+   *   o fun03 sec03 sub02 cat10:
+   *     - mean read depth graph R script
+   *   o fun03 sec03 sub02 cat11:
+   *     - gene coverage graph R script
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -917,6 +921,104 @@ initTK_ftbTclTk(
          str_endLine
       );
 
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub02 Cat10:
+   +   - mean read depth graph R script
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_depthGraph "
+      );
+   checkPaths_freezeTBPaths(
+      tmpStr,
+      (signed char *) "meanDepthGraph.r"
+   );
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+   errSI = Tcl_Eval(tclInterpSTPtr, (char *) fileStr);
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+        stderr,
+        "%s%scould not find the mean read depth script%s",
+        Tcl_GetStringResult(tclInterpSTPtr),
+        str_endLine,
+        str_endLine
+      );
+      return TCL_ERROR;
+   } /*If: error*/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun03 Sec03 Sub02 Cat11:
+   +   - gene coverage graph R script
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   tmpStr = defStr;
+   tmpStr +=
+      cpLine_ulCp(
+         tmpStr,
+         (signed char *) "variable glob_coverGraph "
+      );
+   checkPaths_freezeTBPaths(
+      tmpStr,
+      (signed char *) "coverGraph.r"
+   );
+
+   if(tmpStr[0] == '\0')
+   { /*If: file not found*/
+      tmpStr[0] = '"';
+      tmpStr[1] = '"';
+      tmpStr[2] = '\0';
+   } /*If: file not found*/
+
+   /*needed because windows uses \*/
+   cpStr = defStr;
+   tmpStr = fileStr;
+
+   while(*cpStr != '\0')
+   { /*Loop: esacape \*/
+      if(*cpStr == '\\')
+         *tmpStr++ = '\\';
+      *tmpStr++ = *cpStr++;
+   } /*Loop: esacape \*/
+
+	*tmpStr = '\0';
+   errSI = Tcl_Eval(tclInterpSTPtr, (char *) fileStr);
+
+   if( errSI != TCL_OK)
+   { /*If: error*/
+      fprintf(
+        stderr,
+        "%s%scould not find gene coverage graph script%s",
+        Tcl_GetStringResult(tclInterpSTPtr),
+        str_endLine,
+        str_endLine
+      );
       return TCL_ERROR;
    } /*If: error*/
 

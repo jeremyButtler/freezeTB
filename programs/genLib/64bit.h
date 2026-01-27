@@ -15,14 +15,20 @@
 '     - find number of empty bytes in a ulong
 '   o .h fun02: bytesInUL_64bit
 '     - find number of bytes in a single ulong
-'   o .h fun03: byteLenToULLen_64bit
+'   o .h fun03: bytesToNumUL_64bit
 '     - converts length in bytes to number of ulongs
 '       needed to hold the bytes
+'     - this is sizeof(unsigned long) bytes alignment and
+'       should allow you to avoid read errors
 '   o .h fun04: byteLenToFullULLen_64bit
 '      - converts length in bytes to number of fully
 '        filled ulongs (a paritially filled ulong is lost)
 '   o .h fun05: rshiftByte_64bit
 '     - shift a byte right by x bytes; over shifts go to 0
+'   o .h fun06: ulAlign_64bit
+'      - gives the extra number of bytes to get a ul_64bit
+'        array ending at the last long (alignment)
+'      - this allows you to avoid read errors
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -38,8 +44,13 @@
       typedef unsigned long long ul_64bit;
       typedef signed long long sl_64bit;
    #else
-      typedef unsigned long ul_64bit;
-      typedef signed long sl_64bit;
+      #ifdef BIT_32
+         typedef unsigned int ul_64bit;
+         typedef signed int sl_64bit;
+      #else
+         typedef unsigned long ul_64bit;
+         typedef signed long sl_64bit;
+      #endif
    #endif
 #endif
 
@@ -122,7 +133,7 @@
 |   - Returns:
 |     o number of extra bytes at the end
 \-------------------------------------------------------*/
-#define emptyBytes_64bit(lenMacroVar1) ((lenMacroVar1) - (def_modUL_64bit & (lenMacroVar1)) )
+#define emptyBytes_64bit(lenMacroVar1) (sizeof(ul_64bit) - (def_modUL_64bit & (lenMacroVar1)) )
 
 /*-------------------------------------------------------\
 | Fun02: bytesInUL_64bit
@@ -137,7 +148,7 @@
 #define bytesInUL_64bit(lenMacroVar2) (def_bytesInUL_64bit - emptyBytes_64bit((lenMacroVar2)))
 
 /*-------------------------------------------------------\
-| Fun03: byteLenToULLen_64bit
+| Fun03: bytesToNumUL_64bit
 |   - converts length in bytes to number of ulongs needed
 |     to hold the bytes
 | Input:
@@ -147,7 +158,7 @@
 |   - Returns:
 |     o number of ulongs needed to hold lenSI bytes
 \-------------------------------------------------------*/
-#define byteLenToULLen_64bit(lenMacroVar3) ( ((lenMacroVar3) >> def_byteLenToULLen_64bit) + (emptyBytes_64bit((lenMacroVar3)) > 0) )
+#define bytesToNumUL_64bit(lenMacroVar3) ( ((lenMacroVar3) >> def_byteLenToULLen_64bit) + (emptyBytes_64bit((lenMacroVar3)) > 0) )
 
 /*-------------------------------------------------------\
 | Fun04: byteLenToFullULLen_64bit
@@ -201,4 +212,35 @@
 `      o sets out of bounds values to 0
 `      o 0 if out of bounds
 `      o shifted value if in bounds
+*/
+
+/*-------------------------------------------------------\
+| Fun06: ulAlign_64bit
+|   - gives the extra number of bytes to get a ul_64bit
+|     array ending at the last long (alignment)
+|   - this allows you to avoid read errors
+| Input:
+|   - val6Mac:
+|     o number of data types
+|   - size6Mac:
+|     o size of data type
+| Output:
+|   - Returns:
+|     o number of bytes needed to allocate to keep
+|       alignment
+\-------------------------------------------------------*/
+#define ulAlign_64bit(val6Mac, size6Mac) ( bytesToNumUL_64bit((val6Mac) * (size6Mac)) * (def_bytesInUL_64bit / (size6Mac)) )
+/*Logic:
+` - find alignment to have an array be all ulongs
+`   - numBytes: val6Mac * size6Mac
+`     o number of bytes the user wants to hold in the
+`       array
+`   - numberLongs: byteLenToULLen_64(numBytes)
+`     o gets the number of longs needed to hold the
+`       number of input bytes
+`   - sizePerUlong: def_bytesInUL_64bit / size6Mac
+`     o get number of objects putting into the ulong array
+`   - chunkNumber: numberLongs / sizePerUlong
+`     o get the number of chunks to allocate and keep the
+`       array having a ulong number of bytes
 */

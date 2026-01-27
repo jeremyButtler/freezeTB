@@ -46,8 +46,9 @@ struct geneCoord;
 |   - coordsSTPtr:
 |     o geneCoord struct pointer with gene/target
 |       coordinates want to extract
-|   - numGenesSI:
-|     o number of genes in coordsSTPtr (index 0)
+|     o input 0/null to not filter by genes
+|   - depthArySI:
+|     o histogram (int array) to add each base to
 |   - numOffTargSI:
 |     o number of reads not mapping to a gene coordiante,
 |       but are mapped to the genome
@@ -60,7 +61,6 @@ void
 addRead_ampDepth(
    struct samEntry *samSTPtr,
    struct geneCoord *coordsSTPtr, /*list of genes*/
-   signed int numGenesSI,   /*number genes in list*/
    signed int *depthArySI,  /*depth array to update*/
    signed int *numOffTargSI /*number reads not in list*/
 );
@@ -93,30 +93,27 @@ phead_ampDepth(
 |   - geneCoordSTPtr:
 |     o pointer to an geneCoord structure array with the
 |       locations of each gene
-|   - numGenesSI:
-|     o integer with number of genes in genesST
 |   - offTargSI:
 |     o number off of target reads to print out
 |   - noMapSI:
 |     o number off of unmapped reads to print out
 |   - extraColStr:
 |     o c-string with the first column to print out
-|   - outVoidFILE:
-|     o FILE pointer with output file to print to
+|   - outFILE:
+|     o file to print to
 | Output:
 |   - Prints:
-|     o stats for each gene to outVoidFILE
+|     o stats for each gene to outFILE
 \-------------------------------------------------------*/
 void
 phist_ampDepth(
    signed int *histArySI,
    signed int minDepthSI,
    struct geneCoord *geneCoordSTPtr,
-   signed int numGenesSI,
    signed int offTargSI,
    signed int noMapSI,
    signed char *extraColStr,
-   void *outVoidFILE
+   void *outFILE
 );
 
 /*-------------------------------------------------------\
@@ -177,8 +174,6 @@ pdepth_ampDepth(
 |     o minimum read depth to count as covered
 |   - geneCoordSTPtr:
 |     o geneCoord struct with gene coordinates to print
-|   - numGenesSI:
-|     o number of genes in geneCoordSTPtr (index 0)
 |   - outFILE:
 |     o FILE * pointer to print to
 | Output:
@@ -193,7 +188,6 @@ pGeneCoverage_ampDepth(
    signed int *depthArySI, /*histogram of read depths*/
    signed int minDepthSI,  /*min depth to print*/
    struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
-   signed int numGenesSI,            /*number of genes*/
    void *outFILE           /*file to print to*/
 );
 
@@ -207,13 +201,11 @@ pGeneCoverage_ampDepth(
 |     o minimum read depth to count as covered
 |   - geneCoordSTPtr:
 |     o geneCoord struct with gene coordinates to print
-|   - numGenesSI:
-|     o number of genes in geneCoordSTPtr (index 0)
 | Output:
 |   - Returns:
-|     o float array (size = numGenesSI * 3) with percent
-|       coverage, coverage mean read depth, and gene mean
-|       read depth
+|     o float array (size = geneCoordSTPtr->lenSI * 3)
+|       with percent coverage, coverage mean read depth,
+|       and gene mean read depth
 |       * has two items per index
 |       * index 0: gene percent coverage (as decimal)
 |       * index 1: mean read depth in covered region
@@ -225,8 +217,7 @@ float *
 getGeneCoverage_ampDepth(
    signed int *depthArySI, /*histogram of read depths*/
    signed int minDepthSI,  /*min depth to print*/
-   struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
-   signed int numGenesSI             /*number of genes*/
+   struct geneCoord *geneCoordSTPtr /*gene coordinates*/
 );
 
 #endif

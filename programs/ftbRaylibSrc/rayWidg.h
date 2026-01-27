@@ -459,9 +459,12 @@ typedef struct Font (*fontFunction)(void);
 #endif
 
 /*window width and height are set on the smallest smart
-`  phone screen
+`  phone screen. I changed my mind, since this is a little
+`  to narrow.
+`  #define def_winWidth_rayWidg 420
+`  #define def_winHeight_rayWidg 320
 */
-#define def_winWidth_rayWidg 420
+#define def_winWidth_rayWidg 480
 #define def_winHeight_rayWidg 320
 #define def_FPS_rayWidg 60
 

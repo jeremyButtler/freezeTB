@@ -1693,12 +1693,12 @@
       signed long lenSL = endSL - startSL + 1;
       signed long posSL = 0;
 
-      unsigned long *inULPtr = 0;
+      ulong_ulCp *inULPtr = 0;
       signed long lEndSL = endSL >> def_shiftULBy_ulCp;
 
       if(startSL > shiftSL)
       { /*If: moveing sub-string back in string*/
-         inULPtr = (unsigned long *) &inStr[shiftSL];
+         inULPtr = (ulong_ulCp *) &inStr[shiftSL];
 
          startSL >>= def_shiftULBy_ulCp;
          shiftSL >>= def_shiftULBy_ulCp;
@@ -1745,7 +1745,7 @@
 
       else
       { /*Else: moveing sub-string forward in string*/
-         inULPtr = (unsigned long *) &inStr[startSL];
+         inULPtr = (ulong_ulCp *) &inStr[startSL];
 
          startSL >>= def_shiftULBy_ulCp;
          shiftSL >>= def_shiftULBy_ulCp;

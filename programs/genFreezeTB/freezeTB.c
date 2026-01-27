@@ -5441,9 +5441,6 @@ input_freezeTB(
 |   - geneCoordSTPtr:
 |     o geneCoord structure pointer with gene names
 |     o NEEDS to be sorted by position
-|   - numGenesSI:
-|     o index of the last gene in a geneCoordSTPtr struct
-|       * index 0
 |   - coordsStr:
 |     o c-string with coordinates and drug resistance for
 |       amplicons/genes (has drug resitance columns)
@@ -5465,7 +5462,6 @@ mkAmrCoverageTbl_freezeTB(
    signed int minDepthSI,  /*min read depth for coverage*/
    signed int *depthArySI,    /*array of read depths*/
    struct geneCoord *geneCoordSTPtr, /*has gene coords*/
-   signed int numGenesSI,     /*number of genes*/
    signed char *coordsStr     /*has amrs for each gene*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun11 TOC:
@@ -5491,6 +5487,7 @@ mkAmrCoverageTbl_freezeTB(
    signed int lenSI = 0; /*length of entry*/
    signed int posSI = 0; /*current position in entry*/
    signed int endSI = 0; /*end of info columns in entry*/
+   signed int drugMaxSI = 0;
 
    float *coverHeapAryF = 0;
 
@@ -5501,49 +5498,170 @@ mkAmrCoverageTbl_freezeTB(
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec02:
    ^   - get gene coverage, open files, and print headers
+   ^   o fun11 sec02 sub01:
+   ^     - get gene coverage
+   ^   o fun11 sec02 sub02:
+   ^     - find the maximum number of drugs
+   ^   o fun11 sec02 sub03:
+   ^     - open output file
+   ^   o fun11 sec02 sub04:
+   ^     - print the header for the output file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*________________get_gene_coverage__________________*/
+   /*****************************************************\
+   * Fun11 Sec02 Sub01:
+   *   - get gene coverage
+   \*****************************************************/
+
    coverHeapAryF =
       getGeneCoverage_ampDepth(
          depthArySI,
          minDepthSI,
-         geneCoordSTPtr,
-         numGenesSI + 1
+         geneCoordSTPtr
       ); /*gives percent coverage and mean depth*/
    if(! coverHeapAryF)
       goto memErr_fun11_sec04;
    nameSortFloat3IndexSync_geneCoord(
       geneCoordSTPtr,
-      numGenesSI + 1,
       coverHeapAryF
    ); /*this allows me to easily get genes by name*/
 
-   /*________________open_coordinates_file______________*/
+   /*****************************************************\
+   * Fun11 Sec02 Sub02:
+   *   - find the maximum number of drugs
+   *   o fun11 sec02 sub03 cat01:
+   *     - open input file, start loop, and get gene name
+   *   o fun11 sec02 sub03 cat02:
+   *     - move to drug entries in the coordinate file
+   *   o fun11 sec02 sub03 cat03:
+   *     - find the number of drugs per entry
+   \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun11 Sec02 Sub03 Cat01:
+   +   - open input file, start loop, and get gene name
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
    inFILE = fopen((char *) coordsStr, "r");
    if(! inFILE)
       goto fileErr_fun11_sec04;
 
-   /*________________open_the_output_file_______________*/
+   fgets((char *) lineStr, 4088, inFILE);
+
+   while( fgets((char *) lineStr, 4088, inFILE) )
+   { /*Loop: read in the gene/amplicons*/
+      posSI = 0;
+      lenSI = 0;
+
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         continue; /*blank line*/
+
+      posSI += endWhite_ulCp(&lineStr[posSI]);
+      lineStr[posSI] = 0;
+      ++posSI;
+
+      geneSI =
+         findName_geneCoord(geneCoordSTPtr, lineStr, 0);
+      if(geneSI < 0)
+         continue; /*gene is not found*/
+
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun11 Sec02 Sub03 Cat02:
+      +   - move to drug entries in the coordinate file
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      /*reference*/
+      posSI += endWhite_ulCp(&lineStr[posSI]);
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*direction*/
+      posSI += endWhite_ulCp(&lineStr[posSI]);
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*start of gene*/
+      posSI += endWhite_ulCp(&lineStr[posSI]);
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+      if(! lineStr[posSI])
+         goto fileErr_fun11_sec04;
+
+      /*end of gene*/
+      posSI += endWhite_ulCp(&lineStr[posSI]);
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+
+      /*resistance*/
+      posSI += endWhite_ulCp(&lineStr[posSI]);
+      while(lineStr[posSI] && lineStr[posSI] < 33)
+         ++posSI;
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun11 Sec02 Sub03 Cat03:
+      +   - find the number of drugs per entry
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      if(lineStr[posSI] == '*' || ! lineStr[posSI])
+         continue; /*no drugs for this entry*/
+      endSI = 0;
+     
+      while(lineStr[posSI] && lineStr[posSI] != '*')
+      { /*Loop: find number of drugs*/
+         ++endSI;
+         posSI += endWhite_ulCp(&lineStr[posSI]);
+         while(lineStr[posSI] && lineStr[posSI] < 33)
+            ++posSI;
+      } /*Loop: copy drugs to separate array*/
+
+      if(endSI > drugMaxSI)
+         drugMaxSI = endSI;
+   } /*Loop: read in the gene/amplicons*/
+
+   ++drugMaxSI; /*convert to index 1*/
+   endSI = 0;
+   fseek(inFILE, 0, SEEK_SET); /*move back to start*/
+
+   /*****************************************************\
+   * Fun11 Sec02 Sub03:
+   *   - open output file
+   \*****************************************************/
+
    lenSI = cpStr_ulCp(lineStr, prefixStr);
    cpStr_ulCp(
       &lineStr[lenSI],
-      (signed char *) "-coverage-amrs.tsv"
+      (signed char *) "-coverage.tsv"
    );
    outFILE = fopen((char *) lineStr, "w");
    if(! outFILE)
       goto fileErr_fun11_sec04;
 
-   /*________________print_the_table_header_____________*/
+   /*****************************************************\
+   * Fun11 Sec02 Sub04:
+   *   - print the header for the output file
+   \*****************************************************/
+
    fprintf(
       outFILE,
-      "gene\t%%coverage\tmean_coverage_depth\t"
+      "gene\tperc_coverage\tmean_coverage_depth"
    );
-   fprintf(
-      outFILE,
-      "\tmean_target_depth\tdrugs%s",
-      str_endLine
-   );
+   fprintf(outFILE, "\tmean_target_depth");
+
+   for(endSI = 1; endSI <= drugMaxSI; ++endSI)
+      fprintf(outFILE, "\tdrug_%i", endSI);
+   fprintf(outFILE, "\tend_drugs%s", str_endLine);
+   endSI = 0;
 
    if(! fgets((char *) lineStr, 4088, inFILE) )
       goto fileErr_fun11_sec04; /*blank file*/
@@ -5601,11 +5719,7 @@ mkAmrCoverageTbl_freezeTB(
          goto fileErr_fun11_sec04;
 
       geneSI =
-         findName_geneCoord(
-            geneCoordSTPtr,
-            lineStr,
-            numGenesSI + 1
-         );
+         findName_geneCoord(geneCoordSTPtr, lineStr, 0);
       if(geneSI < 0)
       { /*If: gene was not found*/
          fprintf(
@@ -5715,7 +5829,8 @@ mkAmrCoverageTbl_freezeTB(
       *   - print the new table row
       \**************************************************/
 
-      drugStr[endSI++] = '\t';
+      if(endSI && drugStr[endSI - 1] != '\t')
+         drugStr[endSI++] = '\t';
       drugStr[endSI++] = '*';
       drugStr[endSI] = 0;
       lineStr[lenSI] = 0;
@@ -5758,7 +5873,7 @@ mkAmrCoverageTbl_freezeTB(
          fclose(outFILE);
       outFILE = 0;
 
-      sort_geneCoord(geneCoordSTPtr, 0, numGenesSI);
+      sort_geneCoord(geneCoordSTPtr);
          /*make sure genes are resorted by position*/
 
       return (signed char) lenSI;
@@ -5884,12 +5999,9 @@ run_freezeTB(
    *   - read depth and coverage stats variables
    \*****************************************************/
 
-   signed char readStatsStr[def_lenFileName_freezeTB];
-      /*output file name*/
    signed char genePercTblStr[def_lenFileName_freezeTB];
 
    struct geneCoord *coordsHeapST = 0;
-   signed int numCoordsSI = 0;
    unsigned int lastBaseUI = 0;
 
    signed int *readMapArySI = 0;
@@ -6006,13 +6118,8 @@ run_freezeTB(
    *   - genotyping variables
    \*****************************************************/
 
-   FILE *hsp65OutFILE = 0;
-
    signed char
       hsp65ReadOutStr[def_lenFileName_freezeTB];
-   signed char
-      hsp65ConOutStr[def_lenFileName_freezeTB];
-   signed char hsp65HeadBl = 1; /*1: print header*/
 
    signed int *hsp65SimpleLinHeapArySI = 0;
    signed int *hsp65TrsHeapArySI = 0;
@@ -6749,7 +6856,7 @@ run_freezeTB(
    ^ Fun12 Sec04:
    ^   - check output files (can I open?)
    ^   o fun12 sec04 sub01:
-   ^     - output file for read stats
+   ^     - open the gene coverage file
    ^   o fun12 sec04 sub02:
    ^     - set up cosensus fragments output file
    ^   o fun12 sec04 sub03:
@@ -6772,67 +6879,33 @@ run_freezeTB(
    ^     - set up sam file name (if mapping reads)
    ^   o fun12 sec04 sub12:
    ^     - set up hsp65 read species output name
-   ^   o fun12 sec04 sub13:
-   ^     - set up hsp65 consensus species output name
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
    * Fun12 Sec04 Sub01:
-   *   - set up read stats file name
+   *   - open the gene coverage file
    \*****************************************************/
 
    errSC =
       outputPath_freezeTBPaths(
-        ftbSetStackST.prefixStr,
-        (signed char *) "-depths.tsv",
-        readStatsStr
+         ftbSetStackST.prefixStr,
+         (signed char *) "-gene-coverage.tsv",
+         genePercTblStr
       );
 
    if(errSC)
    { /*If: could not open file*/
       tmpStr = errHeapStr;
-
       tmpStr +=
-         cpStr_ulCp(
-            errHeapStr,
-            (signed char *)
-               "unable to open depths ouput file: "
-         );
-
-      cpStr_ulCp(
-         tmpStr,
-         readStatsStr
-      );
-
+        cpStr_ulCp(
+          errHeapStr,
+          (signed char *)
+             "could not open output coverage file: "
+        );
+      cpStr_ulCp(tmpStr, conTsvStr);
       goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
-   errSC =
-      outputPath_freezeTBPaths(
-        ftbSetStackST.prefixStr,
-        (signed char *) "-geneCoverage.tsv",
-        genePercTblStr
-      );
-
-   if(errSC)
-   { /*If: could not open file*/
-      tmpStr = errHeapStr;
-
-      tmpStr +=
-         cpStr_ulCp(
-            errHeapStr,
-            (signed char *)
-               "unable to open depths ouput file: "
-         );
-
-      cpStr_ulCp(
-         tmpStr,
-         readStatsStr
-      );
-
-      goto err_fun12_sec11_sub02;
-   } /*If: could not open file*/
- 
    /*****************************************************\
    * Fun12 Sec04 Sub02:
    *   - set up cosensus fragments output file
@@ -6856,10 +6929,7 @@ run_freezeTB(
              "unable to open con tsv output file: "
         );
 
-      cpStr_ulCp(
-         tmpStr,
-         conTsvStr
-      );
+      cpStr_ulCp(tmpStr, conTsvStr);
 
       goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
@@ -7210,32 +7280,6 @@ run_freezeTB(
       goto err_fun12_sec11_sub02;
    } /*If: could not open file*/
 
-   /*****************************************************\
-   * Fun12 Sec04 Sub13:
-   *   - set up hsp65 read consensus output name
-   \*****************************************************/
-
-   errSC =
-      outputPath_freezeTBPaths(
-         ftbSetStackST.prefixStr,
-         (signed char *) "-con-hsp65.tsv",
-         hsp65ConOutStr
-      );
-
-   if(errSC)
-   { /*If: could not open file*/
-      tmpStr = errHeapStr;
-      tmpStr +=
-         cpStr_ulCp(
-            errHeapStr,
-            (signed char *)
-               "unable to open hsp65 file output: "
-         );
-      cpStr_ulCp(tmpStr, hsp65ConOutStr);
-
-      goto err_fun12_sec11_sub02;
-   } /*If: could not open file*/
-
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun12 Sec05:
    ^   - read in databases
@@ -7261,7 +7305,6 @@ run_freezeTB(
    coordsHeapST =
       getCoords_geneCoord(
          ftbSetStackST.coordFileStr,
-         &numCoordsSI,
          &lenBuffUL    /*reusing to hold error output*/
       );
 
@@ -7317,7 +7360,8 @@ run_freezeTB(
    } /*If: error*/
 
    lenBuffUL = 0;
-   lastBaseUI = coordsHeapST->endAryUI[numCoordsSI];
+   lastBaseUI =
+      coordsHeapST->endAryUI[coordsHeapST->lenSI - 1];
 
    /*****************************************************\
    * Fun12 Sec05 Sub02:
@@ -8294,7 +8338,6 @@ run_freezeTB(
       addRead_ampDepth(
          &samStackST,
          coordsHeapST,
-         numCoordsSI,
          readMapArySI,
          &offTargReadsSI
       );
@@ -8653,35 +8696,13 @@ run_freezeTB(
    *   - print read stats
    \*****************************************************/
 
-   sort_geneCoord(
-      coordsHeapST,
-      0,
-      (unsigned int) numCoordsSI
-   );
-
-   outFILE = fopen((char *) readStatsStr, "w");
-   phead_ampDepth(outFILE);
-
-   phist_ampDepth(
-      readMapArySI,
-      1,            /*using 1 so all data is printed*/      
-      coordsHeapST,
-      numCoordsSI,
-      offTargReadsSI,
-      noMapReadSI,
-      ftbSetStackST.depthFlagStr,
-      outFILE
-    ); /*print filterd read stats*/
-
-   fclose(outFILE);
-   outFILE = 0;
+   sort_geneCoord(coordsHeapST);
 
    outFILE = fopen((char *) genePercTblStr, "w");
    pGeneCoverage_ampDepth(
       readMapArySI,                    /*read depths*/
       ftbSetStackST.tbConSet.minDepthSI,
       coordsHeapST,
-      numCoordsSI,
       outFILE
    );
 
@@ -8690,7 +8711,6 @@ run_freezeTB(
       ftbSetStackST.tbConSet.minDepthSI,
       readMapArySI,                    /*read depths*/
       coordsHeapST,
-      numCoordsSI,
       ftbSetStackST.coordFileStr
    );
 
@@ -8961,9 +8981,6 @@ run_freezeTB(
    /*open the AMR output file*/
    outFILE = fopen((char *) conAmrStr, "w");
 
-   /*open the hsp65 species and custom lineages file*/
-   hsp65OutFILE = fopen((char *) hsp65ConOutStr, "w");
-
    errSC = 0;
 
    /*remove all the read counters*/
@@ -9062,80 +9079,6 @@ run_freezeTB(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun12 Sec09 Sub04 Cat06:
-     +   - hsp65 species checking + user defined lineages
-     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-      hsp65SimpleLinHeapArySI =
-         simpleLineage_getLin(
-            &samConSTAry[siCon],
-            hsp65SimpleHeapST,
-            &hsp65TblStackST,
-            &hsp65TrsHeapArySI,
-            &hsp65SimpleLenSI
-         );
-
-      if(hsp65SimpleLenSI < 0)
-         goto conHsp65Err_fun12_sec09_sub04_cat06;
-
-      else if(hsp65SimpleLenSI)
-      { /*Else If: have simple lineages*/
-         hsp65ComplexLinHeapArySI =
-            complexLineage_getLin(
-               hsp65ComplexHeapST,
-               hsp65SimpleHeapST,
-               hsp65SimpleLinHeapArySI,
-               hsp65TrsHeapArySI,
-               &hsp65SimpleLenSI,
-               &hsp65ComplexLenSI
-            );
-
-         if(hsp65ComplexLenSI == -2)
-            goto conHsp65Err_fun12_sec09_sub04_cat06;
-
-         if(
-            plineages_getLin(
-               samConSTAry[siCon].qryIdStr,
-               hsp65SimpleLinHeapArySI,
-               hsp65TrsHeapArySI,
-               hsp65SimpleLenSI,
-               hsp65ComplexLinHeapArySI,
-               hsp65ComplexLenSI,
-               hsp65SimpleHeapST,
-               hsp65ComplexHeapST,
-               0, /*only print marked variants*/
-               &hsp65HeadBl, /*tells if printing header*/
-               hsp65OutFILE
-            )
-         ){ /*If: memory error*/
-            conHsp65Err_fun12_sec09_sub04_cat06:;
-               tmpStr = errHeapStr;
-
-               tmpStr +=
-                  cpStr_ulCp(
-                    errHeapStr,
-                    (signed char *)
-                      "memory error for hsp65 on line "
-                  );
-               numToStr(tmpStr, totalReadsUI);
-
-               goto err_fun12_sec11_sub02;
-         }  /*If: memory error*/
-      } /*Else If: have simple lineages*/
-
-      if(hsp65SimpleLinHeapArySI)
-         free(hsp65SimpleLinHeapArySI);
-      hsp65SimpleLinHeapArySI = 0;
-
-      if(hsp65TrsHeapArySI)
-         free(hsp65TrsHeapArySI);
-      hsp65TrsHeapArySI = 0;
-
-      if(hsp65ComplexLinHeapArySI)
-         free(hsp65ComplexLinHeapArySI);
-      hsp65ComplexLinHeapArySI = 0;
-
-     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
      + Fun12 Sec09 Sub04 Cat07:
      +   - free the consensus fragment
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -9147,9 +9090,6 @@ run_freezeTB(
    * Fun12 Sec09 Sub03:
    *   - close output files and free uneeded variables
    \*****************************************************/
-
-   fclose(hsp65OutFILE);
-   hsp65OutFILE = 0;
 
    fclose(outFILE);
    outFILE = 0;
@@ -9459,8 +9399,6 @@ run_freezeTB(
    *     - MIRU-VNTR lineage detection and printing
    *   o fun12 sec10 sub04 cat03:
    *     - spoligotype detection and printing
-   *   o fun12 sec10 sub04 cat04:
-   *     - hsp65 species checking + user defined lineages
    *   o fun12 sec10 sub04 cat05:
    *     - move to next cluster
    \*****************************************************/
@@ -9474,8 +9412,6 @@ run_freezeTB(
 
    outFILE = fopen((char *) conAmrStr, "w");
       /*file to print AMR results to*/
-   hsp65OutFILE = fopen((char *) hsp65ConOutStr, "w");
-
    pConHead_checkAmr(outFILE);
 
    errSC = 0;
@@ -9545,80 +9481,6 @@ run_freezeTB(
          ); /*find spoligotype with kmer search*/
 
      /*++++++++++++++++++++++++++++++++++++++++++++++++++\
-     + Fun12 Sec09 Sub04 Cat04:
-     +   - hsp65 species checking + user defined lineages
-     \++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-      hsp65SimpleLinHeapArySI =
-         simpleLineage_getLin(
-            &samConSTAry[siCon],
-            hsp65SimpleHeapST,
-            &hsp65TblStackST,
-            &hsp65TrsHeapArySI,
-            &hsp65SimpleLenSI
-         );
-
-      if(hsp65SimpleLenSI < 0)
-         goto clustHsp65Err_fun12_sec09_sub04_cat04;
-
-      else if(hsp65SimpleLenSI)
-      { /*Else If: have simple lineages*/
-         hsp65ComplexLinHeapArySI =
-            complexLineage_getLin(
-               hsp65ComplexHeapST,
-               hsp65SimpleHeapST,
-               hsp65SimpleLinHeapArySI,
-               hsp65TrsHeapArySI,
-               &hsp65SimpleLenSI,
-               &hsp65ComplexLenSI
-            );
-
-         if(hsp65ComplexLenSI == -2)
-            goto clustHsp65Err_fun12_sec09_sub04_cat04;
-
-         if(
-            plineages_getLin(
-               samConSTAry[siCon].qryIdStr,
-               hsp65SimpleLinHeapArySI,
-               hsp65TrsHeapArySI,
-               hsp65SimpleLenSI,
-               hsp65ComplexLinHeapArySI,
-               hsp65ComplexLenSI,
-               hsp65SimpleHeapST,
-               hsp65ComplexHeapST,
-               0, /*only print marked variants*/
-               &hsp65HeadBl, /*tells if printing header*/
-               hsp65OutFILE
-            )
-         ){ /*If: memory error*/
-            clustHsp65Err_fun12_sec09_sub04_cat04:;
-               tmpStr = errHeapStr;
-
-               tmpStr +=
-                  cpStr_ulCp(
-                    errHeapStr,
-                    (signed char *)
-                      "memory error for hsp65 on line "
-                  );
-               numToStr(tmpStr, totalReadsUI);
-
-               goto err_fun12_sec11_sub02;
-         }  /*If: memory error*/
-      } /*Else If: have simple lineages*/
-
-      if(hsp65SimpleLinHeapArySI)
-         free(hsp65SimpleLinHeapArySI);
-      hsp65SimpleLinHeapArySI = 0;
-
-      if(hsp65TrsHeapArySI)
-         free(hsp65TrsHeapArySI);
-      hsp65TrsHeapArySI = 0;
-
-      if(hsp65ComplexLinHeapArySI)
-         free(hsp65ComplexLinHeapArySI);
-      hsp65ComplexLinHeapArySI = 0;
-
-     /*++++++++++++++++++++++++++++++++++++++++++++++++++\
      + Fun12 Sec10 Sub04 Cat05:
      +   - move to next cluster
      \++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -9630,9 +9492,6 @@ run_freezeTB(
       freeHeapList_con_clustST(conListHeapST);
    conListHeapST = 0;
    conNodeST = 0;
-
-   fclose(hsp65OutFILE);
-   hsp65OutFILE = 0;
 
    /*****************************************************\
    * Fun12 Se109 Sub05:
@@ -9903,13 +9762,6 @@ run_freezeTB(
       else if(logFILE == stderr) ;
       else fclose(logFILE);
       logFILE = 0;
-
-      if(! hsp65OutFILE) ;
-      else if(hsp65OutFILE == stdin) ;
-      else if(hsp65OutFILE == stdout) ;
-      else if(hsp65OutFILE == stderr) ;
-      else fclose(hsp65OutFILE);
-      hsp65OutFILE = 0;
 
       return errHeapStr;
 } /*run_freezeTB*/

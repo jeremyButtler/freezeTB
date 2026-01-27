@@ -23,8 +23,8 @@
 #include "../genLib/ulCp.h"
 #include "../genBio/geneCoord.h"
 #include "../genBio/seqST.h"
-#include "../genFreezeTB/amrST.h"
-#include "../genFreezeTB/addAmr.h"
+#include "../genAmr/amrST.h"
+#include "../genAmr/addAmr.h"
 
 /*.h files only*/
 #include "../ftbVersion.h"
@@ -56,7 +56,7 @@ pversion_mainAddAmr(
 ){
    fprintf(
       (FILE *) outFILE,
-      "addAmr from freezeTB version: %i-%02i-%02i%s",
+      "addAmr from ftbVersion version: %i-%02i-%02i%s",
       def_year_ftbVersion,
       def_month_ftbVersion,
       def_day_ftbVersion,
@@ -120,10 +120,10 @@ phelp_mainAddAmr(
    ^   - input entry
    ^   o fun02 sec02 sub01:
    ^     - input header
-   *   o fun02 sec02 sub02:
-   *     - gene coordinates file
-   *   o fun02 sec02 sub03:
-   *     - reference
+   ^   o fun02 sec02 sub02:
+   ^     - gene coordinates file
+   ^   o fun02 sec02 sub03:
+   ^     - reference
    ^   o fun02 sec02 sub04:
    ^     - database to add to
    ^   o fun02 sec02 sub05:
@@ -131,12 +131,16 @@ phelp_mainAddAmr(
    ^   o fun02 sec02 sub06:
    ^     - file variant id input
    ^   o fun02 sec02 sub07:
-   ^     - variant gene
+   ^     - file variant id for the amr
    ^   o fun02 sec02 sub08:
-   ^     - AMRs
+   ^     - file reference id input
    ^   o fun02 sec02 sub09:
-   ^     - comment entries
+   ^     - gene the variant belongs to
    ^   o fun02 sec02 sub10:
+   ^     - drug resistances
+   ^   o fun02 sec02 sub11:
+   ^     - comment entries
+   ^   o fun02 sec02 sub12:
    ^     - help and version number
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -331,7 +335,7 @@ phelp_mainAddAmr(
 
    /*****************************************************\
    * Fun02 Sec02 Sub07:
-   *   - variant gene
+   *   - file variant id for the amr
    \*****************************************************/
 
    fprintf(
@@ -339,6 +343,41 @@ phelp_mainAddAmr(
       "Variant file options:%s",
       str_endLine
    );
+
+
+   fprintf(
+      (FILE *) outFILE,
+      "  -var <var_id>: [Required]%s",
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "    o variant id for the AMR%s",
+      str_endLine
+   );
+
+   /*****************************************************\
+   * Fun02 Sec02 Sub08:
+   *   - file reference id input
+   \*****************************************************/
+
+   fprintf(
+      (FILE *) outFILE,
+      "  -ref <ref_id>: [Required]%s",
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "    o reference id of the AMR is from%s",
+      str_endLine
+   );
+
+   /*****************************************************\
+   * Fun02 Sec02 Sub09:
+   *   - gene the variant belongs to
+   \*****************************************************/
 
    fprintf(
       (FILE *) outFILE,
@@ -365,8 +404,8 @@ phelp_mainAddAmr(
    );
 
    /*****************************************************\
-   * Fun02 Sec02 Sub08:
-   *   - AMRs
+   * Fun02 Sec02 Sub10:
+   *   - drug resistances
    \*****************************************************/
 
    fprintf(
@@ -474,26 +513,26 @@ phelp_mainAddAmr(
    );
 
    /*****************************************************\
-   * Fun02 Sec02 Sub09:
+   * Fun02 Sec02 Sub11:
    *   - comment entries
-   *   o fun02 sec02 sub09 cat01:
+   *   o fun02 sec02 sub11 cat01:
    *     - grade
-   *   o fun02 sec02 sub09 cat02:
+   *   o fun02 sec02 sub11 cat02:
    *     - high resistance
-   *   o fun02 sec02 sub09 cat03:
+   *   o fun02 sec02 sub11 cat03:
    *     - low resistance
-   *   o fun02 sec02 sub09 cat04:
+   *   o fun02 sec02 sub11 cat04:
    *     - additive resistance
-   *   o fun02 sec02 sub09 cat05:
+   *   o fun02 sec02 sub11 cat05:
    *     - gene needed
-   *   o fun02 sec02 sub09 cat06:
+   *   o fun02 sec02 sub11 cat06:
    *     - comment
-   *   o fun02 sec02 sub09 cat07:
+   *   o fun02 sec02 sub11 cat07:
    *     - effect
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat01:
+   + Fun02 Sec02 Sub11 Cat01:
    +   - grade
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -511,7 +550,7 @@ phelp_mainAddAmr(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat02:
+   + Fun02 Sec02 Sub11 Cat02:
    +   - high resistance
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -541,7 +580,7 @@ phelp_mainAddAmr(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat03:
+   + Fun02 Sec02 Sub11 Cat03:
    +   - low resistance
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -571,7 +610,7 @@ phelp_mainAddAmr(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat04:
+   + Fun02 Sec02 Sub11 Cat04:
    +   - additive resistance
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -600,7 +639,7 @@ phelp_mainAddAmr(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat05:
+   + Fun02 Sec02 Sub11 Cat05:
    +   - gene needed
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -617,7 +656,7 @@ phelp_mainAddAmr(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat06:
+   + Fun02 Sec02 Sub11 Cat06:
    +   - comment
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -634,7 +673,7 @@ phelp_mainAddAmr(
    );
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun02 Sec02 Sub09 Cat07:
+   + Fun02 Sec02 Sub11 Cat07:
    +   - effect
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -651,7 +690,7 @@ phelp_mainAddAmr(
    );
 
    /*****************************************************\
-   * Fun02 Sec02 Sub10:
+   * Fun02 Sec02 Sub12:
    *   - help and version number
    \*****************************************************/
 
@@ -992,26 +1031,18 @@ main(
 
    signed char errSC = 0;
 
-   struct seqST refStackST;
+   struct seqST *refSeqHeapAryST = 0;
+   signed long refSeqLenSL = 0;
+   signed long refSeqSizeSL = 0;
+   signed int refIndexSI = 0;
 
    struct geneCoord *coordHeapST = 0;
-   signed int coordLenSI = 0;
-
    struct amrST *varAmrHeapST = 0;
+
    signed long errPosSL = 0; /*position of error in line*/
    unsigned long lineUL = 0; /*line on*/
   
-
-   struct amrST *tmpAmrAryST = 0;
-   struct amrST *dbAmrHeapAryST = 0;
-   unsigned int dbAmrLenUI = 0;
-   unsigned int dbAmrSizeUI = 0;
-   unsigned int tmpUI = 0;
-
-   /*store drugs in database*/
-   signed char *drugHeapAryStr = 0;
-   signed int drugLenSI = 0;
-   signed int drugSizeSI = 0;
+   struct refList_amrST *refAmrHeapSTPtr = 0;
 
    FILE *inFILE = 0;
 
@@ -1036,8 +1067,6 @@ main(
    * Main Sec02 Sub01:
    *   - initialize and get input
    \*****************************************************/
-
-   init_seqST(&refStackST);
 
    errSC =
       input_mainAddAmr(
@@ -1118,7 +1147,13 @@ main(
    +   - get reference from file
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   errSC = getFa_seqST(inFILE, &refStackST);
+   refSeqHeapAryST =
+      readFaFile_seqST(
+         inFILE,
+         &refSeqLenSL,
+         &refSeqSizeSL,
+         &errSC
+      ); /*get the reference sequences*/
 
    if(! errSC)
       ;
@@ -1133,6 +1168,22 @@ main(
       goto err_main_sec05;
    } /*Else: could not get reference sequence*/
 
+   for(
+      refIndexSI = 0;
+      refIndexSI < refSeqLenSL;
+      ++refIndexSI
+   ){ /*Loop: trim at frist white space in ref id*/
+      lineUL =
+         endWhite_ulCp(
+            refSeqHeapAryST[refIndexSI].idStr
+         );
+     refSeqHeapAryST[refIndexSI].idStr[lineUL] = 0;
+   }  /*Loop: trim at frist white space in ref id*/
+
+   lineUL = 0;
+   refIndexSI = 0;
+   sort_seqST(refSeqHeapAryST, refSeqLenSL);
+
    if(inFILE != stdin)
       fclose(inFILE);
    inFILE = 0;
@@ -1143,11 +1194,7 @@ main(
    \*****************************************************/
 
    coordHeapST =
-      getCoords_geneCoord(
-         coordsFileStr, /*file with coordinates*/
-         &coordLenSI,   /*number of genes (coordianates)*/
-         &lineUL        /*for errors, re-using variable*/
-      );
+      getCoords_geneCoord(coordsFileStr, &lineUL);
 
    if(! lineUL)
       ;
@@ -1185,7 +1232,7 @@ main(
       goto err_main_sec05;
    } /*Else: invalid line*/
 
-   sortName_geneCoord(coordHeapST, 0, coordLenSI - 1);
+   sortName_geneCoord(coordHeapST);
       /*need to sort by name because var_addAmr uses
       `   a binary search by name
       */
@@ -1197,15 +1244,7 @@ main(
 
    if(dbFileStr)
    { /*If: adding to a database*/
-      dbAmrHeapAryST =
-         readTbl_amrST(
-            dbFileStr,       /*database to read in*/
-            &dbAmrLenUI,     /*AMRs in array/array size*/
-            &drugHeapAryStr, /*gets drugs in database*/
-            &drugLenSI,      /*number drugs read in*/
-            &drugSizeSI,     /*size of drugHeapAryStr*/
-            &errSC           /*gets errors*/
-         );
+      refAmrHeapSTPtr = readTbl_amrST(dbFileStr, &errSC);
 
       if(! errSC)
          ;
@@ -1230,15 +1269,14 @@ main(
          );
          goto err_main_sec05;
       } /*Else: file error*/
-
-      dbAmrSizeUI = dbAmrLenUI;
    } /*If: adding to a database*/
 
    else
    { /*Else: get some inital memory*/
-      dbAmrHeapAryST = malloc(16 * sizeof(struct amrST));
+      refAmrHeapSTPtr =
+         malloc(sizeof(struct refList_amrST));
 
-      if(! dbAmrHeapAryST)
+      if(! refAmrHeapSTPtr)
       { /*If: had memory error*/
          fprintf(
            stderr,
@@ -1248,11 +1286,7 @@ main(
          goto err_main_sec05;
       } /*If: had memory error*/
 
-      for(
-         dbAmrSizeUI = 0;
-         dbAmrSizeUI < 16;
-         ++dbAmrSizeUI
-      ) init_amrST(&dbAmrHeapAryST[dbAmrSizeUI]);
+      init_refList_amrST(refAmrHeapSTPtr);
    } /*Else: get some inital memory*/
 
    /*****************************************************\
@@ -1332,12 +1366,13 @@ main(
       varAmrHeapST =
          getVar_addAmr(
             inFILE,
+            &refIndexSI, /*gets index of input reference*/
             coordHeapST,
-            coordLenSI,
-            refStackST.seqStr,
-            &drugHeapAryStr,
-            &drugLenSI,
-            &drugSizeSI,
+            refSeqHeapAryST,
+            refSeqLenSL,
+            &refAmrHeapSTPtr->drugAryStr,
+            &refAmrHeapSTPtr->drugCntSI,
+            &refAmrHeapSTPtr->drugSizeSI,
             &errSC,
             &errPosSL
          ); /*convert one variant to an AMR*/
@@ -1376,6 +1411,17 @@ main(
          );
          goto err_main_sec05;
       } /*Else If: exceded drug limit*/
+
+      else if(errSC == def_noRef_addAmr)
+      { /*Else If: no reference was input*/
+         fprintf(
+            stderr,
+            "no ref or missing reference for line %lu%s",
+            lineUL,
+            str_endLine
+         );
+         goto err_main_sec05;
+      } /*Else If: no reference was input*/
 
       else if(errSC == def_noVar_addAmr)
       { /*Else If: blank line or empty id*/
@@ -1428,38 +1474,13 @@ main(
       *   - add variant to database array
       \**************************************************/
 
-      if(dbAmrLenUI >= dbAmrSizeUI)
-      { /*If: need a larger database*/
-         dbAmrSizeUI += (dbAmrSizeUI >> 1);
-         tmpAmrAryST =
-            realloc(
-               dbAmrHeapAryST,
-               dbAmrSizeUI * sizeof(struct amrST)
-            );
-         if(! tmpAmrAryST)
-         { /*If: memory error*/
-            fprintf(
-               stderr,
-               "ran out of memory processing variants%s",
-               str_endLine
-            );
-            goto err_main_sec05;
-         } /*If: memory error*/
-
-         dbAmrHeapAryST = tmpAmrAryST;
-         tmpAmrAryST = 0;
-
-         for(
-            tmpUI = dbAmrLenUI;
-            tmpUI < dbAmrSizeUI;
-            ++tmpUI
-         ) init_amrST(&dbAmrHeapAryST[tmpUI]);
-      } /*If: need a larger database*/
-
-      swap_amrST(
-         &dbAmrHeapAryST[dbAmrLenUI++],
-         varAmrHeapST
-      ); /*add the new variant to the database*/
+      if(
+         amrAdd_refList_amrST(
+            varAmrHeapST,
+            refSeqHeapAryST[refIndexSI].idStr,
+            refAmrHeapSTPtr
+         ) > 1
+      ) goto err_main_sec05;
 
       freeHeap_amrST(varAmrHeapST);
       varAmrHeapST = 0;
@@ -1470,15 +1491,8 @@ main(
    ^   - print new/modified database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   sortPos_amrST(dbAmrHeapAryST, 0, dbAmrLenUI - 1);
-
-   p_amrST(
-      dbAmrHeapAryST,
-      dbAmrLenUI,
-      drugHeapAryStr,
-      drugLenSI,
-      outFileStr
-   );
+   sortPos_refList_amrST(refAmrHeapSTPtr);
+   p_amrST(refAmrHeapSTPtr, outFileStr);
       /*already checked if could open the output file*/
            
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1494,34 +1508,27 @@ main(
       goto ret_main_sec05;
 
    ret_main_sec05:;
+      if(refSeqHeapAryST)
+         freeHeapAry_seqST(refSeqHeapAryST, refSeqLenSL);
+      refSeqHeapAryST = 0;
+
       if(varAmrHeapST)
          freeHeap_amrST(varAmrHeapST);
       varAmrHeapST = 0;
 
-      if(dbAmrHeapAryST)
-         freeHeapAry_amrST(dbAmrHeapAryST, dbAmrLenUI);
-      dbAmrHeapAryST = 0;
-      dbAmrLenUI = 0;
+      if(refAmrHeapSTPtr)
+         freeHeap_refList_amrST(refAmrHeapSTPtr);
+      refAmrHeapSTPtr = 0;
 
       if(coordHeapST)
          freeHeap_geneCoord(coordHeapST);
       coordHeapST = 0;
-      coordLenSI = 0;
-
-      if(drugHeapAryStr)
-         free(drugHeapAryStr);
-      drugHeapAryStr = 0;
-      drugLenSI = 0;
-      drugSizeSI = 0;
-
-      freeStack_seqST(&refStackST);
 
       if(! inFILE) ;
       else if(inFILE == stdin) ;
       else if(inFILE == stdout) ;
       else if(inFILE == stderr) ;
-      else
-         fclose(inFILE);
+      else fclose(inFILE);
       inFILE = 0;
 
       return errSC;

@@ -53,8 +53,6 @@
 |   - coordsSTPtr:
 |     o pointer to an geneCoord structure with the
 |       coordinates for each gene
-|   - numGenesSI:
-|     o number of genes in coordsSIPtr
 | Output:
 |   - Returns:
 |     o 0 for no problems
@@ -63,8 +61,7 @@
 signed char
 adjCoords(
    struct samEntry *samSTPtr,
-   struct geneCoord *coordsSTPtr,
-   signed int numGenesSI
+   struct geneCoord *coordsSTPtr
 ){
    signed char errSC = 0;
    signed int siIndx = 0;
@@ -73,7 +70,7 @@ adjCoords(
       findName_geneCoord(
          coordsSTPtr,
          (signed char *) samSTPtr->refIdStr,
-         numGenesSI
+         0 /*do not select for reference*/
       );
 
    if(siIndx == -1)

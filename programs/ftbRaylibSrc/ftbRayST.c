@@ -179,6 +179,7 @@ signed char glob_drugStrAry[def_numDrugs_ftbRayST][32] =
      "Rif",/*15 rifampicin;Rif,Rmp,Rfm*/
      "Stm",/*16 streptomycin;Str,Stp,Stm*/
    }; /*the shorthand name for each drug*/
+   /*should be sorted alphabetically*/
 
 /*colors of drug resistnace*/
 #define def_noAmrBackCol_ftbRayST 0x000004ff
@@ -375,6 +376,7 @@ init_gui_ftbRayST(
    guiSTPtr->minAmrIndelPercEntryIdSI = 0;
 
    guiSTPtr->miruLabIdSI = 0;
+   guiSTPtr->reportPrefixLabIdSI = 0;
    guiSTPtr->spoligoLabIdSI = 0;
    guiSTPtr->drugResRectIdSI = 0;
 
@@ -490,6 +492,7 @@ draw_gui_ftbRayST(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    signed char fqFileStr[1024];
+   signed char pathsStr[1024];
    signed int lenSI = 0;
    signed char tileBl = 1;
 
@@ -733,19 +736,41 @@ draw_gui_ftbRayST(
          )
       ){ /*If: drawing the report page*/
          widthSI = guiSTPtr->widgSTPtr->fontWidthF;
+         heightSI = oneRowSI + oneRowSI / 8;
 
-         heightSI =
-              padSI
-            + def_getTotalPad_rayWidg(
-                 guiSTPtr->widgSTPtr->fontHeightF
-              );
+         guiSTPtr->widgSTPtr->xArySI[
+            guiSTPtr->reportPrefixLabIdSI
+         ] = widthSI;
+         guiSTPtr->widgSTPtr->yArySI[
+            guiSTPtr->reportPrefixLabIdSI
+         ] = heightSI;
+
+         backCheckTextWidth_rayWidg(
+            guiSTPtr->filePrefixStr,
+            pathsStr,
+            glob_maxWidgWidthSI,
+            guiSTPtr->widgSTPtr
+         );
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->reportPrefixLabIdSI,
+            pathsStr,
+            ' ',                  /*padding with spaces*/
+            0,                    /*right pad if needed*/
+            0,
+            guiSTPtr->widgSTPtr
+         );
+
+         heightSI += oneRowSI * 0.8;
+         padSI += oneRowSI * 0.8; /*add another row in*/
 
          for(
             lenSI = 0;
             lenSI < def_numDrugs_ftbRayST;
             ++lenSI
          ){ /*Loop: draw the amr report*/
-            if(lenSI && ! (lenSI % 7) )
+            if(lenSI && ! (lenSI % 9) )
             { /*If: need another row (8 drugs per row)*/
                heightSI += oneRowSI;
                padSI += oneRowSI;
@@ -851,13 +876,19 @@ draw_gui_ftbRayST(
             tileBl,
             guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
+         backCheckTextWidth_rayWidg(
+            fqFileStr,
+            pathsStr,
+            glob_maxWidgWidthSI,
+            guiSTPtr->widgSTPtr
+         );
          labDraw_rayWidg(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->fqLabIdSI,
-            fqFileStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
-            2,                    /*right pad if needed*/
+            0,                    /*no pading*/
             tileBl,
             guiSTPtr->widgSTPtr
          ); /*label for entry box*/
@@ -893,16 +924,23 @@ draw_gui_ftbRayST(
             tileBl,
             guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
+         backCheckTextWidth_rayWidg(
+            guiSTPtr->outDirStr,
+            pathsStr,
+            glob_maxWidgWidthSI,
+            guiSTPtr->widgSTPtr
+         );
          labDraw_rayWidg(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->outDirLabIdSI,
-            guiSTPtr->outDirStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
-            2,                    /*right pad if needed*/
+            0,                    /*do not pad*/
             tileBl,
             guiSTPtr->widgSTPtr
          ); /*label for entry box*/
+         pathsStr[0] = 0;
 
          /*TODO: add illumina check box*/
 
@@ -915,13 +953,19 @@ draw_gui_ftbRayST(
             tileBl,
             guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
+         backCheckTextWidth_rayWidg(
+            guiSTPtr->configFileStr,
+            pathsStr,
+            glob_maxWidgWidthSI,
+            guiSTPtr->widgSTPtr
+         );
          labDraw_rayWidg(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->configLabIdSI,
-            guiSTPtr->configFileStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
-            2,                    /*right pad if needed*/
+            0,                    /*right pad if needed*/
             tileBl,
             guiSTPtr->widgSTPtr
          ); /*label for entry box*/
@@ -947,11 +991,17 @@ draw_gui_ftbRayST(
             tileBl,
             guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
+         backCheckTextWidth_rayWidg(
+            guiSTPtr->filePrefixStr,
+            pathsStr,
+            glob_maxWidgWidthSI,
+            guiSTPtr->widgSTPtr
+         );
          labDraw_rayWidg(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->getPrefixLabIdSI,
-            guiSTPtr->filePrefixStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
             2,                    /*right pad if needed*/
             tileBl,
@@ -1049,23 +1099,18 @@ draw_gui_ftbRayST(
          ); /*label for entry box*/
 
 
-         /*labDraw_rayWidg(
-            guiSTPtr->widgSTPtr->winWidthSI,
-            0,
-            guiSTPtr->miruLabIdSI,
-            guiSTPtr->miruStr,
-            ' ',
-            2,
-            tileBl,
-            guiSTPtr->widgSTPtr
-         );*/ /*label for entry box*/
-
          /*_____________table_menu______________________*/
+         backCheckTextWidth_rayWidg(
+            guiSTPtr->filePrefixStr,
+            pathsStr,
+            glob_maxWidgWidthSI,
+            guiSTPtr->widgSTPtr
+         );
          labDraw_rayWidg(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->amrLabIdSI,
-            guiSTPtr->filePrefixStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
             2,                    /*right pad if needed*/
             tileBl,
@@ -1083,7 +1128,7 @@ draw_gui_ftbRayST(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->hsp65LabIdSI,
-            guiSTPtr->filePrefixStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
             2,                    /*right pad if needed*/
             tileBl,
@@ -1101,7 +1146,7 @@ draw_gui_ftbRayST(
             glob_maxWidgWidthSI,
             0,                    /*no min width*/
             guiSTPtr->geneCoverLabIdSI,
-            guiSTPtr->filePrefixStr,
+            pathsStr,
             ' ',                  /*padding with spaces*/
             2,                    /*right pad if needed*/
             tileBl,
@@ -1497,6 +1542,13 @@ mk_gui_ftbRayST(
       goto memErr_fun06_sec07;
    hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
    inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->reportPrefixLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
    retHeapGUI->spoligoLabIdSI = tmpSI;
 
    tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
@@ -1682,9 +1734,49 @@ mk_gui_ftbRayST(
 
    if(
       addExt_files_rayWidg(
-         (signed char *) "depths.tsv",
+         (signed char *) "coverage.tsv",
          0, /*do not clear old extensions*/
          1, /*select this extension*/
+         retHeapGUI->oldFtbFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06_sec07;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "amrs.tsv",
+         0, /*do not clear old extensions*/
+         0, /*do not select this extension*/
+         retHeapGUI->oldFtbFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06_sec07;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "miru.tsv",
+         0, /*do not clear old extensions*/
+         0, /*do not select this extension*/
+         retHeapGUI->oldFtbFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06_sec07;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "spoligo.tsv",
+         0, /*do not clear old extensions*/
+         0, /*do not select this extension*/
+         retHeapGUI->oldFtbFileSTPtr,
+         retHeapGUI->widgSTPtr
+      )
+   ) goto memErr_fun06_sec07;
+
+   if(
+      addExt_files_rayWidg(
+         (signed char *) "hsp65.tsv",
+         0, /*do not clear old extensions*/
+         0, /*do not select this extension*/
          retHeapGUI->oldFtbFileSTPtr,
          retHeapGUI->widgSTPtr
       )
@@ -1840,6 +1932,10 @@ hideReport_ftbRayST(
       guiSTPtr->widgSTPtr
    );
 
+   hidenAdd_widg_rayWidg(
+      guiSTPtr->reportPrefixLabIdSI,
+      guiSTPtr->widgSTPtr
+   );
    hidenAdd_widg_rayWidg(
       guiSTPtr->miruLabIdSI,
       guiSTPtr->widgSTPtr
@@ -2139,7 +2235,11 @@ checkDrugs_ftbRayST(
    '   o fun15 sec02:
    '     - initialize
    '   o fun15 sec03:
-   '     - get coverage of reads
+   '     - check if have enough coverage for no amr call
+   '   o fun15 sec04:
+   '     - set the drug resistance colors
+   '   o fun15 sec05:
+   '     - find AMRs
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -2153,14 +2253,7 @@ checkDrugs_ftbRayST(
    signed char *tmpStr = 0;
 
    signed char geneStr[128];
-   signed int startSI = 0;
-   signed int endSI = 0;
-
-   signed int refStartSI = 0;
-   signed int refEndSI = 0;
-
-   unsigned int backColUI = 0;
-   unsigned int textColUI = 0;
+   signed int drugSI = 0;
 
    signed char resAryBl[def_numDrugs_ftbRayST];
 
@@ -2188,6 +2281,8 @@ checkDrugs_ftbRayST(
    signed int drugLenSI = 0;
    signed int crossStartSI = 0;
 
+   signed char depthAryBl[17];
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec02:
    ^   - initialize
@@ -2204,6 +2299,10 @@ checkDrugs_ftbRayST(
    
    if(! guiSTPtr->filePrefixStr[0])
       return;
+
+   for(drugSI = 0; drugSI < 17; ++drugSI)
+      depthAryBl[drugSI] = 0;
+      /*records if I have enough depth to make a no call*/
 
    if(guiSTPtr->amrSupStr[0])
       strToF_base10str(guiSTPtr->amrSupStr, &minPerSupF);
@@ -2235,7 +2334,7 @@ checkDrugs_ftbRayST(
         /*space is frist alphabetcially, so I can use it
         `  to keep the header at the top during the sort
         */
-   lineStr[lenSI++] = ' '; /*set lenSI to 4*/
+   lineStr[lenSI++] = ' '; /*set lenSI to 5*/
 
    lenSI +=
       cpStr_ulCp(
@@ -2258,26 +2357,23 @@ checkDrugs_ftbRayST(
    lenSI +=
       cpStr_ulCp(
          &lineStr[lenSI],
-         (signed char *) "read_depth"
+         (signed char *) "%_support"
       );
    while(lenSI < 47)
       lineStr[lenSI++] = ' ';
-   lineStr[lenSI++] = ' '; /*make 48*/
+   lineStr[lenSI++] = ' '; /*make 58*/
 
    lenSI +=
       cpStr_ulCp(
          &lineStr[lenSI],
-         (signed char *) "%_support"
+         (signed char *) "read_depth"
       );
    while(lenSI < 56)
       lineStr[lenSI++] = ' ';
    lineStr[lenSI++] = ' '; /*make 57*/
 
    lenSI +=
-      cpStr_ulCp(
-         &lineStr[lenSI],
-         (signed char *) "needs"
-      );
+      cpStr_ulCp(&lineStr[lenSI],(signed char *) "needs");
 
    /*add header to list box*/
    if(
@@ -2291,34 +2387,33 @@ checkDrugs_ftbRayST(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec03:
-   ^   - get coverage of reads
+   ^   - check if have enough coverage for no amr call
    ^   o fun15 sec03 sub01:
-   ^     - open depths file
+   ^     - open coverage file
    ^   o fun15 sec03 sub02:
-   ^     - get the coverage, gene name, & expected length
+   ^     - start loop, get percent coverage, move to drugs
    ^   o fun15 sec03 sub03:
-   ^     - check if AMR gene & flag if low coverage
+   ^     - find the drugs in each gene/target
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
    * Fun15 Sec03 Sub01:
-   *   - open depths file
+   *   - open coverage file
    \*****************************************************/
 
    lenSI = cpStr_ulCp(fileStr, guiSTPtr->filePrefixStr);
    cpStr_ulCp(
       &fileStr[lenSI],
-      (signed char *) "-depths.tsv"
+      (signed char *) "-coverage.tsv"
    );
 
-   
    inFILE = fopen((char *) fileStr, "r");
    if(! inFILE)
      return;
 
    /*****************************************************\
    * Fun15 Sec03 Sub02:
-   *   - get the coverage, gene name, and expected length
+   *   - start loop, get percent coverage, move to drugs
    \*****************************************************/
 
    if(fgets((char *) lineStr, 1000, inFILE))
@@ -2328,550 +2423,86 @@ checkDrugs_ftbRayST(
          tmpStr = lineStr;
          lenSI = 0;
 
-         while(*tmpStr && lenSI < 4)
-         { /*Loop: get to amplicon start*/
-            if(*tmpStr == '\t')
-               ++lenSI;
+         /*___________get_past_the_gene_name____________*/
+         tmpStr += endWhite_ulCp(tmpStr);
+         while(*tmpStr && *tmpStr < 33)
             ++tmpStr;
-         } /*Loop: get to amplicon start*/
+         if(! *tmpStr)
+            continue;
 
-         /*get start and end of amplicon*/
-         tmpStr += strToSI_base10str(tmpStr, &startSI);
-         if(! *tmpStr) break;
-         ++tmpStr;
-
-         tmpStr += strToSI_base10str(tmpStr, &endSI);
-         if(! *tmpStr) break;
-         ++tmpStr;
-
-         lenSI = 0;
-         while(*tmpStr && lenSI < 3)
-         { /*Loop: get to gene name*/
-            if(*tmpStr == '\t')
-               ++lenSI;
+         /*___________get_perc_coverage_________________*/
+         tmpStr +=
+            strToF_base10str(tmpStr, &percSupReadsF);
+         if(*tmpStr > 32)
+            continue; /*bad line, ignore*/
+         while(*tmpStr && *tmpStr < 33)
             ++tmpStr;
-         } /*Loop: get to amplicon start*/
+         if(! *tmpStr)
+            continue;
 
-         tmpStr += cpWhite_ulCp(geneStr, tmpStr) ;
-         if(! *tmpStr) break;
-         ++tmpStr;
+         /*___________get_past_mean_read_depth__________*/
+         tmpStr += endWhite_ulCp(tmpStr);
+         while(*tmpStr && *tmpStr < 33)
+            ++tmpStr;
+         if(! *tmpStr)
+            continue;
 
-       
-         /*get start and end of amplicon*/
-         tmpStr += strToSI_base10str(tmpStr, &refStartSI);
-         if(! *tmpStr) break;
-         ++tmpStr;
-
-         tmpStr += strToSI_base10str(tmpStr, &refEndSI);
-         if(! *tmpStr) break;
-         ++tmpStr;
-
-         if(startSI > refStartSI || endSI < refEndSI)
-         { /*If: incomplete gene coverage*/
-            backColUI = def_lowDepthBackCol_ftbRayST;
-            textColUI = def_lowDepthTextCol_ftbRayST;
-         } /*If: incomplete gene coverage*/
-
-         else
-         { /*If: incomplete gene coverage*/
-            backColUI = def_noAmrBackCol_ftbRayST;
-            textColUI = def_noAmrTextCol_ftbRayST;
-         } /*If: incomplete gene coverage*/
+         /*___________get_past_mean_read_depth_2________*/
+         tmpStr += endWhite_ulCp(tmpStr);
+         while(*tmpStr && *tmpStr < 33)
+            ++tmpStr;
+         if(! *tmpStr)
+            continue;
 
          /***********************************************\
          * Fun15 Sec03 Sub03:
-         *   - check if gene is an AMR gene and flag if
-         *     low coverage
+         *   - find the drugs in each gene/target
          \***********************************************/
 
-         if(!eqlNull_ulCp((signed char *) "atpE",geneStr))
-         { /*If: is atpE gene (Bdq)*/
-            if(startSI > 1461125 || endSI < 1461242)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
+         nextDrug_fun15_sec03_sub03:;
 
+         for(drugSI = 0; drugSI < 17; ++drugSI)
+         { /*Loop: find drug*/
+            /*_________check_if_have_a_drug_____________*/
+            if(*tmpStr == '*')
+                break; /*done*/
+
+            if(
+                  (tmpStr[0] | 32) =='n'
+               && (tmpStr[1] | 32) =='a'
+               && tmpStr[2] < 33
+            ) break; /*no drug in this column*/
+
+            /*_________check_if_have_this_drug__________*/
+            if(
+                  (tmpStr[0] | 32)
+               != (glob_drugStrAry[drugSI][0] | 32)
+            ) continue;
+
+            else if(
+                  (tmpStr[1] | 32)
+               != (glob_drugStrAry[drugSI][1] | 32)
+            ) continue;
+
+            else if(
+                  (tmpStr[2] | 32)
+               != (glob_drugStrAry[drugSI][2] | 32)
+            ) continue;
+
+            /*______________check_if_have_depth_________*/
+            if(percSupReadsF < 0.95)
+               depthAryBl[drugSI] = -1;
             else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[1] = backColUI;
-            guiSTPtr->drugTextColUI[1] = textColUI;
-         } /*If: is atpE gene (Bdq)*/
-
-         else if(
-            ! eqlNull_ulCp((signed char *) "ddn", geneStr)
-         ){ /*Else If: is ddn gene (Dlm and Pmd)*/
-            if(startSI > 3986737 || endSI < 3987298)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[4] = backColUI;
-            guiSTPtr->drugTextColUI[4] = textColUI;
-            guiSTPtr->drugBackColUI[13] = backColUI;
-            guiSTPtr->drugTextColUI[13] = textColUI;
-         } /*Else If: is ddn gene (Dlm and Pmd)*/
-
-         else if(
-            ! eqlNull_ulCp((signed char *) "eis", geneStr)
-         ){ /*Else If: is eis gene (Amk and Kan)*/
-            if(startSI > 2715339 || endSI < 2715369)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[0] = backColUI;
-            guiSTPtr->drugTextColUI[0] = textColUI;
-            guiSTPtr->drugBackColUI[9] = backColUI;
-            guiSTPtr->drugTextColUI[9] = textColUI;
-         } /*Else If: is eis gene (Amk and Kan)*/
-
-         else if(
-            ! eqlNull_ulCp((signed char *) "embA",geneStr)
-         ) ; /*not in WHO 2023: embA eis gene (Emb)*/
-
-         else if(
-            ! eqlNull_ulCp((signed char *) "embB",geneStr)
-         ){ /*Else If: embB eis gene (Emb)*/
-            if(startSI > 4247429 || endSI < 4248003)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[5] = backColUI;
-            guiSTPtr->drugTextColUI[5] = textColUI;
-         } /*Else If: embB eis gene (Emb)*/
-
-         else if(
-            ! eqlNull_ulCp((signed char *) "ethA",geneStr)
-         ){ /*Else If: ethA eis gene (Eto)*/
-            if(startSI > 4325970 || endSI < 4327480)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[6] = backColUI;
-            guiSTPtr->drugTextColUI[6] = textColUI;
-         } /*Else If: ethA eis gene (Eto)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "fabG1",geneStr)
-         ){ /*Else If: fabG1 eis gene (Eto Inh)*/
-            if(startSI > 1673423 || endSI < 1674048)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[6] = backColUI;
-            guiSTPtr->drugTextColUI[6] = textColUI;
-
-            guiSTPtr->drugBackColUI[8] = backColUI;
-            guiSTPtr->drugTextColUI[8] = textColUI;
-         } /*Else If: fabG1 eis gene (Eto Inh)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "fbiA", geneStr)
-         ){ /*Else If: fbiA eis gene (Cfz Dlm Pmd)*/
-            if(startSI > 3640145 || endSI < 3641537)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[3] = backColUI;
-            guiSTPtr->drugTextColUI[3] = textColUI;
-
-            guiSTPtr->drugBackColUI[4] = backColUI;
-            guiSTPtr->drugTextColUI[4] = textColUI;
-
-            guiSTPtr->drugBackColUI[13] = backColUI;
-            guiSTPtr->drugTextColUI[13] = textColUI;
-         } /*Else If: fbiA eis gene (Cfz Dlm Pmd)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "fbiB", geneStr)
-         ){ /*Else If: fbiB eis gene (Cfz Dlm Pmd)*/
-            if(startSI > 3641538 || endSI < 3642880)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[3] = backColUI;
-            guiSTPtr->drugTextColUI[3] = textColUI;
-
-            guiSTPtr->drugBackColUI[4] = backColUI;
-            guiSTPtr->drugTextColUI[4] = textColUI;
-
-            guiSTPtr->drugBackColUI[13] = backColUI;
-            guiSTPtr->drugTextColUI[13] = textColUI;
-         } /*Else If: fbiB eis gene (Cfz Dlm Pmd)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "fbiC", geneStr)
-         ){ /*Else If: fbiC eis gene (Cfz Dlm Pmd)*/
-            if(startSI > 1302695 || endSI < 1305501)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[3] = backColUI;
-            guiSTPtr->drugTextColUI[3] = textColUI;
-
-            guiSTPtr->drugBackColUI[4] = backColUI;
-            guiSTPtr->drugTextColUI[4] = textColUI;
-
-            guiSTPtr->drugBackColUI[13] = backColUI;
-            guiSTPtr->drugTextColUI[13] = textColUI;
-         } /*Else If: fbiC eis gene (Cfz Dlm Pmd)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "fgd1", geneStr)
-         ) ; /*not in WHO 2023 or at least not as  fgd1
-             `  gene (Cfz Dlm Pmd)
-             */
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "gidB", geneStr)
-         ) ; /*not in WHO 2023 gidB gene (Stm)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "gyrA", geneStr)
-         ){ /*Else If: gyrA gene (Flq Lfx Mfx)*/
-            if(startSI > 7563 || endSI < 7582)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[7] = backColUI;
-            guiSTPtr->drugTextColUI[7] = textColUI;
-
-            guiSTPtr->drugBackColUI[10] = backColUI;
-            guiSTPtr->drugTextColUI[10] = textColUI;
-
-            guiSTPtr->drugBackColUI[12] = backColUI;
-            guiSTPtr->drugTextColUI[12] = textColUI;
-         } /*Else If: gyrA gene (Flq Lfx Mfx)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "gyrB", geneStr)
-         ){ /*Else If: gyrB gene (Flq Lfx Mfx)*/
-            if(startSI > 6579 || endSI < 6750)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[7] = backColUI;
-            guiSTPtr->drugTextColUI[7] = textColUI;
-
-            guiSTPtr->drugBackColUI[10] = backColUI;
-            guiSTPtr->drugTextColUI[10] = textColUI;
-
-            guiSTPtr->drugBackColUI[12] = backColUI;
-            guiSTPtr->drugTextColUI[12] = textColUI;
-         } /*Else If: gyrB gene (Flq Lfx Mfx)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "inhA", geneStr)
-         ){ /*Else If: inhA gene (Eto Inh)*/
-            if(startSI > 1673423 || endSI < 1674481)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[6] = backColUI;
-            guiSTPtr->drugTextColUI[6] = textColUI;
-
-            guiSTPtr->drugBackColUI[8] = backColUI;
-            guiSTPtr->drugTextColUI[8] = textColUI;
-         } /*Else If: inhA gene (Eto Inh)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "katG", geneStr)
-         ){ /*Else If: katG gene (Inh)*/
-            if(startSI > 2153926 || endSI < 2156110)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[8] = backColUI;
-            guiSTPtr->drugTextColUI[8] = textColUI;
-         } /*Else If: katG gene (Inh)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "pncA", geneStr)
-         ){ /*Else If: pncA gene (Pza)*/
-            if(startSI > 2288680 || endSI < 228953)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[14] = backColUI;
-            guiSTPtr->drugTextColUI[14] = textColUI;
-         } /*Else If: pncA gene (Pza)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "pepQ", geneStr)
-         ){ /*Else If: pepQ gene (Bdq Cfz)*/
-            if(startSI > 2859292 || endSI < 2860417)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*If: incomplete gene coverage*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            guiSTPtr->drugBackColUI[1] = backColUI;
-            guiSTPtr->drugTextColUI[1] = textColUI;
-
-            guiSTPtr->drugBackColUI[3] = backColUI;
-            guiSTPtr->drugTextColUI[3] = textColUI;
-         } /*Else If: pepQ gene (Bdq Cfz)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "rpoB", geneStr)
-         ){ /*Else If: rpoB gene (Rif)*/
-            if(startSI > 760314 || endSI < 761277)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*Else: covered amr region*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*Else: covered amr region*/
-
-            guiSTPtr->drugBackColUI[15] = backColUI;
-            guiSTPtr->drugTextColUI[15] = textColUI;
-         } /*Else If: rpoB gene (Rif)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "rpsL", geneStr)
-         ){ /*Else If: rpsL gene (Stm)*/
-            if(startSI > 781682 || endSI < 781822)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*Else: covered amr region*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*Else: covered amr region*/
-
-            guiSTPtr->drugBackColUI[16] = backColUI;
-            guiSTPtr->drugTextColUI[16] = textColUI;
-         } /*Else If: rpsL gene (Stm)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "rrs", geneStr)
-         ){ /*Else If: rrs gene (Amk Cap Kan Stm)*/
-            if(startSI > 1472359 || endSI < 1473329)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*Else: covered amr region*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*Else: covered amr region*/
-
-            guiSTPtr->drugBackColUI[0] = backColUI;
-            guiSTPtr->drugTextColUI[0] = textColUI;
-
-            guiSTPtr->drugBackColUI[2] = backColUI;
-            guiSTPtr->drugTextColUI[2] = textColUI;
-
-            guiSTPtr->drugBackColUI[9] = backColUI;
-            guiSTPtr->drugTextColUI[9] = textColUI;
-
-            guiSTPtr->drugBackColUI[16] = backColUI;
-            guiSTPtr->drugTextColUI[16] = textColUI;
-         } /*Else If: rrs gene (Amk Cap Kan Stm)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "rrl", geneStr)
-         ){ /*Else If: rrl gene (Cap Lzd)*/
-            if(startSI > 1475926 || endSI < 1476471)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*Else: covered amr region*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*Else: covered amr region*/
-
-            guiSTPtr->drugBackColUI[2] = backColUI;
-            guiSTPtr->drugTextColUI[2] = textColUI;
-
-            guiSTPtr->drugBackColUI[11] = backColUI;
-            guiSTPtr->drugTextColUI[11] = textColUI;
-         } /*Else If: rrl gene (Cap Lzd)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "rplC", geneStr)
-         ){ /*Else If: rplC gene (Lzd)*/
-            if(startSI > 801266 || endSI < 801268)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*Else: covered amr region*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*Else: covered amr region*/
-
-            guiSTPtr->drugBackColUI[11] = backColUI;
-            guiSTPtr->drugTextColUI[11] = textColUI;
-         } /*Else If: rplC gene (Lzd)*/
-
-         else if(
-           !eqlNull_ulCp((signed char *) "rv0678",geneStr)
-         ){ /*Else If: rv0678 gene (Bdq Cfz)*/
-            /*likely different name in 2023 catalog*/
-            /*guiSTPtr->drugBackColUI[1] = backColUI;
-            guiSTPtr->drugTextColUI[1] = textColUI;
-
-            guiSTPtr->drugBackColUI[3] = backColUI;
-            guiSTPtr->drugTextColUI[3] = textColUI;*/
-         } /*Else If: rv0678 gene (Bdq Cfz)*/
-
-         else if(
-           !eqlNull_ulCp((signed char *) "rv2983",geneStr)
-         ){ /*Else If: rv2983 gene (Dlm Pmd)*/
-            /*likely different name in 2023 catalog*/
-            /*guiSTPtr->drugBackColUI[4] = backColUI;
-            guiSTPtr->drugTextColUI[4] = textColUI;
-
-            guiSTPtr->drugBackColUI[13] = backColUI;
-            guiSTPtr->drugTextColUI[13] = textColUI;*/
-         } /*Else If: rv2983 gene (Dlm Pmd)*/
-
-         else if(
-           ! eqlNull_ulCp((signed char *) "tlyA", geneStr)
-         ){ /*Else If: tlyA gene (Cap)*/
-            if(startSI > 1917933 || endSI < 1918741)
-            { /*If: incomplete gene coverage*/
-               backColUI = def_lowDepthBackCol_ftbRayST;
-               textColUI = def_lowDepthTextCol_ftbRayST;
-            } /*If: incomplete gene coverage*/
-
-            else
-            { /*Else: covered amr region*/
-               backColUI = def_noAmrBackCol_ftbRayST;
-               textColUI = def_noAmrTextCol_ftbRayST;
-            } /*Else: covered amr region*/
-
-            guiSTPtr->drugBackColUI[2] = backColUI;
-            guiSTPtr->drugTextColUI[2] = textColUI;
-         }  /*Else If: tlyA gene (Cap)*/
+               depthAryBl[drugSI] = 1;
+         } /*Loop: find drug*/
+
+         if(*tmpStr && *tmpStr != '*')
+         { /*If: I have more drugs to find*/
+            tmpStr += endWhite_ulCp(tmpStr);
+            while(*tmpStr && *tmpStr < 33)
+               ++tmpStr;
+            goto nextDrug_fun15_sec03_sub03;
+         } /*If: I have more drugs to find*/
       } /*Loop: get depths for each gene*/
    } /*If: have header*/
 
@@ -2880,29 +2511,55 @@ checkDrugs_ftbRayST(
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec04:
+   ^   - set the drug resistance colors
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   for(drugSI = 0; drugSI < 17; ++drugSI)
+   { /*Loop: set the colors*/
+      if(depthAryBl[drugSI] > 0)
+      { /*If: enough read depth to make no amr call*/
+         guiSTPtr->drugBackColUI[drugSI] =
+            def_noAmrBackCol_ftbRayST;
+         guiSTPtr->drugTextColUI[drugSI] =
+            def_noAmrTextCol_ftbRayST;
+      } /*If: enough read depth to make no amr call*/
+
+      else
+      { /*Else: not enough depth for no amr call*/
+         guiSTPtr->drugBackColUI[drugSI] =
+            def_lowDepthBackCol_ftbRayST;
+         guiSTPtr->drugTextColUI[drugSI] =
+            def_lowDepthTextCol_ftbRayST;
+      } /*Else: not enough depth for no amr call*/
+   } /*Loop: set the colors*/
+
+   drugSI = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun15 Sec05:
    ^   - find AMRs
-   ^   o fun15 sec04 sub01:
+   ^   o fun15 sec05 sub01:
    ^     - open amr file (reads)
-   ^   o fun15 sec04 sub02:
+   ^   o fun15 sec05 sub02:
    ^     - get gene name + start loop
-   ^   o fun15 sec04 sub03:
+   ^   o fun15 sec05 sub03:
    ^     - check for resistance
-   ^   o fun15 sec04 sub04:
+   ^   o fun15 sec05 sub04:
    ^     - check for cross resistance (loops to sub03)
-   ^   o fun15 sec04 sub05:
+   ^   o fun15 sec05 sub05:
    ^     - get variant id, grade, and support
-   ^   o fun15 sec04 sub06:
+   ^   o fun15 sec05 sub06:
    ^     - check if amr has enough support
-   ^   o fun15 sec04 sub07:
+   ^   o fun15 sec05 sub07:
    ^     - if enough support, set resistance colors
-   ^   o fun15 sec04 sub08:
+   ^   o fun15 sec05 sub08:
    ^     - get high/low res, additive res, and genes
-   ^   o fun15 sec04 sub09:
+   ^   o fun15 sec05 sub09:
    ^     - build amr table entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun15 Sec04 Sub01:
+   * Fun15 Sec05 Sub01:
    *   - open amr file (reads)
    \*****************************************************/
 
@@ -2917,7 +2574,7 @@ checkDrugs_ftbRayST(
       return;
 
    /*****************************************************\
-   * Fun15 Sec04 Sub02:
+   * Fun15 Sec05 Sub02:
    *   - get gene name + start loop
    \*****************************************************/
 
@@ -2943,7 +2600,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec04 Sub03:
+         * Fun15 Sec05 Sub03:
          *   - check for resistance
          \***********************************************/
 
@@ -2955,7 +2612,7 @@ checkDrugs_ftbRayST(
 
          else
          { /*Else: check what drug am resistant to*/
-            checkDrug_fun15_sec04_sub03:;
+            checkDrug_fun15_sec05_sub03:;
                for(
                   lenSI = 0;
                   lenSI < def_numDrugs_ftbRayST;
@@ -2988,7 +2645,7 @@ checkDrugs_ftbRayST(
          } /*Else: check what drug am resistant to*/
 
          /***********************************************\
-         * Fun15 Sec04 Sub04:
+         * Fun15 Sec05 Sub04:
          *   - check for cross resistance (loops to sub03)
          \***********************************************/
 
@@ -3021,7 +2678,7 @@ checkDrugs_ftbRayST(
             lenSI = 0;
             while(*tmpStr > 32 && *tmpStr != '_')
                colStr[lenSI++] = ((*tmpStr++) | 32);
-            goto checkDrug_fun15_sec04_sub03;
+            goto checkDrug_fun15_sec05_sub03;
          } /*Else If: have cross resistance*/
 
          if(! *tmpStr)
@@ -3029,7 +2686,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec04 Sub05:
+         * Fun15 Sec05 Sub05:
          *   - get variant id, grade, and support
          \***********************************************/
 
@@ -3070,7 +2727,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec04 Sub06:
+         * Fun15 Sec05 Sub06:
          *   - check if amr has enough support
          \***********************************************/
 
@@ -3092,7 +2749,7 @@ checkDrugs_ftbRayST(
          } /*Else: frameshift or indel*/
 
          /***********************************************\
-         * Fun15 Sec04 Sub07:
+         * Fun15 Sec05 Sub07:
          *   - if enough support, set resistance colors
          \***********************************************/
 
@@ -3117,7 +2774,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec04 Sub08:
+         * Fun15 Sec05 Sub08:
          *   - get high/low res, additive res, and genes
          \***********************************************/
 
@@ -3140,7 +2797,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec04 Sub09:
+         * Fun15 Sec05 Sub09:
          *   - build amr table entry
          \***********************************************/
 
@@ -3156,9 +2813,9 @@ checkDrugs_ftbRayST(
          lenSI +=
             cpStr_ulCp(&lineStr[lenSI], varIdStr);
 
-         while(lenSI < 25)
+         while(lenSI < 23)
             lineStr[lenSI++] = ' ';
-         lineStr[lenSI++] = ' '; /*make 26*/
+         lineStr[lenSI++] = ' '; /*make 24*/
 
          /*copy cross resistance*/
          if(drugAryStr[drugLenSI - 1] == '_')
@@ -3170,26 +2827,27 @@ checkDrugs_ftbRayST(
                &lineStr[lenSI],
                &drugAryStr[crossStartSI]
             );
-         while(lenSI < 37)
+         while(lenSI < 35)
             lineStr[lenSI++] = ' ';
-         lineStr[lenSI++] = ' '; /*sets to 38*/
+         lineStr[lenSI++] = ' '; /*sets to 36*/
 
          /*copy read support*/
-         lenSI += numToStr(&lineStr[lenSI],numSupReadsSI);
-         while(lenSI < 48)
-            lineStr[lenSI++] = ' ';
-         lineStr[lenSI++] = ' '; /*sets to 49*/
-
          lenSI +=
             double_numToStr(
                &lineStr[lenSI],
                percSupReadsF,
                2
             );
+         while(lenSI < 46)
+            lineStr[lenSI++] = ' ';
+         lineStr[lenSI++] = ' '; /*sets to 47*/
+
+         lenSI += numToStr(&lineStr[lenSI],numSupReadsSI);
          while(lenSI < 57)
             lineStr[lenSI++] = ' ';
          lineStr[lenSI++] = ' '; /*sets to 58*/
 
+         /*add needed genes*/
          lenSI +=
             cpStr_ulCp(&lineStr[lenSI], needsGeneStr);
 
@@ -3732,12 +3390,12 @@ mkCoverageTbl_ftbRayST(
    '   o fun17 sec01:
    '     - variable declarations
    '   o fun17 sec02:
-   '     - get gene targets and the drug resistance
+   '     - get maximum column sizes
    '   o fun17 sec03:
-   '     - sort amplicon/gene names for quick look up
+   '     - build the header for the table
    '   o fun17 sec04:
-   '     - get the genes coverage and mean depth
-   '   o fun17 sec04:
+   '     - build the table
+   '   o fun17 sec05:
    '     - clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -3785,14 +3443,19 @@ mkCoverageTbl_ftbRayST(
       cpStr_ulCp(lineStr, guiSTPtr->filePrefixStr);
    cpStr_ulCp(
       &lineStr[linePosSI],
-      (signed char *) "-coverage-amrs.tsv"
+      (signed char *) "-coverage.tsv"
    );
 
    inFILE = fopen((char *) lineStr, "r");
    if(! inFILE)
-      goto fileErr_fun17_sec04;
+      goto fileErr_fun17_sec05;
    if(! fgets((char *) lineStr, 4088, inFILE) )
-      goto fileErr_fun17_sec04;
+      goto fileErr_fun17_sec05;
+
+   /*set the header sizes*/
+   colArySI[0] = 4; /*gene*/
+   colArySI[1] = 10; /*perc_cover*/
+   colArySI[2] = 5; /*depth*/
 
    /*****************************************************\
    * Fun17 Sec02 Sub02:
@@ -3800,7 +3463,11 @@ mkCoverageTbl_ftbRayST(
    \*****************************************************/
 
    lineSI = 0;
-   do { /*Loop: find column sizes*/
+   if(! fgets((char *) lineStr, 4088, inFILE))
+      goto blankFile_fun17_sec05;
+
+   while(fgets((char *) lineStr, 4088, inFILE))
+   { /*Loop: find column sizes*/
       linePosSI = 0;
       colPosSI = 0;
 
@@ -3826,18 +3493,12 @@ mkCoverageTbl_ftbRayST(
       while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
          ++linePosSI;
       if(! linePosSI)
-         goto fileErr_fun17_sec04;
+         goto fileErr_fun17_sec05;
 
       /*____________get_gene_mean_coverage_depth________*/
       outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
-
-      if(! lineSI)
-         colArySI[colPosSI] = 9;
-      else
-      { /*Else: not header*/
-         if(outPosSI > colArySI[colPosSI])
-            colArySI[colPosSI] = outPosSI;
-      } /*Else: not header*/
+      if(outPosSI > colArySI[colPosSI])
+         colArySI[colPosSI] = outPosSI;
 
       ++colPosSI;
 
@@ -3845,7 +3506,7 @@ mkCoverageTbl_ftbRayST(
       while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
          ++linePosSI;
       if(! linePosSI)
-         goto fileErr_fun17_sec04;
+         goto fileErr_fun17_sec05;
 
       /*____________skip_gene_mean_target_depth_________*/
       linePosSI += endWhite_ulCp(&lineStr[linePosSI]);
@@ -3853,7 +3514,7 @@ mkCoverageTbl_ftbRayST(
       while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
          ++linePosSI;
       if(! linePosSI)
-         goto fileErr_fun17_sec04;
+         goto fileErr_fun17_sec05;
 
       /*____________get_drug_names______________________*/
       while(
@@ -3875,40 +3536,125 @@ mkCoverageTbl_ftbRayST(
       if(colPosSI > lastColSI - 1)
          lastColSI = colPosSI - 1;
       ++lineSI;
-   } while( fgets((char *) lineStr, 4088, inFILE) );
-        /*Loop: find column sizes*/
+   } /*Loop: find column sizes*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun17 Sec03:
+   ^   - build the header for the table
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*add in the padding*/
+   colArySI[0] += 1;
+   colArySI[1] += 1;
+   colArySI[2] += 1;
+
+   colPosSI = 0;
+   outPosSI = 0;
+
+   /*________________gene_name__________________________*/
+   lineSI = cpStr_ulCp(outStr, (signed char *) "gene");
+   outPosSI += lineSI;
+   while(lineSI <= colArySI[0])
+   { /*Loop: add in spaces*/
+      outStr[outPosSI++] = ' ';
+      ++lineSI;
+   } /*Loop: add in spaces*/
+
+   /*________________percent_coverage___________________*/
+   lineSI =
+      cpStr_ulCp(
+         &outStr[outPosSI],
+         (signed char *) "perc_cover"
+      );
+   outPosSI += lineSI;
+   while(lineSI <= colArySI[1])
+   { /*Loop: add in spaces*/
+      outStr[outPosSI++] = ' ';
+      ++lineSI;
+   } /*Loop: add in spaces*/
+
+   /*________________mean_depth_________________________*/
+   lineSI =
+      cpStr_ulCp(
+         &outStr[outPosSI],
+         (signed char *) "depth"
+      );
+   outPosSI += lineSI;
+   while(lineSI <= colArySI[2])
+   { /*Loop: add in spaces*/
+      outStr[outPosSI++] = ' ';
+      ++lineSI;
+   } /*Loop: add in spaces*/
+
+   
+   /*________________drug_columns_______________________*/
+   for(colPosSI = 3; colPosSI <= lastColSI; ++colPosSI)
+   { /*Loop: print 'na' for no drug columns*/
+      tmpSI = 0;
+
+      outStr[outPosSI++] = 'd';
+      outStr[outPosSI++] = 'r';
+      outStr[outPosSI++] = 'u';
+      outStr[outPosSI++] = 'g';
+      outStr[outPosSI++] = '_';
+      tmpSI += numToStr(&outStr[outPosSI], colPosSI - 3);
+      outPosSI += tmpSI;
+      tmpSI += 5; /*account for "drug_"*/
+
+      while(tmpSI <= colArySI[colPosSI])
+      { /*Loop: pad column if is to short*/
+         outStr[outPosSI++] = ' ';
+         ++tmpSI;
+      } /*Loop: pad column if is to short*/
+   } /*Loop: print 'na' for no drug columns*/
+
+   outStr[outPosSI] = 0;
+   if(
+      addItem_listBox_rayWidg(
+         outStr,
+         def_listSpecial_rayWidg, /*so does nothing*/
+         guiSTPtr->geneCoverSTPtr,
+         guiSTPtr->widgSTPtr
+      )
+   ) goto memErr_fun17_sec05;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun17 Sec04:
    ^   - build the table
-   ^   o fun17 sec03 sub01:
+   ^   o fun17 sec04 sub01:
    ^     - move to the start of coverage table and start
    ^       read loop
-   ^   o fun17 sec03 sub02:
+   ^   o fun17 sec04 sub02:
    ^     - get the gene name
-   ^   o fun17 sec03 sub03:
+   ^   o fun17 sec04 sub03:
    ^     - get percent coverage of the gene
-   ^   o fun17 sec03 sub04:
+   ^   o fun17 sec04 sub04:
    ^     - get mean covered region read depth
-   ^   o fun17 sec03 sub05:
+   ^   o fun17 sec04 sub05:
    ^     - skip gene mean read depth column
    ^     - this is the mean read depth for the entire
    ^       gene/target instead of the region that had
    ^       good read depth
-   ^   o fun17 sec03 sub06:
+   ^   o fun17 sec04 sub06:
    ^     - get the name for each drug
-   ^   o fun17 sec03 sub07:
+   ^   o fun17 sec04 sub07:
    ^     - add row to table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun17 Sec03 Sub01:
+   * Fun17 Sec04 Sub01:
    *   - move to the start of coverage table and start
    *     read loop
    \*****************************************************/
 
    fseek(inFILE, 0, SEEK_SET);
    lineSI = 0;
+
+   if( ! fgets((char *) lineStr, 4088, inFILE) )
+      lineSI = 0;
+        /*this should never happen since I already
+        `  checked for this
+        */
 
    while( fgets((char *) lineStr, 4088, inFILE) )
    { /*Loop: read in the gene/amplicons*/
@@ -3917,7 +3663,7 @@ mkCoverageTbl_ftbRayST(
       colPosSI = 0;
 
       /**************************************************\
-      * Fun17 Sec03 Sub02:
+      * Fun17 Sec04 Sub02:
       *   - get the gene name
       \**************************************************/
 
@@ -3929,7 +3675,7 @@ mkCoverageTbl_ftbRayST(
       outPosSI += tmpSI;
       linePosSI += tmpSI;
 
-      while(tmpSI <= colArySI[colPosSI] + 2)
+      while(tmpSI <= colArySI[colPosSI])
       { /*Loop: pad column if is to short*/
          outStr[outPosSI++] = ' ';
          ++tmpSI;
@@ -3940,7 +3686,7 @@ mkCoverageTbl_ftbRayST(
       ++colPosSI;
 
       /**************************************************\
-      * Fun17 Sec03 Sub03:
+      * Fun17 Sec04 Sub03:
       *   - get percent coverage of the gene
       \**************************************************/
 
@@ -3952,7 +3698,7 @@ mkCoverageTbl_ftbRayST(
       outPosSI += tmpSI;
       linePosSI += tmpSI;
 
-      while(tmpSI <= colArySI[colPosSI] + 2)
+      while(tmpSI <= colArySI[colPosSI])
       { /*Loop: pad column if is to short*/
          outStr[outPosSI++] = ' ';
          ++tmpSI;
@@ -3963,34 +3709,20 @@ mkCoverageTbl_ftbRayST(
       ++colPosSI;
 
       /**************************************************\
-      * Fun17 Sec03 Sub04:
+      * Fun17 Sec04 Sub04:
       *   - get mean covered region read depth
       \**************************************************/
 
-      if(! lineSI)
-      { /*If: on the header*/
-         linePosSI += endWhite_ulCp(&lineStr[linePosSI]);
-         tmpSI =
-            cpStr_ulCp(
-               &outStr[outPosSI],
-               (signed char *) "mean_depth"
-            );
-      } /*If: on the header*/
-
-      else
-      { /*Else: on a gene/target row*/
-         tmpSI =
-            cpWhite_ulCp(
-               &outStr[outPosSI],
-               &lineStr[linePosSI]
-            );
-         linePosSI += tmpSI;
-      } /*Else: on a gene/target row*/
-
+      tmpSI =
+         cpWhite_ulCp(
+            &outStr[outPosSI],
+            &lineStr[linePosSI]
+         );
+      linePosSI += tmpSI;
 
       outPosSI += tmpSI;
 
-      while(tmpSI <= colArySI[colPosSI] + 2)
+      while(tmpSI <= colArySI[colPosSI])
       { /*Loop: pad column if is to short*/
          outStr[outPosSI++] = ' ';
          ++tmpSI;
@@ -4001,7 +3733,7 @@ mkCoverageTbl_ftbRayST(
       ++colPosSI;
 
       /**************************************************\
-      * Fun17 Sec03 Sub05:
+      * Fun17 Sec04 Sub05:
       *   - skip gene mean read depth column
       *   - this is the mean read depth for the entire
       *     gene/target instead of the region that had
@@ -4013,100 +3745,53 @@ mkCoverageTbl_ftbRayST(
          ++linePosSI;
 
       /**************************************************\
-      * Fun17 Sec03 Sub06:
+      * Fun17 Sec04 Sub06:
       *   - get the name for each drug
-      *   o fun17 sec03 sub06 cat01:
-      *     - if header line; print header columns
-      *   o fun17 sec03 sub06 cat02:
-      *     - if gene/target line; print drugs
       \**************************************************/
 
-      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun17 Sec03 Sub06 Cat01:
-      +   - if header line; print header columns
-      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+      while(
+        lineStr[linePosSI] && lineStr[linePosSI] != '*'
+      ){ /*Loop: find drug column lengths*/
+         tmpSI =
+            cpWhite_ulCp(
+               &outStr[outPosSI],
+               &lineStr[linePosSI]
+            );
+         outPosSI += tmpSI;
+         linePosSI += tmpSI;
 
-      if(! lineSI)
-      { /*If: on the header*/
-         lineSI = 1;
+         while(tmpSI <= colArySI[colPosSI])
+         { /*Loop: pad column if is to short*/
+            outStr[outPosSI++] = ' ';
+            ++tmpSI;
+         } /*Loop: pad column if is to short*/
 
-         while(colPosSI <= lastColSI)
-         { /*Loop: print 'na' for no drug columns*/
-            tmpSI = 0;
-
-            outStr[outPosSI++] = 'd';
-            outStr[outPosSI++] = 'r';
-            outStr[outPosSI++] = 'u';
-            outStr[outPosSI++] = 'g';
-            outStr[outPosSI++] = '_';
-            tmpSI += numToStr(&outStr[outPosSI], lineSI);
-            outPosSI += tmpSI;
-            tmpSI += 5; /*account for "drug_"*/
-
-            while(tmpSI <= colArySI[colPosSI])
-            { /*Loop: pad column if is to short*/
-               outStr[outPosSI++] = ' ';
-               ++tmpSI;
-            } /*Loop: pad column if is to short*/
-
-            ++colPosSI;
-            ++lineSI;
-         } /*Loop: print 'na' for no drug columns*/
-
-         lineSI = 0;
-      } /*If: on the header*/
-
-      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun17 Sec03 Sub06 Cat02:
-      +   - if gene/target line; print drugs
-      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-      else
-      { /*Else: on gene/target entry*/
          while(
-           lineStr[linePosSI] && lineStr[linePosSI] != '*'
-         ){ /*Loop: find drug column lengths*/
-            tmpSI =
-               cpWhite_ulCp(
-                  &outStr[outPosSI],
-                  &lineStr[linePosSI]
-               );
-            outPosSI += tmpSI;
-            linePosSI += tmpSI;
+               lineStr[linePosSI]
+            && lineStr[linePosSI] < 33
+         ) ++linePosSI;
 
-            while(tmpSI <= colArySI[colPosSI])
-            { /*Loop: pad column if is to short*/
-               outStr[outPosSI++] = ' ';
-               ++tmpSI;
-            } /*Loop: pad column if is to short*/
+         ++colPosSI;
+      }  /*Loop: find drug column lengths*/
 
-            while(
-                  lineStr[linePosSI]
-               && lineStr[linePosSI] < 33
-            ) ++linePosSI;
+      /*__________add_na's_for_empty_columns_________*/
+      while(colPosSI <= lastColSI)
+      { /*Loop: print 'na' for no drug columns*/
+         ++colPosSI;
+         outStr[outPosSI++] = 'n';
+         outStr[outPosSI++] = 'a';
 
-            ++colPosSI;
-         }  /*Loop: find drug column lengths*/
+         tmpSI = 2;
 
-         /*__________add_na's_for_empty_columns_________*/
-         while(colPosSI <= lastColSI)
-         { /*Loop: print 'na' for no drug columns*/
-            ++colPosSI;
-            outStr[outPosSI++] = 'n';
-            outStr[outPosSI++] = 'a';
-
-            tmpSI = 2;
-
-            while(tmpSI <= colArySI[colPosSI])
-            { /*Loop: pad column if is to short*/
-               outStr[outPosSI++] = ' ';
-               ++tmpSI;
-            } /*Loop: pad column if is to short*/
-         } /*Loop: print 'na' for no drug columns*/
-      } /*Else: on gene/target entry*/
+         while(tmpSI <= colArySI[colPosSI])
+         { /*Loop: pad column if is to short*/
+            outStr[outPosSI++] = ' ';
+            ++tmpSI;
+         } /*Loop: pad column if is to short*/
+      } /*Loop: print 'na' for no drug columns*/
 
       /**************************************************\
-      * Fun17 Sec03 Sub07:
+      * Fun17 Sec04 Sub07:
       *   - add row to table
       \**************************************************/
 
@@ -4119,28 +3804,48 @@ mkCoverageTbl_ftbRayST(
             guiSTPtr->geneCoverSTPtr,
             guiSTPtr->widgSTPtr
          )
-      ) goto memErr_fun17_sec04;
+      ) goto memErr_fun17_sec05;
  
       ++lineSI;
    } /*Loop: read in the gene/amplicons*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec04:
+   ^ Fun17 Sec05:
    ^   - clean up and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    lineSI = 0;
-   goto ret_fun17_sec04;
+   goto ret_fun17_sec05;
 
-   memErr_fun17_sec04:;
+   memErr_fun17_sec05:;
       lineSI = 1;
-      goto ret_fun17_sec04;
+      goto ret_fun17_sec05;
 
-   fileErr_fun17_sec04:;
+   fileErr_fun17_sec05:;
       lineSI = 2;
-      goto ret_fun17_sec04;
+      goto ret_fun17_sec05;
 
-   ret_fun17_sec04:;
+   blankFile_fun17_sec05:;
+      lineSI = 0;
+
+      /*add in the header quickly*/
+      cpStr_ulCp(
+         lineStr,
+         (signed char *) "gene perc_cover depth drug_1"
+      );
+      if(
+         addItem_listBox_rayWidg(
+            lineStr,
+            def_listSpecial_rayWidg, /*so does nothing*/
+            guiSTPtr->geneCoverSTPtr,
+            guiSTPtr->widgSTPtr
+         )
+      ) goto memErr_fun17_sec05;
+
+      else
+         goto ret_fun17_sec05;
+
+   ret_fun17_sec05:;
       if(inFILE)
          fclose(inFILE);
       inFILE = 0;
@@ -5049,7 +4754,8 @@ checkRunEvent_ftbRayST(
          if(guiSTPtr->browserSC == 3)
          { /*If: need to remove the suffix*/
             tmpHeapStr = guiSTPtr->filePrefixStr;
-            tmpHeapStr += endStr_ulCp(tmpHeapStr) - 11;
+            while(*tmpHeapStr != '-')
+               ++tmpHeapStr;
             *tmpHeapStr = 0;
             tmpHeapStr = 0;
          } /*If: need to remove the suffix*/
@@ -5772,6 +5478,10 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
+      hidenClear_widg_rayWidg(
+         guiSTPtr->reportPrefixLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
       hidenClear_widg_rayWidg(
          guiSTPtr->miruLabIdSI,
          guiSTPtr->widgSTPtr

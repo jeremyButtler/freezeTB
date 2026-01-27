@@ -175,6 +175,7 @@ typedef struct gui_ftbRayST
       /*0 is scroll position, 1 is cursor position*/
    
    /*_________________report_GUI________________________*/
+   signed int reportPrefixLabIdSI;
    signed int spoligoLabIdSI;  /*spoligotype reporting*/
    signed int spoligoStrainLabIdSI;
    signed int spoligoLineageLabIdSI;

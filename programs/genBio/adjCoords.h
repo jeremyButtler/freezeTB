@@ -33,8 +33,6 @@ struct samEntry; /*forward decleration*/
 |   - coordsSTPtr:
 |     o pointer to an geneCoord structure with the
 |       coordinates for each gene
-|   - numGenesSI:
-|     o number of genes in coordsSIPtr
 | Output:
 |   - Returns:
 |     o 0 for no problems
@@ -43,8 +41,7 @@ struct samEntry; /*forward decleration*/
 signed char
 adjCoords(
    struct samEntry *samSTPtr,
-   struct geneCoord *coordsSTPtr,
-   signed int numGenesSI
+   struct geneCoord *coordsSTPtr
 );
 
 #endif

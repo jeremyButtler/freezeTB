@@ -12,16 +12,14 @@ Be aware, this is only for simple variants. It can not
 ## Unix:
 
 ```
-if [ ! -f /usr/local/bin ];
-then
+if [ ! -f /usr/local/bin ]; then
    sudo mkdir /usr/local/bin;
 fi;
 
 cd ~/Downloads;
 
-if [ ! -d freezeTB ];
-then
-   git clone https://github.com/jeremyButtler/freezeTB;
+if [ ! -d freezeTB ]; then
+   git clone https://github.com/jeremyButtler/freezeTB freezeTB;
 fi;
 
 cd freezeTB/programs/addAmrSrc;
@@ -29,31 +27,104 @@ make -f mkfile.unix;
 sudo make -f mkfile.unix install
 ```
 
-# Using:
+# Using addAmr
 
-This program has three required inputs, a file with the
-  coordinates of each gene (for tb (H37Rv) use
-  ../../freezeTBFiles/all-genes-coords.tsv), a reference
-  genome (for H37Rv use ../../freezeTBFiles/NC000962.fa),
-  and a file with the variant ids to convert.
+## intro and usage
 
-`addAmr -coords ../../freezeTBFiles/all-genes-coords.tsv -ref ../../freezeTBFiles/NC000962.fa -var <variants.tsv> > <database>.tsv;`
+You should be able to use addAmr to create a database for
+  getAmr. This should work and the output looks good.
+  However, I have not run a database thourgh getAmr yet.
 
-You can also provide a database to add the variant to with
-  `-db database.tsv`. The only thing I am not sure on
-  is what happens when you add new drugs.
+The required input is a reference sequence, the
+  coordinates for each gene (see ampDepth or `addAmr -h`),
+  and a variants file with variants to convert.
 
-For the variant id file, the first column is the variant,
-  while the remaining columns (tabs and/or spaces) are
-  meta-data or drugs resistant to. The only two required
-  items are the variant id and at least one drug it is
-  resistant to.
+You can get the help message with `addAmr -h`.
 
-The only thing to be aware of is that amino acids are
-  backwards translated for the AMR, but the sequence is
-  used for the reference. This means for indel amino acid
-  variants, you will see a different sequence for the
-  reference and AMR.
+For addAmr, you can run:
+
+```
+addAmr \
+    -ref reference.fasta \
+    -coords coordinates.tsv \
+    -var variants.tsv \
+  > database.tsv`;
+```
+
+## variants file
+
+You can create a database using addAmr using the variant
+  ids from a file. The variant file has three required
+  entries, the variant id, the reference id (`-ref <id>`),
+  and any drug resistance. You can also add a comment with
+  `-note <comment>`.
+
+Here is the generalized example of the variant file.
+
+```
+variant_id	-ref	reference_id	-other	drug_name	-note	comment
+```
+
+You can see test.txt for some examples.
+
+```
+gyrB_p.Ser447Phe	-ref	NC_000962.3	-lfx	-note	levovloxcin_shorthand_flag
+fgd1_LoF	-ref	NC_000962.3	-dlm	-note	delamanid_shorthand_flag
+fgd1_p.Asn112fs	-ref	NC_000962.3	-other	delamanid	-note	and_drug_(this_is_delamanid)_flag
+```
+
+Each variant ID should start out with the gene name,
+  followed by an underscore (`<gene_>`). The next part
+  tells if the gene is coding (`<gene>_c.`), nucleotide
+  (`<gene>_n.`), protein (`<gene>_p.`), gene loss of
+  function (`<gene>_LoF`), or the entire gene was deleted
+  deletion (`<gene>_deletion`). The last part tells the
+  mutation type.
+
+- General variant id examples:
+  - Gene Loss of Function: `fgd1_LoF`
+  - Gene deletion: `katG_deletion`
+
+
+For nucleotide mutations, use position, reference, the
+  symbol, and mutation. For a SNP it would look like
+  `rrl_n.2270G>C`. For an insertion it would look like
+  `eis_c.-8delc`. For an insertion you need to included
+  the two bases the insertion, `ins` and then the base.
+  For example, `rrl_n.2269_2270insT`.
+
+- Nucleotide variant id examples:
+  - SNP: `rrl_n.2270G>C`
+  - insertion: `rrl_n.2269_2270insT`
+  - multi-base insertion: `rrl_n.2269_2270insTAGG`
+  - deletion `eis_c.-8delc`
+
+For amino acid mutations, use the reference sequence,
+  position, then mutation. The mutation can be `dup` for
+  duplicates, `del` for deletion, `ins<AA>` for and
+  insertion, `fs` for a frameshift, and an amino acid for
+  an SNP mutation `<AA>`.
+
+You can also use `?` for any amino acid and `*` for a
+  stop mutation. You can use `ext*?` to get loss of
+  stop codon. All start codons are treated as `Met`.
+
+- Amino acid variant id examples:
+  - SNP: `gyrB_p.Ser447Phe`
+  - SNP: to stop: `Rv0678_p.Gln22*`
+  - SNP: loss of stop: `pncA_p.Ter187Argext*?`
+  - SNP: replace start with anything `Rv0678_p.Met1?`
+  - deletion: `rpoB_p.Asn437_Asn438del`
+  - insertion: `rpoB_p.Ser431_Gln432insArg`
+  - frame shift: `Rv0678_p.Asp8fs`
+  - duplication: `rpoB_p.Phe433dup`
+  - larger duplication: `rpoB_p.Phe433_440dup`
+    - note tested
+
+## flags for drugs
+
+addAmr has some flags for some drugs. So, you do not
+  always need to use the `-other drug` flag.
 
 | flags            | meaning in variant file      |
 |:-----------------|:-----------------------------|
@@ -89,6 +160,8 @@ The only thing to be aware of is that amino acids are
 
 Table: List of flags you can use in the variant file.
 
+## other notes
+
 You can also use `-gene <gene>` to provided the gene the
   varaint is in. Only use this if the gene is not in the
   variant id (ex: you have `p.Lys23Gly` instead
@@ -100,206 +173,34 @@ Here is an example of a line from a variant
 Here is the variant file used to test this program.
 
 ```
-fgd1_LoF -dlm -note forward
-fgd1_p.Asn112fs -other delamanid -note forward
+gyrB_p.Ser447Phe	-ref NC_000962.3	-lfx -note forward
 
-rpoB_p.Ser431_Gln432insArg -other rifampicin -note forward
-gyrB_p.Ser447Phe	-lfx -note forward
+fgd1_LoF -ref NC_000962.3 -dlm -note forward
+fgd1_p.Asn112fs -ref NC_000962.3 -other delamanid -note forward
 
-rpoB_p.Gln432_Met434del	-rif -note forward
-rpoB_p.Asn437_Asn438del -rif -note forward
-rpoB_p.Phe433dup	-grade-1 -note forward
-rpoB_p.Gln432_Met434delinsLeu -rif -note forward
+rpoB_p.Gln432_Met434del	-ref NC_000962.3	-rif -note forward
+rpoB_p.Gln432_Met434delinsLeu -ref NC_000962.3  -rif -note forward
+rpoB_p.Ser431_Gln432insArg -ref NC_000962.3  -other rifampicin -note forward
+rpoB_p.Asn437_Asn438del -ref NC_000962.3  -rif -note forward
+Rv0678_p.Met1?	-ref NC_000962.3	-bdq -needs MmpL5 -note forward
+Rv0678_p.Asp8fs	-ref NC_000962.3	-cfz	-needs MmpL5	-note forward
+Rv0678_p.Gln22* -ref NC_000962.3  -bdq -needs MmpL5 -note forward
+rpoB_p.Phe433dup	-ref NC_000962.3	-grade-1 -note forward
 
-Rv0678_p.Met1?	-bdq -needs MmpL5 -note forward
-Rv0678_p.Asp8fs	-cfz	-needs MmpL5	-note forward
-Rv0678_p.Gln22* -bdq -needs MmpL5 -note forward
+katG_LoF	-ref NC_000962.3	-inh -high-res -note reverse
+katG_p.Pro569fs	-ref NC_000962.3	-inh	-high-res -note reverse
+katG_p.Trp689*	-ref NC_000962.3	-inh -high-res -note reverse
+katG_p.Trp328Leu -ref NC_000962.3  -inh	-grade-1 -high-res -note reverse
+katG_deletion -ref NC_000962.3  -inh -high-res -note reverse
+katG_p.Met1?	-ref NC_000962.3	-grade-1 -inh -high-res -note reverse
 
-katG_LoF	-inh -high-res -note reverse
-katG_p.Pro569fs	-inh	-high-res -note reverse
-katG_p.Trp689*	-inh -high-res  -note reverse
-katG_p.Trp328Leu -inh	-grade-1 -high-res -note reverse
-katG_deletion -inh -high-res -note reverse
-katG_p.Met1?	-grade-1 -inh -high-res -note reverse
+pncA_p.Ter187Argext*? -ref NC_000962.3  -pza -note reverse
+pncA_c.-11A>G -ref NC_000962.3  -pza -grade-1 -note reverse_gene
 
-pncA_p.Ter187Argext*? -pza -note reverse
-pncA_c.-11A>G -pza -grade-1 -note reverse_gene
+rrl_n.2269_2270insT -ref NC_000962.3  -lzd -note forward_gene
+rrl_n.2270G>C -ref NC_000962.3 -lzd -note forward_gene
+eis_c.-8delC -ref NC_000962.3 -kan -note reverse_gene
 
-rrl_n.2270G>C -lzd -note forward_gene
-rrl_n.2269_2270insT -lzd -note forward_gene
-
-eis_c.-8delC -kan -note reverse_gene
-
-inhA_c.-154G>A -eto -note forward_gene
-inhA_c.-154G>A -inh -low-res -add-res -grade-1 -note low_res
-```
-
-# Problems:
-
-Valgrind is reporting an unitialized variable error that
-  I have not been able to track down. Might be a memory
-  overflow. It is always on the first printed variant.
-  Then a few others.
-
-```
-==18744== Memcheck, a memory error detector
-==18744== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
-==18744== Using Valgrind-3.24.0 and LibVEX; rerun with -h for copyright info
-==18744== Command: ./addAmr -coords /usr/local/share/freezeTBFiles/coords.tsv -ref /usr/local/share/freezeTBFiles/NC000962.fa -var test.tsv -out del.tsv
-==18744== 
-0
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x4061FAD: memchr (memchr.c:16)
-==18744==    by 0x4062F75: strnlen (strnlen.c:5)
-==18744==    by 0x405D33A: printf_core (vfprintf.c:594)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x4061FDC: memchr (memchr.c:17)
-==18744==    by 0x4062F75: strnlen (strnlen.c:5)
-==18744==    by 0x405D33A: printf_core (vfprintf.c:594)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x4062045: memchr (memchr.c:25)
-==18744==    by 0x4062F75: strnlen (strnlen.c:5)
-==18744==    by 0x405D33A: printf_core (vfprintf.c:594)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x405D354: printf_core (vfprintf.c:595)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== Syscall param writev(vector[0]) points to uninitialised byte(s)
-==18744==    at 0x40568FC: __syscall3 (syscall_arch.h:29)
-==18744==    by 0x40568FC: __stdio_write (__stdio_write.c:15)
-==18744==    by 0x4056F9F: fflush (fflush.c:29)
-==18744==    by 0x4056E25: fclose (fclose.c:12)
-==18744==    by 0x1123A5: p_amrST (amrST.c:1214)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Address 0x50b3cb1 is 529 bytes inside a block of size 1,264 alloc'd
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x40561FF: fdopen (__fdopen.c:21)
-==18744==    by 0x4057CDE: fopen (fopen.c:26)
-==18744==    by 0x111820: p_amrST (amrST.c:870)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== 
-==18744== HEAP SUMMARY:
-==18744==     in use at exit: 472 bytes in 4 blocks
-==18744==   total heap usage: 48 allocs, 44 frees, 15,892,491 bytes allocated
-==18744== 
-==18744== LEAK SUMMARY:
-==18744==    definitely lost: 0 bytes in 0 blocks
-==18744==    indirectly lost: 0 bytes in 0 blocks
-==18744==      possibly lost: 0 bytes in 0 blocks
-==18744==    still reachable: 0 bytes in 0 blocks
-==18744==         suppressed: 472 bytes in 4 blocks
-==18744== 
-==18744== ERROR SUMMARY: 6 errors from 5 contexts (suppressed: 0 from 0)
-==18744== 
-==18744== 1 errors in context 1 of 5:
-==18744== Syscall param writev(vector[0]) points to uninitialised byte(s)
-==18744==    at 0x40568FC: __syscall3 (syscall_arch.h:29)
-==18744==    by 0x40568FC: __stdio_write (__stdio_write.c:15)
-==18744==    by 0x4056F9F: fflush (fflush.c:29)
-==18744==    by 0x4056E25: fclose (fclose.c:12)
-==18744==    by 0x1123A5: p_amrST (amrST.c:1214)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Address 0x50b3cb1 is 529 bytes inside a block of size 1,264 alloc'd
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x40561FF: fdopen (__fdopen.c:21)
-==18744==    by 0x4057CDE: fopen (fopen.c:26)
-==18744==    by 0x111820: p_amrST (amrST.c:870)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== 
-==18744== 1 errors in context 2 of 5:
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x405D354: printf_core (vfprintf.c:595)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== 
-==18744== 1 errors in context 3 of 5:
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x4062045: memchr (memchr.c:25)
-==18744==    by 0x4062F75: strnlen (strnlen.c:5)
-==18744==    by 0x405D33A: printf_core (vfprintf.c:594)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== 
-==18744== 1 errors in context 4 of 5:
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x4061FDC: memchr (memchr.c:17)
-==18744==    by 0x4062F75: strnlen (strnlen.c:5)
-==18744==    by 0x405D33A: printf_core (vfprintf.c:594)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
-==18744== 
-==18744== 2 errors in context 5 of 5:
-==18744== Conditional jump or move depends on uninitialised value(s)
-==18744==    at 0x4061FAD: memchr (memchr.c:16)
-==18744==    by 0x4062F75: strnlen (strnlen.c:5)
-==18744==    by 0x405D33A: printf_core (vfprintf.c:594)
-==18744==    by 0x405D4DA: vfprintf (vfprintf.c:683)
-==18744==    by 0x4058166: fprintf (fprintf.c:9)
-==18744==    by 0x111BB4: p_amrST (amrST.c:959)
-==18744==    by 0x11A43D: main (mainAddAmr.c:1475)
-==18744==  Uninitialised value was created by a heap allocation
-==18744==    at 0x48B77E4: malloc (vg_replace_malloc.c:446)
-==18744==    by 0x119F4D: main (mainAddAmr.c:1239)
-==18744== 
---18744-- 
---18744-- used_suppression:      1 musl-dynlink4 /usr/libexec/valgrind/default.supp:609 suppressed: 424 bytes in 1 blocks
---18744-- used_suppression:      1 musl-dynlink2 /usr/libexec/valgrind/default.supp:587 suppressed: 48 bytes in 3 blocks
-==18744== 
-==18744== ERROR SUMMARY: 6 errors from 5 contexts (suppressed: 0 from 0)
+inhA_c.-154G>A -ref NC_000962.3 -eto -note forward_gene
+inhA_c.-154G>A -ref NC_000962.3 -inh -low-res -add-res -grade-1 -note low_res
 ```
