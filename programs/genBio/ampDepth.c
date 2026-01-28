@@ -735,6 +735,7 @@ pGeneCoverage_ampDepth(
       startHeapArySI[0] = 0;
       endHeapArySI[0] = 0;
       ntSI = 0;
+      depthSL = 0;
 
       /**************************************************\
       * Fun07 Sec03 Sub02:
