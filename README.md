@@ -436,6 +436,8 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2025-01-29:
+  - made tbAmr detect and ignore the reference column
 - 2025-01-26:
   - chagned coverage graphs in TclTk GUI and added missing
     genes to the mean read depth graph

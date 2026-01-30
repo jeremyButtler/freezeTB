@@ -1431,6 +1431,8 @@ readTbl_amrST(
    unsigned long *drugResUL = 0;
    unsigned long *drugCrossResUL = 0;
 
+   signed char refColBl = 0;
+
    FILE *amrFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -1488,6 +1490,12 @@ readTbl_amrST(
    if(! tmpStr)
       goto fileErr_fun12_sec06_sub03;
   
+   if(
+         (buffHeapStr[0] | 32) == 'r'
+      && (buffHeapStr[1] | 32) == 'e'
+      && (buffHeapStr[2] | 32) == 'f'
+   ) refColBl = 1;
+
    /*****************************************************\
    * Fun12 Sec03 Sub03:
    *   - get number of antibiotics
@@ -1649,6 +1657,13 @@ readTbl_amrST(
 
       init_amrST(&amrSTAry[uiAmr]);
       tmpStr = buffHeapStr;
+
+      if(refColBl)
+      { /*If: have a reference column; ignore it*/
+         tmpStr += endWhite_ulCp(tmpStr);
+         while(*tmpStr && *tmpStr < 33)
+             ++tmpStr;
+      } /*If: have a reference column; ignore it*/
 
       /**************************************************\
       * Fun12 Sec05 Sub02:

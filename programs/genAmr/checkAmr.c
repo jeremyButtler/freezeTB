@@ -1346,6 +1346,14 @@ checkAmr(
          goto isRes_fun06_sec03__sub07; /*is AMR*/
       } /*Else If: insertion*/
 
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun07 Sec03 Sub04 Cat07:
+      +   - skip lof cases (already checked)
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else
+         goto nextAmr_fun07_sec03_sub08;
+
       /**************************************************\
       * Fun07 Sec03 Sub05:
       *   - handle amino acid amr's
@@ -1361,6 +1369,8 @@ checkAmr(
       *     - check forward gene snps/insertions
       *   o fun07 sec03 sub05 cat06:
       *     - else I do not know direction, look at snps
+      *   o fun07 sec03 sub04 cat07:
+      *     - skip lof cases (already checked)
       \**************************************************/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
@@ -2327,6 +2337,9 @@ pCon_checkAmr(
    * Fun12 Sec02 Sub01:
    *   - print AMRs/check if already printed variant
    \*****************************************************/
+
+   if(! amrHitListST)
+      return; /*nothing to print; avoids infinite loops*/
 
    /*flag duplicate AMRs (so only best printed*/
    flagAmrHit_checkAmr(amrHitListST);
