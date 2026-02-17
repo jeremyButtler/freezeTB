@@ -7,6 +7,9 @@ NAME=ftbTclTk
 PREFIX=/usr/local/bin
 O=o.bug
 
+# I need -Wno-incompatible-pointer-types to avoid TclTks
+#   use of const
+
 genFreezeTB=../genFreezeTB
 genLib=../genLib
 genBio=../genBio

@@ -391,7 +391,7 @@ sort_geneCoord(
             else if(
                   geneCoordST->startAryUI[elmOnSL]
                 < geneCoordST->startAryUI[lastElmSL]
-            ) break; /*positioned the element*/
+            ) ; /*need to move elmOnSL one item back*/
 
             else if(
                eqlNull_ulCp(

@@ -1,12 +1,15 @@
 
 CC=cc
 LD=cc
-coreCFLAGS= -c -O3 -std=c99 -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
+coreCFLAGS= -c -O3 -std=c99 -Wno-incompatible-pointer-types -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
 CFLAGS=-DNONE
 NAME=ftbTclTk
 PREFIX=${HOME}/.ftb
 tcltk_prefix=$(PREFIX)
 O=o.unix
+
+# I need -Wno-incompatible-pointer-types to avoid TclTks
+#   use of const
 
 genFreezeTB=../genFreezeTB
 genLib=../genLib
