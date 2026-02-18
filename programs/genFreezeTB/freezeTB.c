@@ -9329,11 +9329,8 @@ run_freezeTB(
    *   - print clusters for mixed infection
    \*****************************************************/
 
-   conOutFILE =
-      fopen(
-         (char *) conOutStr,
-          "a"
-      ); /*open consensus output file*/
+   conOutFILE = fopen((char *) conOutStr, "a");
+      /*open consensus output file*/
 
    errSC =
       plist_con_clustST(conListHeapST, 0, 0, conOutFILE);

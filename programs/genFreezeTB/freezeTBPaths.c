@@ -502,31 +502,12 @@ outputPath_freezeTBPaths(
    signed char *tmpStr = outStr;
    FILE *testFILE = 0;
 
-   tmpStr +=
-      cpDelim_ulCp(
-         tmpStr,
-         prefixStr,
-         0,
-         '\0'
-      );
-
-   tmpStr +=
-      cpDelim_ulCp(
-         tmpStr,
-         nameStr,
-         0,
-         '\0'
-      );
-
-   testFILE =
-      fopen(
-         (char *) outStr,
-         "w"
-      );
+   tmpStr += cpStr_ulCp(tmpStr, prefixStr);
+   tmpStr += cpStr_ulCp(tmpStr, nameStr);
+   testFILE = fopen((char *) outStr, "w");
 
    if(! testFILE)
       return 1;
-
    fclose(testFILE);
    return 0;
 } /*outputPath_freezeTBPaths*/

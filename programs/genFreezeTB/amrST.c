@@ -1504,7 +1504,7 @@ readTbl_amrST(
    /*moving to first antibiotic in header*/
    for(
       siDrug = 0;
-      siDrug < def_firstDrugCol_amrST;
+      siDrug < def_firstDrugCol_amrST + refColBl;
       ++siDrug
    ) while(buffHeapStr[siStartDrug++] > 31) ;
 
@@ -1643,11 +1643,7 @@ readTbl_amrST(
    /*get past header*/
    tmpStr =
       (signed char *)
-      fgets(
-         (char *) buffHeapStr,
-         lenBuffUI,
-         amrFILE
-      );
+      fgets((char *) buffHeapStr, lenBuffUI, amrFILE);
 
    for(
       uiAmr = 0;
@@ -1699,11 +1695,7 @@ readTbl_amrST(
       \**************************************************/
 
       amrSTAry[uiAmr].lenVarIdUI =
-         lenStrNull_ulCp(
-            tmpStr,
-            def_tab_ulCp,
-            '\t'
-         );
+         lenStrNull_ulCp(tmpStr, def_tab_ulCp, '\t');
 
       if(tmpStr[amrSTAry[uiAmr].lenVarIdUI] != '\t')
          goto fileErr_fun12_sec06_sub03; /*end of line*/
@@ -1722,7 +1714,6 @@ readTbl_amrST(
          tmpStr,
          amrSTAry[uiAmr].lenVarIdUI
       );
-
       tmpStr += amrSTAry[uiAmr].lenVarIdUI + 1;
 
       /**************************************************\
@@ -1737,13 +1728,10 @@ readTbl_amrST(
          );
 
       --amrSTAry[uiAmr].refPosUI; /*convert to index 0*/
-
       if(*tmpStr > 32)
          goto fileErr_fun12_sec06_sub03; /*end of line*/
-
       if(*tmpStr == '\0')
          goto fileErr_fun12_sec06_sub03; /*end of line*/
-
       ++tmpStr; /*get off the tab*/
 
       /**************************************************\
@@ -1765,7 +1753,6 @@ readTbl_amrST(
       { /*Loop: get past tab*/
          if(*tmpStr != '\t')
             goto fileErr_fun12_sec06_sub03;
-
          ++tmpStr;
       } /*Loop: get past tab*/
 
@@ -2010,10 +1997,7 @@ readTbl_amrST(
       \**************************************************/
 
       amrSTAry[uiAmr].lenRefAaUI =
-         lenStrNull_charCp(
-            tmpStr,
-            '\t'
-          );
+         lenStrNull_charCp(tmpStr, '\t');
 
       if(tmpStr[amrSTAry[uiAmr].lenRefAaUI] != '\t')
          goto fileErr_fun12_sec06_sub03; /*end of line*/
@@ -2023,7 +2007,6 @@ readTbl_amrST(
               (amrSTAry[uiAmr].lenRefAaUI + 1)
             * sizeof(char)
          );
-   
       if(! amrSTAry[uiAmr].refAaStr)
          goto memErr_fun12_sec06_sub02;
 
@@ -2032,10 +2015,8 @@ readTbl_amrST(
          tmpStr,
          amrSTAry[uiAmr].lenRefAaUI
       );
-
       if(*tmpStr == '\0')
          goto fileErr_fun12_sec06_sub03;/*end of line*/
-
       tmpStr += amrSTAry[uiAmr].lenRefAaUI + 1;
 
       /**************************************************\
@@ -2044,10 +2025,7 @@ readTbl_amrST(
       \**************************************************/
 
       amrSTAry[uiAmr].lenAmrAaUI =
-         lenStrNull_charCp(
-            tmpStr,
-            '\t'
-         );
+         lenStrNull_charCp(tmpStr, '\t');
 
       if(tmpStr[amrSTAry[uiAmr].lenAmrAaUI] != '\t')
          goto fileErr_fun12_sec06_sub03;/*end of line*/
@@ -2222,10 +2200,7 @@ readTbl_amrST(
       else
       { /*Else if: entry (may be NA)*/
          amrSTAry[uiAmr].lenNeedsGeneUI =
-            lenStrNull_charCp(
-               tmpStr,
-               '\t'
-            );
+            lenStrNull_charCp(tmpStr, '\t');
 
          if(tmpStr[amrSTAry[uiAmr].lenNeedsGeneUI] !='\t')
             goto fileErr_fun12_sec06_sub03;/*end of line*/
@@ -2272,12 +2247,14 @@ readTbl_amrST(
          *drugResUL |=
               ((*tmpStr - 48) & def_resFlag_amrST)
             << siDrug;
+            /*durg resistance is 1 or 3*/
 
          *drugCrossResUL |=
                ((
                   (*tmpStr - 48) & def_crossResFlag_amrST
                 ) >> def_crossToResShift_amrST
                ) << siDrug;
+            /*durg cross resistance is 2 or 3*/
 
          ++siDrug;
 
@@ -2288,7 +2265,6 @@ readTbl_amrST(
          { /*Loop: get past tab*/
             if(*tmpStr != '\t')
                goto fileErr_fun12_sec06_sub03;
-
             ++tmpStr;
          } /*Loop: get past tab*/
       } /*Loop: check for antibiotic resistance*/
