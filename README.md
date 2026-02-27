@@ -8,14 +8,14 @@ freezeTB is a program that detects gene mutations
   consensus fragments (as a sam file) and checks for
   lineages by spoligotyping and/or MIRU-VNTR.
 
-  Installing the freezeTB GUI on windows
+  - Installing the freezeTB GUI on windows
     1. TclTk: https://youtu.be/T2Es7UA-DPc 
     2. TclTk with error https://youtu.be/aFOxcqji11E
     3. raylib: https://youtu.be/USbqhzfOveY 
 
-  Installing freezeTB on Mac:
-     1. TclTk: need to upload
-     2. raylib: https://youtu.be/vd6XsDu_E4k
+  - Installing freezeTB on Mac:
+    1. TclTk: need to upload
+    2. raylib: https://youtu.be/vd6XsDu_E4k
 
 Currently freezeTb uses the WHO 2023 mutation catalog from
   [https://github.com/GTB-tbsequencing/mutation-catalogue-2023](
