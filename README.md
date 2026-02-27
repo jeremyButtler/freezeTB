@@ -8,14 +8,14 @@ freezeTB is a program that detects gene mutations
   consensus fragments (as a sam file) and checks for
   lineages by spoligotyping and/or MIRU-VNTR.
 
-  - Installing the freezeTB GUI on windows
-    1. TclTk: https://youtu.be/T2Es7UA-DPc 
-    2. TclTk with error https://youtu.be/aFOxcqji11E
-    3. raylib: https://youtu.be/USbqhzfOveY 
+- Installing the freezeTB GUI on windows
+  1. TclTk: https://youtu.be/T2Es7UA-DPc 
+  2. TclTk with error https://youtu.be/aFOxcqji11E
+  3. raylib: https://youtu.be/USbqhzfOveY 
 
-  - Installing freezeTB on Mac:
-    1. TclTk: need to upload
-    2. raylib: https://youtu.be/vd6XsDu_E4k
+- Installing freezeTB on Mac:
+  1. TclTk: need to upload
+  2. raylib: https://youtu.be/vd6XsDu_E4k
 
 Currently freezeTb uses the WHO 2023 mutation catalog from
   [https://github.com/GTB-tbsequencing/mutation-catalogue-2023](
@@ -386,34 +386,37 @@ If you want graphs, install R with PNG support.
 
 ## Windows
 
-Install the visual studio build tools then you can double
-  click the `winRayInstall.bat` script in the `windows`
-  directory (works for visual studio 2022).
+You can install the raylib GUI (easy, but more clunky) or
+  the TclTk GUI (less clunky, but harder).
 
-If that fails, in the x64 developer terminal, try:
+### Easy way
 
-```
-cd /path/to/freezeTB;
-cd programs/ftbRaylibSrc;
-nmake /F mkfile.win
-```
+The easy way is to install the pre-compiled raylib
+  version. This version may be a little clunky, but it
+  works. The raylib version also has no graphs.
 
-The TclTk GUI is similar to raylib, except you also need
-  to install Magic splat (TclTk for windows) and then run
-  (double click) the `winInstall.bat` script.
+1. Download the windowsFtb.zip file in bin
+2. Put windowsFtb.zip on your desktop
+3. Extract windowsFtb.zip
 
-After compling ftbRay.exe, you should install minimap2.
-  For compiling minimap2 on windows see
-  [https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows](
-   https://github-wiki-see.page/m/genotoul-bioinfo/dgenies/wiki/Compile-minimap2-for-Windows).
-  You should add the minimap2.exe and the needed `.dll`
-  files to the `ftbReasources` folder, which needs to be
-  in same location as ftbRay.exe.
+### Hard way
 
-The other option is copy the `ftbResources` folder in
-  the zip compressed `windowsFtb.zip` folder. This has
-  minimap2.
+The harder GUI is the TclTk GUI. I have had problems with
+  Rscript not working. This means that you will not get
+  the graphs on windows.
 
+1. You will need to install Magic splat (TclTk for
+  windows)
+2. Install the visual studio build tools
+3. Double click click the `winInstall.bat` script in
+  the `windows` directory
+
+- If you get an error (likely visual studio), then open a
+  developer terminal (visual studio->x64 native;
+  or search for `x64 native`)
+  - `cd "%homePath%\Downloads\freezeTB-main\freezeTB-main\windows"`
+  - `winInstall.bat`
+  
 # Run
 
 ## GUI
