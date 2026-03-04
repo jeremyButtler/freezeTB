@@ -5239,7 +5239,7 @@ pReadLineages_getLin(
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   signed char useIdStr[64];
+   signed char useIdStr[1024];
    signed int siPos = 0;
    signed int siCon = 0;
    float tmpF = 0;
@@ -5302,7 +5302,6 @@ pReadLineages_getLin(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    cpWhite_ulCp(useIdStr, idStr);
-
    fprintf((FILE *) outFILE, "%s\tcount", useIdStr);
 
    for(siPos = 0; siPos < cntSTPtr->lenSI; ++siPos)

@@ -452,6 +452,9 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-03-04:
+  - fixed minor bug were long file names would crash
+    freezeTB (new limit is 1024 bytes)
 - 2025-01-29:
   - made tbAmr detect and ignore the reference column
 - 2025-01-26:

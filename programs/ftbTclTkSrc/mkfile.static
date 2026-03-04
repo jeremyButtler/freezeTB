@@ -26,7 +26,6 @@ objFiles= \
    $(genFreezeTB)/checkAmr.$O \
    $(genFreezeTB)/amrST.$O \
    $(genFreezeTB)/drugAry.$O \
-   $(genGeneoType)/getLin.$O \
    $(genLib)/fileFun.$O \
    $(genLib)/charCp.$O \
    $(genBio)/samEntry.$O \
@@ -78,13 +77,14 @@ $(NAME): ftbTclTk.$O
 		elif [ -f /usr/X11R6/lib/libX11.so ]; then x11Obj="usr/X11R6/lib/libX11.so"; \
 		else echo "could not find libX11"; exit; \
 		fi; \
+		echo "found libX11 at $$x11Obj"; \
 		\
 		tclObj=""; \
 		if [ -f /opt/homebrew/lib/libtcl9.0.dylib ]; then tclObj=/opt/homebrew/lib/libtcl9.0.dylib; \
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl9.0.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtcl9.0.dylib; \
 		elif [ -f /opt/homebrew/lib/libtcl8.6.dylib ]; then tclObj=/opt/homebrew/lib/libtcl8.6.dylib; \
-		elif [ -f /opt/homebrew/lib/libtcl9.0.dylib ]; then tclObj=/opt/homebrew/lib/libtcl9.0.dylib; \
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl8.6.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtcl8.6.dylib; \
 		elif [ -f /opt/homebrew/Cellar/tcl-tk@8/8.6.15/lib/libtcl8.6.dylib ]; then tclObj=/opt/homebrew/Cellar/tcl-tk@8/8.6.15/lib/libtcl8.6.dylib; \
-		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib ]; then tclObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib; \
 		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib ]; then tclObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9.0.dylib; \
 		elif [ -f /usr/lib/libtcl9.0.so ]; then tclObj=/usr/lib/libtcl9.0.so; \
 		elif [ -f /usr/lib/libtcl8.6.so ]; then tclObj=/usr/lib/libtcl8.6.so; \
@@ -112,13 +112,18 @@ $(NAME): ftbTclTk.$O
 		elif [ -f /usr/local/libexec/x86_64-linux-gnu/libexectcl8.6.so ]; then tclObj=/usr/local/libexec/x86_64-linux-gnu/libexectcl8.6.so; \
 		else echo "could not find libtcl"; exit; \
 		fi; \
+		echo "found libtcl at $$tclObj"; \
 		\
 		tkObj=""; \
 		if [ -f /opt/homebrew/lib/libtcl9tk9.0.dylib ]; then tkObj=/opt/homebrew/lib/libtcl9tk9.0.dylib; \
 		elif [ -f /opt/homebrew/lib/libtk9.0.dylib ]; then tkObj=/opt/homebrew/lib/libtk9.0.dylib; \
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl9tk9.0.dylib ]; then tkObj=/opt/homebrew/lib/tcl-tk/libtcl9tk9.0.dylib; \
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtk9.0.dylib ]; then tkObj=/opt/homebrew/lib/tcl-tk/libtk9.0.dylib; \
 		elif [ -f /opt/homebrew/lib/libtcl8tk8.6.dylib ]; then tkObj=/opt/homebrew/lib/libtcl8tk8.6.dylib; \
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtcl8tk8.6.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtcl8tk8.6.dylib; \
+		elif [ -f /opt/homebrew/lib/tcl-tk/libtk8.6.dylib ]; then tclObj=/opt/homebrew/lib/tcl-tk/libtk8.6.dylib; \
 		elif [ -f /opt/homebrew/Cellar/tk-tk@8/8.6.15/lib/libtcl8tk8.6.dylib ]; then tkObj=/opt/homebrew/Cellar/tk-tk@8/8.6.15/lib/libtcl8tk8.6.dylib; \
-		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtk9.0.dylib ]; then tkObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9tk9.0.dylib; \
+		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtk9.0.dylib ]; then tkObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtk9.0.dylib; \
 		elif [ -f /usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9tk9.0.dylib ]; then tkObj=/usr/local/Cellar/tcl-tk/9.0.1/lib/libtcl9tk9.0.dylib; \
 		elif [ -f /usr/lib/libtk9.0.so ]; then tkObj=/usr/lib/libtk9.0.so; \
 		elif [ -f /usr/lib/libtk8.6.so ]; then tkObj=/usr/lib/libtk8.6.so; \
@@ -146,7 +151,8 @@ $(NAME): ftbTclTk.$O
 		elif [ -f /usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so ]; then tkObj=/usr/local/libexec/x86_64-linux-gnu/libexectk8.6.so; \
 		else echo "could not find libtk"; exit; \
 		fi; \
-			$(LD) $(objFiles) $$x11Obj $$tkObj $$tclObj  -o $(NAME)
+		echo "found libtk at $$tkObj"; \
+			$(LD) $$x11Obj $$tkObj $$tclObj  -o $(NAME) $(objFiles)
 
 ftbTclTk.$O: \
 	ftbTclTk.c \
@@ -173,6 +179,7 @@ $(genFreezeTB)/freezeTB.$O: \
 	$(genFreezeTB)/miruTbl.$O \
 	$(genFreezeTB)/spolFind.$O \
 	$(genFreezeTB)/freezeTBPaths.$O \
+   $(genGeneoType)/getLin.$O \
 	$(genAln)/mapRead.$O \
 	$(genBio)/gzSeqST.$O \
 	$(genBio)/trimSam.$O \
@@ -206,7 +213,7 @@ $(genFreezeTB)/freezeTBPaths.$O: \
 
 $(genGeneoType)/getLin.$O: \
 	$(genGeneoType)/getLin.c \
-	$(genGeneoType)/getLin.h \
+			  $(genGeneoType)/getLin.h \
 	$(genGeneoType)/linST.$O \
 	$(genAln)/memwaterScan.$O \
 	$(genBio)/samEntry.$O \
@@ -226,6 +233,7 @@ $(genGeneoType)/linST.$O: \
 		$(CC) -o $(genGeneoType)/linST.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genGeneoType)/linST.c
+
 
 $(genLib)/ulCp.$O: \
 	$(genLib)/ulCp.c \
@@ -581,7 +589,7 @@ $(genLib)/endin.$O: \
 
 install:
 	mv $(NAME) $(PREFIX)
-	chmod a+x $(PREFIX)/$(NAME)
+	chmod a+x $(PREFIX)\/$(NAME)
 
 clean:
 	rm $(objFiles)

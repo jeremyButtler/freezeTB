@@ -250,7 +250,8 @@ typedef struct set_freezeTB
       /*spoligotype lineage database*/
    signed char refFileStr[def_lenFileName_freezeTB];
       /*fasta with reference sequence*/
-   signed char prefixStr[64];     /*what to name output*/
+   signed char prefixStr[def_lenFileName_freezeTB];
+       /*what to name output*/
    signed char depthFlagStr[64];  /*graph prefix*/
 
    /*hsp65 species and custom user lineages*/
@@ -295,6 +296,8 @@ void
 init_set_freezeTB(
    struct set_freezeTB *setFTBST
 ){
+   signed int siPos = 0;
+
    if(! setFTBST)
       return;
 
@@ -337,6 +340,20 @@ init_set_freezeTB(
    setFTBST->hsp65MixSupF = 0.4;
 
    /*copy database paths*/
+   for(siPos=0; siPos < def_lenFileName_freezeTB; ++siPos)
+   { /*Loop: set path array values to 0*/
+      setFTBST->amrDbFileStr[siPos] = 0;
+      setFTBST->coordFileStr[siPos] = 0;
+      setFTBST->miruDbFileStr[siPos] = 0;
+      setFTBST->maskPrimFileStr[siPos] = 0;
+      setFTBST->refFileStr[siPos] = 0;
+      setFTBST->spolDBFileStr[siPos] = 0;
+      setFTBST->spolRefFileStr[siPos] = 0;
+      setFTBST->hsp65SimpleFileStr[siPos] = 0;
+      setFTBST->hsp65ComplexFileStr[siPos] = 0;
+      setFTBST->prefixStr[siPos] = 0;
+   } /*Loop: set path array values to 0*/
+
    amrPath_freezeTBPaths(setFTBST->amrDbFileStr);
    coordPath_freezeTBPaths(setFTBST->coordFileStr);
    miruPath_freezeTBPaths(setFTBST->miruDbFileStr);
@@ -355,11 +372,7 @@ init_set_freezeTB(
       setFTBST->depthFlagStr,
       def_depthFlag_freezeTB
    );
-
-   cpStr_ulCp(
-      setFTBST->prefixStr,
-      def_prefix_freezeTB
-   );
+   cpStr_ulCp(setFTBST->prefixStr, def_prefix_freezeTB);
 
 
    /*there is some duplication here, but this should only
