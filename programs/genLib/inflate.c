@@ -435,12 +435,18 @@ void
 init_file_inflate(
    struct file_inflate *fileSTPtr
 ){
+   signed int siPos = 0;
+
    if(! fileSTPtr)
       return;
 
    fileSTPtr->lenTreeST = 0;
    fileSTPtr->distTreeST = 0;
    fileSTPtr->zipFILE = 0;
+
+   for(siPos = 0; siPos < def_window_inflate; ++siPos)
+      fileSTPtr->buffStr[siPos] = 0;
+      /*this avoids out of bounds noise from ulCp error*/
 
    blank_file_inflate(fileSTPtr, 2);
 } /*init_file_inflate*/
