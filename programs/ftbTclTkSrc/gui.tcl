@@ -973,6 +973,8 @@ pack .main -side left ;
 #   o gui02 sec05:
 #     - read mapper checkbox
 #   o gui02 sec05:
+#     - read mapper checkbox
+#   o gui02 sec06:
 #     - set up run and exit button
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1580,10 +1582,8 @@ proc setFreezeTBStatus {} {
       #+++++++++++++++++++++++++++++++++++++++++++++
 
       if { $::glob_useMinimapBl eq 0 } {
-         lappend tbCmd $::glob_fqIn ;
-         #foreach fqStr $::glob_fqIn {
-         #   append cmdStr " \"" $fqStr "\"" ;
-         #} ; # Loop: guard input fastqs from spaces
+         set tbCmd [concat $tbCmd $::glob_fqIn] ;
+            # this works in setup for tcl 8.4
       } ; # If: need to add fastq files to freezeTB cmd
 
       puts $logFile [concat "freezeTB " $tbCmd ] ;
