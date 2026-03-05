@@ -410,9 +410,9 @@ The harder GUI is the TclTk GUI. I have had problems with
   the graphs on windows.
 
 1. You will need to install Magic splat (TclTk for
-  windows)
-  - [https://www.magicsplat.com/tcl-installer/index.html](
-     https://www.magicsplat.com/tcl-installer/index.html)
+   windows)
+   - [https://www.magicsplat.com/tcl-installer/index.html](
+      https://www.magicsplat.com/tcl-installer/index.html)
 3. Install the visual studio build tools
    - [https://visualstudio.microsoft.com/downloads/](
       https://visualstudio.microsoft.com/downloads/)
