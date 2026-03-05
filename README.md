@@ -411,8 +411,14 @@ The harder GUI is the TclTk GUI. I have had problems with
 
 1. You will need to install Magic splat (TclTk for
   windows)
-2. Install the visual studio build tools
-3. Double click click the `winInstall.bat` script in
+  - [https://www.magicsplat.com/tcl-installer/index.html](
+     https://www.magicsplat.com/tcl-installer/index.html)
+3. Install the visual studio build tools
+   - [https://visualstudio.microsoft.com/downloads/](
+      https://visualstudio.microsoft.com/downloads/)
+   - Goto `tools for visual studio`
+   - Download `Build Tools for Visual Studio`
+4. Double click click the `winInstall.bat` script in
   the `windows` directory
 
 - If you get an error (likely visual studio), then open a
