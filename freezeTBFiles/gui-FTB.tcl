@@ -439,7 +439,7 @@ lappend tbCmd $glob_numRebuilds ;
 lappend tbCmd "-no-clust" ;
 } ;
 if { $::glob_useMinimapBl eq 0 } {
-lappend tbCmd $::glob_fqIn ;
+set tbCmd [concat $tbCmd $::glob_fqIn] ;
 } ;
 puts $logFile [concat "freezeTB " $tbCmd ] ;
 setFreezeTBStatus ;

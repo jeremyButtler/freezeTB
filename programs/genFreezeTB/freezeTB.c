@@ -8889,10 +8889,16 @@ run_freezeTB(
 
     if(errSC == def_noMap_tbConDefs)
     { /*If: nothing mapped*/
-       cpStr_ulCp(
-          errHeapStr,
-          (signed char *) "unable to build consensus"
-       );
+      tmpStr = errHeapStr;
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            (signed char *) "M. tuberculosis read depth"
+         );
+      cpStr_ulCp(
+         tmpStr,
+         (signed char *) " is under 10x"
+      );
 
        goto err_fun12_sec11_sub02;
     } /*If: nothing mapped*/
@@ -8956,9 +8962,15 @@ run_freezeTB(
 
    if(! samConSTAry)
    { /*If: error*/
+      tmpStr = errHeapStr;
+      tmpStr +=
+         cpStr_ulCp(
+            tmpStr,
+            (signed char *) "M. tuberculosis read depth"
+         );
       cpStr_ulCp(
-         errHeapStr,
-         (signed char *) "could not collapse consensus"
+         tmpStr,
+         (signed char *) " is under 10x"
       );
 
       goto err_fun12_sec11_sub02;
