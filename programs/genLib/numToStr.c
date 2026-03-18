@@ -306,6 +306,9 @@ double_numToStr(
                *startStr = '0';
 
             --startStr;
+
+            if(*startStr == '.')
+               --startStr; /*on the decimal*/
          } /*Loop: round up*/
 
          if(*startStr != '.')
