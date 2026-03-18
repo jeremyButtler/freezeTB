@@ -452,10 +452,12 @@ close $logFile ;
 return false;
 } ;
 close $logFile ;
-wm title . "Required freezeTB" ;
-.main.reqIn.runexit.statuslab configure -text "" ;
 set ::glob_outPref $prefix ;
 set ::glob_outCur $prefix ;
+depthGraph $::glob_outCur 1 ;
+coverageGraph $::glob_outCur 1 ;
+wm title . "Required freezeTB" ;
+.main.reqIn.runexit.statuslab configure -text "" ;
 .main.menu.outBut invoke ;
 .main.out.set.run.but invoke ;
 } ; 
@@ -1147,16 +1149,21 @@ for { set siDrug 3 } { $siDrug < $endSI } { incr siDrug }  { append outStr [ lin
 .main.out.report.hsp65.reslab configure -text $outStr ;
 return true ;
 } ;
-proc depthGraph {prefixStr} {
+proc depthGraph {prefixStr buildGraphBl } {
 set graphStr "\"" ;
 append graphStr $::glob_depthGraph "\"" ;
 set tmpPathStr $prefixStr ;
 append tmpPathStr "-mean-depth.png" ;
-if {! [image inuse $::glob_depthImg] } {
+if { [image inuse $::glob_depthImg] } {
 image delete $::glob_depthImg ;
 } ; 
 if {$::glob_mkGraphBl ne 0 } {
-if { [file exists $tmpPathStr] eq 1 } {
+if { $buildGraphBl ne 1 } {
+set fileBl [file exists $tmpPathStr] ;
+} else {
+set fileBl 0 ;
+}
+if { $fileBl eq 1 } {
 set ::glob_depthImg [image create photo -file $tmpPathStr] ;
 .main.out.depth.graph configure -image $::glob_depthImg ;
 } else {
@@ -1174,7 +1181,7 @@ set ::glob_depthImg [image create photo -file $tmpPathStr ] ;
 } ;
 } ;
 } ;
-proc coverageGraph {prefixStr} {
+proc coverageGraph {prefixStr buildGraphBl} {
 set dbStr "\"" ;
 append dbStr $::glob_amrDb "\"" ;
 set graphStr "\"" ;
@@ -1183,11 +1190,16 @@ set coordsTsv "\"" ;
 append coordsTsv $::glob_coordsTsv "\"" ;
 set coverPathStr $prefixStr ;
 append coverPathStr "-coverage.png" ;
-if {! [image inuse $::glob_coverImg] } {
+if { [image inuse $::glob_coverImg] } {
 image delete $::glob_coverImg ;
 } ; 
 if {$::glob_mkGraphBl ne 0 } {
-if { ([file exists $coverPathStr] eq 1) } {
+if { $buildGraphBl ne 1 } {
+set fileBl [file exists $coverPathStr] ;
+} else {
+set fileBl 0 ;
+} ;
+if { $fileBl eq 1 } {
 set ::glob_coverImg [image create photo -file $coverPathStr] ;
 .main.out.cover.graph configure -image $::glob_coverImg ;
 } else {
@@ -1397,8 +1409,8 @@ pack .main.out.set.run -anchor w -side top ;
 tk::button .main.out.set.run.but -text "get report" -command { 
 set ::glob_outCur $::glob_outPref ;
 readAmrRep $::glob_outCur ;
-depthGraph $::glob_outCur ;
-coverageGraph $::glob_outCur ;
+depthGraph $::glob_outCur 0 ;
+coverageGraph $::glob_outCur 0 ;
 readSpol $::glob_outCur ;
 readHsp65 $::glob_outCur ;
 readAmrTbl $::glob_outCur "   " ;

@@ -458,6 +458,12 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-03-18:
+  - set TclTk GUI to remake graphs on every freezeTB run,
+    (only exception is if graphing is turned off)
+  - fixed minor bug in number conversion rounding
+    converting `<number>9.9` to `<number:.0` (rounding
+    ended at `.`)
 - 2026-03-04:
   - fixed minor bug were long file names would crash
     freezeTB (new limit is 1024 bytes)

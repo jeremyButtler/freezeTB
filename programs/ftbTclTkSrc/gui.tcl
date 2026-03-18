@@ -1613,6 +1613,13 @@ proc setFreezeTBStatus {} {
 
       close $logFile ;
 
+      set ::glob_outPref $prefix ;
+      set ::glob_outCur $prefix ;
+
+      # make the graphs for freezeTB reall quick
+      depthGraph $::glob_outCur 1 ;
+      coverageGraph $::glob_outCur 1 ;
+
       #+++++++++++++++++++++++++++++++++++++++++++++
       # Gui02 Sec06 Sub02 Cat12:
       #   - run output part of freezeTB
@@ -1624,9 +1631,6 @@ proc setFreezeTBStatus {} {
          configure 
          -text ""
       ---;
-
-      set ::glob_outPref $prefix ;
-      set ::glob_outCur $prefix ;
 
       .main.menu.outBut invoke ;
       .main.out.set.run.but invoke ;
@@ -4256,7 +4260,7 @@ proc readHsp65 {prefixStr} {
 #   - function; read depth graph display
 #**************************************************
 
-proc depthGraph {prefixStr} {
+proc depthGraph {prefixStr buildGraphBl } {
    set graphStr "\"" ;
    append graphStr $::glob_depthGraph "\"" ;
 
@@ -4264,13 +4268,19 @@ proc depthGraph {prefixStr} {
    append tmpPathStr "-mean-depth.png" ;
 
    # delete old graphs
-   if {! [image inuse $::glob_depthImg] } {
-         image delete $::glob_depthImg ;
+   if { [image inuse $::glob_depthImg] } {
+      image delete $::glob_depthImg ;
    } ; # If: image exists
 
    # check if can make graphs and if need to make one
    if {$::glob_mkGraphBl ne 0 } {
-      if { [file exists $tmpPathStr] eq 1 } {
+      if { $buildGraphBl ne 1 } {
+         set fileBl [file exists $tmpPathStr] ;
+      } else {
+         set fileBl 0 ;
+      }
+
+      if { $fileBl eq 1 } {
          ---set
            ::glob_depthImg
            [image create photo -file $tmpPathStr]
@@ -4324,7 +4334,7 @@ proc depthGraph {prefixStr} {
 #   - function; coverage graph dispaly
 #**************************************************
 
-proc coverageGraph {prefixStr} {
+proc coverageGraph {prefixStr buildGraphBl} {
    # deal with spaces
    set dbStr "\"" ;
    append dbStr $::glob_amrDb "\"" ;
@@ -4339,13 +4349,19 @@ proc coverageGraph {prefixStr} {
    append coverPathStr "-coverage.png" ;
 
    # delete old graphs
-   if {! [image inuse $::glob_coverImg] } {
-         image delete $::glob_coverImg ;
+   if { [image inuse $::glob_coverImg] } {
+      image delete $::glob_coverImg ;
    } ; # If: image exists
 
 
    if {$::glob_mkGraphBl ne 0 } {
-      if { ([file exists $coverPathStr] eq 1) } {
+      if { $buildGraphBl ne 1 } {
+         set fileBl [file exists $coverPathStr] ;
+      } else {
+         set fileBl 0 ;
+      } ;
+
+      if { $fileBl eq 1 } {
          ---set
            ::glob_coverImg
            [image create photo -file $coverPathStr]
@@ -4370,7 +4386,6 @@ proc coverageGraph {prefixStr} {
                }
             ]
          ---; # run R to build graphs
-
          if { $status ne 0 } {
             ---tk_messageBox
               -message "failed to build cover graph"
@@ -4952,8 +4967,8 @@ pack .main.out.set.run -anchor w -side top ;
       #conAmrRep $::glob_outCur ;
 
       readAmrRep $::glob_outCur ;
-      depthGraph $::glob_outCur ;
-      coverageGraph $::glob_outCur ;
+      depthGraph $::glob_outCur 0 ;
+      coverageGraph $::glob_outCur 0 ;
 
       #conSpol $::glob_outCur ;
 
