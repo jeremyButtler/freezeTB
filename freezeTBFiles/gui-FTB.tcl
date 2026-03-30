@@ -7,8 +7,9 @@ variable glob_clustBl 0 ;
 variable glob_depthProfBl 0 ;
 variable glob_outPref "" ;
 variable glob_outCur "" ;
-variable glob_depthImg [image create photo -file ""] ;
+variable glob_meanDepthImg [image create photo -file ""] ;
 variable glob_coverImg [image create photo -file ""] ;
+variable glob_depthImg [image create photo -file ""] ;
 variable mapVer "" ;
 variable freezeTBVer "" ;
 variable rVer "" ;
@@ -121,7 +122,93 @@ set ::rPath "" ;
 tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
 }
 } ;
-
+proc getPath { fileStr } {
+set dbPath $fileStr ;
+if { [file exists $dbPath ] eq 0 } {
+set dbPath $::env(HOME) ;
+set dbPath [ file join $dbPath "Documents" ] ;
+set dbPath [ file join $dbPath "freezeTBFiles" ] ;
+set dbPath [ file join $dbPath $fileStr ] ;
+if { [file exists $dbPath ] eq 0 } {
+set osStr [lindex $::tcl_platform(os) 0] ;
+if { $osStr eq "Windows" } {
+set dbPath [file join $::env(PUBLIC) "Documents" "freezeTBFiles" $fileStr ] ;
+if { [file exists $dbPath ] eq 0 } {
+set dbPath [file join $::env(LOCALAPPDATA) "freezeTB" "freezeTBFiles" $fileStr ] ;
+if { [file exists $dbPath ] eq 0 } {
+set dbPath [file join $::env(PROGRAMFILES) "freezeTB" "freezeTBFiles" $fileStr ] ;
+if { [file exists $dbPath ] eq 0 } {
+set dbPath "NA" ;
+tk_messageBox -message [concat $fileStr "not found" ] -title "missing database" ;
+} ;
+} ;
+} ;
+} else {
+set dbPath "/usr/local/share/freezeTBFiles" ;
+set dbPath [file join $dbPath $fileStr] ;
+if { [file exists $dbPath ] eq 0 } {
+set dbPath "NA" ;
+tk_messageBox -message [concat $fileStr "not found"] -title "missing database" ;
+} ;
+} ;
+} ;
+} ; 
+return $dbPath ;
+} ;
+variable glob_refFa [getPath "NC000962.fa"] ;
+variable glob_coordsTsv [getPath "coords.tsv"] ;
+variable glob_amrDb [getPath "amrDb.tsv"] ;
+variable glob_maskCoords "" ;
+variable glob_miruDb [getPath "miruTbl.tsv"] ;
+variable glob_hsp65SimpleDb [getPath "hsp65-db-simple.tsv"] ; 
+variable glob_hsp65ComplexDb [getPath "hsp65-db-complex.tsv"] ; 
+variable glob_spacer [getPath "spoligo-spacers.fa"] ;
+variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
+variable glob_meanDepthGraph [getPath "meanDepthGraph.r"] ;
+variable glob_coverGraph [getPath "coverGraph.r"] ;
+variable glob_depthGraph [getPath "depthGraph.r"] ;
+variable glob_mapq 15 ;
+variable glob_medQ 7 ;
+variable glob_meanQ 7 ;
+variable glob_minLen 50 ;
+variable glob_rmHomoBl 1 ;
+variable glob_rmHomo_homoSI 4 ;
+variable glob_rmHomo_indelSI 4 ; 
+variable glob_amrPercSup 0.1 ;
+variable glob_amrIndelSupF 0.25 ;
+variable glob_amrFrameSupF 0.25 ;
+variable glob_frameshift 1 ;
+variable glob_miruFudge 15 ;
+variable glob_spolSim 0.9 ;
+variable glob_drStart 3119037 ;
+variable glob_drEnd 3123624 ;
+variable glob_depth 10 ;
+variable glob_snpq 3 ;
+variable glob_insq 3 ;
+variable glob_basePerc 0.4 ;
+variable glob_insPerc 0.7 ;
+variable glob_delPerc 0.7 ;
+variable glob_minVarDepth 10 ;
+variable glob_baseVarPerc 0.1 ;
+variable glob_insVarPerc 0.2 ;
+variable glob_delVarPerc 0.2 ;
+variable glob_minClustDepth 10 ;
+variable glob_minClustPercDepth 0.01 ;
+variable glob_minClustSnpQ 3 ;
+variable glob_minClustIndelLen 10 ;
+variable glob_clustReadErr 0.043 ;
+variable glob_clustConErr 0.023 ;
+variable glob_clustErrRatio 50 ;
+variable glob_clustWinErrRatio 200 ;
+variable glob_clustWinLen 500 ;
+variable glob_lenWeight 2 ;
+variable glob_maxClustSim 0.99 ;
+variable glob_minClustOverlap 0.75 ;
+variable glob_maxClustMask 0.05 ;
+variable glob_numRebuilds 1 ;
+variable glob_outSnpSup 0.1 ;
+variable glob_outIndelSup 0.25 ;
+variable glob_mkGraphBl 1 ;
 set fq_types {
 { {fastq}    {.fastq}    }
 { {fastq}    {.fq}       }
@@ -138,7 +225,48 @@ set tsv_types {
 set csv_types {
 { {csv} {.csv} }
 } ;
-
+proc freezeTBProc { argsList } {
+if { [lindex $::tcl_platform(os) 0] eq "Windows" } {
+set programFiles $::env(PROGRAMFILES) ;
+set appData $::env(LOCALAPPDATA) ;
+set freezeTBPath "freezeTB.exe" ;
+set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
+if { $status eq 0 } {
+} else {
+set freezeTBPath [file join $appData "freezeTB" "freezeTB.exe" ] ;
+set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
+if { $status eq 0 } {
+} else {
+set freezeTBPath [file join $programFiles "freezeTB" "freezeTB.exe" ] ;
+set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
+if { $status eq 0 } {
+} else {
+tk_messageBox -message "no freezeTB.exe detected" -title "ERROR" ;
+return 1 ;
+} ;
+} ;
+} ;
+} else {
+set freezeTBPath "freezeTB" ;
+set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
+if { $status ne 0 } {
+set freezeTBPath "./freezeTB" ;
+set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
+if { $status eq 0 } {
+tk_messageBox -message "freezeTB not found" -title "ERROR" ;
+return 1 ;
+} ;
+} ;
+} ; 
+set status [catch { eval exec \$freezeTBPath $argsList } result ] ; 
+if { [ string equal $::errorCode NONE ] } {
+return 0 ;
+} else {
+tk_messageBox -message $result -title "ERROR running freezeTB" ;
+return 1 ;
+} ; 
+return 0 ;
+} ;
 proc tcl_isInt_gui { value index min max } {
 if { $index < 0 } {
 set charIn [string index $value "end"] ;
@@ -443,8 +571,7 @@ set tbCmd [concat $tbCmd $::glob_fqIn] ;
 } ;
 puts $logFile [concat "freezeTB " $tbCmd ] ;
 setFreezeTBStatus ;
-
-if { [catch {eval freezeTB $tbCmd } out] } {
+if { [ freezeTBProc $tbCmd ] } {
 
 tk_messageBox -message "freezeTB error" -title "ERROR" ;
 puts $logFile "freezeTB error" ;
@@ -454,8 +581,9 @@ return false;
 close $logFile ;
 set ::glob_outPref $prefix ;
 set ::glob_outCur $prefix ;
-depthGraph $::glob_outCur 1 ;
+meanDepthGraph $::glob_outCur 1 ;
 coverageGraph $::glob_outCur 1 ;
+depthGraph $::glob_outCur 1 ;
 wm title . "Required freezeTB" ;
 .main.reqIn.runexit.statuslab configure -text "" ;
 .main.menu.outBut invoke ;
@@ -1021,8 +1149,9 @@ tk::frame .main.out ;
 tk::frame .main.out.set ;
 pack .main.out.set -anchor w -side top ;
 tk::frame .main.out.report ;
-tk::frame .main.out.depth ;
+tk::frame .main.out.meanDepth ;
 tk::frame .main.out.cover ;
+tk::frame .main.out.depth ;
 tk::frame .main.out.amr ;
 proc setAmrLab {prefixStr pathStr} {
 set fileStr $prefixStr ;
@@ -1149,13 +1278,13 @@ for { set siDrug 3 } { $siDrug < $endSI } { incr siDrug }  { append outStr [ lin
 .main.out.report.hsp65.reslab configure -text $outStr ;
 return true ;
 } ;
-proc depthGraph {prefixStr buildGraphBl } {
+proc meanDepthGraph {prefixStr buildGraphBl } {
 set graphStr "\"" ;
-append graphStr $::glob_depthGraph "\"" ;
+append graphStr $::glob_meanDepthGraph "\"" ;
 set tmpPathStr $prefixStr ;
 append tmpPathStr "-mean-depth.png" ;
-if { [image inuse $::glob_depthImg] } {
-image delete $::glob_depthImg ;
+if { [image inuse $::glob_meanDepthImg] } {
+image delete $::glob_meanDepthImg ;
 } ; 
 if {$::glob_mkGraphBl ne 0 } {
 if { $buildGraphBl ne 1 } {
@@ -1164,19 +1293,19 @@ set fileBl [file exists $tmpPathStr] ;
 set fileBl 0 ;
 }
 if { $fileBl eq 1 } {
-set ::glob_depthImg [image create photo -file $tmpPathStr] ;
-.main.out.depth.graph configure -image $::glob_depthImg ;
+set ::glob_meanDepthImg [image create photo -file $tmpPathStr] ;
+.main.out.meanDepth.graph configure -image $::glob_meanDepthImg ;
 } else {
 set quoteStr "\"" ;
 append quoteStr $prefixStr "\"" ;
 set prefixStr $quoteStr ;
 set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr } ] ;
 if { $status ne 0 } {
-tk_messageBox -message "failed to build depth graph" -title "ERROR" ;
+tk_messageBox -message "failed to build mean depth graph" -title "ERROR" ;
 .main.out.set.graph.check toggle ;
 } else {
-set ::glob_depthImg [image create photo -file $tmpPathStr ] ;
-.main.out.depth.graph configure -image $::glob_depthImg ;
+set ::glob_meanDepthImg [image create photo -file $tmpPathStr ] ;
+.main.out.meanDepth.graph configure -image $::glob_meanDepthImg ;
 } ;
 } ;
 } ;
@@ -1213,6 +1342,40 @@ tk_messageBox -message "failed to build cover graph" -title "ERROR" ;
 } else {
 set ::glob_coverImg [ image create photo -file $coverPathStr ] ;
 .main.out.cover.graph configure -image $::glob_coverImg ;
+} ;
+} ;
+} ;
+} ;
+proc depthGraph {prefixStr buildGraphBl} {
+set dbStr "\"" ;
+append dbStr $::glob_amrDb "\"" ;
+set graphStr "\"" ;
+append graphStr $::glob_depthGraph "\"" ;
+set depthPathStr $prefixStr ;
+append depthPathStr "-depth.png" ;
+if { [image inuse $::glob_depthImg] } {
+image delete $::glob_depthImg ;
+} ; 
+if {$::glob_mkGraphBl ne 0 } {
+if { $buildGraphBl ne 1 } {
+set fileBl [file exists $depthPathStr] ;
+} else {
+set fileBl 0 ;
+} ;
+if { $fileBl eq 1 } {
+set ::glob_depthImg [image create photo -file $depthPathStr] ;
+.main.out.depth.graph configure -image $::glob_depthImg ;
+} else {
+set quoteStr "\"" ;
+append quoteStr $prefixStr "\"" ;
+set prefixStr $quoteStr ;
+set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr " " $dbStr } ] ;
+if { $status ne 0 } {
+tk_messageBox -message "failed to build read depth graph" -title "ERROR" ;
+.main.out.set.graph.check toggle ;
+} else {
+set ::glob_depthImg [ image create photo -file $depthPathStr ] ;
+.main.out.depth.graph configure -image $::glob_depthImg ;
 } ;
 } ;
 } ;
@@ -1409,8 +1572,9 @@ pack .main.out.set.run -anchor w -side top ;
 tk::button .main.out.set.run.but -text "get report" -command { 
 set ::glob_outCur $::glob_outPref ;
 readAmrRep $::glob_outCur ;
-depthGraph $::glob_outCur 0 ;
+meanDepthGraph $::glob_outCur 0 ;
 coverageGraph $::glob_outCur 0 ;
+depthGraph $::glob_outCur 0 ;
 readSpol $::glob_outCur ;
 readHsp65 $::glob_outCur ;
 readAmrTbl $::glob_outCur "   " ;
@@ -1424,8 +1588,9 @@ pack .main.out.menu -anchor w -side top ;
 tk::button .main.out.menu.setBut -text "out" -command { 
 pack forget .main.out.set ;
 pack forget .main.out.report ;
-pack forget .main.out.depth ;
+pack forget .main.out.meanDepth ;
 pack forget .main.out.cover ;
+pack forget .main.out.depth ;
 pack forget .main.out.amr ;
 pack forget .main.out.menu ;
 pack .main.out.set ;
@@ -1433,16 +1598,18 @@ pack .main.out.menu ;
 wm title . "output select freezeTB" ;
 .main.out.menu.setBut configure -relief sunken -state disabled ;
 .main.out.menu.reportBut configure -relief raised -state normal ;
-.main.out.menu.depthBut configure -relief raised -state normal ;
+.main.out.menu.meanDepthBut configure -relief raised -state normal ;
 .main.out.menu.coverBut configure -relief raised -state normal ;
+.main.out.menu.depthBut configure -relief raised -state normal ;
 .main.out.menu.amrBut configure -relief raised -state normal ;
 } ; 
 pack .main.out.menu.setBut -anchor w -side left ;
 tk::button .main.out.menu.reportBut -text "report" -command { 
 pack forget .main.out.set ;
 pack forget .main.out.report ;
-pack forget .main.out.depth ;
+pack forget .main.out.meanDepth ;
 pack forget .main.out.cover ;
+pack forget .main.out.depth ;
 pack forget .main.out.amr ;
 pack forget .main.out.menu ;
 pack .main.out.report ;
@@ -1450,33 +1617,37 @@ pack .main.out.menu ;
 wm title . [concat [file tail $glob_outCur] "report freezeTB" ] ;
 .main.out.menu.setBut configure -relief raised -state normal ;
 .main.out.menu.reportBut configure -relief sunken -state disabled ;
-.main.out.menu.depthBut configure -relief raised -state normal ;
+.main.out.menu.meanDepthBut configure -relief raised -state normal ;
 .main.out.menu.coverBut configure -relief raised -state normal ;
+.main.out.menu.depthBut configure -relief raised -state normal ;
 .main.out.menu.amrBut configure -relief raised -state normal ;
 } ;
 pack .main.out.menu.reportBut -anchor w -side left ;
-tk::button .main.out.menu.depthBut -text "read depth" -command { 
+tk::button .main.out.menu.meanDepthBut -text "mean depth" -command { 
 pack forget .main.out.set ;
 pack forget .main.out.report ;
-pack forget .main.out.depth ;
+pack forget .main.out.meanDepth ;
 pack forget .main.out.cover ;
+pack forget .main.out.depth ;
 pack forget .main.out.amr ;
 pack forget .main.out.menu ;
-pack .main.out.depth ;
+pack .main.out.meanDepth ;
 pack .main.out.menu ;
-wm title . [concat [file tail $glob_outCur] "read depth freezeTB" ] ;
+wm title . [concat [file tail $glob_outCur] "mean read depth freezeTB" ] ;
 .main.out.menu.setBut configure -relief raised -state normal ;
 .main.out.menu.reportBut configure -relief raised -state normal ;
-.main.out.menu.depthBut configure -relief sunken -state disabled ;
+.main.out.menu.meanDepthBut configure -relief sunken -state disabled ;
 .main.out.menu.coverBut configure -relief raised -state normal ;
+.main.out.menu.depthBut configure -relief raised -state normal ;
 .main.out.menu.amrBut configure -relief raised -state normal ;
 } ;
-pack .main.out.menu.depthBut -anchor w -side left ;
+pack .main.out.menu.meanDepthBut -anchor w -side left ;
 tk::button .main.out.menu.coverBut -text "coverage" -command { 
 pack forget .main.out.set ;
 pack forget .main.out.report ;
-pack forget .main.out.depth ;
+pack forget .main.out.meanDepth ;
 pack forget .main.out.cover ;
+pack forget .main.out.depth ;
 pack forget .main.out.amr ;
 pack forget .main.out.menu ;
 pack .main.out.cover ;
@@ -1484,16 +1655,37 @@ pack .main.out.menu ;
 wm title . [concat [file tail $glob_outCur] "coverage freezeTB" ] ;
 .main.out.menu.setBut configure -relief raised -state normal ;
 .main.out.menu.reportBut configure -relief raised -state normal ;
-.main.out.menu.depthBut configure -relief raised -state normal ;
+.main.out.menu.meanDepthBut configure -relief raised -state normal ;
 .main.out.menu.coverBut configure -relief sunken -state disabled ;
+.main.out.menu.depthBut configure -relief raised -state normal ;
 .main.out.menu.amrBut configure -relief raised -state normal ;
 } ;
 pack .main.out.menu.coverBut -anchor w -side left ;
+tk::button .main.out.menu.depthBut -text "depth" -command { 
+pack forget .main.out.set ;
+pack forget .main.out.report ;
+pack forget .main.out.meanDepth ;
+pack forget .main.out.cover ;
+pack forget .main.out.depth ;
+pack forget .main.out.amr ;
+pack forget .main.out.menu ;
+pack .main.out.depth ;
+pack .main.out.menu ;
+wm title . [concat [file tail $glob_outCur] "read depth freezeTB" ] ;
+.main.out.menu.setBut configure -relief raised -state normal ;
+.main.out.menu.reportBut configure -relief raised -state normal ;
+.main.out.menu.meanDepthBut configure -relief raised -state normal ;
+.main.out.menu.coverBut configure -relief raised -state normal ;
+.main.out.menu.depthBut configure -relief sunken -state disabled ;
+.main.out.menu.amrBut configure -relief raised -state normal ;
+} ;
+pack .main.out.menu.depthBut -anchor w -side left ;
 tk::button .main.out.menu.amrBut -text "AMR table" -command { 
 pack forget .main.out.set ;
 pack forget .main.out.report ;
-pack forget .main.out.depth ;
+pack forget .main.out.meanDepth ;
 pack forget .main.out.cover ;
+pack forget .main.out.depth ;
 pack forget .main.out.amr ;
 pack forget .main.out.menu ;
 pack .main.out.amr ;
@@ -1501,23 +1693,26 @@ pack .main.out.menu ;
 wm title . [concat [file tail $glob_outCur] "AMR table freezeTB" ] ;
 .main.out.menu.setBut configure -relief raised -state normal ;
 .main.out.menu.reportBut configure -relief raised -state normal ;
-.main.out.menu.depthBut configure -relief raised -state normal ;
+.main.out.menu.meanDepthBut configure -relief raised -state normal ;
 .main.out.menu.coverBut configure -relief raised -state normal ;
+.main.out.menu.depthBut configure -relief raised -state normal ;
 .main.out.menu.amrBut configure -relief sunken -state disabled ;
 } ;
 pack .main.out.menu.amrBut -anchor w -side left ;
 tk::button .main.out.menu.inBut -text "input" -command { 
 pack forget .main.out.set ;
 pack forget .main.out.report ;
-pack forget .main.out.depth ;
+pack forget .main.out.meanDepth ;
 pack forget .main.out.cover ;
+pack forget .main.out.depth ;
 pack forget .main.out.amr ;
 pack forget .main.out.menu ;
 .main.menu.reqBut invoke ;
 .main.out.menu.setBut configure -relief raised -state normal ;
 .main.out.menu.reportBut configure -relief raised -state normal ;
-.main.out.menu.depthBut configure -relief raised -state normal ;
+.main.out.menu.meanDepthBut configure -relief raised -state normal ;
 .main.out.menu.coverBut configure -relief raised -state normal ;
+.main.out.menu.depthBut configure -relief raised -state normal ;
 .main.out.menu.amrBut configure -relief raised -state normal ;
 } ;
 pack .main.out.menu.inBut -anchor w -side left ;
@@ -1581,10 +1776,12 @@ pack .main.out.report.hsp65 -anchor w -side top ;
 tk::label .main.out.report.hsp65.headlab -text "hsp65:" ;
 tk::label .main.out.report.hsp65.reslab -text "NA" ;
 pack .main.out.report.hsp65.headlab .main.out.report.hsp65.reslab -anchor w -side left ;
-tk::label .main.out.depth.graph ;
-pack .main.out.depth.graph -anchor w -side left ;
+tk::label .main.out.meanDepth.graph ;
+pack .main.out.meanDepth.graph -anchor w -side left ;
 tk::label .main.out.cover.graph ;
 pack .main.out.cover.graph -anchor w -side left ;
+tk::label .main.out.depth.graph ;
+pack .main.out.depth.graph -anchor w -side left ;
 tk::frame .main.out.amr.read ;
 pack .main.out.amr.read -anchor nw -side right ;
 tk::frame .main.out.amr.read.head ;

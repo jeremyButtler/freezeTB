@@ -70,8 +70,9 @@ variable glob_depthProfBl 0 ;
 variable glob_outPref "" ; # report user is getting
 variable glob_outCur "" ;  # current shown report
 
-variable glob_depthImg [image create photo -file ""] ;
+variable glob_meanDepthImg [image create photo -file ""] ;
 variable glob_coverImg [image create photo -file ""] ;
+variable glob_depthImg [image create photo -file ""] ;
 
 # version numbers
 variable mapVer "" ; # minimap2 version
@@ -602,8 +603,9 @@ variable glob_miruDb [getPath "miruTbl.tsv"] ;
 variable glob_spacer [getPath "spoligo-spacers.fa"] ;
 variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
 
-variable glob_depthGraph [getPath "meanDepthGraph.r"] ;
+variable glob_meanDepthGraph [getPath "meanDepthGraph.r"] ;
 variable glob_coverGraph [getPath "coverGraph.r"] ;
+variable glob_depthGraph [getPath "depthGraph.r"] ;
 
 #***************************************************
 # Header Sec03 Sub03:
@@ -1617,8 +1619,9 @@ proc setFreezeTBStatus {} {
       set ::glob_outCur $prefix ;
 
       # make the graphs for freezeTB reall quick
-      depthGraph $::glob_outCur 1 ;
+      meanDepthGraph $::glob_outCur 1 ;
       coverageGraph $::glob_outCur 1 ;
+      depthGraph $::glob_outCur 1 ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
       # Gui02 Sec06 Sub02 Cat12:
@@ -3946,8 +3949,9 @@ tk::frame .main.out.set ;
 pack .main.out.set -anchor w -side top ;
 
 tk::frame .main.out.report ;
-tk::frame .main.out.depth ;
+tk::frame .main.out.meanDepth ;
 tk::frame .main.out.cover ;
+tk::frame .main.out.depth ;
 tk::frame .main.out.amr ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -3962,10 +3966,12 @@ tk::frame .main.out.amr ;
 #   o gui08 sec02 sub04:
 #     - function read MIRU-VNTR
 #   o gui08 sec02 sub05:
-#     - function; read depth graph
+#     - function; mean read depth graph
 #   o gui08 sec02 sub06:
 #     - function; coverage graph
 #   o gui08 sec02 sub07:
+#     - function; read depth graph
+#   o gui08 sec02 sub08:
 #     - function; read AMR table
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -4257,19 +4263,19 @@ proc readHsp65 {prefixStr} {
 
 #**************************************************
 # Gui08 Sec02 Sub05:
-#   - function; read depth graph display
+#   - function; mean read depth graph display
 #**************************************************
 
-proc depthGraph {prefixStr buildGraphBl } {
+proc meanDepthGraph {prefixStr buildGraphBl } {
    set graphStr "\"" ;
-   append graphStr $::glob_depthGraph "\"" ;
+   append graphStr $::glob_meanDepthGraph "\"" ;
 
    set tmpPathStr $prefixStr ;
    append tmpPathStr "-mean-depth.png" ;
 
    # delete old graphs
-   if { [image inuse $::glob_depthImg] } {
-      image delete $::glob_depthImg ;
+   if { [image inuse $::glob_meanDepthImg] } {
+      image delete $::glob_meanDepthImg ;
    } ; # If: image exists
 
    # check if can make graphs and if need to make one
@@ -4282,12 +4288,12 @@ proc depthGraph {prefixStr buildGraphBl } {
 
       if { $fileBl eq 1 } {
          ---set
-           ::glob_depthImg
+           ::glob_meanDepthImg
            [image create photo -file $tmpPathStr]
          ---;
 
-         ---.main.out.depth.graph
-            configure -image $::glob_depthImg
+         ---.main.out.meanDepth.graph
+            configure -image $::glob_meanDepthImg
          ---;
 
       } else {
@@ -4309,7 +4315,7 @@ proc depthGraph {prefixStr buildGraphBl } {
 
          if { $status ne 0 } {
             ---tk_messageBox
-              -message "failed to build depth graph"
+              -message "failed to build mean depth graph"
               -title "ERROR"
             ---;
 
@@ -4317,17 +4323,17 @@ proc depthGraph {prefixStr buildGraphBl } {
             .main.out.set.graph.check toggle ;
          } else {
             ---set
-              ::glob_depthImg
+              ::glob_meanDepthImg
               [image create photo -file $tmpPathStr ]
             ---;
 
-            ---.main.out.depth.graph
-               configure -image $::glob_depthImg
+            ---.main.out.meanDepth.graph
+               configure -image $::glob_meanDepthImg
             ---;
          } ; # Else: add image
       } ; # check if need to build graphs
     } ; # check if users wants graphs displayed
-} ; # depthGraph
+} ; # meanDepthGraph
 
 #**************************************************
 # Gui08 Sec02 Sub06:
@@ -4410,39 +4416,114 @@ proc coverageGraph {prefixStr buildGraphBl} {
 
 #**************************************************
 # Gui08 Sec02 Sub07:
+#   - function; read depth graph
+#**************************************************
+
+proc depthGraph {prefixStr buildGraphBl} {
+   # deal with spaces
+   set dbStr "\"" ;
+   append dbStr $::glob_amrDb "\"" ;
+
+   set graphStr "\"" ;
+   append graphStr $::glob_depthGraph "\"" ;
+
+   set depthPathStr $prefixStr ;
+   append depthPathStr "-depth.png" ;
+
+   # delete old graphs
+   if { [image inuse $::glob_depthImg] } {
+      image delete $::glob_depthImg ;
+   } ; # If: image exists
+
+
+   if {$::glob_mkGraphBl ne 0 } {
+      if { $buildGraphBl ne 1 } {
+         set fileBl [file exists $depthPathStr] ;
+      } else {
+         set fileBl 0 ;
+      } ;
+
+      if { $fileBl eq 1 } {
+         ---set
+           ::glob_depthImg
+           [image create photo -file $depthPathStr]
+         ---;
+
+         ---.main.out.depth.graph
+            configure -image $::glob_depthImg
+         ---;
+      } else {
+         # using quotes incase of spaces
+         set quoteStr "\"" ;
+         append quoteStr $prefixStr "\"" ;
+         set prefixStr $quoteStr ;
+
+         ---set status
+            [catch
+               {eval exec
+                  $::rPath " " $graphStr
+                  " " $prefixStr
+                  " " $dbStr
+               }
+            ]
+         ---; # run R to build graphs
+         if { $status ne 0 } {
+            ---tk_messageBox
+              -message "failed to build read depth graph"
+              -title "ERROR"
+            ---;
+
+            # turn off graphing
+            .main.out.set.graph.check toggle ;
+         } else {
+            ---set
+              ::glob_depthImg
+              [ image create photo -file $depthPathStr ]
+            ---;
+
+            ---.main.out.depth.graph
+               configure -image $::glob_depthImg
+            ---;
+         } ; # Else: add image
+      } ; # check if need to build graphs
+    } ; # check if users wants graphs displayed
+} ; # depthGraph
+
+#**************************************************
+# Gui08 Sec02 Sub08:
 #   - function; read AMR table
-#   o gui08 sec02 sub07 cat01:
+#   o gui08 sec02 sub08 cat01:
 #     - open file and get header lengths
-#   o gui08 sec02 sub07 cat02:
+#   o gui08 sec02 sub08 cat02:
 #     - find gene id length + start length loop
-#   o gui08 sec02 sub07 cat03:
+#   o gui08 sec02 sub08 cat03:
 #     - find primrary drug length
-#   o gui08 sec02 sub07 cat04:
+#   o gui08 sec02 sub08 cat04:
 #     - find cross resitance drugs length
-#   o gui08 sec02 sub07 cat05:
+#   o gui08 sec02 sub08 cat05:
 #     - find mutation and % support lengths
-#   o gui08 sec02 sub07 cat06:
+#   o gui08 sec02 sub08 cat06:
 #     - find gene depth length + others
-#   o gui08 sec02 sub07 cat07:
+#   o gui08 sec02 sub08 cat07:
 #     - print NA for nothing in file case
-#   o gui08 sec02 sub07 cat08:
+#   o gui08 sec02 sub08 cat08:
 #     - build header for table
-#   o gui08 sec02 sub07 cat09:
+#   o gui08 sec02 sub08 cat09:
 #     - add gene id to header + start table loop
-#   o gui08 sec02 sub07 cat10:
+#   o gui08 sec02 sub08 cat10:
 #     - add primrary drug to header
-#   o gui08 sec02 sub07 cat11:
+#   o gui08 sec02 sub08 cat11:
 #     - add cross-resistance drugs to header
-#   o gui08 sec02 sub07 cat12:
+#   o gui08 sec02 sub08 cat12:
 #     - add mutation + % support + variant id
-#   o gui08 sec02 sub07 cat13:
+#   o gui08 sec02 sub08 cat13:
 #     - add gene depth + resistance data
-#   o gui08 sec02 sub07 cat14:
+#   o gui08 sec02 sub08 cat14:
 #     - put table into AMR read table label
 #**************************************************
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++
-# Gui08 Sec02 Sub07 Cat01:
+# Gui08 Sec02 Sub08 Cat01:
 #   - open file and get header lengths
 #++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4472,7 +4553,7 @@ proc readAmrTbl {prefixStr indentStr} {
    } ; # If; nothing in file
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub07 Cat02:
+   # Gui08 Sec02 Sub08 Cat02:
    #   - find gene id length + start length loop
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4485,7 +4566,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad0 < $lenUI} { set pad0 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat03:
+      # Gui08 Sec02 Sub08 Cat03:
       #   - find primrary drug length
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4512,7 +4593,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad1 < $lenUI} { set pad1 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat04:
+      # Gui08 Sec02 Sub08 Cat04:
       #   - find cross resitance drugs length
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4540,7 +4621,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad2 < $lenUI} { set pad2 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat05:
+      # Gui08 Sec02 Sub08 Cat05:
       #   - find mutation and % support lengths
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4555,7 +4636,7 @@ proc readAmrTbl {prefixStr indentStr} {
       if {$pad8 < $lenUI} { set pad8 $lenUI ; } ;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat06:
+      # Gui08 Sec02 Sub08 Cat06:
       #   - find gene depth length + others
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4588,7 +4669,7 @@ proc readAmrTbl {prefixStr indentStr} {
    close $openFILE ;
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub07 Cat07:
+   # Gui08 Sec02 Sub08 Cat07:
    #   - print NA for nothing in file case
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4602,7 +4683,7 @@ proc readAmrTbl {prefixStr indentStr} {
    } ; # If; nothing in file
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub07 Cat07:
+   # Gui08 Sec02 Sub08 Cat07:
    #   - build header for table
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4639,7 +4720,7 @@ proc readAmrTbl {prefixStr indentStr} {
    append tblStr "\n";
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub07 Cat08:
+   # Gui08 Sec02 Sub08 Cat08:
    #   - add gene id to table + start table loop
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4671,7 +4752,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat09:
+      # Gui08 Sec02 Sub08 Cat09:
       #   - add primrary drug to table
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4697,7 +4778,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat10:
+      # Gui08 Sec02 Sub08 Cat10:
       #   - add cross-resistance drugs to table
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4724,7 +4805,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat11:
+      # Gui08 Sec02 Sub08 Cat11:
       #   - add mutation + % support + variant id
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4744,7 +4825,7 @@ proc readAmrTbl {prefixStr indentStr} {
       append tblStr $tmpStr $indentStr;
 
       #++++++++++++++++++++++++++++++++++++++++++++
-      # Gui08 Sec02 Sub07 Cat12:
+      # Gui08 Sec02 Sub08 Cat12:
       #   - add gene depth + resistance data
       #++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4772,7 +4853,7 @@ proc readAmrTbl {prefixStr indentStr} {
    } ; # Loop: get AMRs
 
    #+++++++++++++++++++++++++++++++++++++++++++++++
-   # Gui08 Sec02 Sub07 Cat13:
+   # Gui08 Sec02 Sub08 Cat13:
    #   - put table into AMR read table label
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -4967,8 +5048,9 @@ pack .main.out.set.run -anchor w -side top ;
       #conAmrRep $::glob_outCur ;
 
       readAmrRep $::glob_outCur ;
-      depthGraph $::glob_outCur 0 ;
+      meanDepthGraph $::glob_outCur 0 ;
       coverageGraph $::glob_outCur 0 ;
+      depthGraph $::glob_outCur 0 ;
 
       #conSpol $::glob_outCur ;
 
@@ -4997,8 +5079,10 @@ pack .main.out.set.run.but -anchor w -side left ;
 #   o gui08 sec04 sub05:
 #     - add coverage graph button
 #   o gui08 sec04 sub06:
-#     - add AMR table button
+#     - add depth graph button
 #   o gui08 sec04 sub07:
+#     - add AMR table button
+#   o gui08 sec04 sub08:
 #     - add input button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -5022,8 +5106,9 @@ pack .main.out.menu -anchor w -side top ;
 ---
       pack forget .main.out.set ;
       pack forget .main.out.report ;
-      pack forget .main.out.depth ;
+      pack forget .main.out.meanDepth ;
       pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
       pack forget .main.out.amr ;
       pack forget .main.out.menu ;
 
@@ -5043,13 +5128,19 @@ pack .main.out.menu -anchor w -side top ;
           -state normal
       ---;
 
-      ---.main.out.menu.depthBut
+      ---.main.out.menu.meanDepthBut
           configure
           -relief raised
           -state normal
       ---;
 
       ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
           configure
           -relief raised
           -state normal
@@ -5076,8 +5167,9 @@ pack .main.out.menu.setBut -anchor w -side left ;
 ---
       pack forget .main.out.set ;
       pack forget .main.out.report ;
-      pack forget .main.out.depth ;
+      pack forget .main.out.meanDepth ;
       pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
       pack forget .main.out.amr ;
       pack forget .main.out.menu ;
 
@@ -5105,13 +5197,19 @@ pack .main.out.menu.setBut -anchor w -side left ;
           -state disabled
       ---;
 
-      ---.main.out.menu.depthBut
+      ---.main.out.menu.meanDepthBut
           configure
           -relief raised
           -state normal
       ---;
 
       ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
           configure
           -relief raised
           -state normal
@@ -5132,18 +5230,19 @@ pack .main.out.menu.reportBut -anchor w -side left ;
 #**************************************************
 
 ---tk::button
-   .main.out.menu.depthBut
-   -text "read depth"
+   .main.out.menu.meanDepthBut
+   -text "mean depth"
    -command {
 ---
       pack forget .main.out.set ;
       pack forget .main.out.report ;
-      pack forget .main.out.depth ;
+      pack forget .main.out.meanDepth ;
       pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
       pack forget .main.out.amr ;
       pack forget .main.out.menu ;
 
-      pack .main.out.depth ;
+      pack .main.out.meanDepth ;
       pack .main.out.menu ;
 
       ---wm
@@ -5151,7 +5250,7 @@ pack .main.out.menu.reportBut -anchor w -side left ;
          .
          [concat
             [file tail $glob_outCur]
-            "read depth freezeTB"
+            "mean read depth freezeTB"
          ]
      ---;
 
@@ -5167,13 +5266,19 @@ pack .main.out.menu.reportBut -anchor w -side left ;
           -state normal
       ---;
 
-      ---.main.out.menu.depthBut
+      ---.main.out.menu.meanDepthBut
           configure
           -relief sunken
           -state disabled
       ---;
 
       ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
           configure
           -relief raised
           -state normal
@@ -5186,7 +5291,7 @@ pack .main.out.menu.reportBut -anchor w -side left ;
       ---;
    } ;
 
-pack .main.out.menu.depthBut -anchor w -side left ;
+pack .main.out.menu.meanDepthBut -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec04 Sub05:
@@ -5200,8 +5305,9 @@ pack .main.out.menu.depthBut -anchor w -side left ;
 ---
       pack forget .main.out.set ;
       pack forget .main.out.report ;
-      pack forget .main.out.depth ;
+      pack forget .main.out.meanDepth ;
       pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
       pack forget .main.out.amr ;
       pack forget .main.out.menu ;
 
@@ -5229,7 +5335,7 @@ pack .main.out.menu.depthBut -anchor w -side left ;
           -state normal
       ---;
 
-      ---.main.out.menu.depthBut
+      ---.main.out.menu.meanDepthBut
           configure
           -relief raised
           -state normal
@@ -5239,6 +5345,12 @@ pack .main.out.menu.depthBut -anchor w -side left ;
           configure
           -relief sunken
           -state disabled
+      ---;
+
+      ---.main.out.menu.depthBut
+          configure
+          -relief raised
+          -state normal
       ---;
 
       ---.main.out.menu.amrBut
@@ -5252,6 +5364,75 @@ pack .main.out.menu.coverBut -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec04 Sub06:
+#   - add read depth graph button
+#**************************************************
+
+---tk::button
+   .main.out.menu.depthBut
+   -text "depth"
+   -command {
+---
+      pack forget .main.out.set ;
+      pack forget .main.out.report ;
+      pack forget .main.out.meanDepth ;
+      pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
+      pack forget .main.out.amr ;
+      pack forget .main.out.menu ;
+
+      pack .main.out.depth ;
+      pack .main.out.menu ;
+
+      ---wm
+         title
+         .
+         [concat
+            [file tail $glob_outCur]
+            "read depth freezeTB"
+         ]
+     ---;
+
+      ---.main.out.menu.setBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.reportBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.meanDepthBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
+          configure
+          -relief sunken
+          -state disabled
+      ---;
+
+      ---.main.out.menu.amrBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+   } ;
+
+pack .main.out.menu.depthBut -anchor w -side left ;
+
+#**************************************************
+# Gui08 Sec04 Sub07:
 #   - add AMR table button
 #**************************************************
 
@@ -5262,8 +5443,9 @@ pack .main.out.menu.coverBut -anchor w -side left ;
 ---
       pack forget .main.out.set ;
       pack forget .main.out.report ;
-      pack forget .main.out.depth ;
+      pack forget .main.out.meanDepth ;
       pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
       pack forget .main.out.amr ;
       pack forget .main.out.menu ;
 
@@ -5291,13 +5473,19 @@ pack .main.out.menu.coverBut -anchor w -side left ;
           -state normal
       ---;
 
-      ---.main.out.menu.depthBut
+      ---.main.out.menu.meanDepthBut
           configure
           -relief raised
           -state normal
       ---;
 
       ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
           configure
           -relief raised
           -state normal
@@ -5313,7 +5501,7 @@ pack .main.out.menu.coverBut -anchor w -side left ;
 pack .main.out.menu.amrBut -anchor w -side left ;
 
 #**************************************************
-# Gui08 Sec04 Sub07:
+# Gui08 Sec04 Sub08:
 #   - add input button
 #**************************************************
 
@@ -5324,8 +5512,9 @@ pack .main.out.menu.amrBut -anchor w -side left ;
 ---
       pack forget .main.out.set ;
       pack forget .main.out.report ;
-      pack forget .main.out.depth ;
+      pack forget .main.out.meanDepth ;
       pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
       pack forget .main.out.amr ;
       pack forget .main.out.menu ;
 
@@ -5343,13 +5532,19 @@ pack .main.out.menu.amrBut -anchor w -side left ;
           -state normal
       ---;
 
-      ---.main.out.menu.depthBut
+      ---.main.out.menu.meanDepthBut
           configure
           -relief raised
           -state normal
       ---;
 
       ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
           configure
           -relief raised
           -state normal
@@ -5673,15 +5868,16 @@ pack .main.out.report.hsp65 -anchor w -side top ;
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec06:
 #   - set up graphs
-#   o gui08 sec05 sub01:
-#     - build reference AMR labels
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-tk::label .main.out.depth.graph ;
-pack .main.out.depth.graph -anchor w -side left ;
+tk::label .main.out.meanDepth.graph ;
+pack .main.out.meanDepth.graph -anchor w -side left ;
 
 tk::label .main.out.cover.graph ;
 pack .main.out.cover.graph -anchor w -side left ;
+
+tk::label .main.out.depth.graph ;
+pack .main.out.depth.graph -anchor w -side left ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec07:

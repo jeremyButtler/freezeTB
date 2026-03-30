@@ -458,6 +458,8 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-03-30:
+  - added a read depth graph (not mean) to the tclTk GUI
 - 2026-03-18:
   - set TclTk GUI to remake graphs on every freezeTB run,
     (only exception is if graphing is turned off)
