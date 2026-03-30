@@ -17,9 +17,12 @@
 '     - prints the header for the read depth output
 '   o fun06: pdepth_ampDepth
 '     - prints the read depth of each base
-'   o fun07: pGeneCoverage_ampDepth
+'   o fun07: pGeneDepth_ampDepth
+'     - prints the read depth of each base in the target
+'       genes
+'   o fun08: pGeneCoverage_ampDepth
 '     - prints percent gene coverage and start/mid/end
-'   o fun08: getGeneCoverage_ampDepth
+'   o fun09: getGeneCoverage_ampDepth
 '     - puts the gene coverage and depth into an array
 '   o license:
 '     - licensing for this code (public domain / mit)
@@ -165,7 +168,40 @@ pdepth_ampDepth(
 );
 
 /*-------------------------------------------------------\
-| Fun07: pGeneCoverage_ampDepth
+| Fun07: pGeneDepth_ampDepth
+|   - prints the read depth of each base in the target
+|     genes
+| Input:
+|   - depthArySI:
+|     o integer array with the depthogram to print out
+|     o the length needs to be the same as the last
+|       gene coordinate in geneCoordSTPtr
+|   - geneCoordSTPtr:
+|     o geneCoord struct pointer with the coordinates
+|       to print
+|   - minDepthSI:
+|     o integer with the min depth to keep an depthogram
+|       entry
+|   - refStr:
+|     o c-string with name of reference sequence
+|     o if 0/null then "reference"
+|   - outFILE:
+|     o file to print to
+| Output:
+|   - Prints:
+|     o depth for each base to outFILE
+\-------------------------------------------------------*/
+void
+pGeneDepth_ampDepth(
+   signed int *depthArySI,  /*has read depths*/
+   struct geneCoord *geneCoordSTPtr, /*gene coordinates*/
+   signed int minDepthSI,   /*minimum read depth*/
+   signed char *refStr,     /*name of reference*/
+   void *outFILE            /*output file*/
+);
+
+/*-------------------------------------------------------\
+| Fun08: pGeneCoverage_ampDepth
 |   - prints percent gene coverage and start/mid/end
 | Input
 |   - depthArySI:
@@ -192,7 +228,7 @@ pGeneCoverage_ampDepth(
 );
 
 /*-------------------------------------------------------\
-| Fun08: getGeneCoverage_ampDepth
+| Fun09: getGeneCoverage_ampDepth
 |   - puts the gene coverage and depth into an array
 | Input
 |   - depthArySI:

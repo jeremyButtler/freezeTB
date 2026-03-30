@@ -6013,6 +6013,7 @@ run_freezeTB(
    \*****************************************************/
 
    signed char genePercTblStr[def_lenFileName_freezeTB];
+   signed char geneDepthStr[def_lenFileName_freezeTB];
 
    struct geneCoord *coordsHeapST = 0;
    unsigned int lastBaseUI = 0;
@@ -6871,26 +6872,28 @@ run_freezeTB(
    ^   o fun12 sec04 sub01:
    ^     - open the gene coverage file
    ^   o fun12 sec04 sub02:
-   ^     - set up cosensus fragments output file
+   ^     - open the gene coverage file
    ^   o fun12 sec04 sub03:
-   ^     - set up read AMRs table outp file name
+   ^     - set up cosensus fragments output file
    ^   o fun12 sec04 sub04:
-   ^     - set up read id AMR hit table
+   ^     - set up read AMRs table outp file name
    ^   o fun12 sec04 sub05:
-   ^     - output file for the AMRs found in consensus
+   ^     - set up read id AMR hit table
    ^   o fun12 sec04 sub06:
-   ^     - set up MIRU reads table output name
+   ^     - output file for the AMRs found in consensus
    ^   o fun12 sec04 sub07:
-   ^     - set up MIRU consensus table output name
+   ^     - set up MIRU reads table output name
    ^   o fun12 sec04 sub08:
-   ^     - set up consensus spoligotyping output file
+   ^     - set up MIRU consensus table output name
    ^   o fun12 sec04 sub09:
-   ^     - set up read spoligotyping output file name
+   ^     - set up consensus spoligotyping output file
    ^   o fun12 sec04 sub10:
-   ^     - set up open consensus output file name
+   ^     - set up read spoligotyping output file name
    ^   o fun12 sec04 sub11:
-   ^     - set up sam file name (if mapping reads)
+   ^     - set up open consensus output file name
    ^   o fun12 sec04 sub12:
+   ^     - set up sam file name (if mapping reads)
+   ^   o fun12 sec04 sub13:
    ^     - set up hsp65 read species output name
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -6921,6 +6924,31 @@ run_freezeTB(
 
    /*****************************************************\
    * Fun12 Sec04 Sub02:
+   *   - open the gene depth file
+   \*****************************************************/
+
+   errSC =
+      outputPath_freezeTBPaths(
+         ftbSetStackST.prefixStr,
+         (signed char *) "-gene-depth.tsv",
+         geneDepthStr
+      );
+
+   if(errSC)
+   { /*If: could not open file*/
+      tmpStr = errHeapStr;
+      tmpStr +=
+        cpStr_ulCp(
+          errHeapStr,
+          (signed char *)
+             "could not open output depth file: "
+        );
+      cpStr_ulCp(tmpStr, conTsvStr);
+      goto err_fun12_sec11_sub02;
+   } /*If: could not open file*/
+
+   /*****************************************************\
+   * Fun12 Sec04 Sub03:
    *   - set up cosensus fragments output file
    \*****************************************************/
 
@@ -6948,7 +6976,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub03:
+   * Fun12 Sec04 Sub04:
    *   - set up read AMRs table outp file name
    \*****************************************************/
 
@@ -6979,7 +7007,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub04:
+   * Fun12 Sec04 Sub05:
    *   - set up read id AMR hit table
    \*****************************************************/
 
@@ -7010,7 +7038,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub05:
+   * Fun12 Sec04 Sub06:
    *   - Set up the name for the consensus AMRs table
    \*****************************************************/
 
@@ -7041,7 +7069,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub06:
+   * Fun12 Sec04 Sub07:
    *   - set up MIRU reads table output name
    \*****************************************************/
 
@@ -7072,7 +7100,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub07:
+   * Fun12 Sec04 Sub08:
    *   - set up MIRU consensus table output name
    \*****************************************************/
 
@@ -7129,7 +7157,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub08:
+   * Fun12 Sec04 Sub09:
    *   - set up consensus spoligotyping output file
    \*****************************************************/
 
@@ -7160,7 +7188,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub09:
+   * Fun12 Sec04 Sub10:
    *   - set up read spoligotyping output file name
    \*****************************************************/
 
@@ -7191,7 +7219,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub10:
+   * Fun12 Sec04 Sub11:
    *   - set up open consensus output file name
    \*****************************************************/
 
@@ -7232,7 +7260,7 @@ run_freezeTB(
    conOutFILE = fopen((char *) conOutStr, "w");
 
    /*****************************************************\
-   * Fun12 Sec04 Sub11:
+   * Fun12 Sec04 Sub12:
    *   - set up sam file name (if mapping reads)
    \*****************************************************/
 
@@ -7268,7 +7296,7 @@ run_freezeTB(
    } /*If: mapping reads*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub12:
+   * Fun12 Sec04 Sub13:
    *   - set up hsp65 read species output name
    \*****************************************************/
 
@@ -8710,6 +8738,18 @@ run_freezeTB(
    \*****************************************************/
 
    sort_geneCoord(coordsHeapST);
+
+   outFILE = fopen((char *) geneDepthStr, "w");
+   pDepthHead_ampDepth(outFILE);
+   pGeneDepth_ampDepth(
+      readMapArySI, /*array with depths for each base*/
+      coordsHeapST,
+      0,            /*print even if no read depth*/
+      (signed char *) "reference",
+      outFILE
+   );
+   fclose(outFILE);
+   outFILE = 0;
 
    outFILE = fopen((char *) genePercTblStr, "w");
    pGeneCoverage_ampDepth(
