@@ -327,21 +327,16 @@ sudo make -f mkfile.unix install
 
 ## Mac
 
-For a source install, the easiest way is using one of the
-  Mac installer scripts. Both the raylib and TclTk install
-  scripts install freezeTB and minimap2 locally.
+This will attempt to install homebrew and then use
+  homebrew to install the dependencies. You will need sudo
+  privileges to run this. This should work, but may not.
+  
+First open a terminal (apps->utilities->terminal).
+  You can also open a file browser and go to the
+  Applications folder, then untilities.
 
-The source install is not covered here, but is the same as
-  Linux, except replace `mkfile.linux` with `mkfile.mac`.
-
-### Mac; easy way pre-steps
-
-You may get a request to install xcode. This is Mac
-  developer software and is needed to compile the code.
-
-Xcode may take a bit to install and you may have to
-  retry a few times. After xcode is installed then
-  run `cd ~/Downloads/freezeTB; sh macInstall;` again.
+You will need to install xcode. In a terminal
+  run
 
 You can check/install xcode by running this command here.
 
@@ -353,40 +348,25 @@ if [ "$xcodeHere" -ne 0 ]; then\
 fi;
 ```
 
-### Mac raylib Easy way:
-
-Open a terminal (apps->terminal). Then copy the code
-  beneath into the terminal and hit enter/return.
-
-```
-git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
-cd ~/Downloads/freezeTB;
-sh macRayInstall;
-```
-
-This should install freezeTB as an app `freezeTB.app` to
-  your desktop.
-
-### Mac TclTk:
-
-This will attempt to install homebrew and then use
-  homebrew to install the dependencies. You will need sudo
-  privileges to run this. This should work, but may not.
-
-
-Open a terminal (apps->terminal). Then copy the code
-  beneath into the terminal and hit enter/return.
+Then copy and paste the commands beneath. Be prepared
+  to enter your user name and password when promted.
+  The freezeTB shortcut should appear on your desktop.
 
 ```
-git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
-cd ~/Downloads/freezeTB;
+
+if [ -d ~/Downloads/freezeTB ]; then
+  cd ~/Downloads/freezeTB;
+  git pull;
+else
+   git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
+   cd ~/Downloads/freezeTB;
+fi;
+
 sh macInstall
 ```
 
-Do not worry about the Rec errors at the end. This is
-  a failed attempt to setup the icon.
-
-If you want graphs, install R with PNG support.
+You can copy the shortcut to Applications to put
+  freezeTB in your apps.
 
 ## Windows
 
