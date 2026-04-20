@@ -86,6 +86,10 @@ save_coverGraph = function(nameStr, extStr = "png"){
 #   - build the coverage graph
 #   o main sec01:
 #     - variable declarations
+#   o main sec02:
+#     - get user input
+#   o main sec03:
+#     - build coverage graph
 #---------------------------------------------------------
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -102,7 +106,6 @@ colPalAry =
       "#F1605DFF"  # 5: magma pink/dark orange; AMR
    ); # color pallete (12 colors)
 
-inputStr = commandArgs(); # get user command line input
 extStr = "png";              # graph file type
 ftbPrefixStr = "del";
 
