@@ -30,7 +30,7 @@
 '   o .h note01:
 '     - windows enviromental variables
 '   o license:
-'     - licensing for this code (public dofun12 / mit)
+'     - licensing for this code (CC0)
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -121,11 +121,12 @@
 #include "spolFind.h" 
 #include "spolST.h"
 
-#include "amrST.h"
-#include "checkAmr.h"
+#include "../genAmr/amrST.h"
+#include "../genAmr/checkAmr.h"
 
 /*freezeTB core*/
 #include "freezeTBPaths.h" /*getting default file paths*/
+#include "ftbGraphs.h"
 
 /********************************************************\
 * Header Sec01 Sub04:
@@ -137,7 +138,7 @@
 
 /*default settings*/
 #include "freezeTBDefs.h"
-#include "tbAmrDefs.h"
+#include "../genAmr/getAmrDefs.h"
 #include "tbMiruDefs.h"
 #include "tbSpolDefs.h"/*includes defaults*/
 #include "../genBio/tbConDefs.h" /*settings/error values*/
@@ -159,6 +160,10 @@
 !   o .c  #include "../genLib/fileFun.h"
 !   o .c  #include "../genLib/endin.h"
 !   o .c  #include "../genLib/checkSum.h"
+!   o .c  #include "../genFont/fontST.h"
+!   o .c  #include "../genFont/smallFont.h"
+!   o .c  #include "../genPng/mkPng.h"
+!   o .c  #include "../genPng/pngDraw.h"
 !   o .c  #include "../genBio/codonFun.h"
 !   o .c  #include "../genBio/kmerFun.h"
 !   o .c  #include "../genBio/seqST.h"
@@ -168,7 +173,7 @@
 !   o .c  #include "../genAln/memwater.h"
 !   o .c  #include "../genAln/water.h"
 !   o .c  #include "../genAln/needle.h"
-!   o .c  #include "../tbAmrSrc/drugAry.h"
+!   o .c  #include "../genAmr/drugAry.h"
 !
 !   o .h  #include "../genBio/ntTo2bit.h" 
 !   o .h  #include "../genBio/revNtTo2bit.h" 
@@ -3182,7 +3187,7 @@ input_freezeTB(
    ^   o fun10 sec03 sub04:
    ^     - indel clean up settings
    ^   o fun10 sec03 sub05:
-   ^     - tbAmr settings
+   ^     - getAmr settings
    ^   o fun10 sec03 sub06:
    ^     - read filtering
    ^   o fun10 sec03 sub07:
@@ -5979,7 +5984,7 @@ run_freezeTB(
 
    /*****************************************************\
    * Fun12 Sec01 Sub02:
-   *   - Temporay and error reporting variables
+   *   - temporay and error reporting variables
    \*****************************************************/
 
    signed char *tmpStr = 0;
@@ -6037,14 +6042,10 @@ run_freezeTB(
    FILE *idFILE = 0; /*For read id printing*/
    FILE *logFILE = 0; /*for mixed infection currently*/
 
-   struct amrST *amrHeapAryST = 0;
+   struct refList_amrST *amrHeapAryST = 0;
    struct amrHit_checkAmr *amrHitHeapSTList = 0;
-   signed int numAmrSI = 0;
    signed int numHitsSI = 0;
 
-   signed char *drugHeapAryStr = 0;
-   signed int numDrugsSI = 0;
-   signed int maxDrugsSI = 0;
    unsigned int totalReadsUI = 0;
 
    /*****************************************************\
@@ -7410,14 +7411,8 @@ run_freezeTB(
    \*****************************************************/
 
    amrHeapAryST =
-      readTbl_amrST(
-         ftbSetStackST.amrDbFileStr,
-         (unsigned int *) &numAmrSI,
-         &drugHeapAryStr,
-         &numDrugsSI,
-         &maxDrugsSI,
-         &errSC
-      ); /*Read in the amr database*/
+      readTbl_amrST(ftbSetStackST.amrDbFileStr, &errSC);
+      /*Read in the amr database*/
 
    if(errSC)
    { /*If: error*/
@@ -7434,7 +7429,7 @@ run_freezeTB(
          cpStr_ulCp(
             tmpStr,
             (signed char *)
-               " not in tbAmr format or empty"
+               " not in getAmr format or empty"
          );
       } /*If: file error*/
 
@@ -8505,8 +8500,8 @@ run_freezeTB(
       amrHitHeapSTList =
          checkAmr(
             &samStackST,
-            amrHeapAryST,
-            numAmrSI,
+            amrHeapAryST->amrsAryST[0],
+            amrHeapAryST->amrLenArySI[0],
             &numHitsSI,
             ftbSetStackST.frameshiftBl,
                /*scan for frameshifts*/
@@ -8536,6 +8531,7 @@ run_freezeTB(
       if(amrHitHeapSTList)
       { /*If: read had AMR(s)*/
          pIdVarTbl_checkAmr(
+            0, /*not printing a reference id*/
             samStackST.qryIdStr,
             amrHitHeapSTList,
             idFILE
@@ -8721,14 +8717,16 @@ run_freezeTB(
    ^   o fun12 sec08 sub01:
    ^     - print read stats
    ^   o fun12 sec08 sub02:
-   ^     - print AMR hits for reads
+   ^     - make graphs
    ^   o fun12 sec08 sub03:
-   ^     - print read MIRU table
+   ^     - print AMR hits for reads
    ^   o fun12 sec08 sub04:
-   ^     - print read spoligotype entry
+   ^     - print read MIRU table
    ^   o fun12 sec08 sub05:
-   ^     - print tsv file of variants
+   ^     - print read spoligotype entry
    ^   o fun12 sec08 sub06:
+   ^     - print tsv file of variants
+   ^   o fun12 sec08 sub07:
    ^     - print hsp65 species and custom user lineages
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -8770,6 +8768,45 @@ run_freezeTB(
    fclose(outFILE);
    outFILE = 0;
 
+   /*****************************************************\
+   * Fun12 Sec08 Sub02:
+   *   - make graphs
+   \*****************************************************/
+
+   depthGraph_ftbGraphs(
+      ftbSetStackST.prefixStr,
+      ftbSetStackST.tbConSet.minDepthSI,/*min read depth*/
+      readMapArySI,               /*read depths*/
+      coordsHeapST,               /*genes targeting*/
+      amrHeapAryST->amrsAryST[0], /*AMR database*/
+      amrHeapAryST->amrLenArySI[0],/*number AMRs*/
+      ftbSetStackST.minPercMapF,  /*min % for SNP AMR*/
+      ftbSetStackST.amrIndelSupF, /*min % for indel AMR*/
+      ftbSetStackST.amrFrameshiftSupF,/*min % frameshift*/
+      ftbSetStackST.frameshiftBl  /*keeping frameshifts*/
+   ); /*print read depths and detected AMRs in reads*/
+
+   meanDepthGraph_ftbGraphs(
+      ftbSetStackST.prefixStr,
+      ftbSetStackST.tbConSet.minDepthSI,/*min read depth*/
+      readMapArySI,               /*read depths*/
+      coordsHeapST                /*genes targeting*/
+   ); /*print mean read depths*/
+
+   coverGraph_ftbGraphs(
+      ftbSetStackST.prefixStr,
+      ftbSetStackST.tbConSet.minDepthSI,/*min read depth*/
+      readMapArySI,               /*read depths*/
+      coordsHeapST,               /*genes targeting*/
+      amrHeapAryST->amrsAryST[0], /*AMR database*/
+      amrHeapAryST->amrLenArySI[0],/*number AMRs*/
+      ftbSetStackST.minPercMapF,  /*min % for SNP AMR*/
+      ftbSetStackST.amrIndelSupF, /*min % for indel AMR*/
+      ftbSetStackST.amrFrameshiftSupF,/*min % frameshift*/
+      ftbSetStackST.frameshiftBl, /*keeping frameshifts*/
+      ftbSetStackST.coordFileStr  /*has gene drug names*/
+   ); /*print read depths and detected AMRs in reads*/
+
    free(readMapArySI);
    readMapArySI = 0;
 
@@ -8777,7 +8814,7 @@ run_freezeTB(
    coordsHeapST = 0;
 
    /*****************************************************\
-   * Fun12 Sec08 Sub02:
+   * Fun12 Sec08 Sub03:
    *   - print AMR hits for reads
    \*****************************************************/
 
@@ -8787,28 +8824,18 @@ run_freezeTB(
          "w"
       ); /*already checked if could open*/
 
-   pReadHead_checkAmr(outFILE);
+   pReadHead_checkAmr(0, outFILE);
+     /*using 0 because not printing the reference id*/
 
    pRead_checkAmr(
       (unsigned int) ftbSetStackST.tbConSet.minDepthSI,
-      ftbSetStackST.minPercMapF,
-         /*min % reads supporting AMR needed to keep*/
-      (float) 0,
-         /*not really usefull, so leaving out*/
-      ftbSetStackST.amrIndelSupF,
-         /*% support to keep indel AMR*/
-      ftbSetStackST.amrFrameshiftSupF,
-         /*% support to keep frameshift AMR*/
-      ftbSetStackST.frameshiftBl,
-         /*1: scanned for frameshifts; 0 no*/
-      totalReadsUI,
-         /*number reads mapped*/
-      amrHeapAryST,
-         /*has detected AMRs*/
-      (unsigned int) numAmrSI,
-         /*number AMRs in amrHeapAryST*/
-      drugHeapAryStr,
-         /*has drug names*/
+      ftbSetStackST.minPercMapF, /*min % to keep snp AMR*/
+      (float) 0, /*% total reads (useless; so keep at 0)*/
+      ftbSetStackST.amrIndelSupF,  /*min % indel for AMR*/
+      ftbSetStackST.amrFrameshiftSupF,/*min % frameshift*/
+      ftbSetStackST.frameshiftBl, /*1: using frameshifts*/
+      totalReadsUI,               /*number reads mapped*/
+      amrHeapAryST,               /*has detected AMRs*/
       outFILE /*file to print to*/
    ); /*print AMRs detected in reads*/
 
@@ -8816,7 +8843,7 @@ run_freezeTB(
    outFILE = 0;
 
    /*****************************************************\
-   * Fun12 Sec08 Sub03:
+   * Fun12 Sec08 Sub04:
    *   - print read MIRU table
    \*****************************************************/
 
@@ -8868,7 +8895,7 @@ run_freezeTB(
       );
 
    /*****************************************************\
-   * Fun12 Sec08 Sub04:
+   * Fun12 Sec08 Sub05:
    *   - print read spoligotype entry
    \*****************************************************/
 
@@ -8910,7 +8937,7 @@ run_freezeTB(
    errSL = 0;
    
    /*****************************************************\
-   * Fun12 Sec08 Sub05:
+   * Fun12 Sec08 Sub06:
    *   - print tsv file of variants
    \*****************************************************/
 
@@ -8944,7 +8971,7 @@ run_freezeTB(
     } /*If: nothing mapped*/
    
    /*****************************************************\
-   * Fun12 Sec08 Sub06:
+   * Fun12 Sec08 Sub07:
    *   - print hsp65 species and custom user lineages
    \*****************************************************/
 
@@ -9051,7 +9078,8 @@ run_freezeTB(
    /*remove all the read counters*/
    resetCnt_miruTbl(miruHeapST);
 
-   pConHead_checkAmr(outFILE);
+   pConHead_checkAmr(0, outFILE);
+     /*using 0 to not print any reference ids*/
 
    spolErrSC = def_noSpol_tbSpolDefs;
 
@@ -9089,8 +9117,8 @@ run_freezeTB(
       amrHitHeapSTList =
          checkAmr(
             &samConSTAry[siCon],
-            amrHeapAryST,
-            numAmrSI,
+            amrHeapAryST->amrsAryST[0],
+            amrHeapAryST->amrLenArySI[0],
             &numHitsSI,
             ftbSetStackST.frameshiftBl,
             0,          /*ignore indels in aa snp AMRs*/
@@ -9103,9 +9131,10 @@ run_freezeTB(
       if(amrHitHeapSTList)
       { /*If: have AMRs*/
          pCon_checkAmr(
+            0, /*no reference column*/
             samConSTAry[siCon].qryIdStr,
             amrHitHeapSTList,
-            drugHeapAryStr,
+            amrHeapAryST,
             outFILE
          ); /*print detected AMRs*/
 
@@ -9170,11 +9199,8 @@ run_freezeTB(
    numFragSI = 0;
 
    /*AMR memory*/
-   freeHeapAry_amrST(amrHeapAryST, numAmrSI);
+   freeHeap_refList_amrST(amrHeapAryST);
    amrHeapAryST = 0 ;
-
-   free(drugHeapAryStr);
-   drugHeapAryStr = 0;
 
    if(errSC)
    { /*If: error*/
@@ -9474,7 +9500,8 @@ run_freezeTB(
 
    outFILE = fopen((char *) conAmrStr, "w");
       /*file to print AMR results to*/
-   pConHead_checkAmr(outFILE);
+   pConHead_checkAmr(0, outFILE);
+     /*0 to not print out the header*/
 
    errSC = 0;
 
@@ -9488,8 +9515,8 @@ run_freezeTB(
       amrHitHeapSTList =
          checkAmr(
             conNodeST->samSTPtr,
-            amrHeapAryST,
-            numAmrSI,
+            amrHeapAryST->amrsAryST[0],
+            amrHeapAryST->amrLenArySI[0],
             &numHitsSI,
             ftbSetStackST.frameshiftBl,
             0,  /*skip AMRs with indels in snp AMRs*/
@@ -9502,9 +9529,10 @@ run_freezeTB(
       if(amrHitHeapSTList)
       { /*If: have AMRs*/
          pCon_checkAmr(
+            0, /*do not print out a reference id*/
             conNodeST->samSTPtr->qryIdStr,
             amrHitHeapSTList,
-            drugHeapAryStr,
+            amrHeapAryST,
             outFILE
          ); /*print detected AMRs*/
 
@@ -9707,10 +9735,7 @@ run_freezeTB(
       coordsHeapST = 0;
 
       if(amrHeapAryST)
-         freeHeapAry_amrST(
-            amrHeapAryST,
-            numAmrSI
-         );
+         freeHeap_refList_amrST(amrHeapAryST);
       amrHeapAryST = 0;
 
       if(amrHitHeapSTList)
@@ -9759,10 +9784,6 @@ run_freezeTB(
       if(readMapArySI)
          free(readMapArySI);
       readMapArySI = 0;
-
-      if(drugHeapAryStr)
-         free(drugHeapAryStr);
-      drugHeapAryStr = 0;
 
       if(maskStartHeapAryUI)
          free(maskStartHeapAryUI);
@@ -9831,70 +9852,158 @@ run_freezeTB(
 /*=======================================================\
 : License:
 : 
-: This code is under the unlicense (public domain).
-:   However, for cases were the public domain is not
-:   suitable, such as countries that do not respect the
-:   public domain or were working with the public domain
-:   is inconveint / not possible, this code is under the
-:   MIT license
+: Creative Commons Legal Code
 : 
-: Public domain:
+: CC0 1.0 Universal
 : 
-: This is free and unencumbered software released into the
-:   public domain.
+:     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND
+:     DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF
+:     THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
+:     RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+:     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS
+:     MAKES NO WARRANTIES REGARDING THE USE OF THIS
+:     DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
+:     HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES
+:     RESULTING FROM THE USE OF THIS DOCUMENT OR THE
+:     INFORMATION OR WORKS PROVIDED HEREUNDER.
 : 
-: Anyone is free to copy, modify, publish, use, compile,
-:   sell, or distribute this software, either in source
-:   code form or as a compiled binary, for any purpose,
-:   commercial or non-commercial, and by any means.
+: Statement of Purpose
 : 
-: In jurisdictions that recognize copyright laws, the
-:   author or authors of this software dedicate any and
-:   all copyright interest in the software to the public
-:   domain. We make this dedication for the benefit of the
-:   public at large and to the detriment of our heirs and
-:   successors. We intend this dedication to be an overt
-:   act of relinquishment in perpetuity of all present and
-:   future rights to this software under copyright law.
+: The laws of most jurisdictions throughout the world
+: automatically confer exclusive Copyright and Related
+: Rights (defined below) upon the creator and subsequent
+: owner(s) (each and all, an "owner") of an original work
+: of authorship and/or a database (each, a "Work").
 : 
-: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO
-:   EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM,
-:   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-:   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-:   IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-:   DEALINGS IN THE SOFTWARE.
+: Certain owners wish to permanently relinquish those
+: rights to a Work for the purpose of contributing to a
+: commons of creative, cultural and scientific works
+: ("Commons") that the public can reliably and without
+: fear of later claims of infringement build upon, modify,
+: incorporate in other works, reuse and redistribute as
+: freely as possible in any form whatsoever and for any
+: purposes, including without limitation commercial
+: purposes. These owners may contribute to the Commons to
+: promote the ideal of a free culture and the further
+: production of creative, cultural and scientific works,
+: or to gain reputation or greater distribution for their
+: Work in part through the use and efforts of others.
 : 
-: For more information, please refer to
-:   <https://unlicense.org>
+: For these and/or other purposes and motivations, and
+: without any expectation of additional consideration or
+: compensation, the person associating CC0 with a Work
+: (the "Affirmer"), to the extent that he or she is an
+: owner of Copyright and Related Rights in the Work,
+: voluntarily elects to apply CC0 to the Work and publicly
+: distribute the Work under its terms, with knowledge of
+: his or her Copyright and Related Rights in the Work and
+: the meaning and intended legal effect of CC0 on those
+: rights.
 : 
-: MIT License:
+: 1. Copyright and Related Rights. A Work made available
+:    under CC0 may be protected by copyright and related
+:    or neighboring rights ("Copyright and Related
+:    Rights"). Copyright and Related Rights include, but
+:    are not limited to, the following:
 : 
-: Copyright (c) 2024 jeremyButtler
+:   i. the right to reproduce, adapt, distribute, perform,
+:      display, communicate, and translate a Work;
+:  ii. moral rights retained by the original author(s)
+:      and/or performer(s);
+: iii. publicity and privacy rights pertaining to a
+:      person's image or likeness depicted in a Work;
+:  iv. rights protecting against unfair competition in
+:      regards to a Work, subject to the limitations in
+:      paragraph 4(a), below;
+:   v. rights protecting the extraction, dissemination,
+:      use and reuse of data in a Work;
+:  vi. database rights (such as those arising under
+:      Directive 96/9/EC of the European Parliament and of
+:      the Council of 11 March 1996 on the legal
+:      protection of databases, and under any national
+:      implementation thereof, including any amended or
+:      successor version of such directive); and
+: vii. other similar, equivalent or corresponding rights
+:      throughout the world based on applicable law or
+:      treaty, and any national implementations thereof.
 : 
-: Permission is hereby granted, free of charge, to any
-:   person obtaining a copy of this software and
-:   associated documentation files (the "Software"), to
-:   deal in the Software without restriction, including
-:   without limitation the rights to use, copy, modify,
-:   merge, publish, distribute, sublicense, and/or sell
-:   copies of the Software, and to permit persons to whom
-:   the Software is furnished to do so, subject to the
-:   following conditions:
+: 2. Waiver. To the greatest extent permitted by, but not
+:    in contravention of, applicable law, Affirmer hereby
+:    overtly, fully, permanently, irrevocably and
+:    unconditionally waives, abandons, and surrenders all
+:    of Affirmer's Copyright and Related Rights and
+:    associated claims and causes of action, whether now
+:    known or unknown (including existing as well as
+:    future claims and causes of action), in the Work (i)
+:    in all territories worldwide, (ii) for the maximum
+:    duration provided by applicable law or treaty
+:    (including future time extensions), (iii) in any
+:    current or future medium and for any number of
+:    copies, and (iv) for any purpose whatsoever,
+:    including without limitation commercial, advertising
+:    or promotional purposes (the "Waiver"). Affirmer
+:    makes the Waiver for the benefit of each member of
+:    the public at large and to the detriment of
+:    Affirmer's heirs and successors, fully intending that
+:    such Waiver shall not be subject to revocation,
+:    rescission, cancellation, termination, or any other
+:    legal or equitable action to disrupt the quiet
+:    enjoyment of the Work by the public as contemplated
+:    by Affirmer's express Statement of Purpose.
 : 
-: The above copyright notice and this permission notice
-:   shall be included in all copies or substantial
-:   portions of the Software.
+: 3. Public License Fallback. Should any part of the
+:    Waiver for any reason be judged legally invalid or
+:    ineffective under applicable law, then the Waiver
+:    shall be preserved to the maximum extent permitted
+:    taking into account Affirmer's express Statement of
+:    Purpose. In addition, to the extent the Waiver is so
+:    judged Affirmer hereby grants to each affected person
+:    a royalty-free, non transferable, non sublicensable,
+:    non exclusive, irrevocable and unconditional license
+:    to exercise Affirmer's Copyright and Related Rights
+:    in the Work (i) in all territories worldwide, (ii)
+:    for the maximum duration provided by applicable law
+:    or treaty (including future time extensions), (iii)
+:    in any current or future medium and for any number of
+:    copies, and (iv) for any purpose whatsoever,
+:    including without limitation commercial, advertising
+:    or promotional purposes (the "License"). The License
+:    shall be deemed effective as of the date CC0 was
+:    applied by Affirmer to the Work. Should any part of
+:    the License for any reason be judged legally invalid
+:    or ineffective under applicable law, such partial
+:    invalidity or ineffectiveness shall not invalidate
+:    the remainder of the License, and in such case
+:    Affirmer hereby affirms that he or she will not (i)
+:    exercise any of his or her remaining Copyright and
+:    Related Rights in the Work or (ii) assert any
+:    associated claims and causes of action with respect
+:    to the Work, in either case contrary to Affirmer's
+:    express Statement of Purpose.
 : 
-: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-:   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-:   LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-:   FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
-:   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-:   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-:   AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-:   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-:   USE OR OTHER DEALINGS IN THE SOFTWARE.
+: 4. Limitations and Disclaimers.
+: 
+:  a. No trademark or patent rights held by Affirmer are
+:     waived, abandoned, surrendered, licensed or
+:     otherwise affected by this document.
+:  b. Affirmer offers the Work as-is and makes no
+:     representations or warranties of any kind concerning
+:     the Work, express, implied, statutory or otherwise,
+:     including without limitation warranties of title,
+:     merchantability, fitness for a particular purpose,
+:     non infringement, or the absence of latent or other
+:     defects, accuracy, or the present or absence of
+:     errors, whether or not discoverable, all to the
+:     greatest extent permissible under applicable law.
+:  c. Affirmer disclaims responsibility for clearing
+:     rights of other persons that may apply to the Work
+:     or any use thereof, including without limitation any
+:     person's Copyright and Related Rights in the Work.
+:     Further, Affirmer disclaims responsibility for
+:     obtaining any necessary consents, permissions or
+:     other rights required for any use of the Work.
+:  d. Affirmer understands and acknowledges that Creative
+:     Commons is not a party to this document and has no
+:     duty or obligation with respect to this CC0 or use
+:     of the Work.
 \=======================================================*/

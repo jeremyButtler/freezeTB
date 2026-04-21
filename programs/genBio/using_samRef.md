@@ -165,10 +165,14 @@ You can then print the reads to bins using the
      - input 5 of getRefLen\_samRef
      - `@HD` entry is printed first
      - all other entries are printed after reference ids
-  4. 1 to print unmapped reads to the unmapped file or
+  4. value to mark the file format I am printing to
+     - 0 is a sam file
+     - 1 is a fastq file (header [input 3] is ignored)
+     - 2 is a fasta file (header [input 3] is ignored)
+  5. 1 to print unmapped reads to the unmapped file or
      0 to not print unmapped reads 
-  5. refs_samRef structure pointer with reference ids
-  6. signed int array or 0/null with the indexs for each
+  6. refs_samRef structure pointer with reference ids
+  7. signed int array or 0/null with the indexs for each
      references bin
      - return value from buildRefMergeIndex_samRef
      - if 0/null, each reference sequence gets its own bin
@@ -357,6 +361,7 @@ main(
             &samStruct,            /*has read to print*/
             (signed char *) "out", /*name of file*/
             headerStr,             /*header of file*/
+            0,                     /*print to a sam file*/
             0,                 /*discared unmapped reads*/
             &refStruct,            /*has reference ids*/
             indexHeapArySI         /*has bins to merge*/

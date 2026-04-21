@@ -9,53 +9,65 @@ O=o.win
 
 genFreezeTB=..\genFreezeTB
 genLib=..\genLib
+genFont=..\genFont
+genPng=..\genPng
 genBio=..\genBio
+genAmr=..\genAmr
 genAln=..\genAln
 genClust=..\genClust
+genGeneoType=..\genGeneoType
 
 objFiles= \
-   $(genFreezeTB)\freezeTB.$O \
-   $(genFreezeTB)\freezeTBPaths.$O \
-   $(genLib)\ulCp.$O \
-   $(genFreezeTB)\checkAmr.$O \
-   $(genFreezeTB)\amrST.$O \
-   $(genFreezeTB)\drugAry.$O \
-   $(genLib)\fileFun.$O \
-   $(genLib)\charCp.$O \
-   $(genBio)\samEntry.$O \
-   $(genLib)\strAry.$O \
-   $(genLib)\numToStr.$O \
-   $(genLib)\base10str.$O \
-   $(genBio)\codonFun.$O \
-   $(genLib)\genMath.$O \
-   $(genFreezeTB)\miruTbl.$O \
-   $(genFreezeTB)\spolFind.$O \
-   $(genFreezeTB)\spolST.$O \
-   $(genBio)\seqST.$O \
-   $(genAln)\kmerFind.$O \
-   $(genAln)\memwater.$O \
-   $(genAln)\alnSet.$O \
-   $(genAln)\indexToCoord.$O \
-   $(genLib)\shellSort.$O \
-   $(genBio)\trimSam.$O \
-   $(genBio)\maskPrim.$O \
-   $(genBio)\ampDepth.$O \
-   $(genBio)\geneCoord.$O \
-   $(genBio)\adjCoords.$O \
-   $(genBio)\rmHomo.$O \
-   $(genClust)\edClust.$O \
-   $(genClust)\clustST.$O \
-   $(genBio)\tbCon.$O \
-   $(genBio)\edDist.$O \
-   $(genAln)\mapRead.$O \
-   $(genAln)\needle.$O \
-   $(genAln)\dirMatrix.$O \
-   $(genAln)\water.$O \
-   $(genBio)\kmerFun.$O \
-   $(genBio)\gzSeqST.$O \
-   $(genLib)\inflate.$O \
-   $(genLib)\checkSum.$O \
-   $(genLib)\endin.$O \
+   $(genFreezeTB)/freezeTB.$O \
+   $(genFreezeTB)/ftbGraphs.$O \
+   $(genFreezeTB)/freezeTBPaths.$O \
+   $(genLib)/ulCp.$O \
+   $(genAmr)/checkAmr.$O \
+   $(genAmr)/amrST.$O \
+   $(genAmr)/drugAry.$O \
+   $(genLib)/fileFun.$O \
+   $(genLib)/charCp.$O \
+   $(genBio)/samEntry.$O \
+   $(genLib)/strAry.$O \
+   $(genLib)/numToStr.$O \
+   $(genLib)/base10str.$O \
+   $(genFont)/fontST.$O \
+   $(genFont)/ibmSan9.$O \
+   $(genPng)/mkPng.$O \
+   $(genPng)/pngDraw.$O \
+   $(genBio)/codonFun.$O \
+   $(genLib)/genMath.$O \
+   $(genFreezeTB)/miruTbl.$O \
+   $(genFreezeTB)/spolFind.$O \
+   $(genFreezeTB)/spolST.$O \
+   $(genGeneoType)/linST.$O \
+   $(genGeneoType)/getLin.$O \
+   $(genBio)/seqST.$O \
+   $(genAln)/kmerFind.$O \
+   $(genAln)/memwater.$O \
+   $(genAln)/memwaterScan.$O \
+   $(genAln)/alnSet.$O \
+   $(genAln)/indexToCoord.$O \
+   $(genLib)/shellSort.$O \
+   $(genBio)/trimSam.$O \
+   $(genBio)/maskPrim.$O \
+   $(genBio)/ampDepth.$O \
+   $(genBio)/geneCoord.$O \
+   $(genBio)/adjCoords.$O \
+   $(genBio)/rmHomo.$O \
+   $(genClust)/edClust.$O \
+   $(genClust)/clustST.$O \
+   $(genBio)/tbCon.$O \
+   $(genBio)/edDist.$O \
+   $(genAln)/mapRead.$O \
+   $(genAln)/needle.$O \
+   $(genAln)/dirMatrix.$O \
+   $(genAln)/water.$O \
+   $(genBio)/kmerFun.$O \
+   $(genBio)/gzSeqST.$O \
+   $(genLib)/inflate.$O \
+   $(genLib)/checkSum.$O \
+   $(genLib)/endin.$O \
    mainFreezeTB.$O
 
 $(NAME): mainFreezeTB.$O
@@ -70,10 +82,13 @@ mainFreezeTB.$O: \
 $(genFreezeTB)\freezeTB.$O: \
 	$(genFreezeTB)\freezeTB.c \
 	$(genFreezeTB)\freezeTB.h \
-	$(genFreezeTB)\checkAmr.$O \
+	$(genFreezeTB)\ftbGraphs.$O \
 	$(genFreezeTB)\miruTbl.$O \
 	$(genFreezeTB)\spolFind.$O \
 	$(genFreezeTB)\freezeTBPaths.$O \
+	$(genAmr)\checkAmr.$O \
+   $(genGeneoType)\linST.$O \
+   $(genGeneoType)\getLin.$O \
 	$(genAln)\mapRead.$O \
 	$(genBio)\gzSeqST.$O \
 	$(genBio)\trimSam.$O \
@@ -91,10 +106,33 @@ $(genFreezeTB)\freezeTB.$O: \
 	$(genLib)\charCp.h \
 	$(genLib)\genMath.h \
 	$(genLib)\endLine.h \
-	..\ftbVersion.h
+	../ftbVersion.h
 		$(CC) /Fo:$(genFreezeTB)\freezeTB.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)\freezeTB.c
+
+$(genGeneoType)\getLin.$O: \
+	$(genGeneoType)\getLin.c \
+	$(genGeneoType)\getLin.h \
+	$(genGeneoType)\linST.$O \
+	$(genAln)\memwaterScan.$O \
+	$(genBio)\samEntry.$O \
+	$(genBio)\codonFun.$O \
+	$(genAln)\alnDefs.h
+		$(CC) /Fo:$(genGeneoType)\getLin.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genGeneoType)\getLin.c
+
+
+$(genGeneoType)\linST.$O: \
+	$(genGeneoType)\linST.c \
+	$(genGeneoType)\linST.h \
+	$(genLib)\fileFun.$O \
+	$(genAln)\kmerFind.$O \
+	$(genAln)\alnDefs.h
+		$(CC) /Fo:$(genGeneoType)\linST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genGeneoType)\linST.c
 
 $(genFreezeTB)\freezeTBPaths.$O: \
 	$(genFreezeTB)\freezeTBPaths.c \
@@ -111,33 +149,46 @@ $(genLib)\ulCp.$O: \
 		$(CC) /Fo:$(genLib)\ulCp.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genLib)\ulCp.c
 
-$(genFreezeTB)\checkAmr.$O: \
-	$(genFreezeTB)\checkAmr.c \
-	$(genFreezeTB)\checkAmr.h \
-	$(genFreezeTB)\amrST.$O \
+$(genAmr)\checkAmr.$O: \
+	$(genAmr)\checkAmr.c \
+	$(genAmr)\checkAmr.h \
+	$(genAmr)\amrST.$O \
 	$(genBio)\samEntry.$O \
 	$(genBio)\codonFun.$O \
 	$(genLib)\genMath.$O
-		$(CC) /Fo:$(genFreezeTB)\checkAmr.$O \
+		$(CC) /Fo:$(genAmr)\checkAmr.$O \
 			$(CFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)\checkAmr.c
+			$(genAmr)\checkAmr.c
 
-$(genFreezeTB)\amrST.$O: \
-	$(genFreezeTB)\amrST.c \
-	$(genFreezeTB)\amrST.h \
-	$(genFreezeTB)\drugAry.$O \
+$(genAmr)\amrST.$O: \
+	$(genAmr)\amrST.c \
+	$(genAmr)\amrST.h \
+	$(genAmr)\drugAry.$O \
 	$(genLib)\fileFun.$O \
 	$(genLib)\charCp.$O \
 	$(genLib)\endLine.h
-		$(CC) /Fo:$(genFreezeTB)\amrST.$O \
+		$(CC) /Fo:$(genAmr)\amrST.$O \
 			$(CFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)\amrST.c
+			$(genAmr)\amrST.c
 
-$(genFreezeTB)\drugAry.$O: \
-	$(genFreezeTB)\drugAry.c $(genFreezeTB)\drugAry.h
-		$(CC) /Fo:$(genFreezeTB)\drugAry.$O \
+
+$(genAmr)\drugAry.$O: \
+	$(genAmr)\drugAry.c $(genAmr)\drugAry.h
+		$(CC) /Fo:$(genAmr)\drugAry.$O \
 			$(CFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)\drugAry.c
+			$(genAmr)\drugAry.c
+
+$(genFreezeTB)\ftbGraphs.$O: \
+	$(genFreezeTB)\ftbGraphs.c \
+	$(genFreezeTB)\ftbGraphs.h \
+	$(genFont)\ibmSan9.$O \
+	$(genPng)\pngDraw.$O \
+	$(genBio)\geneCoord.$O \
+	$(genLib)\genMath.$O
+		$(CC) /Fo:$(genFreezeTB)\ftbGraphs.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)\ftbGraphs.c
+
 
 $(genLib)\fileFun.$O: \
 	$(genLib)\fileFun.c \
@@ -257,6 +308,17 @@ $(genAln)\memwater.$O: \
 	$(genLib)\genMath.h
 		$(CC) /Fo:$(genAln)\memwater.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genAln)\memwater.c
+
+$(genAln)\memwaterScan.$O: \
+	$(genAln)\memwaterScan.c \
+	$(genAln)\memwaterScan.h \
+	$(genAln)\alnSet.$O \
+	$(genAln)\indexToCoord.$O \
+	$(genBio)\seqST.$O \
+	$(genLib)\genMath.h
+		$(CC) /Fo:$(genAln)\memwaterScan.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAln)\memwaterScan.c
 
 $(genAln)\alnSet.$O: \
 	$(genAln)\alnSet.c \
@@ -422,6 +484,39 @@ $(genBio)\gzSeqST.$O: \
  	$(genLib)\inflate.$O
 		$(CC) /Fo:$(genBio)\gzSeqST.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genBio)\gzSeqST.c
+
+$(genPng)\pngDraw.$O: \
+   $(genPng)\pngDraw.c \
+   $(genPng)\pngDraw.h \
+	$(genPng)\mkPng.$O \
+	$(genFont)\fontST.$O
+		$(CC) /Fo:$(genPng)\pngDraw.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genPng)\pngDraw.c
+
+$(genPng)\mkPng.$O: \
+   $(genPng)\mkPng.c \
+   $(genPng)\mkPng.h \
+	$(genLib)\endin.$O \
+	$(genLib)\checkSum.$O \
+	$(genLib)\64bit.h
+		$(CC) /Fo:$(genPng)\mkPng.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genPng)\mkPng.c
+
+$(genFont)\ibmSan9.$O: \
+   $(genFont)\ibmSan9.c \
+   $(genFont)\ibmSan9.h \
+	$(genFont)\fontST.$O
+		$(CC) /Fo:$(genFont)\ibmSan9.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genFont)\ibmSan9.c
+
+$(genFont)\fontST.$O: \
+	$(genFont)\fontST.c \
+	$(genFont)\fontST.h \
+	$(genLib)\base10str.$O \
+	$(genLib)\ulCp.$O \
+	$(genLib)\64bit.h
+		$(CC) /Fo:$(genFont)\fontST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genFont)\fontST.c
 
 $(genLib)\inflate.$O: \
 	$(genLib)\inflate.c \

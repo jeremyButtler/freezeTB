@@ -26,7 +26,10 @@ LDMacFlags=\
 
 genFreezeTB=../genFreezeTB
 genLib=../genLib
+genFont=../genFont
+genPng=../genPng
 genBio=../genBio
+genAmr=../genAmr
 genAln=../genAln
 genClust=../genClust
 genGeneoType=../genGeneoType
@@ -68,9 +71,6 @@ objFiles=\
    $(genLib)/endin.$O \
    $(genClust)/clustST.$O \
    $(genClust)/edClust.$O \
-   $(genFreezeTB)/amrST.$O \
-   $(genFreezeTB)/drugAry.$O \
-   $(genFreezeTB)/checkAmr.$O \
    $(genFreezeTB)/miruTbl.$O \
    $(genFreezeTB)/spolFind.$O \
    $(genFreezeTB)/spolST.$O \
@@ -78,6 +78,14 @@ objFiles=\
    $(genFreezeTB)/freezeTB.$O \
    $(genGeneoType)/linST.$O \
    $(genGeneoType)/getLin.$O \
+   $(genFreezeTB)/ftbGraphs.$O \
+   $(genFont)/fontST.$O \
+   $(genFont)/ibmSan9.$O \
+   $(genPng)/mkPng.$O \
+   $(genPng)/pngDraw.$O \
+   $(genAmr)/checkAmr.$O \
+   $(genAmr)/amrST.$O \
+   $(genAmr)/drugAry.$O \
    darkLight.$O \
    rayWidg.$O \
    ftbRayST.$O \
@@ -112,6 +120,14 @@ ftbRayST.$O: \
 		$(CC) $(coreCFLAGS) $(usrCFLAGS) \
 			-o ftbRayST.$O ftbRayST.c
 
+$(genLib)/ptrAry.$O: \
+	$(genLib)/ptrAry.c \
+	$(genLib)/ptrAry.h \
+	$(genLib)/ulCp.$O
+		$(CC) -o $(genLib)/ptrAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genLib)/ptrAry.c
+
 rayWidg.$O: \
 	rayWidg.c \
 	rayWidg.h \
@@ -125,32 +141,14 @@ rayWidg.$O: \
 darkLight.$O: darkLight.h darkLight.m
 	$(CC) -c darkLight.m -o darkLight.$O -framework Cocoa
 
-$(genLib)/ptrAry.$O: \
-	$(genLib)/ptrAry.c \
-	$(genLib)/ptrAry.h \
-	$(genLib)/ulCp.$O
-		$(CC) $(coreCFLAGS) $(usrCFLAGS) -o $(genLib)/ptrAry.$O \
-			$(genLib)/ptrAry.c
-
-$(genLib)/base10str.$O: \
-	$(genLib)/base10str.c \
-	$(genLib)/base10str.h
-		$(CC) $(coreCFLAGS) $(usrCFLAGS) -o $(genLib)/base10str.$O \
-			$(genLib)/base10str.c
-
-$(genLib)/ulCp.$O: \
-	$(genLib)/ulCp.c \
-	$(genLib)/ulCp.h
-		$(CC) $(coreCFLAGS) $(usrCFLAGS) -o $(genLib)/ulCp.$O \
-			$(genLib)/ulCp.c
-
 $(genFreezeTB)/freezeTB.$O: \
 	$(genFreezeTB)/freezeTB.c \
 	$(genFreezeTB)/freezeTB.h \
-	$(genFreezeTB)/checkAmr.$O \
+	$(genFreezeTB)/ftbGraphs.$O \
 	$(genFreezeTB)/miruTbl.$O \
 	$(genFreezeTB)/spolFind.$O \
 	$(genFreezeTB)/freezeTBPaths.$O \
+	$(genAmr)/checkAmr.$O \
    $(genGeneoType)/linST.$O \
    $(genGeneoType)/getLin.$O \
 	$(genAln)/mapRead.$O \
@@ -172,7 +170,7 @@ $(genFreezeTB)/freezeTB.$O: \
 	$(genLib)/endLine.h \
 	../ftbVersion.h
 		$(CC) -o $(genFreezeTB)/freezeTB.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/freezeTB.c
 
 $(genGeneoType)/getLin.$O: \
@@ -204,49 +202,68 @@ $(genFreezeTB)/freezeTBPaths.$O: \
 	$(genLib)/ulCp.$O
 		$(CC) \
 			-o $(genFreezeTB)/freezeTBPaths.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/freezeTBPaths.c
 
-$(genFreezeTB)/checkAmr.$O: \
-	$(genFreezeTB)/checkAmr.c \
-	$(genFreezeTB)/checkAmr.h \
-	$(genFreezeTB)/amrST.$O \
+$(genLib)/ulCp.$O: \
+	$(genLib)/ulCp.c \
+	$(genLib)/ulCp.h
+		$(CC) -o $(genLib)/ulCp.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/ulCp.c
+
+$(genAmr)/checkAmr.$O: \
+	$(genAmr)/checkAmr.c \
+	$(genAmr)/checkAmr.h \
+	$(genAmr)/amrST.$O \
 	$(genBio)/samEntry.$O \
 	$(genBio)/codonFun.$O \
 	$(genLib)/genMath.$O
-		$(CC) -o $(genFreezeTB)/checkAmr.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)/checkAmr.c
+		$(CC) -o $(genAmr)/checkAmr.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAmr)/checkAmr.c
 
-$(genFreezeTB)/amrST.$O: \
-	$(genFreezeTB)/amrST.c \
-	$(genFreezeTB)/amrST.h \
-	$(genFreezeTB)/drugAry.$O \
+$(genAmr)/amrST.$O: \
+	$(genAmr)/amrST.c \
+	$(genAmr)/amrST.h \
+	$(genAmr)/drugAry.$O \
 	$(genLib)/fileFun.$O \
 	$(genLib)/charCp.$O \
 	$(genLib)/endLine.h
-		$(CC) -o $(genFreezeTB)/amrST.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)/amrST.c
+		$(CC) -o $(genAmr)/amrST.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAmr)/amrST.c
 
-$(genFreezeTB)/drugAry.$O: \
-	$(genFreezeTB)/drugAry.c $(genFreezeTB)/drugAry.h
-		$(CC) -o $(genFreezeTB)/drugAry.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)/drugAry.c
+
+$(genAmr)/drugAry.$O: \
+	$(genAmr)/drugAry.c $(genAmr)/drugAry.h
+		$(CC) -o $(genAmr)/drugAry.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genAmr)/drugAry.c
+
+$(genFreezeTB)/ftbGraphs.$O: \
+	$(genFreezeTB)/ftbGraphs.c \
+	$(genFreezeTB)/ftbGraphs.h \
+	$(genFont)/ibmSan9.$O \
+	$(genPng)/pngDraw.$O \
+	$(genBio)/geneCoord.$O \
+	$(genLib)/genMath.$O
+		$(CC) -o $(genFreezeTB)/ftbGraphs.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/ftbGraphs.c
+
 
 $(genLib)/fileFun.$O: \
 	$(genLib)/fileFun.c \
 	$(genLib)/fileFun.h \
 	$(genLib)/ulCp.$O
 		$(CC) -o $(genLib)/fileFun.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/fileFun.c
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/fileFun.c
 
 $(genLib)/charCp.$O: \
 	$(genLib)/charCp.c \
 	$(genLib)/charCp.h
 		$(CC) -o $(genLib)/charCp.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/charCp.c
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/charCp.c
 
 $(genBio)/samEntry.$O: \
 	$(genBio)/samEntry.c 	$(genBio)/samEntry.h \
@@ -257,14 +274,26 @@ $(genBio)/samEntry.$O: \
 	$(genBio)/ntTo5Bit.h \
 	$(genLib)/endLine.h
 		$(CC) -o $(genBio)/samEntry.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/samEntry.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/samEntry.c
 
 $(genLib)/strAry.$O: \
 	$(genLib)/strAry.c \
 	$(genLib)/strAry.h \
 	$(genLib)/ulCp.$O
 		$(CC) -o $(genLib)/strAry.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/strAry.c
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/strAry.c
+
+$(genLib)/numToStr.$O: \
+	$(genLib)/numToStr.c \
+	$(genLib)/numToStr.h
+		$(CC) -o $(genLib)/numToStr.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/numToStr.c
+
+$(genLib)/base10str.$O: \
+	$(genLib)/base10str.c \
+	$(genLib)/base10str.h
+		$(CC) -o $(genLib)/base10str.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/base10str.c
 
 $(genBio)/codonFun.$O: \
 	$(genBio)/codonFun.c \
@@ -273,13 +302,13 @@ $(genBio)/codonFun.$O: \
 	$(genBio)/ntTo2Bit.h \
 	$(genBio)/revNtTo2Bit.h
 		$(CC) -o $(genBio)/codonFun.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/codonFun.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/codonFun.c
 
 $(genLib)/genMath.$O: \
 	$(genLib)/genMath.c \
 	$(genLib)/genMath.h
 		$(CC) -o $(genLib)/genMath.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/genMath.c
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/genMath.c
 
 $(genFreezeTB)/miruTbl.$O: \
 	$(genFreezeTB)/miruTbl.c \
@@ -290,7 +319,7 @@ $(genFreezeTB)/miruTbl.$O: \
 	$(genLib)/genMath.h \
 	$(genFreezeTB)/tbMiruDefs.h
 		$(CC) -o $(genFreezeTB)/miruTbl.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/miruTbl.c
 
 $(genFreezeTB)/spolFind.$O: \
@@ -301,7 +330,7 @@ $(genFreezeTB)/spolFind.$O: \
 	$(genBio)/samEntry.$O \
 	$(genAln)/kmerFind.$O
 		$(CC) -o $(genFreezeTB)/spolFind.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/spolFind.c
 
 $(genFreezeTB)/spolST.$O: \
@@ -314,7 +343,7 @@ $(genFreezeTB)/spolST.$O: \
 	$(genLib)/endLine.h \
 	$(genFreezeTB)/tbSpolDefs.h
 		$(CC) -o $(genFreezeTB)/spolST.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/spolST.c
 
 $(genBio)/seqST.$O: \
@@ -322,7 +351,7 @@ $(genBio)/seqST.$O: \
 	$(genBio)/seqST.h \
 	$(genLib)/fileFun.$O
 		$(CC) -o $(genBio)/seqST.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/seqST.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/seqST.c
 
 $(genAln)/kmerFind.$O: \
 	$(genAln)/kmerFind.c \
@@ -331,7 +360,7 @@ $(genAln)/kmerFind.$O: \
 	$(genLib)/genMath.h \
 	$(genBio)/kmerBit.h
 		$(CC) -o $(genAln)/kmerFind.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genAln)/kmerFind.c
+			$(CFLAGS) $(coreCFLAGS) $(genAln)/kmerFind.c
 
 $(genAln)/memwater.$O: \
 	$(genAln)/memwater.c \
@@ -340,7 +369,7 @@ $(genAln)/memwater.$O: \
 	$(genBio)/seqST.$O \
 	$(genLib)/genMath.h
 		$(CC) -o $(genAln)/memwater.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genAln)/memwater.c
+			$(CFLAGS) $(coreCFLAGS) $(genAln)/memwater.c
 
 $(genAln)/memwaterScan.$O: \
 	$(genAln)/memwaterScan.c \
@@ -353,7 +382,6 @@ $(genAln)/memwaterScan.$O: \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genAln)/memwaterScan.c
 
-
 $(genAln)/alnSet.$O: \
 	$(genAln)/alnSet.c \
 	$(genAln)/alnDefs.h \
@@ -363,27 +391,27 @@ $(genAln)/alnSet.$O: \
 	$(genAln)/alnDefs.h \
 	$(genLib)/endLine.h
 		$(CC) -o $(genAln)/alnSet.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genAln)/alnSet.c
+			$(CFLAGS) $(coreCFLAGS) $(genAln)/alnSet.c
 
 $(genAln)/indexToCoord.$O: \
 	$(genAln)/indexToCoord.c \
 	$(genAln)/indexToCoord.h
 		$(CC) -o $(genAln)/indexToCoord.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genAln)/indexToCoord.c
 
 $(genLib)/shellSort.$O: \
 	$(genLib)/shellSort.c \
 	$(genLib)/shellSort.h
 		$(CC) -o $(genLib)/shellSort.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/shellSort.c
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/shellSort.c
 
 $(genBio)/trimSam.$O: \
 	$(genBio)/trimSam.c \
 	$(genBio)/trimSam.h \
 	$(genBio)/samEntry.$O
 		$(CC) -o $(genBio)/trimSam.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/trimSam.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/trimSam.c
 
 $(genBio)/maskPrim.$O: \
 	$(genBio)/maskPrim.c \
@@ -391,7 +419,7 @@ $(genBio)/maskPrim.$O: \
 	$(genBio)/samEntry.$O \
 	$(genLib)/shellSort.$O
 		$(CC) -o $(genBio)/maskPrim.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/maskPrim.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/maskPrim.c
 
 $(genBio)/ampDepth.$O: \
 	$(genBio)/ampDepth.c \
@@ -399,7 +427,7 @@ $(genBio)/ampDepth.$O: \
 	$(genBio)/geneCoord.$O \
 	$(genBio)/samEntry.$O
 		$(CC) -o $(genBio)/ampDepth.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/ampDepth.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/ampDepth.c
 
 $(genBio)/geneCoord.$O: \
 	$(genBio)/geneCoord.c \
@@ -409,7 +437,7 @@ $(genBio)/geneCoord.$O: \
 	$(genLib)/charCp.$O \
 	$(genLib)/genMath.h
 	$(CC) -o $(genBio)/geneCoord.$O \
-		$(usrCFLAGS) $(coreCFLAGS) $(genBio)/geneCoord.c
+		$(CFLAGS) $(coreCFLAGS) $(genBio)/geneCoord.c
 
 $(genBio)/adjCoords.$O: \
 	$(genBio)/adjCoords.c \
@@ -417,7 +445,7 @@ $(genBio)/adjCoords.$O: \
 	$(genBio)/geneCoord.$O \
 	$(genBio)/samEntry.$O
 		$(CC) -o $(genBio)/adjCoords.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genBio)/adjCoords.c
 
 $(genBio)/rmHomo.$O: \
@@ -426,14 +454,14 @@ $(genBio)/rmHomo.$O: \
 	$(genBio)/samEntry.$O \
 	$(genBio)/seqST.$O
 		$(CC) -o $(genBio)/rmHomo.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/rmHomo.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/rmHomo.c
 
 $(genClust)/edClust.$O: \
 	$(genClust)/edClust.c \
 	$(genClust)/edClust.h \
 	$(genClust)/clustST.$O
 		$(CC) -o $(genClust)/edClust.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genClust)/edClust.c
+			$(CFLAGS) $(coreCFLAGS) $(genClust)/edClust.c
 
 
 $(genClust)/clustST.$O: \
@@ -444,7 +472,7 @@ $(genClust)/clustST.$O: \
 	$(genBio)/edDist.$O \
 	$(genLib)/genMath.h
 		$(CC) -o $(genClust)/clustST.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genClust)/clustST.c
+			$(CFLAGS) $(coreCFLAGS) $(genClust)/clustST.c
 
 
 $(genBio)/tbCon.$O: \
@@ -455,7 +483,7 @@ $(genBio)/tbCon.$O: \
 	$(genLib)/genMath.h \
 	$(genLib)/endLine.h
 		$(CC) -o $(genBio)/tbCon.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/tbCon.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/tbCon.c
 
 $(genBio)/edDist.$O: \
 	$(genBio)/edDist.c \
@@ -465,7 +493,7 @@ $(genBio)/edDist.$O: \
 	$(genLib)/genMath.h \
 	$(genLib)/endLine.h
 		$(CC) -o $(genBio)/edDist.$O \
-		$(usrCFLAGS) $(coreCFLAGS) $(genBio)/edDist.c
+		$(CFLAGS) $(coreCFLAGS) $(genBio)/edDist.c
 
 $(genAln)/mapRead.$O: \
 	$(genAln)/mapRead.c \
@@ -478,14 +506,14 @@ $(genAln)/mapRead.$O: \
 	$(genAln)/defsMapRead.h  \
 	$(genLib)/genMath.h
 	 	$(CC) -o $(genAln)/mapRead.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genAln)/mapRead.c
+			$(CFLAGS) $(coreCFLAGS) $(genAln)/mapRead.c
 
 $(genAln)/needle.$O: \
 	$(genAln)/needle.c \
 	$(genAln)/dirMatrix.$O \
 	$(genLib)/genMath.h
 		$(CC) -o $(genAln)/needle.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genAln)/needle.c
+			$(CFLAGS) $(coreCFLAGS) $(genAln)/needle.c
 
 $(genAln)/dirMatrix.$O: \
 	$(genAln)/dirMatrix.c \
@@ -495,21 +523,21 @@ $(genAln)/dirMatrix.$O: \
 	$(genBio)/seqST.$O \
 	$(genLib)/charCp.$O
 		$(CC) -o $(genAln)/dirMatrix.$O \
-			$(usrCFLAGS) $(coreCFLAGS) \
+			$(CFLAGS) $(coreCFLAGS) \
 			$(genAln)/dirMatrix.c
 
 $(genAln)/water.$O: $(genAln)/water.c \
 	$(genAln)/dirMatrix.$O \
 	$(genLib)/genMath.h
 		$(CC) -o $(genAln)/water.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genAln)/water.c
+			$(CFLAGS) $(coreCFLAGS) $(genAln)/water.c
 
 $(genBio)/kmerFun.$O: \
 	$(genBio)/kmerFun.c \
 	$(genBio)/kmerFun.h \
 	$(genBio)/kmerBit.h
 		$(CC) -o $(genBio)/kmerFun.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/kmerFun.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/kmerFun.c
 
 $(genBio)/gzSeqST.$O: \
 	$(genBio)/gzSeqST.c \
@@ -517,7 +545,40 @@ $(genBio)/gzSeqST.$O: \
 	$(genBio)/seqST.$O \
  	$(genLib)/inflate.$O
 		$(CC) -o $(genBio)/gzSeqST.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genBio)/gzSeqST.c
+			$(CFLAGS) $(coreCFLAGS) $(genBio)/gzSeqST.c
+
+$(genPng)/pngDraw.$O: \
+   $(genPng)/pngDraw.c \
+   $(genPng)/pngDraw.h \
+	$(genPng)/mkPng.$O \
+	$(genFont)/fontST.$O
+		$(CC) -o $(genPng)/pngDraw.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genPng)/pngDraw.c
+
+$(genPng)/mkPng.$O: \
+   $(genPng)/mkPng.c \
+   $(genPng)/mkPng.h \
+	$(genLib)/endin.$O \
+	$(genLib)/checkSum.$O \
+	$(genLib)/64bit.h
+		$(CC) -o $(genPng)/mkPng.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genPng)/mkPng.c
+
+$(genFont)/ibmSan9.$O: \
+   $(genFont)/ibmSan9.c \
+   $(genFont)/ibmSan9.h \
+	$(genFont)/fontST.$O
+		$(CC) -o $(genFont)/ibmSan9.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genFont)/ibmSan9.c
+
+$(genFont)/fontST.$O: \
+	$(genFont)/fontST.c \
+	$(genFont)/fontST.h \
+	$(genLib)/base10str.$O \
+	$(genLib)/ulCp.$O \
+	$(genLib)/64bit.h
+		$(CC) -o $(genFont)/fontST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genFont)/fontST.c
 
 $(genLib)/inflate.$O: \
 	$(genLib)/inflate.c \
@@ -527,27 +588,20 @@ $(genLib)/inflate.$O: \
 	$(genLib)/genMath.$O \
 	$(genLib)/endLine.h
 		$(CC) -o $(genLib)/inflate.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/inflate.c
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/inflate.c
 
 $(genLib)/checkSum.$O: \
 	$(genLib)/checkSum.c \
 	$(genLib)/checkSum.h \
 	$(genLib)/endin.$O
 	$(CC) -o $(genLib)/checkSum.$O \
-		$(usrCFLAGS) $(coreCFLAGS) $(genLib)/checkSum.c
+		$(CFLAGS) $(coreCFLAGS) $(genLib)/checkSum.c
 
 $(genLib)/endin.$O: \
 	$(genLib)/endin.c \
 	$(genLib)/endin.h
 		$(CC) -o $(genLib)/endin.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/endin.c
-
-$(genLib)/numToStr.$O: \
-	$(genLib)/numToStr.c \
-	$(genLib)/numToStr.h
-		$(CC) -o $(genLib)/numToStr.$O \
-			$(usrCFLAGS) $(coreCFLAGS) $(genLib)/numToStr.c
-
+			$(CFLAGS) $(coreCFLAGS) $(genLib)/endin.c
 
 install:
 	mv ftbRay $(PREFIX);

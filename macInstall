@@ -1,9 +1,5 @@
 #!/usr/bin/env sh
 
-#make -f mkfile.mac -C programs/ftbTclTkSrc;
-
-# VVV old install method VVV
-
 if [ -f "${HOME}/Desktop/freezeTB" ];
 then
    rm "${HOME}/Desktop/freezeTB";
@@ -23,10 +19,8 @@ cd "$(dirname "$0")"; # move to freezeTB directory
 #   o sec04:
 #     - tcltk check/install (looking for tk)
 #   o sec05:
-#     - R check/install
-#   o sec06:
 #     - minimap2 check/install
-#   o sec07:
+#   o sec06:
 #     - install freezeTB
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -109,19 +103,6 @@ fi; # check if need to install tcltk
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Sec05:
-#   - R check/install
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-libStr="$(R --version)";
-
-if [ "$libStr" = "" ];
-then # If: need to install R
-   printf "Installing R\n";
-   brew install R;
-fi; # If: need to install R
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec06:
 #   - minimap2 check/install
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -134,7 +115,7 @@ then # If: need to install minimap2
 fi; # If: need to install minimap2
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Sec07:
+# Sec06:
 #   - install freezeTB
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

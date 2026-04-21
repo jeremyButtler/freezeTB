@@ -51,6 +51,8 @@
 #   - variables to store values
 #***************************************************
 
+#tclRequire("Img") ; # for tcl 8.5
+
 # required input
 variable glob_fqIn "" ;
 ---variable glob_dirOut
@@ -82,35 +84,21 @@ variable rVer "" ; # holds R version
 variable mapPath "" ; # path to minimap2
 variable glob_minimapFoundBl 0 ; # if found minimap2
 variable glob_useMinimapBl 0 ;   # if using minimap2
-variable rPath "" ; # path to Rscript
 
 #***************************************************
 # Header Sec01 Sub02:
 #   - amr list
 #***************************************************
 
-# viridis default color pallete
-
-#--- currently magma from viridis is used instead
-set glob_noAmrCol "#440154" ;        # viridis purple
-set glob_noAmrTextCol "#FDE725" ;    # viridis yellow
-
-set glob_amrCol "#51C56AFF" ;        # viridis light green
-set glob_amrTextCol "#440154" ;      # viridis purple
-
-set glob_lowDepthCol "#21908" ;      # viridis yellow
-set glob_lowDepthTextCol "#FDE725" ; # viridis purple
----#
-
 # viridis magma color pallete
-set glob_noAmrCol "#000004" ;         # magma dark purple
+set glob_noAmrCol "#000004" ;         # magma black
 set glob_noAmrTextCol "#FDE725" ;     # magma yellow
 
-set glob_amrCol "#F1605D" ;          # maga pink
-set glob_amrTextCol "#000004" ;      # magma dark purple
+set glob_amrCol "#fc8961" ;          # maga pink/red
+set glob_amrTextCol "#000004" ;      # magma black
 
-set glob_lowDepthCol "#FDE725" ;     # magma yellow
-set glob_lowDepthTextCol "#000004" ; # magma dark purple
+set glob_lowDepthCol "#b73779" ;     # magma maroon
+set glob_lowDepthTextCol "#FDE725" ; # magma yellow
 
 # keep this list lower case
 ---set
@@ -248,9 +236,9 @@ set glob_amrGenes {
 # Header Sec02:
 #   - program paths
 #   o header sec02 sub01:
-#     - windows program detection
+#     - windows find paths and minimap2
 #   o header sec02 sub02:
-#     - unix program detection
+#     - unix find minimap2
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #***************************************************
@@ -260,8 +248,6 @@ set glob_amrGenes {
 #     - windows general setup 
 #   o header sec02 sub01 cat02:
 #     - windows detect minimap2
-#   o header sec02 sub01 cat03:
-#     - windows find Rscript
 #***************************************************
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -270,7 +256,6 @@ set glob_amrGenes {
 #+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 variable ::mapPath "" ; # minimap2 path
-variable ::rPath "" ;   # Rscript path
 
 if { [lindex $tcl_platform(os) 0] eq "Windows" } {
    set programFiles $::env(PROGRAMFILES) ;
@@ -335,73 +320,14 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
       } ; # see if minimap2 is in global install
    } ; # find minimap2 path
 
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-   # Header Sec02 Sub01 Cat03:
-   #   - windows find Rscript
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-
-   # Not best method, but works for default installs
-   
-   # R is always in program files
-   set ::rPath [file join $programFiles "R"] ;
-	set errSC 1 ;  # assume R not found
-
-   ---set
-      rDirList
-      [glob -type d -nocomplain -directory $::rPath * ]
-   ---;
-
-   set lenSI [llength $rDirList] ;
-
-   for {set siDir 0} {$siDir < $lenSI} {incr siDir} {
-      set ::rPath [ lindex $rDirList $siDir ] ;
-      set ::rPath [ file join $::rPath "bin" ] ;
-      set ::rPath [ file join $::rPath "Rscript.exe" ] ;
-      set errSC [catch {exec $::rPath --version} ::rVer ] ;
-   
-      if { $errSC eq 0 } {
-         break ; # found at least one Rscript
-      } ; # If: found path to Rscript
-   } ; # Loop: check if have a Rscript exe
-   
-   if { $errSC eq 0 } {
-      # If: found Rscript
-   } else {
-      set ::rPath "Rscript.exe" ;
-      ---set
-         errSC
-   		[catch {exec $::rPath --version} ::rVer ]
-   	---; # see if Rscript is in path (unlikely)
-   
-   	if { $errSC ne 0 } {
-        set ::glob_mkGraphBl 0 ;
-        set ::rPath "" ;
-   
-        ---tk_messageBox
-           -message "Unable to run Rscript"
-           -title "ERROR"
-        ---;
-      } ; # If: no R-script
-   } ; # If: unable to find Rscript
-
 #***************************************************
 # Header Sec02 Sub02:
-#   - unix program detection
-#   o header sec02 sub02 cat01:
-#     - unix; find minimap2 version (check if have)
-#   o header sec02 sub02 cat02:
-#     - unix find Rscript
+#   - unix find minimap2
 #***************************************************
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++
-# Header Sec02 Sub02 Cat01:
-#   - unix; find minimap2 version (check if have)
-#+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 } else {
    set glob_minimapFoundBl 1 ;
    set ::mapPath "minimap2" ;
-   set ::rPath "Rscript" ; # linux should be in path
 
    ---set
       status
@@ -464,27 +390,6 @@ if { [lindex $tcl_platform(os) 0] eq "Windows" } {
          } ; # If: failed to find minimap2 locally
       } ; # If: minimap2 could not be found
    } ; # If: minimiap2 not in path or on system
-
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-   # Header Sec02 Sub02 Cat02:
-   #   - unix find Rscript
-   #++++++++++++++++++++++++++++++++++++++++++++++++
-
-   ---set
-      status
-      [catch {exec $::rPath --version} ::rVer]
-   ---;
-   
-   if { $status eq 0 } {
-   } else {
-      set ::glob_mkGraphBl 0 ;
-      set ::rPath "" ;
-   
-      ---tk_messageBox
-         -message "Unable to run Rscript"
-         -title "ERROR"
-      ---;
-   }
 } ;    # check if windows or linux
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -602,10 +507,6 @@ variable glob_miruDb [getPath "miruTbl.tsv"] ;
 
 variable glob_spacer [getPath "spoligo-spacers.fa"] ;
 variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
-
-variable glob_meanDepthGraph [getPath "meanDepthGraph.r"] ;
-variable glob_coverGraph [getPath "coverGraph.r"] ;
-variable glob_depthGraph [getPath "depthGraph.r"] ;
 
 #***************************************************
 # Header Sec03 Sub03:
@@ -1619,9 +1520,9 @@ proc setFreezeTBStatus {} {
       set ::glob_outCur $prefix ;
 
       # make the graphs for freezeTB reall quick
-      meanDepthGraph $::glob_outCur 1 ;
-      coverageGraph $::glob_outCur 1 ;
-      depthGraph $::glob_outCur 1 ;
+      meanDepthGraph $::glob_outCur ;
+      coverageGraph $::glob_outCur ;
+      depthGraph $::glob_outCur ;
 
       #+++++++++++++++++++++++++++++++++++++++++++++
       # Gui02 Sec06 Sub02 Cat12:
@@ -4266,73 +4167,25 @@ proc readHsp65 {prefixStr} {
 #   - function; mean read depth graph display
 #**************************************************
 
-proc meanDepthGraph {prefixStr buildGraphBl } {
-   set graphStr "\"" ;
-   append graphStr $::glob_meanDepthGraph "\"" ;
-
-   set tmpPathStr $prefixStr ;
-   append tmpPathStr "-mean-depth.png" ;
+proc meanDepthGraph {prefixStr} {
+   set meanDepthPathStr $prefixStr ;
+   append meanDepthPathStr "-mean-depth.png" ;
 
    # delete old graphs
    if { [image inuse $::glob_meanDepthImg] } {
       image delete $::glob_meanDepthImg ;
    } ; # If: image exists
 
-   # check if can make graphs and if need to make one
-   if {$::glob_mkGraphBl ne 0 } {
-      if { $buildGraphBl ne 1 } {
-         set fileBl [file exists $tmpPathStr] ;
-      } else {
-         set fileBl 0 ;
-      }
-
-      if { $fileBl eq 1 } {
+      if { [file exists $meanDepthPathStr] eq 1 } {
          ---set
            ::glob_meanDepthImg
-           [image create photo -file $tmpPathStr]
+           [image create photo -file $meanDepthPathStr]
          ---;
 
          ---.main.out.meanDepth.graph
             configure -image $::glob_meanDepthImg
          ---;
-
-      } else {
-         # on windows this fails, for some odd reason
-         #   windows does not like calling Rscript
-
-         # using quotes incase of spaces
-         set quoteStr "\"" ;
-         append quoteStr $prefixStr "\"" ;
-         set prefixStr $quoteStr ;
-
-         ---set status
-            [catch
-               {eval exec
-                  $::rPath " " $graphStr " " $prefixStr
-               }
-            ]
-         ---; # run R to build graphs
-
-         if { $status ne 0 } {
-            ---tk_messageBox
-              -message "failed to build mean depth graph"
-              -title "ERROR"
-            ---;
-
-            # turn off graphing
-            .main.out.set.graph.check toggle ;
-         } else {
-            ---set
-              ::glob_meanDepthImg
-              [image create photo -file $tmpPathStr ]
-            ---;
-
-            ---.main.out.meanDepth.graph
-               configure -image $::glob_meanDepthImg
-            ---;
-         } ; # Else: add image
-      } ; # check if need to build graphs
-    } ; # check if users wants graphs displayed
+      }
 } ; # meanDepthGraph
 
 #**************************************************
@@ -4340,17 +4193,7 @@ proc meanDepthGraph {prefixStr buildGraphBl } {
 #   - function; coverage graph dispaly
 #**************************************************
 
-proc coverageGraph {prefixStr buildGraphBl} {
-   # deal with spaces
-   set dbStr "\"" ;
-   append dbStr $::glob_amrDb "\"" ;
-
-   set graphStr "\"" ;
-   append graphStr $::glob_coverGraph "\"" ;
-
-   set coordsTsv "\"" ;
-   append coordsTsv $::glob_coordsTsv "\"" ;
-
+proc coverageGraph {prefixStr} {
    set coverPathStr $prefixStr ;
    append coverPathStr "-coverage.png" ;
 
@@ -4360,58 +4203,16 @@ proc coverageGraph {prefixStr buildGraphBl} {
    } ; # If: image exists
 
 
-   if {$::glob_mkGraphBl ne 0 } {
-      if { $buildGraphBl ne 1 } {
-         set fileBl [file exists $coverPathStr] ;
-      } else {
-         set fileBl 0 ;
-      } ;
+   if { [file exists $coverPathStr] eq 1 } {
+      ---set
+        ::glob_coverImg
+        [image create photo -file $coverPathStr]
+      ---;
 
-      if { $fileBl eq 1 } {
-         ---set
-           ::glob_coverImg
-           [image create photo -file $coverPathStr]
-         ---;
-
-         ---.main.out.cover.graph
-            configure -image $::glob_coverImg
-         ---;
-      } else {
-         # using quotes incase of spaces
-         set quoteStr "\"" ;
-         append quoteStr $prefixStr "\"" ;
-         set prefixStr $quoteStr ;
-
-         ---set status
-            [catch
-               {eval exec
-                  $::rPath " " $graphStr
-                  " " $prefixStr
-                  " " $coordsTsv
-                  " " $dbStr
-               }
-            ]
-         ---; # run R to build graphs
-         if { $status ne 0 } {
-            ---tk_messageBox
-              -message "failed to build cover graph"
-              -title "ERROR"
-            ---;
-
-            # turn off graphing
-            .main.out.set.graph.check toggle ;
-         } else {
-            ---set
-              ::glob_coverImg
-              [ image create photo -file $coverPathStr ]
-            ---;
-
-            ---.main.out.cover.graph
-               configure -image $::glob_coverImg
-            ---;
-         } ; # Else: add image
-      } ; # check if need to build graphs
-    } ; # check if users wants graphs displayed
+      ---.main.out.cover.graph
+         configure -image $::glob_coverImg
+      ---;
+   }
 } ; # coverageGraph
 
 #**************************************************
@@ -4419,14 +4220,7 @@ proc coverageGraph {prefixStr buildGraphBl} {
 #   - function; read depth graph
 #**************************************************
 
-proc depthGraph {prefixStr buildGraphBl} {
-   # deal with spaces
-   set dbStr "\"" ;
-   append dbStr $::glob_amrDb "\"" ;
-
-   set graphStr "\"" ;
-   append graphStr $::glob_depthGraph "\"" ;
-
+proc depthGraph {prefixStr} {
    set depthPathStr $prefixStr ;
    append depthPathStr "-depth.png" ;
 
@@ -4435,58 +4229,16 @@ proc depthGraph {prefixStr buildGraphBl} {
       image delete $::glob_depthImg ;
    } ; # If: image exists
 
+   if { [file exists $depthPathStr] eq 1 } {
+      ---set
+        ::glob_depthImg
+        [image create photo -file $depthPathStr]
+      ---;
 
-   if {$::glob_mkGraphBl ne 0 } {
-      if { $buildGraphBl ne 1 } {
-         set fileBl [file exists $depthPathStr] ;
-      } else {
-         set fileBl 0 ;
-      } ;
-
-      if { $fileBl eq 1 } {
-         ---set
-           ::glob_depthImg
-           [image create photo -file $depthPathStr]
-         ---;
-
-         ---.main.out.depth.graph
-            configure -image $::glob_depthImg
-         ---;
-      } else {
-         # using quotes incase of spaces
-         set quoteStr "\"" ;
-         append quoteStr $prefixStr "\"" ;
-         set prefixStr $quoteStr ;
-
-         ---set status
-            [catch
-               {eval exec
-                  $::rPath " " $graphStr
-                  " " $prefixStr
-                  " " $dbStr
-               }
-            ]
-         ---; # run R to build graphs
-         if { $status ne 0 } {
-            ---tk_messageBox
-              -message "failed to build read depth graph"
-              -title "ERROR"
-            ---;
-
-            # turn off graphing
-            .main.out.set.graph.check toggle ;
-         } else {
-            ---set
-              ::glob_depthImg
-              [ image create photo -file $depthPathStr ]
-            ---;
-
-            ---.main.out.depth.graph
-               configure -image $::glob_depthImg
-            ---;
-         } ; # Else: add image
-      } ; # check if need to build graphs
-    } ; # check if users wants graphs displayed
+      ---.main.out.depth.graph
+         configure -image $::glob_depthImg
+      ---;
+   }
 } ; # depthGraph
 
 #**************************************************
@@ -5048,9 +4800,9 @@ pack .main.out.set.run -anchor w -side top ;
       #conAmrRep $::glob_outCur ;
 
       readAmrRep $::glob_outCur ;
-      meanDepthGraph $::glob_outCur 0 ;
-      coverageGraph $::glob_outCur 0 ;
-      depthGraph $::glob_outCur 0 ;
+      meanDepthGraph $::glob_outCur ;
+      coverageGraph $::glob_outCur ;
+      depthGraph $::glob_outCur ;
 
       #conSpol $::glob_outCur ;
 
@@ -5659,21 +5411,21 @@ tk::label .main.out.report.amrLegend.spaceTwo ;
    .main.out.report.amrLegend.noAmrLab
    -background $::glob_noAmrCol
    -fg $::glob_noAmrTextCol
-   -text "No drug resistance"
+   -text "No Drug Resistance"
 ---;
 
 ---tk::label
    .main.out.report.amrLegend.lowDepthLab
    -background $::glob_lowDepthCol
    -fg $::glob_lowDepthTextCol
-   -text "No resistance, but missing genes"
+   -text "Low Read Depth"
 ---;
 
 ---tk::label
    .main.out.report.amrLegend.amrLab
    -background $::glob_amrCol
    -fg $::glob_amrTextCol
-   -text "Drug resistance"
+   -text "Drug Resistance"
 ---;
 
 ---pack 
@@ -5922,3 +5674,162 @@ pack .main.out.amr.read.tbl -anchor w -side top ;
    -anchor nw
    -side left
 ---;
+
+#=========================================================
+# License:
+# 
+# Creative Commons Legal Code
+# 
+# CC0 1.0 Universal
+# 
+#     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND
+#     DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF
+#     THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
+#     RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+#     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS
+#     MAKES NO WARRANTIES REGARDING THE USE OF THIS
+#     DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
+#     HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES
+#     RESULTING FROM THE USE OF THIS DOCUMENT OR THE
+#     INFORMATION OR WORKS PROVIDED HEREUNDER.
+# 
+# Statement of Purpose
+# 
+# The laws of most jurisdictions throughout the world
+# automatically confer exclusive Copyright and Related
+# Rights (defined below) upon the creator and subsequent
+# owner(s) (each and all, an "owner") of an original work
+# of authorship and/or a database (each, a "Work").
+# 
+# Certain owners wish to permanently relinquish those
+# rights to a Work for the purpose of contributing to a
+# commons of creative, cultural and scientific works
+# ("Commons") that the public can reliably and without
+# fear of later claims of infringement build upon, modify,
+# incorporate in other works, reuse and redistribute as
+# freely as possible in any form whatsoever and for any
+# purposes, including without limitation commercial
+# purposes. These owners may contribute to the Commons to
+# promote the ideal of a free culture and the further
+# production of creative, cultural and scientific works,
+# or to gain reputation or greater distribution for their
+# Work in part through the use and efforts of others.
+# 
+# For these and/or other purposes and motivations, and
+# without any expectation of additional consideration or
+# compensation, the person associating CC0 with a Work
+# (the "Affirmer"), to the extent that he or she is an
+# owner of Copyright and Related Rights in the Work,
+# voluntarily elects to apply CC0 to the Work and publicly
+# distribute the Work under its terms, with knowledge of
+# his or her Copyright and Related Rights in the Work and
+# the meaning and intended legal effect of CC0 on those
+# rights.
+# 
+# 1. Copyright and Related Rights. A Work made available
+#    under CC0 may be protected by copyright and related
+#    or neighboring rights ("Copyright and Related
+#    Rights"). Copyright and Related Rights include, but
+#    are not limited to, the following:
+# 
+#   i. the right to reproduce, adapt, distribute, perform,
+#      display, communicate, and translate a Work;
+#  ii. moral rights retained by the original author(s)
+#      and/or performer(s);
+# iii. publicity and privacy rights pertaining to a
+#      person's image or likeness depicted in a Work;
+#  iv. rights protecting against unfair competition in
+#      regards to a Work, subject to the limitations in
+#      paragraph 4(a), below;
+#   v. rights protecting the extraction, dissemination,
+#      use and reuse of data in a Work;
+#  vi. database rights (such as those arising under
+#      Directive 96/9/EC of the European Parliament and of
+#      the Council of 11 March 1996 on the legal
+#      protection of databases, and under any national
+#      implementation thereof, including any amended or
+#      successor version of such directive); and
+# vii. other similar, equivalent or corresponding rights
+#      throughout the world based on applicable law or
+#      treaty, and any national implementations thereof.
+# 
+# 2. Waiver. To the greatest extent permitted by, but not
+#    in contravention of, applicable law, Affirmer hereby
+#    overtly, fully, permanently, irrevocably and
+#    unconditionally waives, abandons, and surrenders all
+#    of Affirmer's Copyright and Related Rights and
+#    associated claims and causes of action, whether now
+#    known or unknown (including existing as well as
+#    future claims and causes of action), in the Work (i)
+#    in all territories worldwide, (ii) for the maximum
+#    duration provided by applicable law or treaty
+#    (including future time extensions), (iii) in any
+#    current or future medium and for any number of
+#    copies, and (iv) for any purpose whatsoever,
+#    including without limitation commercial, advertising
+#    or promotional purposes (the "Waiver"). Affirmer
+#    makes the Waiver for the benefit of each member of
+#    the public at large and to the detriment of
+#    Affirmer's heirs and successors, fully intending that
+#    such Waiver shall not be subject to revocation,
+#    rescission, cancellation, termination, or any other
+#    legal or equitable action to disrupt the quiet
+#    enjoyment of the Work by the public as contemplated
+#    by Affirmer's express Statement of Purpose.
+# 
+# 3. Public License Fallback. Should any part of the
+#    Waiver for any reason be judged legally invalid or
+#    ineffective under applicable law, then the Waiver
+#    shall be preserved to the maximum extent permitted
+#    taking into account Affirmer's express Statement of
+#    Purpose. In addition, to the extent the Waiver is so
+#    judged Affirmer hereby grants to each affected person
+#    a royalty-free, non transferable, non sublicensable,
+#    non exclusive, irrevocable and unconditional license
+#    to exercise Affirmer's Copyright and Related Rights
+#    in the Work (i) in all territories worldwide, (ii)
+#    for the maximum duration provided by applicable law
+#    or treaty (including future time extensions), (iii)
+#    in any current or future medium and for any number of
+#    copies, and (iv) for any purpose whatsoever,
+#    including without limitation commercial, advertising
+#    or promotional purposes (the "License"). The License
+#    shall be deemed effective as of the date CC0 was
+#    applied by Affirmer to the Work. Should any part of
+#    the License for any reason be judged legally invalid
+#    or ineffective under applicable law, such partial
+#    invalidity or ineffectiveness shall not invalidate
+#    the remainder of the License, and in such case
+#    Affirmer hereby affirms that he or she will not (i)
+#    exercise any of his or her remaining Copyright and
+#    Related Rights in the Work or (ii) assert any
+#    associated claims and causes of action with respect
+#    to the Work, in either case contrary to Affirmer's
+#    express Statement of Purpose.
+# 
+# 4. Limitations and Disclaimers.
+# 
+#  a. No trademark or patent rights held by Affirmer are
+#     waived, abandoned, surrendered, licensed or
+#     otherwise affected by this document.
+#  b. Affirmer offers the Work as-is and makes no
+#     representations or warranties of any kind concerning
+#     the Work, express, implied, statutory or otherwise,
+#     including without limitation warranties of title,
+#     merchantability, fitness for a particular purpose,
+#     non infringement, or the absence of latent or other
+#     defects, accuracy, or the present or absence of
+#     errors, whether or not discoverable, all to the
+#     greatest extent permissible under applicable law.
+#  c. Affirmer disclaims responsibility for clearing
+#     rights of other persons that may apply to the Work
+#     or any use thereof, including without limitation any
+#     person's Copyright and Related Rights in the Work.
+#     Further, Affirmer disclaims responsibility for
+#     obtaining any necessary consents, permissions or
+#     other rights required for any use of the Work.
+#  d. Affirmer understands and acknowledges that Creative
+#     Commons is not a party to this document and has no
+#     duty or obligation with respect to this CC0 or use
+#     of the Work.
+#=========================================================

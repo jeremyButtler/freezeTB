@@ -9,24 +9,32 @@ O=o.bug
 
 genFreezeTB=../genFreezeTB
 genLib=../genLib
+genFont=../genFont
+genPng=../genPng
 genBio=../genBio
+genAmr=../genAmr
 genAln=../genAln
 genClust=../genClust
 genGeneoType=../genGeneoType
 
 objFiles= \
    $(genFreezeTB)/freezeTB.$O \
+   $(genFreezeTB)/ftbGraphs.$O \
    $(genFreezeTB)/freezeTBPaths.$O \
    $(genLib)/ulCp.$O \
-   $(genFreezeTB)/checkAmr.$O \
-   $(genFreezeTB)/amrST.$O \
-   $(genFreezeTB)/drugAry.$O \
+   $(genAmr)/checkAmr.$O \
+   $(genAmr)/amrST.$O \
+   $(genAmr)/drugAry.$O \
    $(genLib)/fileFun.$O \
    $(genLib)/charCp.$O \
    $(genBio)/samEntry.$O \
    $(genLib)/strAry.$O \
    $(genLib)/numToStr.$O \
    $(genLib)/base10str.$O \
+   $(genFont)/fontST.$O \
+   $(genFont)/ibmSan9.$O \
+   $(genPng)/mkPng.$O \
+   $(genPng)/pngDraw.$O \
    $(genBio)/codonFun.$O \
    $(genLib)/genMath.$O \
    $(genFreezeTB)/miruTbl.$O \
@@ -74,10 +82,11 @@ mainFreezeTB.$O: \
 $(genFreezeTB)/freezeTB.$O: \
 	$(genFreezeTB)/freezeTB.c \
 	$(genFreezeTB)/freezeTB.h \
-	$(genFreezeTB)/checkAmr.$O \
+	$(genFreezeTB)/ftbGraphs.$O \
 	$(genFreezeTB)/miruTbl.$O \
 	$(genFreezeTB)/spolFind.$O \
 	$(genFreezeTB)/freezeTBPaths.$O \
+	$(genAmr)/checkAmr.$O \
    $(genGeneoType)/linST.$O \
    $(genGeneoType)/getLin.$O \
 	$(genAln)/mapRead.$O \
@@ -140,33 +149,46 @@ $(genLib)/ulCp.$O: \
 		$(CC) -o $(genLib)/ulCp.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genLib)/ulCp.c
 
-$(genFreezeTB)/checkAmr.$O: \
-	$(genFreezeTB)/checkAmr.c \
-	$(genFreezeTB)/checkAmr.h \
-	$(genFreezeTB)/amrST.$O \
+$(genAmr)/checkAmr.$O: \
+	$(genAmr)/checkAmr.c \
+	$(genAmr)/checkAmr.h \
+	$(genAmr)/amrST.$O \
 	$(genBio)/samEntry.$O \
 	$(genBio)/codonFun.$O \
 	$(genLib)/genMath.$O
-		$(CC) -o $(genFreezeTB)/checkAmr.$O \
+		$(CC) -o $(genAmr)/checkAmr.$O \
 			$(CFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)/checkAmr.c
+			$(genAmr)/checkAmr.c
 
-$(genFreezeTB)/amrST.$O: \
-	$(genFreezeTB)/amrST.c \
-	$(genFreezeTB)/amrST.h \
-	$(genFreezeTB)/drugAry.$O \
+$(genAmr)/amrST.$O: \
+	$(genAmr)/amrST.c \
+	$(genAmr)/amrST.h \
+	$(genAmr)/drugAry.$O \
 	$(genLib)/fileFun.$O \
 	$(genLib)/charCp.$O \
 	$(genLib)/endLine.h
-		$(CC) -o $(genFreezeTB)/amrST.$O \
+		$(CC) -o $(genAmr)/amrST.$O \
 			$(CFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)/amrST.c
+			$(genAmr)/amrST.c
 
-$(genFreezeTB)/drugAry.$O: \
-	$(genFreezeTB)/drugAry.c $(genFreezeTB)/drugAry.h
-		$(CC) -o $(genFreezeTB)/drugAry.$O \
+
+$(genAmr)/drugAry.$O: \
+	$(genAmr)/drugAry.c $(genAmr)/drugAry.h
+		$(CC) -o $(genAmr)/drugAry.$O \
 			$(CFLAGS) $(coreCFLAGS) \
-			$(genFreezeTB)/drugAry.c
+			$(genAmr)/drugAry.c
+
+$(genFreezeTB)/ftbGraphs.$O: \
+	$(genFreezeTB)/ftbGraphs.c \
+	$(genFreezeTB)/ftbGraphs.h \
+	$(genFont)/ibmSan9.$O \
+	$(genPng)/pngDraw.$O \
+	$(genBio)/geneCoord.$O \
+	$(genLib)/genMath.$O
+		$(CC) -o $(genFreezeTB)/ftbGraphs.$O \
+			$(CFLAGS) $(coreCFLAGS) \
+			$(genFreezeTB)/ftbGraphs.c
+
 
 $(genLib)/fileFun.$O: \
 	$(genLib)/fileFun.c \
@@ -462,6 +484,39 @@ $(genBio)/gzSeqST.$O: \
  	$(genLib)/inflate.$O
 		$(CC) -o $(genBio)/gzSeqST.$O \
 			$(CFLAGS) $(coreCFLAGS) $(genBio)/gzSeqST.c
+
+$(genPng)/pngDraw.$O: \
+   $(genPng)/pngDraw.c \
+   $(genPng)/pngDraw.h \
+	$(genPng)/mkPng.$O \
+	$(genFont)/fontST.$O
+		$(CC) -o $(genPng)/pngDraw.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genPng)/pngDraw.c
+
+$(genPng)/mkPng.$O: \
+   $(genPng)/mkPng.c \
+   $(genPng)/mkPng.h \
+	$(genLib)/endin.$O \
+	$(genLib)/checkSum.$O \
+	$(genLib)/64bit.h
+		$(CC) -o $(genPng)/mkPng.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genPng)/mkPng.c
+
+$(genFont)/ibmSan9.$O: \
+   $(genFont)/ibmSan9.c \
+   $(genFont)/ibmSan9.h \
+	$(genFont)/fontST.$O
+		$(CC) -o $(genFont)/ibmSan9.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genFont)/ibmSan9.c
+
+$(genFont)/fontST.$O: \
+	$(genFont)/fontST.c \
+	$(genFont)/fontST.h \
+	$(genLib)/base10str.$O \
+	$(genLib)/ulCp.$O \
+	$(genLib)/64bit.h
+		$(CC) -o $(genFont)/fontST.$O \
+			$(CFLAGS) $(coreCFLAGS) $(genFont)/fontST.c
 
 $(genLib)/inflate.$O: \
 	$(genLib)/inflate.c \

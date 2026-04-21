@@ -115,13 +115,25 @@ freezeTB includes databases from other repositories and
   - Under SIL Open Font License Version 1.1
   - [https://www.fontspace.com/search?q=IBM%20Plex%20Mono](
      https://www.fontspace.com/search?q=IBM%20Plex%20Mono)
+- A slightly modified version of the IBM San variable
+  width font is used for graphing
+  - The initial conversion was with the co-pilot llm. I
+    did some minor polishing by hand.
+- minimap2 (pre-compiled)
+  - [https://github.com/lh3/minimap2](
+    (https://github.com/lh3/minimap2)
+  - MIT license
 
-All code that is unique to freezeTB is under a dual
-  license. The primary license is Unlicense. However, not
-  all companies/countries like or will even respect the
-  Unlicense. So, in those cases or cases were the
-  Unlicense is not wanted/allowed, the freezeTB unique
-  code is under the MIT license.
+- Co-pilot was used to make the dark and light mode
+  detection step for ftbRay. I am not sure on the
+  licensing issues on these files so I left the license
+  out
+  - files: darLight.m, darkLight.c, and darkLight.h
+  - the AI code only effects Windows and Mac an can be
+    compiled out with the `-DNO_AI` flag
+
+All code that is unique to freezeTB is under CC0 license.
+  This should be close to public domain.
 
 # Thanks
 
@@ -269,7 +281,7 @@ Install the dependiences listed in
 
 Once you have installed the dependencies:
 
-#### global install:
+### global install:
 
 ```
 git clone https://github.com/jeremybuttler/freezeTB ~/Downloads/freezeTB;
@@ -312,10 +324,9 @@ For Linux I am assuming you are using a Debian based
   on Ubuntu (some linking issue). For other distros or
   Unix OS's, make sure you have the packages.
 
-1. Install R: `sudo apt-get install r-base;`
-2. Install: tcltk:`sudo apt-get install tcl-dev tk-dev`
-3. You may need to install `gcc` and `make`
-4. I recommend minimap2: `sudo apt-get install minimap2;`
+1. Install: tcltk:`sudo apt-get install tcl-dev tk-dev`
+2. You may need to install `gcc` and `make`
+3. I recommend minimap2: `sudo apt-get install minimap2;`
    - Otherwise freezeTB is slow
 
 ```
@@ -385,9 +396,7 @@ The easy way is to install the pre-compiled raylib
 
 ### Hard way
 
-The harder GUI is the TclTk GUI. I have had problems with
-  Rscript not working. This means that you will not get
-  the graphs on windows.
+The harder GUI is the TclTk GUI.
 
 1. You will need to install Magic splat (TclTk for
    windows)
@@ -438,6 +447,13 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-04-20:
+  - added in a general png library to have the freezeTB
+    command line program to make graphs
+    - we no longer use R to build graphs
+      - the old graphing scripts are in the scripts folder
+    - file size is larger due to no compression, but all
+      three graphs are less then 1Mb in size
 - 2026-03-30:
   - added a read depth graph (not mean) to the tclTk GUI
 - 2026-03-18:

@@ -156,3 +156,132 @@ numBytesSL =
 if(numBytesSL)
    /*deal with memory errors*/
 ```
+
+## file indexing
+
+You can index each line in the file using the
+  `lineIndex_fileFun`. After the index step you can
+  extract a line at a index using the
+  `getLineByIndex_fileFun` function.
+
+To index each line in the file use `lineIndex_fileFun`.
+  This function will return a signed long array with
+  each index. The array will have the number of lines + 1
+  elements, with the last element being one byte after
+  the last character in the file (the null).
+
+- Input:
+  1. FILE pionter with the file to index
+  2. signed long pointer to get the number of lines
+  3. signed long pointer to get the number of bytes
+     (including `\n` and `\r`) in the longest line
+- Output:
+  - Modifies:
+    - input 2 to have the number of lines in the file
+      - for memory errors; input 2 will be set to -1
+    - input 3 to get teh maximum line length
+  - Returns:
+    - signed long array with input 2 + 1 items
+      - each item is the index of a line, with the very
+        last item has the null byte
+
+After indexing the file you can get a line by index by
+  using the `getLineByIndex_fileFun` function. The input
+  buffer must be the size of the longest line found by
+  the `lineIndex_fileFun` function.
+
+- Input:
+  1. c-string buffer to store the line in
+     - must be the same size as the modified input 3 from
+       `lineIndex_fileFun`
+  2. index of the line to extract
+  3. the index array (signed long array) returned from
+     `lineIndex_fileFun` (has index's for each lines)
+  4. number of lines in the file (input 2 from the
+     `lineIndex_fileFun` function)
+  5. FILE pointer to get lines from
+- Output:
+  - Modifies:
+    - adds the target line to input buffer (input 1)
+    - FILE pointer (intput 5) to be at end of the target
+      line
+  - Returns:
+    - length of line (>= 0) for no errors
+    - -1 if input 2 (index to extract) is out of bounds
+
+**a non-tested example**
+
+```
+#ifdef PLAN9
+   #include <u.h>
+   #include <libc.h>
+#else
+   #include <stdlib.h>
+#endif
+
+#include <stdio.h>
+#include "fileFun.h"
+
+int
+main(
+){
+   signed int retSI = 0;
+   signed char *buffHeapStr = 0;
+
+   signed long numLinesSL = 0;
+   signed long maxLineLenSL = 0;
+   signed long *indexHeapArySL = 0;
+
+   FILE *inFILE = fopen("test.txt", r);
+
+   if(! inFILE)
+      goto err_main;
+
+   indexHeapArySL =
+      lineIndex_fileFun(inFILE,&numLinesSL,&maxLineLenSL);
+   if(! indexHeapArySL)
+      goto err_main;
+
+   buffHeapStr =
+      malloc(maxLineLenSL * sizeof(signed char));
+   if(! buffHeapStr)
+      goto err_main;
+
+   if(
+      getLineByIndex_fileFun(
+         buffHeapStr,  /*gets the line*/
+         3,            /*get 3rd line; (header +2 lines)*/
+         indexHeapArySL, /*index for each line in file*/
+         numLinesSL,
+         inFILE
+      )
+   ) goto err_main; /*file does not have this many lines*/
+
+   printf(
+      "line 4 (3rd line after header): %s\n",
+      buffHeapStr
+   );
+
+   retSI = 0;
+   goto ret_main;
+
+   err_main:;
+      retSI = 1;
+      goto ret_main;
+
+   ret_main:;
+      if(indexHeapArySL)
+         free(indexHeapArySL);
+      indexHeapArySL = 0;
+
+      if(buffHeapStr)
+         free(buffHeapStr);
+      buffHeapStr = 0;
+
+      if(inFILE)
+         fclose(inFILE);
+      inFILE = 0;
+
+      return retSI;
+} /*main*/
+```

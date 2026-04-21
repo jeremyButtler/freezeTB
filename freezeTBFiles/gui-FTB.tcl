@@ -16,14 +16,12 @@ variable rVer "" ;
 variable mapPath "" ;
 variable glob_minimapFoundBl 0 ;
 variable glob_useMinimapBl 0 ;
-variable rPath "" ;
-
 set glob_noAmrCol "#000004" ;
 set glob_noAmrTextCol "#FDE725" ;
-set glob_amrCol "#F1605D" ;
+set glob_amrCol "#fc8961" ;
 set glob_amrTextCol "#000004" ;
-set glob_lowDepthCol "#FDE725" ;
-set glob_lowDepthTextCol "#000004" ;
+set glob_lowDepthCol "#b73779" ;
+set glob_lowDepthTextCol "#FDE725" ;
 set glob_amrList [list "amikacin" "bedaquiline" "capreomycin" "clofazimine" "delamanid" "ethambutol" "ethionamide" "fluoroquine" "isoniazid" "kanamycin" "levofloxacin" "linezolid" "moxifloxacin" "protonimid" "pyrazinamide" "rifampicin" "streptomycin" ] ;
 set glob_amrShort [list "Amk" "Bdq" "Cap" "Cfz" "Dlm" "Emb" "Eto" "Flq" "Inh" "Kan" "Lfx" "Lzd" "Mfx" "Pmd" "Pza" "Rif" "Stm" ] ;
 
@@ -47,7 +45,6 @@ set glob_amrGenes {
 {"Stm" "rrs" "gidB" "rpsL"}
 } ;
 variable ::mapPath "" ;
-variable ::rPath "" ;
 if { [lindex $tcl_platform(os) 0] eq "Windows" } {
 set programFiles $::env(PROGRAMFILES) ;
 set appData $::env(LOCALAPPDATA);
@@ -68,33 +65,9 @@ set glob_minimapFoundBl 0 ;
 } ;
 } ;
 } ; 
-set ::rPath [file join $programFiles "R"] ;
-set errSC 1 ;  
-set rDirList [glob -type d -nocomplain -directory $::rPath * ] ;
-set lenSI [llength $rDirList] ;
-for {set siDir 0} {$siDir < $lenSI} {incr siDir} {
-set ::rPath [ lindex $rDirList $siDir ] ;
-set ::rPath [ file join $::rPath "bin" ] ;
-set ::rPath [ file join $::rPath "Rscript.exe" ] ;
-set errSC [catch {exec $::rPath --version} ::rVer ] ;
-if { $errSC eq 0 } {
-break ; 
-} ;
-} ; 
-if { $errSC eq 0 } {
-} else {
-set ::rPath "Rscript.exe" ;
-set errSC [catch {exec $::rPath --version} ::rVer ] ;
-if { $errSC ne 0 } {
-set ::glob_mkGraphBl 0 ;
-set ::rPath "" ;
-tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
-} ;
-} ; 
 } else {
 set glob_minimapFoundBl 1 ;
 set ::mapPath "minimap2" ;
-set ::rPath "Rscript" ; 
 set status [catch {exec $mapPath --version} ::mapVer ]  ; 
 if { $status ne 0 } {
 set ::mapPath "./minimap2" ;
@@ -114,101 +87,8 @@ set glob_minimapFoundBl 0 ;
 } ;
 } ;
 } ; 
-set status [catch {exec $::rPath --version} ::rVer] ;
-if { $status eq 0 } {
-} else {
-set ::glob_mkGraphBl 0 ;
-set ::rPath "" ;
-tk_messageBox -message "Unable to run Rscript" -title "ERROR" ;
-}
 } ;
-proc getPath { fileStr } {
-set dbPath $fileStr ;
-if { [file exists $dbPath ] eq 0 } {
-set dbPath $::env(HOME) ;
-set dbPath [ file join $dbPath "Documents" ] ;
-set dbPath [ file join $dbPath "freezeTBFiles" ] ;
-set dbPath [ file join $dbPath $fileStr ] ;
-if { [file exists $dbPath ] eq 0 } {
-set osStr [lindex $::tcl_platform(os) 0] ;
-if { $osStr eq "Windows" } {
-set dbPath [file join $::env(PUBLIC) "Documents" "freezeTBFiles" $fileStr ] ;
-if { [file exists $dbPath ] eq 0 } {
-set dbPath [file join $::env(LOCALAPPDATA) "freezeTB" "freezeTBFiles" $fileStr ] ;
-if { [file exists $dbPath ] eq 0 } {
-set dbPath [file join $::env(PROGRAMFILES) "freezeTB" "freezeTBFiles" $fileStr ] ;
-if { [file exists $dbPath ] eq 0 } {
-set dbPath "NA" ;
-tk_messageBox -message [concat $fileStr "not found" ] -title "missing database" ;
-} ;
-} ;
-} ;
-} else {
-set dbPath "/usr/local/share/freezeTBFiles" ;
-set dbPath [file join $dbPath $fileStr] ;
-if { [file exists $dbPath ] eq 0 } {
-set dbPath "NA" ;
-tk_messageBox -message [concat $fileStr "not found"] -title "missing database" ;
-} ;
-} ;
-} ;
-} ; 
-return $dbPath ;
-} ;
-variable glob_refFa [getPath "NC000962.fa"] ;
-variable glob_coordsTsv [getPath "coords.tsv"] ;
-variable glob_amrDb [getPath "amrDb.tsv"] ;
-variable glob_maskCoords "" ;
-variable glob_miruDb [getPath "miruTbl.tsv"] ;
-variable glob_hsp65SimpleDb [getPath "hsp65-db-simple.tsv"] ; 
-variable glob_hsp65ComplexDb [getPath "hsp65-db-complex.tsv"] ; 
-variable glob_spacer [getPath "spoligo-spacers.fa"] ;
-variable glob_spolDb [getPath "spoligo-lineages.csv"] ;
-variable glob_meanDepthGraph [getPath "meanDepthGraph.r"] ;
-variable glob_coverGraph [getPath "coverGraph.r"] ;
-variable glob_depthGraph [getPath "depthGraph.r"] ;
-variable glob_mapq 15 ;
-variable glob_medQ 7 ;
-variable glob_meanQ 7 ;
-variable glob_minLen 50 ;
-variable glob_rmHomoBl 1 ;
-variable glob_rmHomo_homoSI 4 ;
-variable glob_rmHomo_indelSI 4 ; 
-variable glob_amrPercSup 0.1 ;
-variable glob_amrIndelSupF 0.25 ;
-variable glob_amrFrameSupF 0.25 ;
-variable glob_frameshift 1 ;
-variable glob_miruFudge 15 ;
-variable glob_spolSim 0.9 ;
-variable glob_drStart 3119037 ;
-variable glob_drEnd 3123624 ;
-variable glob_depth 10 ;
-variable glob_snpq 3 ;
-variable glob_insq 3 ;
-variable glob_basePerc 0.4 ;
-variable glob_insPerc 0.7 ;
-variable glob_delPerc 0.7 ;
-variable glob_minVarDepth 10 ;
-variable glob_baseVarPerc 0.1 ;
-variable glob_insVarPerc 0.2 ;
-variable glob_delVarPerc 0.2 ;
-variable glob_minClustDepth 10 ;
-variable glob_minClustPercDepth 0.01 ;
-variable glob_minClustSnpQ 3 ;
-variable glob_minClustIndelLen 10 ;
-variable glob_clustReadErr 0.043 ;
-variable glob_clustConErr 0.023 ;
-variable glob_clustErrRatio 50 ;
-variable glob_clustWinErrRatio 200 ;
-variable glob_clustWinLen 500 ;
-variable glob_lenWeight 2 ;
-variable glob_maxClustSim 0.99 ;
-variable glob_minClustOverlap 0.75 ;
-variable glob_maxClustMask 0.05 ;
-variable glob_numRebuilds 1 ;
-variable glob_outSnpSup 0.1 ;
-variable glob_outIndelSup 0.25 ;
-variable glob_mkGraphBl 1 ;
+
 set fq_types {
 { {fastq}    {.fastq}    }
 { {fastq}    {.fq}       }
@@ -225,48 +105,7 @@ set tsv_types {
 set csv_types {
 { {csv} {.csv} }
 } ;
-proc freezeTBProc { argsList } {
-if { [lindex $::tcl_platform(os) 0] eq "Windows" } {
-set programFiles $::env(PROGRAMFILES) ;
-set appData $::env(LOCALAPPDATA) ;
-set freezeTBPath "freezeTB.exe" ;
-set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
-if { $status eq 0 } {
-} else {
-set freezeTBPath [file join $appData "freezeTB" "freezeTB.exe" ] ;
-set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
-if { $status eq 0 } {
-} else {
-set freezeTBPath [file join $programFiles "freezeTB" "freezeTB.exe" ] ;
-set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
-if { $status eq 0 } {
-} else {
-tk_messageBox -message "no freezeTB.exe detected" -title "ERROR" ;
-return 1 ;
-} ;
-} ;
-} ;
-} else {
-set freezeTBPath "freezeTB" ;
-set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
-if { $status ne 0 } {
-set freezeTBPath "./freezeTB" ;
-set status [catch {exec $freezeTBPath --version} ::freezeTBVer ]  ;
-if { $status eq 0 } {
-tk_messageBox -message "freezeTB not found" -title "ERROR" ;
-return 1 ;
-} ;
-} ;
-} ; 
-set status [catch { eval exec \$freezeTBPath $argsList } result ] ; 
-if { [ string equal $::errorCode NONE ] } {
-return 0 ;
-} else {
-tk_messageBox -message $result -title "ERROR running freezeTB" ;
-return 1 ;
-} ; 
-return 0 ;
-} ;
+
 proc tcl_isInt_gui { value index min max } {
 if { $index < 0 } {
 set charIn [string index $value "end"] ;
@@ -571,7 +410,8 @@ set tbCmd [concat $tbCmd $::glob_fqIn] ;
 } ;
 puts $logFile [concat "freezeTB " $tbCmd ] ;
 setFreezeTBStatus ;
-if { [ freezeTBProc $tbCmd ] } {
+
+if { [catch {eval freezeTB $tbCmd } out] } {
 
 tk_messageBox -message "freezeTB error" -title "ERROR" ;
 puts $logFile "freezeTB error" ;
@@ -581,9 +421,9 @@ return false;
 close $logFile ;
 set ::glob_outPref $prefix ;
 set ::glob_outCur $prefix ;
-meanDepthGraph $::glob_outCur 1 ;
-coverageGraph $::glob_outCur 1 ;
-depthGraph $::glob_outCur 1 ;
+meanDepthGraph $::glob_outCur ;
+coverageGraph $::glob_outCur ;
+depthGraph $::glob_outCur ;
 wm title . "Required freezeTB" ;
 .main.reqIn.runexit.statuslab configure -text "" ;
 .main.menu.outBut invoke ;
@@ -1278,107 +1118,38 @@ for { set siDrug 3 } { $siDrug < $endSI } { incr siDrug }  { append outStr [ lin
 .main.out.report.hsp65.reslab configure -text $outStr ;
 return true ;
 } ;
-proc meanDepthGraph {prefixStr buildGraphBl } {
-set graphStr "\"" ;
-append graphStr $::glob_meanDepthGraph "\"" ;
-set tmpPathStr $prefixStr ;
-append tmpPathStr "-mean-depth.png" ;
+proc meanDepthGraph {prefixStr} {
+set meanDepthPathStr $prefixStr ;
+append meanDepthPathStr "-mean-depth.png" ;
 if { [image inuse $::glob_meanDepthImg] } {
 image delete $::glob_meanDepthImg ;
 } ; 
-if {$::glob_mkGraphBl ne 0 } {
-if { $buildGraphBl ne 1 } {
-set fileBl [file exists $tmpPathStr] ;
-} else {
-set fileBl 0 ;
+if { [file exists $meanDepthPathStr] eq 1 } {
+set ::glob_meanDepthImg [image create photo -file $meanDepthPathStr] ;
+.main.out.meanDepth.graph configure -image $::glob_meanDepthImg ;
 }
-if { $fileBl eq 1 } {
-set ::glob_meanDepthImg [image create photo -file $tmpPathStr] ;
-.main.out.meanDepth.graph configure -image $::glob_meanDepthImg ;
-} else {
-set quoteStr "\"" ;
-append quoteStr $prefixStr "\"" ;
-set prefixStr $quoteStr ;
-set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr } ] ;
-if { $status ne 0 } {
-tk_messageBox -message "failed to build mean depth graph" -title "ERROR" ;
-.main.out.set.graph.check toggle ;
-} else {
-set ::glob_meanDepthImg [image create photo -file $tmpPathStr ] ;
-.main.out.meanDepth.graph configure -image $::glob_meanDepthImg ;
 } ;
-} ;
-} ;
-} ;
-proc coverageGraph {prefixStr buildGraphBl} {
-set dbStr "\"" ;
-append dbStr $::glob_amrDb "\"" ;
-set graphStr "\"" ;
-append graphStr $::glob_coverGraph "\"" ;
-set coordsTsv "\"" ;
-append coordsTsv $::glob_coordsTsv "\"" ;
+proc coverageGraph {prefixStr} {
 set coverPathStr $prefixStr ;
 append coverPathStr "-coverage.png" ;
 if { [image inuse $::glob_coverImg] } {
 image delete $::glob_coverImg ;
 } ; 
-if {$::glob_mkGraphBl ne 0 } {
-if { $buildGraphBl ne 1 } {
-set fileBl [file exists $coverPathStr] ;
-} else {
-set fileBl 0 ;
-} ;
-if { $fileBl eq 1 } {
+if { [file exists $coverPathStr] eq 1 } {
 set ::glob_coverImg [image create photo -file $coverPathStr] ;
 .main.out.cover.graph configure -image $::glob_coverImg ;
-} else {
-set quoteStr "\"" ;
-append quoteStr $prefixStr "\"" ;
-set prefixStr $quoteStr ;
-set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr " " $coordsTsv " " $dbStr } ] ;
-if { $status ne 0 } {
-tk_messageBox -message "failed to build cover graph" -title "ERROR" ;
-.main.out.set.graph.check toggle ;
-} else {
-set ::glob_coverImg [ image create photo -file $coverPathStr ] ;
-.main.out.cover.graph configure -image $::glob_coverImg ;
+}
 } ;
-} ;
-} ;
-} ;
-proc depthGraph {prefixStr buildGraphBl} {
-set dbStr "\"" ;
-append dbStr $::glob_amrDb "\"" ;
-set graphStr "\"" ;
-append graphStr $::glob_depthGraph "\"" ;
+proc depthGraph {prefixStr} {
 set depthPathStr $prefixStr ;
 append depthPathStr "-depth.png" ;
 if { [image inuse $::glob_depthImg] } {
 image delete $::glob_depthImg ;
 } ; 
-if {$::glob_mkGraphBl ne 0 } {
-if { $buildGraphBl ne 1 } {
-set fileBl [file exists $depthPathStr] ;
-} else {
-set fileBl 0 ;
-} ;
-if { $fileBl eq 1 } {
+if { [file exists $depthPathStr] eq 1 } {
 set ::glob_depthImg [image create photo -file $depthPathStr] ;
 .main.out.depth.graph configure -image $::glob_depthImg ;
-} else {
-set quoteStr "\"" ;
-append quoteStr $prefixStr "\"" ;
-set prefixStr $quoteStr ;
-set status [catch {eval exec $::rPath " " $graphStr " " $prefixStr " " $dbStr } ] ;
-if { $status ne 0 } {
-tk_messageBox -message "failed to build read depth graph" -title "ERROR" ;
-.main.out.set.graph.check toggle ;
-} else {
-set ::glob_depthImg [ image create photo -file $depthPathStr ] ;
-.main.out.depth.graph configure -image $::glob_depthImg ;
-} ;
-} ;
-} ;
+}
 } ;
 proc readAmrTbl {prefixStr indentStr} {
 set fileStr $prefixStr ;
@@ -1572,9 +1343,9 @@ pack .main.out.set.run -anchor w -side top ;
 tk::button .main.out.set.run.but -text "get report" -command { 
 set ::glob_outCur $::glob_outPref ;
 readAmrRep $::glob_outCur ;
-meanDepthGraph $::glob_outCur 0 ;
-coverageGraph $::glob_outCur 0 ;
-depthGraph $::glob_outCur 0 ;
+meanDepthGraph $::glob_outCur ;
+coverageGraph $::glob_outCur ;
+depthGraph $::glob_outCur ;
 readSpol $::glob_outCur ;
 readHsp65 $::glob_outCur ;
 readAmrTbl $::glob_outCur "   " ;
@@ -1739,9 +1510,9 @@ pack .main.out.report.amrLegend -side top -anchor w ;
 tk::label .main.out.report.amrLegend.legLab -text "legend: " ;
 tk::label .main.out.report.amrLegend.spaceOne ;
 tk::label .main.out.report.amrLegend.spaceTwo ;
-tk::label .main.out.report.amrLegend.noAmrLab -background $::glob_noAmrCol -fg $::glob_noAmrTextCol -text "No drug resistance" ;
-tk::label .main.out.report.amrLegend.lowDepthLab -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol -text "No resistance, but missing genes" ;
-tk::label .main.out.report.amrLegend.amrLab -background $::glob_amrCol -fg $::glob_amrTextCol -text "Drug resistance" ;
+tk::label .main.out.report.amrLegend.noAmrLab -background $::glob_noAmrCol -fg $::glob_noAmrTextCol -text "No Drug Resistance" ;
+tk::label .main.out.report.amrLegend.lowDepthLab -background $::glob_lowDepthCol -fg $::glob_lowDepthTextCol -text "Low Read Depth" ;
+tk::label .main.out.report.amrLegend.amrLab -background $::glob_amrCol -fg $::glob_amrTextCol -text "Drug Resistance" ;
 pack .main.out.report.amrLegend.legLab .main.out.report.amrLegend.noAmrLab .main.out.report.amrLegend.spaceOne .main.out.report.amrLegend.lowDepthLab .main.out.report.amrLegend.spaceTwo .main.out.report.amrLegend.amrLab -anchor w -side left ;
 tk::frame .main.out.report.space3 ;
 pack .main.out.report.space3 -anchor w -side top ;
