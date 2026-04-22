@@ -851,7 +851,7 @@ depthGraph_ftbGraphs(
       (signed char *) "-depth.png"
    );
 
-   outFILE = fopen((char *) outStr, "w");
+   outFILE = fopen((char *) outStr, "wb");
    if(! outFILE)
       goto fileErr_fun01_sec06;
    print_st_mkPng(pngHeapST, outFILE);
@@ -1316,7 +1316,7 @@ meanDepthGraph_ftbGraphs(
       (signed char *) "-mean-depth.png"
    );
 
-   outFILE = fopen((char *) outStr, "w");
+   outFILE = fopen((char *) outStr, "wb");
    if(! outFILE)
       goto fileErr_fun02_sec07;
    print_st_mkPng(pngHeapST, outFILE);
@@ -2241,7 +2241,7 @@ coverGraph_ftbGraphs(
       (signed char *) "-coverage.png"
    );
 
-   outFILE = fopen((char *) outStr, "w");
+   outFILE = fopen((char *) outStr, "wb");
    if(! outFILE)
       goto fileErr_fun03_sec07;
    print_st_mkPng(pngHeapST, outFILE);
