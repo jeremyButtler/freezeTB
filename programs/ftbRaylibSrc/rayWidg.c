@@ -11968,17 +11968,16 @@ fileBrowserEvent_rayWidg(
       { /*Else: directory selected*/
          if(! fileSTPtr->fileListST.onSI)
          { /*If: going back one directory*/
-       printf("%s\n", fileSTPtr->pwdStr); /*DELETE*/
             tmpSI = endStr_ulCp(fileSTPtr->pwdStr) - 1;
-            while(tmpSI > 0)
+            while(tmpSI >= 0)
             { /*Loop: find start of the next directory*/
                if(
                      fileSTPtr->pwdStr[tmpSI]
                   == def_pathSep_rayWidg
-               ){ /*If: at unix root or last directory*/
+               ){ /*If: end of the unix system*/
                   fileSTPtr->pwdStr[tmpSI + 1] = 0;
                   break;
-               }  /*If: at unix root or last directory*/
+               }  /*If: end of the unix system*/
 
                else if(
                      fileSTPtr->pwdStr[tmpSI] == ':'
@@ -11999,18 +11998,21 @@ fileBrowserEvent_rayWidg(
                --tmpSI;
             } /*Loop: find start of the next directory*/
 
-            if(! tmpSI)
-               goto noEvent_fun130_sec04;
-               /*can  not go further back in history*/
+            if(tmpSI < 0)
+               ; /*moved past the file path*/
+
+            else if(! tmpSI)
+               ;
 
             else
-            { /*Else: windows root or not root*/
+            { /*Else: moved to a new directory*/
                tmpSC = fileSTPtr->pwdStr[tmpSI];
                fileSTPtr->pwdStr[tmpSI] = 0;
 
                if(
                   DirectoryExists(
-                     (char *)fileSTPtr->pwdStr)
+                     (char *)fileSTPtr->pwdStr
+                  )
                ) ;
 
                else
@@ -12018,8 +12020,7 @@ fileBrowserEvent_rayWidg(
                   fileSTPtr->pwdStr[tmpSI] = tmpSC;
                   goto noEvent_fun130_sec04;
                } /*Else: hit end of directory list*/
-            } /*Else: windows root or not root*/
-
+            } /*Else: moved to a new directory*/
          } /*If: going back one directory*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
@@ -12029,7 +12030,6 @@ fileBrowserEvent_rayWidg(
 
          else
          { /*Else: adding another directory*/
-
             tmpSI = fileSTPtr->fileListST.onSI;
 
             if(
