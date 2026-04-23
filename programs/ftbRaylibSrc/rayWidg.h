@@ -3792,7 +3792,9 @@ setFileLimit_files_rayWidg(
 |       * max size is 511 bytes
 |     o 0 for an error
 |       * for no files fileOnSIPtr is set to -1
-|       * for memory errors fileOnSIPtr is set to -2
+|       * for present working direcotry fileOnSIPtr is set
+|         to -2
+|       * for memory errors fileOnSIPtr is set to -3
 \-------------------------------------------------------*/
 signed char *
 getFile_files_rayWidg(

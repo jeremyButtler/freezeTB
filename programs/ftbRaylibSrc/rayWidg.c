@@ -10395,6 +10395,10 @@ void
 blank_files_rayWidg(
   struct files_rayWidg *fileSTPtr
 ){
+   #ifdef WINDOWS
+      signed int tmpSI = 0;
+   #endif
+
    if(! fileSTPtr)
       return;
 
@@ -10403,10 +10407,15 @@ blank_files_rayWidg(
    fileSTPtr->lastWidgSI = -1;/*no previous widgets*/
 
    #ifdef WINDOWS
+      tmpSI =
+         cpStr_ulCp(
+            fileSTPtr->pwdStr,
+            (signed char *) getenv("HOMEDRIVE")
+         ); /*get the drive letter for home*/
       cpStr_ulCp(
-         fileSTPtr->pwdStr,
+         &fileSTPtr->pwdStr[tmpSI],
          (signed char *) getenv("HOMEPATH")
-      );
+      ); /*get the users home directory*/
    #else
       cpStr_ulCp(
          fileSTPtr->pwdStr,
@@ -10533,7 +10542,9 @@ setFileLimit_files_rayWidg(
 |       * max size is 511 bytes
 |     o 0 for an error
 |       * for no files fileOnSIPtr is set to -1
-|       * for memory errors fileOnSIPtr is set to -2
+|       * for present working direcotry fileOnSIPtr is set
+|         to -2
+|       * for memory errors fileOnSIPtr is set to -3
 \-------------------------------------------------------*/
 signed char *
 getFile_files_rayWidg(
@@ -10542,13 +10553,36 @@ getFile_files_rayWidg(
                             */
    signed char specialBl,   /*1: ret non-select special*/
    struct files_rayWidg *fileSTPtr /*has selected files*/
-){
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun122 TOC:
+   '   - gets the next selected files from a files_rayWidg
+   '     struct
+   '   o fun122 sec01:
+   '     - variable declarations
+   '   o fun122 sec02:
+   '     - check if we have an item we can return
+   '   o fun122 sec03:
+   '     - if no files; check if return current directory
+   '   o fun122 sec04:
+   '     - return the result
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun122 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    signed char *retHeapStr = 0;
    signed int lenSI = 0;
 
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun122 Sec02:
+   ^   - check if we have an item we can return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    retHeapStr = malloc(512 * sizeof(signed char));
    if(! retHeapStr)
-      goto memErr_fun00e;
+      goto memErr_fun122_sec04;
 
    if(*fileOnSIPtr < 0)
       fileOnSIPtr = 0;
@@ -10579,29 +10613,91 @@ getFile_files_rayWidg(
          );
 
          ++*fileOnSIPtr;
-         goto retFile_fun00e;
+         goto retFile_fun122_sec04;
       }  /*If: found a selected file*/
 
       else
          ++*fileOnSIPtr;
    }  /*Loop: find next file*/
 
-   /*no files were found*/
-   *fileOnSIPtr = -1;
-   goto errClean_fun00e;
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun122 Sec03:
+   ^   - if no files; check if return current directory
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   memErr_fun00e:;
-      *fileOnSIPtr = -2;
-      goto errClean_fun00e;
+   if(! *fileOnSIPtr)
+   { /*If: no file found; check if can return last dir*/
+      for(
+         lenSI = 0;
+         lenSI < fileSTPtr->extListST.lenSI;
+         ++lenSI
+      ){ /*Loop: check if file matches any directories*/
+         if(! fileSTPtr->extListST.stateArySC[lenSI])
+            break; /*assume all extensions are valid*/
 
-   errClean_fun00e:;
+         else if(
+              fileSTPtr->extListST.stateArySC[lenSI]
+            & def_listSelect_rayWidg
+         ) break; /*if the file extension is selected*/
+
+         else
+           continue; /*file extension is not used*/
+
+         if(
+            fileSTPtr->extListST.textAryStr[
+               lenSI
+            ][0] == '+'
+         ) break;
+
+         else if(
+              fileSTPtr->extListST.textAryStr[
+                 lenSI
+              ][0]=='d'
+           && fileSTPtr->extListST.textAryStr[
+                 lenSI
+              ][1]=='d'
+           && fileSTPtr->extListST.textAryStr[
+                 lenSI
+              ][2]=='r'
+           && ! fileSTPtr->extListST.textAryStr[lenSI][3]
+         ) break; /*checking directories*/
+
+         else
+            continue;
+      }  /*Loop: check if file matches any directories*/
+
+      if(lenSI < fileSTPtr->extListST.lenSI)
+      { /*If: can return the directory in*/
+         lenSI = cpStr_ulCp(retHeapStr,fileSTPtr->pwdStr);
+         *fileOnSIPtr = -2;
+      } /*If: can return the directory in*/
+
+      else
+         *fileOnSIPtr = -1;
+   } /*If: no file found; check if can return last dir*/
+
+   else
+      *fileOnSIPtr = -1;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun122 Sec04:
+   ^   - return the result
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   goto errClean_fun122_sec04;
+
+   memErr_fun122_sec04:;
+      *fileOnSIPtr = -3;
+      goto errClean_fun122_sec04;
+
+   errClean_fun122_sec04:;
       if(retHeapStr)
          free(retHeapStr);
       retHeapStr = 0;
 
-      goto retFile_fun00e;
+      goto retFile_fun122_sec04;
 
-   retFile_fun00e:;
+   retFile_fun122_sec04:;
       return retHeapStr;
 } /*getFile_files_rayWidg*/
 
@@ -11872,20 +11968,38 @@ fileBrowserEvent_rayWidg(
       { /*Else: directory selected*/
          if(! fileSTPtr->fileListST.onSI)
          { /*If: going back one directory*/
+       printf("%s\n", fileSTPtr->pwdStr); /*DELETE*/
             tmpSI = endStr_ulCp(fileSTPtr->pwdStr) - 1;
-            while(
-                  tmpSI > 0
-               &&    fileSTPtr->pwdStr[tmpSI]
-                  != def_pathSep_rayWidg
-            ) --tmpSI;
+            while(tmpSI > 0)
+            { /*Loop: find start of the next directory*/
+               if(
+                     fileSTPtr->pwdStr[tmpSI]
+                  == def_pathSep_rayWidg
+               ){ /*If: at unix root or last directory*/
+                  fileSTPtr->pwdStr[tmpSI + 1] = 0;
+                  break;
+               }  /*If: at unix root or last directory*/
 
-            if(
-                 ! tmpSI
-              && *fileSTPtr->pwdStr == def_pathSep_rayWidg
-            ) fileSTPtr->pwdStr[tmpSI + 1] = 0;
-              /*If: Uinux root directory*/
+               else if(
+                     fileSTPtr->pwdStr[tmpSI] == ':'
+                  &&
+                        fileSTPtr->pwdStr[tmpSI + 1]
+                     == def_pathSep_rayWidg
+               ){ /*Else If: at windows root*/
+                  /*ray lib will not go past C:\, so I
+                  `  am limited to one windows drive
+                  ` I would need to do a registery query
+                  `  to  get the drive letters
+                  */
+                  ++tmpSI;
+                  fileSTPtr->pwdStr[tmpSI + 1] = 0;
+                  break;
+               }  /*Else If: at windows root*/
 
-            else if(! tmpSI)
+               --tmpSI;
+            } /*Loop: find start of the next directory*/
+
+            if(! tmpSI)
                goto noEvent_fun130_sec04;
                /*can  not go further back in history*/
 

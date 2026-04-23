@@ -4714,6 +4714,7 @@ checkRunEvent_ftbRayST(
 
          if(tmpSI == 1)
          { /*If: files were selected*/
+            tmpSI = 0;
             tmpHeapStr =
                getFile_files_rayWidg(
                   &tmpSI,
