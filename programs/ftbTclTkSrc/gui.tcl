@@ -1222,7 +1222,16 @@ proc setFreezeTBStatus {} {
          set cmdStr " -a" ;
          append cmdStr " -x" ;
          append cmdStr " " $::glob_srCheck ;
-         append cmdStr " \"" $::glob_refFa "\" " ;
+
+         set tmpStr [lindex $::tcl_platform(os) 0] ;
+         if { $tmpStr eq "Windows" } {
+           set tmpStr [string map {\\\ /} $::glob_refFa ] ;
+             # I need an extra \ for rm blocks
+         } else {
+           set tmpStr $::glob_refFa ;
+         } ; # If: windows; make sure path is tcl freindly
+
+         append cmdStr " \"" $tmpStr "\" " ;
 
          foreach fqStr $::glob_fqIn {
             append cmdStr " \"" $fqStr "\"" ;
