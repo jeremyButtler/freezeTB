@@ -276,7 +276,13 @@ puts $logFile [concat "minmimap2: " $::mapVer] ;
 set cmdStr " -a" ;
 append cmdStr " -x" ;
 append cmdStr " " $::glob_srCheck ;
-append cmdStr " \"" $::glob_refFa "\" " ;
+set tmpStr [lindex $::tcl_platform(os) 0] ;
+if { $tmpStr eq "Windows" } {
+set tmpStr [string map {\\ /} $::glob_refFa ] ;
+} else {
+set tmpStr $::glob_refFa ;
+} ;
+append cmdStr " \"" $tmpStr "\" " ;
 foreach fqStr $::glob_fqIn {
 append cmdStr " \"" $fqStr "\"" ;
 } ;
