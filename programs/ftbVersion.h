@@ -5,7 +5,7 @@
 
 #define def_year_ftbVersion 2026
 #define def_month_ftbVersion 4
-#define def_day_ftbVersion 20
+#define def_day_ftbVersion 23
 
 /*=======================================================\
 : License:
