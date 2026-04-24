@@ -187,11 +187,11 @@ signed char glob_drugStrAry[def_numDrugs_ftbRayST][32] =
 #define def_noAmrBackCol_ftbRayST 0x000004ff
 #define def_noAmrTextCol_ftbRayST 0xFDE725ff
 
-#define def_amrBackCol_ftbRayST 0xF1605Dff
+#define def_amrBackCol_ftbRayST 0xFC8961ff
 #define def_amrTextCol_ftbRayST 0x000004ff
 
-#define def_lowDepthBackCol_ftbRayST 0xFDE725ff
-#define def_lowDepthTextCol_ftbRayST 0x000004ff
+#define def_lowDepthBackCol_ftbRayST 0xB73779ff
+#define def_lowDepthTextCol_ftbRayST 0xFDE725ff
 
 /*cursor blink settings*/
 #define def_blinkInterval_ftbRayST 55
@@ -2284,6 +2284,7 @@ checkDrugs_ftbRayST(
    signed int crossStartSI = 0;
 
    signed char depthAryBl[17];
+   signed char refBl = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec02:
@@ -2582,6 +2583,15 @@ checkDrugs_ftbRayST(
 
    if(fgets((char *) lineStr, 1000, inFILE))
    { /*If: have header*/
+      if(
+            lineStr[0] == 'r'
+         && lineStr[1] == 'e'
+         && lineStr[2] == 'f'
+      ) refBl = 1;
+
+      else
+         refBl = 0;
+
       while( fgets((char *) lineStr, 1000, inFILE) )
       { /*Loop: get drug resistance*/
          crossStartSI = 0;
@@ -2590,6 +2600,17 @@ checkDrugs_ftbRayST(
 
          tmpStr = lineStr;
 
+         /*_________get_past_the_reference_name_________*/
+         if(refBl)
+         { /*If: need to get past the reference name*/
+            tmpStr += endWhite_ulCp(tmpStr);
+            while(*tmpStr && *tmpStr < 33)
+               ++tmpStr;
+            if(! *tmpStr)
+               continue;
+         } /*If: need to get past the reference name*/
+
+         /*___________get_the_gene_name__________________*/
          tmpStr += cpWhite_ulCp(geneStr, tmpStr);
          if(! *tmpStr)
             continue;
