@@ -8824,8 +8824,11 @@ run_freezeTB(
          "w"
       ); /*already checked if could open*/
 
-   pReadHead_checkAmr(0, outFILE);
-     /*using 0 because not printing the reference id*/
+   if(amrHeapAryST->noRefBl)
+      pReadHead_checkAmr(0, outFILE);
+      /*using 0 because not printing the reference id*/
+   else
+      pReadHead_checkAmr(1, outFILE);
 
    pRead_checkAmr(
       (unsigned int) ftbSetStackST.tbConSet.minDepthSI,
