@@ -224,10 +224,8 @@ For all GUI freezeTB source (not pre-compiled) install
 The installation steps for the command line programs, are
   not covered here. If you wish to install a command line
   program, open a terminal (for windows a developer
-  terminal). Then do `cd programs/<program>Src` and
-  `make -f mkfile.unix` for Linux/BSD/Mac
-  or `nmake /F mkfile.win` for windows. Put the compiled
-  binary in the desired location.
+  terminal). Then see the instructions in each programs
+  readme (all programs are in the programs directory).
 
 ## pre-compiled install
 
