@@ -25,10 +25,17 @@ All code that is unique to freezeTB (not from other
 For any unix OS (Mac/Linux/BSD) do:
 
 ```
-git clone \
-   https://github.com/jeremyButtler/freezeTB \
-   "${HOME}/Downloads/freezeTB;
-cd "${HOME}/Downloads/freezeTB/programs/freezeTBStr;
+if [ ! -d "${HOME}/Downloads/freezeTB" ];
+then
+   git clone \
+      https://github.com/jeremyButtler/freezeTB \
+      "${HOME}/Downloads/freezeTB";
+   cd "${HOME}/Downloads/freezeTB/programs/freezeTBStr";
+else
+   cd "${HOME}/Downloads/freezeTB/programs/freezeTBStr";
+   git pull;
+fi;
+
 make -f mkfile.unix;
 ```
 
