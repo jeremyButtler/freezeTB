@@ -4293,6 +4293,7 @@ proc readAmrTbl {prefixStr indentStr} {
    append fileStr "-read-amrs.tsv" ;
    set openFILE [open $fileStr] ;
 
+   set refBl 0 ;
    set pad0 [string length "gene"] ;
    set pad1 [string length "drug"] ;
    set pad2 [string length "cross-res"] ;
@@ -4318,11 +4319,17 @@ proc readAmrTbl {prefixStr indentStr} {
    #   - find gene id length + start length loop
    #+++++++++++++++++++++++++++++++++++++++++++++++
 
+   set lineStr [split $lineStr "\t"] ;
+   if { [string equal [lindex $lineStr 0] "ref"] } {
+      set refBl 1 ;
+   } ;
+
    while {[gets $openFILE lineStr] > -1} {
       set lineStr [split $lineStr "\t"] ;
 
       # gene name length
-      set tmpStr [lindex $lineStr 0] ;
+      set indexSI $refBl ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad0 < $lenUI} { set pad0 $lenUI ; } ;
 
@@ -4331,7 +4338,8 @@ proc readAmrTbl {prefixStr indentStr} {
       #   - find primrary drug length
       #++++++++++++++++++++++++++++++++++++++++++++
 
-      set tmpStr [lindex $lineStr 1] ;
+      set indexSI [expr $refBl + 1] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [string tolower $tmpStr] ;
 
       # reducing to three letter code if possible
@@ -4359,7 +4367,8 @@ proc readAmrTbl {prefixStr indentStr} {
       #++++++++++++++++++++++++++++++++++++++++++++
 
       # cross resistance length
-      set tmpStr [lindex $lineStr 2] ;
+      set indexSI [expr $refBl + 2] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [string tolower $tmpStr] ;
 
       # reducing to three letter code if possible
@@ -4387,12 +4396,14 @@ proc readAmrTbl {prefixStr indentStr} {
       #++++++++++++++++++++++++++++++++++++++++++++
 
       # mutation length
-      set tmpStr [lindex $lineStr 4] ;
+      set indexSI [expr $refBl + 4] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad4 < $lenUI} { set pad4 $lenUI ; } ;
 
       # percent support length
-      set tmpStr [lindex $lineStr 8] ;
+      set indexSI [expr $refBl + 8] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad8 < $lenUI} { set pad8 $lenUI ; } ;
 
@@ -4402,27 +4413,32 @@ proc readAmrTbl {prefixStr indentStr} {
       #++++++++++++++++++++++++++++++++++++++++++++
 
       # depth
-      set tmpStr [lindex $lineStr 9] ;
+      set indexSI [expr $refBl + 9] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad9 < $lenUI} { set pad9 $lenUI ; } ;
 
       # variant id
-      set tmpStr [lindex $lineStr 3] ;
+      set indexSI [expr $refBl + 3] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad3 < $lenUI} { set pad3 $lenUI ; } ;
 
       # AMR level
-      set tmpStr [lindex $lineStr 10] ;
+      set indexSI [expr $refBl + 10] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad10 < $lenUI} { set pad10 $lenUI ; } ;
 
       # AMR is additive
-      set tmpStr [lindex $lineStr 11] ;
+      set indexSI [expr $refBl + 11] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad11 < $lenUI} { set pad11 $lenUI ; } ;
 
       # AMR requires gene
-      set tmpStr [lindex $lineStr 12] ;
+      set indexSI [expr $refBl + 12] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set lenUI [string length $tmpStr] ;
       if {$pad12 < $lenUI} { set pad12 $lenUI ; } ;
    } ; # Loop: find longest entries per column
@@ -4493,11 +4509,13 @@ proc readAmrTbl {prefixStr indentStr} {
 
 
       # get percent support (0 to 1)
-      set tmpF [lindex $lineStr 8] ;
+      set indexSI [expr $refBl + 8] ;
+      set tmpF [lindex $lineStr $indexSI] ;
       set tmpF [expr $tmpF / 100] ;
 
       # make sure keeping entry
-      if {[lindex $lineStr 4] eq "snp"} {
+      set indexSI [expr $refBl + 4] ;
+      if {[lindex $lineStr $indexSI] eq "snp"} {
          if { $tmpF < $::glob_outSnpSup} {
              continue ;
          } ; # If: support is to low
@@ -4508,7 +4526,8 @@ proc readAmrTbl {prefixStr indentStr} {
       } ; # check if snp or indel
 
 
-      set tmpStr [lindex $lineStr 0] ; # gene id
+      set indexSI [expr $refBl + 0] ;
+      set tmpStr [lindex $lineStr $indexSI] ; # gene id
       set tmpStr [format "%-*s" $pad0 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
@@ -4517,7 +4536,8 @@ proc readAmrTbl {prefixStr indentStr} {
       #   - add primrary drug to table
       #++++++++++++++++++++++++++++++++++++++++++++
 
-      set tmpStr [lindex $lineStr 1] ;
+      set indexSI [expr $refBl + 1] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [string tolower $tmpStr] ;
 
       # try to reduce drug to three letter code
@@ -4543,7 +4563,8 @@ proc readAmrTbl {prefixStr indentStr} {
       #   - add cross-resistance drugs to table
       #++++++++++++++++++++++++++++++++++++++++++++
 
-      set tmpStr [lindex $lineStr 2] ;
+      set indexSI [expr $refBl + 2] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [string tolower $tmpStr] ;
 
       # try to reduce drug to three letter code
@@ -4571,17 +4592,20 @@ proc readAmrTbl {prefixStr indentStr} {
       #++++++++++++++++++++++++++++++++++++++++++++
 
       # variant id
-      set tmpStr [lindex $lineStr 3] ;
+      set indexSI [expr $refBl + 3] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad3 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       # mutation type
-      set tmpStr [lindex $lineStr 4] ;
+      set indexSI [expr $refBl + 4] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad4 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       # percent of reads supporting
-      set tmpStr [lindex $lineStr 8] ;
+      set indexSI [expr $refBl + 8] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad8 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
@@ -4591,22 +4615,26 @@ proc readAmrTbl {prefixStr indentStr} {
       #++++++++++++++++++++++++++++++++++++++++++++
 
       # mutation type
-      set tmpStr [lindex $lineStr 9] ;
+      set indexSI [expr $refBl + 9] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad9 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       # resitance level
-      set tmpStr [lindex $lineStr 10] ;
+      set indexSI [expr $refBl + 10] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad10 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       # resistance is additive
-      set tmpStr [lindex $lineStr 11] ;
+      set indexSI [expr $refBl + 11] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad11 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
       # resistance is needs gene
-      set tmpStr [lindex $lineStr 12] ;
+      set indexSI [expr $refBl + 12] ;
+      set tmpStr [lindex $lineStr $indexSI] ;
       set tmpStr [format "%-*s" $pad12 $tmpStr] ;
       append tblStr $tmpStr $indentStr;
 
