@@ -19,14 +19,15 @@ For unix several of the programs are installed in the
 Chapter one: monsters that consume all hope
 
 - freezeTB: core program for freezeTB
-- ftbTclTk: primrary gui that wraps freezeTB
-- graphAmpDepth.r: Rscript that makes graphs for freezeTB
+- ftbTclTk: TclTK gui that wraps freezeTB
+- ftbRaylib: Raylib gui that wraps freezeTB
 
 ## Modules:
 
 Chapter two: here be dragons
 
 - tbAmr: AMR detection
+  - move to bioTools repository and renamed to getAmr
 - tbMiru: detects MIRU-VNTR lineages in reads
   - can run on fastx files (slower)
   - there are some side awk scripts (not installed) for
@@ -37,14 +38,16 @@ Chapter two: here be dragons
       out the number of reads supporting each primer
 - tbSpol: does spoligotyping
   - can run on fastx files (slower)
+  - poor insertion handeling (often deletes)
+- getLin: generalized lineage system (not spoligotyping
+  or MIRU) used in freezeTB (in bioTools repository)
 
 ## Other, less useful programs:
 
 Chapter three: do not underestimate the pixies
 
 - addAmr: adds an drug resistance mutation to a tbAmr
-  (freezeTB) AMR databse
-  - has some valgrind issues, but should work ok
+  (freezeTB) AMR databse (also in bioTools repository)
 - whoToAmr: converts the WHO 2023 catalog to tbAmr format
 - swapDbRef: is a program to switch out references in the
   reference database.
@@ -52,6 +55,8 @@ Chapter three: do not underestimate the pixies
     check for frame shifts or other problems
 - mkMiurTbl: takes in an miru table and adds the reference
   coordinates for tbMiru into the table header
+- rayWidg (in ftbRaylibSrc) is the widget organization
+  system for the raylib GUI
 - scripts/catPrimers.sh: bash script that uses minimap2
   and awk to merge amplicons (not installed)
   - also prints out the amplicon and primer coordinates
@@ -98,9 +103,7 @@ Chapter three: do not underestimate the pixies
 
 Chapter four: monsters from beyond
 
-- ftbRaylib is an attempt to remake the freezeTB GUI
-- rayWidg (in ftbRaylibSrc) is the widget organization
-  system for the new GUI attempt
+Currently none
 
 ## Older progams (some functional):
 
@@ -213,14 +216,17 @@ To give a a better picture of how freezeTB works I made
   I want to keep the script more simple. Also, this has
   not been tested.
 
+The only thing you can not make is the same graphs. These
+  have been built into freezeTB.
+
 Finally, the shell script will be slower, since these
   programs are built into freezeTB.
 
 You will need some programs from my bioTools repo(
   [https://github.com/jeremybuttler/bioTools](
    https://github.com/jeremybuttler/bioTools)). These
-  include ampDepth, filtsam, getLin, maskPrim, edClust,
-  tbCon, rmHomo, and mapRead.
+  include ampDepth, filtsam, getAmr, getLin, maskPrim,
+  edClust, tbCon, rmHomo, and mapRead.
 
 ```
 #!/usr/bin/sh
@@ -398,7 +404,7 @@ ampDepth \
   > "$prefixStr-stats.tsv";
 
 # find AMRs
-tbAmr \
+getAmr \
    -amr-tbl "$dbDirStr/amrDb.tsv" \
    -sam "$samStr" \
    -id-file "$prefixStr-read-amrsIds.tsv" \
