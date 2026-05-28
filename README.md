@@ -51,6 +51,18 @@ As of 2025-12-08 freezeTB uses getLin and the hsp65 gene
   - *M. peregrinum*
   - *M. senegalense*
   - *M. smegamtis*
+
+As of 2026-05-28 we added references from Dai et al 2011.
+  This slows down freezeTB a bit, but also adds more
+  species. Species are called if the read is within 10
+  SNPs of the targeted mutations. In cases were one read
+  supports multiple species the closest species is used.
+
+Dai J, Chen Y, Lauzardo M. Web-accessible database of
+  hsp65 sequences from Mycobacterium reference strains.
+  J Clin Microbiol. 2011 Jun;49(6):2296-303.
+  doi: 10.1128/JCM.02602-10. Epub 2011 Mar 30.
+  PMID: 21450960; PMCID: PMC3122750.
   
 
 # Protocols
@@ -445,6 +457,8 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-05-28:
+  - expanded the hsp65 database to include more species
 - 2026-04-20:
   - added in a general png library to have the freezeTB
     command line program to make graphs
