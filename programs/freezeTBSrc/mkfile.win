@@ -99,7 +99,6 @@ $(genFreezeTB)\freezeTB.$O: \
 	$(genBio)\tbCon.$O \
 	$(genClust)\edClust.$O \
 	$(genFreezeTB)\freezeTBDefs.h \
-	$(genFreezeTB)\tbAmrDefs.h \
 	$(genFreezeTB)\tbMiruDefs.h \
 	$(genFreezeTB)\tbSpolDefs.h \
 	$(genBio)\tbConDefs.h \
