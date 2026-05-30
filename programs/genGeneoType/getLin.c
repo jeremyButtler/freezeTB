@@ -76,13 +76,15 @@
 '   * lineage print functions
 '     o fun27: addReadLineages_cnt_getLin
 '       - adds lineages for a read to a cnt_getLin struct
-'     o fun28: pReadLineages_getLin
+'     o fun29: setCounts_cnt_getLin
+'       - sets counts for each lineage in a cnt_getLin
+'     o fun30: pReadLineages_getLin
 '       - prints the lineage counts for a set of reads and
 '         then prints the consensus lineage for the reads
 '       !!! warning, this does not have a conistent header
 '           system, because the TRS lineages are variable.
 '           expect different headers for different input
-'     o fun29: pGenomeLineage_getLin
+'     o fun31: pGenomeLineage_getLin
 '       - prints lineages found by simpleLinage_getLin &
 '         complexLineage_getLin for a single sequence
 '       !!! warning, this does not have a conistent header
@@ -237,6 +239,8 @@ snpNtLineage_getLin(
       &posArySI[0],     /*reference position*/
       &posArySI[1]      /*sequence position*/
    ); /*move to first base in lineage*/
+
+   ++linSTPtr->readCntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun01 Sec03:
@@ -406,6 +410,7 @@ snpNtLineage_getLin(
       goto noMatch_fun01_sec05;
 
    match_fun01_sec05:;
+      ++linSTPtr->readSupSI;
       retSI = 1;
       goto ret_fun01_sec05;
 
@@ -550,6 +555,7 @@ snpAALineage_getLin(
       ); /*move to first base in lineage*/
 
    seqPosSI = posArySI[1];
+   ++linSTPtr->readCntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun02 Sec03:
@@ -798,6 +804,7 @@ snpAALineage_getLin(
       goto noMatch_fun02_sec05;
 
    match_fun02_sec05:;
+      ++linSTPtr->readSupSI;
       retSI = 1;
       goto ret_fun02_sec05;
 
@@ -922,6 +929,8 @@ delLineage_getLin(
       &posArySI[1]      /*sequence position*/
    ); /*move to first base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec03:
    ^   - check if lineage is in read
@@ -980,7 +989,11 @@ delLineage_getLin(
 
 
    if(diffSI <= linSTPtr->fudgeSI)
+   { /*If: found the lineage*/
+      ++linSTPtr->readSupSI;
       return 1;
+   } /*If: found the lineage*/
+
    else
       goto noMatch_fun03_sec04;
 
@@ -1095,6 +1108,8 @@ lengthLineage_getLin(
       &seqPosSI      /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun04 Sec03:
    ^   - find the lineage to assign
@@ -1131,6 +1146,7 @@ lengthLineage_getLin(
       else
          return -2; /*do not have complete position*/
    foundLineage_fun04_sec04:;
+      ++linSTPtr->readSupSI;
       return 1; /*found the lineage*/
 } /*lengthLineagee_getLin*/
 
@@ -1709,6 +1725,8 @@ insNtLineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun09 Sec03:
    ^   - check if have match and return
@@ -1737,6 +1755,7 @@ insNtLineage_getLin(
    goto noIns_fun09_sec03;
 
    foundMatch_fun09_sec03:;
+      ++linSTPtr->readSupSI;
       return 1;
    defaultLineage_fun09_sec03:;
       return -1;
@@ -1878,6 +1897,8 @@ insNtFastLineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun10 Sec03:
    ^   - check if have match and return
@@ -1918,6 +1939,7 @@ insNtFastLineage_getLin(
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    foundMatch_fun10_sec04:;
+      ++linSTPtr->readSupSI;
       scoreSL = 1;
       goto ret_fun10_sec04;
 
@@ -2078,6 +2100,8 @@ insAALineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec03:
    ^   - get aa sequence and check if have match
@@ -2130,6 +2154,7 @@ insAALineage_getLin(
    goto noIns_fun11_sec04;
 
    foundMatch_fun11_sec04:;
+      ++linSTPtr->readSupSI;
       scoreSL = 1;
       goto ret_fun11_sec04;
 
@@ -2358,6 +2383,8 @@ trsNtLineage_getLin(
       &refEndSI,  /*reference position*/
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
+
+   ++linSTPtr->readCntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun13 Sec03:
@@ -2609,6 +2636,8 @@ trsNtFastLineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun14 Sec03:
    ^   - get the alignments
@@ -2811,6 +2840,7 @@ trsAALineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun15 Sec03:
@@ -3091,6 +3121,8 @@ countNtLineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun16 Sec03:
    ^   - get the alignments, filter, and get counts
@@ -3282,6 +3314,8 @@ countNtFastLineage_getLin(
       &refEndSI,  /*reference position*/
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
+
+   ++linSTPtr->readCntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun17 Sec03:
@@ -3475,6 +3509,7 @@ countAALineage_getLin(
       &seqLenSI   /*sequence position*/
    ); /*move to last base in lineage*/
 
+   ++linSTPtr->readCntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun18 Sec03:
@@ -4270,6 +4305,9 @@ complexLineage_getLin(
    signed int indexSI = 0;
    signed int missSI = 0;
 
+   signed int refStartSI = 0;
+   signed int refEndSI = 0;
+
    signed int *histHeapArySI = 0;
       /*keeps track of lineages hit so I can clear later*/
 
@@ -4309,11 +4347,13 @@ complexLineage_getLin(
    \*****************************************************/
 
    if(simpleLinArySI && *simpleLenSIPtr)
-      firstLinSI = 
+      ;
+      /*this code caused to many problems*/
+      /*firstLinSI = 
          posFind_complex_linST(
-           simpleSTPtr->linAryST[simpleLinArySI[0]].endSI,
+           simpleSTPtr->linAryST[0].endSI,
            complexSTPtr
-         ); /*find the first possible complex lineage
+         );*/ /*find the first possible complex lineage
             `  given the simple lineages. This array is
             `  sorted by index, which in turn is sorted
             `  by the starting position and then ending
@@ -4326,15 +4366,42 @@ complexLineage_getLin(
    if(firstLinSI < 0)
       goto noSimpleLinErr_fun20_sec04;
 
+   refStartSI = simpleLinArySI[0];
+   refStartSI = simpleSTPtr->linAryST[refStartSI].startSI;
+
+   refEndSI = 0;
+   for(siMLin = 0; siMLin < *simpleLenSIPtr; ++siMLin)
+   { /*Loop: find the last reference base*/
+      indexSI = simpleLinArySI[siMLin];
+      refEndSI =
+         max_genMath(
+            refEndSI,
+            simpleSTPtr->linAryST[indexSI].endSI
+         );
+   } /*Loop: find the last reference base*/
+
    for(
       siMLin = firstLinSI;
       siMLin < complexSTPtr->lenSI;
       ++siMLin
    ){ /*Loop: find complex lineages*/
       complexSTPtr->cntArySI[siMLin] = 0;
+
       missSI = 0;
       mLinSTPtr = &complexSTPtr->linAryST[siMLin];
          /*for sanity*/
+
+      if(mLinSTPtr->startSI > refEndSI)
+         continue;
+      else
+         ++mLinSTPtr->readCntSI;
+
+      if(mLinSTPtr->startSI < refStartSI)
+         continue; /*I am missing at least one lineage*/
+      else if(mLinSTPtr->endSI > refEndSI)
+         continue; /*I am missing at least one lineage*/
+      else
+         ++mLinSTPtr->readMapSI;
 
       /**************************************************\
       * Fun20 Sec03 Sub02:
@@ -4464,6 +4531,7 @@ complexLineage_getLin(
 
       if(mLinSTPtr->typeSC !=def_closestComplexType_linST)
          continue; /*this is not a count lineage*/
+
       else if(complexSTPtr->cntArySI[indexSI] < 0)
          continue;
          /*this count lineage has been eliminated*/
@@ -4535,12 +4603,18 @@ complexLineage_getLin(
        mLinSTPtr = &complexSTPtr->linAryST[siMLin];
 
        if(! mLinSTPtr->overwriteBl)
+       { /*If: not overwriting lineages*/
+          ++mLinSTPtr->readSupSI;
           continue;
+       } /*If: not overwriting lineages*/
+
        else if(complexSTPtr->cntArySI[siMLin] == -2)
           continue;
           /*this lineage was closest lineage that was not
           `  used or has already been checked
           */
+       else
+          ++mLinSTPtr->readSupSI;
 
       if(mLinSTPtr->overwriteBl & 2)
       { /*If: overwriting the default groups*/
@@ -4710,8 +4784,13 @@ init_cnt_getLin(
       return;
 
    cntSTPtr->linStrAry = 0;
+   cntSTPtr->linIndexArySI = 0;
+   cntSTPtr->compAryBl = 0;
+
    cntSTPtr->idSizeArySI = 0;
    cntSTPtr->linCntArySI = 0;
+   cntSTPtr->linMapArySI = 0;
+   cntSTPtr->linSupArySI = 0;
    cntSTPtr->sizeSI = 0;
 
    blank_cnt_getLin(cntSTPtr);
@@ -4738,8 +4817,17 @@ freeStack_cnt_getLin(
 
    if(cntSTPtr->idSizeArySI)
       free(cntSTPtr->idSizeArySI);
+   if(cntSTPtr->linIndexArySI)
+      free(cntSTPtr->linIndexArySI);
+   if(cntSTPtr->compAryBl)
+      free(cntSTPtr->compAryBl);
+
    if(cntSTPtr->linCntArySI)
       free(cntSTPtr->linCntArySI);
+   if(cntSTPtr->linMapArySI)
+      free(cntSTPtr->linMapArySI);
+   if(cntSTPtr->linSupArySI)
+      free(cntSTPtr->linSupArySI);
 
    if(cntSTPtr->linStrAry)
    { /*Loop: free c-string pointers*/
@@ -4804,6 +4892,7 @@ addMem_cnt_getLin(
 ){
    signed char **swapStrPtr = 0;
    signed int *swapSI = 0;
+   signed char *swapStr = 0;
    signed int siPos = 0;
 
    if(! cntSTPtr)
@@ -4823,9 +4912,29 @@ addMem_cnt_getLin(
       if(! cntSTPtr->idSizeArySI)
          goto err_fun25;
 
+      cntSTPtr->linIndexArySI =
+         calloc(lenSI, sizeof(signed int));
+      if(! cntSTPtr->linIndexArySI)
+         goto err_fun25;
+
+      cntSTPtr->compAryBl =
+         calloc(lenSI, sizeof(signed char));
+      if(! cntSTPtr->compAryBl)
+         goto err_fun25;
+
       cntSTPtr->linCntArySI =
          calloc(lenSI, sizeof(signed int));
       if(! cntSTPtr->linCntArySI)
+         goto err_fun25;
+
+      cntSTPtr->linMapArySI =
+         calloc(lenSI, sizeof(signed int));
+      if(! cntSTPtr->linMapArySI)
+         goto err_fun25;
+
+      cntSTPtr->linSupArySI =
+         calloc(lenSI, sizeof(signed int));
+      if(! cntSTPtr->linSupArySI)
          goto err_fun25;
    } /*If: first allcation*/
 
@@ -4843,7 +4952,7 @@ addMem_cnt_getLin(
       swapSI =
          realloc(
             cntSTPtr->idSizeArySI,
-            lenSI * sizeof(signed char *)
+            lenSI * sizeof(signed int)
          );
       if(! swapSI)
          goto err_fun25;
@@ -4851,18 +4960,57 @@ addMem_cnt_getLin(
 
       swapSI =
          realloc(
+            cntSTPtr->linIndexArySI,
+            lenSI * sizeof(signed int)
+         );
+      if(! swapSI)
+         goto err_fun25;
+      cntSTPtr->linIndexArySI = swapSI;
+
+      swapStr =
+         realloc(
+            cntSTPtr->compAryBl,
+            lenSI * sizeof(signed char)
+         );
+      if(! swapStr)
+         goto err_fun25;
+      cntSTPtr->compAryBl = swapStr;
+
+      swapSI =
+         realloc(
             cntSTPtr->linCntArySI,
-            lenSI * sizeof(signed char *)
+            lenSI * sizeof(signed int)
          );
       if(! swapSI)
          goto err_fun25;
       cntSTPtr->linCntArySI = swapSI;
 
+      swapSI =
+         realloc(
+            cntSTPtr->linMapArySI,
+            lenSI * sizeof(signed int)
+         );
+      if(! swapSI)
+         goto err_fun25;
+      cntSTPtr->linMapArySI = swapSI;
+
+      swapSI =
+         realloc(
+            cntSTPtr->linSupArySI,
+            lenSI * sizeof(signed int)
+         );
+      if(! swapSI)
+         goto err_fun25;
+      cntSTPtr->linSupArySI = swapSI;
+
       for(siPos = cntSTPtr->lenSI; siPos < lenSI; ++siPos)
       { /*Loop: initialize memory*/
          cntSTPtr->linStrAry[siPos] = 0;
          cntSTPtr->idSizeArySI[siPos] = 0;
+
          cntSTPtr->linCntArySI[siPos] = 0;
+         cntSTPtr->linMapArySI[siPos] = 0;
+         cntSTPtr->linSupArySI[siPos] = 0;
       } /*Loop: initialize memory*/
    } /*Else: expanding memory*/
 
@@ -4880,6 +5028,15 @@ addMem_cnt_getLin(
 | Input:
 |   - linStr:
 |     o c-string with the name of the lineage to add
+|   - mapSI:
+|     o number of reads mapping to the lineage
+|   - cntSI:
+|     o total of reads mapping to at least part of the
+|       lineage
+|   - indexSI:
+|     o index in lineage array of the lineage
+|   - complexBl:
+|     o 1: is a complex lineage; is a simple lineage
 |   - cntSTPtr:
 |     o cnt_getLin struct pionter to add the lineage to
 | Output:
@@ -4888,7 +5045,7 @@ addMem_cnt_getLin(
 |       lineage it is not already in it
 |     o idSizeArySI in cntSTPtr if needed to add more
 |       memory to a string pionter in linStrAry
-|     o linCntArySI in cntSTPtr to have the lineage added
+|     o linSupArySI in cntSTPtr to have the lineage added
 |       if the arrays have something
 |     o lenSI in cntSTPtr to have the new lineage (if new)
 |   - Returns:
@@ -4898,6 +5055,10 @@ addMem_cnt_getLin(
 signed char
 addLineage_cnt_getLin(
    signed char *linStr,
+   signed int mapSI,
+   signed int cntSI,
+   signed int indexSI,
+   signed char complexBl,
    struct cnt_getLin *cntSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun26 TOC:
@@ -4999,6 +5160,19 @@ addLineage_cnt_getLin(
          cntSTPtr->idSizeArySI[tmpSI + 1] ^=
             cntSTPtr->idSizeArySI[tmpSI];
 
+         cntSTPtr->linIndexArySI[tmpSI + 1] ^=
+            cntSTPtr->linIndexArySI[tmpSI];
+         cntSTPtr->linIndexArySI[tmpSI] ^=
+            cntSTPtr->linIndexArySI[tmpSI + 1];
+         cntSTPtr->linIndexArySI[tmpSI + 1] ^=
+            cntSTPtr->linIndexArySI[tmpSI];
+
+         cntSTPtr->compAryBl[tmpSI + 1] ^=
+            cntSTPtr->compAryBl[tmpSI];
+         cntSTPtr->compAryBl[tmpSI] ^=
+            cntSTPtr->compAryBl[tmpSI + 1];
+         cntSTPtr->compAryBl[tmpSI + 1] ^=
+            cntSTPtr->compAryBl[tmpSI];
 
          cntSTPtr->linCntArySI[tmpSI + 1] ^=
             cntSTPtr->linCntArySI[tmpSI];
@@ -5006,10 +5180,24 @@ addLineage_cnt_getLin(
             cntSTPtr->linCntArySI[tmpSI + 1];
          cntSTPtr->linCntArySI[tmpSI + 1] ^=
             cntSTPtr->linCntArySI[tmpSI];
+
+         cntSTPtr->linMapArySI[tmpSI + 1] ^=
+            cntSTPtr->linMapArySI[tmpSI];
+         cntSTPtr->linMapArySI[tmpSI] ^=
+            cntSTPtr->linMapArySI[tmpSI + 1];
+         cntSTPtr->linMapArySI[tmpSI + 1] ^=
+            cntSTPtr->linMapArySI[tmpSI];
+
+         cntSTPtr->linSupArySI[tmpSI + 1] ^=
+            cntSTPtr->linSupArySI[tmpSI];
+         cntSTPtr->linSupArySI[tmpSI] ^=
+            cntSTPtr->linSupArySI[tmpSI + 1];
+         cntSTPtr->linSupArySI[tmpSI + 1] ^=
+            cntSTPtr->linSupArySI[tmpSI];
       } /*Loop: shift lineages to make room*/
 
       addLineage_fun26_sec04:;
-         cntSTPtr->linCntArySI[midSI] = 1;
+         cntSTPtr->linSupArySI[midSI] = 1;
          tmpSI = endStr_ulCp(linStr);
 
          if(tmpSI >= cntSTPtr->idSizeArySI[midSI])
@@ -5029,10 +5217,16 @@ addLineage_cnt_getLin(
             tmpSI
          );
          ++cntSTPtr->lenSI;
+
+         cntSTPtr->linIndexArySI[midSI] = indexSI;
+         cntSTPtr->compAryBl[midSI] = !!complexBl;
    } /*If: is a new lineage*/
 
    else
-      ++cntSTPtr->linCntArySI[midSI];
+      ++cntSTPtr->linSupArySI[midSI];
+
+   cntSTPtr->linMapArySI[midSI] = mapSI;
+   cntSTPtr->linCntArySI[midSI] = cntSI;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun26 Sec05:
@@ -5077,8 +5271,9 @@ addLineage_cnt_getLin(
 |       (multiple variant) lineages names
 | Output:
 |   - Modifies:
-|     o linStrAry, idSizeArySI, and linCntAry in cntSTPtr
-|       to have all lineages in the list
+|     o linStrAry, idSizeArySI, and linCntArySI,
+|       linMapArySI, and linSupArySI in cntSTPtr to have
+|       all lineages in the list and some level of counts
 |     o numReadsSL in cntSTPtr to be incurmented by 1
 |     o if needed lenSI and sizeSI in cntSTPtr to account
 |       for the new lineage or resize
@@ -5115,11 +5310,7 @@ addReadLineages_cnt_getLin(
       if(! pAllVarsBl && ! linSTPtr->printLinBl)
          continue; /*this lineage is not printed*/
 
-      idLenSI =
-         cpStr_ulCp(
-            idStr,
-            linSTPtr->groupStr
-         );
+      idLenSI = cpStr_ulCp(idStr, linSTPtr->groupStr);
       idStr[idLenSI++] = def_trsLinMark_linST;
 
       if(
@@ -5144,8 +5335,16 @@ addReadLineages_cnt_getLin(
          idLenSI +=
             numToStr(&idStr[idLenSI], trsLinArySI[siLin]);
 
-      if( addLineage_cnt_getLin(idStr, cntSTPtr) )
-         goto memErr_fun27;
+      if(
+         addLineage_cnt_getLin(
+            idStr,
+            linSTPtr->readCntSI,
+            linSTPtr->readCntSI,
+            simpLinArySI[siLin], /*index of lineage*/
+            0,                   /*is a simple lineage*/
+            cntSTPtr
+         )
+      ) goto memErr_fun27;
    } /*Loop: add simple lineages to the count*/
 
    /*______________add_complex_lineages_________________*/
@@ -5161,8 +5360,16 @@ addReadLineages_cnt_getLin(
       idLenSI +=
         cpStr_ulCp(&idStr[idLenSI],mLinSTPtr->lineageStr);
 
-      if( addLineage_cnt_getLin(idStr, cntSTPtr) )
-         goto memErr_fun27;
+      if(
+         addLineage_cnt_getLin(
+            idStr,
+            mLinSTPtr->readMapSI,
+            mLinSTPtr->readCntSI,
+            complexLinArySI[siLin], /*index of lineage*/
+            1,                   /*is a complex lineage*/
+            cntSTPtr
+         )
+      ) goto memErr_fun27;
    } /*Loop: add complex lineages to the count*/
 
    return 0;
@@ -5171,7 +5378,591 @@ addReadLineages_cnt_getLin(
 } /*addReadLineages_cnt_getLin*/
 
 /*-------------------------------------------------------\
-| Fun28: pReadLineages_getLin
+| Fun28: pReadBins_getLin
+|   - prints reads to bins
+| Input:
+|   - samSTPtr:
+|     o samEntry struct pointer with read to print
+|   - prefixStr:
+|     o c-string with the output file name
+|   - fileTypeSC:
+|     o 0: for read ids
+|     o 1: for fastq file
+|     o 2: for sam file
+|   - pBinsSC:
+|     o 0 to not print any bins
+|     o 1 for classified bins
+|     o 2 for uncassified (no lineages), but good length
+|     o 4 for fragments bin
+|     o 8 to print regardless of print status (simple)
+|     o 16 to print regardless of print status (complex)
+|   - simpLinArySI:
+|     o signed int array with the simple lineages found by
+|       simpleLinage_getLin to print
+|   - trsLinArySI:
+|     o signed int array with the trs lineage assigned to
+|       each simple lineage (from simpleLinage_getLin)
+|   - simpLenSI:
+|     o number of simple lineages in simpLinArySI and
+|       trsLinArySI
+|   - simpleSTPtr:
+|     o simple_linST struct pointer with the simple
+|       (one variant) lineage names
+|   - complexLinArySI:
+|     o signed int array with the complex lineages found
+|       by complexLineage_getLin
+|   - complexLenSI:
+|     o number of complese lineages found
+|   - complexSTPtr:
+|     o complex_linST struct array with the complex
+|       (multiple variant) lineages names
+| Output:
+|   - Prints:
+|     o read to its output assigned bin
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for file errors
+\-------------------------------------------------------*/
+signed char
+pReadBins_getLin(
+   struct samEntry *samSTPtr,  /*read to print*/
+   signed char *prefixStr,     /*name for output file*/
+   signed char fileTypeSC,     /*0:id 1:fastq 2:sam*/
+   signed char pBinsSC,   /*1:found 2:unkown 4:fragments*/
+   signed int *simpLinArySI,   /*simple lineages found*/
+   signed int *trsLinArySI,    /*simple lineage TRS #s*/
+   signed int simpLenSI,       /*# found simple lineages*/
+   struct simple_linST *simpleSTPtr,/*1VariantLineages*/
+   signed int *complexLinArySI,/*complex lineages found*/
+   signed int complexLenSI,   /*# found complex lineages*/
+   struct complex_linST *complexSTPtr /*complex lineages*/
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun28 TOC:
+   '   - prints reads to bins
+   '   o fun28 sec01:
+   '     - variable declarations
+   '   o fun28 sec02:
+   '     - print simple lineages
+   '   o fun28 sec03:
+   '     - print complex lineages
+   '   o fun28 sec04:
+   '     - print unclassifed, but full mapped reads
+   '   o fun28 sec05:
+   '     - print the fragments
+   '   o fun28 sec06:
+   '     - return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun28 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   signed int siLin = 0;
+   signed int lenSI = 0;
+   signed char fileStr[4096]; /*save file to*/
+
+   signed char *lastGroupStr = 0;
+   signed char printBl = 0;
+
+   FILE *outFILE = 0;
+
+   struct one_linST *linSTPtr = 0; /*for sanity*/
+   struct multi_linST *mLinSTPtr = 0; /*for sanity*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun28 Sec02:
+   ^   - print simple lineages
+   ^   o fun28 sec02 sub01:
+   ^     - check if can print & setup file name (simple)
+   ^   o fun28 sec02 sub02:
+   ^     - build the file name (simple lin)
+   ^   o fun28 sec02 sub03:
+   ^     - add the file name extension (simple lin)
+   ^   o fun28 sec02 sub04:
+   ^     - print read to the output file (simple lin)
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun28 Sec02 Sub01:
+   *   - check if can print & setup file name (simple)
+   \*****************************************************/
+
+   if(! pBinsSC)
+      goto done_fun28_sec06; /*not printing bins*/
+
+   for(siLin = 0; siLin < simpLenSI; ++siLin)
+   { /*Loop: check if have any simple lineage prints*/
+      linSTPtr =
+         &simpleSTPtr->linAryST[simpLinArySI[siLin]];
+
+      if( ! (pBinsSC & 8) && ! linSTPtr->printLinBl)
+         continue; /*this lineage is not printed*/
+      else if(linSTPtr->printLinBl)
+      { /*Else If: printing the read*/
+         printBl = 1;
+
+         if(! (pBinsSC & 1) )
+            break; /*not printing classified reads*/
+      } /*Else If: printing the read*/
+
+      else if(! (pBinsSC & 1) )
+         continue;
+      
+      /**************************************************\
+      * Fun28 Sec02 Sub02:
+      *   - build the file name (simple lin)
+      \**************************************************/
+
+      lenSI = cpStr_ulCp(fileStr, prefixStr);
+      fileStr[lenSI++] = '-';
+      lenSI +=
+         cpStr_ulCp(&fileStr[lenSI], linSTPtr->groupStr);
+      fileStr[lenSI++] = '-';
+
+      if(linSTPtr->checkTypeSC == def_trsType_linST)
+         lenSI +=
+            numToStr(&fileStr[lenSI], trsLinArySI[siLin]);
+
+      else if(
+         linSTPtr->checkTypeSC == def_trsFastType_linST
+      ) lenSI +=
+            numToStr(&fileStr[lenSI], trsLinArySI[siLin]);
+
+      else if(linSTPtr->lineageStr[0])
+         lenSI +=
+            cpStr_ulCp(
+              &fileStr[lenSI],
+              linSTPtr->lineageStr
+            );
+
+      else
+      { /*Else: no lineage id*/
+         fileStr[lenSI++] = 'N';
+         fileStr[lenSI++] = 'A';
+         fileStr[lenSI++] = 0;
+      } /*Else: no lineage id*/
+
+      /**************************************************\
+      * Fun28 Sec02 Sub03:
+      *   - add the file name extension (simple lin)
+      \**************************************************/
+
+      if(fileTypeSC == 0)
+      { /*If: printing read ids*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'i';
+         fileStr[lenSI++] = 'd';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 0;
+      } /*If: printing read ids*/
+
+      else if(fileTypeSC == 1)
+      { /*If: printing fastq file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'f';
+         fileStr[lenSI++] = 'q';
+         fileStr[lenSI++] = 0;
+      } /*If: printing fastq file*/
+
+      else if(fileTypeSC == 2)
+      { /*If: printing sam file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 'a';
+         fileStr[lenSI++] = 'm';
+         fileStr[lenSI++] = 0;
+      } /*If: printing sam file*/
+
+      /**************************************************\
+      * Fun28 Sec02 Sub04:
+      *   - print read to the output file (simple lin)
+      \**************************************************/
+
+      outFILE = fopen((char *) fileStr, "a");
+      if(! outFILE)
+         goto fileErr_fun28_sec06;
+
+      if(fileTypeSC == 0)
+         fprintf(outFILE, "%s\n", samSTPtr->qryIdStr);
+      else if(fileTypeSC == 1)
+         pfq_samEntry(samSTPtr, outFILE);
+      else
+         p_samEntry(samSTPtr, 0, outFILE);
+
+      fclose(outFILE);
+      outFILE = 0;
+   } /*Loop: check if have any simple lineage prints*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun28 Sec03:
+   ^   - print complex lineages
+   ^   o fun28 sec03 sub01:
+   ^     - check if can print & setup file name (complex)
+   ^   o fun28 sec03 sub02:
+   ^     - build the file name (complex lin)
+   ^   o fun28 sec03 sub03:
+   ^     - print read to the output file (complex lin)
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun28 Sec03 Sub01:
+   *   - check if can print
+   \*****************************************************/
+
+   if(printBl && ! (pBinsSC & 1) )
+      goto pUnkown_fun28_sec04_sub01;
+      /*not printing classified reads*/
+
+   for(siLin = 0; siLin < complexLenSI; ++siLin)
+   { /*Loop: check if can print any complex lineages*/
+      mLinSTPtr =
+         &complexSTPtr->linAryST[complexLinArySI[siLin]];
+
+      if(! !(pBinsSC & 16) && ! mLinSTPtr->printLinBl)
+         continue; /*this lineage is not printed*/
+
+      else if(mLinSTPtr->printLinBl)
+      { /*Else If: printing read*/
+         printBl = 1;
+
+         if(! (pBinsSC & 1) )
+            break; /*not printing classified reads*/
+      } /*Else If: printing read*/
+
+      else if(! (pBinsSC & 1) )
+         continue;
+
+      /**************************************************\
+      * Fun28 Sec03 Sub02:
+      *   - build the file name (complex lin)
+      \**************************************************/
+
+      lenSI = cpStr_ulCp(fileStr, prefixStr);
+      fileStr[lenSI++] = '-';
+      lenSI +=
+        cpStr_ulCp(&fileStr[lenSI],mLinSTPtr->groupIdStr);
+      fileStr[lenSI++] = '-';
+      lenSI +=
+        cpStr_ulCp(&fileStr[lenSI],mLinSTPtr->lineageStr);
+
+      if(fileTypeSC == 0)
+      { /*If: printing read ids*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'i';
+         fileStr[lenSI++] = 'd';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 0;
+      } /*If: printing read ids*/
+
+      else if(fileTypeSC == 1)
+      { /*If: printing fastq file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'f';
+         fileStr[lenSI++] = 'q';
+         fileStr[lenSI++] = 0;
+      } /*If: printing fastq file*/
+
+      else if(fileTypeSC == 2)
+      { /*If: printing sam file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 'a';
+         fileStr[lenSI++] = 'm';
+         fileStr[lenSI++] = 0;
+      } /*If: printing sam file*/
+
+      /**************************************************\
+      * Fun28 Sec03 Sub03:
+      *   - print read to the output file (complex lin)
+      \**************************************************/
+
+      outFILE = fopen((char *) fileStr, "a");
+      if(! outFILE)
+         goto fileErr_fun28_sec06;
+
+      if(fileTypeSC == 0)
+         fprintf(outFILE, "%s\n", samSTPtr->qryIdStr);
+      else if(fileTypeSC == 1)
+         pfq_samEntry(samSTPtr, outFILE);
+      else
+         p_samEntry(samSTPtr, 0, outFILE);
+
+      fclose(outFILE);
+      outFILE = 0;
+   } /*Loop: check if can print any complex lineages*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun28 Sec04:
+   ^   - print unclassifed, but full mapped reads
+   ^   o fun28 sec04 sub01:
+   ^     - is read unclassified + find closest lineage
+   ^   o fun28 sec04 sub02:
+   ^     - check if read is a full mapping
+   ^   o fun28 sec04 sub03:
+   ^     - build the file name (unkown lin)
+   ^   o fun28 sec04 sub04:
+   ^     - print read to the output file (unkown lin)
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun28 Sec04 Sub01:
+   *   - check if read unclassified & find closest lineage
+   \*****************************************************/
+
+   pUnkown_fun28_sec04_sub01:;
+
+   if(printBl)
+      goto done_fun28_sec06; /*reads were classified*/
+   else if(! complexSTPtr)
+      goto done_fun28_sec06; /*no complex lineages*/
+   else if(! (pBinsSC & 2) && printBl )
+      goto pfragment_fun28_sec05; /*not printing */
+
+   siLin = 
+      posFind_complex_linST(
+        samSTPtr->refStartUI,
+        complexSTPtr
+      ); /*find the earlyist ending complex lineage*/
+
+   lastGroupStr = 0;
+
+   /*****************************************************\
+   * Fun28 Sec04 Sub02:
+   *   - check if read is a full mapping
+   \*****************************************************/
+
+   for( ; siLin < complexSTPtr->lenSI; ++siLin)
+   { /*Loop: check all lineages to see if full mapping*/
+      mLinSTPtr = &complexSTPtr->linAryST[siLin];
+
+      if(
+           mLinSTPtr->startSI
+         < (signed int) samSTPtr->refStartUI
+      ) continue; /*read does not start early enough*/
+
+      else if(
+           mLinSTPtr->startSI
+         > (signed int) samSTPtr->refEndUI
+      ) continue; /*lineage starts afer read*/
+
+      else if(
+           mLinSTPtr->endSI
+         > (signed int) samSTPtr->refEndUI
+      ) continue; /*read does not get the last bases*/
+
+      else if(! lastGroupStr)
+         printBl = 1;
+      else if(
+        ! eqlNull_ulCp(lastGroupStr,mLinSTPtr->groupIdStr)
+      ) continue; /*already printed this group*/
+
+      else
+      { /*Else: printing the read*/
+         printBl = 1;
+
+         if(! (pBinsSC & 2) )
+            break; /*not printing mapped unkown reads*/
+      } /*Else: printing the read*/
+
+      lastGroupStr = mLinSTPtr->groupIdStr;
+
+      /**************************************************\
+      * Fun28 Sec04 Sub03:
+      *   - build the file name (unkown lin)
+      \**************************************************/
+
+      lenSI = cpStr_ulCp(fileStr, prefixStr);
+      fileStr[lenSI++] = '-';
+      lenSI +=
+        cpStr_ulCp(&fileStr[lenSI],mLinSTPtr->groupIdStr);
+      fileStr[lenSI++] = '-';
+      lenSI +=
+         cpStr_ulCp(
+            &fileStr[lenSI],
+            (signed char *) "unkown"
+         );
+
+      if(fileTypeSC == 0)
+      { /*If: printing read ids*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'i';
+         fileStr[lenSI++] = 'd';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 0;
+      } /*If: printing read ids*/
+
+      else if(fileTypeSC == 1)
+      { /*If: printing fastq file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'f';
+         fileStr[lenSI++] = 'q';
+         fileStr[lenSI++] = 0;
+      } /*If: printing fastq file*/
+
+      else if(fileTypeSC == 2)
+      { /*If: printing sam file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 'a';
+         fileStr[lenSI++] = 'm';
+         fileStr[lenSI++] = 0;
+      } /*If: printing sam file*/
+
+      /**************************************************\
+      * Fun28 Sec04 Sub04:
+      *   - print read to the output file (unkown lin)
+      \**************************************************/
+
+      outFILE = fopen((char *) fileStr, "a");
+      if(! outFILE)
+         goto fileErr_fun28_sec06;
+
+      if(fileTypeSC == 0)
+         fprintf(outFILE, "%s\n", samSTPtr->qryIdStr);
+      else if(fileTypeSC == 1)
+         pfq_samEntry(samSTPtr, outFILE);
+      else
+         p_samEntry(samSTPtr, 0, outFILE);
+
+      fclose(outFILE);
+      outFILE = 0;
+   } /*Loop: check all lineages to see if full mapping*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun28 Sec05:
+   ^   - print the fragments
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+    pfragment_fun28_sec05:;
+
+    if(printBl)
+       goto done_fun28_sec06; /*printed the reads*/
+    else if(! (pBinsSC & 4) )
+       goto done_fun28_sec06; /*not printing fragments*/
+
+    else
+    { /*Else: printing the fragment*/
+      lenSI = cpStr_ulCp(fileStr, prefixStr);
+      lenSI +=
+         cpStr_ulCp(
+            &fileStr[lenSI],
+            (signed char *) "-fragments"
+         );
+
+      if(fileTypeSC == 0)
+      { /*If: printing read ids*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'i';
+         fileStr[lenSI++] = 'd';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 0;
+      } /*If: printing read ids*/
+
+      else if(fileTypeSC == 1)
+      { /*If: printing fastq file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 'f';
+         fileStr[lenSI++] = 'q';
+         fileStr[lenSI++] = 0;
+      } /*If: printing fastq file*/
+
+      else if(fileTypeSC == 2)
+      { /*If: printing sam file*/
+         fileStr[lenSI++] = '.';
+         fileStr[lenSI++] = 's';
+         fileStr[lenSI++] = 'a';
+         fileStr[lenSI++] = 'm';
+         fileStr[lenSI++] = 0;
+      } /*If: printing sam file*/
+
+      outFILE = fopen((char *) fileStr, "a");
+      if(! outFILE)
+         goto fileErr_fun28_sec06;
+
+      if(fileTypeSC == 0)
+         fprintf(outFILE, "%s\n", samSTPtr->qryIdStr);
+      else if(fileTypeSC == 1)
+         pfq_samEntry(samSTPtr, outFILE);
+      else
+         p_samEntry(samSTPtr, 0, outFILE);
+
+      fclose(outFILE);
+      outFILE = 0;
+    } /*Else: printing the fragment*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun28 Sec06:
+   ^   - return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   goto done_fun28_sec06;
+
+   done_fun28_sec06:;
+      printBl = 0;
+      goto ret_fun28_sec06;
+
+   fileErr_fun28_sec06:;
+      printBl = 1;
+      goto ret_fun28_sec06;
+
+   ret_fun28_sec06:;
+      if(outFILE)
+         fclose(outFILE);
+      outFILE = 0;
+
+      return printBl;
+} /*pReadBins_getLin*/
+
+/*-------------------------------------------------------\
+| Fun29: setCounts_cnt_getLin
+|   - sets counts for each lineage in a cnt_getLin struct
+| Input:
+|   - simpleSTPtr:
+|     o simple_linST struct pointer with the simple
+|       (one variant) lineage names
+|   - complexSTPtr:
+|     o complex_linST struct array with the complex
+|       (multiple variant) lineages names
+|   - cntSTPtr:
+|     o cnt_getLin struct pointer to set counts for
+| Output:
+|   - Modifies:
+|     o linSupArySI, linMapArySI, and linCntArySI to have
+|       the correct counts
+\-------------------------------------------------------*/
+void
+setCounts_cnt_getLin(
+   struct simple_linST *simpleSTPtr,
+   struct complex_linST *complexSTPtr,
+   struct cnt_getLin *cntSTPtr
+){
+   signed int siLin = 0;
+   signed int indexSI = 0;
+
+   for(siLin = 0; siLin < cntSTPtr->lenSI; ++siLin)
+   { /*Loop: add linage counts*/
+      indexSI = cntSTPtr->linIndexArySI[siLin];
+      if(cntSTPtr->compAryBl[siLin])
+      { /*If: a complex lineage*/
+         cntSTPtr->linCntArySI[siLin] =
+            complexSTPtr->linAryST[indexSI].readCntSI;
+         cntSTPtr->linMapArySI[siLin] =
+            complexSTPtr->linAryST[indexSI].readMapSI;
+      } /*If: a complex lineage*/
+
+      else
+      { /*Else: a simple lineage*/
+         cntSTPtr->linCntArySI[siLin] =
+            simpleSTPtr->linAryST[indexSI].readCntSI;
+         cntSTPtr->linMapArySI[siLin] =
+            simpleSTPtr->linAryST[indexSI].readCntSI;
+      } /*Else: a simple lineage*/
+   } /*Loop: add linage counts*/
+} /*setCounts_cnt_getLin*/
+
+/*-------------------------------------------------------\
+| Fun30: pReadLineages_getLin
 |   - prints the lineage counts for a set of reads and
 |     then prints the consensus lineage for the reads
 |   !!! warning, this does not have a conistent header
@@ -5216,26 +6007,26 @@ pReadLineages_getLin(
    float maxMixedPercF,        /*max minor var in mixed*/
    void *outFILE               /*file to print to*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun28 TOC:
+   ' Fun30 TOC:
    '   - prints the lineage counts for a set of reads and
    '     then prints the consensus lineage for the reads
    '   !!! warning, this does not have a conistent header
    '       system, because the TRS lineages are variable.
    '       expect different headers for different input
-   '   o fun28 sec01:
+   '   o fun30 sec01:
    '     - variable declarations
-   '   o fun28 sec02:
+   '   o fun30 sec02:
    '     - print header and setup memory 
-   '   o fun28 sec03:
+   '   o fun30 sec03:
    '     - number reads per lineage row + find consensus
-   '   o fun28 sec04:
+   '   o fun30 sec04:
    '     - print consensus row
-   '   o fun28 sec05:
+   '   o fun30 sec05:
    '     - return and clean up
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun28 Sec01:
+   ^ Fun30 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5251,7 +6042,7 @@ pReadLineages_getLin(
    ulong_ulCp ulDelim = mkDelim_ulCp(def_trsType_linST);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun28 Sec02:
+   ^ Fun30 Sec02:
    ^   - print header and setup memory 
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5288,16 +6079,16 @@ pReadLineages_getLin(
 
    conHeapArySI = calloc(conLenSI, sizeof(signed int));
    if(! conHeapArySI)
-      goto memErr_fun28_sec05;
+      goto memErr_fun30_sec05;
 
    mixedHeapArySC = calloc(conLenSI, sizeof(signed char));
    if(! mixedHeapArySC)
-      goto memErr_fun28_sec05;
+      goto memErr_fun30_sec05;
 
    conLenSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun28 Sec03:
+   ^ Fun30 Sec03:
    ^   - number reads per lineage row + find consensus
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -5309,11 +6100,15 @@ pReadLineages_getLin(
    { /*Loop: print the count line and find consensus*/
       fprintf(
          (FILE *) outFILE,
-         "\t%i",
+         "\tsup=%i:perc=%0.2f:useful=%i:depth=%i",
+         cntSTPtr->linSupArySI[siPos],
+         (float) cntSTPtr->linSupArySI[siPos]
+            / (float) cntSTPtr->linMapArySI[siPos],
+         cntSTPtr->linMapArySI[siPos],
          cntSTPtr->linCntArySI[siPos]
       );
 
-      if(cntSTPtr->linCntArySI[siPos] >= minDepthSI)
+      if(cntSTPtr->linSupArySI[siPos] >= minDepthSI)
       { /*If: I have enough read depth*/
          if(! conLenSI)
             conHeapArySI[conLenSI++] = siPos;
@@ -5340,14 +6135,14 @@ pReadLineages_getLin(
                tmpF =
                   (float)
                   min_genMath(
-                    cntSTPtr->linCntArySI[siPos],
-                    cntSTPtr->linCntArySI[siPos - 1]
+                    cntSTPtr->linSupArySI[siPos],
+                    cntSTPtr->linSupArySI[siPos - 1]
                  );
 
                tmpF /=
                   (float) (
-                       cntSTPtr->linCntArySI[siPos]
-                     + cntSTPtr->linCntArySI[siPos - 1]
+                       cntSTPtr->linSupArySI[siPos]
+                     + cntSTPtr->linSupArySI[siPos - 1]
                   );
 
                if(tmpF < maxMixedPercF)
@@ -5355,8 +6150,8 @@ pReadLineages_getLin(
                   /*hit users mixed infection threshold*/
 
                else if(
-                    cntSTPtr->linCntArySI[siPos]
-                  > cntSTPtr->linCntArySI[siPos] - 1
+                    cntSTPtr->linSupArySI[siPos]
+                  > cntSTPtr->linSupArySI[siPos] - 1
                ){ /*Else If: have better read depth*/
                   conHeapArySI[conLenSI - 1] = siPos;
                   mixedHeapArySC[conLenSI - 1] = 0;
@@ -5372,7 +6167,7 @@ pReadLineages_getLin(
    fprintf((FILE *) outFILE, "\t*%s", str_endLine);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun28 Sec04:
+   ^ Fun30 Sec04:
    ^   - print consensus row
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
    
@@ -5383,7 +6178,7 @@ pReadLineages_getLin(
    { /*Loop: print the consensus row*/
       if(siCon >= conLenSI || siPos < conHeapArySI[siCon])
       { /*If: not part of the consensus*/
-         if(cntSTPtr->linCntArySI[siPos] < minDepthSI)
+         if(cntSTPtr->linSupArySI[siPos] < minDepthSI)
             fprintf((FILE *) outFILE, "\tLOW_DEPTH");
          else
             fprintf((FILE *) outFILE, "\tNOT_SELECTED");
@@ -5406,18 +6201,18 @@ pReadLineages_getLin(
    fprintf((FILE *) outFILE, "\t*%s", str_endLine);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun28 Sec05:
+   ^ Fun30 Sec05:
    ^   - return and clean up
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    siPos = 0;
-   goto ret_fun28_sec05;
+   goto ret_fun30_sec05;
 
-   memErr_fun28_sec05:;
+   memErr_fun30_sec05:;
       siPos = 1;
-      goto ret_fun28_sec05;
+      goto ret_fun30_sec05;
 
-   ret_fun28_sec05:;
+   ret_fun30_sec05:;
       if(conHeapArySI)
          free(conHeapArySI);
       conHeapArySI = 0;
@@ -5430,7 +6225,7 @@ pReadLineages_getLin(
 } /*pReadLineages_getLin*/
 
 /*-------------------------------------------------------\
-| Fun29: pGenomeLineage_getLin
+| Fun31: pGenomeLineage_getLin
 |   - prints lineages found by simpleLinage_getLin and
 |     complexLineage_getLin for a single sequence
 |   !!! warning, this does not have a conistent header
@@ -5509,7 +6304,7 @@ plineages_getLin(
          simpleSTPtr,
          complexSTPtr
      ) /*gets lineage output formant and sorts by group*/
-   ) goto memErr_fun29;
+   ) goto memErr_fun31;
 
    /*___________________PRINT_HEADER____________________*/
    if(*pHeadBlPtr)
@@ -5534,12 +6329,12 @@ plineages_getLin(
 
    /*_______________CLEAN_UP_AND_RETURN_________________*/
    complexLenSI = 0;
-   goto ret_fun29;
+   goto ret_fun31;
 
-   memErr_fun29:;
+   memErr_fun31:;
       complexLenSI = 1;
-      goto ret_fun29;
-   ret_fun29:;
+      goto ret_fun31;
+   ret_fun31:;
       freeStack_cnt_getLin(&linStackST);
       return (signed char) complexLenSI;
 } /*pGenomeLineage_getLin*/

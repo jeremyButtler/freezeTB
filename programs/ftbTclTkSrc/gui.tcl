@@ -3874,7 +3874,7 @@ tk::frame .main.out.amr ;
 #   o gui08 sec02 sub03:
 #     - function; read spoligotype
 #   o gui08 sec02 sub04:
-#     - function read MIRU-VNTR
+#     - function read hsp65 results
 #   o gui08 sec02 sub05:
 #     - function; mean read depth graph
 #   o gui08 sec02 sub06:

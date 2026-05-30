@@ -46,7 +46,7 @@
 '         - unsorts a one_linST array using an array of
 '           original index's
 '     + one_linST find functions (all need a sorted array)
-'       ! fun12 and fun 12 are hidden becuase fun39
+'       ! fun12 and fun 12 are hidden becuase fun41
 '         retuns a position sorted array
 '       o fun11: posFindAry_one_linST
 '         - find the first variant that is between the
@@ -61,53 +61,59 @@
 '         simple_linST struct to 0
 '     o fun15: init_simple_linST
 '       - sets array addresses in simple_linST to 0/null
-'     o fun16: freeStack_simple_linST
+'     o fun16: resetReadCounts_simple_linST
+'       - resets all read counts in a simple_linST
+'         structure to 0
+'     o fun17: freeStack_simple_linST
 '       - frees all arrays in a simple_linST struct
-'     o fun17: freeHeap_simple_linST
+'     o fun18: freeHeap_simple_linST
 '       - frees a simple_linST struct
-'     o fun18: addMem_simple_linST
+'     o fun19: addMem_simple_linST
 '       - adds memory to a simple_linST struct
-'     o fun19: clearGroup_simple_linST
+'     o fun20: clearGroup_simple_linST
 '       - clears all detected groups in a simple_linST
-'     o fun20: unsort_simple_linST
+'     o fun21: unsort_simple_linST
 '       - unsorts a simple_linST struct using an array
 '         of original index's
 '   * multi_linST structures
-'     o fun21: blank_multi_linST
+'     o fun22: blank_multi_linST
 '       - blanks (sets to defaults) a multi_linST struct
-'     o fun22: init_multi_linST
+'     o fun23: init_multi_linST
 '       - initializes a multi_linST structure
-'     o fun23: freeStack_multi_linST
+'     o fun24: freeStack_multi_linST
 '       - frees variables in a multi_linST structure
-'     o fun24: freeHeap_multi_linST
+'     o fun25: freeHeap_multi_linST
 '       - frees a multi_linST structure
-'     o fun25: freeHeapAry_multi_linST
+'     o fun26: freeHeapAry_multi_linST
 '       - frees a multi_linST struct array
 '   * complex_linST structure general functions
-'      o fun26: blank_complex_linST
+'      o fun27: blank_complex_linST
 '        - sets length in a complex_linST to 0;(lazy blank
-'      o fun27: init_complex_linST
+'      o fun28: init_complex_linST
 '        - sets all values complex_linST to 0/null
-'      o fun28: freeStack_complex_linST
+'      o fun29: resetReadCnt_complex_linST
+'       - restets the read counts for the multi_linST
+'         struct array in a complex_linST structure
+'      o fun30: freeStack_complex_linST
 '        - frees all variabls in a complex_linST struct
-'      o fun29: freeHeap_complex_linST
+'      o fun31: freeHeap_complex_linST
 '        - frees a complex_linST struct
-'      o fun30: addMem_complex_linST
+'      o fun32: addMem_complex_linST
 '        - adds memory to a complex_linST struct
-'      ! fun31 to fun36 are only used in getting complex
+'      ! fun33 to fun38 are only used in getting complex
 '        lineages to decrease search time in reading in
 '        the database
-'      o .c fun31: swap_complex_linST
+'      o .c fun33: swap_complex_linST
 '        - swap two index in a complex lineage array
-'      o .c fun32: addIdSort_complex_linST
+'      o .c fun34: addIdSort_complex_linST
 '        - add complex id to an lineage by sorting
-'      o .c fun33: idFind_complex_linST
+'      o .c fun35: idFind_complex_linST
 '        - finds an id in an id sorted complex_linST
 '        - this is only used in the reading in function
-'      o .c fun34: groupSort_complex_linST
+'      o .c fun36: groupSort_complex_linST
 '        - sorts a mult_linST array in a complex_linST
 '          struct by the group id
-'      o .c fun35: positionSort_complex_linST
+'      o .c fun37: positionSort_complex_linST
 '        - sorts a mult_linST array in a complex_linST
 '          struct by the position (end coordinate)
 '        - this sort also makes sure that lineages that
@@ -115,23 +121,23 @@
 '        - between end and total at ends, this ensures
 '          complex lineages that are depenent on other
 '          complex lineages end up at the end
-'      o .c fun36: unsort_complex_linST
+'      o .c fun38: unsort_complex_linST
 '        - unsort a mult_linST array in a complex_linST
 '          by the original index's
-'      o fun37: posFind_complex_linST
+'      o fun39: posFind_complex_linST
 '        - find the first complex variant that is between
 '          the start and end position in a complex_linST
 '   * general functions
-'      o .c fun38: flipIndexAry_complex_linST
+'      o .c fun40: flipIndexAry_complex_linST
 '        - changes the index array so that the stored
 '          index is the position and the old position is
 '          the new stored index
-'     o fun39: getSimpleLineages_linST
+'     o fun41: getSimpleLineages_linST
 '       - gets the lineages from the variants lineage file
-'     o .c fun40: intInsert_linST
+'     o .c fun42: intInsert_linST
 '       - inserts an integer into an array at its sorted
 '         position (this does not insert duplicates)
-'     o fun41: getComplexLineages_linST
+'     o fun43: getComplexLineages_linST
 '       - gets the lineages from the complex lineage file
 '   o license:
 '     - licensing for this code (CC0)
@@ -189,6 +195,8 @@ typedef struct one_linST
    /*_____________________coordiantes___________________*/
    signed int startSI;    /*first base in the lineage*/
    signed int endSI;      /*last base in the lineage*/
+   signed int readSupSI;  /*number reads supporting call*/
+   signed int readCntSI;  /*number reads map to lineage*/
 
    /*_________________lineage_system_type_______________*/
    signed char moleculeTypeSC;
@@ -324,6 +332,13 @@ typedef struct multi_linST
                              `    lineage
                              */
 
+   /*__________read_counts_for_depths___________________*/
+   signed int readSupSI; /*number reads supporting*/
+   signed int readMapSI; /*number fully mapped reads*/
+   signed int readCntSI;
+      /*total possible reads, including fragments*/
+
+   /*____________lineage_variables______________________*/
    /*these are for figuring out what lineages are needed
    `  to get a complex lineage
    */
@@ -539,7 +554,24 @@ init_simple_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun16: freeStack_simple_linST
+| Fun16: resetReadCounts_simple_linST
+|   - resets all read counts in a simple_linST structure
+|     to 0
+| Input:
+|   - simpleSTPtr:
+|     o simple_linST struct pointer to set counts to 0
+| Output:
+|   - Modifies:
+|     o readSupSI and readCntSI in each linAryST struct in
+|       simpleSTPtr to be 0
+\-------------------------------------------------------*/
+void
+resetReadCounts_simple_linST(
+   struct simple_linST *simpleSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun17: freeStack_simple_linST
 |   - frees all arrays in a simple_linST struct
 | Input:
 |   - simpleSTPtr:
@@ -555,7 +587,7 @@ freeStack_simple_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun17: freeHeap_simple_linST
+| Fun18: freeHeap_simple_linST
 |   - frees a simple_linST struct
 | Input:
 |   - simpleSTPtr:
@@ -570,7 +602,7 @@ freeHeap_simple_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun18: addMem_simple_linST
+| Fun19: addMem_simple_linST
 |   - adds memory to a simple_linST struct
 | Input:
 |   - simpleSTPtr:
@@ -595,7 +627,7 @@ addMem_simple_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun19: clearGroup_simple_linST
+| Fun20: clearGroup_simple_linST
 |   - clears all detected groups in a simple_linST struct
 | Input
 |   - simpleSTPtr:
@@ -611,7 +643,7 @@ clearGroup_simple_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun20: unsort_simple_linST
+| Fun21: unsort_simple_linST
 |   - unsorts a simple_linST struct using an array of
 |     original index's
 | Input:
@@ -632,7 +664,7 @@ unsort_simple_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun21: blank_multi_linST
+| Fun22: blank_multi_linST
 |   - blanks (sets to defaults) a multi_linST structure
 | Input:
 |   - mLinSTPtr:
@@ -648,7 +680,7 @@ blank_multi_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun22: init_multi_linST
+| Fun23: init_multi_linST
 |   - initializes a multi_linST structure
 | Input:
 |   - mLinSTPtr:
@@ -663,7 +695,7 @@ init_multi_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun23: freeStack_multi_linST
+| Fun24: freeStack_multi_linST
 |   - frees variables in a multi_linST structure
 | Input:
 |   - mLinSTPtr:
@@ -682,7 +714,7 @@ freeStack_multi_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun24: freeHeap_multi_linST
+| Fun25: freeHeap_multi_linST
 |   - frees a multi_linST structure
 | Input:
 |   - mLinSTPtr:
@@ -700,7 +732,7 @@ freeHeap_multi_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun25: freeHeapAry_multi_linST
+| Fun26: freeHeapAry_multi_linST
 |   - frees a multi_linST struct array
 | Input:
 |   - mLinAryST:
@@ -718,7 +750,7 @@ freeHeapAry_multi_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun26: blank_complex_linST
+| Fun27: blank_complex_linST
 |   - sets length in a complex_linST to 0 (lazy blank)
 | Input:
 |   - complexSTPtr:
@@ -733,7 +765,7 @@ blank_complex_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun27: init_complex_linST
+| Fun28: init_complex_linST
 |   - sets all values complex_linST to 0/null
 | Input:
 |   - complexSTPtr:
@@ -748,7 +780,25 @@ init_complex_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun28: freeStack_complex_linST
+| Fun29: resetReadCnt_complex_linST
+|   - restets the read counts for the multi_linST struct
+|     array in a complex_linST structure
+| Input:
+|   - complexSTPtr:
+|     o complex_linST struct pointer with multi lineages
+|       to reset read counts for
+| Output:
+|   - sets readSupSI, readCntSI, and readMapSI in each
+|     multi_linST struct in linARyST in complexSTPtr to
+|     0
+\-------------------------------------------------------*/
+void
+resetReadCnt_complex_linST(
+   struct complex_linST *complexSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun30: freeStack_complex_linST
 |   - frees all variabls in a complex_linST struct
 | Input:
 |   - complexSTPtr:
@@ -765,7 +815,7 @@ freeStack_complex_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun29: freeHeap_complex_linST
+| Fun31: freeHeap_complex_linST
 |   - frees a complex_linST struct
 | Input:
 |   - complexSTPtr:
@@ -780,7 +830,7 @@ freeHeap_complex_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun30: addMem_complex_linST
+| Fun32: addMem_complex_linST
 |   - adds memory to a complex_linST struct
 | Input:
 |   - complexSTPtr:
@@ -805,7 +855,7 @@ addMem_complex_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun37: posFind_complex_linST
+| Fun39: posFind_complex_linST
 |   - find the first complex variant that is between the
 |     start and end position in a complex_linST struct
 | Input:
@@ -828,7 +878,7 @@ posFind_complex_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun39: getSimpleLineages_linST
+| Fun41: getSimpleLineages_linST
 |   - gets the lineages from the variants lineage file
 | Input:
 |   - noFastBl
@@ -861,7 +911,7 @@ getSimpleLineages_linST(
 );
 
 /*-------------------------------------------------------\
-| Fun41: getComplexLineages_linST
+| Fun43: getComplexLineages_linST
 |   - gets the lineages from the complex lineage file
 | Input:
 |   - simpleSTPtr:

@@ -3895,17 +3895,17 @@ getHsp65Lin_ftbRayST(
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun18 TOC:
    '   - get the getLin hsp65 lineages (an others)
-   '   o fun18 sec01:
+   '   o fun18 depth01:
    '     - variable declarations
-   '   o fun18 sec02:
+   '   o fun18 depth02:
    '     - open the hsp65 read lineage file output and
    '       read the three lines in the file
-   '   o fun18 sec03:
+   '   o fun18 depth03:
    '     - get id and move past id and type column
-   '   o fun18 sec04:
+   '   o fun18 depth04:
    '     - extract the lineages from the file and add to
    '       the table
-   '   o fun18 sec05:
+   '   o fun18 depth05:
    '     - clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -3918,18 +3918,21 @@ getHsp65Lin_ftbRayST(
    #define def_lenLine_fun18 (2 << 10) /*about 4kb*/
 
    /*variables for processing the three lines*/
-   signed char firstLineStr[def_lenLine_fun18];
-   signed char *firstStr = 0;
-   signed int firstMaxLenSI = 0;
-   signed char *firstEndStr = 0;
+   signed char linLineStr[def_lenLine_fun18];
+   signed char *linStr = 0;
+   signed int linMaxLenSI = 0;
+   signed char *linEndStr = 0;
 
-   signed char secLineStr[def_lenLine_fun18];
-   signed char *secStr = 0;
-   signed int secMaxLenSI = 0;
-   signed char *secEndStr = 0;
+   signed char depthLineStr[def_lenLine_fun18];
+   signed char *depthStr = 0;
+   signed int supMaxLenSI = 0;
+   signed int percMaxLenSI = 0;
+   signed int unknownMaxLenSI = 0;
+   signed int depthMaxLenSI = 0;
+   signed char *depthEndStr = 0;
  
-   signed char thirdLineStr[def_lenLine_fun18];
-   signed char *thirdStr = 0;
+   signed char callLineStr[def_lenLine_fun18];
+   signed char *callStr = 0;
 
    /*variables for printing to table*/
    signed char outLineStr[256];
@@ -3945,54 +3948,103 @@ getHsp65Lin_ftbRayST(
    ^ Fun18 Sec02:
    ^   - open the hsp65 read lineage file output and
    ^     read the three lines in the file
+   ^   o fun18 sec02 sub01:
+   ^     - clear hsp65 list box and load new results
+   ^   o fun18 sec02 sub02:
+   ^     - read in the lineage detection line
+   ^   o fun18 sec02 sub03:
+   ^     - get depth and support line
+   ^   o fun18 sec02 sub04:
+   ^     - get called (mixed and low depth) line
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun18 Sec02 Sub01:
+   *   - clear hsp65 list box and load new results
+   \*****************************************************/
 
    clear_listBox_rayWidg(guiSTPtr->hsp65ListSTPtr);
 
    if(! guiSTPtr->filePrefixStr[0])
-      goto done_fun18_sec05;
+      goto done_fun18_depth05;
 
-   secStr = firstLineStr;
-   secStr += cpStr_ulCp(secStr, guiSTPtr->filePrefixStr);
-   secStr +=
-     cpStr_ulCp(secStr,(signed char *) "-read-hsp65.tsv");
+   depthStr = linLineStr;
+   depthStr +=
+      cpStr_ulCp(depthStr, guiSTPtr->filePrefixStr);
+   depthStr +=
+     cpStr_ulCp(
+        depthStr,
+        (signed char *) "-read-hsp65.tsv"
+     );
 
-   hsp65FILE = fopen((char *) firstLineStr, "r");
+   hsp65FILE = fopen((char *) linLineStr, "r");
    if(! hsp65FILE)
-      goto done_fun18_sec05;
+      goto done_fun18_depth05;
+
+   /*****************************************************\
+   * Fun18 Sec02 Sub02:
+   *   - read in the lineage detection line
+   \*****************************************************/
 
    lenSI =
       getLine_fileFun(
          hsp65FILE,
-         firstLineStr,
+         linLineStr,
          def_lenLine_fun18,
          &ignoreSL
       );
    if(lenSI <= 0)
-      goto done_fun18_sec05;
-   firstStr = firstLineStr;
+      goto done_fun18_depth05;
+   linStr = linLineStr;
+
+   /*****************************************************\
+   * Fun18 Sec02 Sub03:
+   *   - get depth and support line
+   \*****************************************************/
 
    lenSI =
       getLine_fileFun(
          hsp65FILE,
-         secLineStr,
+         depthLineStr,
          def_lenLine_fun18,
          &ignoreSL
       );
    if(lenSI <= 0)
-      goto done_fun18_sec05;
-   secStr = secLineStr;
+      goto done_fun18_depth05;
+   depthStr = depthLineStr;
+
+   outStr = depthLineStr;
+   callLineStr = depthLineStr;
+
+   while(*callLineStr)
+   { /*Loop: clean up the depth entry*/
+      if(*callLineStr >= '0' && *callLineStr <= '9')
+         *outStr++ = *callLineStr;
+      else if(*callLineStr == ':')
+         *outStr++ = '\t';
+      else if(*callLineStr == '.')
+         *outStr++ = *callLineStr;
+      ++callLineStr;
+   } /*Loop: clean up the depth entry*/
+
+   *outStr = 0;
+   outStr = 0;
+
+   /*****************************************************\
+   * Fun18 Sec02 Sub04:
+   *   - get called (mixed and low depth) line
+   \*****************************************************/
 
    lenSI =
       getLine_fileFun(
          hsp65FILE,
-         thirdLineStr,
+         callLineStr,
          def_lenLine_fun18,
          &ignoreSL
       );
    if(lenSI <= 0)
-      goto done_fun18_sec05;
-   thirdStr = thirdLineStr;
+      goto done_fun18_depth05;
+   callStr = callLineStr;
 
    fclose(hsp65FILE);
    hsp65FILE = 0;
@@ -4005,50 +4057,50 @@ getHsp65Lin_ftbRayST(
    outStr = outLineStr;
 
    /*get past id column*/
-   firstStr += endWhite_ulCp(firstStr);
-   secStr += endWhite_ulCp(secStr);
-   thirdStr += endWhite_ulCp(thirdStr);
-   if(! *firstStr || ! *secStr || ! *thirdStr)
-      goto done_fun18_sec05;
+   linStr += endWhite_ulCp(linStr);
+   depthStr += endWhite_ulCp(depthStr);
+   callStr += endWhite_ulCp(callStr);
+   if(! *linStr || ! *depthStr || ! *callStr)
+      goto done_fun18_depth05;
 
    /*get off the tab and white space*/
-   while(*firstStr && *firstStr < 33)
-      ++firstStr;
-   while(*secStr && *secStr < 33)
-      ++secStr;
-   while(*thirdStr && *thirdStr < 33)
-      ++thirdStr;
+   while(*linStr && *linStr < 33)
+      ++linStr;
+   while(*depthStr && *depthStr < 33)
+      ++depthStr;
+   while(*callStr && *callStr < 33)
+      ++callStr;
 
    /*get of the type column*/
-   firstStr += endWhite_ulCp(firstStr);
-   secStr += endWhite_ulCp(secStr);
-   thirdStr += endWhite_ulCp(thirdStr);
-   if(! *firstStr || ! *secStr || ! *thirdStr)
-      goto done_fun18_sec05;
+   linStr += endWhite_ulCp(linStr);
+   depthStr += endWhite_ulCp(depthStr);
+   callStr += endWhite_ulCp(callStr);
+   if(! *linStr || ! *depthStr || ! *callStr)
+      goto done_fun18_depth05;
 
    /*get off the tab and white space*/
-   while(*firstStr && *firstStr < 33)
-      ++firstStr;
-   while(*secStr && *secStr < 33)
-      ++secStr;
-   while(*thirdStr && *thirdStr < 33)
-      ++thirdStr;
-   if(! *firstStr || ! *secStr || ! *thirdStr)
-      goto done_fun18_sec05;
+   while(*linStr && *linStr < 33)
+      ++linStr;
+   while(*depthStr && *depthStr < 33)
+      ++depthStr;
+   while(*callStr && *callStr < 33)
+      ++callStr;
+   if(! *linStr || ! *depthStr || ! *callStr)
+      goto done_fun18_depth05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun18 Sec04:
    ^   - extract the lineages from the file and add to
    ^     the table
-   ^   o fun18 sec04 sub01:
+   ^   o fun18 depth04 sub01:
    ^     - find the maximum length of each column and
    ^       build the header
-   ^   o fun18 sec04 sub02:
+   ^   o fun18 depth04 sub02:
    ^     - start lineage loop + get next lineage, counts,
    ^       and status from the
-   ^   o fun18 sec04 sub03:
+   ^   o fun18 depth04 sub03:
    ^     - add in call for the lineage
-   ^   o fun18 sec04 sub04:
+   ^   o fun18 depth04 sub04:
    ^     - add lineage to the list box and move off white
    ^       space
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
@@ -4057,52 +4109,123 @@ getHsp65Lin_ftbRayST(
    * Fun18 Sec04 Sub01:
    *   - find the maximum length of each column and build
    *     the header
+   *   o fun18 sec04 sub01 cat01:
+   *     - find the maximum size of each column
+   *   o fun18 sec04 sub02 cat02:
+   *     - header; add lineage entry
+   *   o fun18 sec04 sub01 cat03:
+   *     - header; add depth entries
+   *   o fun18 sec04 sub01 cat04:
+   *     - header; add call entery and add header to table
    \*****************************************************/
 
-   /*___________find_column_lengths_____________________*/
-   firstEndStr = firstStr;
-   secEndStr = secStr;
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun18 Sec04 Sub01 Cat01:
+   +   - find the maximum size of each column
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   while(*secEndStr && *secEndStr != '*')
+   linEndStr = linStr;
+   depthEndStr = depthStr;
+
+   while(*depthEndStr && *depthEndStr != '*')
    { /*Loop: find longest entry for each column*/
-      lenSI = endWhite_ulCp(firstEndStr);
-      if(lenSI > firstMaxLenSI)
-         firstMaxLenSI = lenSI;
-      firstEndStr += lenSI;
+      lenSI = endWhite_ulCp(linEndStr);
+      if(lenSI > linMaxLenSI)
+         linMaxLenSI = lenSI;
+      linEndStr += lenSI;
 
-      lenSI = endWhite_ulCp(secEndStr);
-      if(lenSI > secMaxLenSI)
-         secMaxLenSI = lenSI;
-      secEndStr += lenSI;
+      lenSI = endWhite_ulCp(depthEndStr);
+      if(lenSI > subMaxLenSI)
+         supMaxLenSI = lenSI;
+      depthEndStr += lenSI;
 
-      while(*firstEndStr && *firstEndStr < 33)
-         ++firstEndStr;
-      while(*secEndStr && *secEndStr < 33)
-         ++secEndStr;
+      lenSI = endWhite_ulCp(depthEndStr);
+      if(lenSI > percMaxLenSI)
+         percMaxLenSI = lenSI;
+      depthEndStr += lenSI;
+
+      lenSI = endWhite_ulCp(depthEndStr);
+      if(lenSI > unkownMaxLenSI)
+         unkownMaxLenSI = lenSI;
+      depthEndStr += lenSI;
+
+      lenSI = endWhite_ulCp(depthEndStr);
+      if(lenSI > depthMaxLenSI)
+         depthMaxLenSI = lenSI;
+      depthEndStr += lenSI;
+
+      while(*linEndStr && *linEndStr < 33)
+         ++linEndStr;
+      while(*depthEndStr && *depthEndStr < 33)
+         ++depthEndStr;
    } /*Loop: find longest entry for each column*/
 
    outStr = outLineStr;
 
-   /*___________build_the_header________________________*/
-   if(firstMaxLenSI < 9)
-      firstMaxLenSI = 9;
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun18 Sec04 Sub01 Cat02:
+   +   - header; add lineage entry
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(linMaxLenSI < 9)
+      linMaxLenSI = 9;
    else
-      firstMaxLenSI += 2;
+      linMaxLenSI += 2;
    lenSI = cpStr_ulCp(outStr, (signed char *) "lineage");
    outStr += lenSI;
-   for( ; lenSI <= firstMaxLenSI; ++lenSI)
+   for( ; lenSI <= linMaxLenSI; ++lenSI)
       *outStr++ = ' ';
    *outStr = 0;
 
-   if(secMaxLenSI < 7)
-      secMaxLenSI = 7;
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun18 Sec04 Sub01 Cat03:
+   +   - header; add depth entries
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   if(supMaxLenSI < 9)
+      supMaxLenSI = 9;
    else
-      secMaxLenSI += 2;
-   lenSI = cpStr_ulCp(outStr, (signed char *) "depth");
+      supMaxLenSI += 2;
+   lenSI = cpStr_ulCp(outStr, (signed char *) "support");
    outStr += lenSI;
-   for( ; lenSI <= secMaxLenSI; ++lenSI)
+   for( ; lenSI <= supMaxLenSI; ++lenSI)
       *outStr++ = ' ';
    *outStr = 0;
+
+   if(percMaxLenSI < 6)
+      percMaxLenSI = 6;
+   else
+      percMaxLenSI += 2;
+   lenSI = cpStr_ulCp(outStr, (signed char *) "perc");
+   outStr += lenSI;
+   for( ; lenSI <= percMaxLenSI; ++lenSI)
+      *outStr++ = ' ';
+   *outStr = 0;
+
+   if(unkownMaxLenSI < 9)
+      unkownMaxLenSI = 9;
+   else
+      unkownMaxLenSI += 2;
+   lenSI = cpStr_ulCp(outStr, (signed char *) "unknown");
+   outStr += lenSI;
+   for( ; lenSI <= unkownMaxLenSI; ++lenSI)
+      *outStr++ = ' ';
+   *outStr = 0;
+
+   if(depthMaxLenSI < 7)
+      depthMaxLenSI = 7;
+   else
+      depthMaxLenSI += 2;
+   lenSI = cpStr_ulCp(outStr, (signed char *) "depth");
+   outStr += lenSI;
+   for( ; lenSI <= depthMaxLenSI; ++lenSI)
+      *outStr++ = ' ';
+   *outStr = 0;
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun18 Sec04 Sub01 Cat04:
+   +   - header; add call entery and add header to table
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    lenSI = cpStr_ulCp(outStr, (signed char *) "call");
    outStr += lenSI;
@@ -4115,7 +4238,7 @@ getHsp65Lin_ftbRayST(
          guiSTPtr->hsp65ListSTPtr,
          guiSTPtr->widgSTPtr
       )
-   ) goto memErr_fun18_sec05;
+   ) goto memErr_fun18_depth05;
 
    /*****************************************************\
    * Fun18 Sec04 Sub02:
@@ -4123,16 +4246,16 @@ getHsp65Lin_ftbRayST(
    *     and status from the
    \*****************************************************/
 
-   while(secStr != secEndStr)
+   while(depthStr != depthEndStr)
    { /*Loop: build the table*/
       outStr = outLineStr;
 
       /*______________add_lineage_to_entry______________*/
-      lenSI = cpWhite_ulCp(outStr, firstStr);
-      firstStr += lenSI;
+      lenSI = cpWhite_ulCp(outStr, linStr);
+      linStr += lenSI;
       outStr += lenSI;
 
-      while(lenSI <= firstMaxLenSI)
+      while(lenSI <= linMaxLenSI)
       { /*Loop: add padding for the lineage*/
          *outStr++ = ' ';
          ++lenSI;
@@ -4140,11 +4263,47 @@ getHsp65Lin_ftbRayST(
       *outStr = 0;
 
 
-      /*______________add_depth_to_entry________________*/
-      lenSI = cpWhite_ulCp(outStr, secStr);
-      secStr += lenSI;
+      /*___________add_read_support_to_entry____________*/
+      lenSI = cpWhite_ulCp(outStr, depthStr);
+      depthStr += lenSI;
       outStr += lenSI;
-      while(lenSI <= secMaxLenSI)
+      while(lenSI <= depthMaxLenSI)
+      { /*Loop: add padding for the number*/
+         *outStr++ = ' ';
+         ++lenSI;
+      } /*Loop: add padding for the number*/
+      lenSI = 0;
+      *outStr = 0;
+
+      /*___________add_read_precent_to_entry____________*/
+      lenSI = cpWhite_ulCp(outStr, depthStr);
+      depthStr += lenSI;
+      outStr += lenSI;
+      while(lenSI <= depthMaxLenSI)
+      { /*Loop: add padding for the number*/
+         *outStr++ = ' ';
+         ++lenSI;
+      } /*Loop: add padding for the number*/
+      lenSI = 0;
+      *outStr = 0;
+
+      /*___________add_unkown_reads_to_entry____________*/
+      lenSI = cpWhite_ulCp(outStr, depthStr);
+      depthStr += lenSI;
+      outStr += lenSI;
+      while(lenSI <= depthMaxLenSI)
+      { /*Loop: add padding for the number*/
+         *outStr++ = ' ';
+         ++lenSI;
+      } /*Loop: add padding for the number*/
+      lenSI = 0;
+      *outStr = 0;
+
+      /*___________add_read_depth_to_entry______________*/
+      lenSI = cpWhite_ulCp(outStr, depthStr);
+      depthStr += lenSI;
+      outStr += lenSI;
+      while(lenSI <= depthMaxLenSI)
       { /*Loop: add padding for the number*/
          *outStr++ = ' ';
          ++lenSI;
@@ -4157,19 +4316,19 @@ getHsp65Lin_ftbRayST(
       *   - add in call for the lineage
       \**************************************************/
 
-      if(thirdStr[0] == 'L')
+      if(callStr[0] == 'L')
          cpStr_ulCp(
             outStr,
             (signed char *) "low_depth"
          );
 
-      else if(thirdStr[0] == 'N')
+      else if(callStr[0] == 'N')
          cpStr_ulCp(
             outStr,
             (signed char *) "alternate"
          );
 
-      else if(thirdStr[0] == 'M')
+      else if(callStr[0] == 'M')
          cpStr_ulCp(
             outStr,
             (signed char *) "mixed_lineage"
@@ -4194,15 +4353,15 @@ getHsp65Lin_ftbRayST(
             guiSTPtr->hsp65ListSTPtr,
             guiSTPtr->widgSTPtr
          )
-      ) goto memErr_fun18_sec05;
+      ) goto memErr_fun18_depth05;
 
       /*get off the tab and white space*/
-      while(*firstStr && *firstStr < 33)
-         ++firstStr;
-      while(*secStr && *secStr < 33)
-         ++secStr;
-      while(*thirdStr && *thirdStr < 33)
-         ++thirdStr;
+      while(*linStr && *linStr < 33)
+         ++linStr;
+      while(*depthStr && *depthStr < 33)
+         ++depthStr;
+      while(*callStr && *callStr < 33)
+         ++callStr;
    } /*Loop: build the table*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -4212,15 +4371,15 @@ getHsp65Lin_ftbRayST(
 
    sort_listBox_rayWidg(guiSTPtr->hsp65ListSTPtr);
 
-   done_fun18_sec05:;
+   done_fun18_depth05:;
       lenSI = 0;
-      goto ret_fun18_sec05;
+      goto ret_fun18_depth05;
 
-   memErr_fun18_sec05:;
+   memErr_fun18_depth05:;
       lenSI = 1;
-      goto ret_fun18_sec05;
+      goto ret_fun18_depth05;
 
-   ret_fun18_sec05:;
+   ret_fun18_depth05:;
       if(! hsp65FILE)
          ;
       else

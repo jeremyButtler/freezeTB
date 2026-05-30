@@ -76,13 +76,17 @@
 '   * lineage print functions
 '     o fun27: addReadLineages_cnt_getLin
 '       - adds lineages for a read to a cnt_getLin struct
-'     o fun28: pReadLineages_getLin
+'     o fun28: pReadBins_getLin
+'       - prints reads to bins
+'     o fun29: setCounts_cnt_getLin
+'       - sets counts for each lineage in a cnt_getLin
+'     o fun30: pReadLineages_getLin
 '       - prints the lineage counts for a set of reads and
 '         then prints the consensus lineage for the reads
 '       !!! warning, this does not have a conistent header
 '           system, because the TRS lineages are variable.
 '           expect different headers for different input
-'     o fun29: pGenomeLineage_getLin
+'     o fun31: pGenomeLineage_getLin
 '       - prints lineages found by simpleLineage_getLin &
 '         complexLineage_getLin for a single sequence
 '       !!! warning, this does not have a conistent header
@@ -114,8 +118,17 @@ struct complex_linST;
 typedef struct cnt_getLin
 {
    signed char **linStrAry; /*has lineage names*/
+
+   /*________setup_backtracking_arrays__________________*/
+   signed int *linIndexArySI; /*index of lineage*/
+   signed char *compAryBl;    /*1: is a complex lineage*/
+      /*allows adding the final depths in*/
+
    signed int *idSizeArySI; /*max bytes for each name*/
-   signed int *linCntArySI; /*number of reads supporting*/
+   signed int *linCntArySI; /*number of total reads*/
+   signed int *linMapArySI; /*number reads fully mapping*/
+   signed int *linSupArySI; /*number of reads supporting*/
+
    signed int lenSI;        /*number of lineages*/
    signed int sizeSI;       /*max lineages before resize*/
 
@@ -800,8 +813,9 @@ addMem_cnt_getLin(
 |       (multiple variant) lineages names
 | Output:
 |   - Modifies:
-|     o linStrAry, idSizeArySI, and linCntAry in cntSTPtr
-|       to have all lineages in the list
+|     o linStrAry, idSizeArySI, and linCntArySI,
+|       linMapArySI, and linSupArySI in cntSTPtr to have
+|       all lineages in the list and some level of counts
 |     o numReadsSL in cntSTPtr to be incurmented by 1
 |     o if needed lenSI and sizeSI in cntSTPtr to account
 |       for the new lineage or resize
@@ -823,7 +837,92 @@ addReadLineages_cnt_getLin(
 );
 
 /*-------------------------------------------------------\
-| Fun28: pReadLineages_getLin
+| Fun28: pReadBins_getLin
+|   - prints reads to bins
+| Input:
+|   - samSTPtr:
+|     o samEntry struct pointer with read to print
+|   - prefixStr:
+|     o c-string with the output file name
+|   - fileTypeSC:
+|     o 0: for read ids
+|     o 1: for fastq file
+|     o 2: for sam file
+|   - pBinsSC:
+|     o 0 to not print any bins
+|     o 1 for classified bins
+|     o 2 for uncassified (no lineages), but good length
+|     o 4 for fragments bin
+|     o 8 to print regardless of print status (simple)
+|     o 16 to print regardless of print status (complex)
+|   - simpLinArySI:
+|     o signed int array with the simple lineages found by
+|       simpleLinage_getLin to print
+|   - trsLinArySI:
+|     o signed int array with the trs lineage assigned to
+|       each simple lineage (from simpleLinage_getLin)
+|   - simpLenSI:
+|     o number of simple lineages in simpLinArySI and
+|       trsLinArySI
+|   - simpleSTPtr:
+|     o simple_linST struct pointer with the simple
+|       (one variant) lineage names
+|   - complexLinArySI:
+|     o signed int array with the complex lineages found
+|       by complexLineage_getLin
+|   - complexLenSI:
+|     o number of complese lineages found
+|   - complexSTPtr:
+|     o complex_linST struct array with the complex
+|       (multiple variant) lineages names
+| Output:
+|   - Prints:
+|     o read to its output assigned bin
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for file errors
+\-------------------------------------------------------*/
+signed char
+pReadBins_getLin(
+   struct samEntry *samSTPtr,  /*read to print*/
+   signed char *prefixStr,     /*name for output file*/
+   signed char fileTypeSC,     /*0:id 1:fastq 2:sam*/
+   signed char pBinsSC,   /*1:found 2:unkown 4:fragments*/
+   signed int *simpLinArySI,   /*simple lineages found*/
+   signed int *trsLinArySI,    /*simple lineage TRS #s*/
+   signed int simpLenSI,       /*# found simple lineages*/
+   struct simple_linST *simpleSTPtr,/*1VariantLineages*/
+   signed int *complexLinArySI,/*complex lineages found*/
+   signed int complexLenSI,   /*# found complex lineages*/
+   struct complex_linST *complexSTPtr /*complex lineages*/
+);
+
+/*-------------------------------------------------------\
+| Fun29: setCounts_cnt_getLin
+|   - sets counts for each lineage in a cnt_getLin struct
+| Input:
+|   - simpleSTPtr:
+|     o simple_linST struct pointer with the simple
+|       (one variant) lineage names
+|   - complexSTPtr:
+|     o complex_linST struct array with the complex
+|       (multiple variant) lineages names
+|   - cntSTPtr:
+|     o cnt_getLin struct pointer to set counts for
+| Output:
+|   - Modifies:
+|     o linSupArySI, linMapArySI, and linCntArySI to have
+|       the correct counts
+\-------------------------------------------------------*/
+void
+setCounts_cnt_getLin(
+   struct simple_linST *simpleSTPtr,
+   struct complex_linST *complexSTPtr,
+   struct cnt_getLin *cntSTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun30: pReadLineages_getLin
 |   - prints the lineage counts for a set of reads and
 |     then prints the consensus lineage for the reads
 |   !!! warning, this does not have a conistent header
@@ -870,7 +969,7 @@ pReadLineages_getLin(
 );
 
 /*-------------------------------------------------------\
-| Fun29: pGenomeLineage_getLin
+| Fun31: pGenomeLineage_getLin
 |   - prints lineages found by simpleLineage_getLin and
 |     complexLineage_getLin for a single sequence
 |   !!! warning, this does not have a conistent header
