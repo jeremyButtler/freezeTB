@@ -4014,19 +4014,36 @@ getHsp65Lin_ftbRayST(
    depthStr = depthLineStr;
 
    outStr = depthLineStr;
-   callLineStr = depthLineStr;
+   callStr = depthLineStr;
 
-   while(*callLineStr)
+   /*_________move_to_the_first_support_________________*/
+   callStr += endWhite_ulCp(callStr);
+   while(*callStr && *callStr < 33)
+      ++callStr;
+   if(! *callStr)
+      goto done_fun18_depth05;
+
+   callStr += endWhite_ulCp(callStr);
+   while(*callStr && *callStr < 33)
+      ++callStr;
+   if(! *callStr)
+      goto done_fun18_depth05;
+
+   while(*callStr)
    { /*Loop: clean up the depth entry*/
-      if(*callLineStr >= '0' && *callLineStr <= '9')
-         *outStr++ = *callLineStr;
-      else if(*callLineStr == ':')
+      if(*callStr >= '0' && *callStr <= '9')
+         *outStr++ = *callStr;
+      else if(*callStr == ':')
          *outStr++ = '\t';
-      else if(*callLineStr == '.')
-         *outStr++ = *callLineStr;
-      ++callLineStr;
+      else if(*callStr == '\t')
+         *outStr++ = '\t';
+      else if(*callStr == '.')
+         *outStr++ = *callStr;
+      ++callStr;
    } /*Loop: clean up the depth entry*/
 
+   while(*(outStr - 1) && *(outStr -1) < 32)
+      --outStr;
    *outStr = 0;
    outStr = 0;
 
@@ -4058,34 +4075,28 @@ getHsp65Lin_ftbRayST(
 
    /*get past id column*/
    linStr += endWhite_ulCp(linStr);
-   depthStr += endWhite_ulCp(depthStr);
    callStr += endWhite_ulCp(callStr);
-   if(! *linStr || ! *depthStr || ! *callStr)
+   if(! *linStr || ! *callStr)
       goto done_fun18_depth05;
 
    /*get off the tab and white space*/
    while(*linStr && *linStr < 33)
       ++linStr;
-   while(*depthStr && *depthStr < 33)
-      ++depthStr;
    while(*callStr && *callStr < 33)
       ++callStr;
 
    /*get of the type column*/
    linStr += endWhite_ulCp(linStr);
-   depthStr += endWhite_ulCp(depthStr);
    callStr += endWhite_ulCp(callStr);
-   if(! *linStr || ! *depthStr || ! *callStr)
+   if(! *linStr || ! *callStr)
       goto done_fun18_depth05;
 
    /*get off the tab and white space*/
    while(*linStr && *linStr < 33)
       ++linStr;
-   while(*depthStr && *depthStr < 33)
-      ++depthStr;
    while(*callStr && *callStr < 33)
       ++callStr;
-   if(! *linStr || ! *depthStr || ! *callStr)
+   if(! *linStr || ! *callStr)
       goto done_fun18_depth05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -4135,29 +4146,35 @@ getHsp65Lin_ftbRayST(
       linEndStr += lenSI;
 
       lenSI = endWhite_ulCp(depthEndStr);
-      if(lenSI > subMaxLenSI)
+      if(lenSI > supMaxLenSI)
          supMaxLenSI = lenSI;
       depthEndStr += lenSI;
+      while(*depthEndStr && *depthEndStr < 33)
+         ++depthEndStr;
 
       lenSI = endWhite_ulCp(depthEndStr);
       if(lenSI > percMaxLenSI)
          percMaxLenSI = lenSI;
       depthEndStr += lenSI;
+      while(*depthEndStr && *depthEndStr < 33)
+         ++depthEndStr;
 
       lenSI = endWhite_ulCp(depthEndStr);
-      if(lenSI > unkownMaxLenSI)
-         unkownMaxLenSI = lenSI;
+      if(lenSI > unknownMaxLenSI)
+         unknownMaxLenSI = lenSI;
       depthEndStr += lenSI;
+      while(*depthEndStr && *depthEndStr < 33)
+         ++depthEndStr;
 
       lenSI = endWhite_ulCp(depthEndStr);
       if(lenSI > depthMaxLenSI)
          depthMaxLenSI = lenSI;
       depthEndStr += lenSI;
+      while(*depthEndStr && *depthEndStr < 33)
+         ++depthEndStr;
 
       while(*linEndStr && *linEndStr < 33)
          ++linEndStr;
-      while(*depthEndStr && *depthEndStr < 33)
-         ++depthEndStr;
    } /*Loop: find longest entry for each column*/
 
    outStr = outLineStr;
@@ -4202,13 +4219,13 @@ getHsp65Lin_ftbRayST(
       *outStr++ = ' ';
    *outStr = 0;
 
-   if(unkownMaxLenSI < 9)
-      unkownMaxLenSI = 9;
+   if(unknownMaxLenSI < 9)
+      unknownMaxLenSI = 9;
    else
-      unkownMaxLenSI += 2;
+      unknownMaxLenSI += 2;
    lenSI = cpStr_ulCp(outStr, (signed char *) "unknown");
    outStr += lenSI;
-   for( ; lenSI <= unkownMaxLenSI; ++lenSI)
+   for( ; lenSI <= unknownMaxLenSI; ++lenSI)
       *outStr++ = ' ';
    *outStr = 0;
 
@@ -4227,8 +4244,11 @@ getHsp65Lin_ftbRayST(
    +   - header; add call entery and add header to table
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   lenSI = cpStr_ulCp(outStr, (signed char *) "call");
-   outStr += lenSI;
+   lenSI =
+      cpStr_ulCp(
+         outStr,
+         (signed char *) "call        "
+      );
 
    /*___________add_header_to_the_table_________________*/
    if(
@@ -4266,8 +4286,11 @@ getHsp65Lin_ftbRayST(
       /*___________add_read_support_to_entry____________*/
       lenSI = cpWhite_ulCp(outStr, depthStr);
       depthStr += lenSI;
+      while(*depthStr && *depthStr < 33)
+         ++depthStr;
+
       outStr += lenSI;
-      while(lenSI <= depthMaxLenSI)
+      while(lenSI <= supMaxLenSI)
       { /*Loop: add padding for the number*/
          *outStr++ = ' ';
          ++lenSI;
@@ -4278,8 +4301,11 @@ getHsp65Lin_ftbRayST(
       /*___________add_read_precent_to_entry____________*/
       lenSI = cpWhite_ulCp(outStr, depthStr);
       depthStr += lenSI;
+      while(*depthStr && *depthStr < 33)
+         ++depthStr;
+
       outStr += lenSI;
-      while(lenSI <= depthMaxLenSI)
+      while(lenSI <= percMaxLenSI)
       { /*Loop: add padding for the number*/
          *outStr++ = ' ';
          ++lenSI;
@@ -4290,8 +4316,11 @@ getHsp65Lin_ftbRayST(
       /*___________add_unkown_reads_to_entry____________*/
       lenSI = cpWhite_ulCp(outStr, depthStr);
       depthStr += lenSI;
+      while(*depthStr && *depthStr < 33)
+         ++depthStr;
+
       outStr += lenSI;
-      while(lenSI <= depthMaxLenSI)
+      while(lenSI <= unknownMaxLenSI)
       { /*Loop: add padding for the number*/
          *outStr++ = ' ';
          ++lenSI;

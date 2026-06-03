@@ -4154,13 +4154,14 @@ proc readHsp65 {prefixStr} {
    # need to remove lineage index
    set endSI [ expr [llength $lineStr] - 1 ] ;
       # get number items
-   set outStr [lindex $lineStr 2] ; # get first species
+   set outStr [lindex $lineStr 2] ; # get first specie
+   append outStr $outStr " " ; # add space to separate
 
    ---for
-      { set siDrug 3 }
-      { $siDrug < $endSI }
-      { incr siDrug }
-   --- { append outStr [ lindex $lineStr $siDrug ] ; } ;
+      { set siLin 3 }
+      { $siLin < $endSI }
+      { incr siLin }
+   --- { append outStr [ lindex $lineStr $siLin] " " ; } ;
        # get hsp65 species detected
 
    ---.main.out.report.hsp65.reslab
