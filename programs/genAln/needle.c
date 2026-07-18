@@ -3,8 +3,6 @@
 '   - has functions to do a needle man alignment
 '   o header:
 '     - included libraries
-'   o .c fun01: scoreIndel_water
-'     - gets the indel score for a water alignment
 '   o fun01 needle:
 '     - run a Needleman Wunsch alignment on two sequences
 '   o license:

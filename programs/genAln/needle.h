@@ -3,8 +3,6 @@
 '   - has functions to do a needle man alignment
 '   o header:
 '     - forward declerations and guards
-'   o .c fun01: scoreIndel_water
-'     - gets the indel score for a water alignment
 '   o fun01 water:
 '     - run a memory efficent Waterman Smith alignment on
 '       input sequences
