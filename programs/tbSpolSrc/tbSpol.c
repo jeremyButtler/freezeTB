@@ -894,7 +894,7 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (signed char *) "-min-perc-kmer",
+            (signed char *) "-min-kmer-perc",
             (signed char *) argAryStr[siArg],
             (signed char) '\0'
          )
