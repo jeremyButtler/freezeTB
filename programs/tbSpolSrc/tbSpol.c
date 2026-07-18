@@ -137,7 +137,13 @@ phelp_tbSpol(
 
    fprintf(
      outFILE,
-     "or tbSpol -spoligo spacers.fa -fa consensus.fa%s",
+     "  or tbSpol -spoligo spacers.fa -fa consensus.fa%s",
+      str_endLine
+   );
+
+   fprintf(
+     outFILE,
+     "  or tbSpol -spoligo spacers.fa -fq reads.fq%s",
       str_endLine
    );
 
@@ -352,7 +358,57 @@ phelp_tbSpol(
    /*****************************************************\
    * Fun02 Sec04 Sub07:
    *   - Print the filtering paramerters
+   *   o fun02 sec04 sub07 cat01:
+   *     - minimum read depth and percent read depth
+   *   o fun02 sec04 sub07 cat02:
+   *     - percent score (waterman/kmer scan)
    \*****************************************************/
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub07 Cat01:
+   +   - minimum read depth and percent read depth
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      outFILE,
+      "  -min-depth: [%i]%s",
+      def_minDepth_tbSpolDefs,
+      str_endLine
+   );
+
+   fprintf(
+     outFILE,
+     "    o Minimum read depth to count a spacer as%s",
+      str_endLine
+   );
+   fprintf(
+     outFILE,
+     "      present%s",
+      str_endLine
+   );
+
+   fprintf(
+      outFILE,
+      "  -min-perc-depth: [%.2f]%s",
+      def_minPercDepth_tbSpolDefs,
+      str_endLine
+   );
+
+   fprintf(
+     outFILE,
+     "    o Minimum percent of max read depth to count%s",
+      str_endLine
+   );
+   fprintf(
+     outFILE,
+     "      a spacer as present (0 to 1)%s",
+      str_endLine
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun02 Sec04 Sub07 Cat02:
+   +   - percent score (waterman/kmer scan)
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
    fprintf(
       outFILE,
@@ -458,20 +514,10 @@ phelp_tbSpol(
    *   - fragment mode options
    \*****************************************************/
 
-   if(   def_frag_tbSpolDefs
-      || def_conFrag_tbSpolDefs
-   ) fprintf(
-         outFILE,
-         "  -frag: [Yes]%s",
-      str_endLine
-      );
-
-    else 
-      fprintf(
-         outFILE,
-         "  -frag: [No]%s",
-      str_endLine
-      );
+   if(def_frag_tbSpolDefs)
+      fprintf(outFILE, "  -frag: [Yes]%s", str_endLine);
+   else 
+      fprintf(outFILE, "  -frag: [No]%s", str_endLine);
 
    fprintf(
      outFILE,
@@ -479,62 +525,10 @@ phelp_tbSpol(
       str_endLine
    );
 
-   if(def_conFrag_tbSpolDefs)
-      fprintf(
-         outFILE,
-         "  -con-frag: [Yes]%s",
-      str_endLine
-      );
-
+   if(! def_frag_tbSpolDefs)
+      fprintf(outFILE,"  -no-frag: [Yes]%s",str_endLine);
    else
-      fprintf(
-         outFILE,
-         "  -con-frag: [No]%s",
-      str_endLine
-      );
-
-   fprintf(
-     outFILE,
-     "    o fragments are in an conensus%s",
-      str_endLine
-   );
-   
-   if(! def_conFrag_tbSpolDefs
-      && def_frag_tbSpolDefs
-   )
-      fprintf(
-         outFILE,
-         "  -read-frag: [Yes]%s",
-      str_endLine
-      );
-
-   else
-      fprintf(
-         outFILE,
-         "  -read-frag: [No]%s",
-      str_endLine
-      );
-
-   fprintf(
-     outFILE,
-     "    o fragments are in reads%s",
-      str_endLine
-   );
-
-   if(! def_frag_tbSpolDefs
-      && ! def_conFrag_tbSpolDefs
-   ) fprintf(
-         outFILE,
-         "  -no-frag: [Yes]%s",
-      str_endLine
-      );
-
-   else
-      fprintf(
-         outFILE,
-         "  -no-frag: [No]%s",
-      str_endLine
-      );
+      fprintf(outFILE, "  -no-frag: [No]%s", str_endLine);
 
    fprintf(
      outFILE,
@@ -617,6 +611,10 @@ phelp_tbSpol(
 |   o minPercScoreF:
 |     - pointer to float to hold the minimum percent score
 |       to detect an spoligotype hit
+|   o minDepthSI:
+|     o signed int pointer to get minimum read depth
+|   o minPercDepthF:
+|     o float pointer to get minimum percent read depth
 |   o dirStartSI:
 |     - will hold the start of the DR region
 |   o dirEndSI:
@@ -662,12 +660,13 @@ input_tbSpol(
    signed char **spoliogDbStr,/*database of lineages*/
    signed char **outFileStr, /*File to save to*/
    float *minPercScoreF,     /*min % score to count hit*/
+   signed int *minDepthSI,   /*minimum read depth*/
+   float *minPercDepthF,    /*minimum percent read depth*/
    signed int *dirStartSI,   /*start of DR region*/
    signed int *dirEndSI,     /*start of DR region*/
    float *minKmersPercF,     /*Min number kmers for fast*/
    signed char *fastTypingBl,/*1: Do fast spoligo typing*/
-   signed char *fragBl,      /*1: fragment checking*/
-   signed char *conFragBl    /*1: non-con fragment mode*/
+   signed char *fragBl      /*1: fragment checking*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun03 TOC:
    '   o fun03 sec01:
@@ -712,12 +711,14 @@ input_tbSpol(
    ^   o fun03 sec03 sub04:
    ^     - alignment method input checks
    ^   o fun03 sec03 sub05:
-   ^     - help message request checks
+   ^     - minimum depth (percent and hard)
    ^   o fun03 sec03 sub06:
-   ^     - version number request check
+   ^     - help message request checks
    ^   o fun03 sec03 sub07:
-   ^     - invalid argument
+   ^     - version number request check
    ^   o fun03 sec03 sub08:
+   ^     - invalid argument
+   ^   o fun03 sec03 sub09:
    ^     - move to next argument
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -932,39 +933,115 @@ input_tbSpol(
 
       else if(
          ! eql_charCp(
-            (signed char *) "-con-frag",
-            (signed char *) argAryStr[siArg],
-            (signed char) '\0'
-         )
-      ){ /*Else If: consensus is in fragments*/
-         *conFragBl = 1; /*using consensuses*/
-         *fragBl = 1;
-      } /*Else If: consensus is in fragments*/
-
-      else if(
-         ! eql_charCp(
-            (signed char *) "-read-frag",
-            (signed char *) argAryStr[siArg],
-            (signed char) '\0'
-         )
-      ){ /*Else If: sequence is in fragments*/
-         *conFragBl = 0; /*using consensuses*/
-         *fragBl = 1;
-      } /*Else If: sequence is in fragments*/
-
-      else if(
-         ! eql_charCp(
             (signed char *) "-no-frag",
             (signed char *) argAryStr[siArg],
             (signed char) '\0'
          )
-      ){ /*Else If: sequence is in fragments*/
-         *fragBl = 0;
-         *conFragBl = 0; /*using consensuses*/
-      } /*Else If: sequence is in fragments*/
+      ) *fragBl = 0;
 
       /**************************************************\
       * Fun03 Sec03 Sub05:
+      *   - minimum depth (percent and hard)
+      *   o fun03 sec03 sub05 cat01:
+      *     - minimum read depth
+      *   o fun03 sec03 sub05 cat02:
+      *     - minimum percent read depth
+      \**************************************************/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub05 Cat01:
+      +   - minimum read depth
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-min-depth",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: minimum read depth*/
+         ++siArg;
+         tmpStr = (signed char *) argAryStr[siArg];
+
+         tmpStr +=
+            strToSI_base10str(
+               (signed char *) argAryStr[siArg],
+               minDepthSI
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: non-numeric*/
+            fprintf(
+               stderr,
+               "-min-depth %s; non-numeric or to large%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+             goto err_fun03_sec04;
+         } /*If: non-numeric*/
+
+         else if(*minDepthSI < 0)
+         { /*Else If: to low*/
+            fprintf(
+               stderr,
+               "-min-depth %s must be positive%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+             goto err_fun03_sec04;
+         } /*Else If: to low*/
+      }  /*Else If: minimum read depth*/
+
+      /*+++++++++++++++++++++++++++++++++++++++++++++++++\
+      + Fun03 Sec03 Sub05 Cat02:
+      +   - minimum percent read depth
+      \+++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-min-perc-depth",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: minimum percent read depth*/
+         ++siArg;
+         tmpStr = (signed char *) argAryStr[siArg];
+
+         tmpStr +=
+            strToF_base10str(
+               (signed char *) argAryStr[siArg],
+               minPercDepthF
+            );
+
+         if(*tmpStr != '\0')
+         { /*If: non-numeric*/
+            fprintf(
+              stderr,
+              "-min-perc-depth %s;non-numeric/to large%s",
+              argAryStr[siArg],
+              str_endLine
+            );
+
+             goto err_fun03_sec04;
+         } /*If: non-numeric*/
+
+         else if(*minPercDepthF < 0)
+         { /*Else If: negative*/
+            fprintf(
+               stderr,
+               "-min-perc-depth %s must be positive%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+             goto err_fun03_sec04;
+         } /*Else If: negative*/
+      }  /*Else If: minimum percent read depth*/
+
+      /**************************************************\
+      * Fun03 Sec03 Sub06:
       *   - help message request checks
       \**************************************************/
 
@@ -1024,7 +1101,7 @@ input_tbSpol(
       } /*Else If: wanted help message*/
 
       /**************************************************\
-      * Fun03 Sec03 Sub06:
+      * Fun03 Sec03 Sub07:
       *   - version number request check
       \**************************************************/
 
@@ -1084,7 +1161,7 @@ input_tbSpol(
       } /*Else If: wanted version number*/
 
       /**************************************************\
-      * Fun03 Sec03 Sub07:
+      * Fun03 Sec03 Sub08:
       *   - invalid argument
       \**************************************************/
 
@@ -1101,7 +1178,7 @@ input_tbSpol(
       } /*Else: invalid input*/
 
       /**************************************************\
-      * Fun03 Sec03 Sub08:
+      * Fun03 Sec03 Sub09:
       *   - move to next argument
       \**************************************************/
 
@@ -1173,7 +1250,8 @@ main(
    #define def_numSpol_tbSpolDefs 64
    unsigned int codeAryUI[def_numSpol_tbSpolDefs + 1];
       /*holds barcode for spoligo*/
-   unsigned int minDepthUI = 1;
+   signed int minDepthSI = def_minDepth_tbSpolDefs;
+   float minPercDepthF = def_minPercDepth_tbSpolDefs;
 
    signed char *seqFileStr = 0;   /*sequences to type*/
    signed char *spoligoFileStr = 0;
@@ -1189,9 +1267,6 @@ main(
 
    signed char fragCheckBl = def_frag_tbSpolDefs;
      /*do fragmentation checks*/
-
-   signed char conFragBl = def_conFrag_tbSpolDefs;
-      /*consensus fragment mode*/
 
    unsigned int numSupReadsUI = 0;
      /*number reads with an spacer*/
@@ -1262,12 +1337,13 @@ main(
          &spoligoDbStr,
          &outFileStr,
          &minPercScoreF,
+         &minDepthSI,
+         &minPercDepthF,
          &drStartSI,
          &drEndSI,
          &minKmerPercF,
          &fastBl,
-         &fragCheckBl,
-         &conFragBl
+         &fragCheckBl
       );
 
    if(errSC)
@@ -1535,7 +1611,7 @@ main(
    *   - print header
    \*****************************************************/
 
-   phead_spolST((!conFragBl) & fragCheckBl, outFILE);
+   phead_spolST(fragCheckBl, outFILE);
 
    /*****************************************************\
    * Main Sec05 Sub02:
@@ -1622,8 +1698,9 @@ main(
                pspol_spolST(
                   seqStackST.idStr,
                   codeAryUI,
-                  minDepthUI,
-                  (!conFragBl) & fragCheckBl,
+                  0,             /*not fragment mode*/
+                  0,             /*not fragment mode*/
+                  fragCheckBl,
                   numSupReadsUI,
                   spolDbHeapAryST,
                   numLineagesSI,
@@ -1716,7 +1793,6 @@ main(
       { /*Loop: Check read read for spoligotypes*/
          if(*samStackST.seqStr == '\0')
             goto nextSamEntry_main_sec04_sub03_cat02;
-
          ++siArg;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
@@ -1767,8 +1843,9 @@ main(
                pspol_spolST(
                   samStackST.qryIdStr,
                   codeAryUI,
-                  minDepthUI,
-                  (!conFragBl) & fragCheckBl,
+                  0,
+                  0,
+                  0,            /*do not print depths*/
                   numSupReadsUI,
                   spolDbHeapAryST,
                   numLineagesSI,
@@ -1813,33 +1890,20 @@ main(
    *   - print out fragment check results
    \*****************************************************/
 
-   if(fragCheckBl && ! conFragBl)
+   if(fragCheckBl)
    { /*If: I am did fragment checks*/
       pspol_spolST(
          seqFileStr,
          codeAryUI,
-         minDepthUI,
-         1,                 /*do not output lineage*/
+         minDepthSI,
+         minPercDepthF,
+         1,             /*print out spacer depths*/
          numSupReadsUI,
          spolDbHeapAryST,
          numLineagesSI,
          outFILE
       );
    } /*If: I am did fragment checks*/
-
-   else if(conFragBl)
-   { /*Else: I am working with consensus fragments*/
-      pspol_spolST(
-         samStackST.qryIdStr,
-         codeAryUI,
-         minDepthUI,
-         0,     /*I want to output the lineage*/
-         numSupReadsUI,
-         spolDbHeapAryST,
-         numLineagesSI,
-         outFILE
-      );
-   } /*Else: I am working with consensus fragments*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Main Sec06:

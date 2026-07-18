@@ -9,6 +9,10 @@
 
 #define def_numSpol_tbSpolDefs 64/*max # spacers allowed*/
 
+#define def_minDepth_tbSpolDefs 10 /*minimum read depths*/
+#define def_minPercDepth_tbSpolDefs 0.2f
+   /*minimum percent read depths*/
+
 #define def_noSpol_tbSpolDefs 1
 #define def_fileErr_tbSpolDefs 2
 #define def_memErr_tbSpolDefs 64

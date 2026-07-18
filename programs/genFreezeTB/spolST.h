@@ -26,7 +26,7 @@
 '   o fun07: sortAry_spolST
 '     - sorts an array of spolST structures by least to
 '       greatest with shell sort
-'   o fun08: getBarcode_spolST
+'   o fun08: codeToLineage_spolST
 '     - finds an spoligo barcode in an array of spolST
 '       structures using an binary search
 '   o fun09: readDb_spolST
@@ -184,7 +184,7 @@ sortAry_spolST(
 );
 
 /*-------------------------------------------------------\
-| Fun08: getBarcode_spolST
+| Fun08: codeToLineage_spolST
 |  - finds an spoligo barcode in an array of spolST
 |    structures using an binary search
 | Input:
@@ -199,10 +199,10 @@ sortAry_spolST(
 | Output:
 |  - Returns:
 |    o nearest index at or after codeUL
-|    o -1 for lineage not found
+|    o (index + 1) * -1 for lineage not found
 \-------------------------------------------------------*/
-signed int
-getBarcode_spolST(
+signed long
+codeToLineage_spolST(
    struct spolST *spolSTAryPtr,
    unsigned long codeUL,
    unsigned int lenAryUI
@@ -269,6 +269,10 @@ phead_spolST(
 |     o c-string with id/name of sequence
 |   - codeAryUI:
 |     o unsigned int array with the spoligotype counts
+|   - minDepthUI:
+|     o mininum read depth to keep a spacer
+|   - minPercDepthF:
+|     o minimum percent read depth (0 to 1)
 |   - fragmentBl:
 |     o 1: fragment mode, do not find lineages
 |     o 0: complete reads find lineages
@@ -281,11 +285,16 @@ phead_spolST(
 |     o length of spoligoAryST (index 1)
 |   - outFILE:
 |     o FILE pointer with file to print to
+| Output:
+|   - Prints:
+|     o spoligotype entry to the outFILE
 \-------------------------------------------------------*/
 void
 pspol_spolST(
    signed char *idStr,
    unsigned int *codeAryUI,
+   unsigned int minDepthUI,
+   float minPercDepthF,
    signed char fragmentBl,
    unsigned int numSupUI,
    struct spolST *spoligoAryST,

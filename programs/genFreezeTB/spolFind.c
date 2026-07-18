@@ -1195,7 +1195,8 @@ fxwater_spolFind(
 |       alnSetSTPtr
 | Output:
 |   - Modifies:
-|     o codeStr to hold the spoligotype barcode
+|     o codeAryUI to have spoligotypes in reads marked
+|       (end set to -1)
 |   - Returns:
 |     o 0 for success
 |     o def_noSpol_tbSpolDefs

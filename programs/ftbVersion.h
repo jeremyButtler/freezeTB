@@ -4,8 +4,8 @@
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #define def_year_ftbVersion 2026
-#define def_month_ftbVersion 6
-#define def_day_ftbVersion 3
+#define def_month_ftbVersion 7
+#define def_day_ftbVersion 20
 
 /*=======================================================\
 : License:

@@ -26,7 +26,7 @@
 '   o fun07: sortAry_spolST
 '     - sorts an array of spolST structures by least to
 '       greatest with shell sort
-'   o fun08: getBarcode_spolST
+'   o fun08: codeToLineage_spolST
 '     - finds an spoligo barcode in an array of spolST
 '       structures using an binary search
 '   o fun09: readDb_spolST
@@ -416,7 +416,7 @@ sortAry_spolST(
 } /*sortAry_spolST*/
 
 /*-------------------------------------------------------\
-| Fun08: getBarcode_spolST
+| Fun08: codeToLineage_spolST
 |  - finds an spoligo barcode in an array of spolST
 |    structures using an binary search
 | Input:
@@ -431,34 +431,38 @@ sortAry_spolST(
 | Output:
 |  - Returns:
 |    o nearest index at or after codeUL
-|    o -1 for lineage not found
+|    o (index + 1) * -1 for lineage not found
 \-------------------------------------------------------*/
-signed int
-getBarcode_spolST(
+signed long
+codeToLineage_spolST(
    struct spolST *spolSTAryPtr,
    unsigned long codeUL,
    unsigned int lenAryUI
 ){
-   signed int midSI = 0;
-   signed int rightSI = (lenAryUI) - 1;
-   signed int leftSI = 0;
+   signed long midSL = 0;
+   signed long stepSL = lenAryUI;
 
-   while(leftSI <= rightSI)
-   { /*Loop: Search for the query lineage*/
-      midSI = (leftSI + rightSI) >> 1;
+   while(stepSL > 1)
+   { /*Loop: find insert position*/
+      stepSL >>= 1;
 
-     if((codeUL) > (spolSTAryPtr)[midSI].codeUL)
-         leftSI = midSI + 1;
+      if(codeUL >= spolSTAryPtr[midSL + stepSL].codeUL)
+         midSL += stepSL;
+   } /*Loop: find insert position*/
 
-     else if((codeUL)<(spolSTAryPtr)[midSI].codeUL)
-         rightSI = midSI - 1;
+   while(
+         midSL < lenAryUI
+      && codeUL > spolSTAryPtr[midSL].codeUL
+   ) ++midSL;
 
-     else
-        return midSI;
-   } /*Loop: Search for the query lineage*/
+   if(
+         midSL < lenAryUI
+      && codeUL == spolSTAryPtr[midSL].codeUL
+   ) return midSL;
 
-   return -1;
-} /*getBarcode_spolST*/
+   else
+      return (midSL + 1) * -1;
+} /*codeToLineage_spolST*/
 
 /*-------------------------------------------------------\
 | Fun09: readDb_spolST
@@ -904,13 +908,146 @@ phead_spolST(
 } /*phead_spolST*/
 
 /*-------------------------------------------------------\
+| Fun0x: depthToBarcode_spolST
+|   - converts a read depth array to a barcode
+| Input:
+|   - barStr:
+|     o c-string of 65 bytes to store the barcode
+|   - codeAryUI:
+|     o unsigned int array with the spoligotype counts,
+|       ends with (unsigned int) -1
+|   - minDepthUI:
+|     o mininum read depth to keep a spacer
+|   - minPercDepthF:
+|     o mininum percent read depth to keep a spacer
+| Output:
+|   - Modifies:
+|     o barStr to have the barcode
+|       * `o` for no barcode
+|       * `I` for barcode present
+|       * `x` if positon had low depth
+\-------------------------------------------------------*/
+void
+depthToBarcode_spolST(
+   signed char *barStr,
+   unsigned int *codeAryUI,
+   unsigned int minDepthUI,
+   float minPercDepthF
+){
+   unsigned int maxDepthUI = 0;
+   unsigned int siDig = 0;
+   signed int *codeArySI = (signed int *) codeAryUI;
+      /*this is for my sanity, it is not needed*/
+
+   /*_find_minimum_percent_depth________________________*/
+   if(minPercDepthF > 0)
+   { /*If: have a minimum percent read depth*/
+      for(siDig = 0; codeArySI[siDig] > -1; ++siDig)
+      { /*Loop: find maximum read depth*/
+         if(siDig >= 43)
+            break;
+         maxDepthUI =
+            max_genMath(maxDepthUI, codeAryUI[siDig]);
+      } /*Loop: find maximum read depth*/
+
+      minPercDepthF = (float) maxDepthUI * minPercDepthF;
+
+      if((unsigned int) minPercDepthF > minDepthUI)
+         minDepthUI = minPercDepthF;
+         /*truncating (flooring) makes more sense then
+         `  rounding up
+         */
+   } /*If: have a minimum percent read depth*/
+
+   /*_build_the_barcode_________________________________*/
+   siDig = 0;
+   for(siDig = 0; codeArySI[siDig] > -1; ++siDig)
+   { /*Loop: convert depths to barcode*/
+      if(siDig >= 43)
+         break;
+      if(codeAryUI[siDig] >= minDepthUI)
+         barStr[siDig] = 'I';
+      else if(codeAryUI[siDig])
+         barStr[siDig] = 'x';
+      else
+         barStr[siDig] = 'o';
+   } /*Loop: convert depths to barcode*/
+
+   barStr[siDig] = 0;
+} /*depthToBarcode_spolST*/
+
+/*-------------------------------------------------------\
+| Fun0y: barcodeToOctal_spolST
+|   - convert barcode from depthToBarcode_spolST to an
+|     octal
+| Input:
+|   - octalStr:
+|     o c-string to get octal number (at least 32 bytes)
+|   - barStr:
+|     o c-string with barcode to convert to an octal code
+|     o barStr from depthToBarcode_spolST()
+| Output:
+|   - Modifies:
+|     o octalStr to have the octal code (x's got to o)
+|   - Returns:
+|     o unsigned long with index of barcode for quick look
+|       up
+\-------------------------------------------------------*/
+unsigned long
+barcodeToOctal_spolST(
+   signed char *octalStr,
+   signed char *barStr
+){
+   signed int siBar = 0;
+   signed int siOctal = 0;
+   signed int shiftSC = 0; 
+   unsigned long codeUL = 0;
+
+   octalStr[0] = 0;
+
+   for(siBar = 0; barStr[siBar]; ++siBar)
+   { /*Loop: barcode to octal*/
+      codeUL <<= 1;
+
+      if(shiftSC < 3)
+         octalStr[siOctal] <<= 1;
+      else
+      { /*Else: moving onto the next number*/
+         shiftSC = 0;
+         octalStr[siOctal++] += 48; /*make numeric*/
+         octalStr[siOctal] = 0;
+      } /*Else: moving onto the next number*/
+
+      ++shiftSC;
+
+      if(barStr[siBar] == 'I')
+      { /*If: spacer mapped*/
+          codeUL |= 1;
+          octalStr[siOctal] |= 1;
+      } /*If: spacer mapped*/
+   } /*Loop: Translate the barcode to number and octal*/
+
+
+   if(shiftSC > 0)
+      octalStr[siOctal++] += 48;
+   octalStr[siOctal] = 0;
+
+   return codeUL;
+} /*barcodeToOctal_spolST*/
+
+/*-------------------------------------------------------\
 | Fun11: pspol_spolST
 |   - print out an spoligotype and matching lineage
 | Input:
 |   - idStr:
 |     o c-string with id/name of sequence
 |   - codeAryUI:
-|     o unsigned int array with the spoligotype counts
+|     o unsigned int array with the spoligotype counts,
+|       ends with (unsigned int) -1
+|   - minDepthUI:
+|     o mininum read depth to keep a spacer
+|   - minPercDepthF:
+|     o minimum percent read depth (0 to 1)
 |   - fragmentBl:
 |     o 1: fragment mode, do not find lineages
 |     o 0: complete reads find lineages
@@ -923,11 +1060,16 @@ phead_spolST(
 |     o length of spoligoAryST (index 1)
 |   - outFILE:
 |     o FILE pointer with file to print to
+| Output:
+|   - Prints:
+|     o spoligotype entry to the outFILE
 \-------------------------------------------------------*/
 void
 pspol_spolST(
    signed char *idStr,
    unsigned int *codeAryUI,
+   unsigned int minDepthUI,
+   float minPercDepthF,
    signed char fragmentBl,
    unsigned int numSupUI,
    struct spolST *spoligoAryST,
@@ -937,13 +1079,13 @@ pspol_spolST(
    ' Fun11 TOC:
    '   - Print out an spoligotype and matching lineage
    '   o fun11 sec01:
-   '     - Variable declerations
+   '     - variable declerations
    '   o fun11 sec02:
-   '     - Convert barcode to numeric & "octal" formats
+   '     - get barcode and octal + clean up id
    '   o fun11 sec03:
-   '     - Find the lineage and print out the entry
+   '     - print spoligotype entry
    '   o fun11 sec04:
-   '     - for fragments, print out counts
+   '     - print read counts (fragment mode)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
@@ -954,128 +1096,40 @@ pspol_spolST(
    signed int siDig = 0;
    signed char tmpC = 0;
 
-   /*For getting the "octal" number*/
-   signed char codeStr[65];
-   signed char octalStr[65];
-   signed int lenOctalSI = 0;
-
-   signed char cntStr[4096];
-   signed int digInCntStr = 0;
+   signed char buffStr[512];
+   signed char *barStr = &buffStr[0];
+   signed char *octalStr = &buffStr[128];
 
    signed int indexSI = 0;/*Index of lineage in database*/
-
    unsigned long codeUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec02:
-   ^   - Convert the barcode to numeric & "octal" formats
-   ^   o fun11 sec02 sub01:
-   ^     - see if first spacer mapped (bit 1 in octal)
-   ^   o fun11 sec02 sub02:
-   ^     - see if second spacer mapped (bit 2 in octal)
-   ^   o fun11 sec02 sub03:
-   ^     - see if third spacer mapped (bit 3 in octal)
+   ^   - get barcode and octal + clean up id
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   /*****************************************************\
-   * Fun11 Sec02 Sub01:
-   *   - see if first spacer mapped (bit 1 in octal)
-   \*****************************************************/
+   depthToBarcode_spolST(
+      barStr,
+      codeAryUI,
+      minDepthUI,
+      minPercDepthF
+   );
+   codeUL = barcodeToOctal_spolST(octalStr, barStr);
 
-   while((signed int) codeAryUI[siDig] > -1)
-   { /*Loop: Translate the barcode to number and octal*/
-      codeUL <<= 1;
-
-      if(codeAryUI[siDig] > 0)
-      { /*If: spacer mapped*/
-          codeStr[siDig] = 'I';
-          codeUL |= 1;
-          octalStr[lenOctalSI] = 1;
-      } /*If: spacer mapped*/
-
-      else
-      { /*Else: no spacer*/
-          codeStr[siDig] = 'o';
-          octalStr[lenOctalSI] = 0;
-      } /*Else: no spacer*/
-
-      ++siDig;
-
-      if((signed int) codeAryUI[siDig] < 0)
-      { /*If: I have converted the barcode*/
-         octalStr[lenOctalSI] += 48;/*make octal numeric*/
-         ++lenOctalSI;
-         break;
-      } /*If: I have converted the barcode*/
-
-      /**************************************************\
-      * Fun11 Sec02 Sub02:
-      *   - see if second spacer mapped (bit 2 in octal)
-      \**************************************************/
-
-      codeUL <<= 1;
-      octalStr[lenOctalSI] <<= 1;
-
-      if(codeAryUI[siDig] > 0)
-      { /*If: spacer mapped*/
-          codeStr[siDig] = 'I';
-          codeUL |= 1;
-          octalStr[lenOctalSI] |= 1;
-      } /*If: spacer mapped*/
-
-      else
-          codeStr[siDig] = 'o'; /*no spacer*/
-
-      ++siDig;
-
-      if((signed int) codeAryUI[siDig] < 0)
-      { /*If: I have converted the barcode*/
-         octalStr[lenOctalSI] += 48;/*make octal numeric*/
-         ++lenOctalSI;
-         break;
-      } /*If: I have converted the barcode*/
-
-      /**************************************************\
-      * Fun11 Sec02 Sub03:
-      *   - see if third spacer mapped (bit 3 in octal)
-      \**************************************************/
-
-      codeUL <<= 1;
-      octalStr[lenOctalSI] <<= 1;
-
-      if(codeAryUI[siDig] > 0)
-      { /*If: spacer mapped*/
-          codeStr[siDig] = 'I';
-          codeUL |= 1;
-          octalStr[lenOctalSI] |= 1;
-      } /*If: spacer mapped*/
-
-      else
-          codeStr[siDig] = 'o'; /*no spacer*/
-
-      octalStr[lenOctalSI] += 48; /*make octal numeric*/
-      ++lenOctalSI;
-      ++siDig;
-   } /*Loop: Translate the barcode to number and octal*/
+   /*_remove_spaces_from_input_id_______________________*/
+   siDig = endWhite_ulCp(idStr);
+   tmpC = idStr[siDig];
+   idStr[siDig] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec03:
-   ^   - Find the lineage and print out the entry
+   ^   - print spoligotype entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-   /*This is here to remove spaces*/
-   octalStr[lenOctalSI] = '\0';
-   codeStr[siDig] = '\0';
-
-   siDig = 0;
-   while(idStr[siDig++] > 32) ;
-   tmpC = idStr[siDig];
-   idStr[siDig] = '\0';
 
    if(spoligoAryST)
    { /*If: I have lineages to check*/
       indexSI =
-         getBarcode_spolST(
+         codeToLineage_spolST(
             spoligoAryST,
             codeUL,
             numSpoligosSI           
@@ -1089,7 +1143,7 @@ pspol_spolST(
          "%s\t%s\t%s\t\'%s\t%s\t%s\t%s",
          idStr,
          spoligoAryST[indexSI].idStr,
-         codeStr,
+         barStr,
          octalStr,
          spoligoAryST[indexSI].lineageStr,
          spoligoAryST[indexSI].sitStr,
@@ -1105,50 +1159,229 @@ pspol_spolST(
          (FILE *) outFILE,
          "%s\tNA\t%s\t\'%s\tNA\tNA\tNA",
          idStr,
-         codeStr,
+         barStr,
          octalStr
       );
    } /*Else: There is no lineage*/
 
+   idStr[siDig] = tmpC; 
+
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun11 Sec04:
-   ^   - for fragments, print out counts
+   ^   - print read counts (fragment mode)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    if(fragmentBl)
    { /*If: I am checking fragments*/
+      indexSI = 0;
+
       for(
          siDig = 0;
          (signed int) codeAryUI[siDig] > -1;
          ++siDig
       ){ /*Loop: get the counts and barcode*/
-         codeStr[siDig] = (!!codeAryUI[siDig]) + 48;
-
-         digInCntStr += 
-            numToStr(
-               &cntStr[digInCntStr],
-               codeAryUI[siDig]
-         );
-
-         cntStr[digInCntStr++] = '\t';
+         if(siDig >= 43)
+            break;
+         indexSI += 
+            numToStr(&buffStr[indexSI], codeAryUI[siDig]);
+         buffStr[indexSI++] = '\t';
       } /*Loop: get the counts and barcode*/
 
-      --digInCntStr;
-      cntStr[digInCntStr] = '\0';
-
-      codeStr[siDig] = '\0';
+      --indexSI;
+      buffStr[indexSI] = '\0';
 
       fprintf(
          (FILE *) outFILE,
          "\t%u\t%s",
          numSupUI,
-         cntStr
+         buffStr
       ); /*print out the counts*/
    } /*If: I am checking fragments*/
 
    fprintf((FILE *) outFILE, "%s", str_endLine);
-   idStr[siDig] = tmpC; 
 } /*pspol_spolST*/
+
+/*-------------------------------------------------------\
+| Fun12: genLineageDbRead_spolST
+|   - read in a database for general lineages
+| Input:
+|   - dbFILE:
+|     o FILE pointer to database to read in
+|   - lenSLPtr:
+|     o signed long pointer to get number of lineages
+| Output:
+|   - Modifies:
+|     o lenSLPtr to be
+|       * 0 for no input/no lineages in database
+|       * number lineages if no errors
+|       * -1 for file errors
+|       * -2 for memory errors
+|   - Returns:
+|     o signed char array with lineages
+|     o 0 for no input, file errors, or memory errors
+| dbFILE database format:
+|    1	10000000000xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+|    2	0000000000000000000000000000000000xxxxxxxxx
+|    3	xxxxxxxxxxxxxxxxxxxxxx000000000000xxxxxxxxx
+|    4	0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxDDDDxxxxxxxxx
+|    
+|    Where 1 = always present
+|    Where 0 = always absent
+|    Where x = not used (set or deleted)
+|    Where D = some deleted (set 1)
+|    Where - = some deleted (set 2)
+|    Where S = some set (set 1)
+|    Where + = some set (set 2)
+\-------------------------------------------------------*/
+
+/*-------------------------------------------------------\
+| Fun13: genLineageSearch_spolST
+|   - searchs the spoligotype for generalized lineages
+| Input:
+|   - spacerDepthAryUI:
+|     o unsigned int array with read depth for each spacer
+|     o end of spacers marked with a -1
+|   - numLinFoundSIPtr:
+|     o signed int pointer to get number of lineages found
+| Output:
+|   - Modifies:
+|     o numLinFoundSIPtr to be
+|       * 0 for no input/no lineages in database
+|       * number lineages if no errors
+|       * -1 for file errors
+|       * -2 for memory errors
+|   - Returns:
+|     o signed int array with each found lineage
+|     o 0 for no input, file errors, or memory errors
+\-------------------------------------------------------*/
+#ifdef NEW
+signed int *
+lineageDetect_tbSpol(
+   unsigned int *spacerDepthAryUI, /*depths per spacer*/
+   signed int minDepthSI,       /*minimum depth*/
+   signed char **lineageAryStr, /*has lineage patterns*/
+   signed int numberLineagesSI, /*number of lineages*/
+   signed int *numLinFoundSIPtr
+){
+   #define def_numSpoligo_xxx 43
+   signed int siSpacer = 0;
+   signed int siLin = 0;
+
+   #define def_delOne_fun13 2
+   #define def_delOneMatch_fun13 4
+
+   #define def_delTwo_fun13 8
+   #define def_delTwoMatch_fun13 16
+
+   #define def_delThree_fun13 32
+   #define def_delThreeMatch_fun13 64
+
+   #define def_insOne_fun13 2
+   signed short *hitHeapArySS = 0;
+   signed int *retHeapArySC = 0;
+
+   hitHeapArySS =
+      malloc(numberLineagesSI * sizeof(signed short));
+   if(! hitHeapArySS)
+      goto memErr_Fun13_sec0x;
+
+   for(siLin = 0; siLin < numberLineagesSI; ++siLin)
+      hitHeapArySC[siLin] = 1;
+   
+   for(
+      siSpacer = 0;
+      siSpacer < def_numSpoligo_xxx;
+      ++siSpacer
+   ){ /*Loop: map spacers*/
+      if(spacerDepthAryUI[siSpacer] == (unsigned int) -1)
+         break; /*no more spacers to check*/
+
+      for(siLin = 0; siLin < numberLineagesSI; ++siLin)
+      { /*Loop: check if have a match*/
+         if(! linHitArySC[siLin])
+            ;
+
+         else if(
+            (lineageArySTr[siLin][siSpacer] | 32) == 'x'
+         ) ;
+
+         else if(
+                lineageAryStr[siLin][siSpacer] == '0'
+             && spacerDepthArySI[siSpacer] < minDepthSI
+         ) ;
+
+         else if(lineageAryStr[siLin][siSpacer] == '0')
+            linHitArySC[siLin] = 0;
+
+         else if(
+                lineageAryStr[siLin][siSpacer] == '1'
+             && spacerDepthArySI[siSpacer] >= minDepthSI
+         ) ;
+
+         else if(lineageAryStr[siLin][siSpacer] == '1')
+            linHitArySC[siLin] = 0;
+
+         else if(
+               (lineageAryStr[siLin][siSpacer] |32) == 'd'
+            && spacerDepthArySI[siSpacer] < minDepthSI
+         ) linHitArySC[siSpacer] = 2;
+
+         else if(
+               (lineageAryStr[siLin][siSpacer] |32) == 'd'
+            && linHitArySC[siSpacer] < 2
+         ) linHitArySC[siSpacer] = -1;
+
+         else if(
+               (lineageAryStr[siLin][siSpacer] |32) == 's'
+            && spacerDepthArySI[siSpacer] >= minDepthSI
+         ) linHitArySC[siSpacer] = 2;
+
+         else if(
+               (lineageAryStr[siLin][siSpacer] |32) == 's'
+            && linHitArySC[siSpacer] < 2
+         ) linHitArySC[siSpacer] = -1;
+      } /*Loop: check if have a match*/
+
+   } /*Loop: map spacers*/
+
+   for(siLin = 0; siLin < numberLineagesSI; ++siLin)
+   { /*Loop: set non-lineages to 0*/
+      if(linHitArySC[siLin] > 1)
+         linHitArySC[siLin] = 0;
+         /*partial pattern never completed*/
+
+      else if(linHitArySC[siLin] > 0)
+      { /*Else If: kept a lineage*/
+         ++siSpacer;
+         linHitArySC[siLin] = 1;
+      } /*Else If: kept a lineage*/
+   } /*Loop: set non-lineages to 0*/
+         
+   goto ret_fun13_sec0x;
+
+   fileErr_fun13_sec0x:;
+      *numLinFoundSIPtr = -1;
+      goto errClean_fun13_sec0x;
+
+   memErr_fun13_sec0x:;
+      *numLinFoundSIPtr = -2;
+      goto errClean_fun13_sec0x;
+
+   errClean_fun13_sec0x:;
+      if(retHeapArySC)
+         free(retHeapArySC);
+      retHeapArySC = 0;
+
+      goto ret_fun13_sec0x;
+
+   ret_fun13_sec0x:;
+      if(hitHeapArySS)
+         free(hitHeapArySS);
+      hitHeapArySS = 0;
+
+      return retHeapArySC;
+} /*lineageDetect_tbSpol*/
+#endif
 
 /*=======================================================\
 : License:

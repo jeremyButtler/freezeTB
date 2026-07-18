@@ -231,6 +231,8 @@ typedef struct set_freezeTB
    float percShiftF;       /*% bases to shift window by*/
    float percExtraNtInWinF;/*% extra bases in window*/
    struct alnSet alnSetST; /*waterman settings*/
+   signed int spolMinDepthSI;/*minim read depth*/
+   float spolMinPercDepthF;  /*minim percent read depth*/
 
    /*consensus building*/
    struct set_tbCon tbConSet;
@@ -333,6 +335,9 @@ init_set_freezeTB(
    setFTBST->percShiftF = def_percShift_kmerFind;
    setFTBST->percExtraNtInWinF =
       def_extraNtInWin_kmerFind;
+   setFTBST->spolMinDepthSI = def_minDepth_tbSpolDefs;
+   setFTBST->spolMinPercDepthF =
+      def_minPercDepth_tbSpolDefs;
 
    /*initialize settings structures*/
    init_alnSet(&setFTBST->alnSetST);
@@ -2541,6 +2546,10 @@ phelp_freezeTB(
    *     - spoligtyping dr-start
    *   o fun09 sec04 sub08 cat05:
    *     - spoligtyping dr-end
+   *   o fun09 sec04 sub08 cat06:
+   *     - spoligtyping minimum read depth
+   *   o fun09 sec04 sub08 cat07:
+   *     - spoligtyping minimum percent read depth
    \*****************************************************/
 
    skipPrintSet_fun09_sec04_sub07_cat01:;
@@ -2644,6 +2653,54 @@ phelp_freezeTB(
    fprintf(
       (FILE *) outFILE,
       "      o end of reference direct repeat region%s",
+      str_endLine
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun09 Sec04 Sub08 Cat06:
+   +   - spoligtyping minimum read depth
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -spoligo-min-depth %i: [Optional; %i]%s",
+      def_minDepth_tbSpolDefs,
+      def_minDepth_tbSpolDefs,
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o minimum read depth to count a%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "        spoligotype spacer as present%s",
+      str_endLine
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun09 Sec04 Sub08 Cat07:
+   +   - spoligtyping minimum percent read depth
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -spoligo-min-perc-depth %.2f: [Optional; %.2f]%s",
+      def_minPercDepth_tbSpolDefs,
+      def_minPercDepth_tbSpolDefs,
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o minimum percent read depth to count a%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "        spoligotype spacer as present (0 to 1)%s",
       str_endLine
    );
 
@@ -4411,6 +4468,100 @@ input_freezeTB(
             goto err_fun10_sec04;
          } /*If: value out of range*/
       } /*Else If: end of direct repeat region*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-spoligo-min-depth",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: minimum read depth for spoligotypes*/
+         ++siArg;
+         tmpStr = (signed char *) argAryStr[siArg];
+
+         tmpStr +=
+            strToSI_base10str(
+               tmpStr,
+               &ftbSetSTPtr->spolMinDepthSI
+            );
+
+         if(tmpStr[0] != '\0')
+         { /*If: error*/
+            if(helpBl)
+               goto phelp_fun10_sec02;
+
+            fprintf(
+               stderr,
+               "-spoligo-min-depth %s; non-numeric%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+            goto err_fun10_sec04;
+         } /*If: error*/
+
+         if(ftbSetSTPtr->spolMinDepthSI < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun10_sec02;
+
+            fprintf(
+               stderr,
+               "-spoligo-min-depth %s is less then 0%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+            goto err_fun10_sec04;
+         } /*If: value out of range*/
+      } /*Else If: minimum read depth for spoligotypes*/
+
+      else if(
+         ! eql_charCp(
+            (signed char *) "-spoligo-min-perc-depth",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: spoligo minimum percent read depth*/
+         ++siArg;
+         tmpStr = (signed char *) argAryStr[siArg];
+
+         tmpStr +=
+            strToF_base10str(
+               tmpStr,
+               &ftbSetSTPtr->spolMinPercDepthF
+            );
+
+         if(tmpStr[0] != '\0')
+         { /*If: error*/
+            if(helpBl)
+               goto phelp_fun10_sec02;
+
+            fprintf(
+              stderr,
+              "-spoligo-min-perc-depth %s; non-numeric%s",
+              argAryStr[siArg],
+              str_endLine
+            );
+
+            goto err_fun10_sec04;
+         } /*If: error*/
+
+         if(ftbSetSTPtr->spolMinPercDepthF < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun10_sec02;
+
+            fprintf(
+               stderr,
+               "-spoligo-min-perc-depth %s is < 0%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+            goto err_fun10_sec04;
+         } /*If: value out of range*/
+      }  /*Else If: spoligo minimum percent read depth*/
 
       /**************************************************\
       * Fun10 Sec03 Sub08:
@@ -8951,6 +9102,8 @@ run_freezeTB(
       pspol_spolST(
          ftbSetStackST.prefixStr,
          spoligoAryUI,
+         ftbSetStackST.spolMinDepthSI,
+         ftbSetStackST.spolMinPercDepthF,
          1,                /*fragment print*/
          spoligoNumReadsUI,/*reads with 1 or more spacer*/
          lineageHeapAryST,
@@ -9379,8 +9532,10 @@ run_freezeTB(
       pspol_spolST(
          ftbSetStackST.prefixStr,
          spoligoAryUI,
-         0,                       /*non-fragment print*/
-         1,                       /*1 supporting read*/
+         1,                 /*minimum depth of 1*/
+         0,                 /*no minimum percetn support*/
+         0,                 /*non-fragment print*/
+         1,                 /*1 supporting read*/
          lineageHeapAryST,
          numLineagesSI,
          spoligoOutFILE
@@ -9835,6 +9990,8 @@ run_freezeTB(
       pspol_spolST(
          ftbSetStackST.prefixStr,
          spoligoAryUI,
+         1,                       /*at least on read*/
+         0,                       /*no percent depth*/
          0,                       /*non-fragment print*/
          1,                       /*1 supporting read*/
          lineageHeapAryST,
