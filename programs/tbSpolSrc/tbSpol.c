@@ -1173,6 +1173,7 @@ main(
    #define def_numSpol_tbSpolDefs 64
    unsigned int codeAryUI[def_numSpol_tbSpolDefs + 1];
       /*holds barcode for spoligo*/
+   unsigned int minDepthUI = 1;
 
    signed char *seqFileStr = 0;   /*sequences to type*/
    signed char *spoligoFileStr = 0;
@@ -1373,11 +1374,7 @@ main(
 
    else
    { /*Else: An input file was provided*/
-      inFILE =
-         fopen(
-            (char *) seqFileStr,
-            "r"
-         );
+      inFILE = fopen((char *) seqFileStr, "r");
 
       if(! inFILE)
       { /*If: The input file could not be opened*/
@@ -1538,10 +1535,7 @@ main(
    *   - print header
    \*****************************************************/
 
-   phead_spolST(
-      (!conFragBl) & fragCheckBl,
-      outFILE
-   );
+   phead_spolST((!conFragBl) & fragCheckBl, outFILE);
 
    /*****************************************************\
    * Main Sec05 Sub02:
@@ -1605,7 +1599,7 @@ main(
                   numSpacersSI,
                   minPercScoreF,
                   codeAryUI,
-                  1, /*Print progress*/
+                  0, /*do not Print progress*/
                   fragCheckBl,
                   &alnSetStackST
                ); /*Detect spoligotypes*/
@@ -1628,6 +1622,7 @@ main(
                pspol_spolST(
                   seqStackST.idStr,
                   codeAryUI,
+                  minDepthUI,
                   (!conFragBl) & fragCheckBl,
                   numSupReadsUI,
                   spolDbHeapAryST,
@@ -1772,6 +1767,7 @@ main(
                pspol_spolST(
                   samStackST.qryIdStr,
                   codeAryUI,
+                  minDepthUI,
                   (!conFragBl) & fragCheckBl,
                   numSupReadsUI,
                   spolDbHeapAryST,
@@ -1822,6 +1818,7 @@ main(
       pspol_spolST(
          seqFileStr,
          codeAryUI,
+         minDepthUI,
          1,                 /*do not output lineage*/
          numSupReadsUI,
          spolDbHeapAryST,
@@ -1835,6 +1832,7 @@ main(
       pspol_spolST(
          samStackST.qryIdStr,
          codeAryUI,
+         minDepthUI,
          0,     /*I want to output the lineage*/
          numSupReadsUI,
          spolDbHeapAryST,
