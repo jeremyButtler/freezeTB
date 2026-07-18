@@ -3434,10 +3434,20 @@ findRefInChunk_kmerFind(
    { /*If: I had enough kmers to do an alignment*/
       /*find the max score possible*/
       /*start of alignment region*/
-      tblSTPtr->seqSTPtr->offsetSL = tblSTPtr->seqPosUL;
-      tblSTPtr->seqSTPtr->offsetSL -= 
-         (tblSTPtr->ntInWinUI -1);
-         /*-1 to account for seqPosUL being index 1*/
+
+      if(
+        tblSTPtr->seqSTPtr->seqLenSL
+          < (signed long) tblSTPtr->ntInWinUI
+      ) tblSTPtr->seqSTPtr->offsetSL = 0;
+        /*my window is longer then my sequence*/
+
+      else
+      { /*Else: need to find start of alignment*/
+         tblSTPtr->seqSTPtr->offsetSL=tblSTPtr->seqPosUL;
+         tblSTPtr->seqSTPtr->offsetSL -= 
+            (tblSTPtr->ntInWinUI -1);
+            /*-1 to account for seqPosUL being index 1*/
+      } /*Else: need to find start of alignment*/
 
       /*find end of alignment region*/
       tblSTPtr->seqSTPtr->endAlnSL = tblSTPtr->seqPosUL;
