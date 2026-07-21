@@ -9,8 +9,8 @@
 
 #define def_numSpol_tbSpolDefs 64/*max # spacers allowed*/
 
-#define def_minDepth_tbSpolDefs 10 /*minimum read depths*/
-#define def_minPercDepth_tbSpolDefs 0.2f
+#define def_minDepth_tbSpolDefs 5 /*minimum read depths*/
+#define def_minPercDepth_tbSpolDefs 0.1f
    /*minimum percent read depths*/
 
 #define def_noSpol_tbSpolDefs 1
@@ -28,7 +28,8 @@
 #define def_seqIn_tbSpolDefs def_samFile_tbSpolDefs
 
 /*waterman variables*/
-#define def_minPercScore_tbSpolDefs 0.9f
+/*#define def_minPercScore_tbSpolDefs 0.9f*/
+#define def_minPercScore_tbSpolDefs 1
 
 /*kmer fin variables*/
 #define def_minKmerPerc_tbSpolDefs 0.5f
