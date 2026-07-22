@@ -62,7 +62,8 @@
 !   - .c  #include "../genAln/memwater.h"
 !   - .c  #include "../genAln/indexToCoord.h"
 !   - .h  #include "../genAln/alnDefs.h"
-!   - .h  #include "../genLib/genMath.h" .h max macros
+!   - .h  #include "../genLib/genMath.h"
+!   - .h  #include "../genLib/64bit.h"
 !   - .h  #include "../genBio/ntTo5Bit.h"
 !   - .h  #include "../genBio/kmerBit.h"
 \%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -1698,8 +1699,8 @@ main(
                pspol_spolST(
                   seqStackST.idStr,
                   codeAryUI,
-                  0,             /*not fragment mode*/
-                  0,             /*not fragment mode*/
+                  1,          /*minimum read depth of 1*/
+                  0,          /*min percent read depth 0*/
                   fragCheckBl,
                   numSupReadsUI,
                   spolDbHeapAryST,
@@ -1843,9 +1844,9 @@ main(
                pspol_spolST(
                   samStackST.qryIdStr,
                   codeAryUI,
-                  0,
-                  0,
-                  0,            /*do not print depths*/
+                  1,          /*minimum read depth of 1*/
+                  0,          /*min percent read depth 0*/
+                  fragCheckBl,/*do not print depths*/
                   numSupReadsUI,
                   spolDbHeapAryST,
                   numLineagesSI,
