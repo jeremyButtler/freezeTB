@@ -65,6 +65,44 @@ spolST
 }spolST; /*spolST*/
 
 /*-------------------------------------------------------\
+| ST02: fuzzy_spolST
+|   - holds all fuzzy spoligotype lineages in a databse
+\-------------------------------------------------------*/
+typedef struct
+fuzzy_spolST{
+   signed char **idAryStr;      /*id for each lineage*/
+   signed int lenSI;            /*number of lineages*/
+   signed int sizeSI;           /*max lineages*/
+   signed char **barAryStr;     /*lineage barcodes*/
+     /*
+     ` - non-set values in barcodes
+     `   * o = no spacer (spacer is missing)
+     `   * I = inserted (present) spacer
+     `   * x = can be absent or present
+     ` for sets: a set is a set of spacers were at least
+     `   one spacer must be present (s+p) or absent (d-m).
+     `   Each used set must be present before a match is
+     `   made
+     `   * d = at least one spacer is deleted (set 1)
+     `   * a = at least one spacer is absent  (set 2)
+     `   * m = at least one spacer is missing (set 3)
+     `   * s = at least one spacer is set (set 1)
+     `   * f = at least one spacer is found (set 2)
+     `   * p = at least one spacer is present (set 3)
+     */
+}fuzzy_spolST;
+
+#define def_del_spolST 'o'
+#define def_set_spolST 'i'
+#define def_unkown_spolST 'x'
+#define def_delOne_spolST 'd'
+#define def_delTwo_spolST 'a'
+#define def_delThree_spolST 'm'
+#define def_setOne_spolST 's'
+#define def_setTwo_spolST 'f'
+#define def_setThree_spolST 'p'
+
+/*-------------------------------------------------------\
 | Fun01: blank_spolST
 |   - blanks all variables in and spolST structure
 | Input:

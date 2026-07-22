@@ -64,6 +64,7 @@
 /*.h files only*/
 #include "../genLib/genMath.h" /*.h macros only*/
 #include "../genLib/endLine.h"
+#include "../genLib/64bit.h"
 #include "tbSpolDefs.h"
 
 /*-------------------------------------------------------\
@@ -1201,176 +1202,473 @@ pspol_spolST(
    fprintf((FILE *) outFILE, "%s", str_endLine);
 } /*pspol_spolST*/
 
+#ifdef NEW
 /*-------------------------------------------------------\
-| Fun12: genLineageDbRead_spolST
+| Fun12: fuzzyDbGet_spolST
 |   - read in a database for general lineages
 | Input:
 |   - dbFILE:
 |     o FILE pointer to database to read in
-|   - lenSLPtr:
-|     o signed long pointer to get number of lineages
+|   - errSLPtr:
+|     o signed long pointer to get the line of the error
+|       or error type
 | Output:
 |   - Modifies:
-|     o lenSLPtr to be
-|       * 0 for no input/no lineages in database
-|       * number lineages if no errors
-|       * -1 for file errors
+|     o errSCPtr:
+|       * 0 for no errors
+|       * line error was on (> 0) for file error
+|       * -1 for empty file
 |       * -2 for memory errors
 |   - Returns:
-|     o signed char array with lineages
+|     o fuzzy_spolST array with the fuzzy lineages
 |     o 0 for no input, file errors, or memory errors
-| dbFILE database format:
-|    1	10000000000xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-|    2	0000000000000000000000000000000000xxxxxxxxx
-|    3	xxxxxxxxxxxxxxxxxxxxxx000000000000xxxxxxxxx
+| dbFILE database format (1st row header, rest lineages):
+|  - spaces and tabs separat columns
+|  - format
+|    lineage	barcode
+|    1	Iooooooooooxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+|    2	ooooooooooooooooooooooooooooooooooxxxxxxxxx
+|    3	xxxxxxxxxxxxxxxxxxxxxxooooooooooooxxxxxxxxx
 |    4	0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxDDDDxxxxxxxxx
-|    
-|    Where 1 = always present
-|    Where 0 = always absent
-|    Where x = not used (set or deleted)
-|    Where D = some deleted (set 1)
-|    Where - = some deleted (set 2)
-|    Where S = some set (set 1)
-|    Where + = some set (set 2)
+|  - possible values used in the barcode
+|    * I = always present
+|    * o = always absent
+|    * x = not used (set or deleted)
+|    * D = at least one spacer delete (delete; set 1)
+|    * a = at least one spacer delete (absent; set 2)
+|    * M = at least one spacer delete (missing; set 3)
+|    * S = at least one spacer set (set; set 1)
+|    * F = at least one spacer set (found; set 2)
+|    * P = at least one spacer set (present; set 3)
 \-------------------------------------------------------*/
+struct fuzzy_spolST *
+fuzzyDbGet_spolST(
+   void *dbFILE,
+   signed long *errSLPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' fun12: fuzzyDbGet_spolST
+   '   - read in a database for general lineages
+   '   o fun12 sec01:
+   '     - variable declarations
+   '   o fun12 sec02:
+   '     - read in the fuzzy barcodes
+   '   o fun12 sec03:
+   '     - return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun12 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   #define def_buffSize_fun12_spolST 1024
+   signed char buffStr[def_buffSize_fun13_spolST + 1]
+
+   signed int idStartSI = 0; 
+   signed int idLenSI = 0; 
+   signed int barStartSI = 0; 
+   signed int barLenSI = 0; 
+
+   struct fuzzy_spolST *fuzzyHeapST = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun12 Sec02:
+   ^   - read in the fuzzy barcodes
+   ^   o fun12 sec02 sub01:
+   ^     - get past the header
+   ^   o fun12 sec02 sub02:
+   ^     - get row and find id length and barcode start
+   ^   o fun12 sec02 sub03:
+   ^     - make sure the barcode entry is valid
+   ^   o fun12 sec02 sub04:
+   ^     - copy lineage id
+   ^   o fun12 sec02 sub05:
+   ^     - copy barcode
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun12 Sec02 Sub01:
+   *   - get past the header
+   \*****************************************************/
+
+   fuzzyHeapST = malloc(sizeof(struct fuzzy_spolST));
+   if(! fuzzyHeapST)
+      goto memErr_fun12_sec0x;
+   init_fuzzy_spolST(fuzzyHeapST);
+       /*TODO: add init*/
+
+   *errSLPtr = 1;
+   if(
+      ! fgets(
+         buffStr,
+         def_buffSize_fun12_spolST,
+         (FILE *) dbFILE
+      )
+   ) goto emptyFile_fun12_sec0x;
+
+   /*****************************************************\
+   * Fun12 Sec02 Sub02:
+   *   - get row and find id length and barcode start
+   \*****************************************************/
+
+   while(
+      ! fgets(
+         buffStr,
+         def_buffSize_fun12_spolST,
+         (FILE *) dbFILE
+      )
+   ){ /*Loop: get fuzzy lineages*/
+      ++(*errSLPtr);
+
+      while(buffStr[idStartSI] && buffStr[idStartSI] < 33)
+         ++idStartSI;
+      if(! buffStr[idLenSI])
+         continue; /*empty line*/
+
+      idLenSI = endWhite_ulCp(&buffStr[idStartSI]);
+      if(buffStr[idLenSI] == ' ')
+         ;
+      else if(buffStr[idLenSI] == '\t')
+         ;
+      else
+         goto fileErr_fun12_sec0x;
+
+      barStartSI = idLenSI + idStartSI;
+      while(buffStr[barStartSI] && buffStr[barStartSI]<33)
+         ++barStartSI;
+      if(! buffStr[barStartSI])
+         goto fileErr_fun12_sec0x;
+
+      /**************************************************\
+      * Fun12 Sec02 Sub03:
+      *   - make sure the barcode entry is valid
+      \**************************************************/
+
+      barLenSI = barStartSI;
+      while(buffStr[barLenSI] && buffStr[barLenSI] > 32)
+      { /*Loop: check barcode*/
+         buffStr[barLenSI] |= 32;
+         if(buffStr[barLenSI] == def_del_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_set_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_unkown_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_delOne_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_delTwo_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_delThree_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_setOne_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_setTwo_spolST)
+            ;
+         else if(buffStr[barLenSI] == def_setThree_spolST)
+            ;
+         else
+            goto fileErr_fun12_sec0x;
+
+         ++barLenSI;
+      } /*Loop: check barcode*/
+
+      barLenSI -= barStartSI;
+
+      /**************************************************\
+      * Fun12 Sec02 Sub04:
+      *   - copy lineage id
+      \**************************************************/
+
+      /*TODO: make memAdd*/
+      if(memAdd_fuzzy_spolST(fuzzyHeapST))
+         goto memErr_fun12_sec0x;
+
+      fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI] =
+         malloc(
+            ulAlign_64bit(idLenSI +1, sizeof(signed char))
+               * sizeof(signed char)
+         );
+      if(! fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI])
+         goto memErr_fun12_sec0x;
+      cpLen_ulCp(
+         fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI],
+         &buffStr[idStartSI],
+         idLenSI
+      );
+
+      /**************************************************\
+      * Fun12 Sec02 Sub05:
+      *   - copy barcode
+      \**************************************************/
+
+      fuzzyHeapST->barAryStr[fuzzyHeapST->lenSI] =
+         malloc(
+            ulAlign_64bit(barLenSI+1, sizeof(signed char))
+               * sizeof(signed char)
+         );
+      if(! fuzzyHeapST->barAryStr[fuzzyHeapST->lenSI])
+         goto memErr_fun12_sec0x;
+      cpLen_ulCp(
+         fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI],
+         &buffStr[barStartSI],
+         barLenSI
+      );
+
+      ++fuzzyHeapST->lenSI;
+   }  /*Loop: get fuzzy lineages*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun12 Sec03:
+   ^   - return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   *errSLPtr = 0;
+   goto ret_fun12_sec0x;
+
+   emptyFile_fun12_sec0x:;
+      *errSLPtr = -1;
+      goto errClean_fun12_sec0x;
+
+   fileErr_fun12_sec0x:;
+      goto errClean_fun12_sec0x;
+
+   memErr_fun12_sec0x:;
+      *errSLPtr = -2;
+      goto errClean_fun12_sec0x;
+
+   errClean_fun12_sec0x:;
+      /*TODO: make freeHeap*/
+      if(fuzzyHeapST)
+         freeHeap_fuzzy_spolST(fuzzyHeapST);
+      fuzzyHeapST = 0;
+      goto ret_fun12_sec0x;
+
+   ret_fun12_sec0x:;
+      return fuzzyHeapST;
+} /*fuzzyDbGet_spolST*/
 
 /*-------------------------------------------------------\
 | Fun13: genLineageSearch_spolST
-|   - searchs the spoligotype for generalized lineages
+|   - searches the spoligotype for generalized lineages
 | Input:
-|   - spacerDepthAryUI:
-|     o unsigned int array with read depth for each spacer
-|     o end of spacers marked with a -1
-|   - numLinFoundSIPtr:
-|     o signed int pointer to get number of lineages found
+|   - barStr:
+|     o c-string with barcode
+|     o use depthToBarcode_spolST to build this
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer with fuzzy lineages
+|       to look for
+|   - lenSIPtr:
+|     o signed int pointer with number of fuzzy lineages
+|       found
 | Output:
 |   - Modifies:
-|     o numLinFoundSIPtr to be
-|       * 0 for no input/no lineages in database
-|       * number lineages if no errors
-|       * -1 for file errors
-|       * -2 for memory errors
+|     o lenSIPtr:
+|       * to have the number of fuzzy lineages found
+|       * -1 if barStr did not have 43 spacers
+|       * -1 for memory errors
 |   - Returns:
-|     o signed int array with each found lineage
-|     o 0 for no input, file errors, or memory errors
+|     o index of lineage in 
+|     o 0 for no input or memory errors
 \-------------------------------------------------------*/
-#ifdef NEW
 signed int *
 lineageDetect_tbSpol(
-   unsigned int *spacerDepthAryUI, /*depths per spacer*/
-   signed int minDepthSI,       /*minimum depth*/
-   signed char **lineageAryStr, /*has lineage patterns*/
-   signed int numberLineagesSI, /*number of lineages*/
-   signed int *numLinFoundSIPtr
+   signed char *barStr,
+   struct fuzzy_spolST *fuzzySTPtr,
+   signed int *lenSIPtr
 ){
    #define def_numSpoligo_xxx 43
-   signed int siSpacer = 0;
+   signed int siPos = 0;
    signed int siLin = 0;
 
-   #define def_delOne_fun13 2
-   #define def_delOneMatch_fun13 4
+   #define def_delOne_fun13 (1 << 1)
+   #define def_delOneMatch_fun13 (1 << 2)
 
-   #define def_delTwo_fun13 8
-   #define def_delTwoMatch_fun13 16
+   #define def_delTwo_fun13 (1 << 3)
+   #define def_delTwoMatch_fun13 (1 << 4)
 
-   #define def_delThree_fun13 32
-   #define def_delThreeMatch_fun13 64
+   #define def_delThree_fun13 (1 << 5)
+   #define def_delThreeMatch_fun13 (1 << 6)
 
-   #define def_insOne_fun13 2
+
+   #define def_setOne_fun13 (1 << 7)
+   #define def_setOneMatch_fun13 (1 << 8)
+
+   #define def_setTwo_fun13 (1 << 9)
+   #define def_setTwoMatch_fun13 (1 << 10)
+
+   #define def_setThree_fun13 (1 << 11)
+   #define def_setThreeMatch_fun13 (1 << 12)
+
    signed short *hitHeapArySS = 0;
-   signed int *retHeapArySC = 0;
+   signed int *retHeapArySI = 0;
+
+   /*for my own sanity*/
+   signed char **linAryStr = fuzzySTPtr->barAryStr;
+
+   *lenSIPtr = 0;
 
    hitHeapArySS =
-      malloc(numberLineagesSI * sizeof(signed short));
+      malloc(fuzzySTPtr->lenSI * sizeof(signed short));
    if(! hitHeapArySS)
       goto memErr_Fun13_sec0x;
 
-   for(siLin = 0; siLin < numberLineagesSI; ++siLin)
+   for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
       hitHeapArySC[siLin] = 1;
    
-   for(
-      siSpacer = 0;
-      siSpacer < def_numSpoligo_xxx;
-      ++siSpacer
-   ){ /*Loop: map spacers*/
-      if(spacerDepthAryUI[siSpacer] == (unsigned int) -1)
-         break; /*no more spacers to check*/
+   for(siPos = 0; siPos < def_numSpoligo_xxx; ++siPos)
+   { /*Loop: map spacers*/
+      if(barStr[siPos])
+         goto noBarcode_fun13_sec0x;
 
-      for(siLin = 0; siLin < numberLineagesSI; ++siLin)
+      for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
       { /*Loop: check if have a match*/
-         if(! linHitArySC[siLin])
+         if(linAryStr[siLin][siPos] == def_unkown_spolST)
             ;
 
-         else if(
-            (lineageArySTr[siLin][siSpacer] | 32) == 'x'
-         ) ;
+         else if(linAryStr[siLin][siPos]==def_del_spolST)
+         { /*ElseI If: have a deletion*/
+            if( (barStr[siPos] | 32) != def_del_spolST )
+               hitHeapArySS[siPos] = 0;
+         } /*ElseI If: have a deletion*/
+
+         else if(linAryStr[siLin][siPos]==def_set_spolST)
+         { /*ElseI If: spacer must be set*/
+            if( (barStr[siPos] | 32) != def_set_spolST )
+               hitHeapArySS[siPos] = 0;
+         } /*ElseI If: spacer must be set*/
 
          else if(
-                lineageAryStr[siLin][siSpacer] == '0'
-             && spacerDepthArySI[siSpacer] < minDepthSI
-         ) ;
+            linAryStr[siLin][siPos] == def_delOne_spolST
+         ){ /*Else If: at least one spacer must be a del*/
+            hitHeapArySS[siPos] |= def_delOne_fun13;
 
-         else if(lineageAryStr[siLin][siSpacer] == '0')
-            linHitArySC[siLin] = 0;
-
-         else if(
-                lineageAryStr[siLin][siSpacer] == '1'
-             && spacerDepthArySI[siSpacer] >= minDepthSI
-         ) ;
-
-         else if(lineageAryStr[siLin][siSpacer] == '1')
-            linHitArySC[siLin] = 0;
+            if( (barStr[siPos] | 32) == def_del_spolST )
+               hitHeapArySS[siPos]|=def_delOneMatch_fun13;
+         }  /*Else If: at least one spacer must be a del*/
 
          else if(
-               (lineageAryStr[siLin][siSpacer] |32) == 'd'
-            && spacerDepthArySI[siSpacer] < minDepthSI
-         ) linHitArySC[siSpacer] = 2;
+            linAryStr[siLin][siPos] == def_delTwo_spolST
+         ){ /*Else If: at least one spacer must be a del*/
+            hitHeapArySS[siPos] |= def_delTwo_fun13;
+
+            if( (barStr[siPos] | 32) == def_del_spolST )
+               hitHeapArySS[siPos]|=def_delTwoMatch_fun13;
+         }  /*Else If: at least one spacer must be a del*/
 
          else if(
-               (lineageAryStr[siLin][siSpacer] |32) == 'd'
-            && linHitArySC[siSpacer] < 2
-         ) linHitArySC[siSpacer] = -1;
+            linAryStr[siLin][siPos] == def_delThree_spolST
+         ){ /*Else If: at least one spacer must be a del*/
+            hitHeapArySS[siPos] |= def_delThree_fun13;
+
+            if( (barStr[siPos] | 32) == def_del_spolST )
+               hitHeapArySS[siPos] |=
+                  def_delThreeMatch_fun13;
+         }  /*Else If: at least one spacer must be a del*/
 
          else if(
-               (lineageAryStr[siLin][siSpacer] |32) == 's'
-            && spacerDepthArySI[siSpacer] >= minDepthSI
-         ) linHitArySC[siSpacer] = 2;
+            linAryStr[siLin][siPos] == def_setOne_spolST
+         ){ /*Else If: at least one spacer must be set*/
+            hitHeapArySS[siPos] |= def_setOne_fun13;
+
+            if( (barStr[siPos] | 32) == def_set_spolST )
+               hitHeapArySS[siPos]|=def_setOneMatch_fun13;
+         }  /*Else If: at least one spacer must be set*/
 
          else if(
-               (lineageAryStr[siLin][siSpacer] |32) == 's'
-            && linHitArySC[siSpacer] < 2
-         ) linHitArySC[siSpacer] = -1;
+            linAryStr[siLin][siPos] == def_setTwo_spolST
+         ){ /*Else If: at least one spacer must be set*/
+            hitHeapArySS[siPos] |= def_setTwo_fun13;
+
+            if( (barStr[siPos] | 32) == def_set_spolST )
+               hitHeapArySS[siPos]|=def_setTwoMatch_fun13;
+         }  /*Else If: at least one spacer must be set*/
+
+         else if(
+            linAryStr[siLin][siPos] == def_setThree_spolST
+         ){ /*Else If: at least one spacer must be set*/
+            hitHeapArySS[siPos] |= def_setThree_fun13;
+
+            if( (barStr[siPos] | 32) == def_set_spolST )
+               hitHeapArySS[siPos] |=
+                  def_setThreeMatch_fun13;
+         }  /*Else If: at least one spacer must be set*/
       } /*Loop: check if have a match*/
-
    } /*Loop: map spacers*/
 
-   for(siLin = 0; siLin < numberLineagesSI; ++siLin)
-   { /*Loop: set non-lineages to 0*/
-      if(linHitArySC[siLin] > 1)
-         linHitArySC[siLin] = 0;
-         /*partial pattern never completed*/
+   for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
+   { /*Loop: find number of detected lineages*/
+      if(hitHeapArySS[siPos] == 1)
+         ++(*lenSIPtr);
 
-      else if(linHitArySC[siLin] > 0)
-      { /*Else If: kept a lineage*/
-         ++siSpacer;
-         linHitArySC[siLin] = 1;
-      } /*Else If: kept a lineage*/
-   } /*Loop: set non-lineages to 0*/
-         
+      else if(! hitHeapArySS[siPos])
+         continue;
+
+      else if(
+           hitHeapArySS[siPos] & def_delOne_spolST
+        && !(hitHeapArySS[siPos] & def_delOneMatch_spolST)
+      ) hitHeapArySS[siPos] = 0;
+
+      else if(
+           hitHeapArySS[siPos] & def_delTwo_spolST
+        && !(hitHeapArySS[siPos] & def_delTwoMatch_spolST)
+      ) hitHeapArySS[siPos] = 0;
+
+      else if(
+           hitHeapArySS[siPos] & def_delThree_spolST
+        && !(
+            hitHeapArySS[siPos] & def_delThreeMatch_spolST
+           )
+      ) hitHeapArySS[siPos] = 0;
+
+      else if(
+           hitHeapArySS[siPos] & def_setOne_spolST
+        && !(hitHeapArySS[siPos] & def_setOneMatch_spolST)
+      ) hitHeapArySS[siPos] = 0;
+
+      else if(
+           hitHeapArySS[siPos] & def_setTwo_spolST
+        && !(hitHeapArySS[siPos] & def_setTwoMatch_spolST)
+      ) hitHeapArySS[siPos] = 0;
+
+      else if(
+           hitHeapArySS[siPos] & def_setThree_spolST
+        && !(
+            hitHeapArySS[siPos] & def_setThreeMatch_spolST
+           )
+      ) hitHeapArySS[siPos] = 0;
+
+      else
+      { /*Else: all partial sets and absent met*/
+         hitHeapArySS[siPos] = 1;
+         ++(*lenSIPtr);
+      } /*Else: all partial sets and absent met*/
+   } /*Loop: find number of detected lineages*/
+
+   retHeapArySI = malloc(*lenSIPtr * sizeof(signed int));
+   if(! retHeapArySI)
+      goto memErr_fun13_sec0x;
+
+   *lenSIPtr = 0;
+   for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
+   { /*Loop: recored match index's*/
+      if(hitHeapArySS[siPos] == 1)
+         retHeapArySI[*lenSIPtr++] = siLin;
+   } /*Loop: recored match index's*/
+
    goto ret_fun13_sec0x;
 
-   fileErr_fun13_sec0x:;
-      *numLinFoundSIPtr = -1;
+   noBarcode_fun13_sec0x:;
+      *lenSIPtr = -1;
       goto errClean_fun13_sec0x;
 
    memErr_fun13_sec0x:;
-      *numLinFoundSIPtr = -2;
+      *lenSIPtr = -2;
       goto errClean_fun13_sec0x;
 
    errClean_fun13_sec0x:;
-      if(retHeapArySC)
-         free(retHeapArySC);
-      retHeapArySC = 0;
+      if(retHeapArySI)
+         free(retHeapArySI);
+      retHeapArySI = 0;
 
       goto ret_fun13_sec0x;
 
@@ -1379,7 +1677,7 @@ lineageDetect_tbSpol(
          free(hitHeapArySS);
       hitHeapArySS = 0;
 
-      return retHeapArySC;
+      return retHeapArySI;
 } /*lineageDetect_tbSpol*/
 #endif
 
