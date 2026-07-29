@@ -1,0 +1,40 @@
+# build is a single threaded build system that I am trying
+#  to make. This is my current vision for a build file
+
+get ../compilers.build
+get ../genLib/genLib.build
+
+$(program) closestSpol$=(ext)
+
+>commands<
+
+all :use:link [:in:spolST]
+
+debugbug_compile
+   $(O) $=(O).bug
+   $(CFLAGS) $=(bugCFlags)
+   cmd all
+
+closestSpol :use:compile
+   [:in:closestSpol.c
+    :cmd:base10str
+    :cmd:../genFreezeTB/findCloseBarcodes
+   ]
+
+../genFreezeTB/findCloseBarcodes :use:compile
+   [:in:../genFreezeTB/findCloseBarcodes.c 
+    ../genFreezeTB/findCloseBarcodes.h
+    :cmd:spolST
+   ]
+
+
+spolST :use:compile
+   [:in:spolST.c
+    spolST.h
+    ../genLib/genMath.h
+    ../genLib/64bit.h
+    ../genFreezeTB/tbSpolDefs.h
+    :cmd:charCp
+    :cmd:numToStr
+    :cmd:fileFun
+   ]

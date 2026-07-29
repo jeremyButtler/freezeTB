@@ -90,6 +90,10 @@ Most methods of finding mean q-scores take the mean of all
       - < 90% similarity, not a spacer
    f. repeat step c until at end of the direct repeat
       region in the read
+   g. the barcode is then compared to the database and
+      all barcodes that share 38 spacers (no more then
+      5 differences) are kept
+      - (printed to `<prefix>-read-spoligo-close.tsv`)
 
 - freezeTB detectes the different *Mycobaterium* species
   and other lineages in each read using getLin

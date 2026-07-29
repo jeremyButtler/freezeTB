@@ -1,3 +1,5 @@
+/*SPDX-License-Identifier: CC0-1.0*/
+
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 ' hardFtbWdig SOF: Start Of File
 '   - has the hardcoded parts of the rayWidg that is
@@ -33,25 +35,31 @@
 '     - hides the amr table menu
 '   o .c fun11: hideHsp65_ftbRayST
 '     - hides the hsp65 and user lineage table menu
-'   o .c fun12: hideGeneCover_ftbRayST
+'   o .c fun12: hideCloseSpol_ftbRayST
+'     - hides the close spoligotype and table menu
+'   o .c fun13: hideGeneCover_ftbRayST
 '     - hides the gene coverage table
-'   o .c fun13: spoligoLinGet_ftbRayST
+'   o .c fun14: spoligoLinGet_ftbRayST
 '     - gets the spoligotype lineage and sets the spoligo
-'   o .c fun14: miruLinGet_ftbRayST
+'   o .c fun15: miruLinGet_ftbRayST
 '     - gets the MIRU-VNTR lineage & sets miru text output
-'   o .c fun15: checkDrugs_ftbRayST
+'   o .c fun16: checkDrugs_ftbRayST
 '     - builds the drug resistance part of the ftb report
-'   o .c fun16: getDatabases_ftbRayST
+'   o .c fun17: getDatabases_ftbRayST
 '     - get database files for freezeTB (currently Mac)
-'   o .c fun17: mkCoverageTbl_ftbRayST
+'   o .c fun18: mkCoverageTbl_ftbRayST
 '     - makes the gene percent coverage table
-'   o .c fun18: getHsp65Lin_ftbRayST
+'   o .c fun19: getHsp65Lin_ftbRayST
 '     - get the getLin hsp65 lineages (an others)
-'   o fun19: checkRunEvent_ftbRayST
+'   o .c fun20: closeSpolGet_ftbRayST
+'     - get spoligotypes that were close to found barcode
+'   o fun21: checkRunEvent_ftbRayST
 '     - checks for an event, and if can runs found event
 '     - also redraws the GUI
-'   o license:
-'     - licensing for this code (CC0)
+' This file is released into the Public Domain under
+'   CC0-1.0.
+' See https://creativecommons.org/publicdomain/zero/1.0/
+'   for details (or ../../license-CC-1.0.txt).
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -137,7 +145,7 @@ signed int glob_widthPrefixEntrySI =
 
 /*do not mess with drug tables. If you are adding
 `  or removing something, then make sure to also change
-`  the gene coverage step in checkDrugs_ftbRayST (fun15)
+`  the gene coverage step in checkDrugs_ftbRayST (fun16)
 */
 signed char
    glob_drugFullStrAry[def_numDrugs_ftbRayST][32] =
@@ -323,6 +331,10 @@ blank_gui_ftbRayST(
    if(guiSTPtr->hsp65ListSTPtr)
       clear_listBox_rayWidg(guiSTPtr->hsp65ListSTPtr);
 
+   /*____________________close_spoligotype_GUI__________*/
+   if(guiSTPtr->closeSpolListSTPtr)
+      clear_listBox_rayWidg(guiSTPtr->closeSpolListSTPtr);
+
    /*_________________gene_coverage_table_______________*/
    if(guiSTPtr->geneCoverSTPtr)
       clear_listBox_rayWidg(guiSTPtr->geneCoverSTPtr);
@@ -390,6 +402,10 @@ init_gui_ftbRayST(
    guiSTPtr->hsp65LabIdSI = 0;
    guiSTPtr->hsp65ListSTPtr = 0;
 
+   guiSTPtr->closeSpolTblIdSI = 0;
+   guiSTPtr->closeSpolLabIdSI = 0;
+   guiSTPtr->closeSpolListSTPtr = 0;
+
    guiSTPtr->geneCoverTblIdSI = 0;
    guiSTPtr->geneCoverLabIdSI = 0;
    guiSTPtr->geneCoverSTPtr = 0;
@@ -430,6 +446,10 @@ freeStack_gui_ftbRayST(
       freeHeap_listBox_rayWidg(guiSTPtr->amrListSTPtr);
    if(guiSTPtr->hsp65ListSTPtr)
       freeHeap_listBox_rayWidg(guiSTPtr->hsp65ListSTPtr);
+   if(guiSTPtr->closeSpolListSTPtr)
+      freeHeap_listBox_rayWidg(
+         guiSTPtr->closeSpolListSTPtr
+      );
    if(guiSTPtr->geneCoverSTPtr)
       freeHeap_listBox_rayWidg(guiSTPtr->geneCoverSTPtr);
 
@@ -602,11 +622,22 @@ draw_gui_ftbRayST(
       20,
       guiSTPtr->hsp65ListSTPtr
    );
-
    heightSet_listBox_rayWidg(
       guiSTPtr->widgSTPtr->winHeightSI - oneRowSI * 2,
       20,
       guiSTPtr->hsp65ListSTPtr
+   );
+
+   widthSet_listBox_rayWidg(
+      guiSTPtr->widgSTPtr->winWidthSI
+         - guiSTPtr->widgSTPtr->fontWidthF * 2,
+      20,
+      guiSTPtr->closeSpolListSTPtr
+   );
+   heightSet_listBox_rayWidg(
+      guiSTPtr->widgSTPtr->winHeightSI - oneRowSI * 2,
+      20,
+      guiSTPtr->closeSpolListSTPtr
    );
 
    widthSet_listBox_rayWidg(
@@ -709,6 +740,23 @@ draw_gui_ftbRayST(
             0,                /*minumum width = any size*/
             guiSTPtr->hsp65GuiIdSI,
             (signed char *) "hsp65",
+            0,
+            guiSTPtr->widgSTPtr    /*has widgets to draw*/
+         );
+
+      widthSI += guiSTPtr->widgSTPtr->fontWidthF;
+      guiSTPtr->widgSTPtr->xArySI[
+         guiSTPtr->closeSpolGuiIdSI
+      ] = widthSI;
+      guiSTPtr->widgSTPtr->yArySI[
+         guiSTPtr->closeSpolGuiIdSI
+      ] = ySI;
+      widthSI +=
+         butDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                /*minumum width = any size*/
+            guiSTPtr->closeSpolGuiIdSI,
+            (signed char *) "spoligo",
             0,
             guiSTPtr->widgSTPtr    /*has widgets to draw*/
          );
@@ -1143,6 +1191,24 @@ draw_gui_ftbRayST(
             guiSTPtr->widgSTPtr
          );
 
+         /*_____________close_spoligotype_menu__________*/
+         labDraw_rayWidg(
+            glob_maxWidgWidthSI,
+            0,                    /*no min width*/
+            guiSTPtr->closeSpolLabIdSI,
+            pathsStr,
+            ' ',                  /*padding with spaces*/
+            2,                    /*right pad if needed*/
+            tileBl,
+            guiSTPtr->widgSTPtr
+         ); /*label for entry box*/
+         draw_listBox_rayWidg(
+            guiSTPtr->closeSpolTblIdSI,
+            tileBl,
+            guiSTPtr->closeSpolListSTPtr,
+            guiSTPtr->widgSTPtr
+         );
+
          /*___________gene_coverage_menu________________*/
          labDraw_rayWidg(
             glob_maxWidgWidthSI,
@@ -1258,6 +1324,8 @@ mk_gui_ftbRayST(
    ^   o fun06 sec02 sub07:
    ^     - add report screen widgets (last for rectangles)
    ^   o fun06 sec02 sub08:
+   ^     - add close spoligotype table widgets
+   ^   o fun06 sec02 sub09:
    ^     - add report screen widgets (last for rectangles)
    ^     - last because requires creating a large number
    ^       of untracked widgets for the drugs
@@ -1288,6 +1356,12 @@ mk_gui_ftbRayST(
    if(! retHeapGUI->hsp65ListSTPtr)
       goto memErr_fun06_sec07;
    init_listBox_rayWidg(retHeapGUI->hsp65ListSTPtr);
+
+   retHeapGUI->closeSpolListSTPtr =
+      malloc(sizeof(struct listBox_rayWidg));
+   if(! retHeapGUI->closeSpolListSTPtr)
+      goto memErr_fun06_sec07;
+   init_listBox_rayWidg(retHeapGUI->closeSpolListSTPtr);
 
    retHeapGUI->geneCoverSTPtr =
       malloc(sizeof(struct listBox_rayWidg));
@@ -1345,6 +1419,11 @@ mk_gui_ftbRayST(
    if(tmpSI < 0)
       goto memErr_fun06_sec07;
    retHeapGUI->hsp65GuiIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   retHeapGUI->closeSpolGuiIdSI = tmpSI;
 
    tmpSI = addWidget_widg_rayWidg(0,0,0,-1,-1,widgSTPtr);
    if(tmpSI < 0)
@@ -1516,6 +1595,24 @@ mk_gui_ftbRayST(
 
    /*****************************************************\
    * Fun06 Sec02 Sub07:
+   *   - add close spoligotype table widgets
+   \*****************************************************/
+
+   tmpSI = addWidget_widg_rayWidg(0,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   inactiveAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->closeSpolLabIdSI = tmpSI;
+
+   tmpSI = addWidget_widg_rayWidg(1,0,1,-1,-1,widgSTPtr);
+   if(tmpSI < 0)
+      goto memErr_fun06_sec07;
+   hidenAdd_widg_rayWidg(tmpSI, retHeapGUI->widgSTPtr);
+   retHeapGUI->closeSpolTblIdSI = tmpSI;
+
+   /*****************************************************\
+   * Fun06 Sec02 Sub08:
    *   - add gene coverage table
    \*****************************************************/
 
@@ -1533,7 +1630,7 @@ mk_gui_ftbRayST(
    retHeapGUI->geneCoverTblIdSI = tmpSI;
 
    /*****************************************************\
-   * Fun06 Sec02 Sub08:
+   * Fun06 Sec02 Sub09:
    *   - add report screen widgets (last for rectangles)
    *   - last because requires creating a large number of
    *     untracked widgets for the drugs
@@ -2024,7 +2121,37 @@ hideHsp65_ftbRayST(
 } /*hideHsp65_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun12: hideGeneCover_ftbRayST
+| Fun12: hideCloseSpol_ftbRayST
+|   - hides the close spoligotype and table menu
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct pointer with gui
+| Output:
+|   - Mofidies:
+|     o all output GUI widgets to be hidden and the output
+|       menu button to have the inactive state removed
+\-------------------------------------------------------*/
+void
+hideCloseSpol_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){
+      inactiveClear_widg_rayWidg(
+         guiSTPtr->closeSpolGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->closeSpolTblIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenAdd_widg_rayWidg(
+         guiSTPtr->closeSpolLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+} /*hideCloseSpol_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun13: hideGeneCover_ftbRayST
 |   - hides the gene coverage table
 | Input:
 |   - guiSTPtr:
@@ -2054,7 +2181,7 @@ hideGeneCover_ftbRayST(
 } /*hideGeneCover_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun13: spoligoLinGet_ftbRayST
+| Fun14: spoligoLinGet_ftbRayST
 |   - gets the spoligotype lineage and sets the spoligo
 |     output text (for report)
 | Input:
@@ -2154,7 +2281,7 @@ spoligoLinGet_ftbRayST(
 } /*spoligoLinGet_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun14: miruLinGet_ftbRayST
+| Fun15: miruLinGet_ftbRayST
 |   - gets the MIRU-VNTR lineage and sets miru text output
 | Input:
 |   - guiSTPtr
@@ -2217,7 +2344,7 @@ miruLinGet_ftbRayST(
 } /*miruLinGet_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun15: checkDrugs_ftbRayST
+| Fun16: checkDrugs_ftbRayST
 |   - builds the drug resistance part of the ftb report
 | Input:
 |   - guiSTPtr
@@ -2230,22 +2357,22 @@ void
 checkDrugs_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun15 TOC:
+   ' Fun16 TOC:
    '   - builds the drug resistance part of the ftb report
-   '   o fun15 sec01:
+   '   o fun16 sec01:
    '     - variable declarations
-   '   o fun15 sec02:
+   '   o fun16 sec02:
    '     - initialize
-   '   o fun15 sec03:
+   '   o fun16 sec03:
    '     - check if have enough coverage for no amr call
-   '   o fun15 sec04:
+   '   o fun16 sec04:
    '     - set the drug resistance colors
-   '   o fun15 sec05:
+   '   o fun16 sec05:
    '     - find AMRs
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec01:
+   ^ Fun16 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2287,16 +2414,16 @@ checkDrugs_ftbRayST(
    signed char refBl = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec02:
+   ^ Fun16 Sec02:
    ^   - initialize
-   ^   o fun15 sec02 sub01:
+   ^   o fun16 sec02 sub01:
    ^     - get default filters and clear AMRs
-   ^   o fun15 sec02 sub02:
+   ^   o fun16 sec02 sub02:
    ^     - add the header to the amr table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun15 Sec02 Sub01:
+   * Fun16 Sec02 Sub01:
    *   - get default filters and clear AMRs
    \*****************************************************/
    
@@ -2326,7 +2453,7 @@ checkDrugs_ftbRayST(
    } /*Loop: blank the drug colors*/
 
    /*****************************************************\
-   * Fun15 Sec02 Sub02:
+   * Fun16 Sec02 Sub02:
    *   - add the header to the amr table
    \*****************************************************/
 
@@ -2389,18 +2516,18 @@ checkDrugs_ftbRayST(
    ) return; /*memory error*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec03:
+   ^ Fun16 Sec03:
    ^   - check if have enough coverage for no amr call
-   ^   o fun15 sec03 sub01:
+   ^   o fun16 sec03 sub01:
    ^     - open coverage file
-   ^   o fun15 sec03 sub02:
+   ^   o fun16 sec03 sub02:
    ^     - start loop, get percent coverage, move to drugs
-   ^   o fun15 sec03 sub03:
+   ^   o fun16 sec03 sub03:
    ^     - find the drugs in each gene/target
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun15 Sec03 Sub01:
+   * Fun16 Sec03 Sub01:
    *   - open coverage file
    \*****************************************************/
 
@@ -2415,7 +2542,7 @@ checkDrugs_ftbRayST(
      return;
 
    /*****************************************************\
-   * Fun15 Sec03 Sub02:
+   * Fun16 Sec03 Sub02:
    *   - start loop, get percent coverage, move to drugs
    \*****************************************************/
 
@@ -2458,11 +2585,11 @@ checkDrugs_ftbRayST(
             continue;
 
          /***********************************************\
-         * Fun15 Sec03 Sub03:
+         * Fun16 Sec03 Sub03:
          *   - find the drugs in each gene/target
          \***********************************************/
 
-         nextDrug_fun15_sec03_sub03:;
+         nextDrug_fun16_sec03_sub03:;
 
          for(drugSI = 0; drugSI < 17; ++drugSI)
          { /*Loop: find drug*/
@@ -2504,7 +2631,7 @@ checkDrugs_ftbRayST(
             tmpStr += endWhite_ulCp(tmpStr);
             while(*tmpStr && *tmpStr < 33)
                ++tmpStr;
-            goto nextDrug_fun15_sec03_sub03;
+            goto nextDrug_fun16_sec03_sub03;
          } /*If: I have more drugs to find*/
       } /*Loop: get depths for each gene*/
    } /*If: have header*/
@@ -2513,7 +2640,7 @@ checkDrugs_ftbRayST(
    inFILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec04:
+   ^ Fun16 Sec04:
    ^   - set the drug resistance colors
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2539,30 +2666,30 @@ checkDrugs_ftbRayST(
    drugSI = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun15 Sec05:
+   ^ Fun16 Sec05:
    ^   - find AMRs
-   ^   o fun15 sec05 sub01:
+   ^   o fun16 sec05 sub01:
    ^     - open amr file (reads)
-   ^   o fun15 sec05 sub02:
+   ^   o fun16 sec05 sub02:
    ^     - get gene name + start loop
-   ^   o fun15 sec05 sub03:
+   ^   o fun16 sec05 sub03:
    ^     - check for resistance
-   ^   o fun15 sec05 sub04:
+   ^   o fun16 sec05 sub04:
    ^     - check for cross resistance (loops to sub03)
-   ^   o fun15 sec05 sub05:
+   ^   o fun16 sec05 sub05:
    ^     - get variant id, grade, and support
-   ^   o fun15 sec05 sub06:
+   ^   o fun16 sec05 sub06:
    ^     - check if amr has enough support
-   ^   o fun15 sec05 sub07:
+   ^   o fun16 sec05 sub07:
    ^     - if enough support, set resistance colors
-   ^   o fun15 sec05 sub08:
+   ^   o fun16 sec05 sub08:
    ^     - get high/low res, additive res, and genes
-   ^   o fun15 sec05 sub09:
+   ^   o fun16 sec05 sub09:
    ^     - build amr table entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun15 Sec05 Sub01:
+   * Fun16 Sec05 Sub01:
    *   - open amr file (reads)
    \*****************************************************/
 
@@ -2577,7 +2704,7 @@ checkDrugs_ftbRayST(
       return;
 
    /*****************************************************\
-   * Fun15 Sec05 Sub02:
+   * Fun16 Sec05 Sub02:
    *   - get gene name + start loop
    \*****************************************************/
 
@@ -2623,7 +2750,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec05 Sub03:
+         * Fun16 Sec05 Sub03:
          *   - check for resistance
          \***********************************************/
 
@@ -2635,7 +2762,7 @@ checkDrugs_ftbRayST(
 
          else
          { /*Else: check what drug am resistant to*/
-            checkDrug_fun15_sec05_sub03:;
+            checkDrug_fun16_sec05_sub03:;
                for(
                   lenSI = 0;
                   lenSI < def_numDrugs_ftbRayST;
@@ -2668,7 +2795,7 @@ checkDrugs_ftbRayST(
          } /*Else: check what drug am resistant to*/
 
          /***********************************************\
-         * Fun15 Sec05 Sub04:
+         * Fun16 Sec05 Sub04:
          *   - check for cross resistance (loops to sub03)
          \***********************************************/
 
@@ -2701,7 +2828,7 @@ checkDrugs_ftbRayST(
             lenSI = 0;
             while(*tmpStr > 32 && *tmpStr != '_')
                colStr[lenSI++] = ((*tmpStr++) | 32);
-            goto checkDrug_fun15_sec05_sub03;
+            goto checkDrug_fun16_sec05_sub03;
          } /*Else If: have cross resistance*/
 
          if(! *tmpStr)
@@ -2709,7 +2836,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec05 Sub05:
+         * Fun16 Sec05 Sub05:
          *   - get variant id, grade, and support
          \***********************************************/
 
@@ -2750,7 +2877,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec05 Sub06:
+         * Fun16 Sec05 Sub06:
          *   - check if amr has enough support
          \***********************************************/
 
@@ -2772,7 +2899,7 @@ checkDrugs_ftbRayST(
          } /*Else: frameshift or indel*/
 
          /***********************************************\
-         * Fun15 Sec05 Sub07:
+         * Fun16 Sec05 Sub07:
          *   - if enough support, set resistance colors
          \***********************************************/
 
@@ -2797,7 +2924,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec05 Sub08:
+         * Fun16 Sec05 Sub08:
          *   - get high/low res, additive res, and genes
          \***********************************************/
 
@@ -2820,7 +2947,7 @@ checkDrugs_ftbRayST(
          ++tmpStr;
 
          /***********************************************\
-         * Fun15 Sec05 Sub09:
+         * Fun16 Sec05 Sub09:
          *   - build amr table entry
          \***********************************************/
 
@@ -2898,7 +3025,7 @@ checkDrugs_ftbRayST(
 } /*checkDrugs_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun16: getDatabases_ftbRayST
+| Fun17: getDatabases_ftbRayST
 |   - get database files for freezeTB (currently Mac)
 | Input:
 |   - appPathStr:
@@ -2934,36 +3061,36 @@ getDatabases_ftbRayST(
    signed char **argAryStr, /*gets database paths*/
    signed int *argLenSIPtr  /*number of arguments*/
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun16 TOC: getDatabases_ftbRayST
+   ' Fun17 TOC: getDatabases_ftbRayST
    '   - get database files for freezeTB (currently Mac)
-   '   o fun16 sec01:
+   '   o fun17 sec01:
    '     - variable declarations
-   '   o fun16 sec02:
+   '   o fun17 sec02:
    '     - get path to databases
-   '   o fun16 sec03:
+   '   o fun17 sec03:
    '     - get reference file
-   '   o fun16 sec02:
+   '   o fun17 sec02:
    '     - get amrs table (amrs database)
-   '   o fun16 sec05:
+   '   o fun17 sec05:
    '     - get gene coordinates file
-   '   o fun16 sec06:
+   '   o fun17 sec06:
    '     - get MIRU-VNTR lineage table
-   '   o fun16 sec07:
+   '   o fun17 sec07:
    '     - get spoligotype spacer sequences
-   '   o fun16 sec08:
+   '   o fun17 sec08:
    '     - get spoligotype lineage database
-   '   o fun16 sec09:
+   '   o fun17 sec09:
    '     - get hsp65 simple speices database
-   '   o fun16 sec10:
+   '   o fun17 sec10:
    '     - get hsp65 complex speices database
-   '   o fun16 sec11:
+   '   o fun17 sec11:
    '     - find path to minimap2
-   '   o fun16 sec12:
+   '   o fun17 sec12:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec01:
+   ^ Fun17 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -2984,7 +3111,7 @@ getDatabases_ftbRayST(
    #endif
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec02:
+   ^ Fun17 Sec02:
    ^   - get path to databases
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3014,7 +3141,7 @@ getDatabases_ftbRayST(
    #endif
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec03:
+   ^ Fun17 Sec03:
    ^   - get reference file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3027,7 +3154,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(8 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'r';
    argAryStr[*argLenSIPtr][2] = 'e';
@@ -3038,7 +3165,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    refPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
 
    if(! argAryStr[*argLenSIPtr][0])
@@ -3049,14 +3176,14 @@ getDatabases_ftbRayST(
    ++*argLenSIPtr;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec04:
+   ^ Fun17 Sec04:
    ^   - get amr table (amrs database)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'a';
    argAryStr[*argLenSIPtr][2] = 'm';
@@ -3071,7 +3198,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
 
    amrPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3086,14 +3213,14 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec05:
+   ^ Fun17 Sec05:
    ^   - get gene coordinates file
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'g';
    argAryStr[*argLenSIPtr][2] = 'e';
@@ -3112,7 +3239,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
 
    coordPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3128,14 +3255,14 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec06:
+   ^ Fun17 Sec06:
    ^   - get MIRU-VNTR lineage table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'm';
    argAryStr[*argLenSIPtr][2] = 'i';
@@ -3151,7 +3278,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-     goto err_fun16_sec11;
+     goto err_fun17_sec11;
 
    miruPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3165,14 +3292,14 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec07:
+   ^ Fun17 Sec07:
    ^   - get spoligotype spacer sequences
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 's';
    argAryStr[*argLenSIPtr][2] = 'p';
@@ -3187,7 +3314,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
       malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
 
    spolSpacerPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3202,14 +3329,14 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec08:
+   ^ Fun17 Sec08:
    ^   - get spoligotype lineage database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'd';
    argAryStr[*argLenSIPtr][2] = 'b';
@@ -3227,7 +3354,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
      malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-     goto err_fun16_sec11;
+     goto err_fun17_sec11;
 
    spolLineagePath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3242,14 +3369,14 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec09:
+   ^ Fun17 Sec09:
    ^   - get hsp65 simple speices database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'h';
    argAryStr[*argLenSIPtr][2] = 's';
@@ -3269,7 +3396,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
      malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-     goto err_fun16_sec11;
+     goto err_fun17_sec11;
 
    hsp65SimpleDbPath_freezeTBPaths(argAryStr[*argLenSIPtr]);
    if(! argAryStr[*argLenSIPtr][0])
@@ -3284,14 +3411,14 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec10:
+   ^ Fun17 Sec10:
    ^   - get hsp65 complex speices database
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    argAryStr[*argLenSIPtr] =
       malloc(16 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-      goto err_fun16_sec11;
+      goto err_fun17_sec11;
    argAryStr[*argLenSIPtr][0] = '-';
    argAryStr[*argLenSIPtr][1] = 'h';
    argAryStr[*argLenSIPtr][2] = 's';
@@ -3312,7 +3439,7 @@ getDatabases_ftbRayST(
    argAryStr[*argLenSIPtr] =
      malloc(256 * sizeof(signed char));
    if(! argAryStr[*argLenSIPtr])
-     goto err_fun16_sec11;
+     goto err_fun17_sec11;
 
    hsp65ComplexDbPath_freezeTBPaths(
       argAryStr[*argLenSIPtr]
@@ -3330,7 +3457,7 @@ getDatabases_ftbRayST(
    ++(*argLenSIPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec11:
+   ^ Fun17 Sec11:
    ^   - find path to minimap2
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3379,18 +3506,18 @@ getDatabases_ftbRayST(
    } /*Else: minimap2 is not in the path*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun16 Sec12:
+   ^ Fun17 Sec12:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    return 0;
 
-   err_fun16_sec11:;
+   err_fun17_sec11:;
       return 1;
 } /*getDatbases_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun17: mkCoverageTbl_ftbRayST
+| Fun18: mkCoverageTbl_ftbRayST
 |   - makes the gene percent coverage table
 | Input:
 |   - guiSTPtr:
@@ -3408,22 +3535,22 @@ signed int
 mkCoverageTbl_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun17 TOC:
+   ' Fun18 TOC:
    '   - makes the gene percent coverage table
-   '   o fun17 sec01:
+   '   o fun18 sec01:
    '     - variable declarations
-   '   o fun17 sec02:
+   '   o fun18 sec02:
    '     - get maximum column sizes
-   '   o fun17 sec03:
+   '   o fun18 sec03:
    '     - build the header for the table
-   '   o fun17 sec04:
+   '   o fun18 sec04:
    '     - build the table
-   '   o fun17 sec05:
+   '   o fun18 sec05:
    '     - clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec01:
+   ^ Fun18 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3445,16 +3572,16 @@ mkCoverageTbl_ftbRayST(
    clear_listBox_rayWidg(guiSTPtr->geneCoverSTPtr);
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec02:
+   ^ Fun18 Sec02:
    ^   - get maximum column sizes
-   ^   o fun17 sec02 sub01:
+   ^   o fun18 sec02 sub01:
    ^     - open the amr coverage file
-   ^   o fun17 sec02 sub02:
+   ^   o fun18 sec02 sub02:
    ^     - find column sizes
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun17 Sec02 Sub01:
+   * Fun18 Sec02 Sub01:
    *   - open the amr coverage file
    \*****************************************************/
 
@@ -3471,9 +3598,9 @@ mkCoverageTbl_ftbRayST(
 
    inFILE = fopen((char *) lineStr, "r");
    if(! inFILE)
-      goto fileErr_fun17_sec05;
+      goto fileErr_fun18_sec05;
    if(! fgets((char *) lineStr, 4088, inFILE) )
-      goto fileErr_fun17_sec05;
+      goto fileErr_fun18_sec05;
 
    /*set the header sizes*/
    colArySI[0] = 4; /*gene*/
@@ -3481,13 +3608,13 @@ mkCoverageTbl_ftbRayST(
    colArySI[2] = 5; /*depth*/
 
    /*****************************************************\
-   * Fun17 Sec02 Sub02:
+   * Fun18 Sec02 Sub02:
    *   - find column sizes
    \*****************************************************/
 
    lineSI = 0;
    if(! fgets((char *) lineStr, 4088, inFILE))
-      goto blankFile_fun17_sec05;
+      goto blankFile_fun18_sec05;
 
    while(fgets((char *) lineStr, 4088, inFILE))
    { /*Loop: find column sizes*/
@@ -3516,7 +3643,7 @@ mkCoverageTbl_ftbRayST(
       while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
          ++linePosSI;
       if(! linePosSI)
-         goto fileErr_fun17_sec05;
+         goto fileErr_fun18_sec05;
 
       /*____________get_gene_mean_coverage_depth________*/
       outPosSI = endWhite_ulCp(&lineStr[linePosSI]);
@@ -3529,7 +3656,7 @@ mkCoverageTbl_ftbRayST(
       while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
          ++linePosSI;
       if(! linePosSI)
-         goto fileErr_fun17_sec05;
+         goto fileErr_fun18_sec05;
 
       /*____________skip_gene_mean_target_depth_________*/
       linePosSI += endWhite_ulCp(&lineStr[linePosSI]);
@@ -3537,7 +3664,7 @@ mkCoverageTbl_ftbRayST(
       while(lineStr[linePosSI] && lineStr[linePosSI] < 33)
          ++linePosSI;
       if(! linePosSI)
-         goto fileErr_fun17_sec05;
+         goto fileErr_fun18_sec05;
 
       /*____________get_drug_names______________________*/
       while(
@@ -3562,7 +3689,7 @@ mkCoverageTbl_ftbRayST(
    } /*Loop: find column sizes*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec03:
+   ^ Fun18 Sec03:
    ^   - build the header for the table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -3639,33 +3766,33 @@ mkCoverageTbl_ftbRayST(
          guiSTPtr->geneCoverSTPtr,
          guiSTPtr->widgSTPtr
       )
-   ) goto memErr_fun17_sec05;
+   ) goto memErr_fun18_sec05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec04:
+   ^ Fun18 Sec04:
    ^   - build the table
-   ^   o fun17 sec04 sub01:
+   ^   o fun18 sec04 sub01:
    ^     - move to the start of coverage table and start
    ^       read loop
-   ^   o fun17 sec04 sub02:
+   ^   o fun18 sec04 sub02:
    ^     - get the gene name
-   ^   o fun17 sec04 sub03:
+   ^   o fun18 sec04 sub03:
    ^     - get percent coverage of the gene
-   ^   o fun17 sec04 sub04:
+   ^   o fun18 sec04 sub04:
    ^     - get mean covered region read depth
-   ^   o fun17 sec04 sub05:
+   ^   o fun18 sec04 sub05:
    ^     - skip gene mean read depth column
    ^     - this is the mean read depth for the entire
    ^       gene/target instead of the region that had
    ^       good read depth
-   ^   o fun17 sec04 sub06:
+   ^   o fun18 sec04 sub06:
    ^     - get the name for each drug
-   ^   o fun17 sec04 sub07:
+   ^   o fun18 sec04 sub07:
    ^     - add row to table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun17 Sec04 Sub01:
+   * Fun18 Sec04 Sub01:
    *   - move to the start of coverage table and start
    *     read loop
    \*****************************************************/
@@ -3686,7 +3813,7 @@ mkCoverageTbl_ftbRayST(
       colPosSI = 0;
 
       /**************************************************\
-      * Fun17 Sec04 Sub02:
+      * Fun18 Sec04 Sub02:
       *   - get the gene name
       \**************************************************/
 
@@ -3709,7 +3836,7 @@ mkCoverageTbl_ftbRayST(
       ++colPosSI;
 
       /**************************************************\
-      * Fun17 Sec04 Sub03:
+      * Fun18 Sec04 Sub03:
       *   - get percent coverage of the gene
       \**************************************************/
 
@@ -3732,7 +3859,7 @@ mkCoverageTbl_ftbRayST(
       ++colPosSI;
 
       /**************************************************\
-      * Fun17 Sec04 Sub04:
+      * Fun18 Sec04 Sub04:
       *   - get mean covered region read depth
       \**************************************************/
 
@@ -3756,7 +3883,7 @@ mkCoverageTbl_ftbRayST(
       ++colPosSI;
 
       /**************************************************\
-      * Fun17 Sec04 Sub05:
+      * Fun18 Sec04 Sub05:
       *   - skip gene mean read depth column
       *   - this is the mean read depth for the entire
       *     gene/target instead of the region that had
@@ -3768,7 +3895,7 @@ mkCoverageTbl_ftbRayST(
          ++linePosSI;
 
       /**************************************************\
-      * Fun17 Sec04 Sub06:
+      * Fun18 Sec04 Sub06:
       *   - get the name for each drug
       \**************************************************/
 
@@ -3814,7 +3941,7 @@ mkCoverageTbl_ftbRayST(
       } /*Loop: print 'na' for no drug columns*/
 
       /**************************************************\
-      * Fun17 Sec04 Sub07:
+      * Fun18 Sec04 Sub07:
       *   - add row to table
       \**************************************************/
 
@@ -3827,28 +3954,28 @@ mkCoverageTbl_ftbRayST(
             guiSTPtr->geneCoverSTPtr,
             guiSTPtr->widgSTPtr
          )
-      ) goto memErr_fun17_sec05;
+      ) goto memErr_fun18_sec05;
  
       ++lineSI;
    } /*Loop: read in the gene/amplicons*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun17 Sec05:
+   ^ Fun18 Sec05:
    ^   - clean up and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    lineSI = 0;
-   goto ret_fun17_sec05;
+   goto ret_fun18_sec05;
 
-   memErr_fun17_sec05:;
+   memErr_fun18_sec05:;
       lineSI = 1;
-      goto ret_fun17_sec05;
+      goto ret_fun18_sec05;
 
-   fileErr_fun17_sec05:;
+   fileErr_fun18_sec05:;
       lineSI = 2;
-      goto ret_fun17_sec05;
+      goto ret_fun18_sec05;
 
-   blankFile_fun17_sec05:;
+   blankFile_fun18_sec05:;
       lineSI = 0;
 
       /*add in the header quickly*/
@@ -3863,12 +3990,12 @@ mkCoverageTbl_ftbRayST(
             guiSTPtr->geneCoverSTPtr,
             guiSTPtr->widgSTPtr
          )
-      ) goto memErr_fun17_sec05;
+      ) goto memErr_fun18_sec05;
 
       else
-         goto ret_fun17_sec05;
+         goto ret_fun18_sec05;
 
-   ret_fun17_sec05:;
+   ret_fun18_sec05:;
       if(inFILE)
          fclose(inFILE);
       inFILE = 0;
@@ -3877,7 +4004,7 @@ mkCoverageTbl_ftbRayST(
 } /*mkCoverageTbl_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun18: getHsp65Lin_ftbRayST
+| Fun19: getHsp65Lin_ftbRayST
 |   - get the getLin hsp65 lineages (an others)
 | Input:
 |   - guiSTPtr:
@@ -3893,37 +4020,37 @@ signed char
 getHsp65Lin_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun18 TOC:
+   ' Fun19 TOC:
    '   - get the getLin hsp65 lineages (an others)
-   '   o fun18 depth01:
+   '   o fun19 depth01:
    '     - variable declarations
-   '   o fun18 depth02:
+   '   o fun19 depth02:
    '     - open the hsp65 read lineage file output and
    '       read the three lines in the file
-   '   o fun18 depth03:
+   '   o fun19 depth03:
    '     - get id and move past id and type column
-   '   o fun18 depth04:
+   '   o fun19 depth04:
    '     - extract the lineages from the file and add to
    '       the table
-   '   o fun18 depth05:
+   '   o fun19 depth05:
    '     - clean up and return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec01:
+   ^ Fun19 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*for reading in the database*/
-   #define def_lenLine_fun18 (2 << 10) /*about 4kb*/
+   #define def_lenLine_fun19 (2 << 10) /*about 4kb*/
 
    /*variables for processing the three lines*/
-   signed char linLineStr[def_lenLine_fun18];
+   signed char linLineStr[def_lenLine_fun19];
    signed char *linStr = 0;
    signed int linMaxLenSI = 0;
    signed char *linEndStr = 0;
 
-   signed char depthLineStr[def_lenLine_fun18];
+   signed char depthLineStr[def_lenLine_fun19];
    signed char *depthStr = 0;
    signed int supMaxLenSI = 0;
    signed int percMaxLenSI = 0;
@@ -3931,7 +4058,7 @@ getHsp65Lin_ftbRayST(
    signed int depthMaxLenSI = 0;
    signed char *depthEndStr = 0;
  
-   signed char callLineStr[def_lenLine_fun18];
+   signed char callLineStr[def_lenLine_fun19];
    signed char *callStr = 0;
 
    /*variables for printing to table*/
@@ -3941,32 +4068,33 @@ getHsp65Lin_ftbRayST(
    /*temporary or general variables*/
    signed int lenSI = 0;
    signed long ignoreSL = 0;
+   signed char foundLineagesBl = 0;
 
    FILE *hsp65FILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec02:
+   ^ Fun19 Sec02:
    ^   - open the hsp65 read lineage file output and
    ^     read the three lines in the file
-   ^   o fun18 sec02 sub01:
+   ^   o fun19 sec02 sub01:
    ^     - clear hsp65 list box and load new results
-   ^   o fun18 sec02 sub02:
+   ^   o fun19 sec02 sub02:
    ^     - read in the lineage detection line
-   ^   o fun18 sec02 sub03:
+   ^   o fun19 sec02 sub03:
    ^     - get depth and support line
-   ^   o fun18 sec02 sub04:
+   ^   o fun19 sec02 sub04:
    ^     - get called (mixed and low depth) line
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun18 Sec02 Sub01:
+   * Fun19 Sec02 Sub01:
    *   - clear hsp65 list box and load new results
    \*****************************************************/
 
    clear_listBox_rayWidg(guiSTPtr->hsp65ListSTPtr);
 
    if(! guiSTPtr->filePrefixStr[0])
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    depthStr = linLineStr;
    depthStr +=
@@ -3979,10 +4107,10 @@ getHsp65Lin_ftbRayST(
 
    hsp65FILE = fopen((char *) linLineStr, "r");
    if(! hsp65FILE)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    /*****************************************************\
-   * Fun18 Sec02 Sub02:
+   * Fun19 Sec02 Sub02:
    *   - read in the lineage detection line
    \*****************************************************/
 
@@ -3990,15 +4118,15 @@ getHsp65Lin_ftbRayST(
       getLine_fileFun(
          hsp65FILE,
          linLineStr,
-         def_lenLine_fun18,
+         def_lenLine_fun19,
          &ignoreSL
       );
    if(lenSI <= 0)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
    linStr = linLineStr;
 
    /*****************************************************\
-   * Fun18 Sec02 Sub03:
+   * Fun19 Sec02 Sub03:
    *   - get depth and support line
    \*****************************************************/
 
@@ -4006,11 +4134,11 @@ getHsp65Lin_ftbRayST(
       getLine_fileFun(
          hsp65FILE,
          depthLineStr,
-         def_lenLine_fun18,
+         def_lenLine_fun19,
          &ignoreSL
       );
    if(lenSI <= 0)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
    depthStr = depthLineStr;
 
    outStr = depthLineStr;
@@ -4021,13 +4149,13 @@ getHsp65Lin_ftbRayST(
    while(*callStr && *callStr < 33)
       ++callStr;
    if(! *callStr)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    callStr += endWhite_ulCp(callStr);
    while(*callStr && *callStr < 33)
       ++callStr;
    if(! *callStr)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    while(*callStr)
    { /*Loop: clean up the depth entry*/
@@ -4048,7 +4176,7 @@ getHsp65Lin_ftbRayST(
    outStr = 0;
 
    /*****************************************************\
-   * Fun18 Sec02 Sub04:
+   * Fun19 Sec02 Sub04:
    *   - get called (mixed and low depth) line
    \*****************************************************/
 
@@ -4056,18 +4184,18 @@ getHsp65Lin_ftbRayST(
       getLine_fileFun(
          hsp65FILE,
          callLineStr,
-         def_lenLine_fun18,
+         def_lenLine_fun19,
          &ignoreSL
       );
    if(lenSI <= 0)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
    callStr = callLineStr;
 
    fclose(hsp65FILE);
    hsp65FILE = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec03:
+   ^ Fun19 Sec03:
    ^   - move past id and type column
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4077,7 +4205,7 @@ getHsp65Lin_ftbRayST(
    linStr += endWhite_ulCp(linStr);
    callStr += endWhite_ulCp(callStr);
    if(! *linStr || ! *callStr)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    /*get off the tab and white space*/
    while(*linStr && *linStr < 33)
@@ -4089,7 +4217,7 @@ getHsp65Lin_ftbRayST(
    linStr += endWhite_ulCp(linStr);
    callStr += endWhite_ulCp(callStr);
    if(! *linStr || ! *callStr)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    /*get off the tab and white space*/
    while(*linStr && *linStr < 33)
@@ -4097,41 +4225,41 @@ getHsp65Lin_ftbRayST(
    while(*callStr && *callStr < 33)
       ++callStr;
    if(! *linStr || ! *callStr)
-      goto done_fun18_depth05;
+      goto done_fun19_depth05;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec04:
+   ^ Fun19 Sec04:
    ^   - extract the lineages from the file and add to
    ^     the table
-   ^   o fun18 depth04 sub01:
+   ^   o fun19 depth04 sub01:
    ^     - find the maximum length of each column and
    ^       build the header
-   ^   o fun18 depth04 sub02:
+   ^   o fun19 depth04 sub02:
    ^     - start lineage loop + get next lineage, counts,
    ^       and status from the
-   ^   o fun18 depth04 sub03:
+   ^   o fun19 depth04 sub03:
    ^     - add in call for the lineage
-   ^   o fun18 depth04 sub04:
+   ^   o fun19 depth04 sub04:
    ^     - add lineage to the list box and move off white
    ^       space
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun18 Sec04 Sub01:
+   * Fun19 Sec04 Sub01:
    *   - find the maximum length of each column and build
    *     the header
-   *   o fun18 sec04 sub01 cat01:
+   *   o fun19 sec04 sub01 cat01:
    *     - find the maximum size of each column
-   *   o fun18 sec04 sub02 cat02:
+   *   o fun19 sec04 sub02 cat02:
    *     - header; add lineage entry
-   *   o fun18 sec04 sub01 cat03:
+   *   o fun19 sec04 sub01 cat03:
    *     - header; add depth entries
-   *   o fun18 sec04 sub01 cat04:
+   *   o fun19 sec04 sub01 cat04:
    *     - header; add call entery and add header to table
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun18 Sec04 Sub01 Cat01:
+   + Fun19 Sec04 Sub01 Cat01:
    +   - find the maximum size of each column
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4180,7 +4308,7 @@ getHsp65Lin_ftbRayST(
    outStr = outLineStr;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun18 Sec04 Sub01 Cat02:
+   + Fun19 Sec04 Sub01 Cat02:
    +   - header; add lineage entry
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4195,7 +4323,7 @@ getHsp65Lin_ftbRayST(
    *outStr = 0;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun18 Sec04 Sub01 Cat03:
+   + Fun19 Sec04 Sub01 Cat03:
    +   - header; add depth entries
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4240,7 +4368,7 @@ getHsp65Lin_ftbRayST(
    *outStr = 0;
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun18 Sec04 Sub01 Cat04:
+   + Fun19 Sec04 Sub01 Cat04:
    +   - header; add call entery and add header to table
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4258,13 +4386,15 @@ getHsp65Lin_ftbRayST(
          guiSTPtr->hsp65ListSTPtr,
          guiSTPtr->widgSTPtr
       )
-   ) goto memErr_fun18_depth05;
+   ) goto memErr_fun19_depth05;
 
    /*****************************************************\
-   * Fun18 Sec04 Sub02:
+   * Fun19 Sec04 Sub02:
    *   - start lineage loop + get next lineage, counts,
    *     and status from the
    \*****************************************************/
+
+   foundLineagesBl = 1;
 
    while(depthStr != depthEndStr)
    { /*Loop: build the table*/
@@ -4341,7 +4471,7 @@ getHsp65Lin_ftbRayST(
       *outStr = 0;
 
       /**************************************************\
-      * Fun18 Sec04 Sub03:
+      * Fun19 Sec04 Sub03:
       *   - add in call for the lineage
       \**************************************************/
 
@@ -4370,7 +4500,7 @@ getHsp65Lin_ftbRayST(
          );
 
       /**************************************************\
-      * Fun18 Sec04 Sub04:
+      * Fun19 Sec04 Sub04:
       *   - add lineage to the list box and move off white
       *     space
       \**************************************************/
@@ -4382,7 +4512,7 @@ getHsp65Lin_ftbRayST(
             guiSTPtr->hsp65ListSTPtr,
             guiSTPtr->widgSTPtr
          )
-      ) goto memErr_fun18_depth05;
+      ) goto memErr_fun19_depth05;
 
       /*get off the tab and white space*/
       while(*linStr && *linStr < 33)
@@ -4394,21 +4524,34 @@ getHsp65Lin_ftbRayST(
    } /*Loop: build the table*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun18 Sec05:
+   ^ Fun19 Sec05:
    ^   - clean up and return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    sort_listBox_rayWidg(guiSTPtr->hsp65ListSTPtr);
 
-   done_fun18_depth05:;
+   done_fun19_depth05:;
+      if(! foundLineagesBl)
+      { /*If: no lineages were found*/
+         if(
+            addItem_listBox_rayWidg(
+               (signed char *)
+                  "no hsp65 lineages were found",
+               def_listSpecial_rayWidg, /*so does nothing*/
+               guiSTPtr->hsp65ListSTPtr,
+               guiSTPtr->widgSTPtr
+            )
+         ) goto memErr_fun19_depth05;
+      } /*If: no lineages were found*/
+
       lenSI = 0;
-      goto ret_fun18_depth05;
+      goto ret_fun19_depth05;
 
-   memErr_fun18_depth05:;
+   memErr_fun19_depth05:;
       lenSI = 1;
-      goto ret_fun18_depth05;
+      goto ret_fun19_depth05;
 
-   ret_fun18_depth05:;
+   ret_fun19_depth05:;
       if(! hsp65FILE)
          ;
       else
@@ -4419,7 +4562,213 @@ getHsp65Lin_ftbRayST(
 } /*getHsp65Lin_ftbRayST*/
 
 /*-------------------------------------------------------\
-| Fun19: checkRunEvent_ftbRayST
+| Fun20: closeSpolGet_ftbRayST
+|   - get the spoligotypes that were close to our barcode
+| Input:
+|   - guiSTPtr:
+|     o gui_ftbRayST struct with lineage list box
+| Output:
+|   - Modifies:
+|     - closeSpolListBox list box widget to have the close
+|       spoligotype lineages
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for memory errors
+\-------------------------------------------------------*/
+signed char
+closeSpolGet_ftbRayST(
+   struct gui_ftbRayST *guiSTPtr
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun20 TOC:
+   '   - get spoligotypes that were close to our barcode
+   '   o fun20 sec01:
+   '     - variable declarations
+   '   o fun20 sec02:
+   '     - clear table and get first line of file
+   '   o fun20 sec03:
+   '     - get the maximum column lengths
+   '   o fun20 sec04:
+   '     - print close spoligotype table
+   '   o fun20 sec05:
+   '     - clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*for reading in the database*/
+   #define def_lenLine_fun20 (2 << 10) /*about 4kb*/
+
+   signed char lineStr[def_lenLine_fun20];
+
+   /*variables for getting max column size*/
+   signed int maxLenArySI[3] = {0, 0, 0};;
+
+   /*variables for printing to table*/
+   signed char outLineStr[256];
+   signed char *outStr = 0;
+
+   /*temporary or general variables*/
+   signed int lenSI = 0;
+   signed long ignoreSL = 0;
+   unsigned char tmpUC = 0;
+
+   signed int numberLinesSI = 0;
+   FILE *closeFILE = 0;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec02:
+   ^   - clear table and get first line of file
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   clear_listBox_rayWidg(guiSTPtr->closeSpolListSTPtr);
+
+   if(! guiSTPtr->filePrefixStr[0])
+      goto done_fun20_depth05;
+
+   outStr = lineStr;
+   outStr += cpStr_ulCp(outStr, guiSTPtr->filePrefixStr);
+   outStr +=
+     cpStr_ulCp(
+        outStr,
+        (signed char *) "-read-spoligo-close.tsv"
+     );
+
+   closeFILE = fopen((char *) lineStr, "r");
+   if(! closeFILE)
+      goto done_fun20_depth05;
+
+   /*___read_in_first_line______________________________*/
+   lenSI =
+      getLine_fileFun(
+         closeFILE,
+         lineStr,
+         def_lenLine_fun20,
+         &ignoreSL
+      );
+   if(lenSI <= 0)
+      goto done_fun20_depth05;
+   outStr = lineStr;
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec03:
+   ^   - get the maximum column lengths
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while(lenSI)
+   { /*Loop: get column lengths*/
+      ++numberLinesSI;
+      for(tmpUC = 0; tmpUC < 3; ++tmpUC)
+      { /*Loop: get length of three columns I am keeping*/
+         lenSI = endWhite_ulCp(outStr);
+
+         if(lenSI > maxLenArySI[tmpUC])
+            maxLenArySI[tmpUC] = lenSI;
+         outStr += lenSI;
+
+         while(*outStr && *outStr < 33)
+            ++outStr;
+         if(! *outStr)
+            goto done_fun20_depth05;
+      } /*Loop: get length of three columns I am keeping*/
+
+      lenSI =
+         getLine_fileFun(
+            closeFILE,
+            lineStr,
+            def_lenLine_fun20,
+            &ignoreSL
+         );
+      outStr = lineStr;
+   } /*Loop: get column lengths*/
+
+   fseek(closeFILE, 0, SEEK_SET);
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec04:
+   ^   - print close spoligotype table
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   while(1 == 1)
+   { /*Loop: get column lengths*/
+      ignoreSL =
+         getLine_fileFun(
+            closeFILE,
+            lineStr,
+            def_lenLine_fun20,
+            &ignoreSL
+         );
+      if(! ignoreSL)
+         break;
+      outStr = lineStr;
+      lenSI = 0;
+
+      for(tmpUC = 0; tmpUC < 3; ++tmpUC)
+      { /*Loop: add column values to the table*/
+         ignoreSL =
+            cpWhite_ulCp(&outLineStr[lenSI], outStr);
+         lenSI += ignoreSL;
+         outStr += ignoreSL;
+
+         while(ignoreSL++ < maxLenArySI[tmpUC] + 2)
+            outLineStr[lenSI++] = ' ';
+         outLineStr[lenSI] = 0;
+
+         while(*outStr && *outStr < 33)
+            ++outStr;
+      } /*Loop: add column values to the table*/
+
+      if(
+         addItem_listBox_rayWidg(
+            outLineStr,
+            def_listSpecial_rayWidg, /*so does nothing*/
+            guiSTPtr->closeSpolListSTPtr,
+            guiSTPtr->widgSTPtr
+         )
+      ) goto memErr_fun20_depth05;
+   } /*Loop: get column lengths*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec05:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   done_fun20_depth05:;
+      lenSI = 0;
+
+      if(numberLinesSI < 2)
+      { /*If: nothing in file*/
+         if(
+            addItem_listBox_rayWidg(
+               (signed char *)
+                  "no close spoligotypes found",
+               def_listSpecial_rayWidg,/*so does nothing*/
+               guiSTPtr->closeSpolListSTPtr,
+               guiSTPtr->widgSTPtr
+            )
+         ) goto memErr_fun20_depth05;
+      } /*If: nothing in file*/
+
+      goto ret_fun20_depth05;
+
+   memErr_fun20_depth05:;
+      lenSI = 1;
+      goto ret_fun20_depth05;
+
+   ret_fun20_depth05:;
+      if(! closeFILE)
+         ;
+      else
+         fclose(closeFILE);
+      closeFILE = 0;
+
+      return (signed char) lenSI;
+} /*closeSpolGet_ftbRayST*/
+
+/*-------------------------------------------------------\
+| Fun21: checkRunEvent_ftbRayST
 |   - checks for an event, and if can runs the found event
 |   - also redraws the GUI
 | Input:
@@ -4439,20 +4788,20 @@ signed char
 checkRunEvent_ftbRayST(
    struct gui_ftbRayST *guiSTPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun19 TOC:
+   ' Fun21 TOC:
    '   - checks for an event, and if can runs found event
-   '   o fun19 sec01:
+   '   o fun21 sec01:
    '     - variable declarations
-   '   o fun19 sec02:
+   '   o fun21 sec02:
    '     - get and check events
-   '   o fun19 sec06:
+   '   o fun21 sec06:
    '     - handle running button events
-   '   o fun19 sec07:
+   '   o fun21 sec07:
    '     - return results and redraw gui
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec01:
+   ^ Fun21 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -4461,15 +4810,15 @@ checkRunEvent_ftbRayST(
    signed char buildReportBl = 0;
 
    /*for reading the config file*/
-   #define def_lineLen_fun19 1024
-   signed char lineStr[def_lineLen_fun19 + 8];
-   signed char logFileStr[def_lineLen_fun19 + 8];
+   #define def_lineLen_fun21 1024
+   signed char lineStr[def_lineLen_fun21 + 8];
+   signed char logFileStr[def_lineLen_fun21 + 8];
    FILE *inFILE = 0;
    signed long discardSL = 0; /*for reading files*/
 
-   signed char refStr[def_lineLen_fun19 + 8];
-   signed char coordsStr[def_lineLen_fun19 + 8];
-   signed char minimap2Str[def_lineLen_fun19 + 8];
+   signed char refStr[def_lineLen_fun21 + 8];
+   signed char coordsStr[def_lineLen_fun21 + 8];
+   signed char minimap2Str[def_lineLen_fun21 + 8];
 
    /*for buiding freezeTB run command*/
    signed char *argAryStr[1024];
@@ -4488,16 +4837,16 @@ checkRunEvent_ftbRayST(
       argAryStr[tmpSI] = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec02:
+   ^ Fun21 Sec02:
    ^   - get and check events
-   ^   o fun19 sec02 sub01:
+   ^   o fun21 sec02 sub01:
    ^     - get event and check entery event
-   ^   o fun19 sec02 sub02:
+   ^   o fun21 sec02 sub02:
    ^     - check which event I am running
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun19 Sec02 Sub01:
+   * Fun21 Sec02 Sub01:
    *   - get event and check entery event
    \*****************************************************/
 
@@ -4542,7 +4891,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
    } /*If: was a entry box input event*/
 
 
@@ -4564,7 +4913,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->amrSupLenSI = tmpSI;
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
    } /*If: was a entry box input event*/
 
    tmpSI =
@@ -4582,7 +4931,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->indelSupLenSI = tmpSI;
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
    } /*If: was a entry box input event*/
 
    tmpSI =
@@ -4596,7 +4945,7 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
    } /*If: was a entry box input event*/
 
    tmpSI =
@@ -4610,7 +4959,21 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
+   } /*If: was a entry box input event*/
+
+   tmpSI =
+      listBoxEvent_rayWidg(
+         guiSTPtr->closeSpolTblIdSI,   /*id of list box*/
+         guiSTPtr->closeSpolListSTPtr, /*list box items*/
+         &eventStackST,
+         guiSTPtr->widgSTPtr
+      ); /*add any keyboard inputs to entry box*/
+
+   if(tmpSI >= 0)
+   { /*If: was a entry box input event*/
+      guiSTPtr->prefixLenSI = tmpSI;
+      goto done_fun21_sec07;
    } /*If: was a entry box input event*/
 
    tmpSI =
@@ -4624,104 +4987,109 @@ checkRunEvent_ftbRayST(
    if(tmpSI >= 0)
    { /*If: was a entry box input event*/
       guiSTPtr->prefixLenSI = tmpSI;
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
    } /*If: was a entry box input event*/
 
    /*****************************************************\
-   * Fun19 Sec02 Sub02:
+   * Fun21 Sec02 Sub02:
    *   - check which event I am running
    \*****************************************************/
 
    if(eventStackST.idSI == guiSTPtr->fqButIdSI)
-      goto getFqFiles_fun19_sec06_sub02;
+      goto getFqFiles_fun21_sec06_sub02;
 
    else if(eventStackST.idSI == guiSTPtr->outDirIdSI)
-      goto getOutDir_fun19_sec06_sub03;
+      goto getOutDir_fun21_sec06_sub03;
 
    else if(eventStackST.idSI == guiSTPtr->configIdSI)
-      goto getConfigFile_fun19_sec06_sub04;
+      goto getConfigFile_fun21_sec06_sub04;
 
    else if(eventStackST.idSI == guiSTPtr->runIdSI)
-      goto runFtb_fun19_sec06_sub06;
+      goto runFtb_fun21_sec06_sub06;
 
    else if(
       eventStackST.idSI == guiSTPtr->reportGuiIdSI
-   ) goto reportMenu_fun19_sec06_sub10;
+   ) goto reportMenu_fun21_sec06_sub10;
 
    else if(eventStackST.idSI==guiSTPtr->inputGuiIdSI)
-      goto inputMenu_fun19_sec06_sub07;
+      goto inputMenu_fun21_sec06_sub07;
 
    else if(eventStackST.idSI == guiSTPtr->outGuiIdSI)
-      goto outputMenu_fun19_sec06_sub08;
+      goto outputMenu_fun21_sec06_sub08;
 
    else if(eventStackST.idSI == guiSTPtr->amrsGuiIdSI)
-      goto amrTblMenu_fun19_sec06_sub12;
+      goto amrTblMenu_fun21_sec06_sub12;
 
    else if(eventStackST.idSI == guiSTPtr->getOutButSI)
-      goto buildOutReport_fun19_sec06_sub0x;
+      goto buildOutReport_fun21_sec06_sub0x;
 
    else if(eventStackST.idSI == guiSTPtr->hsp65GuiIdSI)
-      goto hsp65TblMenu_fun19_sec06_sub12;
+      goto hsp65TblMenu_fun21_sec06_sub13;
+
+   else if(eventStackST.idSI ==guiSTPtr->closeSpolGuiIdSI)
+      goto closeSpolTblMenu_fun21_sec06_sub14;
 
    else if(eventStackST.idSI == guiSTPtr->coverGuiIdSI)
-      goto geneCoverMenu_fun19_sec06_sub13;
+      goto geneCoverMenu_fun21_sec06_sub15;
 
    else if(eventStackST.idSI==guiSTPtr->getPrefixButIdSI)
-       goto getFtbPrefix_fun19_sec06_sub11;
+       goto getFtbPrefix_fun21_sec06_sub11;
 
    else if(eventStackST.idSI == guiSTPtr->getOutButSI)
-      goto buildOutReport_fun19_sec06_sub0x;
+      goto buildOutReport_fun21_sec06_sub0x;
 
    else if(eventStackST.parIdSI == guiSTPtr->mesgBoxIdSI)
-      goto mesgBox_fun19_sec06_sub01;
+      goto mesgBox_fun21_sec06_sub01;
 
    else if(
       eventStackST.parIdSI == guiSTPtr->fileBrowserIdSI
-   ) goto fileBrowser_fun19_sec06_sub05;
+   ) goto fileBrowser_fun21_sec06_sub05;
 
-   goto done_fun19_sec07;
+   goto done_fun21_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec06:
+   ^ Fun21 Sec06:
    ^   - handle running button events
-   ^   o fun19 sec06 sub01:
+   ^   o fun21 sec06 sub01:
    ^     - message box event
-   ^   o fun19 sec06 sub02:
+   ^   o fun21 sec06 sub02:
    ^     - get fastq files event
-   ^   o fun19 sec06 sub03:
+   ^   o fun21 sec06 sub03:
    ^     - get output directory event
-   ^   o fun19 sec06 sub04:
+   ^   o fun21 sec06 sub04:
    ^     - get configuration file event
-   ^   o fun19 sec06 sub05:
+   ^   o fun21 sec06 sub05:
    ^     - file browser event actions
-   ^   o fun19 sec06 sub06:
+   ^   o fun21 sec06 sub06:
    ^     - run event actions
-   ^   o fun19 sec06 sub07:
+   ^   o fun21 sec06 sub07:
    ^     - button pressed to build the output report
-   ^   o fun19 sec06 sub08:
+   ^   o fun21 sec06 sub08:
    ^     - goto output menu
-   ^   o fun15 sec04 sub09:
+   ^   o fun16 sec04 sub09:
    ^     - build amr table entry
-   ^   o fun19 sec06 sub10:
+   ^   o fun21 sec06 sub10:
    ^     - got to report
-   ^   o fun19 sec06 sub11:
+   ^   o fun21 sec06 sub11:
    ^     - get ftb prefix
-   ^   o fun19 sec06 sub12:
+   ^   o fun21 sec06 sub12:
    ^     - goto to the amr table
-   ^   o fun19 sec06 sub13:
+   ^   o fun21 sec06 sub13:
    ^     - goto to the hsp65 species/lineage table
-   ^   o fun19 sec06 sub14:
+   ^   o fun21 sec06 sub14:
+   ^     - goto to the close spoligotype table
+   ^   o fun21 sec06 sub15:
    ^     - goto to gene coverage table
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun19 Sec06 Sub01:
+   * Fun21 Sec06 Sub01:
    *   - message box event
    \*****************************************************/
 
-   mesgBox_fun19_sec06_sub01:;
+   mesgBox_fun21_sec06_sub01:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       mesgBoxEvent_rayWidg(
          2, /*rease key event*/
@@ -4729,16 +5097,16 @@ checkRunEvent_ftbRayST(
          eventStackST.idSI,
          guiSTPtr->widgSTPtr
       );
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub02:
+   * Fun21 Sec06 Sub02:
    *   - get fastq files event
    \*****************************************************/
 
-   getFqFiles_fun19_sec06_sub02:;
+   getFqFiles_fun21_sec06_sub02:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -4751,16 +5119,16 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select fastq files to run"
       );
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub03:
+   * Fun21 Sec06 Sub03:
    *   - get output directory event
    \*****************************************************/
 
-   getOutDir_fun19_sec06_sub03:;
+   getOutDir_fun21_sec06_sub03:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -4773,16 +5141,16 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select output folder"
       );
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub04:
+   * Fun21 Sec06 Sub04:
    *   - get configuration file event
    \*****************************************************/
 
-   getConfigFile_fun19_sec06_sub04:;
+   getConfigFile_fun21_sec06_sub04:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -4795,33 +5163,33 @@ checkRunEvent_ftbRayST(
          guiSTPtr->fileMesgStr,
          (signed char *) "select FTB configuration file"
       );
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub05:
+   * Fun21 Sec06 Sub05:
    *   - file browser event actions
-   *   o fun19 sec06 sub05 cat01:
+   *   o fun21 sec06 sub05 cat01:
    *     - run file brower event
-   *   o fun19 sec06 sub05 cat02:
+   *   o fun21 sec06 sub05 cat02:
    *     - cancel event
-   *   o fun19 sec06 sub05 cat03:
+   *   o fun21 sec06 sub05 cat03:
    *     - selected or cleared files
-   *   o fun19 sec06 sub05 cat04:
+   *   o fun21 sec06 sub05 cat04:
    *     - selected fastq files
-   *   o fun19 sec06 sub05 cat05:
+   *   o fun21 sec06 sub05 cat05:
    *     - get file and find browser used
-   *   o fun19 sec06 sub05 cat06:
+   *   o fun21 sec06 sub05 cat06:
    *     - add file to the browswer (or clear)
-   *   o fun19 sec06 sub05 cat07:
+   *   o fun21 sec06 sub05 cat07:
    *     - error or no event
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun19 Sec06 Sub05 Cat01:
+   + Fun21 Sec06 Sub05 Cat01:
    +   - run file brower event
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   fileBrowser_fun19_sec06_sub05:;
+   fileBrowser_fun21_sec06_sub05:;
       switch(guiSTPtr->browserSC)
       { /*Switch: find which browser using*/
          case 0: fileSTPtr = guiSTPtr->fqFileSTPtr;
@@ -4833,7 +5201,7 @@ checkRunEvent_ftbRayST(
          case 3: fileSTPtr = guiSTPtr->oldFtbFileSTPtr;
                  break;
 
-         default: goto done_fun19_sec07;
+         default: goto done_fun21_sec07;
            /*invalid option*/
       } /*Switch: find which browser using*/
 
@@ -4846,7 +5214,7 @@ checkRunEvent_ftbRayST(
          );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub05 Cat02:
+      + Fun21 Sec06 Sub05 Cat02:
       +   - cancel event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4857,11 +5225,11 @@ checkRunEvent_ftbRayST(
             guiSTPtr->widgSTPtr
           ); /*use hit cancel*/
 
-          goto done_fun19_sec07;
+          goto done_fun21_sec07;
       } /*If: hit cancel*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub05 Cat03:
+      + Fun21 Sec06 Sub05 Cat03:
       +   - selected or clear files
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4873,7 +5241,7 @@ checkRunEvent_ftbRayST(
          ); /*user hit select*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub05 Cat04:
+         + Fun21 Sec06 Sub05 Cat04:
          +   - selected fastq files
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4898,7 +5266,7 @@ checkRunEvent_ftbRayST(
                   if(tmpSI < 0)
                       break;
                   else if(! tmpHeapStr)
-                     goto err_fun19_sec07;
+                     goto err_fun21_sec07;
 
                   if(
                      add_str_ptrAry(
@@ -4906,18 +5274,18 @@ checkRunEvent_ftbRayST(
                         guiSTPtr->fqStrSTPtr,
                         guiSTPtr->fqStrSTPtr->lenSL
                      )
-                  ) goto err_fun19_sec07;
+                  ) goto err_fun21_sec07;
 
                   free(tmpHeapStr);
                   tmpHeapStr = 0;
                } /*Loop: get fastq files*/
             } /*Else: getting fastq files*/
 
-            goto done_fun19_sec07;
+            goto done_fun21_sec07;
          } /*If: fastq files input*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub05 Cat05:
+         + Fun21 Sec06 Sub05 Cat05:
          +   - get file and find browser used
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4931,7 +5299,7 @@ checkRunEvent_ftbRayST(
                   fileSTPtr
                );
             if(! tmpHeapStr)
-               goto err_fun19_sec07;
+               goto err_fun21_sec07;
          } /*If: files were selected*/
 
          switch(guiSTPtr->browserSC)
@@ -4950,7 +5318,7 @@ checkRunEvent_ftbRayST(
          } /*Switch: find which browser using*/
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub05 Cat06:
+         + Fun21 Sec06 Sub05 Cat06:
          +   - add file to browser or clear
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -4972,52 +5340,52 @@ checkRunEvent_ftbRayST(
             tmpHeapStr = 0;
          } /*If: need to remove the suffix*/
 
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       } /*Else If: files were selected or cleared*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub05 Cat07:
+      + Fun21 Sec06 Sub05 Cat07:
       +   - error or no event
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
       else if(tmpSI < -2)
-         goto err_fun19_sec07;
+         goto err_fun21_sec07;
 
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub06:
+   * Fun21 Sec06 Sub06:
    *   - run event actions
-   *   o fun19 sec06 sub06 cat01:
+   *   o fun21 sec06 sub06 cat01:
    *     - check if everything was input
-   *   o fun19 sec06 sub06 cat02:
+   *   o fun21 sec06 sub06 cat02:
    *     - read in the config file
-   *   o fun19 sec06 sub06 cat03:
+   *   o fun21 sec06 sub06 cat03:
    *     - build prefix & make output directory
-   *   o fun19 sec06 sub06 cat04:
+   *   o fun21 sec06 sub06 cat04:
    *     - build the log file
-   *   o fun19 sec06 sub06 cat05:
+   *   o fun21 sec06 sub06 cat05:
    *     - check if can run minimap2
-   *   o fun19 sec06 sub06 cat06:
+   *   o fun21 sec06 sub06 cat06:
    *     - find length of minimap2 command and get memory
-   *   o fun19 sec06 sub06 cat07:
+   *   o fun21 sec06 sub06 cat07:
    *     - build minimap2 command
-   *   o fun19 sec06 sub06 cat08:
+   *   o fun21 sec06 sub06 cat08:
    *     - add the -sam <file>.sam entry to ftb
-   *   o fun19 sec06 sub06 cat09:
+   *   o fun21 sec06 sub06 cat09:
    *     - run minimap2
-   *   o fun19 sec06 sub06 cat10:
+   *   o fun21 sec06 sub06 cat10:
    *     - if cannot, copy fastq files to ftb command
    \*****************************************************/
 
    /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
-   + Fun19 Sec06 Sub06 Cat01:
+   + Fun21 Sec06 Sub06 Cat01:
    +   - check if everything was input
    \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-   runFtb_fun19_sec06_sub06:;
+   runFtb_fun21_sec06_sub06:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       if(guiSTPtr->fqStrSTPtr->lenSL <= 0)
       { /*If: no fastq files input*/
@@ -5030,7 +5398,7 @@ checkRunEvent_ftbRayST(
             (signed char *) "no fastq files input"
          );
 
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       } /*If: no fastq files input*/
 
       else if(guiSTPtr->prefixLenSI <= 0)
@@ -5049,11 +5417,11 @@ checkRunEvent_ftbRayST(
                guiSTPtr->inPrefixStr,
                (signed char *) "FTB_OUT"
             );
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       } /*Else If: no prefix input*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub06 Cat02:
+      + Fun21 Sec06 Sub06 Cat02:
       +   - read in the config file
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5069,7 +5437,7 @@ checkRunEvent_ftbRayST(
             argAryStr,
             &argLenSI
          )
-      ) goto err_fun19_sec07;
+      ) goto err_fun21_sec07;
 
       if(guiSTPtr->configFileStr[0])
       { /*If: user provided a configuration file*/
@@ -5080,7 +5448,7 @@ checkRunEvent_ftbRayST(
             getLine_fileFun(
                inFILE,
                lineStr,
-               def_lineLen_fun19,
+               def_lineLen_fun21,
                &discardSL
             )
          ){ /*Loop: read in configuration file*/
@@ -5095,7 +5463,7 @@ checkRunEvent_ftbRayST(
             argAryStr[argLenSI] =
                malloc((tmpSI + 8) * sizeof(signed char));
             if(! argAryStr[argLenSI])
-               goto err_fun19_sec07;
+               goto err_fun21_sec07;
 
             tmpHeapStr +=
                cpWhite_ulCp(
@@ -5120,7 +5488,7 @@ checkRunEvent_ftbRayST(
             if(! argAryStr[argLenSI])
             { /*If: memory error*/
                tmpHeapStr = 0;
-               goto err_fun19_sec07;
+               goto err_fun21_sec07;
             } /*If: memory error*/
 
             cpWhite_ulCp(argAryStr[argLenSI], tmpHeapStr);
@@ -5164,7 +5532,7 @@ checkRunEvent_ftbRayST(
       } /*If: user provided a configuration file*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub06 Cat03:
+      + Fun21 Sec06 Sub06 Cat03:
       +   - build prefix and make output directory
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5173,7 +5541,7 @@ checkRunEvent_ftbRayST(
          malloc((7 + 8) * sizeof(signed char));
 
       if(! argAryStr[argLenSI])
-         goto err_fun19_sec07;
+         goto err_fun21_sec07;
       cpStr_ulCp(
          argAryStr[argLenSI],
          (signed char *) "-prefix"
@@ -5187,7 +5555,7 @@ checkRunEvent_ftbRayST(
       argAryStr[argLenSI] =
          malloc((tmpSI + 8) * sizeof(signed char));
       if(! argAryStr[argLenSI])
-         goto err_fun19_sec07;
+         goto err_fun21_sec07;
       tmpSI =
          cpStr_ulCp(
             argAryStr[argLenSI],
@@ -5215,7 +5583,7 @@ checkRunEvent_ftbRayST(
             &guiSTPtr->mesgStr[tmpSI],
             argAryStr[argLenSI]
          );
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       } /*If: could not make the output directory*/
 
       argAryStr[argLenSI][tmpSI++] = def_pathSep_rayWidg;
@@ -5226,7 +5594,7 @@ checkRunEvent_ftbRayST(
          );
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub06 Cat04:
+      + Fun21 Sec06 Sub06 Cat04:
       +   - build the log file
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5243,7 +5611,7 @@ checkRunEvent_ftbRayST(
 
       tmpFILE = fopen((char *) logFileStr, "w");
       if(! tmpFILE)
-         goto err_fun19_sec07;
+         goto err_fun21_sec07;
       pcitation_freezeTB(tmpFILE);
       fclose(tmpFILE);
       tmpFILE = 0;
@@ -5251,7 +5619,7 @@ checkRunEvent_ftbRayST(
       ++argLenSI;
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub06 Cat05:
+      + Fun21 Sec06 Sub06 Cat05:
       +   - check if can run minimap2
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5272,7 +5640,7 @@ checkRunEvent_ftbRayST(
          system((char *) lineStr);
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub06 Cat06:
+         + Fun21 Sec06 Sub06 Cat06:
          +   - find length of minimap2 command
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5294,10 +5662,10 @@ checkRunEvent_ftbRayST(
          tmpHeapStr =
             malloc((tmpSI + 8) * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun19_sec07;
+            goto err_fun21_sec07;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub06 Cat07:
+         + Fun21 Sec06 Sub06 Cat07:
          +   - build minimap2 command
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5348,14 +5716,14 @@ checkRunEvent_ftbRayST(
          tmpHeapStr[tmpSI] = 0;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub06 Cat08:
+         + Fun21 Sec06 Sub06 Cat08:
          +   - add the -sam <file>.sam entry to ftb
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
          argAryStr[argLenSI] =
             malloc(11 * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun19_sec07;
+            goto err_fun21_sec07;
          argAryStr[argLenSI][0] = '-';
          argAryStr[argLenSI][1] = 's';
          argAryStr[argLenSI][2] = 'a';
@@ -5367,7 +5735,7 @@ checkRunEvent_ftbRayST(
          argAryStr[argLenSI] =
             malloc((tmpSI + 13) * sizeof(signed char));
          if(! tmpHeapStr)
-            goto err_fun19_sec07;
+            goto err_fun21_sec07;
          cpLen_ulCp(
             argAryStr[argLenSI],
             argAryStr[argLenSI - 2],
@@ -5381,7 +5749,7 @@ checkRunEvent_ftbRayST(
          ++argLenSI;
 
          /*++++++++++++++++++++++++++++++++++++++++++++++\
-         + Fun19 Sec06 Sub06 Cat09:
+         + Fun21 Sec06 Sub06 Cat09:
          +   - run minimap2
          \++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5415,7 +5783,7 @@ checkRunEvent_ftbRayST(
                &guiSTPtr->mesgStr[tmpSI],
                argAryStr[argLenSI]
             );
-            goto done_fun19_sec07;
+            goto done_fun21_sec07;
          } /*If: minimap2 errored out*/
 
          free(tmpHeapStr);
@@ -5423,7 +5791,7 @@ checkRunEvent_ftbRayST(
       } /*If: have minimap2*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub06 Cat10:
+      + Fun21 Sec06 Sub06 Cat10:
       +   - if cannot, copy fastq files to ftb command
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5442,7 +5810,7 @@ checkRunEvent_ftbRayST(
                );
 
             if(! argAryStr[argLenSI])
-               goto err_fun19_sec07;
+               goto err_fun21_sec07;
 
             cpLen_ulCp(
                argAryStr[argLenSI],
@@ -5455,7 +5823,7 @@ checkRunEvent_ftbRayST(
       } /*Else: no minimap2*/
 
       /*+++++++++++++++++++++++++++++++++++++++++++++++++\
-      + Fun19 Sec06 Sub06 Cat11:
+      + Fun21 Sec06 Sub06 Cat11:
       +   - run freezeTB
       \+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -5519,7 +5887,7 @@ checkRunEvent_ftbRayST(
          );
          fclose(inFILE);
          inFILE = 0;
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       } /*If: had an error*/
 
       /*remove run fastq files*/
@@ -5543,21 +5911,22 @@ checkRunEvent_ftbRayST(
          guiSTPtr->inPrefixStr
       );
       guiSTPtr->inPrefixStr[0] = 0;
-      goto buildOutReport_fun19_sec06_sub0x;
+      goto buildOutReport_fun21_sec06_sub0x;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub07:
+   * Fun21 Sec06 Sub07:
    *   - got to input menu
    \*****************************************************/
 
-   inputMenu_fun19_sec06_sub07:;
+   inputMenu_fun21_sec06_sub07:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       hideOutput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
       hideHsp65_ftbRayST(guiSTPtr);
       hideGeneCover_ftbRayST(guiSTPtr);
+      hideCloseSpol_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->inputGuiIdSI,
@@ -5600,21 +5969,22 @@ checkRunEvent_ftbRayST(
          guiSTPtr->runIdSI,
          guiSTPtr->widgSTPtr
       );
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub08:
+   * Fun21 Sec06 Sub08:
    *   - goto output menu
    \*****************************************************/
 
-   outputMenu_fun19_sec06_sub08:;
+   outputMenu_fun21_sec06_sub08:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       hideInput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
       hideHsp65_ftbRayST(guiSTPtr);
       hideGeneCover_ftbRayST(guiSTPtr);
+      hideCloseSpol_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->outGuiIdSI,
@@ -5622,7 +5992,7 @@ checkRunEvent_ftbRayST(
       );
 
       if(buildReportBl)
-         goto buildOutReport_fun19_sec06_sub0x;
+         goto buildOutReport_fun21_sec06_sub0x;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->getPrefixButIdSI,
@@ -5653,37 +6023,39 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
-   buildOutReport_fun19_sec06_sub0x:;
+   buildOutReport_fun21_sec06_sub0x:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
       if(! guiSTPtr->filePrefixStr[0])
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       /*build drug resistance report*/
       checkDrugs_ftbRayST(guiSTPtr);
       spoligoLinGet_ftbRayST(guiSTPtr);
       miruLinGet_ftbRayST(guiSTPtr);
       getHsp65Lin_ftbRayST(guiSTPtr);
+      closeSpolGet_ftbRayST(guiSTPtr);
       mkCoverageTbl_ftbRayST(guiSTPtr);
 
-      goto reportMenu_fun19_sec06_sub10;
+      goto reportMenu_fun21_sec06_sub10;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub10:
+   * Fun21 Sec06 Sub10:
    *   - got to report
    \*****************************************************/
 
-   reportMenu_fun19_sec06_sub10:;
+   reportMenu_fun21_sec06_sub10:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hideInput_ftbRayST(guiSTPtr);
       hideOutput_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
       hideHsp65_ftbRayST(guiSTPtr);
       hideGeneCover_ftbRayST(guiSTPtr);
+      hideCloseSpol_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->reportGuiIdSI,
@@ -5716,16 +6088,16 @@ checkRunEvent_ftbRayST(
             guiSTPtr->drugResRectIdSI + tmpSI,
             guiSTPtr->widgSTPtr
          );
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub11:
+   * Fun21 Sec06 Sub11:
    *   - get ftb prefix
    \*****************************************************/
 
-   getFtbPrefix_fun19_sec06_sub11:;
+   getFtbPrefix_fun21_sec06_sub11:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hidenClear_widg_rayWidg(
          guiSTPtr->fileBrowserIdSI,
@@ -5737,22 +6109,23 @@ checkRunEvent_ftbRayST(
          (signed char *) "select a FTB output file"
       );
       guiSTPtr->browserSC = 3;
-      goto fileBrowser_fun19_sec06_sub05;
+      goto fileBrowser_fun21_sec06_sub05;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub12:
+   * Fun21 Sec06 Sub12:
    *   - goto to the amr table
    \*****************************************************/
 
-   amrTblMenu_fun19_sec06_sub12:;
+   amrTblMenu_fun21_sec06_sub12:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hideInput_ftbRayST(guiSTPtr);
       hideOutput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideHsp65_ftbRayST(guiSTPtr);
       hideGeneCover_ftbRayST(guiSTPtr);
+      hideCloseSpol_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->amrsGuiIdSI,
@@ -5768,22 +6141,23 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub13:
+   * Fun21 Sec06 Sub13:
    *   - goto to the hsp65 species/lineage table
    \*****************************************************/
 
-   hsp65TblMenu_fun19_sec06_sub12:;
+   hsp65TblMenu_fun21_sec06_sub13:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hideInput_ftbRayST(guiSTPtr);
       hideOutput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideGeneCover_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
+      hideCloseSpol_ftbRayST(guiSTPtr);
 
 
       inactiveAdd_widg_rayWidg(
@@ -5800,22 +6174,56 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*****************************************************\
-   * Fun19 Sec06 Sub14:
+   * Fun21 Sec06 Sub14:
+   *   - goto to the close spoligotype table
+   \*****************************************************/
+
+   closeSpolTblMenu_fun21_sec06_sub14:;
+      if(! (indexSI & def_releaseEvent_rayWidg) )
+         goto done_fun21_sec07;
+
+      hideInput_ftbRayST(guiSTPtr);
+      hideOutput_ftbRayST(guiSTPtr);
+      hideReport_ftbRayST(guiSTPtr);
+      hideGeneCover_ftbRayST(guiSTPtr);
+      hideTable_ftbRayST(guiSTPtr);
+      hideHsp65_ftbRayST(guiSTPtr);
+
+
+      inactiveAdd_widg_rayWidg(
+         guiSTPtr->closeSpolGuiIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      hidenClear_widg_rayWidg(
+         guiSTPtr->closeSpolTblIdSI,
+         guiSTPtr->widgSTPtr
+      );
+      hidenClear_widg_rayWidg(
+         guiSTPtr->closeSpolLabIdSI,
+         guiSTPtr->widgSTPtr
+      );
+
+      goto done_fun21_sec07;
+
+   /*****************************************************\
+   * Fun21 Sec06 Sub15:
    *   - goto to gene coverage table
    \*****************************************************/
 
-   geneCoverMenu_fun19_sec06_sub13:;
+   geneCoverMenu_fun21_sec06_sub15:;
       if(! (indexSI & def_releaseEvent_rayWidg) )
-         goto done_fun19_sec07;
+         goto done_fun21_sec07;
 
       hideInput_ftbRayST(guiSTPtr);
       hideOutput_ftbRayST(guiSTPtr);
       hideReport_ftbRayST(guiSTPtr);
       hideHsp65_ftbRayST(guiSTPtr);
       hideTable_ftbRayST(guiSTPtr);
+      hideCloseSpol_ftbRayST(guiSTPtr);
 
       inactiveAdd_widg_rayWidg(
          guiSTPtr->coverGuiIdSI,
@@ -5831,25 +6239,25 @@ checkRunEvent_ftbRayST(
          guiSTPtr->widgSTPtr
       );
 
-      goto done_fun19_sec07;
+      goto done_fun21_sec07;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun19 Sec07:
+   ^ Fun21 Sec07:
    ^   - return results and redraw gui
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   goto done_fun19_sec07;
+   goto done_fun21_sec07;
 
-   err_fun19_sec07:;
+   err_fun21_sec07:;
       tmpSI = 1;
-      goto ret_fun19_sec07;
+      goto ret_fun21_sec07;
 
-   done_fun19_sec07:;
+   done_fun21_sec07:;
       draw_gui_ftbRayST(guiSTPtr);
       tmpSI = 0;
-      goto ret_fun19_sec07;
+      goto ret_fun21_sec07;
 
-   ret_fun19_sec07:;
+   ret_fun21_sec07:;
       if(inFILE)
          fclose(inFILE); /*never will be stdout/in/err*/
       inFILE = 0;
@@ -5875,162 +6283,3 @@ checkRunEvent_ftbRayST(
 
       return (signed char) tmpSI;
 } /*checkRunEvent_ftbRayST*/
-
-/*=======================================================\
-: License:
-: 
-: Creative Commons Legal Code
-: 
-: CC0 1.0 Universal
-: 
-:     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND
-:     DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF
-:     THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
-:     RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-:     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS
-:     MAKES NO WARRANTIES REGARDING THE USE OF THIS
-:     DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-:     HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES
-:     RESULTING FROM THE USE OF THIS DOCUMENT OR THE
-:     INFORMATION OR WORKS PROVIDED HEREUNDER.
-: 
-: Statement of Purpose
-: 
-: The laws of most jurisdictions throughout the world
-: automatically confer exclusive Copyright and Related
-: Rights (defined below) upon the creator and subsequent
-: owner(s) (each and all, an "owner") of an original work
-: of authorship and/or a database (each, a "Work").
-: 
-: Certain owners wish to permanently relinquish those
-: rights to a Work for the purpose of contributing to a
-: commons of creative, cultural and scientific works
-: ("Commons") that the public can reliably and without
-: fear of later claims of infringement build upon, modify,
-: incorporate in other works, reuse and redistribute as
-: freely as possible in any form whatsoever and for any
-: purposes, including without limitation commercial
-: purposes. These owners may contribute to the Commons to
-: promote the ideal of a free culture and the further
-: production of creative, cultural and scientific works,
-: or to gain reputation or greater distribution for their
-: Work in part through the use and efforts of others.
-: 
-: For these and/or other purposes and motivations, and
-: without any expectation of additional consideration or
-: compensation, the person associating CC0 with a Work
-: (the "Affirmer"), to the extent that he or she is an
-: owner of Copyright and Related Rights in the Work,
-: voluntarily elects to apply CC0 to the Work and publicly
-: distribute the Work under its terms, with knowledge of
-: his or her Copyright and Related Rights in the Work and
-: the meaning and intended legal effect of CC0 on those
-: rights.
-: 
-: 1. Copyright and Related Rights. A Work made available
-:    under CC0 may be protected by copyright and related
-:    or neighboring rights ("Copyright and Related
-:    Rights"). Copyright and Related Rights include, but
-:    are not limited to, the following:
-: 
-:   i. the right to reproduce, adapt, distribute, perform,
-:      display, communicate, and translate a Work;
-:  ii. moral rights retained by the original author(s)
-:      and/or performer(s);
-: iii. publicity and privacy rights pertaining to a
-:      person's image or likeness depicted in a Work;
-:  iv. rights protecting against unfair competition in
-:      regards to a Work, subject to the limitations in
-:      paragraph 4(a), below;
-:   v. rights protecting the extraction, dissemination,
-:      use and reuse of data in a Work;
-:  vi. database rights (such as those arising under
-:      Directive 96/9/EC of the European Parliament and of
-:      the Council of 11 March 1996 on the legal
-:      protection of databases, and under any national
-:      implementation thereof, including any amended or
-:      successor version of such directive); and
-: vii. other similar, equivalent or corresponding rights
-:      throughout the world based on applicable law or
-:      treaty, and any national implementations thereof.
-: 
-: 2. Waiver. To the greatest extent permitted by, but not
-:    in contravention of, applicable law, Affirmer hereby
-:    overtly, fully, permanently, irrevocably and
-:    unconditionally waives, abandons, and surrenders all
-:    of Affirmer's Copyright and Related Rights and
-:    associated claims and causes of action, whether now
-:    known or unknown (including existing as well as
-:    future claims and causes of action), in the Work (i)
-:    in all territories worldwide, (ii) for the maximum
-:    duration provided by applicable law or treaty
-:    (including future time extensions), (iii) in any
-:    current or future medium and for any number of
-:    copies, and (iv) for any purpose whatsoever,
-:    including without limitation commercial, advertising
-:    or promotional purposes (the "Waiver"). Affirmer
-:    makes the Waiver for the benefit of each member of
-:    the public at large and to the detriment of
-:    Affirmer's heirs and successors, fully intending that
-:    such Waiver shall not be subject to revocation,
-:    rescission, cancellation, termination, or any other
-:    legal or equitable action to disrupt the quiet
-:    enjoyment of the Work by the public as contemplated
-:    by Affirmer's express Statement of Purpose.
-: 
-: 3. Public License Fallback. Should any part of the
-:    Waiver for any reason be judged legally invalid or
-:    ineffective under applicable law, then the Waiver
-:    shall be preserved to the maximum extent permitted
-:    taking into account Affirmer's express Statement of
-:    Purpose. In addition, to the extent the Waiver is so
-:    judged Affirmer hereby grants to each affected person
-:    a royalty-free, non transferable, non sublicensable,
-:    non exclusive, irrevocable and unconditional license
-:    to exercise Affirmer's Copyright and Related Rights
-:    in the Work (i) in all territories worldwide, (ii)
-:    for the maximum duration provided by applicable law
-:    or treaty (including future time extensions), (iii)
-:    in any current or future medium and for any number of
-:    copies, and (iv) for any purpose whatsoever,
-:    including without limitation commercial, advertising
-:    or promotional purposes (the "License"). The License
-:    shall be deemed effective as of the date CC0 was
-:    applied by Affirmer to the Work. Should any part of
-:    the License for any reason be judged legally invalid
-:    or ineffective under applicable law, such partial
-:    invalidity or ineffectiveness shall not invalidate
-:    the remainder of the License, and in such case
-:    Affirmer hereby affirms that he or she will not (i)
-:    exercise any of his or her remaining Copyright and
-:    Related Rights in the Work or (ii) assert any
-:    associated claims and causes of action with respect
-:    to the Work, in either case contrary to Affirmer's
-:    express Statement of Purpose.
-: 
-: 4. Limitations and Disclaimers.
-: 
-:  a. No trademark or patent rights held by Affirmer are
-:     waived, abandoned, surrendered, licensed or
-:     otherwise affected by this document.
-:  b. Affirmer offers the Work as-is and makes no
-:     representations or warranties of any kind concerning
-:     the Work, express, implied, statutory or otherwise,
-:     including without limitation warranties of title,
-:     merchantability, fitness for a particular purpose,
-:     non infringement, or the absence of latent or other
-:     defects, accuracy, or the present or absence of
-:     errors, whether or not discoverable, all to the
-:     greatest extent permissible under applicable law.
-:  c. Affirmer disclaims responsibility for clearing
-:     rights of other persons that may apply to the Work
-:     or any use thereof, including without limitation any
-:     person's Copyright and Related Rights in the Work.
-:     Further, Affirmer disclaims responsibility for
-:     obtaining any necessary consents, permissions or
-:     other rights required for any use of the Work.
-:  d. Affirmer understands and acknowledges that Creative
-:     Commons is not a party to this document and has no
-:     duty or obligation with respect to this CC0 or use
-:     of the Work.
-\=======================================================*/

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: CC0-1.0
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # gui SOF: Start Of File
 #   - freezeTB gui in tcltk (copy to guiFreezeTB.c)
@@ -22,6 +24,10 @@
 #     - consensus settings
 #   o gui08:
 #     - set up output settings/input frame
+# This file is released into the Public Domain under
+#   CC0-1.0.
+# See https://creativecommons.org/publicdomain/zero/1.0/
+#   for details (or ../../license-CC-1.0.txt).
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #--------------------------------------------------
@@ -535,6 +541,9 @@ variable glob_miruFudge 15 ;
 variable glob_spolSim 0.9 ;
 variable glob_drStart 3119037 ;
 variable glob_drEnd 3123624 ;
+variable glob_spolMinDepth 5 ;
+variable glob_spolMinPercDepth 0.1 ;
+variable glob_spolMaxDist 5 ;
 
 # consensus settings
 variable glob_depth 10 ;
@@ -1380,6 +1389,20 @@ proc setFreezeTBStatus {} {
       lappend tbCmd "-fudge" $glob_miruFudge ;
       lappend tbCmd "-dr-start" $::glob_drStart ;
       lappend tbCmd "-dr-end" $::glob_drEnd ;
+
+      ---lappend tbCmd
+         "-spoligo-min-depth" $::glob_spolMinDepth ;
+      ---
+
+      ---lappend tbCmd
+         "-spoligo-min-perc-depth"
+         $::glob_spolMinPercDepth ;
+      ---
+
+      ---lappend tbCmd
+         "-spoligo-max-dist"
+         $::glob_spolMaxDist ;
+      ---
 
       lappend tbCmd "-spoligo-min-score" ;
       lappend tbCmd $::glob_spolSim ;
@@ -2699,6 +2722,12 @@ pack .main.lin.miru -anchor w -side top ;
 #     - direct repeat starting coordinates
 #   o gui06 sec04 sub05:
 #     - direct repeat ending coordinates
+#   o gui06 sec04 sub06:
+#     - spoligotype minimum read depth
+#   o gui06 sec04 sub07:
+#     - spoligotype percent minimum read depth
+#   o gui06 sec04 sub08:
+#     - spoligotype max edit distance
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #***************************************************
@@ -2804,6 +2833,104 @@ pack .main.lin.spol.dr.end -anchor w -side top ;
 ---pack
    .main.lin.spol.dr.end.lab
    .main.lin.spol.dr.end.entry
+   -anchor w
+   -side left
+--- ;
+
+#***************************************************
+# Gui06 Sec04 Sub06:
+#   - spoligotype minimum read depth
+#***************************************************
+
+#___general_settings_
+
+tk::frame .main.lin.spol.set ;
+pack .main.lin.spol.set -anchor w -side top ;
+
+tk::frame .main.lin.spol.set.set ;
+pack .main.lin.spol.set.set -anchor w -side top ;
+
+---tk::label
+   .main.lin.spol.set.set.lab
+   -text "Spoligotype read depth and edit distance"
+--- ;
+
+pack .main.lin.spol.set.set.lab -anchor w -side left ;
+
+#___minimum_depth_settings
+
+tk::frame .main.lin.spol.set.depth ;
+pack .main.lin.spol.set.depth -anchor w -side top ;
+
+---tk::label
+   .main.lin.spol.set.depth.lab
+   -text "    min depth (> 0):"
+--- ;
+
+---tk::entry
+   .main.lin.spol.set.depth.entry
+   -textvariable glob_spolMinDepth
+   -validate key
+   -vcmd { tcl_isInt_gui %P %i 1 2000000000 }
+--- ;
+
+---pack
+   .main.lin.spol.set.depth.lab
+   .main.lin.spol.set.depth.entry
+   -anchor w
+   -side left
+--- ;
+
+#***************************************************
+# Gui06 Sec04 Sub07:
+#   - spoligotype percent minimum read depth
+#***************************************************
+
+tk::frame .main.lin.spol.set.perc ;
+pack .main.lin.spol.set.perc -anchor w -side top ;
+
+---tk::label
+   .main.lin.spol.set.perc.lab
+   -text "    min % depth (> 0):"
+--- ;
+
+---tk::entry
+   .main.lin.spol.set.perc.entry
+   -textvariable glob_spolMinPercDepth
+   -validate key
+   -vcmd { tcl_isFloat_gui %P %i 0 1 }
+--- ;
+
+---pack
+   .main.lin.spol.set.perc.lab
+   .main.lin.spol.set.perc.entry
+   -anchor w
+   -side left
+--- ;
+
+#***************************************************
+# Gui06 Sec04 Sub08:
+#   - spoligotype max edit distance
+#***************************************************
+
+tk::frame .main.lin.spol.set.dist ;
+pack .main.lin.spol.set.dist -anchor w -side top ;
+
+---tk::label
+   .main.lin.spol.set.dist.lab
+   -text "    max close distance (> 0):"
+--- ;
+
+---tk::entry
+   .main.lin.spol.set.dist.entry
+   -textvariable glob_spolMaxDist
+   -validate key
+   -vcmd { tcl_isInt_gui %P %i 0 127 }
+--- ;
+
+---pack
+   .main.lin.spol.set.dist.lab
+   .main.lin.spol.set.dist.entry
    -anchor w
    -side left
 --- ;
@@ -3863,6 +3990,7 @@ tk::frame .main.out.meanDepth ;
 tk::frame .main.out.cover ;
 tk::frame .main.out.depth ;
 tk::frame .main.out.amr ;
+tk::frame .main.out.closeSpol ;
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec02:
@@ -4663,6 +4791,151 @@ proc readAmrTbl {prefixStr indentStr} {
    return true ;
 } ; # readAmrTbl
 
+#**************************************************
+# Gui08 Sec02 Sub09:
+#   - function; close spoligotyping table
+#   o gui08 sec02 sub09 cat01:
+#     - open file and get header lengths
+#   o gui08 sec02 sub09 cat02:
+#     - get lengths for each column
+#   o gui08 sec02 sub09 cat03:
+#     - build header for table
+#   o gui08 sec02 sub09 cat04:
+#     - get table values
+#   o gui08 sec02 sub09 cat05:
+#     - add close lineages to table
+#**************************************************
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++
+# Gui08 Sec02 Sub09 Cat01:
+#   - open file and get header lengths
+#++++++++++++++++++++++++++++++++++++++++++++++++++
+
+proc closeSpoligoTbl {prefixStr indentStr} {
+   set fileStr $prefixStr ;
+   append fileStr "-read-spoligo-close.tsv" ;
+   set openFILE [open $fileStr] ;
+
+   set lineBl 0 ;
+   set pad0 [string length "id"] ;
+   set pad1 [string length "strain"] ;
+   set pad2 [string length "distance"] ;
+
+   if {[gets $openFILE lineStr] < 0} {
+      ---.main.out.closeSpol.read.tbl.lab
+          configure
+          -text "No close spoligotypes file"
+      ---;
+
+      return false ;
+   } ; # If; nothing in file
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub09 Cat02:
+   #   - get lengths for each column
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+
+   set lineStr [split $lineStr "\t"] ;
+
+   while {[gets $openFILE lineStr] > -1} {
+      set lineBl 1 ;
+      set lineStr [split $lineStr "\t"] ;
+
+      # id length
+      set tmpStr [lindex $lineStr 0] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad0 < $lenUI} { set pad0 $lenUI ; } ;
+
+      # lineage name length
+      set tmpStr [lindex $lineStr 1] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad1 < $lenUI} { set pad1 $lenUI ; } ;
+
+      # distance length
+      set tmpStr [lindex $lineStr 2] ;
+      set lenUI [string length $tmpStr] ;
+      if {$pad2 < $lenUI} { set pad2 $lenUI ; } ;
+   } ; # Loop: find longest entries per column
+
+   close $openFILE ;
+
+   if { $lineBl < 1} {
+      ---.main.out.closeSpol.read.tbl.lab
+          configure
+          -text "No close spoligotypes file"
+      ---;
+
+      return false ;
+   } ; # If: nothing in file
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub09 Cat03:
+   #   - build header for table
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+
+   set tmpStr [format "%-*s" $pad0 "id"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad1 "lineage"] ;
+   append tblStr $tmpStr $indentStr;
+
+   set tmpStr [format "%-*s" $pad2 "distance"] ;
+   append tblStr $tmpStr $indentStr;
+
+   append tblStr "\n";
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub09 Cat04:
+   #   - get table values
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+
+   set openFILE [open $fileStr] ;
+   gets $openFILE lineStr ;
+
+   while {[gets $openFILE lineStr] > -1} {
+      set lineStr [split $lineStr "\t"] ;
+
+      # print id
+      set tmpStr [lindex $lineStr 0] ; # id
+      set tmpStr [format "%-*s" $pad0 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # print lineage
+      set tmpStr [lindex $lineStr 1] ;
+      set tmpStr [format "%-*s" $pad1 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      # print distance
+      set tmpStr [lindex $lineStr 2] ;
+      set tmpStr [format "%-*s" $pad2 $tmpStr] ;
+      append tblStr $tmpStr $indentStr;
+
+      append tblStr "\n" ; # next row
+   } ; # Loop: get AMRs
+
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+   # Gui08 Sec02 Sub09 Cat05:
+   #   - add close lineages to table
+   #+++++++++++++++++++++++++++++++++++++++++++++++
+
+   # allow editing
+   ---.main.out.closeSpol.read.tbl.txt
+      configure -state normal ;
+   ---
+
+   # delete old text; then insert new
+   .main.out.closeSpol.read.tbl.txt delete 0.0 end ;
+   .main.out.closeSpol.read.tbl.txt insert end $tblStr ;
+
+   ---.main.out.closeSpol.read.tbl.txt
+       configure
+       -state disabled
+   ---; # disable editing
+
+   close $openFILE ;
+   return true ;
+} ; # readAmrTbl
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Gui08 Sec03:
 #   - set up settings output gui frame
@@ -4847,6 +5120,7 @@ pack .main.out.set.run -anchor w -side top ;
       readSpol $::glob_outCur ;
       readHsp65 $::glob_outCur ;
       readAmrTbl $::glob_outCur "   " ;
+      closeSpoligoTbl $::glob_outCur "   " ;
 
       .main.out.menu.reportBut invoke ;
       .main.out.set.prefix.lab configure -text "" ;
@@ -4873,6 +5147,8 @@ pack .main.out.set.run.but -anchor w -side left ;
 #   o gui08 sec04 sub07:
 #     - add AMR table button
 #   o gui08 sec04 sub08:
+#     - add close spoligotype table button
+#   o gui08 sec04 sub09:
 #     - add input button
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -4900,6 +5176,7 @@ pack .main.out.menu -anchor w -side top ;
       pack forget .main.out.cover ;
       pack forget .main.out.depth ;
       pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
       pack forget .main.out.menu ;
 
       pack .main.out.set ;
@@ -4936,6 +5213,12 @@ pack .main.out.menu -anchor w -side top ;
           -state normal
       ---;
 
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
       ---.main.out.menu.amrBut
           configure
           -relief raised
@@ -4961,6 +5244,7 @@ pack .main.out.menu.setBut -anchor w -side left ;
       pack forget .main.out.cover ;
       pack forget .main.out.depth ;
       pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
       pack forget .main.out.menu ;
 
       pack .main.out.report ;
@@ -5005,6 +5289,12 @@ pack .main.out.menu.setBut -anchor w -side left ;
           -state normal
       ---;
 
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
       ---.main.out.menu.amrBut
           configure
           -relief raised
@@ -5030,6 +5320,7 @@ pack .main.out.menu.reportBut -anchor w -side left ;
       pack forget .main.out.cover ;
       pack forget .main.out.depth ;
       pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
       pack forget .main.out.menu ;
 
       pack .main.out.meanDepth ;
@@ -5074,6 +5365,12 @@ pack .main.out.menu.reportBut -anchor w -side left ;
           -state normal
       ---;
 
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
       ---.main.out.menu.amrBut
           configure
           -relief raised
@@ -5099,6 +5396,7 @@ pack .main.out.menu.meanDepthBut -anchor w -side left ;
       pack forget .main.out.cover ;
       pack forget .main.out.depth ;
       pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
       pack forget .main.out.menu ;
 
       pack .main.out.cover ;
@@ -5143,6 +5441,12 @@ pack .main.out.menu.meanDepthBut -anchor w -side left ;
           -state normal
       ---;
 
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
       ---.main.out.menu.amrBut
           configure
           -relief raised
@@ -5168,6 +5472,7 @@ pack .main.out.menu.coverBut -anchor w -side left ;
       pack forget .main.out.cover ;
       pack forget .main.out.depth ;
       pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
       pack forget .main.out.menu ;
 
       pack .main.out.depth ;
@@ -5212,6 +5517,12 @@ pack .main.out.menu.coverBut -anchor w -side left ;
           -state disabled
       ---;
 
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
       ---.main.out.menu.amrBut
           configure
           -relief raised
@@ -5237,6 +5548,7 @@ pack .main.out.menu.depthBut -anchor w -side left ;
       pack forget .main.out.cover ;
       pack forget .main.out.depth ;
       pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
       pack forget .main.out.menu ;
 
       pack .main.out.amr ;
@@ -5281,6 +5593,12 @@ pack .main.out.menu.depthBut -anchor w -side left ;
           -state normal
       ---;
 
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
       ---.main.out.menu.amrBut
           configure
           -relief sunken
@@ -5292,6 +5610,82 @@ pack .main.out.menu.amrBut -anchor w -side left ;
 
 #**************************************************
 # Gui08 Sec04 Sub08:
+#   - add close spoligotype table button
+#**************************************************
+
+---tk::button
+   .main.out.menu.closeSpolBut
+   -text "spoligo"
+   -command {
+---
+      pack forget .main.out.set ;
+      pack forget .main.out.report ;
+      pack forget .main.out.meanDepth ;
+      pack forget .main.out.cover ;
+      pack forget .main.out.depth ;
+      pack forget .main.out.amr ;
+      pack forget .main.out.closeSpol ;
+      pack forget .main.out.menu ;
+
+      pack .main.out.closeSpol ;
+      pack .main.out.menu ;
+
+      ---wm
+         title
+         .
+         [concat
+            [file tail $glob_outCur]
+            "close spoligotype table freezeTB"
+         ]
+     ---;
+
+      ---.main.out.menu.setBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.reportBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.meanDepthBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.coverBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.depthBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.amrBut
+          configure
+          -relief raised
+          -state normal
+      ---;
+
+      ---.main.out.menu.closeSpolBut
+          configure
+          -relief sunken
+          -state disabled
+      ---;
+   } ;
+
+pack .main.out.menu.closeSpolBut -anchor w -side left ;
+
+#**************************************************
+# Gui08 Sec04 Sub09:
 #   - add input button
 #**************************************************
 
@@ -5713,161 +6107,49 @@ pack .main.out.amr.read.tbl -anchor w -side top ;
    -side left
 ---;
 
-#=========================================================
-# License:
-# 
-# Creative Commons Legal Code
-# 
-# CC0 1.0 Universal
-# 
-#     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND
-#     DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF
-#     THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
-#     RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-#     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS
-#     MAKES NO WARRANTIES REGARDING THE USE OF THIS
-#     DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-#     HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES
-#     RESULTING FROM THE USE OF THIS DOCUMENT OR THE
-#     INFORMATION OR WORKS PROVIDED HEREUNDER.
-# 
-# Statement of Purpose
-# 
-# The laws of most jurisdictions throughout the world
-# automatically confer exclusive Copyright and Related
-# Rights (defined below) upon the creator and subsequent
-# owner(s) (each and all, an "owner") of an original work
-# of authorship and/or a database (each, a "Work").
-# 
-# Certain owners wish to permanently relinquish those
-# rights to a Work for the purpose of contributing to a
-# commons of creative, cultural and scientific works
-# ("Commons") that the public can reliably and without
-# fear of later claims of infringement build upon, modify,
-# incorporate in other works, reuse and redistribute as
-# freely as possible in any form whatsoever and for any
-# purposes, including without limitation commercial
-# purposes. These owners may contribute to the Commons to
-# promote the ideal of a free culture and the further
-# production of creative, cultural and scientific works,
-# or to gain reputation or greater distribution for their
-# Work in part through the use and efforts of others.
-# 
-# For these and/or other purposes and motivations, and
-# without any expectation of additional consideration or
-# compensation, the person associating CC0 with a Work
-# (the "Affirmer"), to the extent that he or she is an
-# owner of Copyright and Related Rights in the Work,
-# voluntarily elects to apply CC0 to the Work and publicly
-# distribute the Work under its terms, with knowledge of
-# his or her Copyright and Related Rights in the Work and
-# the meaning and intended legal effect of CC0 on those
-# rights.
-# 
-# 1. Copyright and Related Rights. A Work made available
-#    under CC0 may be protected by copyright and related
-#    or neighboring rights ("Copyright and Related
-#    Rights"). Copyright and Related Rights include, but
-#    are not limited to, the following:
-# 
-#   i. the right to reproduce, adapt, distribute, perform,
-#      display, communicate, and translate a Work;
-#  ii. moral rights retained by the original author(s)
-#      and/or performer(s);
-# iii. publicity and privacy rights pertaining to a
-#      person's image or likeness depicted in a Work;
-#  iv. rights protecting against unfair competition in
-#      regards to a Work, subject to the limitations in
-#      paragraph 4(a), below;
-#   v. rights protecting the extraction, dissemination,
-#      use and reuse of data in a Work;
-#  vi. database rights (such as those arising under
-#      Directive 96/9/EC of the European Parliament and of
-#      the Council of 11 March 1996 on the legal
-#      protection of databases, and under any national
-#      implementation thereof, including any amended or
-#      successor version of such directive); and
-# vii. other similar, equivalent or corresponding rights
-#      throughout the world based on applicable law or
-#      treaty, and any national implementations thereof.
-# 
-# 2. Waiver. To the greatest extent permitted by, but not
-#    in contravention of, applicable law, Affirmer hereby
-#    overtly, fully, permanently, irrevocably and
-#    unconditionally waives, abandons, and surrenders all
-#    of Affirmer's Copyright and Related Rights and
-#    associated claims and causes of action, whether now
-#    known or unknown (including existing as well as
-#    future claims and causes of action), in the Work (i)
-#    in all territories worldwide, (ii) for the maximum
-#    duration provided by applicable law or treaty
-#    (including future time extensions), (iii) in any
-#    current or future medium and for any number of
-#    copies, and (iv) for any purpose whatsoever,
-#    including without limitation commercial, advertising
-#    or promotional purposes (the "Waiver"). Affirmer
-#    makes the Waiver for the benefit of each member of
-#    the public at large and to the detriment of
-#    Affirmer's heirs and successors, fully intending that
-#    such Waiver shall not be subject to revocation,
-#    rescission, cancellation, termination, or any other
-#    legal or equitable action to disrupt the quiet
-#    enjoyment of the Work by the public as contemplated
-#    by Affirmer's express Statement of Purpose.
-# 
-# 3. Public License Fallback. Should any part of the
-#    Waiver for any reason be judged legally invalid or
-#    ineffective under applicable law, then the Waiver
-#    shall be preserved to the maximum extent permitted
-#    taking into account Affirmer's express Statement of
-#    Purpose. In addition, to the extent the Waiver is so
-#    judged Affirmer hereby grants to each affected person
-#    a royalty-free, non transferable, non sublicensable,
-#    non exclusive, irrevocable and unconditional license
-#    to exercise Affirmer's Copyright and Related Rights
-#    in the Work (i) in all territories worldwide, (ii)
-#    for the maximum duration provided by applicable law
-#    or treaty (including future time extensions), (iii)
-#    in any current or future medium and for any number of
-#    copies, and (iv) for any purpose whatsoever,
-#    including without limitation commercial, advertising
-#    or promotional purposes (the "License"). The License
-#    shall be deemed effective as of the date CC0 was
-#    applied by Affirmer to the Work. Should any part of
-#    the License for any reason be judged legally invalid
-#    or ineffective under applicable law, such partial
-#    invalidity or ineffectiveness shall not invalidate
-#    the remainder of the License, and in such case
-#    Affirmer hereby affirms that he or she will not (i)
-#    exercise any of his or her remaining Copyright and
-#    Related Rights in the Work or (ii) assert any
-#    associated claims and causes of action with respect
-#    to the Work, in either case contrary to Affirmer's
-#    express Statement of Purpose.
-# 
-# 4. Limitations and Disclaimers.
-# 
-#  a. No trademark or patent rights held by Affirmer are
-#     waived, abandoned, surrendered, licensed or
-#     otherwise affected by this document.
-#  b. Affirmer offers the Work as-is and makes no
-#     representations or warranties of any kind concerning
-#     the Work, express, implied, statutory or otherwise,
-#     including without limitation warranties of title,
-#     merchantability, fitness for a particular purpose,
-#     non infringement, or the absence of latent or other
-#     defects, accuracy, or the present or absence of
-#     errors, whether or not discoverable, all to the
-#     greatest extent permissible under applicable law.
-#  c. Affirmer disclaims responsibility for clearing
-#     rights of other persons that may apply to the Work
-#     or any use thereof, including without limitation any
-#     person's Copyright and Related Rights in the Work.
-#     Further, Affirmer disclaims responsibility for
-#     obtaining any necessary consents, permissions or
-#     other rights required for any use of the Work.
-#  d. Affirmer understands and acknowledges that Creative
-#     Commons is not a party to this document and has no
-#     duty or obligation with respect to this CC0 or use
-#     of the Work.
-#=========================================================
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Gui08 Sec08:
+#   - set up close spoligotype output table
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tk::frame .main.out.closeSpol.read ;
+pack .main.out.closeSpol.read -anchor nw -side right ;
+
+tk::frame .main.out.closeSpol.read.head ;
+pack .main.out.closeSpol.read.head -anchor w -side top ;
+
+tk::frame .main.out.closeSpol.read.tbl ;
+pack .main.out.closeSpol.read.tbl -anchor w -side top ;
+
+---tk::label
+   .main.out.closeSpol.read.head.lab
+   -font "Courier"
+   -text "Close Spoligotypes:"
+---;
+
+---text
+   .main.out.closeSpol.read.tbl.txt
+   -height 20
+   -width 50
+   -yscrollcommand
+      ".main.out.closeSpol.read.tbl.scroll set"
+---; # set up text box
+
+# so user can not edit
+---.main.out.closeSpool.read.tbl.txt configure
+   -state disabled ;
+---
+
+---scrollbar
+   .main.out.closeSpol.read.tbl.scroll
+   -command ".main.out.closeSpol.read.tbl.txt yview"
+   -orient v
+---; # setup scroll bar for text box
+
+---pack
+   .main.out.closeSpol.read.head.lab
+   .main.out.closeSpol.read.tbl.txt
+   .main.out.closeSpol.read.tbl.scroll
+   -anchor nw
+   -side left
+---;

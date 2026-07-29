@@ -1,0 +1,112 @@
+# build is a single threaded build system that I am trying
+#  to make. This is my current vision for a build file
+
+$(homePath) env(home)
+
+$(prefix*!win) path:/usr/local/bin:
+$(prefix*win) path:$=(homePath)/appData/local/bin:
+
+$(ext*win) exe
+
+# default compilers (when not using `cmd compiler`)
+$(CC*!win*!plan9) cc
+$(CC*win) cl.exe
+$(CC*plan9*cpu_x86*bit_64) 6c
+$(CC*plan9*cpu_x86*bit_32) 8c
+$(CC*plan9*cpu_68000) 1c
+$(CC*plan9*cpu_68020) 2c
+$(CC*plan9*cpu_arm*bit_32) 5c
+$(CC*plan9*cpu_arm*bit_64) 7c
+$(CC*plan9*cpu_mips) vc
+$(CC*plan9*cpu_powerpc*bit_32) qc
+$(CC*plan9*cpu_powerpc*bit_64) 9c
+$(CC*plan9*cpu_sparc*bit_32) kc
+$(CC*plan9*cpu_sparc*bit_32) uc
+$(CC*plan9*cpu_spim) 0c
+
+# linkers
+$(LD*!win*!plan9) cc
+$(LD*win) link.exe
+$(LD*plan9*cpu_x86*bit_64) 6l
+$(LD*plan9*cpu_x86*bit_32) 8l
+$(LD*plan9*cpu_68000) 1l
+$(LD*plan9*cpu_68020) 2l
+$(LD*plan9*cpu_arm*bit_32) 5l
+$(LD*plan9*cpu_arm*bit_64) 7l
+$(LD*plan9*cpu_mips) 7l
+$(LD*plan9*cpu_powerpc*bit_32) ql
+$(LD*plan9*cpu_powerpc*bit_64) 9l
+$(LD*plan9*cpu_sparc*bit_32) kl
+$(LD*plan9*cpu_sparc*bit_64) ul
+$(LD*plan9*cpu_spim) 0l
+
+# output .o file names
+*!plan9 $(O) .o
+
+# plan9
+$(O*plan9*cpu_x86*bit_64) 6
+$(O*plan9*cpu_x86*bit_32) 8
+$(O*plan9*cpu_68000) 1
+$(O*plan9*cpu_68020) 2
+$(O*plan9*cpu_arm*bit_32) 5
+$(O*plan9*cpu_arm*bit_64) 7
+$(O*plan9*cpu_mips) v
+$(O*plan9*cpu_powerpc*bit_32) q
+$(O*plan9*cpu_powerpc*bit_64) 9
+$(O*plan9*cpu_sparc*bit_32) k
+$(O*plan9*cpu_sparc*bit_64) u
+$(O*plan9*cpu_spim) 0
+
+# cflags for compiling
+$(CFLAGS*!win*!plan9) -O3 -static -c
+$(CFLAGS*win) /c /Ot /O2 /Tc
+$(CFLAGS*plan9*!bit_64) -DPLAN9
+$(CFLAGS*plan9*bit_64) -DPLAN9 -DPLAN9_64
+
+# cflags for debugging
+---$(bugCFlags*!win*!plan9)
+   -O0 -std=c89 -g -Werror -Wall -Wextra -Wpedantic
+   -Wundef -Waggregate-return -Wwrite-strings
+   -Wstrict-prototypes -Wpointer-arith -Wshadow
+   -Wunreachable-code -Winit-selF
+---
+
+$(bugCFlags*win) /c /Ot /O2 /Tc
+$(bugCFlags*plan9*!bit_64) -DPLAN9
+$(bugCFlags*plan9*bit_64) -DPLAN9 -DPLAN9_64
+
+# command to run the compiler and linker
+
+$(compile*!win) -o @&out &=(CC) &=(CFLAGS) @&(in)
+$(COMPILE*win) &=(CC) /Fo:@&(out) &=(CFLAGS) @&(in)
+
+$(LINK*!win) &=(LD) -o @&(out) &=(objectFiles)
+$(LINK*win) &=(LD) /out:@&(out) &=(objectFiles)
+
+>commands<
+
+# these are templates that I can use in commands to make
+#   them shorter (reduce repitition)
+
+compile :template :out :addPath :ext:$=(O)
+   return :nofire @=(return) @=(out)
+   +sys &=(compile)
+   return @=(return) @=(out)
+
+link :template :out :exe:$=(ext)
+   +sys &=(link)
+
+# these commands are genralized in such a way that
+#  they can be called from any build file
+
+install [&=(program)]
+   search &=(prefix) # detect if install location exists
+      fail +mkdir &=(prefix)
+         # build errors out if directory could not be made
+   *win +move &=program &=(prefix)
+   *!win +move &=(program) &=(prefix)
+   *!win +sys chmod a+x &=(prefix)/&=program
+
+# again this is a more generalized command
+clean :nofire [:cmd:all]
+   +del @=(return)

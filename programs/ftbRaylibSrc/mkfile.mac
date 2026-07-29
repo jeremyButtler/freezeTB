@@ -79,6 +79,7 @@ objFiles=\
    $(genGeneoType)/linST.$O \
    $(genGeneoType)/getLin.$O \
    $(genFreezeTB)/ftbGraphs.$O \
+   $(genFreezeTB)/findCloseBarcodes.$O \
    $(genFont)/fontST.$O \
    $(genFont)/ibmSan9.$O \
    $(genPng)/mkPng.$O \
@@ -163,6 +164,7 @@ $(genFreezeTB)/freezeTB.$O: \
 	$(genFreezeTB)/freezeTBDefs.h \
 	$(genFreezeTB)/tbMiruDefs.h \
 	$(genFreezeTB)/tbSpolDefs.h \
+	$(genFreezeTB)/findCloseBarcodes.$O \
 	$(genBio)/tbConDefs.h \
 	$(genLib)/charCp.h \
 	$(genLib)/genMath.h \
@@ -171,6 +173,14 @@ $(genFreezeTB)/freezeTB.$O: \
 		$(CC) -o $(genFreezeTB)/freezeTB.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)/freezeTB.c
+
+../genFreezeTB/findCloseBarcodes.$(O): \
+	../genFreezeTB/findCloseBarcodes.c \
+	../genFreezeTB/findCloseBarcodes.h \
+	../genFreezeTB/spolST.$(O)
+		$(CC) -o ../genFreezeTB/findCloseBarcodes.$(O) \
+			$(CFLAGS) $(coreCFLAGS) \
+			../genFreezeTB/findCloseBarcodes.c
 
 $(genGeneoType)/getLin.$O: \
 	$(genGeneoType)/getLin.c \

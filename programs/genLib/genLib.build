@@ -1,0 +1,48 @@
+# build is a single threaded build system that I am trying
+#  to make. This is my current vision for a build file
+
+get ../compilers.build
+
+genLib_all
+  [
+     :cmd:base10str
+     :cmd:checkSum
+     :cmd:charCp
+     :cmd:endin
+     :cmd:fileFun
+     :cmd:genMath
+     :cmd:inflate
+     :cmd:numToStr
+     :cmd:ptrAry
+     :cmd:shellSort
+     :cmd:strAry
+     :cmd:strFun
+     :cmd:ulCp
+  ]
+
+base10str :use:compile [:in:base10str.c base10str.h]
+checkSum :use:compile [:in:checkSum.c checkSum.h :cmd:endin]
+charCp :use:compile [:in:charCp.c charCp.h]
+endin :use:compile [:in:endin.c endin.h]
+
+fileFun :use:compile
+   [:in:fileFun.c fileFun.h endLine.h :cmd:ulCp]
+
+genMath :use:compile [:in:genMath.c genMath.h]
+
+inflate :use:compile
+   [
+      :in:inflate.c
+      inflate.h
+      endLine.h
+      :cmd:checksum
+      :cmd:ulCp
+      :cmd:genMath
+   ]
+
+numToStr :use:compile [:in:numToStr.c numToStr.h]
+ptrAry :use:compile [:in:ptrAry.c ptrAry.h :cmd:ulCp]
+shellSort :use:compile [:in:shellSort.c shellSort.h]
+strAry :use:compile [:in:strAry.c strAry.h :cmd:ulCp]
+strFun :use:compile [:in:strFun.c strFun.h]
+ulCp :use:compile [:in:ulCp.c ulCp.h]

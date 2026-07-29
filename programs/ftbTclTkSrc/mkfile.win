@@ -65,6 +65,7 @@ objFiles= \
    $(genFreezeTB)\freezeTB.$O \
    $(genFreezeTB)/ftbGraphs.$O \
    $(genFreezeTB)\freezeTBPaths.$O \
+   $(genFreezeTB)\findCloseBarcodes.$O \
    $(genFont)\fontST.$O \
    $(genFont)\ibmSan9.$O \
    $(genPng)\mkPng.$O \
@@ -130,6 +131,7 @@ $(genFreezeTB)\freezeTB.$O: \
 	$(genFreezeTB)\miruTbl.$O \
 	$(genFreezeTB)\spolFind.$O \
 	$(genFreezeTB)\freezeTBPaths.$O \
+	$(genFreezeTB)\findCloseBarcodes.$O \
 	$(genAmr)\checkAmr.$O \
    $(genGeneoType)\linST.$O \
    $(genGeneoType)\getLin.$O \
@@ -153,6 +155,14 @@ $(genFreezeTB)\freezeTB.$O: \
 		$(CC) /Fo:$(genFreezeTB)\freezeTB.$O \
 			$(CFLAGS) $(coreCFLAGS) \
 			$(genFreezeTB)\freezeTB.c
+
+..\genFreezeTB\findCloseBarcodes.$(O): \
+	..\genFreezeTB\findCloseBarcodes.c \
+	..\genFreezeTB\findCloseBarcodes.h \
+	..\genFreezeTB\spolST.$(O)
+		$(CC) /Fo:..\genFreezeTB\findCloseBarcodes.$(O) \
+			$(CFLAGS) $(coreCFLAGS) \
+			..\genFreezeTB\findCloseBarcodes.c
 
 $(genGeneoType)\getLin.$O: \
 	$(genGeneoType)\getLin.c \

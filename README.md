@@ -457,6 +457,9 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-07-29:
+  - added detection step for finding spoligotype lineages
+    that have up to 5 spacers different
 - 2026-05-28:
   - expanded the hsp65 database to include more species
 - 2026-04-20:

@@ -12,6 +12,8 @@
 #define def_minDepth_tbSpolDefs 5 /*minimum read depths*/
 #define def_minPercDepth_tbSpolDefs 0.1f
    /*minimum percent read depths*/
+#define def_maxDist_tbSpolDefs 5
+   /*max edit distance between spacers for closestSpol*/
 
 #define def_noSpol_tbSpolDefs 1
 #define def_fileErr_tbSpolDefs 2

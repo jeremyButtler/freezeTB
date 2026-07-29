@@ -39,6 +39,9 @@ Chapter two: here be dragons
 - tbSpol: does spoligotyping
   - can run on fastx files (slower)
   - poor insertion handeling (often deletes)
+- closestSpol: detects lineages within 5 spacers of the
+  barcode output by tbSpol (should work for barcodes
+  from tbProfiler to)
 - getLin: generalized lineage system (not spoligotyping
   or MIRU) used in freezeTB (in bioTools repository)
 

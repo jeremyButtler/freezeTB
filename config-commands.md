@@ -174,6 +174,17 @@ The lineage systems in freezeTB that you can change
   a spoligotype spacer as mapped (for the waterman
   alignment step). Valid values are 0 to 1.
 
+`-spoligo-min-depth 5`: minimum number of reads to count
+  a spoligotype spacer as present.
+
+`-spoligo-min-perc-depth 0.1`: Is used to set the minimum
+  read depth filters for spoligotype spacers. In this case
+  spacers with less then  `<value> * maximum_spacer_depth`
+  read depth are counted as absent.
+
+`-spoligo-max-dist 5`: maximum edit distance to count two
+  barcodes as close (`<prefix>-read-spol-close.tsv`).
+
 ## lineage variables you should not change
 
 `-dr-start 3119037`: first base of the direct repeat

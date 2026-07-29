@@ -1,43 +1,77 @@
-/*########################################################
-# Name: spolST
-#   - holds the spolST (spoligotype structure) and its
-#     supporting functions
-########################################################*/
+/*SPDX-License-Identifier: CC0-1.0*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' spolST SOF: Start Of File
+'   - holds the spolST (spoligotype structure) and its
+'     supporting functions
 '   o header:
-'     - included libraries
+'     - guards
 '   o .h st01: spolST
-'     - holds an single lineage for an spoligotype
-'   o fun01: blank_spolST
-'     - blanks all variables in and spolST structure
-'   o fun02: init_spolST
-'     - sets all pointers to null and other variables
-'      (none) to defaults in an spolST struct
-'   o fun03: mkAry_spolST
-'     - makes array of initialized spoligotype structers
-'   o fun04: freeStack_spolST
-'     - frees an spolST struct on the stack
-'   o fun05: freeHeap_spolST
-'     - frees an spolST struct (on heap)
-'   o fun06: freeHeapAry_spolST
-'     - frees an array of spolST struct (on heap)
-'   o fun07: sortAry_spolST
-'     - sorts an array of spolST structures by least to
-'       greatest with shell sort
-'   o fun08: codeToLineage_spolST
-'     - finds an spoligo barcode in an array of spolST
-'       structures using an binary search
-'   o fun09: readDb_spolST
-'     - reads in an database of spoligotypes and returns
-'       an array of spolST structures sorted by barcode
-'   o fun10: phead_spolST
-'     - print out the header for the spoligotype output
-'   o fun11: pspol_spolST
-'     - print out an spoligotype and matching lineage
-'   o license:
-'     - licensing for this code (CC0)
+'     - holds an single spoligotype lineage
+'   o .h st02: fuzzy_spolST
+'     - holds all fuzzy spoligotype lineages in a databse
+'   o table of contents:
+'     *_sof01: spolST general functions
+'     *_sof02: spolST barcode and database functions
+'     *_sof03: spolST print functions
+'     *_sof04: fuzzy spolST general functions
+'     *_sof05: fuzzy spolST lineage and database functions
+'   *_Sof01:___spolST_general_functions___________________
+'     o fun01: blank_spolST
+'       - blanks all variables in and spolST structure
+'     o fun02: init_spolST
+'       - sets all pointers to null and other variables
+'        (none) to defaults in an spolST struct
+'     o fun03: mkAry_spolST
+'       - makes array of initialized spoligotype structers
+'     o fun04: freeStack_spolST
+'       - frees an spolST struct on the stack
+'     o fun05: freeHeap_spolST
+'       - frees an spolST struct (on heap)
+'     o fun06: freeHeapAry_spolST
+'       - frees an array of spolST struct (on heap)
+'   *_Sof02:___spolST_barcode_and_database_functions______
+'     o fun07: sortAry_spolST
+'       - sorts an array of spolST structures by least to
+'         greatest with shell sort
+'     o fun08: codeToLineage_spolST
+'       - finds an spoligo barcode in an array of spolST
+'         structures using an binary search
+'     o fun09: readDb_spolST
+'       - reads in an database of spoligotypes and returns
+'         an array of spolST structures sorted by barcode
+'     o fun10: depthToBarcode_spolST
+'       - converts a read depth array to a barcode
+'     o fun11: barcodeToOctal_spolST
+'       - convert barcode from depthToBarcode_spolST to an
+'         octal
+'   *_Sof03:___spolST_print_functions_____________________
+'     o fun12: phead_spolST
+'       - print out the header for the spoligotype output
+'     o fun13: pspol_spolST
+'       - print out an spoligotype and matching lineage
+'   *_Sof04:___fuzzy_spolST_general_functions_____________
+'     o fun14: blank_fuzzy_spolST
+'       - blank a fuzzy_spolST struct
+'     o fun15: init_fuzzy_spolST
+'       - initializes a fuzzy_spolST structure
+'     o fun16: freeStack_fuzzy_spolST
+'       - frees variables in a fuzzy_spolST structure
+'     o fun17: freeHeap_fuzzy_spolST
+'       - frees a fuzzy_spolST structure
+'     o fun18: memAdd_fuzzy_spolST
+'       - check if can add one more item to a fuzzy_spolST
+'         struct, if not expand memory
+'   *_Sof05:___fuzzy_spolST_lineage_and_database_functions
+'     o fun19: fuzzyDbGet_spolST
+'       - read in a database for general lineages
+'     o fun20: fuzzyLineageSearch_spolST
+'       - searches the spoligotype for fuzzy (generalized)
+'         lineages
+' This file is released into the Public Domain under
+'   CC0-1.0.
+' See https://creativecommons.org/publicdomain/zero/1.0/
+'   for details (or ../../LICENSE).
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -854,62 +888,7 @@ readDb_spolST(
 } /*readSpoligoDB*/
 
 /*-------------------------------------------------------\
-| Fun10: phead_spolST
-|   - print out the header for the spoligotype output
-| Input:
-|   - fragBl:
-|     o 1: printing out header for sequence fragments
-|          that  not have the entire direct repeat region.
-|     o 0: header for sequences with full DR. An consensus
-|          with fragments will use this header as well.
-|   - outFILE:
-|     o FILE pointer with file to print to
-| Output:
-|   - Prints:
-|     o header to the output file
-\-------------------------------------------------------*/
-void
-phead_spolST(
-   signed char fragBl,
-   void *outFILE
-){
-
-   fprintf(
-      (FILE *) outFILE,
-      "input\tstrain\tbarcode\toctal\tlineage\tSIT"
-   );
-
-   fprintf(
-      (FILE *) outFILE,
-      "\tcountries"
-   );
-
-   if(fragBl)
-   { /*If: I am doing fragment checks on reads*/
-
-      fprintf(
-         (FILE *) outFILE,
-         "\tmapped_reads"
-      );
-
-      for(
-         fragBl = 0;
-         fragBl < 43;
-         ++fragBl
-      ){ /*Loop: print out counter header*/
-         fprintf(
-            (FILE *) outFILE,
-            "\t%i",
-            fragBl + 1
-         );
-      } /*Loop: print out counter header*/
-   } /*If: I am doing fragment checks on reads*/
-
-   fprintf((FILE *) outFILE, "%s", str_endLine);
-} /*phead_spolST*/
-
-/*-------------------------------------------------------\
-| Fun0x: depthToBarcode_spolST
+| Fun10: depthToBarcode_spolST
 |   - converts a read depth array to a barcode
 | Input:
 |   - barStr:
@@ -978,7 +957,7 @@ depthToBarcode_spolST(
 } /*depthToBarcode_spolST*/
 
 /*-------------------------------------------------------\
-| Fun0y: barcodeToOctal_spolST
+| Fun11: barcodeToOctal_spolST
 |   - convert barcode from depthToBarcode_spolST to an
 |     octal
 | Input:
@@ -1036,8 +1015,64 @@ barcodeToOctal_spolST(
    return codeUL;
 } /*barcodeToOctal_spolST*/
 
+
 /*-------------------------------------------------------\
-| Fun11: pspol_spolST
+| Fun12: phead_spolST
+|   - print out the header for the spoligotype output
+| Input:
+|   - fragBl:
+|     o 1: printing out header for sequence fragments
+|          that  not have the entire direct repeat region.
+|     o 0: header for sequences with full DR. An consensus
+|          with fragments will use this header as well.
+|   - outFILE:
+|     o FILE pointer with file to print to
+| Output:
+|   - Prints:
+|     o header to the output file
+\-------------------------------------------------------*/
+void
+phead_spolST(
+   signed char fragBl,
+   void *outFILE
+){
+
+   fprintf(
+      (FILE *) outFILE,
+      "input\tstrain\tbarcode\toctal\tlineage\tSIT"
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "\tcountries"
+   );
+
+   if(fragBl)
+   { /*If: I am doing fragment checks on reads*/
+
+      fprintf(
+         (FILE *) outFILE,
+         "\tmapped_reads"
+      );
+
+      for(
+         fragBl = 0;
+         fragBl < 43;
+         ++fragBl
+      ){ /*Loop: print out counter header*/
+         fprintf(
+            (FILE *) outFILE,
+            "\t%i",
+            fragBl + 1
+         );
+      } /*Loop: print out counter header*/
+   } /*If: I am doing fragment checks on reads*/
+
+   fprintf((FILE *) outFILE, "%s", str_endLine);
+} /*phead_spolST*/
+
+/*-------------------------------------------------------\
+| Fun13: pspol_spolST
 |   - print out an spoligotype and matching lineage
 | Input:
 |   - idStr:
@@ -1077,20 +1112,20 @@ pspol_spolST(
    signed int numSpoligosSI,
    void *outFILE
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' Fun11 TOC:
+   ' Fun13 TOC:
    '   - Print out an spoligotype and matching lineage
-   '   o fun11 sec01:
+   '   o fun13 sec01:
    '     - variable declerations
-   '   o fun11 sec02:
+   '   o fun13 sec02:
    '     - get barcode and octal + clean up id
-   '   o fun11 sec03:
+   '   o fun13 sec03:
    '     - print spoligotype entry
-   '   o fun11 sec04:
+   '   o fun13 sec04:
    '     - print read counts (fragment mode)
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec01:
+   ^ Fun13 Sec01:
    ^   - Variable declerations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1105,7 +1140,7 @@ pspol_spolST(
    unsigned long codeUL = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec02:
+   ^ Fun13 Sec02:
    ^   - get barcode and octal + clean up id
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1123,7 +1158,7 @@ pspol_spolST(
    idStr[siDig] = '\0';
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec03:
+   ^ Fun13 Sec03:
    ^   - print spoligotype entry
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1137,7 +1172,7 @@ pspol_spolST(
          ); /*Find the lineage*/
 
       if(indexSI < 0)
-         goto noLineage_fun10_sec04;
+         goto noLineage_fun12_sec04;
 
       fprintf(
          (FILE *) outFILE,
@@ -1154,7 +1189,7 @@ pspol_spolST(
 
    else
    { /*Else: There is no lineage*/
-      noLineage_fun10_sec04:;
+      noLineage_fun12_sec04:;
 
       fprintf(
          (FILE *) outFILE,
@@ -1168,7 +1203,7 @@ pspol_spolST(
    idStr[siDig] = tmpC; 
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun11 Sec04:
+   ^ Fun13 Sec04:
    ^   - print read counts (fragment mode)
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1204,7 +1239,191 @@ pspol_spolST(
 
 #ifdef NEW
 /*-------------------------------------------------------\
-| Fun12: fuzzyDbGet_spolST
+| Fun14: blank_fuzzy_spolST
+|   - blank a fuzzy_spolST struct
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer to blank
+| Output:
+|   - Modifies:
+|     o frees all c-strings in idArySTr and barAryStr
+|     o sets lenSI to 0
+\-------------------------------------------------------*/
+void
+blank_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+){
+   signed int siPos = 0;
+   if(! fuzzySTPtr)
+      return;
+   for(siPso = 0; siPos < fuzzySTPtr->lenSI; ++siPos)
+   { /*Loop: blank ids and barcodes*/
+      if(fuzzySTPtr->idAryStr[fuzzySTPtr->lenSI])
+         free(fuzzySTPtr->idAryStr[fuzzySTPtr->lenSI]);
+      fuzzySTPtr->idAryStr[fuzzySTPtr->lenSI] = 0;
+
+      if(fuzzySTPtr->barAryStr[fuzzySTPtr->lenSI])
+         free(fuzzySTPtr->barAryStr[fuzzySTPtr->lenSI]);
+      fuzzySTPtr->barAryStr[fuzzySTPtr->lenSI] = 0;
+   } /*Loop: blank ids and barcodes*/
+
+   fuzzySTPtr->lenSI = 0;
+} /*blank_fuzzy_spolST*/
+
+/*-------------------------------------------------------\
+| Fun15: init_fuzzy_spolST
+|   - initializes a fuzzy_spolST structure
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer to initialize
+| Output:
+|   - Modifies:
+|     o sets all values and arrays to 0/null
+\-------------------------------------------------------*/
+void
+init_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+){
+   if(! fuzzySTPtr)
+      return;
+
+   fuzzySTPtr->idAryStr = 0;
+   fuzzySTPtr->lenSI = 0;
+   fuzzySTPtr->sizeSI = 0;
+   fuzzySTPtr->barArySI = 0;
+
+   blank_fuzzy_spolST(fuzzySTPtr);
+      /*does nothing, here for future proof*/
+} /*init_fuzzy_spolST*/
+
+/*-------------------------------------------------------\
+| Fun16: freeStack_fuzzy_spolST
+|   - frees variables in a fuzzy_spolST structure
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer with variables to free
+| Output:
+|   - Modifies:
+|     o frees all heap variables and initializes
+\-------------------------------------------------------*/
+void
+freeStack_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+){
+   if(! fuzzySTPtr)
+      return;
+
+   blank_fuzzy_spolST(fuzzySTPtr);
+
+   if(fuzyySTPtr->idAryStr)
+      free(fuzzySTPtr->idAryStr);
+   if(fuzyySTPtr->barAryStr)
+      free(fuzzySTPtr->barAryStr);
+
+   init_fuzzy_spolST(fuzzySTPtr);
+} /*freeStack_fuzzy_spolST*/
+
+/*-------------------------------------------------------\
+| Fun17: freeHeap_fuzzy_spolST
+|   - frees a fuzzy_spolST structure
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer to free
+| Output:
+|   - Modifies:
+|     o frees fuzzySTPtr, but you must set to 0/null
+\-------------------------------------------------------*/
+void
+freeHeap_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+){
+   if(! fuzzySTPtr)
+      return;
+
+   freeStack_fuzzy_spolST(fuzzySTPtr);
+   free(fuzzySTPtr);
+} /*freeHeap_fuzzy_spolST*/
+
+/*-------------------------------------------------------\
+| Fun18: memAdd_fuzzy_spolST
+|   - check if can add one more item to a fuzzy_spolST
+|     struct, if not expand memory
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct to check
+| Output:
+|   - Modifies:
+|     o if needed; expands idAryStr in fuzzySTPtr
+|     o if needed; expands barAryStr in fuzzySTPtr
+|     o if needed; increases sizeSI by 25%
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for a memory error
+\-------------------------------------------------------*/
+signed char
+memAdd_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+){
+   signed int tmpSI = 0;
+   signed char **swapStrPtr = 0;
+
+   if(fuzzySTPtr->lenSI < fuzzySTPtr->sizeSI)
+      goto noErrRet_fun18;
+
+   if(fuzzySTPtr->lenSI)
+   { /*If: have items*/
+      tmpSI =
+         fuzzySTPtr->sizeSI + (fuzzySTPtr->sizeSI >> 2);
+
+      swapStrPtr =
+         realloc(
+            fuzzySTPtr->idAryStr,
+            tmpSI * sizeof(signed char *)
+         );
+      if(! swapStrPtr)
+         goto memErrRet_fun18;
+      fuzzySTPtr->idAryStr = swapStrPtr;
+
+      swapStrPtr =
+         realloc(
+            fuzzySTPtr->barAryStr,
+            tmpSI * sizeof(signed char *)
+         );
+      if(! swapStrPtr)
+         goto memErrRet_fun18;
+      fuzzySTPtr->barAryStr = swapStrPtr;
+   } /*If: have items*/
+
+   else
+   { /*Else: no initial memory*/
+      freeStack_fuzzy_spolST(fuzzySTPtr);
+      tmpSI = 16;
+      
+      fuzzySTPtr->idAryStr =
+         malloc(tmpSI * sizeof(signed char *));
+      if(! fuzzySTPtr->idAryStr)
+         goto memErrRet_fun18;
+
+      fuzzySTPtr->barAryStr =
+         malloc(tmpSI * sizeof(signed char *));
+      if(! fuzzySTPtr->barAryStr)
+         goto memErrRet_fun18;
+   } /*Else: no initial memory*/
+
+   for(; fuzzySTPtr->sizeSI < tmpSI; ++fuzzySTPtr->sizeSI)
+   { /*Loop: initialize new items*/
+         fuzzySTPtr->idAryStr[fuzzySTPtr->sizeSI] = 0;
+         fuzzySTPtr->barAryStr[fuzzySTPtr->sizeSI] = 0;
+   } /*Loop: initialize new items*/
+
+   noErrRet_fun18:;
+      return 0;
+   memErrRet_fun18:;
+      return 1;
+} /*memAdd_fuzzy_spolST*/
+
+/*-------------------------------------------------------\
+| Fun19: fuzzyDbGet_spolST
 |   - read in a database for general lineages
 | Input:
 |   - dbFILE:
@@ -1246,23 +1465,23 @@ fuzzyDbGet_spolST(
    void *dbFILE,
    signed long *errSLPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-   ' fun12: fuzzyDbGet_spolST
+   ' Fun19: fuzzyDbGet_spolST
    '   - read in a database for general lineages
-   '   o fun12 sec01:
+   '   o fun19 sec01:
    '     - variable declarations
-   '   o fun12 sec02:
+   '   o fun19 sec02:
    '     - read in the fuzzy barcodes
-   '   o fun12 sec03:
+   '   o fun19 sec03:
    '     - return
    \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec01:
+   ^ Fun19 Sec01:
    ^   - variable declarations
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   #define def_buffSize_fun12_spolST 1024
-   signed char buffStr[def_buffSize_fun13_spolST + 1]
+   #define def_buffSize_fun19_spolST 1024
+   signed char buffStr[def_buffSize_fun20_spolST + 1]
 
    signed int idStartSI = 0; 
    signed int idLenSI = 0; 
@@ -1272,49 +1491,48 @@ fuzzyDbGet_spolST(
    struct fuzzy_spolST *fuzzyHeapST = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec02:
+   ^ Fun19 Sec02:
    ^   - read in the fuzzy barcodes
-   ^   o fun12 sec02 sub01:
+   ^   o fun19 sec02 sub01:
    ^     - get past the header
-   ^   o fun12 sec02 sub02:
+   ^   o fun19 sec02 sub02:
    ^     - get row and find id length and barcode start
-   ^   o fun12 sec02 sub03:
+   ^   o fun19 sec02 sub03:
    ^     - make sure the barcode entry is valid
-   ^   o fun12 sec02 sub04:
+   ^   o fun19 sec02 sub04:
    ^     - copy lineage id
-   ^   o fun12 sec02 sub05:
+   ^   o fun19 sec02 sub05:
    ^     - copy barcode
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    /*****************************************************\
-   * Fun12 Sec02 Sub01:
+   * Fun19 Sec02 Sub01:
    *   - get past the header
    \*****************************************************/
 
    fuzzyHeapST = malloc(sizeof(struct fuzzy_spolST));
    if(! fuzzyHeapST)
-      goto memErr_fun12_sec0x;
+      goto memErr_fun19_sec0x;
    init_fuzzy_spolST(fuzzyHeapST);
-       /*TODO: add init*/
 
    *errSLPtr = 1;
    if(
       ! fgets(
          buffStr,
-         def_buffSize_fun12_spolST,
+         def_buffSize_fun19_spolST,
          (FILE *) dbFILE
       )
-   ) goto emptyFile_fun12_sec0x;
+   ) goto emptyFile_fun19_sec0x;
 
    /*****************************************************\
-   * Fun12 Sec02 Sub02:
+   * Fun19 Sec02 Sub02:
    *   - get row and find id length and barcode start
    \*****************************************************/
 
    while(
       ! fgets(
          buffStr,
-         def_buffSize_fun12_spolST,
+         def_buffSize_fun19_spolST,
          (FILE *) dbFILE
       )
    ){ /*Loop: get fuzzy lineages*/
@@ -1331,16 +1549,16 @@ fuzzyDbGet_spolST(
       else if(buffStr[idLenSI] == '\t')
          ;
       else
-         goto fileErr_fun12_sec0x;
+         goto fileErr_fun19_sec0x;
 
       barStartSI = idLenSI + idStartSI;
       while(buffStr[barStartSI] && buffStr[barStartSI]<33)
          ++barStartSI;
       if(! buffStr[barStartSI])
-         goto fileErr_fun12_sec0x;
+         goto fileErr_fun19_sec0x;
 
       /**************************************************\
-      * Fun12 Sec02 Sub03:
+      * Fun19 Sec02 Sub03:
       *   - make sure the barcode entry is valid
       \**************************************************/
 
@@ -1367,7 +1585,7 @@ fuzzyDbGet_spolST(
          else if(buffStr[barLenSI] == def_setThree_spolST)
             ;
          else
-            goto fileErr_fun12_sec0x;
+            goto fileErr_fun19_sec0x;
 
          ++barLenSI;
       } /*Loop: check barcode*/
@@ -1375,13 +1593,12 @@ fuzzyDbGet_spolST(
       barLenSI -= barStartSI;
 
       /**************************************************\
-      * Fun12 Sec02 Sub04:
+      * Fun19 Sec02 Sub04:
       *   - copy lineage id
       \**************************************************/
 
-      /*TODO: make memAdd*/
       if(memAdd_fuzzy_spolST(fuzzyHeapST))
-         goto memErr_fun12_sec0x;
+         goto memErr_fun19_sec0x;
 
       fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI] =
          malloc(
@@ -1389,7 +1606,7 @@ fuzzyDbGet_spolST(
                * sizeof(signed char)
          );
       if(! fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI])
-         goto memErr_fun12_sec0x;
+         goto memErr_fun19_sec0x;
       cpLen_ulCp(
          fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI],
          &buffStr[idStartSI],
@@ -1397,7 +1614,7 @@ fuzzyDbGet_spolST(
       );
 
       /**************************************************\
-      * Fun12 Sec02 Sub05:
+      * Fun19 Sec02 Sub05:
       *   - copy barcode
       \**************************************************/
 
@@ -1407,7 +1624,7 @@ fuzzyDbGet_spolST(
                * sizeof(signed char)
          );
       if(! fuzzyHeapST->barAryStr[fuzzyHeapST->lenSI])
-         goto memErr_fun12_sec0x;
+         goto memErr_fun19_sec0x;
       cpLen_ulCp(
          fuzzyHeapST->idAryStr[fuzzyHeapST->lenSI],
          &buffStr[barStartSI],
@@ -1418,38 +1635,38 @@ fuzzyDbGet_spolST(
    }  /*Loop: get fuzzy lineages*/
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
-   ^ Fun12 Sec03:
+   ^ Fun19 Sec03:
    ^   - return
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    *errSLPtr = 0;
-   goto ret_fun12_sec0x;
+   goto ret_fun19_sec0x;
 
-   emptyFile_fun12_sec0x:;
+   emptyFile_fun19_sec0x:;
       *errSLPtr = -1;
-      goto errClean_fun12_sec0x;
+      goto errClean_fun19_sec0x;
 
-   fileErr_fun12_sec0x:;
-      goto errClean_fun12_sec0x;
+   fileErr_fun19_sec0x:;
+      goto errClean_fun19_sec0x;
 
-   memErr_fun12_sec0x:;
+   memErr_fun19_sec0x:;
       *errSLPtr = -2;
-      goto errClean_fun12_sec0x;
+      goto errClean_fun19_sec0x;
 
-   errClean_fun12_sec0x:;
-      /*TODO: make freeHeap*/
+   errClean_fun19_sec0x:;
       if(fuzzyHeapST)
          freeHeap_fuzzy_spolST(fuzzyHeapST);
       fuzzyHeapST = 0;
-      goto ret_fun12_sec0x;
+      goto ret_fun19_sec0x;
 
-   ret_fun12_sec0x:;
+   ret_fun19_sec0x:;
       return fuzzyHeapST;
 } /*fuzzyDbGet_spolST*/
 
 /*-------------------------------------------------------\
-| Fun13: genLineageSearch_spolST
-|   - searches the spoligotype for generalized lineages
+| Fun20: fuzzyLineageSearch_spolST
+|   - searches the spoligotype for fuzzy (generalized)
+|     lineages
 | Input:
 |   - barStr:
 |     o c-string with barcode
@@ -1471,33 +1688,36 @@ fuzzyDbGet_spolST(
 |     o 0 for no input or memory errors
 \-------------------------------------------------------*/
 signed int *
-lineageDetect_tbSpol(
+fuzzyLineageSearch_spolST(
    signed char *barStr,
    struct fuzzy_spolST *fuzzySTPtr,
    signed int *lenSIPtr
-){
-   #define def_numSpoligo_xxx 43
+){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+   ' Fun20 TOC:
+   '   - searches the spoligotype for fuzzy (generalized)
+   '     lineages
+   '   o fun20 sec01:
+   '     - variable declarations
+   '   o fun20 sec02:
+   '     - allocate memory and initialize
+   '   o fun20 sec03:
+   '     - find number of matching spacers for lineages
+   '   o fun20 sec04:
+   '     - find number of matching lineages
+   '   o fun20 sec05:
+   '     - copy matching lineages
+   '   o fun20 sec06:
+   '     - clean up and return
+   \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec01:
+   ^   - variable declarations
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   #define def_maxSpol_fun20_spolST 43
    signed int siPos = 0;
    signed int siLin = 0;
-
-   #define def_delOne_fun13 (1 << 1)
-   #define def_delOneMatch_fun13 (1 << 2)
-
-   #define def_delTwo_fun13 (1 << 3)
-   #define def_delTwoMatch_fun13 (1 << 4)
-
-   #define def_delThree_fun13 (1 << 5)
-   #define def_delThreeMatch_fun13 (1 << 6)
-
-
-   #define def_setOne_fun13 (1 << 7)
-   #define def_setOneMatch_fun13 (1 << 8)
-
-   #define def_setTwo_fun13 (1 << 9)
-   #define def_setTwoMatch_fun13 (1 << 10)
-
-   #define def_setThree_fun13 (1 << 11)
-   #define def_setThreeMatch_fun13 (1 << 12)
 
    signed short *hitHeapArySS = 0;
    signed int *retHeapArySI = 0;
@@ -1505,20 +1725,61 @@ lineageDetect_tbSpol(
    /*for my own sanity*/
    signed char **linAryStr = fuzzySTPtr->barAryStr;
 
+
+   #define def_delOne_fun20 (1 << 1)
+   #define def_delOneMatch_fun20 (1 << 2)
+
+   #define def_delTwo_fun20 (1 << 3)
+   #define def_delTwoMatch_fun20 (1 << 4)
+
+   #define def_delThree_fun20 (1 << 5)
+   #define def_delThreeMatch_fun20 (1 << 6)
+
+
+   #define def_setOne_fun20 (1 << 7)
+   #define def_setOneMatch_fun20 (1 << 8)
+
+   #define def_setTwo_fun20 (1 << 9)
+   #define def_setTwoMatch_fun20 (1 << 10)
+
+   #define def_setThree_fun20 (1 << 11)
+   #define def_setThreeMatch_fun20 (1 << 12)
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec02:
+   ^   - allocate memory and initialize
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    *lenSIPtr = 0;
 
    hitHeapArySS =
       malloc(fuzzySTPtr->lenSI * sizeof(signed short));
    if(! hitHeapArySS)
-      goto memErr_Fun13_sec0x;
+      goto memErr_Fun20_sec06;
 
    for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
       hitHeapArySC[siLin] = 1;
-   
-   for(siPos = 0; siPos < def_numSpoligo_xxx; ++siPos)
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec03:
+   ^   - find number of matching spacers for each lineage
+   ^   o fun20 sec03 sub01:
+   ^     - check non-set (o, x, i) hits
+   ^   o fun20 sec03 sub02:
+   ^     - check deletion sets; at least 1 spacer missing
+   ^   o fun20 sec03 sub03:
+   ^     - check insertion sets; at least 1 spacer present
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+   /*****************************************************\
+   * Fun20 Sec03 Sub01:
+   *   - check non-set (o, x, i) hits
+   \*****************************************************/
+
+   for(siPos=0; siPos < def_maxSpol_fun20_spolST; ++siPos)
    { /*Loop: map spacers*/
       if(barStr[siPos])
-         goto noBarcode_fun13_sec0x;
+         goto noBarcode_fun20_sec06;
 
       for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
       { /*Loop: check if have a match*/
@@ -1537,63 +1798,78 @@ lineageDetect_tbSpol(
                hitHeapArySS[siPos] = 0;
          } /*ElseI If: spacer must be set*/
 
+         /***********************************************\
+         * Fun20 Sec03 Sub02:
+         *   - deletion sets (at least 1 spacer missing)
+         \***********************************************/
+
          else if(
             linAryStr[siLin][siPos] == def_delOne_spolST
          ){ /*Else If: at least one spacer must be a del*/
-            hitHeapArySS[siPos] |= def_delOne_fun13;
+            hitHeapArySS[siPos] |= def_delOne_fun20;
 
             if( (barStr[siPos] | 32) == def_del_spolST )
-               hitHeapArySS[siPos]|=def_delOneMatch_fun13;
+               hitHeapArySS[siPos]|=def_delOneMatch_fun20;
          }  /*Else If: at least one spacer must be a del*/
 
          else if(
             linAryStr[siLin][siPos] == def_delTwo_spolST
          ){ /*Else If: at least one spacer must be a del*/
-            hitHeapArySS[siPos] |= def_delTwo_fun13;
+            hitHeapArySS[siPos] |= def_delTwo_fun20;
 
             if( (barStr[siPos] | 32) == def_del_spolST )
-               hitHeapArySS[siPos]|=def_delTwoMatch_fun13;
+               hitHeapArySS[siPos]|=def_delTwoMatch_fun20;
          }  /*Else If: at least one spacer must be a del*/
 
          else if(
             linAryStr[siLin][siPos] == def_delThree_spolST
          ){ /*Else If: at least one spacer must be a del*/
-            hitHeapArySS[siPos] |= def_delThree_fun13;
+            hitHeapArySS[siPos] |= def_delThree_fun20;
 
             if( (barStr[siPos] | 32) == def_del_spolST )
                hitHeapArySS[siPos] |=
-                  def_delThreeMatch_fun13;
+                  def_delThreeMatch_fun20;
          }  /*Else If: at least one spacer must be a del*/
+
+         /***********************************************\
+         * Fun20 Sec03 Sub03:
+         *   - insertion sets (at least 1 spacer present)
+         \***********************************************/
 
          else if(
             linAryStr[siLin][siPos] == def_setOne_spolST
          ){ /*Else If: at least one spacer must be set*/
-            hitHeapArySS[siPos] |= def_setOne_fun13;
+            hitHeapArySS[siPos] |= def_setOne_fun20;
 
             if( (barStr[siPos] | 32) == def_set_spolST )
-               hitHeapArySS[siPos]|=def_setOneMatch_fun13;
+               hitHeapArySS[siPos]|=def_setOneMatch_fun20;
          }  /*Else If: at least one spacer must be set*/
 
          else if(
             linAryStr[siLin][siPos] == def_setTwo_spolST
          ){ /*Else If: at least one spacer must be set*/
-            hitHeapArySS[siPos] |= def_setTwo_fun13;
+            hitHeapArySS[siPos] |= def_setTwo_fun20;
 
             if( (barStr[siPos] | 32) == def_set_spolST )
-               hitHeapArySS[siPos]|=def_setTwoMatch_fun13;
+               hitHeapArySS[siPos]|=def_setTwoMatch_fun20;
          }  /*Else If: at least one spacer must be set*/
 
          else if(
             linAryStr[siLin][siPos] == def_setThree_spolST
          ){ /*Else If: at least one spacer must be set*/
-            hitHeapArySS[siPos] |= def_setThree_fun13;
+            hitHeapArySS[siPos] |= def_setThree_fun20;
 
             if( (barStr[siPos] | 32) == def_set_spolST )
                hitHeapArySS[siPos] |=
-                  def_setThreeMatch_fun13;
+                  def_setThreeMatch_fun20;
          }  /*Else If: at least one spacer must be set*/
       } /*Loop: check if have a match*/
    } /*Loop: map spacers*/
+
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec04:
+   ^   - find number of matching lineages
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
    for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
    { /*Loop: find number of detected lineages*/
@@ -1644,9 +1920,14 @@ lineageDetect_tbSpol(
       } /*Else: all partial sets and absent met*/
    } /*Loop: find number of detected lineages*/
 
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec05:
+   ^   - copy matching lineages
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
    retHeapArySI = malloc(*lenSIPtr * sizeof(signed int));
    if(! retHeapArySI)
-      goto memErr_fun13_sec0x;
+      goto memErr_fun20_sec06;
 
    *lenSIPtr = 0;
    for(siLin = 0; siLin < fuzzySTPtr->lenSI; ++siLin)
@@ -1655,187 +1936,33 @@ lineageDetect_tbSpol(
          retHeapArySI[*lenSIPtr++] = siLin;
    } /*Loop: recored match index's*/
 
-   goto ret_fun13_sec0x;
+   /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
+   ^ Fun20 Sec06:
+   ^   - clean up and return
+   \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   noBarcode_fun13_sec0x:;
+   goto ret_fun20_sec06;
+
+   noBarcode_fun20_sec06:;
       *lenSIPtr = -1;
-      goto errClean_fun13_sec0x;
+      goto errClean_fun20_sec06;
 
-   memErr_fun13_sec0x:;
+   memErr_fun20_sec06:;
       *lenSIPtr = -2;
-      goto errClean_fun13_sec0x;
+      goto errClean_fun20_sec06;
 
-   errClean_fun13_sec0x:;
+   errClean_fun20_sec06:;
       if(retHeapArySI)
          free(retHeapArySI);
       retHeapArySI = 0;
 
-      goto ret_fun13_sec0x;
+      goto ret_fun20_sec06;
 
-   ret_fun13_sec0x:;
+   ret_fun20_sec06:;
       if(hitHeapArySS)
          free(hitHeapArySS);
       hitHeapArySS = 0;
 
       return retHeapArySI;
-} /*lineageDetect_tbSpol*/
+} /*fuzzyLineageSearch_spolST*/
 #endif
-
-/*=======================================================\
-: License:
-: 
-: Creative Commons Legal Code
-: 
-: CC0 1.0 Universal
-: 
-:     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND
-:     DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF
-:     THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
-:     RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-:     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS
-:     MAKES NO WARRANTIES REGARDING THE USE OF THIS
-:     DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-:     HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES
-:     RESULTING FROM THE USE OF THIS DOCUMENT OR THE
-:     INFORMATION OR WORKS PROVIDED HEREUNDER.
-: 
-: Statement of Purpose
-: 
-: The laws of most jurisdictions throughout the world
-: automatically confer exclusive Copyright and Related
-: Rights (defined below) upon the creator and subsequent
-: owner(s) (each and all, an "owner") of an original work
-: of authorship and/or a database (each, a "Work").
-: 
-: Certain owners wish to permanently relinquish those
-: rights to a Work for the purpose of contributing to a
-: commons of creative, cultural and scientific works
-: ("Commons") that the public can reliably and without
-: fear of later claims of infringement build upon, modify,
-: incorporate in other works, reuse and redistribute as
-: freely as possible in any form whatsoever and for any
-: purposes, including without limitation commercial
-: purposes. These owners may contribute to the Commons to
-: promote the ideal of a free culture and the further
-: production of creative, cultural and scientific works,
-: or to gain reputation or greater distribution for their
-: Work in part through the use and efforts of others.
-: 
-: For these and/or other purposes and motivations, and
-: without any expectation of additional consideration or
-: compensation, the person associating CC0 with a Work
-: (the "Affirmer"), to the extent that he or she is an
-: owner of Copyright and Related Rights in the Work,
-: voluntarily elects to apply CC0 to the Work and publicly
-: distribute the Work under its terms, with knowledge of
-: his or her Copyright and Related Rights in the Work and
-: the meaning and intended legal effect of CC0 on those
-: rights.
-: 
-: 1. Copyright and Related Rights. A Work made available
-:    under CC0 may be protected by copyright and related
-:    or neighboring rights ("Copyright and Related
-:    Rights"). Copyright and Related Rights include, but
-:    are not limited to, the following:
-: 
-:   i. the right to reproduce, adapt, distribute, perform,
-:      display, communicate, and translate a Work;
-:  ii. moral rights retained by the original author(s)
-:      and/or performer(s);
-: iii. publicity and privacy rights pertaining to a
-:      person's image or likeness depicted in a Work;
-:  iv. rights protecting against unfair competition in
-:      regards to a Work, subject to the limitations in
-:      paragraph 4(a), below;
-:   v. rights protecting the extraction, dissemination,
-:      use and reuse of data in a Work;
-:  vi. database rights (such as those arising under
-:      Directive 96/9/EC of the European Parliament and of
-:      the Council of 11 March 1996 on the legal
-:      protection of databases, and under any national
-:      implementation thereof, including any amended or
-:      successor version of such directive); and
-: vii. other similar, equivalent or corresponding rights
-:      throughout the world based on applicable law or
-:      treaty, and any national implementations thereof.
-: 
-: 2. Waiver. To the greatest extent permitted by, but not
-:    in contravention of, applicable law, Affirmer hereby
-:    overtly, fully, permanently, irrevocably and
-:    unconditionally waives, abandons, and surrenders all
-:    of Affirmer's Copyright and Related Rights and
-:    associated claims and causes of action, whether now
-:    known or unknown (including existing as well as
-:    future claims and causes of action), in the Work (i)
-:    in all territories worldwide, (ii) for the maximum
-:    duration provided by applicable law or treaty
-:    (including future time extensions), (iii) in any
-:    current or future medium and for any number of
-:    copies, and (iv) for any purpose whatsoever,
-:    including without limitation commercial, advertising
-:    or promotional purposes (the "Waiver"). Affirmer
-:    makes the Waiver for the benefit of each member of
-:    the public at large and to the detriment of
-:    Affirmer's heirs and successors, fully intending that
-:    such Waiver shall not be subject to revocation,
-:    rescission, cancellation, termination, or any other
-:    legal or equitable action to disrupt the quiet
-:    enjoyment of the Work by the public as contemplated
-:    by Affirmer's express Statement of Purpose.
-: 
-: 3. Public License Fallback. Should any part of the
-:    Waiver for any reason be judged legally invalid or
-:    ineffective under applicable law, then the Waiver
-:    shall be preserved to the maximum extent permitted
-:    taking into account Affirmer's express Statement of
-:    Purpose. In addition, to the extent the Waiver is so
-:    judged Affirmer hereby grants to each affected person
-:    a royalty-free, non transferable, non sublicensable,
-:    non exclusive, irrevocable and unconditional license
-:    to exercise Affirmer's Copyright and Related Rights
-:    in the Work (i) in all territories worldwide, (ii)
-:    for the maximum duration provided by applicable law
-:    or treaty (including future time extensions), (iii)
-:    in any current or future medium and for any number of
-:    copies, and (iv) for any purpose whatsoever,
-:    including without limitation commercial, advertising
-:    or promotional purposes (the "License"). The License
-:    shall be deemed effective as of the date CC0 was
-:    applied by Affirmer to the Work. Should any part of
-:    the License for any reason be judged legally invalid
-:    or ineffective under applicable law, such partial
-:    invalidity or ineffectiveness shall not invalidate
-:    the remainder of the License, and in such case
-:    Affirmer hereby affirms that he or she will not (i)
-:    exercise any of his or her remaining Copyright and
-:    Related Rights in the Work or (ii) assert any
-:    associated claims and causes of action with respect
-:    to the Work, in either case contrary to Affirmer's
-:    express Statement of Purpose.
-: 
-: 4. Limitations and Disclaimers.
-: 
-:  a. No trademark or patent rights held by Affirmer are
-:     waived, abandoned, surrendered, licensed or
-:     otherwise affected by this document.
-:  b. Affirmer offers the Work as-is and makes no
-:     representations or warranties of any kind concerning
-:     the Work, express, implied, statutory or otherwise,
-:     including without limitation warranties of title,
-:     merchantability, fitness for a particular purpose,
-:     non infringement, or the absence of latent or other
-:     defects, accuracy, or the present or absence of
-:     errors, whether or not discoverable, all to the
-:     greatest extent permissible under applicable law.
-:  c. Affirmer disclaims responsibility for clearing
-:     rights of other persons that may apply to the Work
-:     or any use thereof, including without limitation any
-:     person's Copyright and Related Rights in the Work.
-:     Further, Affirmer disclaims responsibility for
-:     obtaining any necessary consents, permissions or
-:     other rights required for any use of the Work.
-:  d. Affirmer understands and acknowledges that Creative
-:     Commons is not a party to this document and has no
-:     duty or obligation with respect to this CC0 or use
-:     of the Work.
-\=======================================================*/

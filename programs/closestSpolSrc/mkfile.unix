@@ -1,0 +1,67 @@
+CC=cc
+LD=cc
+CFLAGS= -O3 -std=c89 -Wall -Wextra -Wpedantic -Wundef -Waggregate-return -Wwrite-strings -Wstrict-prototypes -Wpointer-arith -Wshadow -Wunreachable-code -Winit-self
+O=o.unix
+PREFIX=/usr/local/bin
+
+objFiles= \
+   closestSpol.$(O) \
+	../genFreezeTB/findCloseBarcodes.$(O) \
+   ../genFreezeTB/spolST.$(O) \
+   ../genLib/ulCp.$(O) \
+   ../genLib/charCp.$(O) \
+   ../genLib/numToStr.$(O) \
+   ../genLib/base10str.$(O) \
+   ../genLib/fileFun.$(O)
+
+all: closestSpol.$(O)
+	$(LD) -o closestSpol $(objFiles)
+
+closestSpol.$(O): \
+	closestSpol.c \
+	../genFreezeTB/findCloseBarcodes.$(O) \
+	../genLib/base10str.$(O)
+		$(CC) -o closestSpol.$(O) $(CFLAGS) -c closestSpol.c
+
+../genFreezeTB/findCloseBarcodes.$(O): \
+	../genFreezeTB/findCloseBarcodes.c \
+	../genFreezeTB/findCloseBarcodes.h \
+	../genFreezeTB/spolST.$(O)
+		$(CC) -o ../genFreezeTB/findCloseBarcodes.$(O) \
+			$(CFLAGS) -c ../genFreezeTB/findCloseBarcodes.c
+
+../genFreezeTB/spolST.$(O): \
+	../genFreezeTB/spolST.c \
+	../genFreezeTB/spolST.h \
+	../genLib/charCp.$(O) \
+	../genLib/numToStr.$(O) \
+	../genLib/fileFun.$(O) \
+	../genLib/genMath.h \
+	../genLib/64bit.h \
+	../genFreezeTB/tbSpolDefs.h
+		$(CC) -o ../genFreezeTB/spolST.$(O) $(CFLAGS) -c ../genFreezeTB/spolST.c
+
+../genLib/fileFun.$(O): \
+	../genLib/fileFun.c \
+	../genLib/fileFun.h \
+	../genLib/ulCp.$(O) \
+	../genLib/endLine.h
+		$(CC) -o ../genLib/fileFun.$(O) $(CFLAGS) -c ../genLib/fileFun.c
+
+../genLib/ulCp.$(O): ../genLib/ulCp.c ../genLib/ulCp.h
+		$(CC) -o ../genLib/ulCp.$(O) $(CFLAGS) -c ../genLib/ulCp.c
+
+../genLib/charCp.$(O): ../genLib/charCp.c ../genLib/charCp.h
+		$(CC) -o ../genLib/charCp.$(O) $(CFLAGS) -c ../genLib/charCp.c
+
+../genLib/numToStr.$(O): ../genLib/numToStr.c ../genLib/numToStr.h
+		$(CC) -o ../genLib/numToStr.$(O) $(CFLAGS) -c ../genLib/numToStr.c
+
+../genLib/base10str.$(O): ../genLib/base10str.c ../genLib/base10str.h
+		$(CC) -o ../genLib/base10str.$(O) $(CFLAGS) -c ../genLib/base10str.c
+
+install:
+	mv closestSpol $(PREFIX)
+	chmod a+x $(PREFIX)/closestSpol
+clean:
+	rm $(objFiles)

@@ -1,43 +1,77 @@
-/*########################################################
-# Name: spolST
-#   - holds the spolST (spoligotype structure) and its
-#     supporting functions
-########################################################*/
+/*SPDX-License-Identifier: CC0-1.0*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-' SOF: Start Of File
+' spolST SOF: Start Of File
+'   - holds the spolST (spoligotype structure) and its
+'     supporting functions
 '   o header:
 '     - guards
 '   o .h st01: spolST
 '     - holds an single spoligotype lineage
-'   o fun01: blank_spolST
-'     - blanks all variables in and spolST structure
-'   o fun02: init_spolST
-'     - sets all pointers to null and other variables
-'      (none) to defaults in an spolST struct
-'   o fun03: mkAry_spolST
-'     - makes array of initialized spoligotype structers
-'   o fun04: freeStack_spolST
-'     - frees an spolST struct on the stack
-'   o fun05: freeHeap_spolST
-'     - frees an spolST struct (on heap)
-'   o fun06: freeHeapAry_spolST
-'     - frees an array of spolST struct (on heap)
-'   o fun07: sortAry_spolST
-'     - sorts an array of spolST structures by least to
-'       greatest with shell sort
-'   o fun08: codeToLineage_spolST
-'     - finds an spoligo barcode in an array of spolST
-'       structures using an binary search
-'   o fun09: readDb_spolST
-'     - reads in an database of spoligotypes and returns
-'       an array of spolST structures sorted by barcode
-'   o fun10: phead_spolST
-'     - print out the header for the spoligotype output
-'   o fun11: pspol_spolST
-'     - print out an spoligotype and matching lineage
-'   o license:
-'     - licensing for this code (CC0)
+'   o .h st02: fuzzy_spolST
+'     - holds all fuzzy spoligotype lineages in a databse
+'   o table of contents:
+'     *_sof01: spolST general functions
+'     *_sof02: spolST barcode and database functions
+'     *_sof03: spolST print functions
+'     *_sof04: fuzzy spolST general functions
+'     *_sof05: fuzzy spolST lineage and database functions
+'   *_Sof01:___spolST_general_functions___________________
+'     o fun01: blank_spolST
+'       - blanks all variables in and spolST structure
+'     o fun02: init_spolST
+'       - sets all pointers to null and other variables
+'        (none) to defaults in an spolST struct
+'     o fun03: mkAry_spolST
+'       - makes array of initialized spoligotype structers
+'     o fun04: freeStack_spolST
+'       - frees an spolST struct on the stack
+'     o fun05: freeHeap_spolST
+'       - frees an spolST struct (on heap)
+'     o fun06: freeHeapAry_spolST
+'       - frees an array of spolST struct (on heap)
+'   *_Sof02:___spolST_barcode_and_database_functions______
+'     o fun07: sortAry_spolST
+'       - sorts an array of spolST structures by least to
+'         greatest with shell sort
+'     o fun08: codeToLineage_spolST
+'       - finds an spoligo barcode in an array of spolST
+'         structures using an binary search
+'     o fun09: readDb_spolST
+'       - reads in an database of spoligotypes and returns
+'         an array of spolST structures sorted by barcode
+'     o fun10: depthToBarcode_spolST
+'       - converts a read depth array to a barcode
+'     o fun11: barcodeToOctal_spolST
+'       - convert barcode from depthToBarcode_spolST to an
+'         octal
+'   *_Sof03:___spolST_print_functions_____________________
+'     o fun12: phead_spolST
+'       - print out the header for the spoligotype output
+'     o fun13: pspol_spolST
+'       - print out an spoligotype and matching lineage
+'   *_Sof04:___fuzzy_spolST_general_functions_____________
+'     o fun14: blank_fuzzy_spolST
+'       - blank a fuzzy_spolST struct
+'     o fun15: init_fuzzy_spolST
+'       - initializes a fuzzy_spolST structure
+'     o fun16: freeStack_fuzzy_spolST
+'       - frees variables in a fuzzy_spolST structure
+'     o fun17: freeHeap_fuzzy_spolST
+'       - frees a fuzzy_spolST structure
+'     o fun18: memAdd_fuzzy_spolST
+'       - check if can add one more item to a fuzzy_spolST
+'         struct, if not expand memory
+'   *_Sof05:___fuzzy_spolST_lineage_and_database_functions
+'     o fun19: fuzzyDbGet_spolST
+'       - read in a database for general lineages
+'     o fun20: fuzzyLineageSearch_spolST
+'       - searches the spoligotype for fuzzy (generalized)
+'         lineages
+' This file is released into the Public Domain under
+'   CC0-1.0.
+' See https://creativecommons.org/publicdomain/zero/1.0/
+'   for details (or ../../LICENSE).
 \~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*-------------------------------------------------------\
@@ -279,7 +313,58 @@ readDb_spolST(
 );
 
 /*-------------------------------------------------------\
-| Fun10: phead_spolST
+| Fun10: depthToBarcode_spolST
+|   - converts a read depth array to a barcode
+| Input:
+|   - barStr:
+|     o c-string of 65 bytes to store the barcode
+|   - codeAryUI:
+|     o unsigned int array with the spoligotype counts,
+|       ends with (unsigned int) -1
+|   - minDepthUI:
+|     o mininum read depth to keep a spacer
+|   - minPercDepthF:
+|     o mininum percent read depth to keep a spacer
+| Output:
+|   - Modifies:
+|     o barStr to have the barcode
+|       * `o` for no barcode
+|       * `I` for barcode present
+|       * `x` if positon had low depth
+\-------------------------------------------------------*/
+void
+depthToBarcode_spolST(
+   signed char *barStr,
+   unsigned int *codeAryUI,
+   unsigned int minDepthUI,
+   float minPercDepthF
+);
+
+/*-------------------------------------------------------\
+| Fun11: barcodeToOctal_spolST
+|   - convert barcode from depthToBarcode_spolST to an
+|     octal
+| Input:
+|   - octalStr:
+|     o c-string to get octal number (at least 32 bytes)
+|   - barStr:
+|     o c-string with barcode to convert to an octal code
+|     o barStr from depthToBarcode_spolST()
+| Output:
+|   - Modifies:
+|     o octalStr to have the octal code (x's got to o)
+|   - Returns:
+|     o unsigned long with index of barcode for quick look
+|       up
+\-------------------------------------------------------*/
+unsigned long
+barcodeToOctal_spolST(
+   signed char *octalStr,
+   signed char *barStr
+);
+
+/*-------------------------------------------------------\
+| Fun12: phead_spolST
 |   - Print out the header for the spoligotype output
 | Input:
 |   - fragBl:
@@ -300,7 +385,7 @@ phead_spolST(
 );
 
 /*-------------------------------------------------------\
-| Fun11: pspol_spolST
+| Fun13: pspol_spolST
 |   - print out an spoligotype and matching lineage
 | Input:
 |   - idStr:
@@ -340,163 +425,161 @@ pspol_spolST(
    void *outFILE
 );
 
-#endif
+/*-------------------------------------------------------\
+| Fun14: blank_fuzzy_spolST
+|   - blank a fuzzy_spolST struct
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct to blank
+| Output:
+|   - Modifies:
+|     o frees all c-strings in idArySTr and barAryStr
+|     o sets lenSI to 0
+\-------------------------------------------------------*/
+void
+blank_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+);
 
-/*=======================================================\
-: License:
-: 
-: Creative Commons Legal Code
-: 
-: CC0 1.0 Universal
-: 
-:     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND
-:     DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF
-:     THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
-:     RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-:     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS
-:     MAKES NO WARRANTIES REGARDING THE USE OF THIS
-:     DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-:     HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES
-:     RESULTING FROM THE USE OF THIS DOCUMENT OR THE
-:     INFORMATION OR WORKS PROVIDED HEREUNDER.
-: 
-: Statement of Purpose
-: 
-: The laws of most jurisdictions throughout the world
-: automatically confer exclusive Copyright and Related
-: Rights (defined below) upon the creator and subsequent
-: owner(s) (each and all, an "owner") of an original work
-: of authorship and/or a database (each, a "Work").
-: 
-: Certain owners wish to permanently relinquish those
-: rights to a Work for the purpose of contributing to a
-: commons of creative, cultural and scientific works
-: ("Commons") that the public can reliably and without
-: fear of later claims of infringement build upon, modify,
-: incorporate in other works, reuse and redistribute as
-: freely as possible in any form whatsoever and for any
-: purposes, including without limitation commercial
-: purposes. These owners may contribute to the Commons to
-: promote the ideal of a free culture and the further
-: production of creative, cultural and scientific works,
-: or to gain reputation or greater distribution for their
-: Work in part through the use and efforts of others.
-: 
-: For these and/or other purposes and motivations, and
-: without any expectation of additional consideration or
-: compensation, the person associating CC0 with a Work
-: (the "Affirmer"), to the extent that he or she is an
-: owner of Copyright and Related Rights in the Work,
-: voluntarily elects to apply CC0 to the Work and publicly
-: distribute the Work under its terms, with knowledge of
-: his or her Copyright and Related Rights in the Work and
-: the meaning and intended legal effect of CC0 on those
-: rights.
-: 
-: 1. Copyright and Related Rights. A Work made available
-:    under CC0 may be protected by copyright and related
-:    or neighboring rights ("Copyright and Related
-:    Rights"). Copyright and Related Rights include, but
-:    are not limited to, the following:
-: 
-:   i. the right to reproduce, adapt, distribute, perform,
-:      display, communicate, and translate a Work;
-:  ii. moral rights retained by the original author(s)
-:      and/or performer(s);
-: iii. publicity and privacy rights pertaining to a
-:      person's image or likeness depicted in a Work;
-:  iv. rights protecting against unfair competition in
-:      regards to a Work, subject to the limitations in
-:      paragraph 4(a), below;
-:   v. rights protecting the extraction, dissemination,
-:      use and reuse of data in a Work;
-:  vi. database rights (such as those arising under
-:      Directive 96/9/EC of the European Parliament and of
-:      the Council of 11 March 1996 on the legal
-:      protection of databases, and under any national
-:      implementation thereof, including any amended or
-:      successor version of such directive); and
-: vii. other similar, equivalent or corresponding rights
-:      throughout the world based on applicable law or
-:      treaty, and any national implementations thereof.
-: 
-: 2. Waiver. To the greatest extent permitted by, but not
-:    in contravention of, applicable law, Affirmer hereby
-:    overtly, fully, permanently, irrevocably and
-:    unconditionally waives, abandons, and surrenders all
-:    of Affirmer's Copyright and Related Rights and
-:    associated claims and causes of action, whether now
-:    known or unknown (including existing as well as
-:    future claims and causes of action), in the Work (i)
-:    in all territories worldwide, (ii) for the maximum
-:    duration provided by applicable law or treaty
-:    (including future time extensions), (iii) in any
-:    current or future medium and for any number of
-:    copies, and (iv) for any purpose whatsoever,
-:    including without limitation commercial, advertising
-:    or promotional purposes (the "Waiver"). Affirmer
-:    makes the Waiver for the benefit of each member of
-:    the public at large and to the detriment of
-:    Affirmer's heirs and successors, fully intending that
-:    such Waiver shall not be subject to revocation,
-:    rescission, cancellation, termination, or any other
-:    legal or equitable action to disrupt the quiet
-:    enjoyment of the Work by the public as contemplated
-:    by Affirmer's express Statement of Purpose.
-: 
-: 3. Public License Fallback. Should any part of the
-:    Waiver for any reason be judged legally invalid or
-:    ineffective under applicable law, then the Waiver
-:    shall be preserved to the maximum extent permitted
-:    taking into account Affirmer's express Statement of
-:    Purpose. In addition, to the extent the Waiver is so
-:    judged Affirmer hereby grants to each affected person
-:    a royalty-free, non transferable, non sublicensable,
-:    non exclusive, irrevocable and unconditional license
-:    to exercise Affirmer's Copyright and Related Rights
-:    in the Work (i) in all territories worldwide, (ii)
-:    for the maximum duration provided by applicable law
-:    or treaty (including future time extensions), (iii)
-:    in any current or future medium and for any number of
-:    copies, and (iv) for any purpose whatsoever,
-:    including without limitation commercial, advertising
-:    or promotional purposes (the "License"). The License
-:    shall be deemed effective as of the date CC0 was
-:    applied by Affirmer to the Work. Should any part of
-:    the License for any reason be judged legally invalid
-:    or ineffective under applicable law, such partial
-:    invalidity or ineffectiveness shall not invalidate
-:    the remainder of the License, and in such case
-:    Affirmer hereby affirms that he or she will not (i)
-:    exercise any of his or her remaining Copyright and
-:    Related Rights in the Work or (ii) assert any
-:    associated claims and causes of action with respect
-:    to the Work, in either case contrary to Affirmer's
-:    express Statement of Purpose.
-: 
-: 4. Limitations and Disclaimers.
-: 
-:  a. No trademark or patent rights held by Affirmer are
-:     waived, abandoned, surrendered, licensed or
-:     otherwise affected by this document.
-:  b. Affirmer offers the Work as-is and makes no
-:     representations or warranties of any kind concerning
-:     the Work, express, implied, statutory or otherwise,
-:     including without limitation warranties of title,
-:     merchantability, fitness for a particular purpose,
-:     non infringement, or the absence of latent or other
-:     defects, accuracy, or the present or absence of
-:     errors, whether or not discoverable, all to the
-:     greatest extent permissible under applicable law.
-:  c. Affirmer disclaims responsibility for clearing
-:     rights of other persons that may apply to the Work
-:     or any use thereof, including without limitation any
-:     person's Copyright and Related Rights in the Work.
-:     Further, Affirmer disclaims responsibility for
-:     obtaining any necessary consents, permissions or
-:     other rights required for any use of the Work.
-:  d. Affirmer understands and acknowledges that Creative
-:     Commons is not a party to this document and has no
-:     duty or obligation with respect to this CC0 or use
-:     of the Work.
-\=======================================================*/
+/*-------------------------------------------------------\
+| Fun15: init_fuzzy_spolST
+|   - initializes a fuzzy_spolST structure
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer to initialize
+| Output:
+|   - Modifies:
+|     o sets all values and arrays to 0/null
+\-------------------------------------------------------*/
+void
+init_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun16: freeStack_fuzzy_spolST
+|   - frees variables in a fuzzy_spolST structure
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer with variables to free
+| Output:
+|   - Modifies:
+|     o frees all heap variables and initializes
+\-------------------------------------------------------*/
+void
+freeStack_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun17: freeHeap_fuzzy_spolST
+|   - frees a fuzzy_spolST structure
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer to free
+| Output:
+|   - Modifies:
+|     o frees fuzzySTPtr, but you must set to 0/null
+\-------------------------------------------------------*/
+void
+freeHeap_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun18: memAdd_fuzzy_spolST
+|   - check if can add one more item to a fuzzy_spolST
+|     struct, if not expand memory
+| Input:
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct to check
+| Output:
+|   - Modifies:
+|     o if needed; expands idAryStr in fuzzySTPtr
+|     o if needed; expands barAryStr in fuzzySTPtr
+|     o if needed; increases sizeSI by 25%
+|   - Returns:
+|     o 0 for no errors
+|     o 1 for a memory error
+\-------------------------------------------------------*/
+signed char
+memAdd_fuzzy_spolST(
+   struct fuzzy_spolST *fuzzySTPtr
+);
+
+/*-------------------------------------------------------\
+| Fun19: fuzzyDbGet_spolST
+|   - read in a database for general lineages
+| Input:
+|   - dbFILE:
+|     o FILE pointer to database to read in
+|   - errSLPtr:
+|     o signed long pointer to get the line of the error
+|       or error type
+| Output:
+|   - Modifies:
+|     o errSCPtr:
+|       * 0 for no errors
+|       * line error was on (> 0) for file error
+|       * -1 for empty file
+|       * -2 for memory errors
+|   - Returns:
+|     o fuzzy_spolST array with the fuzzy lineages
+|     o 0 for no input, file errors, or memory errors
+| dbFILE database format (1st row header, rest lineages):
+|  - spaces and tabs separat columns
+|  - format
+|    lineage	barcode
+|    1	Iooooooooooxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+|    2	ooooooooooooooooooooooooooooooooooxxxxxxxxx
+|    3	xxxxxxxxxxxxxxxxxxxxxxooooooooooooxxxxxxxxx
+|    4	0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxDDDDxxxxxxxxx
+|  - possible values used in the barcode
+|    * I = always present
+|    * o = always absent
+|    * x = not used (set or deleted)
+|    * D = at least one spacer delete (delete; set 1)
+|    * a = at least one spacer delete (absent; set 2)
+|    * M = at least one spacer delete (missing; set 3)
+|    * S = at least one spacer set (set; set 1)
+|    * F = at least one spacer set (found; set 2)
+|    * P = at least one spacer set (present; set 3)
+\-------------------------------------------------------*/
+struct fuzzy_spolST *
+fuzzyDbGet_spolST(
+   void *dbFILE,
+   signed long *errSLPtr
+);
+
+/*-------------------------------------------------------\
+| Fun20: fuzzyLineageSearch_spolST
+|   - searches the spoligotype for fuzzy (generalized)
+|     lineages
+| Input:
+|   - barStr:
+|     o c-string with barcode
+|     o use depthToBarcode_spolST to build this
+|   - fuzzySTPtr:
+|     o fuzzy_spolST struct pointer with fuzzy lineages
+|       to look for
+|   - lenSIPtr:
+|     o signed int pointer with number of fuzzy lineages
+|       found
+| Output:
+|   - Modifies:
+|     o lenSIPtr:
+|       * to have the number of fuzzy lineages found
+|       * -1 if barStr did not have 43 spacers
+|       * -1 for memory errors
+|   - Returns:
+|     o index of lineage in 
+|     o 0 for no input or memory errors
+\-------------------------------------------------------*/
+signed int *
+fuzzyLineageSearch_spolST(
+   signed char *barStr,
+   struct fuzzy_spolST *fuzzySTPtr,
+   signed int *lenSIPtr
+);
+
+#endif

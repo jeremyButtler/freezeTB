@@ -13,6 +13,7 @@ genClust=../genClust
 objFiles= \
    $genFreezeTB/freezeTB.$O \
    $genFreezeTB/freezeTBPaths.$O \
+   $genFreezeTB/findCloseBarcodes.$O \
    $genLib/ulCp.$O \
    $genFreezeTB/checkAmr.$O \
    $genFreezeTB/amrST.$O \
@@ -71,6 +72,7 @@ $genFreezeTB/freezeTB.$O: \
 	$genFreezeTB/miruTbl.$O \
 	$genFreezeTB/spolFind.$O \
 	$genFreezeTB/freezeTBPaths.$O \
+	$genFreezeTB/findCloseBarcodes.$O \
 	$genAln/mapRead.$O \
 	$genBio/gzSeqST.$O \
 	$genBio/trimSam.$O \
@@ -91,6 +93,14 @@ $genFreezeTB/freezeTB.$O: \
 		$CC -o $genFreezeTB/freezeTB.$O \
 			$CFLAGS $coreCFLAGS \
 			$genFreezeTB/freezeTB.c
+
+../genFreezeTB/findCloseBarcodes.$O: \
+	../genFreezeTB/findCloseBarcodes.c \
+	../genFreezeTB/findCloseBarcodes.h \
+	../genFreezeTB/spolST.$O
+		$CC -o ../genFreezeTB/findCloseBarcodes.$O \
+			$CFLAGS $coreCFLAGS \
+			../genFreezeTB/findCloseBarcodes.c
 
 $genFreezeTB/freezeTBPaths.$O: \
 	$genFreezeTB/freezeTBPaths.c \

@@ -120,6 +120,7 @@
 
 #include "spolFind.h" 
 #include "spolST.h"
+#include "findCloseBarcodes.h"
 
 #include "../genAmr/amrST.h"
 #include "../genAmr/checkAmr.h"
@@ -234,6 +235,9 @@ typedef struct set_freezeTB
    signed int spolMinDepthSI;/*minim read depth*/
    float spolMinPercDepthF;  /*minim percent read depth*/
 
+   signed char spolMaxDistSC;
+      /*max distance to print a close spoligotype lineage*/
+
    /*consensus building*/
    struct set_tbCon tbConSet;
 
@@ -338,6 +342,7 @@ init_set_freezeTB(
    setFTBST->spolMinDepthSI = def_minDepth_tbSpolDefs;
    setFTBST->spolMinPercDepthF =
       def_minPercDepth_tbSpolDefs;
+   setFTBST->spolMaxDistSC = def_maxDist_tbSpolDefs;
 
    /*initialize settings structures*/
    init_alnSet(&setFTBST->alnSetST);
@@ -2601,8 +2606,8 @@ phelp_freezeTB(
    fprintf(
       (FILE *) outFILE,
       "    -spoligo-min-score %.2f: [Optional; %.2f]%s",
-      def_minPercScore_tbSpolDefs,
-      def_minPercScore_tbSpolDefs,
+      (float) def_minPercScore_tbSpolDefs,
+      (float) def_minPercScore_tbSpolDefs,
       str_endLine
    );
 
@@ -2701,6 +2706,30 @@ phelp_freezeTB(
    fprintf(
       (FILE *) outFILE,
       "        spoligotype spacer as present (0 to 1)%s",
+      str_endLine
+   );
+
+   /*++++++++++++++++++++++++++++++++++++++++++++++++++++\
+   + Fun09 Sec04 Sub08 Cat08:
+   +   - spoligtyping maximum barcode edit distance
+   \++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+   fprintf(
+      (FILE *) outFILE,
+      "    -spoligo-max-dist %i: [Optional; %i]%s",
+      def_maxDist_tbSpolDefs,
+      def_maxDist_tbSpolDefs,
+      str_endLine
+   );
+
+   fprintf(
+      (FILE *) outFILE,
+      "      o maximum edit distance to mark two%s",
+      str_endLine
+   );
+   fprintf(
+      (FILE *) outFILE,
+      "        barcodes as close (prints out)%s",
       str_endLine
    );
 
@@ -4563,6 +4592,53 @@ input_freezeTB(
          } /*If: value out of range*/
       }  /*Else If: spoligo minimum percent read depth*/
 
+      else if(
+         ! eql_charCp(
+            (signed char *) "-spoligo-max-dist",
+            (signed char *) argAryStr[siArg],
+            (signed char) '\0'
+         )
+      ){ /*Else If: spoligo maximum edit distance*/
+         ++siArg;
+         tmpStr = (signed char *) argAryStr[siArg];
+
+         tmpStr +=
+            strToSC_base10str(
+               tmpStr,
+               &ftbSetSTPtr->spolMaxDistSC
+            );
+
+         if(tmpStr[0] != '\0')
+         { /*If: error*/
+            if(helpBl)
+               goto phelp_fun10_sec02;
+
+            fprintf(
+              stderr,
+              "-spoligo-max-dist %s; non-numeric%s",
+              argAryStr[siArg],
+              str_endLine
+            );
+
+            goto err_fun10_sec04;
+         } /*If: error*/
+
+         if(ftbSetSTPtr->spolMaxDistSC < 0)
+         { /*If: value out of range*/
+            if(helpBl)
+               goto phelp_fun10_sec02;
+
+            fprintf(
+               stderr,
+               "-spoligo-max-dist %s is < 0%s",
+               argAryStr[siArg],
+               str_endLine
+            );
+
+            goto err_fun10_sec04;
+         } /*If: value out of range*/
+      }  /*Else If: spoligo maximum edit distance*/
+
       /**************************************************\
       * Fun10 Sec03 Sub08:
       *   - clustering settings
@@ -6225,6 +6301,8 @@ run_freezeTB(
       outSpoligoFileStr[def_lenFileName_freezeTB];
    signed char
       outReadSpoligoFileStr[def_lenFileName_freezeTB];
+   signed char
+      outCloseSpoligoFileStr[def_lenFileName_freezeTB];
 
    signed char spolErrSC = 0;
 
@@ -6238,6 +6316,10 @@ run_freezeTB(
    struct tblST_kmerFind kmerTblStackST;
    struct refST_kmerFind *kmerRefAryST = 0;
    signed int numSpoligosSI = 0;
+
+   /*for close spoligotype detection*/
+   signed long *distHeapArySL = 0;
+   signed int distLenSI = 0;
 
    /*****************************************************\
    * Fun12 Sec01 Sub08:
@@ -7047,12 +7129,14 @@ run_freezeTB(
    ^   o fun12 sec04 sub10:
    ^     - set up read spoligotyping output file name
    ^   o fun12 sec04 sub11:
-   ^     - set up open consensus output file name
+   ^     - set up read close spoligotyping output name
    ^   o fun12 sec04 sub12:
-   ^     - set up sam file name (if mapping reads)
+   ^     - set up open consensus output file name
    ^   o fun12 sec04 sub13:
-   ^     - set up hsp65 read species output name
+   ^     - set up sam file name (if mapping reads)
    ^   o fun12 sec04 sub14:
+   ^     - set up hsp65 read species output name
+   ^   o fun12 sec04 sub15:
    ^     - set up consensus hsp65 read species output name
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -7379,6 +7463,37 @@ run_freezeTB(
 
    /*****************************************************\
    * Fun12 Sec04 Sub11:
+   *   - set up read close spoligotyping output file name
+   \*****************************************************/
+
+   errSC =
+      outputPath_freezeTBPaths(
+         ftbSetStackST.prefixStr,
+         (signed char *) "-read-spoligo-close.tsv",
+         outCloseSpoligoFileStr
+      );
+
+   if(errSC)
+   { /*If: could not open file*/
+      tmpStr = errHeapStr;
+
+      tmpStr +=
+        cpStr_ulCp(
+          errHeapStr,
+          (signed char *)
+             "unable to open read close spoligo output: "
+        );
+
+      cpStr_ulCp(
+         tmpStr,
+         outCloseSpoligoFileStr
+      );
+
+      goto err_fun12_sec11_sub02;
+   } /*If: could not open file*/
+
+   /*****************************************************\
+   * Fun12 Sec04 Sub12:
    *   - set up open consensus output file name
    \*****************************************************/
 
@@ -7419,7 +7534,7 @@ run_freezeTB(
    conOutFILE = fopen((char *) conOutStr, "w");
 
    /*****************************************************\
-   * Fun12 Sec04 Sub12:
+   * Fun12 Sec04 Sub13:
    *   - set up sam file name (if mapping reads)
    \*****************************************************/
 
@@ -7455,7 +7570,7 @@ run_freezeTB(
    } /*If: mapping reads*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub13:
+   * Fun12 Sec04 Sub14:
    *   - set up hsp65 read species output name
    \*****************************************************/
 
@@ -7481,7 +7596,7 @@ run_freezeTB(
    } /*If: could not open file*/
 
    /*****************************************************\
-   * Fun12 Sec04 Sub14:
+   * Fun12 Sec04 Sub15:
    *   - set up consensus hsp65 read species output name
    \*****************************************************/
 
@@ -8909,8 +9024,10 @@ run_freezeTB(
    ^   o fun12 sec08 sub05:
    ^     - print read spoligotype entry
    ^   o fun12 sec08 sub06:
-   ^     - print hsp65 species and custom user lineages
+   ^     - print close spoligotype lineages
    ^   o fun12 sec08 sub07:
+   ^     - print hsp65 species and custom user lineages
+   ^   o fun12 sec08 sub08:
    ^     - print tsv file of variants
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -9075,11 +9192,7 @@ run_freezeTB(
    *tmpStr++ = 'v';
    *tmpStr++ = '\0';
 
-    errSC =
-      plineages_miruTbl(
-         miruHeapST,
-         readMiruStr
-      );
+    errSC = plineages_miruTbl(miruHeapST, readMiruStr);
 
    /*****************************************************\
    * Fun12 Sec08 Sub05:
@@ -9087,15 +9200,8 @@ run_freezeTB(
    \*****************************************************/
 
    spoligoOutFILE =
-      fopen(
-         (char *) outReadSpoligoFileStr,
-         "w"
-      );
-
-   phead_spolST(
-      1,             /*print fragment header*/
-      spoligoOutFILE
-   );
+      fopen((char *) outReadSpoligoFileStr, "w");
+   phead_spolST(1, spoligoOutFILE);
 
    if(spoligoNumReadsUI > 0)
    { /*If: detected spoligotypes*/
@@ -9116,6 +9222,56 @@ run_freezeTB(
    spoligoOutFILE = 0;
    spolErrSC = 0;
 
+   /*****************************************************\
+   * Fun12 Sec08 Sub06:
+   *   - print close spoligotype lineages
+   \*****************************************************/
+
+   spoligoOutFILE =
+      fopen((char *) outCloseSpoligoFileStr, "w");
+
+   depthToBarcode_spolST(
+      outReadSpoligoFileStr,
+      spoligoAryUI,
+      ftbSetStackST.spolMinDepthSI,
+      ftbSetStackST.spolMinPercDepthF
+   );
+
+   distHeapArySL =
+      getDistances_findCloseBarcodes(
+         outReadSpoligoFileStr,
+         ftbSetStackST.spolMaxDistSC,
+         &distLenSI,
+         lineageHeapAryST,
+         numLineagesSI
+      );
+   if(distHeapArySL)
+      ;
+   else if(distLenSI < 0)
+   { /*Else If: memory error*/
+      cpStr_ulCp(
+         errHeapStr,
+         (signed char *)
+               "memory error printing close spoligotypes"
+      );
+      goto err_fun12_sec11_sub02;
+   } /*Else If: memory error*/
+
+   pCloseLineages_findCloseBarcodes(
+      outReadSpoligoFileStr,
+      distHeapArySL,
+      distLenSI,
+      lineageHeapAryST,
+      spoligoOutFILE
+   );
+
+   if(distHeapArySL)
+      free(distHeapArySL);
+   distHeapArySL = 0;
+
+   fclose(spoligoOutFILE);
+   spoligoOutFILE = 0;
+
    for(
       errSL = 0;
       errSL < def_lenSpolAry_fun12;
@@ -9126,7 +9282,7 @@ run_freezeTB(
    errSL = 0;
 
    /*****************************************************\
-   * Fun12 Sec08 Sub06:
+   * Fun12 Sec08 Sub07:
    *   - print hsp65 species and custom user lineages
    \*****************************************************/
 
@@ -9151,7 +9307,7 @@ run_freezeTB(
    freeStack_cnt_getLin(&hsp65CntStackST);
 
    /*****************************************************\
-   * Fun12 Sec08 Sub07:
+   * Fun12 Sec08 Sub08:
    *   - print tsv file of variants
    \*****************************************************/
 
@@ -10121,6 +10277,10 @@ run_freezeTB(
             numLineagesSI
          );
       lineageHeapAryST = 0;
+
+      if(distHeapArySL)
+         free(distHeapArySL);
+      distHeapArySL = 0;
 
       freeStack_tblST_kmerFind(&kmerTblStackST);
 
