@@ -6136,7 +6136,7 @@ pack .main.out.closeSpol.read.tbl -anchor w -side top ;
 ---; # set up text box
 
 # so user can not edit
----.main.out.closeSpool.read.tbl.txt configure
+---.main.out.closeSpol.read.tbl.txt configure
    -state disabled ;
 ---
 
