@@ -413,7 +413,7 @@ phelp_tbSpol(
 
    fprintf(
       outFILE,
-      "  -min-score: [%.2f]%s",
+      "  -min-score: [%.2d]%s",
       def_minPercScore_tbSpolDefs,
       str_endLine
    );
