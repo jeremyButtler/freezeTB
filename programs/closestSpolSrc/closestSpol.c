@@ -196,8 +196,8 @@ phelp_closestSpol(
 |     o number of arguments the user input
 |   - argAryStr:
 |     o c-string array with user input
-|   - barStrPtr:
-|     o c-string pointer to get set to input barcode
+|   - barcode:
+|     o 65 byte c-string to get the input barcode
 |   - dbStrPtr:
 |     o c-string pointer to get set to input database path
 |   - distSCPtr:
@@ -220,7 +220,7 @@ signed char
 input_closestSpol(
    signed int argLenSI,
    char *argAryStr[],
-   signed char **barStrPtr,
+   signed char *barcode,
    signed char **dbStrPtr,
    signed char *distSCPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
@@ -245,10 +245,13 @@ input_closestSpol(
 
    signed int siArg = 1;
    signed char *errStr = 0;
+   signed int length = 0;
    FILE *dbFILE = 0;
 
    if(argLenSI < 1)
       goto phelp_fun03_sec05;
+
+   barcode[0] = 0;
 
    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\
    ^ Fun03 Sec02:
@@ -285,7 +288,30 @@ input_closestSpol(
             goto err_fun03_sec05;
          } /*If: no second argument*/
 
-         *barStrPtr = (signed char *) argAryStr[siArg];
+         errStr = (signed char *) argAryStr[siArg];
+         length = endStr_ulCp(errStr);
+         if(length > 63)
+         { /* If: the barcode is to long */
+            errStr =
+               (signed char *)
+               "-bar must be less then 64 characters";
+            goto err_fun03_sec05;
+         } /* If: the barcode is to long */
+
+         if(errStr[0] != '-')
+            cpLen_ulCp(barcode, errStr, length);
+         else
+         { /* Else: user supplied stdin input */
+            if(! fgets((char *) barcode, 63, stdin))
+            { /* If: no input */
+               errStr =
+                  (signed char *)
+                  "-bar - must have input from stdin";
+               goto err_fun03_sec05;
+            } /* If: no input */
+         } /* Else: user supplied stdin input */
+
+         errStr = 0;
       } /*If: barcode*/
 
       /**************************************************\
@@ -412,7 +438,7 @@ input_closestSpol(
    ^   - check if barcode is valid
    \<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-   if(! *barStrPtr)
+   if(! barcode[0])
    { /*If: no barcode input*/
       errStr =
          (signed char *)
@@ -420,23 +446,27 @@ input_closestSpol(
       goto err_fun03_sec05;
    } /*If: no barcode input*/
 
-   errStr = *barStrPtr;
    siArg = 0;
+   length = 0;
 
-   while(errStr[siArg])
+   while(barcode[siArg])
    { /*Loop: check the barcode*/
-      if( (errStr[siArg] | 32) == 'o' )
-         ;
-      else if( (errStr[siArg] | 32) == 'i' )
-         ;
-      else if( (errStr[siArg] | 32) == 'n' )
-         ;
-      else if( (errStr[siArg] | 32) == '0' )
-         ;
-      else if( (errStr[siArg] | 32) == '1' )
-         ;
-      else if( (errStr[siArg] | 32) == 'x' )
-         ;
+      if( (barcode[siArg] | 32) == 'o' )
+         barcode[length++] = barcode[siArg];
+      else if( (barcode[siArg] | 32) == 'i' )
+         barcode[length++] = barcode[siArg];
+      else if( (barcode[siArg] | 32) == 'n' )
+         barcode[length++] = barcode[siArg];
+      else if( (barcode[siArg] | 32) == '0' )
+         barcode[length++] = barcode[siArg];
+      else if( (barcode[siArg] | 32) == '1' )
+         barcode[length++] = barcode[siArg];
+      else if( (barcode[siArg] | 32) == 'x' )
+         barcode[length++] = barcode[siArg];
+      else if(barcode[siArg] == '\n' )
+         break;
+      else if(barcode[siArg] == '\r' )
+         break;
       else
       { /*Else: not a barcode*/
          errStr =
@@ -447,6 +477,8 @@ input_closestSpol(
 
       ++siArg;
    } /*Loop: check the barcode*/
+
+   barcode[length] = 0;
 
    if(siArg < 43)
    { /*If: barcode is to short*/
@@ -549,7 +581,7 @@ main(
 
    signed char errSC = 0;
 
-   signed char *barStr = 0;
+   signed char barStr[65];
    signed char *dbStr = 0;
    signed char maxDistSC = def_maxDist_tbSpolDefs;
 
@@ -568,7 +600,7 @@ main(
       input_closestSpol(
          argLenSI,
          argAryStr,
-         &barStr,
+         barStr,
          &dbStr,
          &maxDistSC
       );
