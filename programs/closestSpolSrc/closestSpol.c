@@ -134,6 +134,11 @@ phelp_closestSpol(
       "    o barcode to search for (0101.../oIoI...):%s",
       str_endLine
    );
+   fprintf(
+      (FILE *) outFILE,
+      "    o use `-bar -` for stdin input%s",
+      str_endLine
+   );
 
    fprintf(
       (FILE *) outFILE,
