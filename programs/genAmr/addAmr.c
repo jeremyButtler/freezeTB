@@ -960,7 +960,7 @@ parseVarId_addAmr(
 
    amrSTPtr->refAaStr =
       calloc(
-         amrSTPtr->lenRefAaUI + 1,
+         amrSTPtr->lenRefAaUI + 8,
          sizeof(signed char)
       );
    if(! amrSTPtr->refAaStr)
@@ -1067,6 +1067,8 @@ parseVarId_addAmr(
 |     o c-string with variant to convert
 |   - refStr:
 |     o reference sequence
+|   - referenceLength:
+|     o length of the reference genome
 |   - startUI:
 |     o first base in gene
 |   - endUI:
@@ -1093,6 +1095,7 @@ signed char
 addNtSeq_addAmr(
    signed char *varStr,   /*variant to add*/
    signed char *refStr,   /*reference sequence*/
+   signed int referenceLength, /*length of reference */
    unsigned int startUI,  /*first base in gene*/
    unsigned int endUI,    /*last base in gene*/
    signed char revBl,     /*1: for reverse gene*/
@@ -1202,9 +1205,26 @@ addNtSeq_addAmr(
       } /*If: comes after stop codon*/
 
       else if(revBl)
-         varStartSI = endUI - varStartSI;
+      { /* Else If: reverse complement */
+         if(
+               (signed int) endUI - varStartSI
+            >= referenceLength
+         ) varStartSI = varStartSI - referenceLength;
+            /* variant is at start of refrence */
+         else
+            varStartSI = endUI - varStartSI;
+         /* for the WHO negative reverse complement
+         *     genome coordinates are always upstream
+         */
+      } /* Else If: reverse complement */
+
       else
-         varStartSI += startUI;
+      { /* Else: forward gene */
+         if((signed int) startUI + varStartSI >= 0)
+            varStartSI += startUI;
+         else
+            varStartSI += referenceLength;
+      } /* Else: forward gene */
 
       amrSTPtr->refPosUI = varStartSI;
 
@@ -1220,11 +1240,35 @@ addNtSeq_addAmr(
       else if(varStr[siVar] == '_')
       { /*Else If: have end coordinate*/
          ++siVar;
+
+         /* in some cases the deleted stop codon will come
+         *     before the end of the range (thanks WHO)
+         *     in these cases I need to skip the stop
+         *     codon
+         */
+         while(varStr[siVar])
+         { /* Loop: find start of range */
+            if(varStr[siVar] == '-')
+               break;
+            else if(varStr[siVar] < '0')
+               ++siVar;
+            else if(varStr[siVar] > '9')
+               ++siVar;
+            else
+               break;
+         } /* Loop: find start of range */
+
          siVar +=
-            strToSI_base10str(&varStr[siVar], &varEndSI);
+            strToSI_base10str(
+               &varStr[siVar],
+               &varEndSI
+            );
 
          if(varEndSI > 0)
             --varEndSI; /*convert to index 0*/
+         else if(varEndSI < 0)
+            ++varEndSI; /*convert to index 0*/
+
          if(afterStopBl)
          { /*If: comes after stop codon*/
             if(revBl)
@@ -1234,9 +1278,26 @@ addNtSeq_addAmr(
          } /*If: comes after stop codon*/
 
          else if(revBl)
-            varEndSI = endUI - varEndSI;
+         { /* Else If: reverse complement */
+            if(
+                  (signed int) endUI - varEndSI
+               >= referenceLength
+            ) varEndSI = varEndSI - referenceLength;
+                /* variant is at start of refrence */
+
+            else
+               varEndSI = endUI - varEndSI;
+         } /* Else If: reverse complement */
+
          else
-            varEndSI += startUI;
+         { /* Else If: foward gene */
+            if((signed int) startUI + varEndSI >= 0)
+               varEndSI += startUI;
+            else
+               varEndSI += referenceLength;
+         } /* Else If: foward gene */
+
+         lenUI = ab_genMath(varEndSI - varStartSI) + 1;
       } /*Else If: have end coordinate*/
 
       if(! varStr[siVar])
@@ -1257,7 +1318,7 @@ addNtSeq_addAmr(
          amrSTPtr->mutTypeStr[3] = 0;
 
          if(varEndSI)
-            lenUI = ab_genMath(varEndSI - varStartSI);
+            ;
          else
             lenUI = 1;
 
@@ -1312,13 +1373,13 @@ addNtSeq_addAmr(
          siVar += 3; /*get of 'del' entry*/
 
          if(varEndSI)
-            lenUI = ab_genMath(varEndSI - varStartSI);
+            ;
          else
             lenUI = 1;
 
          if(revBl)
          { /*If: reverese complement sequence*/
-            varStartSI -= lenUI; /*get to first base*/
+            varStartSI -= (lenUI - 1); /*get first base*/
             ++varStartSI; /*account for index 1 lenUI*/
          } /*If: reverese complement sequence*/
 
@@ -1356,7 +1417,7 @@ addNtSeq_addAmr(
             siVar += 3; /*get of ins entry*/
             lenUI = endStr_ulCp(&varStr[siVar]);
             amrSTPtr->amrSeqStr =
-               malloc((1 + 9) * sizeof(signed char));
+               malloc((lenUI + 9) * sizeof(signed char));
             if(! amrSTPtr->amrSeqStr)
                goto memErr_fun05_sec05;
 
@@ -1428,7 +1489,7 @@ addNtSeq_addAmr(
          amrSTPtr->mutTypeStr[3] = 0;
 
          if(varEndSI)
-            lenUI = ab_genMath(varEndSI - varStartSI);
+            ;
          else
             lenUI = 1;
 
@@ -2197,6 +2258,8 @@ addCodonPos_addAmr(
 |     o c-string with reference id
 |   - refSeqStr:
 |     o c-string with the reference sequence
+|   - referenceLength:
+|     o length of the reference genome
 |   - errSCPtr:
 |     o pointer to signed char to get returned error type
 | Output:
@@ -2216,6 +2279,7 @@ var_addAmr(
    struct geneCoord *coordsSTPtr,/*has gene coordaintes*/
    signed char *refIdStr,      /*reference id*/
    signed char *refSeqStr,     /*reference sequence*/
+   signed long referenceLength, /* length of reference */
    signed char *errSCPtr
 ){ /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
    ' Fun07 TOC:
@@ -2253,8 +2317,8 @@ var_addAmr(
 
    amrHeapST->lenGeneIdUI = endStr_ulCp(geneStr);
    amrHeapST->geneIdStr =
-      malloc(
-        (amrHeapST->lenGeneIdUI + 8) * sizeof(signed char)
+      calloc(
+        (amrHeapST->lenGeneIdUI + 8), sizeof(signed char)
       );
    if(! amrHeapST->geneIdStr)
       goto memErr_fun07_sec05;
@@ -2268,8 +2332,8 @@ var_addAmr(
    if(! amrHeapST->lenVarIdUI)
       goto noVar_fun07_sec05;
    amrHeapST->varIdStr =
-      malloc(
-         (amrHeapST->lenVarIdUI + 8) * sizeof(signed char)
+      calloc(
+         (amrHeapST->lenVarIdUI + 8), sizeof(signed char)
       );
    if(! amrHeapST->varIdStr)
       goto noVar_fun07_sec05;
@@ -2298,6 +2362,7 @@ var_addAmr(
       addNtSeq_addAmr(
          varStr,
          refSeqStr,
+         referenceLength,
          coordsSTPtr->startAryUI[siPos],
          coordsSTPtr->endAryUI[siPos],
          coordsSTPtr->dirAryUC[siPos],
@@ -2603,6 +2668,7 @@ addDrugs_addAmr(
 |         drug limit (for an amrST struct)
 |       * def_eof_addAmr if end of file (no variant)
 |       * def_noRef_addAmr if no reference found
+|       * def_noGene_addAmr if no gene was provided
 |     o errPosSLPtr to get position of error in line
 |   - Returns:
 |     o 0 for errors
@@ -2818,17 +2884,17 @@ lineToVar_addAmr(
       while(*tmpStr)
       { /*Loop: get flags in file*/
          if(tmpStr[0] != '-')
-            ;
+            goto noGeneErr_fun09_sec06;
          else if(tmpStr[1] != 'g')
-            ;
+            goto noGeneErr_fun09_sec06;
          else if(tmpStr[2] != 'e')
-            ;
+            goto noGeneErr_fun09_sec06;
          else if(tmpStr[3] != 'n')
-            ;
+            goto noGeneErr_fun09_sec06;
          else if(tmpStr[4] != 'e')
-            ;
+            goto noGeneErr_fun09_sec06;
          else if(tmpStr[5] > 32)
-            ;
+            goto noGeneErr_fun09_sec06;
          else
          { /*Else: found the gene flag*/
             tmpStr += 5;
@@ -2865,6 +2931,7 @@ lineToVar_addAmr(
          coordsSTPtr,
          refStr, /*reference id*/
          refSeqArySTPtr[*refIndexSIPtr].seqStr,
+         refSeqArySTPtr[*refIndexSIPtr].seqLenSL,
          errSCPtr
        );
 
@@ -3099,6 +3166,7 @@ lineToVar_addAmr(
          amrHeapST->lenEffectUI = lenSL;
 
          cpLen_ulCp(amrHeapST->effectStr, tmpStr, lenSL);
+         tmpStr += lenSL;
       }  /*Else If: effect of the mutation*/
 
       /**************************************************\
@@ -3700,6 +3768,10 @@ lineToVar_addAmr(
       *errSCPtr = def_noVar_addAmr;
       goto errClean_fun09_sec06;
 
+   noGeneErr_fun09_sec06:;
+      *errSCPtr = def_noGene_addAmr;
+      goto errClean_fun09_sec06;
+
    noRef_fun09_sec06:;
       *errSCPtr = def_noRef_addAmr;
       goto errClean_fun09_sec06;
@@ -3770,6 +3842,8 @@ lineToVar_addAmr(
 |       * def_overflow_addAmr if went past the maximum
 |         drug limit (for an amrST struct)
 |       * def_eof_addAmr if end of file (no variant)
+|       * def_noGene_addAmr if no gene is provided for
+|         the varaint
 |     o errPosSLPtr to get position of error in line
 |   - Returns:
 |     o 0 for errors
@@ -3856,6 +3930,8 @@ getVar_addAmr(
       goto memErr_fun10_sec03;
    else if(*errSCPtr == def_varErr_addAmr)
       goto varErr_fun10_sec03;
+   else if(*errSCPtr == def_noGene_addAmr)
+      goto noGene_fun10_sec03;
    else if(*errSCPtr == def_overflow_addAmr)
       goto overlfow_fun10_sec03;
    else if(*errSCPtr == def_noRef_addAmr)
@@ -3885,6 +3961,10 @@ getVar_addAmr(
 
    noVar_fun10_sec03:;
       *errSCPtr = def_noVar_addAmr;
+      goto errClean_fun10_sec03;
+
+   noGene_fun10_sec03:;
+      *errSCPtr = def_noGene_addAmr;
       goto errClean_fun10_sec03;
 
    noRef_fun10_sec03:;

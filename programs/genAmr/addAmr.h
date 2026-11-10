@@ -82,6 +82,8 @@ struct geneCoord;
 |     o c-string with reference id
 |   - refSeqStr:
 |     o c-string with the reference sequence
+|   - referenceLength:
+|     o length of the reference genome
 |   - errSCPtr:
 |     o pointer to signed char to get returned error type
 | Output:
@@ -101,6 +103,7 @@ var_addAmr(
    struct geneCoord *coordsSTPtr,/*has gene coordaintes*/
    signed char *refIdStr,      /*reference id*/
    signed char *refSeqStr,     /*reference sequence*/
+   signed long referenceLength, /* length of reference */
    signed char *errSCPtr
 );
 
@@ -213,6 +216,8 @@ addDrugs_addAmr(
 |         drug limit (for an amrST struct)
 |       * def_eof_addAmr if end of file (no variant)
 |       * def_noRef_addAmr if no reference found
+|       * def_noGene_addAmr if no gene is provided for
+|         the varaint
 |     o errPosSLPtr to get position of error in line
 |   - Returns:
 |     o 0 for errors
@@ -283,6 +288,8 @@ lineToVar_addAmr(
 |       * def_overflow_addAmr if went past the maximum
 |         drug limit (for an amrST struct)
 |       * def_eof_addAmr if end of file (no variant)
+|       * def_noGene_addAmr if no gene is provided for
+|         the varaint
 |     o errPosSLPtr to get position of error in line
 |   - Returns:
 |     o 0 for errors

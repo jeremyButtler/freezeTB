@@ -572,7 +572,7 @@ cp_amrST(
       cpLen_ulCp(
          dupAmrST->refAaStr,
          cpAmrST->refAaStr,
-         cpAmrST->lenAmrAaUI
+         cpAmrST->lenRefAaUI
       );
 
    dupAmrST->lenRefAaUI = cpAmrST->lenRefAaUI;
