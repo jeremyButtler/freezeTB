@@ -25,6 +25,28 @@ freezeTB is a program that detects gene mutations
   - [Mac source install steps](#Mac); do raylib
   - [Windows source install steps](#Windows); do raylib
 
+## Using the 3rd edition catalog
+
+To use the 3rd edition catalog. I think it should work,
+   but it has not been tested.
+
+1. Create a `freezeTBFiles` directory (folder) in your
+   Documents directory
+2. Copy the `amrDb-3rdEdition.tsv` in `freezeTBFiles` to
+   the `freezeTBFiles` in your Documents directory.
+3. Rename the copied `amrDb-3rdEdition.tsv` to `amrDb.tsv`
+
+On Windows, the `.tsv` extension may not be shown. In that
+   case ignore the `.tsv`.
+
+If you do not have a Documents directory on Windows, then
+   make one in your home directory.
+
+1. Open `my computer`
+2. Click local disk C (`C:\\`)
+3. Click on the directory (folder) with your user name
+4. Make a Documents folder
+
 ## Catalog and hsp65 species
 
 Currently freezeTb uses the WHO 2023 mutation catalog from
@@ -119,6 +141,11 @@ freezeTB includes databases from other repositories and
   code from other repositories. The code in in the
   programs directory that is not from freezeTB are.
 
+- WHO catalogs: are often under a
+  - 3rd edition under: CC BY-NC-SA 3.0 IGO
+- tbProfilers spoligotype database from tbdb: under LGPL3
+  - [https://github.com/jodyphelan/tbdb](
+     https://github.com/jodyphelan/tbdb)
 - raylib from raysan5's raylib
   [https://github.com/raysan5/raylib](
    https://github.com/raysan5/raylib)
@@ -434,13 +461,6 @@ Double click the installed freezeTB/ftbRay/ftbTclTk icon
   to launch. Provide the fastq files by hitting
   the `fastq` button and then hit the run button.
 
-### R9.4 flow cells
-
-The settings for freezeTB are setup for R10.4 flow cells.
-  If you plan on using R9.4 flow cells, then at least
-  disable frame shift checking and increase the required
-  percentage of indels needed to keep an AMR to 70%.
-
 # Extra files:
 
 The extra files are saved as `.md` files. You can view
@@ -457,6 +477,7 @@ The extra files are saved as `.md` files. You can view
 
 # Updates:
 
+- 2026-11-12: added who 3rd edition catalog database
 - 2026-07-29:
   - added detection step for finding spoligotype lineages
     that have up to 5 spacers different
