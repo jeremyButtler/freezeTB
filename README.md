@@ -27,8 +27,8 @@ freezeTB is a program that detects gene mutations
 
 ## Using the 3rd edition catalog
 
-To use the 3rd edition catalog. I think it should work,
-   but it has not been tested.
+To use the 3rd edition catalog. I mostly is correct.
+   However, the delins mutations need some corrections.
 
 1. Create a `freezeTBFiles` directory (folder) in your
    Documents directory
